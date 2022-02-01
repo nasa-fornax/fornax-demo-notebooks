@@ -1,0 +1,14 @@
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# PyCharm
+.idea
+
+# Mac OSX
+.DS_Store
+
+# PyCharm
+.idea
+
+# VSCode
+.vscode
