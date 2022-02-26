@@ -39,7 +39,7 @@ from tractor import (Tractor, PointSource, PixPos, Flux, PixelizedPSF, NullWCS,
 # COSMOS 2015 with only some of the columns and a few rows
 # Type: 0 = galaxy, 1 = star, 2 = X-ray source
 # I think the center of this catalog is roughy 149.955, 3.5375
-df = pd.read_csv('table_irsa_catalog_search_results.csv')
+df = pd.read_csv('/home/jkrick/fornax-demo-notebooks/data/table_irsa_catalog_search_results.csv')
 
 # set default cutout width = 10"
 cutout_width = 10
@@ -153,7 +153,7 @@ def prepare_prf(prf_fitsname, ra_0, dec_0, rotate_angle):
     ext_prf.header['CRVAL2'] = dec_0
 
     cutout = (fits.open(
-        '0001_149.96582000_2.53160000_irac_ch1_go2_sci_10.fits')[0])
+        '/home/jkrick/fornax-demo-notebooks/data/0001_149.96582000_2.53160000_irac_ch1_go2_sci_10.fits')[0])
 
     prf_resample, footprint = reproject_interp(ext_prf, cutout.header)
 
@@ -309,16 +309,16 @@ flux_conv = irac_fluxconversion
 mosaic_pix_scale = 0.6
 
 # set up prfs for each channel
-prfs = [prepare_prf('IRAC.1.EXTPRF.5X.fits', ra_0, dec_0, rotate_angle),
-        prepare_prf('IRAC.2.EXTPRF.5X.fits', ra_0, dec_0, rotate_angle),
-        prepare_prf('IRAC.3.EXTPRF.5X.fits', ra_0, dec_0, rotate_angle),
-        prepare_prf('IRAC.4.EXTPRF.5X.fits', ra_0, dec_0, rotate_angle)]
+prfs = [prepare_prf('/home/jkrick/fornax-demo-notebooks/data/IRAC.1.EXTPRF.5X.fits', ra_0, dec_0, rotate_angle),
+        prepare_prf('/home/jkrick/fornax-demo-notebooks/data/IRAC.2.EXTPRF.5X.fits', ra_0, dec_0, rotate_angle),
+        prepare_prf('/home/jkrick/fornax-demo-notebooks/data/IRAC.3.EXTPRF.5X.fits', ra_0, dec_0, rotate_angle),
+        prepare_prf('/home/jkrick/fornax-demo-notebooks/data/IRAC.4.EXTPRF.5X.fits', ra_0, dec_0, rotate_angle)]
 
 # set up mosaics for each channel
-infiles = ['COSMOS_irac_ch1_mosaic_test.fits',
-           'COSMOS_irac_ch2_mosaic_test.fits',
-           'COSMOS_irac_ch3_mosaic_test.fits',
-           'COSMOS_irac_ch4_mosaic_test.fits']
+infiles = ['/home/jkrick/fornax-demo-notebooks/data/COSMOS_irac_ch1_mosaic_test.fits',
+           '/home/jkrick/fornax-demo-notebooks/data/COSMOS_irac_ch2_mosaic_test.fits',
+           '/home/jkrick/fornax-demo-notebooks/data/COSMOS_irac_ch3_mosaic_test.fits',
+           '/home/jkrick/fornax-demo-notebooks/data/COSMOS_irac_ch4_mosaic_test.fits']
 
 
 def calc_instrflux(band, ra, dec, stype, ks_flux_aper2):
