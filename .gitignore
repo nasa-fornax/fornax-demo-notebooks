@@ -12,3 +12,6 @@
 
 # VSCode
 .vscode
+
+#pycache
+_pycache_
