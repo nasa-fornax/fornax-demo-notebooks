@@ -3,28 +3,58 @@ import os
 import warnings
 from astropy.io import fits
 from astropy.stats import sigma_clipped_stats
-from astropy.wcs import WCS
 import numpy as np
 
 from cutout import make_cutouts
+
 # temporarily let the notebook start without tractor as dependency
 try:
-    from tractor import (Tractor, PointSource, PixPos, Flux, PixelizedPSF, NullWCS,
+    from tractor import (Tractor, PixelizedPSF, NullWCS,
                          NullPhotoCal, ConstantSky, Image)
 
     from find_nconfsources import find_nconfsources
+
 except ImportError:
     print("tractor is missing")
     pass
 
-from exceptions import CutoutError
-from extract_cutout import extract_cutout
 
+def setup_for_tractor(*, band_configs, ra, dec, stype, ks_flux_aper2, infiles, df):
+    """Create image cutouts, calculate sky background statistics, and find nearby sources.
 
-def setup_for_tractor(band_configs, ra, dec, stype, ks_flux_aper2, infiles, df):
+    Parameters:
+    -----------
+    band_configs: BandConfigs
+        Settings for a single band. See above for the definition of BandConfigs.
+    ra, dec: float or double
+        celestial coordinates for measuring photometry
+    stype: int
+        0, 1, 2, -9 for star, galaxy, x-ray source
+    ks_flux_aper_2: float
+        flux in aperture 2
+    infiles: Tuple[str, str]
+        Paths to FITS files to be used as the input science and sky-background images respectively.
+    df: pd.DataFrame
+        <need a description of this parameter>.
+        Previous arguments (ra, dec, stype, ks_flux_aper_2) come from a single row of this df.
+        However, we must also pass the entire dataframe in order to find nearby sources which are possible contaminates.
+
+    Returns:
+    --------
+    subimage:
+        Science cutout.
+    objsrc: List[tractor.ducks.Source]
+        List of tractor Source objects for the target and nearby sources.
+    nconfsrcs: int
+        Number of nearby confusing sources
+    skymean: float
+        Mean of sigma-clipped background
+    skynoise: float
+        Standard deviation of sigma-clipped background
+    """
     # tractor doesn't need the entire image, just a small region around the object of interest
     subimage, x1, y1, subimage_wcs, bgsubimage = make_cutouts(
-        ra, dec, infiles, band_configs.cutout_width, band_configs.mosaic_pix_scale
+        ra, dec, infiles=infiles, cutout_width=band_configs.cutout_width, mosaic_pix_scale=band_configs.mosaic_pix_scale
     )
 
     # set up the source list by finding neighboring sources
@@ -42,43 +72,29 @@ def setup_for_tractor(band_configs, ra, dec, stype, ks_flux_aper2, infiles, df):
     return subimage, objsrc, nconfsrcs, skymean, skynoise
 
 
-def make_cutouts(ra, dec, infiles, cutout_width, mosaic_pix_scale):
-    """Create cutouts from science and background images.
+def run_tractor(*, subimage, prf, objsrc, skymean, skynoise):
+    """Make the tractor image and perform forced photometry.
 
-    Raise an error if a cutout cannot be extracted.
+    Parameters:
+    -----------
+    subimage:
+        Science cutout.
+    prf:
+        <need parameter definition>
+    objsrc: List[tractor.ducks.Source]
+        List of tractor Source objects for the target and nearby sources.
+    skymean: float
+        Mean of sigma-clipped background
+    skynoise: float
+        Standard deviation of sigma-clipped background
+
+    Returns:
+    -------
+    flux_var:
+        <need description>. NaN if the tractor optimization failed.
+    fit_fail: bool
+        Whether the tractor optimization failed.
     """
-    imgfile, skybgfile = infiles
-
-    # extract science image cutout
-    hdulist = fits.open(imgfile)[0]
-    wcs_info = WCS(hdulist)
-    subimage, nodata_param, x1, y1, subimage_wcs = extract_cutout(
-        ra, dec, cutout_width, mosaic_pix_scale, hdulist, wcs_info
-    )
-
-    # if cutout extraction failed, raise an error
-    if nodata_param is True:
-        raise CutoutError("Cutout could not be extracted")
-
-    # extract sky background cutout
-    # if input is same as above, don't redo the cutout, just return
-    if skybgfile == imgfile:
-        return subimage, x1, y1, subimage_wcs, subimage
-
-    # else continue with the extraction
-    bkg_hdulist = fits.open(skybgfile)[0]
-    bgsubimage, bgnodata_param, bgx1, bgy1, bgimage_wcs = extract_cutout(
-        ra, dec, cutout_width, mosaic_pix_scale, bkg_hdulist, wcs_info
-    )
-
-    # if cutout extraction failed, raise an error
-    if bgnodata_param is True:
-        raise CutoutError("Cutout could not be extracted")
-
-    return subimage, x1, y1, subimage_wcs, bgsubimage
-
-
-def run_tractor(subimage, prf, objsrc, skymean, skynoise):
     # make the tractor image
     tim = Image(
         data=subimage,
@@ -113,6 +129,7 @@ def run_tractor(subimage, prf, objsrc, skymean, skynoise):
                         break
 
     # catch exceptions and bad fits
+
     except Exception:
         fit_fail = True
         flux_var = np.nan
@@ -120,14 +137,38 @@ def run_tractor(subimage, prf, objsrc, skymean, skynoise):
     return flux_var, fit_fail
 
 
-def interpret_tractor_results(flux_var, flux_conv, fit_fail, objsrc, nconfsrcs):
+def interpret_tractor_results(*, flux_var, flux_conv, fit_fail, objsrc, nconfsrcs):
+    """Convert the tractor results to a flux and uncertainty.
+
+    <needs brief description of the logic>
+
+    Parameters:
+    -----------
+    flux_var:
+        <need description>. NaN if the tractor optimization failed.
+    flux_conv: float
+        factor used to convert tractor result to microjanskies
+    fit_fail: bool
+        Whether the tractor optimization failed.
+    objsrc: List[tractor.ducks.Source]
+        List of tractor Source objects for the target and nearby sources.
+    nconfsrcs: int
+        Number of nearby confusing sources
+
+    Returns:
+    --------
+    flux: float
+        measured flux in microJansky, NaN if unmeasurable
+    unc: float
+        measured uncertainty in microJansky, NaN if not able to estimate
+    """
     # record the photometry results
     if fit_fail:
         # tractor fit failed
         # set flux and uncertainty as nan and move on
         return (np.nan, np.nan)
 
-    elif flux_var is None:
+    if flux_var is None:
         # fit worked, but flux variance did not get reported
         params_list = objsrc[0].getParamNames()
         bindex = params_list.index("brightness.Flux")
@@ -136,24 +177,24 @@ def interpret_tractor_results(flux_var, flux_conv, fit_fail, objsrc, nconfsrcs):
         microJy_flux = flux * flux_conv
         return (microJy_flux, np.nan)
 
-    else:
-        # fit and variance worked
-        params_list = objsrc[0].getParamNames()
-        bindex = params_list.index("brightness.Flux")
-        flux = objsrc[0].getParams()[bindex]
+    # if we get here, fit and variance worked
+    params_list = objsrc[0].getParamNames()
+    bindex = params_list.index("brightness.Flux")
+    flux = objsrc[0].getParams()[bindex]
 
-        # determine flux uncertainty
-        # which value of flux_var is for the flux variance?
-        # assumes we are fitting positions and flux
-        fv = ((nconfsrcs + 1) * 3) - 1
-        # fv = ((nconfsrcs+1)*1) - 1  #assumes we are fitting only flux
+    # determine flux uncertainty
+    # which value of flux_var is for the flux variance?
+    # assumes we are fitting positions and flux
+    fv = ((nconfsrcs + 1) * 3) - 1
+    # fv = ((nconfsrcs+1)*1) - 1  #assumes we are fitting only flux
 
-        tractor_std = np.sqrt(flux_var[fv])
+    tractor_std = np.sqrt(flux_var[fv])
 
-        # convert to microjanskies
-        microJy_flux = flux * flux_conv
-        microJy_unc = tractor_std * flux_conv
-        return (microJy_flux, microJy_unc)
+    # convert to microjanskies
+    microJy_flux = flux * flux_conv
+    microJy_unc = tractor_std * flux_conv
+
+    return microJy_flux, microJy_unc
 
 
 @contextmanager
