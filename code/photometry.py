@@ -6,6 +6,7 @@ from astropy.stats import sigma_clipped_stats
 from astropy.wcs import WCS
 import numpy as np
 
+from cutout import make_cutouts
 # temporarily let the notebook start without tractor as dependency
 try:
     from tractor import (Tractor, PointSource, PixPos, Flux, PixelizedPSF, NullWCS,
