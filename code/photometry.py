@@ -19,13 +19,13 @@ except ImportError:
     pass
 
 
-def setup_for_tractor(*, band_configs, ra, dec, stype, ks_flux_aper2, infiles, df):
-    """Create image cutouts, calculate sky background statistics, and find nearby sources.
+def setup_for_tractor(*, band_params, ra, dec, stype, ks_flux_aper2, infiles, df):
+    """Extract image cutouts, find nearby sources, and calculate sky-background statistics.
 
     Parameters:
     -----------
-    band_configs: BandConfigs
-        Settings for a single band. See above for the definition of BandConfigs.
+    band_params: BandParams
+        Settings for a single band. See above for the definition of BandParams.
     ra, dec: float or double
         celestial coordinates for measuring photometry
     stype: int
@@ -41,7 +41,7 @@ def setup_for_tractor(*, band_configs, ra, dec, stype, ks_flux_aper2, infiles, d
 
     Returns:
     --------
-    subimage:
+    subimage: <need type>
         Science cutout.
     objsrc: List[tractor.ducks.Source]
         List of tractor Source objects for the target and nearby sources.
@@ -54,12 +54,12 @@ def setup_for_tractor(*, band_configs, ra, dec, stype, ks_flux_aper2, infiles, d
     """
     # tractor doesn't need the entire image, just a small region around the object of interest
     subimage, x1, y1, subimage_wcs, bgsubimage = make_cutouts(
-        ra, dec, infiles=infiles, cutout_width=band_configs.cutout_width, mosaic_pix_scale=band_configs.mosaic_pix_scale
+        ra, dec, infiles=infiles, cutout_width=band_params.cutout_width, mosaic_pix_scale=band_params.mosaic_pix_scale
     )
 
     # set up the source list by finding neighboring sources
     objsrc, nconfsrcs = find_nconfsources(
-        ra, dec, stype, ks_flux_aper2, x1, y1, band_configs.cutout_width, subimage_wcs, df
+        ra, dec, stype, ks_flux_aper2, x1, y1, band_params.cutout_width, subimage_wcs, df
     )
 
     # measure sky noise and mean level
@@ -138,9 +138,7 @@ def run_tractor(*, subimage, prf, objsrc, skymean, skynoise):
 
 
 def interpret_tractor_results(*, flux_var, flux_conv, fit_fail, objsrc, nconfsrcs):
-    """Convert the tractor results to a flux and uncertainty.
-
-    <needs brief description of the logic>
+    """Report tractor results for flux and uncertainty in microJy; NaN if tractor results not reported.
 
     Parameters:
     -----------
