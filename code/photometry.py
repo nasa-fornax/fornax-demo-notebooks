@@ -1,7 +1,8 @@
-import sys
+from contextlib import contextmanager
 import os
+import sys
 import warnings
-from astropy.io import fits
+
 from astropy.stats import sigma_clipped_stats
 import numpy as np
 
