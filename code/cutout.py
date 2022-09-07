@@ -26,7 +26,7 @@ def make_cutouts(ra, dec, *, infiles, cutout_width, mosaic_pix_scale):
     # extract science image cutout
     hdulist = fits.open(imgfile)[0]
     wcs_info = WCS(hdulist)
-    subimage, x1, y1, subimage_wcs = extract_cutout(
+    subimage, x1, y1, subimage_wcs = extract(
         ra, dec, hdulist=hdulist, wcs_info=wcs_info, cutout_width=cutout_width, mosaic_pix_scale=mosaic_pix_scale
     )
 
@@ -36,17 +36,17 @@ def make_cutouts(ra, dec, *, infiles, cutout_width, mosaic_pix_scale):
         return subimage, x1, y1, subimage_wcs, subimage
     # else continue with the extraction
     bkg_hdulist = fits.open(skybgfile)[0]
-    bgsubimage, _, _, _ = extract_cutout(
+    bgsubimage, _, _, _ = extract(
         ra, dec, hdulist=bkg_hdulist, wcs_info=wcs_info, cutout_width=cutout_width, mosaic_pix_scale=mosaic_pix_scale
     )
 
     return subimage, x1, y1, subimage_wcs, bgsubimage
 
 
-def extract_cutout(ra, dec, *, hdulist, wcs_info, cutout_width, mosaic_pix_scale):
+def extract(ra, dec, *, hdulist, wcs_info, cutout_width, mosaic_pix_scale):
     '''Extract an image cutout from hdulist.
 
-    Raise `CutoutError` if the cutout cannot be extracted.
+    Raise a `CutoutError` if the cutout cannot be extracted.
 
     Returns:
     --------
