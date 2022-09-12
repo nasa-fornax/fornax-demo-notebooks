@@ -6,71 +6,38 @@ import warnings
 from astropy.stats import sigma_clipped_stats
 import numpy as np
 
-from cutout import make_cutouts
-
 # temporarily let the notebook start without tractor as dependency
 try:
     from tractor import (Tractor, PixelizedPSF, NullWCS,
                          NullPhotoCal, ConstantSky, Image)
-
-    from find_nconfsources import find_nconfsources
 
 except ImportError:
     print("tractor is missing")
     pass
 
 
-def setup_for_tractor(*, band_params, ra, dec, stype, ks_flux_aper2, infiles, df):
-    """Extract image cutouts, find nearby sources, and calculate sky-background statistics.
+def calc_background(*, bkgsubimage):
+    """Measure sky noise and mean level.
 
     Parameters:
     -----------
-    band_params: BandParams
-        Settings for a single band. See above for the definition of BandParams.
-    ra, dec: float or double
-        celestial coordinates for measuring photometry
-    stype: int
-        0, 1, 2, -9 for star, galaxy, x-ray source
-    ks_flux_aper_2: float
-        flux in aperture 2
-    infiles: Tuple[str, str]
-        Paths to FITS files to be used as the input science and sky-background images respectively.
-    df: pd.DataFrame
-        <need a description of this parameter>.
-        Previous arguments (ra, dec, stype, ks_flux_aper_2) come from a single row of this df.
-        However, we must also pass the entire dataframe in order to find nearby sources which are possible contaminates.
+    bkgsubimage: <need type>
+        Background image cutout
 
     Returns:
     --------
-    subimage: <need type>
-        Science cutout.
-    objsrc: List[tractor.ducks.Source]
-        List of tractor Source objects for the target and nearby sources.
-    nconfsrcs: int
-        Number of nearby confusing sources
     skymean: float
         Mean of sigma-clipped background
     skynoise: float
         Standard deviation of sigma-clipped background
     """
-    # tractor doesn't need the entire image, just a small region around the object of interest
-    subimage, x1, y1, subimage_wcs, bgsubimage = make_cutouts(
-        ra, dec, infiles=infiles, cutout_width=band_params.cutout_width, mosaic_pix_scale=band_params.mosaic_pix_scale
-    )
-
-    # set up the source list by finding neighboring sources
-    objsrc, nconfsrcs = find_nconfsources(
-        ra, dec, stype, ks_flux_aper2, x1, y1, band_params.cutout_width, subimage_wcs, df
-    )
-
-    # measure sky noise and mean level
     # suppress warnings about nans in the calculation
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=RuntimeWarning)
         skymean, skymedian, skynoise = sigma_clipped_stats(
-            bgsubimage, sigma=3.0)
+            bkgsubimage, sigma=3.0)
 
-    return subimage, objsrc, nconfsrcs, skymean, skynoise
+    return skymean, skynoise
 
 
 def run_tractor(*, subimage, prf, objsrc, skymean, skynoise):
