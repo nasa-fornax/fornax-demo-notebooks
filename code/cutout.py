@@ -7,44 +7,41 @@ from astropy.wcs import WCS
 from exceptions import CutoutError
 
 
-def make_cutouts(ra, dec, *, infiles, cutout_width, mosaic_pix_scale):
-    """Load the science and background images from `infiles` and extract cutouts from both.
+def extract_pair(ra, dec, *, fitsfiles, cutout_width, mosaic_pix_scale):
+    """Load the science and background images from `fitsfiles` and extract cutouts from both.
 
     Returns:
     --------
     cutout:
-        Cropped science-image data.
+        Cropped science image data.
+    bkg_cutout:
+        Cropped background image data.
     x, y:
         Pixel coordinates of the target in the science cutout.
     cutout_wcs:
         `WCS` for the science cutout.
-    bkg_cutout:
-        Cropped background-image data.
     """
-    imgfile, skybgfile = infiles
+    imgfile, skybkgfile = fitsfiles
 
     # extract science image cutout
-    hdulist = fits.open(imgfile)[0]
-    wcs_info = WCS(hdulist)
     subimage, x1, y1, subimage_wcs = extract(
-        ra, dec, hdulist=hdulist, wcs_info=wcs_info, cutout_width=cutout_width, mosaic_pix_scale=mosaic_pix_scale
+        ra, dec, fitsfile=imgfile, cutout_width=cutout_width, mosaic_pix_scale=mosaic_pix_scale
     )
 
     # extract sky background cutout
-    # if input is same as above, don't redo the cutout, just return
-    if skybgfile == imgfile:
-        return subimage, x1, y1, subimage_wcs, subimage
-    # else continue with the extraction
-    bkg_hdulist = fits.open(skybgfile)[0]
-    bgsubimage, _, _, _ = extract(
-        ra, dec, hdulist=bkg_hdulist, wcs_info=wcs_info, cutout_width=cutout_width, mosaic_pix_scale=mosaic_pix_scale
-    )
+    # if input is same as above, don't redo the cutout
+    if skybkgfile == imgfile:
+        bkgsubimage = subimage
+    else:
+        bkgsubimage, _, _, _ = extract(
+            ra, dec, fitsfile=skybkgfile, cutout_width=cutout_width, mosaic_pix_scale=mosaic_pix_scale
+        )
 
-    return subimage, x1, y1, subimage_wcs, bgsubimage
+    return subimage, bkgsubimage, x1, y1, subimage_wcs
 
 
-def extract(ra, dec, *, hdulist, wcs_info, cutout_width, mosaic_pix_scale):
-    '''Extract an image cutout from hdulist.
+def extract(ra, dec, *, fitsfile, cutout_width, mosaic_pix_scale):
+    '''Extract an image cutout from fitsfile.
 
     Raise a `CutoutError` if the cutout cannot be extracted.
 
@@ -57,6 +54,9 @@ def extract(ra, dec, *, hdulist, wcs_info, cutout_width, mosaic_pix_scale):
     cutout_wcs:
         `WCS` for the cutout.
     '''
+    hdulist = fits.open(fitsfile)[0]
+    wcs_info = WCS(hdulist)
+
     try:
 
         # convert ra and dec into x, y
