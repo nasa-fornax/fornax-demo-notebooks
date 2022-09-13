@@ -3,21 +3,21 @@
 ```{important}
 See [results.ipynb](results.ipynb) (in this directory) for test results.
 
-See [collect_results.py](collect_results.py) (in this directory) for the code that collects the output from each notebook.
+See [collect_output.py](collect_output.py) (in this directory) for the code that collects the output from each notebook.
 ```
 
 PR \#49 requests to merge `troyraen:issue28` -> `fornax-navo:main`
 
 Test outline:
 
--   [Run both notebooks](#run-the-notebooks) on fornaxdev
+-   [Run notebooks](#run-the-notebooks) from both branches on fornaxdev
 -   [Collect](#collect-the-output) some key variables and dump them to a file. Variables:
     -   band params:
         -   band, prf, cutout_width, flux_conv, mosaic_pix_scale
         -   (prf is an array, so I'll just check their hashes)
     -   source params:
         -   row.Index, band, row.ra, row.dec, row.type, row.ks_flux_aper2, imgpath, bkgpath
-    -   tractor output for a subset of sources
+    -   tractor output for a subset (same for both branches) of sources
         -   row.Index, band, flux, flux_unc
 -   [Compare the outputs](#compare-output)
     -   tests pass if the corresponding outputs from each notebook are equal
@@ -52,23 +52,14 @@ git pull
 
 ## Collect the output
 
--   Collect the results by executing the following in a cell in the multiband_photometery notebook. (This uses [collect_results.py](collect_results.py), which is in this directory.)
+-   The code that defines our tests is in [collect_output.py](collect_output.py).
+    -   Copy and paste the entire file into a cell in the multiband_photometery notebook
+    -   Make one change: Uncomment the correct option for `branch`.
+    -   Execute the cell
+-   Then run the output collection by executing the following in another cell:
 
 ```python
-branch28 = "troyraenissue28"
-branchmain = "fornaxnavomain"
-# --- CHOOSE ONE OF THE FOLLOWING:
-branch = branch28
-branch = branchmain
-
-# directory where collect_results.py is
-# output files will be written to this same directory
-fbase = "../../issue28/test-pr49"
-
-sys.path.append(fbase)
-import collect_results
-
-collect_results.run(fbase, branch)
+collect_output(fbase, branch)
 ```
 
 ## Compare output

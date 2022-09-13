@@ -2,37 +2,41 @@
 #
 # This script collects output from a notebook and dumps it to local files.
 #
-# Usage:  See the README.md in this directory
-
+# Usage:
+#   See the README.md in this directory.
+#   In short:
+#       - run the multiband_photometry.ipynb notebook
+#       - then, copy and paste the contents of this file into the notebook
+#           - uncomment the appropriate `branch` variable
+#           - execute it
+#       - then run the test by calling `collect_output(fbase, branch)`
 from random import randint
 
-import numpy as np
-import pandas as pd
-
-# ### Setup
 
 # branch names
 branch28 = "troyraenissue28"
 branchmain = "fornaxnavomain"
 
+# UNCOMMENT ONE OF THE FOLLOWING
+# branch = branch28
+# branch = branchmain
+
+
+fbase = '../../issue28/test-pr49'
+
 
 # define file paths that we'll write to, plus their columns
-
 
 def fband(fbase, branch): return f"{fbase}/bandparams-{branch}.csv"
 
 
 band_cols = ["band", "prf", "cutout_width", "flux_conv", "mosaic_pix_scale"]
-
-
 def fsource(fbase, branch): return f"{fbase}/sourceparams-{branch}.csv"
 
 
 source_cols = [
     "row.Index", "band", "row.ra", "row.dec", "row.type", "row.ks_flux_aper2", "imgpath", "bkgpath"
 ]
-
-
 def ftractor(fbase, branch): return f"{fbase}/tractoroutput-{branch}.csv"
 
 
@@ -50,7 +54,7 @@ def get_indexes_for_tractor(fbase, branch):
                                for i in range(nsources_test)]
         # write it to file so the other branch can use the same list
         with open(findexes_for_tractor, 'w') as fout:
-            np.savetxt(fout, indexes_for_tractor, fmt="%.1x")
+            np.savetxt(fout, indexes_for_tractor, fmt="%.1u")
     else:
         # read in the pre-generated list
         with open(findexes_for_tractor, 'r') as fin:
@@ -104,23 +108,23 @@ def collect_source_params_main(paramlist, fout, cols):
     dfout.to_csv(fout)
 
 
-def collect_tractor_results(paramlist, idxs, fout, cols)):
-    outlist=[]
+def collect_tractor_results(paramlist, idxs, fout, cols):
+    outlist = []
     for idx in idxs:
-        rowIndex=paramlist[idx][0]
-        tractor_results=calc_instrflux(*paramlist[idx][1:])
+        rowIndex = paramlist[idx][0]
+        tractor_results = calc_instrflux(*paramlist[idx][1:])
         outlist.append([rowIndex, *tractor_results])
-    tractordf=pd.DataFrame(outlist, columns = cols).set_index(cols[0])
+    tractordf = pd.DataFrame(outlist, columns=cols).set_index(cols[0])
     tractordf.to_csv(fout)
 
 
-def run(fbase, branch):
+def collect_output(fbase, branch):
     # get indexes of a random sample of sources to get tractor output for
-    indexes_for_tractor=get_indexes_for_tractor(fbase, branch)
+    indexes_for_tractor = get_indexes_for_tractor(fbase, branch)
 
     # ### Collect band params and dump to file
-    fout=fband(fbase, branch)
-    cols=band_cols
+    fout = fband(fbase, branch)
+    cols = band_cols
     print(f"Collecting Band params and dumping to file at {fout}")
     if branch == branch28:
         collect_band_params_issue28(all_band_params, fout, cols)
@@ -129,8 +133,8 @@ def run(fbase, branch):
                                  flux_conv_list, mosaic_pix_scale_list, fout, cols)
 
     # ### Collect source params and dump to file
-    fout=fsource(branch)
-    cols=source_cols
+    fout = fsource(fbase, branch)
+    cols = source_cols
     print(f"Collecting Source params and dumping to file at {fout}")
     if branch == branch28:
         collect_source_params_issue28(paramlist, fout, cols)
@@ -138,10 +142,9 @@ def run(fbase, branch):
         collect_source_params_main(paramlist, fout, cols)
 
     # ### Collect tractor output and dump to file
-    fout=ftractor(branch)
-    cols=tractor_cols
+    fout = ftractor(fbase, branch)
+    cols = tractor_cols
     print(
         f"Running tractor, collecting results, and dumping to file at {fout}")
     # same for both branches
     collect_tractor_results(paramlist, indexes_for_tractor, fout, cols)
-
