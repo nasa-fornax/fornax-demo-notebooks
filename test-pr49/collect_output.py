@@ -124,9 +124,6 @@ def collect_tractor_results(paramlist, idxs, fout, cols):
 
 
 def collect_output(fbase, branch):
-    # get indexes of a random sample of sources to get tractor output for
-    indexes_for_tractor = get_indexes_for_tractor(fbase, branch)
-
     # ### Collect band params and dump to file
     fout = fband(fbase, branch)
     cols = band_cols
@@ -151,5 +148,6 @@ def collect_output(fbase, branch):
     cols = tractor_cols
     print(
         f"Running tractor, collecting results, and dumping to file at {fout}")
-    # same for both branches
+    # same calls for both branches
+    indexes_for_tractor = get_indexes_for_tractor(fbase, branch)
     collect_tractor_results(paramlist, indexes_for_tractor, fout, cols)
