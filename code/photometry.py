@@ -6,6 +6,8 @@ import warnings
 from astropy.stats import sigma_clipped_stats
 import numpy as np
 
+from exceptions import TractorError
+
 # temporarily let the notebook start without tractor as dependency
 try:
     from tractor import (Tractor, PixelizedPSF, NullWCS,
@@ -22,7 +24,7 @@ def calc_background(*, bkgsubimage):
     Parameters:
     -----------
     bkgsubimage: <need type>
-        Background image cutout
+        Image data from which the sky background will be calculated.
 
     Returns:
     --------
@@ -45,10 +47,10 @@ def run_tractor(*, subimage, prf, objsrc, skymean, skynoise):
 
     Parameters:
     -----------
-    subimage:
-        Science cutout.
-    prf:
-        <need parameter definition>
+    subimage: <need type>
+        Science image cutout.
+    prf: np.ndarray
+        Point spread function for the band/channel.
     objsrc: List[tractor.ducks.Source]
         List of tractor Source objects for the target and nearby sources.
     skymean: float
@@ -58,10 +60,13 @@ def run_tractor(*, subimage, prf, objsrc, skymean, skynoise):
 
     Returns:
     -------
-    flux_var:
-        <need description>. NaN if the tractor optimization failed.
-    fit_fail: bool
-        Whether the tractor optimization failed.
+    flux_var: float, double, or None
+        Flux variance result from the tractor optimization.
+        None if tractor optimization succeeded but it didn't report a variance.
+
+    Raises:
+    -------
+    TractorError: If the tractor optimization fails.
     """
     # make the tractor image
     tim = Image(
@@ -83,7 +88,6 @@ def run_tractor(*, subimage, prf, objsrc, skymean, skynoise):
 
     # run the tractor optimization (do forced photometry)
     # Take several linearized least squares steps
-    fit_fail = False
     try:
         tr = 0
         with suppress_stdout():
@@ -97,25 +101,22 @@ def run_tractor(*, subimage, prf, objsrc, skymean, skynoise):
                         break
 
     # catch exceptions and bad fits
+    except Exception as e:
+        raise TractorError("Tractor failed to converge") from e
 
-    except Exception:
-        fit_fail = True
-        flux_var = np.nan
-
-    return flux_var, fit_fail
+    return flux_var
 
 
-def interpret_tractor_results(*, flux_var, flux_conv, fit_fail, objsrc, nconfsrcs):
-    """Report tractor results for flux and uncertainty in microJy; NaN if tractor results not reported.
+def interpret_tractor_results(*, flux_var, flux_conv, objsrc, nconfsrcs):
+    """Return the flux and its uncertainty in microJy.
 
     Parameters:
     -----------
-    flux_var:
-        <need description>. NaN if the tractor optimization failed.
+    flux_var: float, double, or None
+        Flux variance result from the tractor optimization.
+        None if tractor optimization succeeded but it didn't report a variance.
     flux_conv: float
         factor used to convert tractor result to microjanskies
-    fit_fail: bool
-        Whether the tractor optimization failed.
     objsrc: List[tractor.ducks.Source]
         List of tractor Source objects for the target and nearby sources.
     nconfsrcs: int
@@ -124,41 +125,29 @@ def interpret_tractor_results(*, flux_var, flux_conv, fit_fail, objsrc, nconfsrc
     Returns:
     --------
     flux: float
-        measured flux in microJansky, NaN if unmeasurable
-    unc: float
-        measured uncertainty in microJansky, NaN if not able to estimate
+        Measured flux in microJansky.
+    flux_unc: float
+        Flux uncertainty in microJansky, calculated from the tractor results.
+        NaN if tractor didn't report a variance.
     """
-    # record the photometry results
-    if fit_fail:
-        # tractor fit failed
-        # set flux and uncertainty as nan and move on
-        return (np.nan, np.nan)
-
-    if flux_var is None:
-        # fit worked, but flux variance did not get reported
-        params_list = objsrc[0].getParamNames()
-        bindex = params_list.index("brightness.Flux")
-        flux = objsrc[0].getParams()[bindex]
-        # convert to microjanskies
-        microJy_flux = flux * flux_conv
-        return (microJy_flux, np.nan)
-
-    # if we get here, fit and variance worked
+    # get the flux and convert to microJansky
     params_list = objsrc[0].getParamNames()
     bindex = params_list.index("brightness.Flux")
     flux = objsrc[0].getParams()[bindex]
-
-    # determine flux uncertainty
-    # which value of flux_var is for the flux variance?
-    # assumes we are fitting positions and flux
-    fv = ((nconfsrcs + 1) * 3) - 1
-    # fv = ((nconfsrcs+1)*1) - 1  #assumes we are fitting only flux
-
-    tractor_std = np.sqrt(flux_var[fv])
-
-    # convert to microjanskies
     microJy_flux = flux * flux_conv
-    microJy_unc = tractor_std * flux_conv
+
+    # calculate the flux uncertainty and convert to microJansky
+    if flux_var is None:
+        # the tractor fit worked, but flux variance did not get reported
+        microJy_unc = np.nan
+    else:
+        # fit and variance both worked
+        # which value of flux_var is for the flux variance?
+        # assumes we are fitting positions and flux
+        fv = ((nconfsrcs + 1) * 3) - 1
+        # fv = ((nconfsrcs+1)*1) - 1  #assumes we are fitting only flux
+        tractor_std = np.sqrt(flux_var[fv])
+        microJy_unc = tractor_std * flux_conv
 
     return microJy_flux, microJy_unc
 

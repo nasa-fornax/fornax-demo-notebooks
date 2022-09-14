@@ -30,17 +30,17 @@ fbase = '../../issue28/test-pr49'
 def fband(fbase, branch): return f"{fbase}/bandparams-{branch}.csv"
 
 
-band_cols = ["band", "prf", "cutout_width", "flux_conv", "mosaic_pix_scale"]
+band_cols = ["idx", "prf", "cutout_width", "flux_conv", "mosaic_pix_scale"]
 def fsource(fbase, branch): return f"{fbase}/sourceparams-{branch}.csv"
 
 
 source_cols = [
-    "row.Index", "band", "row.ra", "row.dec", "row.type", "row.ks_flux_aper2", "imgpath", "bkgpath"
+    "row.Index", "band.idx", "row.ra", "row.dec", "row.type", "row.ks_flux_aper2", "imgpath", "bkgpath"
 ]
 def ftractor(fbase, branch): return f"{fbase}/tractoroutput-{branch}.csv"
 
 
-tractor_cols = ["row.Index", "band", "flux", "flux_unc"]
+tractor_cols = ["row.Index", "band.idx", "flux", "flux_unc"]
 
 
 def get_indexes_for_tractor(fbase, branch):
@@ -62,9 +62,9 @@ def get_indexes_for_tractor(fbase, branch):
     return indexes_for_tractor
 
 
-def collect_band_params_issue28(all_band_params, fout, cols):
+def collect_bands_issue28(all_bands, fout, cols):
     paramdf = pd.DataFrame(
-        all_band_params, columns=cols).set_index(cols[0])
+        all_bands, columns=cols).set_index(cols[0])
     # hash the prf
     paramdf['prf_hash'] = paramdf['prf'].apply(
         lambda prf: hash(tuple(prf.flatten())))
@@ -72,27 +72,27 @@ def collect_band_params_issue28(all_band_params, fout, cols):
     paramdf.to_csv(fout)
 
 
-def collect_band_params_main(
+def collect_bands_main(
     prfs, cutout_width_list, flux_conv_list, mosaic_pix_scale_list, fout, cols
 ):
-    all_band_params = [
+    all_bands = [
         [
-            band,
-            prfs[band],
-            cutout_width_list[band],
-            flux_conv_list[band],
-            mosaic_pix_scale_list[band],
+            bandidx,
+            prfs[bandidx],
+            cutout_width_list[bandidx],
+            flux_conv_list[bandidx],
+            mosaic_pix_scale_list[bandidx],
         ]
-        for band in range(6)
+        for bandidx in range(6)
     ]
-    collect_band_params_issue28(all_band_params, fout, cols)
+    collect_bands_issue28(all_bands, fout, cols)
 
 
 def collect_source_params_issue28(paramlist, fout, cols):
     outlist = []
-    for (index, band_params, ra, dec, stype, ks_flux_aper2, infiles, df) in paramlist:
+    for (index, band, ra, dec, stype, ks_flux_aper2, infiles, df) in paramlist:
         outlist.append([
-            index, band_params.band, ra, dec, stype, ks_flux_aper2, *infiles
+            index, band.idx, ra, dec, stype, ks_flux_aper2, *infiles
         ])
     dfout = pd.DataFrame(outlist, columns=cols).set_index(cols[0])
     dfout.to_csv(fout)
@@ -100,9 +100,9 @@ def collect_source_params_issue28(paramlist, fout, cols):
 
 def collect_source_params_main(paramlist, fout, cols):
     outlist = []
-    for (index, band, ra, dec, stype, ks_flux_aper2, g_band) in paramlist:
+    for (index, bandidx, ra, dec, stype, ks_flux_aper2, g_band) in paramlist:
         outlist.append([
-            index, band, ra, dec, stype, ks_flux_aper2, infiles[g_band], skybgfiles[g_band]
+            index, bandidx, ra, dec, stype, ks_flux_aper2, infiles[g_band], skybgfiles[g_band]
         ])
     dfout = pd.DataFrame(outlist, columns=cols).set_index(cols[0])
     dfout.to_csv(fout)
@@ -127,10 +127,10 @@ def collect_output(fbase, branch):
     cols = band_cols
     print(f"Collecting Band params and dumping to file at {fout}")
     if branch == branch28:
-        collect_band_params_issue28(all_band_params, fout, cols)
+        collect_bands_issue28(all_bands, fout, cols)
     else:
-        collect_band_params_main(prfs, cutout_width_list,
-                                 flux_conv_list, mosaic_pix_scale_list, fout, cols)
+        collect_bands_main(prfs, cutout_width_list,
+                           flux_conv_list, mosaic_pix_scale_list, fout, cols)
 
     # ### Collect source params and dump to file
     fout = fsource(fbase, branch)

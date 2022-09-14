@@ -8,7 +8,7 @@ See [collect_output.py](collect_output.py) (in this directory) for the code that
 
 PR \#49 requests to merge `troyraen:issue28` -> `fornax-navo:main`
 
-Test outline:
+## Test outline:
 
 -   [Run notebooks](#run-the-notebooks) from both branches on fornaxdev
 -   [Collect](#collect-the-output) some key variables and dump them to a file. Variables:
