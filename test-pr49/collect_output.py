@@ -9,20 +9,13 @@
 #       - then, copy and paste the contents of this file into the notebook
 #           - uncomment the appropriate `branch` variable
 #           - execute it
-#       - then run the test by calling `collect_output(fbase, branch)`
+#       - then set `branch` and `fbase` and run the test by calling `collect_output(fbase, branch)`
 from random import randint
 
 
 # branch names
 branch28 = "troyraenissue28"
 branchmain = "fornaxnavomain"
-
-# UNCOMMENT ONE OF THE FOLLOWING
-# branch = branch28
-# branch = branchmain
-
-
-fbase = '../../issue28/test-pr49'
 
 
 # define file paths that we'll write to, plus their columns
@@ -95,6 +88,18 @@ def collect_source_params_issue28(paramlist, fout, cols):
             index, band.idx, ra, dec, stype, ks_flux_aper2, *infiles
         ])
     dfout = pd.DataFrame(outlist, columns=cols).set_index(cols[0])
+
+    def populate_path(row):
+        # the code will use the imgpath for the bkgpath, if bkgpath is null
+        if row.bkgpath is not None:
+            return row.bkgpath
+        return row.imgpath
+    # populate the null paths so we can compare with the main branch
+    dfout["bkgpath"] = dfout[["imgpath", "bkgpath"]].apply(
+        lambda row: row.bkgpath if row.bkgpath is not None else row.imgpath,
+        axis=1,
+    )
+    # populate_path, axis=1)
     dfout.to_csv(fout)
 
 

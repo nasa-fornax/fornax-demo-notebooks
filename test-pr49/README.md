@@ -49,16 +49,23 @@ git pull
 -   Run the notebook force_photometery/multiband_photometery.ipynb
     -   using the `conda env:tractor`
     -   run at least through/including the cell that creates the `paramlist` in section "Calculate forced photomery" (ok to exclude section "A little Data Exploration").
+        - **When creating the `paramlist` in branch=issue28, use the `img_pair` that includes file paths and NOT pre-loaded HDUs.**
 
 ## Collect the output
 
 -   The code that defines our tests is in [collect_output.py](collect_output.py).
     -   Copy and paste the entire file into a cell in the multiband_photometery notebook
-    -   Make one change: Uncomment the correct option for `branch`.
     -   Execute the cell
 -   Then run the output collection by executing the following in another cell:
 
 ```python
+# uncomment ONE of the following
+# branch = branch28
+# branch = branchmain
+
+# use same base path for both branches
+fbase = '../../issue28/test-pr49'
+
 collect_output(fbase, branch)
 ```
 
