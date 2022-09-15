@@ -14,15 +14,15 @@ def extract_pair(ra, dec, *, img_pair, cutout_width, mosaic_pix_scale):
 
     Parameters:
     -----------
-    ra, dec: float or double
+    ra, dec : float
         celestial coordinates for measuring photometry
-    img_pair: tuple
+    img_pair : tuple
         Pair of images for science and background respectively.
         If the tuple only contains one element, the same image will be used for both cutouts.
         A tuple element can be a fits.ImageHDU or the path to a FITS file as a string.
-    cutout_width: int
+    cutout_width : int
         width of desired cutout in arcseconds
-    mosaic_pix_scale: float
+    mosaic_pix_scale : float
         Pixel scale of the image
 
     Returns:
@@ -60,15 +60,15 @@ def extract(ra, dec, *, hdu, cutout_width, mosaic_pix_scale):
 
     Parameters:
     -----------
-    ra, dec: float or double
+    ra, dec : float
         celestial coordinates for measuring photometry
-    hdu: fits.ImageHDU or str
+    hdu : fits.ImageHDU or str
         Image data to extract the cutout from.
         If this is a `str`, it should be the path to a FITS file -- the primary HDU
         will be loaded and used.
-    cutout_width: int
+    cutout_width : int
         width of desired cutout in arcseconds
-    mosaic_pix_scale: float
+    mosaic_pix_scale : float
         Pixel scale of the image
 
     Returns:
@@ -82,7 +82,7 @@ def extract(ra, dec, *, hdu, cutout_width, mosaic_pix_scale):
 
     Raises:
     -------
-    CutoutError: If the cutout cannot be extracted.
+    CutoutError : If the cutout cannot be extracted.
     '''
     if isinstance(hdu, str):
         # hdu is a file path. load the primary HDU

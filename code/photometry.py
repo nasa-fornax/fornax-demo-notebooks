@@ -23,14 +23,14 @@ def calc_background(*, bkgsubimage):
 
     Parameters:
     -----------
-    bkgsubimage: <need type>
+    bkgsubimage : np.ndarray
         Image data from which the sky background will be calculated.
 
     Returns:
     --------
-    skymean: float
+    skymean : float
         Mean of sigma-clipped background
-    skynoise: float
+    skynoise : float
         Standard deviation of sigma-clipped background
     """
     # suppress warnings about nans in the calculation
@@ -47,26 +47,26 @@ def run_tractor(*, subimage, prf, objsrc, skymean, skynoise):
 
     Parameters:
     -----------
-    subimage: <need type>
+    subimage : np.ndarray
         Science image cutout.
-    prf: np.ndarray
+    prf : np.ndarray
         Point spread function for the band/channel.
-    objsrc: List[tractor.ducks.Source]
+    objsrc : List[tractor.ducks.Source]
         List of tractor Source objects for the target and nearby sources.
-    skymean: float
+    skymean : float
         Mean of sigma-clipped background
-    skynoise: float
+    skynoise : float
         Standard deviation of sigma-clipped background
 
     Returns:
     -------
-    flux_var: float, double, or None
+    flux_var : float, double, or None
         Flux variance result from the tractor optimization.
         None if tractor optimization succeeded but it didn't report a variance.
 
     Raises:
     -------
-    TractorError: If the tractor optimization fails.
+    TractorError : If the tractor optimization fails.
     """
     # make the tractor image
     tim = Image(
@@ -112,21 +112,21 @@ def interpret_tractor_results(*, flux_var, flux_conv, objsrc, nconfsrcs):
 
     Parameters:
     -----------
-    flux_var: float, double, or None
+    flux_var : float, double, or None
         Flux variance result from the tractor optimization.
         None if tractor optimization succeeded but it didn't report a variance.
-    flux_conv: float
+    flux_conv : float
         factor used to convert tractor result to microjanskies
-    objsrc: List[tractor.ducks.Source]
+    objsrc : List[tractor.ducks.Source]
         List of tractor Source objects for the target and nearby sources.
-    nconfsrcs: int
+    nconfsrcs : int
         Number of nearby confusing sources
 
     Returns:
     --------
-    flux: float
+    flux : float
         Measured flux in microJansky.
-    flux_unc: float
+    flux_unc : float
         Flux uncertainty in microJansky, calculated from the tractor results.
         NaN if tractor didn't report a variance.
     """
