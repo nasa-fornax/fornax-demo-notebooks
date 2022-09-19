@@ -6,18 +6,18 @@ See [results.ipynb](results.ipynb) (in this directory) for test results.
 See [collect_output.py](collect_output.py) (in this directory) for the code that collects the output from each notebook.
 ```
 
-PR \#49 requests to merge `troyraen:issue28` -> `fornax-navo:main`
+PR \#49 requests to merge ``troyraen:issue28`` -> ``fornax-navo:main``
 
 ## Test outline:
 
 -   [Run notebooks](#run-the-notebooks) from both branches on fornaxdev
--   [Collect](#collect-the-output) some key variables and dump them to a file. Variables:
+-   [Collect](#collect-the-output) some key variables and write them to disk. Variables will include:
     -   band params:
         -   band, prf, cutout_width, flux_conv, mosaic_pix_scale
         -   (prf is an array, so I'll just check their hashes)
     -   source params:
         -   row.Index, band, row.ra, row.dec, row.type, row.ks_flux_aper2, imgpath, bkgpath
-    -   tractor output for a subset (same for both branches) of sources
+    -   ``calc_instrflux`` output for a subset of sources (same subset for both branches)
         -   row.Index, band, flux, flux_unc
 -   [Compare the outputs](#compare-output)
     -   tests pass if the corresponding outputs from each notebook are equal
@@ -53,22 +53,35 @@ git pull
 
 ## Collect the output
 
--   The code that defines our tests is in [collect_output.py](collect_output.py).
-    -   Copy and paste the entire file into a cell in the multiband_photometery notebook
-    -   Execute the cell
--   Then run the output collection by executing the following in another cell:
+In a new cell in the notebook that you ran in the last step, do the following.
+Note: Fill in the ``issue28dir`` and uncomment a ``branch`` before executing.
 
 ```python
-# uncomment ONE of the following
+# TODO: enter the path to the root dir for issue28 branch
+issue28dir = "path/to/issue28"
+
+# source the output collection code into the environment
+# use the same .py from issue28 for both branches
+%run -i "$issue28dir/test-pr49/collect_output.py"
+
+# TODO: uncomment ONE of the following
 # branch = branch28
 # branch = branchmain
 
-# use same base path for both branches
-fbase = '../../issue28/test-pr49'
-
-collect_output(fbase, branch)
+# collect output
+run_collectors(branch)
 ```
 
 ## Compare output
 
-Load the output files and test for equality by running the [results.ipynb](results.ipynb) notebook that is in this directory.
+After doing the previous two steps in both branches,
+
+Load the output files and test for equality by running the following from within this directory:
+
+```bash
+# TODO: enter the path to the root dir for issue28 branch
+issue28dir="path/to/issue28"
+cd "${issue28dir}/test/pr49"
+
+python -c "import tests; tests.run_equality_tests()"
+```

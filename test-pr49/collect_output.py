@@ -9,35 +9,45 @@
 #       - then, copy and paste the contents of this file into the notebook
 #           - uncomment the appropriate `branch` variable
 #           - execute it
-#       - then set `branch` and `fbase` and run the test by calling `collect_output(fbase, branch)`
+#       - then set `branch` and `dout` and run the test by calling `collect_output(dout, branch)`
+from pathlib import Path
 from random import randint
 
+
+# directory for output files
+DOUT = Path(__file__).parent / "output"
 
 # branch names
 branch28 = "troyraenissue28"
 branchmain = "fornaxnavomain"
 
 
-# define file paths that we'll write to, plus their columns
+# define file paths that we'll write to, plus their columns if applicable
+def fresults(dout): return f"{dout}/RESULTS.out"
 
-def fband(fbase, branch): return f"{fbase}/bandparams-{branch}.csv"
+
+commitsha_cols = ["sha"]
+def fcommitsha(dout, branch): return f"{dout}/commitsha-{branch}.csv"
+
+
+def fband(dout, branch): return f"{dout}/bandparams-{branch}.csv"
 
 
 band_cols = ["idx", "prf", "cutout_width", "flux_conv", "mosaic_pix_scale"]
-def fsource(fbase, branch): return f"{fbase}/sourceparams-{branch}.csv"
+def fsource(dout, branch): return f"{dout}/sourceparams-{branch}.csv"
 
 
 source_cols = [
     "row.Index", "band.idx", "row.ra", "row.dec", "row.type", "row.ks_flux_aper2", "imgpath", "bkgpath"
 ]
-def ftractor(fbase, branch): return f"{fbase}/tractoroutput-{branch}.csv"
+def ftractor(dout, branch): return f"{dout}/tractoroutput-{branch}.csv"
 
 
 tractor_cols = ["row.Index", "band.idx", "flux", "flux_unc"]
 
 
-def get_indexes_for_tractor(fbase, branch):
-    findexes_for_tractor = f"{fbase}/indexes_for_tractor.csv"
+def get_indexes_for_tractor(dout, branch):
+    findexes_for_tractor = f"{dout}/indexes_for_tractor.csv"
     if branch == branch28:
         # generate the list
         # total number of sources (initial IRSA radius is 15 arcmin)
@@ -123,31 +133,85 @@ def collect_tractor_results(paramlist, idxs, fout, cols):
     tractordf.to_csv(fout)
 
 
-def collect_output(fbase, branch):
-    # ### Collect band params and dump to file
-    fout = fband(fbase, branch)
+def collect_repo_head_sha(fout):
+    """Get the SHA of the repo HEAD commit and dump to file"""
+    import git
+
+    with open(fout, 'w') as f:
+        np.savetxt(f, git.Repo(search_parent_directories=True).head.object.hexsha)
+
+
+def run_collectors(branch, dout=DOUT):
+    """Run all collectors and write output to file."""
+    dout.mkdir(exist_ok=True)
+    print(f"Output will be written to: \n{dout}\n")
+
+    fout = fcommitsha(dout, branch)
+    collect_repo_head_sha(fout)
+
+    # Collect band params and dump to file
+    fout = fband(dout, branch)
     cols = band_cols
-    print(f"Collecting Band params and dumping to file at {fout}")
+    print(f"Collecting Band params and dumping to file at: \n{fout.split('/')[-1]}")
     if branch == branch28:
         collect_bands_issue28(all_bands, fout, cols)
     else:
         collect_bands_main(prfs, cutout_width_list,
                            flux_conv_list, mosaic_pix_scale_list, fout, cols)
 
-    # ### Collect source params and dump to file
-    fout = fsource(fbase, branch)
+    # Collect source params and dump to file
+    fout = fsource(dout, branch)
     cols = source_cols
-    print(f"Collecting Source params and dumping to file at {fout}")
+    print(f"Collecting Source params and dumping to file at: \n{fout.split('/')[-1]}")
     if branch == branch28:
         collect_source_params_issue28(paramlist, fout, cols)
     else:
         collect_source_params_main(paramlist, fout, cols)
 
-    # ### Collect tractor output and dump to file
-    fout = ftractor(fbase, branch)
+    # Collect calc_instrflux output and dump to file
+    fout = ftractor(dout, branch)
     cols = tractor_cols
     print(
-        f"Running tractor, collecting results, and dumping to file at {fout}")
+        f"Running calc_instrflux and dumping results to file at: \n{fout.split('/')[-1]}")
     # same calls for both branches
-    indexes_for_tractor = get_indexes_for_tractor(fbase, branch)
+    indexes_for_tractor = get_indexes_for_tractor(dout, branch)
     collect_tractor_results(paramlist, indexes_for_tractor, fout, cols)
+
+
+def run_equality_tests(dout=DOUT):
+    """Load the collected output files and test equality across branches."""
+    import pandas as pd
+
+    _fout = fresults(dout)
+    print(f"Writing results to: {_fout}")
+
+    def _read(fin):
+        with open(fin, "r") as f:
+            return f.read()
+
+    def _print_and_write(lines, fout=_fout):
+        print(f"{line}\n" for line in lines)
+        with open(fout, "a") as f:
+            f.writelines(lines)
+
+    _print_and_write([
+        f"Comparing output located in: {dout}",
+        "Generated from branches: \n",
+        *[f"\t{branch} - HEAD SHA: {_read(fcommitsha(dout, branch))}" for branch in [branch28, branchmain]],
+        "Running equality tests...",
+    ])
+
+    # zip (test name, function that returns the path to an output file)
+    tests = zip(
+        ("Band params", "Source params", "calc_instrflux output"),
+        (fband, fsource, ftractor)
+    )
+    # load the collected output and test the results for equality
+    for name, fin in tests:
+        df28 = pd.read_csv(fin(dout, branch28))
+        dfmain = pd.read_csv(fin(dout, branchmain))
+
+        if df28.equals(dfmain):
+            _print_and_write([f"{name} PASSED -- branches produced identical output"])
+        else:
+            _print_and_write([f"{name} FAILED -- branches produced different output"])
