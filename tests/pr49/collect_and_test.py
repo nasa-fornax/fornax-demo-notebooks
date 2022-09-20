@@ -195,10 +195,10 @@ def run_equality_tests(dout=DOUT):
             f.writelines(lines)
 
     _print_and_write([
-        f"Comparing output located in: {dout}",
+        f"Comparing output located in: {dout}\n",
         "Generated from branches: \n",
-        *[f"\t{branch} - HEAD SHA: {_read(fcommitsha(dout, branch))}" for branch in [branch28, branchmain]],
-        "Running equality tests...",
+        *[f"\t{branch} - HEAD SHA: {_read(fcommitsha(dout, branch))}\n" for branch in [branch28, branchmain]],
+        "Running equality tests...\n",
     ])
 
     # zip (test name, function that returns the path to an output file)
@@ -212,6 +212,6 @@ def run_equality_tests(dout=DOUT):
         dfmain = pd.read_csv(fin(dout, branchmain))
 
         if df28.equals(dfmain):
-            _print_and_write([f"{name} PASSED -- branches produced identical output"])
+            _print_and_write([f"PASSED : {name} -- branches produced identical output\n"])
         else:
-            _print_and_write([f"{name} FAILED -- branches produced different output"])
+            _print_and_write([f"FAILED : {name} -- branches produced different output\n"])
