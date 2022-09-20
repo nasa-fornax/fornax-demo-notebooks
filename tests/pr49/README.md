@@ -4,7 +4,7 @@ PR \#49 requests to merge ``troyraen:issue28`` -> ``fornax-navo:main``
 
 This page contains a description of the tests written for that PR, and instructions for running them.
 
-These tests have already been run -- see [RESULTS.out](RESULTS.out).
+These tests have already been run -- see [output/RESULTS.out](output/RESULTS.out).
 
 See [collect_and_test.py](collect_and_test.py) for the code used to
 collect the output from each notebook and run the tests.
