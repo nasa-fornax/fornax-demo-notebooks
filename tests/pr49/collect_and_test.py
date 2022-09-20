@@ -138,7 +138,7 @@ def collect_repo_head_sha(fout):
     import git
 
     with open(fout, 'w') as f:
-        np.savetxt(f, git.Repo(search_parent_directories=True).head.object.hexsha)
+        f.writelines([git.Repo(search_parent_directories=True).head.object.hexsha])
 
 
 def run_collectors(branch, dout=DOUT):

@@ -64,7 +64,7 @@ issue28dir = "path/to/issue28"
 
 # source the output collection code into the environment
 # use the same .py from issue28 for both branches
-%run -i "$issue28dir/test-pr49/collect_and_test.py"
+%run -i "$issue28dir/tests/pr49/collect_and_test.py"
 
 # TODO: uncomment ONE of the following
 # branch = branch28
