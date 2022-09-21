@@ -10,6 +10,7 @@
 #           - uncomment the appropriate `branch` variable
 #           - execute it
 #       - then set `branch` and `dout` and run the test by calling `collect_output(dout, branch)`
+from datetime import datetime
 from pathlib import Path
 from random import randint
 
@@ -23,7 +24,7 @@ branchmain = "fornaxnavomain"
 
 
 # define file paths that we'll write to, plus their columns if applicable
-def fresults(dout): return f"{dout}/RESULTS.out"
+def fresults(dout): return Path(dout).parent / f"RESULTS_{datetime.now().date()}.out"
 
 
 commitsha_cols = ["sha"]
