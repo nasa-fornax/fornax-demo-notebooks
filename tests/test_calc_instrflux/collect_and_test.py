@@ -24,7 +24,10 @@ branchmain = "fornaxnavomain"
 
 
 # define file paths that we'll write to, plus their columns if applicable
-def fresults(dout): return Path(dout).parent / f"RESULTS_{datetime.now().date()}.out"
+def fresults(dout):
+    logdir = Path(dout).parent / "logs"
+    logdir.mkdir(exist_ok=True)
+    return logdir / f"test_calc_instrflux_{datetime.now().date()}.out"
 
 
 commitsha_cols = ["sha"]
