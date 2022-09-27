@@ -4,8 +4,6 @@ from astropy.nddata import Cutout2D
 import astropy.io.fits as fits
 from astropy.wcs import WCS
 
-from exceptions import CutoutError
-
 
 def extract_pair(ra, dec, *, img_pair, cutout_width, mosaic_pix_scale):
     """Extract cutouts from the science and background images in `img_pair`.
@@ -79,37 +77,29 @@ def extract(ra, dec, *, hdu, cutout_width, mosaic_pix_scale):
         Pixel coordinates of the target in the cutout.
     cutout_wcs:
         `WCS` for the cutout.
-
-    Raises:
-    -------
-    CutoutError : If the cutout cannot be extracted.
     '''
     if isinstance(hdu, str):
         # hdu is a file path. load the primary HDU
         hdu = fits.open(hdu)[0]
     wcs_info = WCS(hdu)
 
-    try:
-        # convert ra and dec into x, y
-        x0, y0 = wcs_info.all_world2pix(ra, dec, 1)
-        position = (x0, y0)
+    # convert ra and dec into x, y
+    x0, y0 = wcs_info.all_world2pix(ra, dec, 1)
+    position = (x0, y0)
 
-        # make size array in pixels
-        # how many pixels are in cutout_width
-        size = (cutout_width / mosaic_pix_scale)
-        size = int(math.ceil(size))  # round up the nearest integer
+    # make size array in pixels
+    # how many pixels are in cutout_width
+    size = (cutout_width / mosaic_pix_scale)
+    size = int(math.ceil(size))  # round up the nearest integer
 
-        # make the cutout
-        cutout = Cutout2D(hdu.data, position, size,
-                          copy=True, mode="trim", wcs=wcs_info)
-        subimage = cutout.data.copy()
-        subimage_wcs = cutout.wcs.copy()
+    # make the cutout
+    cutout = Cutout2D(hdu.data, position, size,
+                      copy=True, mode="trim", wcs=wcs_info)
+    subimage = cutout.data.copy()
+    subimage_wcs = cutout.wcs.copy()
 
-        # now need to set the values of x1, y1 at the location of the target *in the cutout*
-        x1, y1 = subimage_wcs.all_world2pix(ra, dec, 1)
-        #print('x1, y1', x1, y1)
-
-    except Exception as e:
-        raise CutoutError("Cutout could not be extracted") from e
+    # now need to set the values of x1, y1 at the location of the target *in the cutout*
+    x1, y1 = subimage_wcs.all_world2pix(ra, dec, 1)
+    #print('x1, y1', x1, y1)
 
     return subimage.data, x1, y1, subimage_wcs
