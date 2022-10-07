@@ -93,10 +93,9 @@ def extract(ra, dec, *, hdu, cutout_width, mosaic_pix_scale):
     size = int(math.ceil(size))  # round up the nearest integer
 
     # make the cutout
-    cutout = Cutout2D(hdu.data, position, size,
-                      copy=True, mode="trim", wcs=wcs_info)
-    subimage = cutout.data.copy()
-    subimage_wcs = cutout.wcs.copy()
+    cutout = Cutout2D(hdu.data, position, size, mode="trim", wcs=wcs_info)
+    subimage = cutout.data
+    subimage_wcs = cutout.wcs
 
     # now need to set the values of x1, y1 at the location of the target *in the cutout*
     x1, y1 = subimage_wcs.all_world2pix(ra, dec, 1)
