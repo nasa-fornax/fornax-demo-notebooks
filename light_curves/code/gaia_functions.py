@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from astropy.time import Time
 from astropy.table import Table
+import astropy.units as u
 
 # We first define some function:
 # 1. Gaia_retrieve_EPOCH_PHOTOMETRY: to retrieve the epoch photometry for a given Gaia (DR3) ID
