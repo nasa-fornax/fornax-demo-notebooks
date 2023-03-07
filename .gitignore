@@ -15,6 +15,7 @@
 
 #pycache
 _pycache_
+./light_curves/code/__pycache__
 
 # untimely github repo
 light_curves/unTimely_Catalog_explorer 
