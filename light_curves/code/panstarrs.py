@@ -1,3 +1,7 @@
+import requests
+import numpy as np
+from astropy.table import Table
+
 def ps1cone(ra,dec,radius,table="mean",release="dr1",format="csv",columns=None,
            baseurl="https://catalogs.mast.stsci.edu/api/v0.1/panstarrs", verbose=False,
            **kw):

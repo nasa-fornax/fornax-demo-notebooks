@@ -14,4 +14,7 @@
 .vscode
 
 #pycache
-_pycache_
+__pycache__
+
+# untimely github repo
+./light_curves/unTimely_Catalog_explorer/
