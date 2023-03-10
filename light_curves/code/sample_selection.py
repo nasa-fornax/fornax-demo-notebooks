@@ -143,7 +143,28 @@ def get_graham_sample(coords, labels):
         coords.append(SkyCoord(test_str, unit=(u.hourangle, u.deg)))
         labels.append('Graham 19')
         
-        
+#SDSS QSO sample of any desired number
+#These are "normal" QSOs to use in the classifier
+def get_SDSS_sample(coords, labels, num):
+    # Define the query
+    query = "SELECT TOP " + str(num) + " specObjID, ra, dec, z FROM SpecObj \
+    WHERE ( z > 0.0 AND z < 2.0 AND class='QSO' AND zWARNING=0 )"
+#    query = """SELECT TOP " + num + " specObjID, ra, dec, z 
+#    FROM SpecObj 
+#    WHERE ( z > 0.0 AND z < 2.0
+#    AND class='QSO' AND zWARNING=0 )"""
+
+    #making up redshift range here, but should look at redshift distribution of the CLQ
+
+    #use astroquery to return an astropy table of results
+    res = SDSS.query_sql(query, data_release = 16)
+
+    SDSS_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(res['ra'], res['dec'])]
+    SDSS_labels = ['SDSS' for ra in res['ra']]
+    
+    coords.extend(SDSS_coords)
+    labels.extend(SDSS_labels)
+    
         
 #and now a function to remove duplicates from the coordinate list 
 def remove_duplicate_coords(skycoordslist, labels):
