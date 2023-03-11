@@ -6,9 +6,19 @@ import pandas as pd
 from astropy.io import fits,ascii
 
 
-def ztfDF(df_lc, coords_list,labels_list,ztf_radius = 0.000278, plotprint = 1): 
+def ztf_lightcurve(df_lc, coords_list,labels_list,ztf_radius = 0.000278, plotprint = 1): 
     ''' Function to add the ZTF lightcurves in all three bands 
-    to a multiframe data structure '''
+    to a multiframe data structure 
+    input:
+     --- a multi-data frame to add the light curves to
+     --- list of coordinates
+     --- list of labels
+     --- ztf_radius default to 0.000278
+     --- optional plotprint number of objects to plot
+     
+     output:
+      --- the multi-data frame with ztf sources appended.
+      '''
 
     count_nomatch = 0 # counter for non matched objects
     count_plots = 0 
