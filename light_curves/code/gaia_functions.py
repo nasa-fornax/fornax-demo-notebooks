@@ -152,7 +152,7 @@ def Gaia_mk_MultiIndex(data, labels_list, gaia_phot , gaia_epoch_phot , verbose)
     '''
 
     for ii in range(len(data)):
-        print("{} matched to: ".format( data["Object Name"][ii])  , end=" ")
+        #print("{} matched to: ".format( data["Object Name"][ii])  , end=" ")
 
         ## Check if this object has a Gaia light curve:
 
