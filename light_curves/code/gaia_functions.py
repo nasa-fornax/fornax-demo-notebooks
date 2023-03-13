@@ -132,7 +132,7 @@ def Gaia_mk_MultibandTimeSeries(epoch_phot):
     return(out)
 
 
-def Gaia_mk_MultiIndex(data , gaia_phot , gaia_epoch_phot , verbose):
+def Gaia_mk_MultiIndex(data, labels_list, gaia_phot , gaia_epoch_phot , verbose):
     '''
     Creates a MultiIndex Pandas Dataframe for the Gaia observations. Specifically, it 
     returns the epoch photometry as a function of time. For sources without Gaia epoch
@@ -152,12 +152,15 @@ def Gaia_mk_MultiIndex(data , gaia_phot , gaia_epoch_phot , verbose):
     '''
 
     for ii in range(len(data)):
-        print("{} matched to: ".format( data["Object Name"][ii])  , end=" ")
+        #print("{} matched to: ".format( data["Object Name"][ii])  , end=" ")
 
         ## Check if this object has a Gaia light curve:
 
         # get Gaia source_id
-        sel = np.where(data["Object Name"][ii] == gaia_phot["input_object_name"])[0]
+        #sel = np.where(data["Object Name"][ii] == gaia_phot["input_object_name"])[0]
+        sel = np.where(data[ii] == gaia_phot["input_object_name"])[0]
+        lab = labels_list[ii]
+        
         if len(sel) > 0:
             source_id = gaia_phot["source_id"][sel[0]]
             print(source_id , end=" ")
@@ -183,10 +186,10 @@ def Gaia_mk_MultiIndex(data , gaia_phot , gaia_epoch_phot , verbose):
                                  err=np.asarray(dy2), # in mJy
                                  time=t.mjd, # in MJD
                                  #objectid=gaia_phot["input_object_name"][sel],
-                                 objectid=np.repeat(ii+1, len(y)),
+                                 objectid=np.repeat(ii+1, len(y)),label=lab,
                                  band="Gaia {}".format(band.lower())
                                                 )
-                                           ).set_index(["objectid", "band", "time"])
+                                           ).set_index(["objectid","label", "band", "time"])
 
                     # add to table
                     try:
@@ -218,10 +221,10 @@ def Gaia_mk_MultiIndex(data , gaia_phot , gaia_epoch_phot , verbose):
                                  err=np.asarray(dy2), # in mJy
                                  time=t.mjd, # in MJD
                                  #objectid=gaia_phot["input_object_name"][sel],
-                                 objectid=np.repeat(ii+1, len(y)),
+                                 objectid=np.repeat(ii+1, len(y)),label=lab,
                                  band="Gaia {}".format(band.lower())
                                     )
-                    ).set_index(["objectid", "band", "time"])
+                    ).set_index(["objectid", "label", "band", "time"])
 
                     # add to table
                     try:
