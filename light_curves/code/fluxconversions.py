@@ -1,6 +1,24 @@
 #need to convert those magnitudes into mJy to be consistent in data structure.
 #using zeropoints from here: https://wise2.ipac.caltech.edu/docs/release/allsky/expsup/sec4_4h.html
 def convert_WISEtoJanskies(mag, magerr, band):
+    """converts WISE telescope magnitudes into flux units of Jansies in mJy
+    
+    Parameters
+    ----------
+    mag : array-like
+        array of WISE magnitudes
+    magerr : array-like
+        array of WISE uncertainties on the magnitudes
+    band : str {'w1', 'w2'}
+        name of the WISE band to be converted
+        
+    Returns
+    -------
+    flux: array
+        flux in mJy corresponding to the input magnitudes
+    flux uncertaintiy: array
+        uncertainty on the returned flux corresponding to input magerr
+    """
     if band == 'w1':
         zpt = 309.54
     elif band == 'w2':
@@ -19,7 +37,28 @@ def convert_WISEtoJanskies(mag, magerr, band):
     return flux_Jy*1E3, fluxerr_Jy*1E3  #now in mJy
 
 def convertACSmagtoflux(date, filterstring, mag, magerr):
+    """converts HST ACS magnitudes into flux units of Jansies 
     
+    Parameters
+    ----------
+    date : float
+        date of observation in units of MJD
+    filterstring : str {'F435W', 'F475W','F502N','F550M','F555W','F606W','F625W',/
+    'F658N','F660N','F775W','F814W','F850LP','F892N'}
+        name of the ACS band to be converted
+    mag : array-like
+        array of ACS magnitudes
+    magerr : array-like
+        array of ACS uncertainties on the magnitudes
+        
+    Returns
+    -------
+    flux: array
+        flux in janskies corresponding to the input magnitudes
+    flux uncertaintiy: array
+        uncertainty on the returned flux corresponding to input magerr
+    """
+ 
     #date is currently in MJD and needs to be in ISO Format (YYYY-MM-DD)
     #use astropy to handle this properly
     t = Time(date, format = 'mjd')

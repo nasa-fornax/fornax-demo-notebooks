@@ -11,8 +11,18 @@ from astropy import table
 import numpy as np
 
 #lamassa et al., 2015  1 source
-
 def get_lamassa_sample(coords, labels, verbose=1):
+    """Automatically grabs changing look AGN from LaMassa et al 2015 sample.
+    
+    Parameters
+    ----------
+    coords : list
+        list of Astropy SkyCoords derived from literature sources, shared amongst functions
+    lables : list
+        List of the first author name and publication year for tracking the sources, shared amongst functions
+    verbose : int, optional
+        Print out the length of the sample derived from this literature source  
+    """
     lamassa_CLQ = Ned.query_refcode('2015ApJ...800..144L')
     lamassa_CLQ= lamassa_CLQ[0]  #dont know what those other targets are.
     coords.append(SkyCoord(lamassa_CLQ['RA'], lamassa_CLQ['DEC'], frame='icrs', unit='deg'))
@@ -23,6 +33,17 @@ def get_lamassa_sample(coords, labels, verbose=1):
 
 #MacLeod et al., 2016
 def get_macleod16_sample(coords, labels, verbose=1):
+    """Automatically grabs changing look AGN from MacLeod et al., 2016 sample.
+    
+    Parameters
+    ----------
+    coords : list
+        list of Astropy SkyCoords derived from literature sources, shared amongst functions
+    lables : list
+        List of the first author name and publication year for tracking the sources, shared amongst functions
+    verbose : int, optional
+        Print out the length of the sample derived from this literature source  
+    """
     macleod_CSQ = Table.read('https://academic.oup.com/mnras/article/457/1/389/989199', htmldict={'table_id': 5}, format='ascii.html')
 
     #get coords from "name" column for this
@@ -32,11 +53,22 @@ def get_macleod16_sample(coords, labels, verbose=1):
         coords.append(SkyCoord(test_str, unit=(u.hourangle, u.deg)))
         labels.append('MacLeod 16')
     if verbose:
-        print('Changing Look AGN- McLeod et al 2016: ',len(macleod_CSQ))
+        print('Changing Look AGN- MacLeod et al 2016: ',len(macleod_CSQ))
 
         
 #Ruan et al., 2016  3 sources
 def get_ruan_sample(coords, labels, verbose=1):
+    """Automatically grabs changing look AGN from Ruan et al., 2016 sample.
+    
+    Parameters
+    ----------
+    coords : list
+        list of Astropy SkyCoords derived from literature sources, shared amongst functions
+    lables : list
+        List of the first author name and publication year for tracking the sources, shared amongst functions
+    verbose : int, optional
+        Print out the length of the sample derived from this literature source  
+    """
     ruan_CSQ = Ned.query_refcode('2016ApJ...826..188R')
 
     ruan_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(ruan_CSQ['RA'], ruan_CSQ['DEC'])]
@@ -51,6 +83,17 @@ def get_ruan_sample(coords, labels, verbose=1):
 
 #MacLeod et al., 2019 17 sources
 def get_macleod19_sample(coords, labels, verbose=1):
+    """Automatically grabs changing look AGN from MacLeod et al., 2019 sample.
+    
+    Parameters
+    ----------
+    coords : list
+        list of Astropy SkyCoords derived from literature sources, shared amongst functions
+    lables : list
+        List of the first author name and publication year for tracking the sources, shared amongst functions
+    verbose : int, optional
+        Print out the length of the sample derived from this literature source  
+    """
     #try vizier
     Vizier.ROW_LIMIT = -1
     catalog_list = Vizier.find_catalogs('2019ApJ...874....8M')
@@ -71,6 +114,17 @@ def get_macleod19_sample(coords, labels, verbose=1):
 
 #sheng et al., 2020
 def get_sheng_sample(coords, labels, verbose=1):
+    """Automatically grabs changing look AGN from sheng et al., 2020 sample.
+    
+    Parameters
+    ----------
+    coords : list
+        list of Astropy SkyCoords derived from literature sources, shared amongst functions
+    lables : list
+        List of the first author name and publication year for tracking the sources, shared amongst functions
+    verbose : int, optional
+        Print out the length of the sample derived from this literature source  
+    """
     CLQ = Ned.query_refcode('2020ApJ...889...46S') 
     sheng_CLQ = CLQ[[0,1,3]]#need the first 3 objects in their table, 
     sheng_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(sheng_CLQ['RA'], sheng_CLQ['DEC'])]
@@ -84,6 +138,17 @@ def get_sheng_sample(coords, labels, verbose=1):
 
 #green et al., 2022  19 sources
 def get_green_sample(coords, labels, verbose=1):
+    """Automatically grabs changing look AGN from green et al., 2022 sample.
+    
+    Parameters
+    ----------
+    coords : list
+        list of Astropy SkyCoords derived from literature sources, shared amongst functions
+    lables : list
+        List of the first author name and publication year for tracking the sources, shared amongst functions
+    verbose : int, optional
+        Print out the length of the sample derived from this literature source  
+    """
     green_CSQ = Table.read('https://cfn-live-content-bucket-iop-org.s3.amazonaws.com/journals/0004-637X/933/2/180/revision2/apjac743ft2_mrt.txt?AWSAccessKeyId=AKIAYDKQL6LTV7YY2HIK&Expires=1678235090&Signature=sRu3zJOwgegGTF2iCZvkRxwjT44%3D', format='ascii')
     green_CSQ = green_CSQ.to_pandas()
 
@@ -103,6 +168,17 @@ def get_green_sample(coords, labels, verbose=1):
 
 #Lyu et al., 2021  lists a known sample of 68 sources to date!!!
 def get_lyu_sample(coords, labels, verbose=1):
+    """Automatically grabs changing look AGN from Lyu et al., 2021 sample.
+    
+    Parameters
+    ----------
+    coords : list
+        list of Astropy SkyCoords derived from literature sources, shared amongst functions
+    lables : list
+        List of the first author name and publication year for tracking the sources, shared amongst functions
+    verbose : int, optional
+        Print out the length of the sample derived from this literature source  
+    """
     CLQ = Ned.query_refcode('2022ApJ...927..227L') 
     lyu_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(CLQ['RA'], CLQ['DEC'])]
     lyu_labels = ['Lyu 21' for ra in CLQ['RA']]
@@ -115,6 +191,17 @@ def get_lyu_sample(coords, labels, verbose=1):
 
 #Lopez-navas et al., 2022
 def get_lopeznavas_sample(coords, labels, verbose=1):
+    """Automatically grabs changing look AGN from Lopez-navas et al., 2022 sample.
+    
+    Parameters
+    ----------
+    coords : list
+        list of Astropy SkyCoords derived from literature sources, shared amongst functions
+    lables : list
+        List of the first author name and publication year for tracking the sources, shared amongst functions
+    verbose : int, optional
+        Print out the length of the sample derived from this literature source  
+    """
     result_table = Simbad.query_bibobj('2022MNRAS.513L..57L')
     result_table = result_table[[0,1,2,3]]  #pick the correct sources by hand
 
@@ -129,6 +216,17 @@ def get_lopeznavas_sample(coords, labels, verbose=1):
 
 #Hon et al., 2022
 def get_hon_sample(coords, labels, verbose=1):
+    """Automatically grabs changing look AGN from Hon et al., 2022 sample.
+    
+    Parameters
+    ----------
+    coords : list
+        list of Astropy SkyCoords derived from literature sources, shared amongst functions
+    lables : list
+        List of the first author name and publication year for tracking the sources, shared amongst functions
+    verbose : int, optional
+        Print out the length of the sample derived from this literature source  
+    """
     CLQ = Ned.query_refcode('2022MNRAS.511...54H') 
     hon_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(CLQ['RA'], CLQ['DEC'])]
     hon_labels = ['Hon 22' for ra in CLQ['RA']]
@@ -138,8 +236,19 @@ def get_hon_sample(coords, labels, verbose=1):
     if verbose:
         print('Changing Look AGN- Hon et al 2022: ',len(CLQ['RA']))
      
-
+#yang et al., 2018
 def get_yang_sample(coords, labels, verbose=1):
+    """Automatically grabs changing look AGN from yang et al., 2018 sample.
+    
+    Parameters
+    ----------
+    coords : list
+        list of Astropy SkyCoords derived from literature sources, shared amongst functions
+    lables : list
+        List of the first author name and publication year for tracking the sources, shared amongst functions
+    verbose : int, optional
+        Print out the length of the sample derived from this literature source  
+    """
     CLQ = Ned.query_refcode('2018ApJ...862..109Y')
     yang_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(CLQ['RA'], CLQ['DEC'])]
     yang_labels = ['Yang 18' for ra in CLQ['RA']]
@@ -152,7 +261,19 @@ def get_yang_sample(coords, labels, verbose=1):
                   
 #Here are additional CLAGN samples 
 #but not spectroscopically confirmed
+#Sanchez Saez et al., 2021
 def get_sanchezsaez_sample(coords, labels, verbose=1):
+    """Automatically grabs changing look AGN from Sanchez Saez et al., 2021 sample.
+    
+    Parameters
+    ----------
+    coords : list
+        list of Astropy SkyCoords derived from literature sources, shared amongst functions
+    lables : list
+        List of the first author name and publication year for tracking the sources, shared amongst functions
+    verbose : int, optional
+        Print out the length of the sample derived from this literature source  
+    """
                   
     CSAGN = Ned.query_refcode('2021AJ....162..206S') # from Sanchez-Saez 2021
 
@@ -163,7 +284,19 @@ def get_sanchezsaez_sample(coords, labels, verbose=1):
     if verbose:
         print('Changing Look AGN- Sanchez et al: ',len(CSAGN['RA']))
                   
+#Graham et al., 2019            
 def get_graham_sample(coords, labels, verbose=1):
+    """Automatically grabs changing look AGN from Graham et al., 2019  sample.
+    
+    Parameters
+    ----------
+    coords : list
+        list of Astropy SkyCoords derived from literature sources, shared amongst functions
+    lables : list
+        List of the first author name and publication year for tracking the sources, shared amongst functions
+    verbose : int, optional
+        Print out the length of the sample derived from this literature source  
+    """
     #use astropy table to get larger sample that neither NED nor astropy can access.
     CSQ = Table.read('https://academic.oup.com/mnras/article/491/4/4925/5634279', htmldict={'table_id': 5}, format='ascii.html')
 
@@ -180,13 +313,22 @@ def get_graham_sample(coords, labels, verbose=1):
 #SDSS QSO sample of any desired number
 #These are "normal" QSOs to use in the classifier
 def get_SDSS_sample(coords, labels, num, verbose=1):
+    """Automatically grabs SDSS quasar sample.
+    
+    Parameters
+    ----------
+    coords : list
+        list of Astropy SkyCoords derived from literature sources, shared amongst functions
+    lables : list
+        List of the first author name and publication year for tracking the sources, shared amongst functions
+    num : int < 500K
+        How many quasars for which to return the coords and labels
+    verbose : int, optional
+        Print out the length of the sample derived from this literature source  
+    """
     # Define the query
     query = "SELECT TOP " + str(num) + " specObjID, ra, dec, z FROM SpecObj \
     WHERE ( z > 0.0 AND z < 2.0 AND class='QSO' AND zWARNING=0 )"
-#    query = """SELECT TOP " + num + " specObjID, ra, dec, z 
-#    FROM SpecObj 
-#    WHERE ( z > 0.0 AND z < 2.0
-#    AND class='QSO' AND zWARNING=0 )"""
 
     #making up redshift range here, but should look at redshift distribution of the CLQ
 
@@ -206,6 +348,24 @@ def get_SDSS_sample(coords, labels, num, verbose=1):
     
 #and now a function to remove duplicates from the coordinate list 
 def remove_duplicate_coords(skycoordslist, labels, verbose=1):
+    """Makes a unique sample of skycoords and labels with no repeats
+    
+    Parameters
+    ----------
+    skycoordslist : list
+        list of Astropy SkyCoords derived from literature sources
+    lables : list
+        List of the first author name and publication year for tracking the sources
+    verbose : int, optional
+        Print out the length of the sample after applying this function
+        
+    Returns
+    -------
+    sample_CLQ : list
+        unique skycoords
+    labels_CLQ : list
+        labels associated with unique skycoords list
+    """
     #first turn the skycoord list into a table to be able to access table functions in astropy
     t = Table([skycoordslist, labels, np.arange(0, len(skycoordslist), 1)], names=['sc', 'label', 'idx'])
 
