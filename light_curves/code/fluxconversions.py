@@ -37,7 +37,7 @@ def convert_WISEtoJanskies(mag, magerr, band):
     return flux_Jy*1E3, fluxerr_Jy*1E3  #now in mJy
 
 def convertACSmagtoflux(date, filterstring, mag, magerr):
-    """converts HST ACS magnitudes into flux units of Jansies 
+    """converts HST ACS magnitudes into flux units of Janskies 
     
     Parameters
     ----------
