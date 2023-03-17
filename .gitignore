@@ -1,3 +1,7 @@
+# .fits files
+./**/*.fits
+*.fits
+
 # Jupyter Notebook
 .ipynb_checkpoints
 
