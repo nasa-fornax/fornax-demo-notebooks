@@ -1,5 +1,8 @@
 import requests
 from astropy.table import Table
+from tqdm import tqdm
+import pandas as pd
+from astropy.coordinates import SkyCoord
 
 ## Functions related to the HCV.
 def get_hscapiurl():
@@ -156,3 +159,73 @@ def checklegal_hcv(table,release,magtype):
         if magtype not in magtypelist:
             raise ValueError("Bad value for magtype (must be one of {})".format(
                 ", ".join(magtypelist)))
+            
+def HCV_get_lightcurves(df_lc, coords_list, labels_list, radius):
+    """Searches Hubble Catalog of variables for light curves from a list of input coordinates
+    
+    Parameters
+    ----------
+    df_lc : pandas multiindex dataframe
+        the main data structure to store all light curves
+    coords_list : list of astropy skycoords
+        the coordinates of the targets for which a user wants light curves
+    labels_list: list of strings
+        journal articles associated with the target coordinates
+    radius : float
+        search radius, how far from the source should the archives return results
+
+    Returns
+    -------
+    df_lc : pandas dataframe
+        the main data structure to store all light curves
+    """
+
+    for ccount, coord in enumerate(coords_list):
+
+        #doesn't take SkyCoord, convert to floats
+        ra = coords_list.ra.deg[ccount]
+        dec = coords_list.dec.deg[ccount]
+        lab = labels_list[ccount]
+
+        #IC 1613 from the demo for testing
+        #ra = 16.19913
+        #dec = 2.11778
+    
+        #look in the summary table for anything within a radius of our targets
+        tab = hcvcone(ra,dec,radius,table="hcvsummary")
+        if tab == '':
+            print (ccount, 'no matches')
+        else:
+            #print(ccount, 'got a live one')
+        
+            tab = ascii.read(tab)
+                
+            matchid = tab['MatchID'][0]  #take the first one, assuming it is the nearest match
+        
+            #just pulling one filter for an example (more filters are available)
+            try:
+                src_814 = ascii.read(hcvsearch(table='hcv',MatchID=matchid,Filter='ACS_F814W'))
+            except FileNotFoundError:
+                #that filter doesn't exist for this target
+                print("no F814W filter info for this target")
+            else:        
+                time_814 = src_814['MJD']
+                mag_814 = src_814['CorrMag']  #need to convert this to flux
+                magerr_814 = src_814['MagErr']
+
+                filterstring = 'F814W'
+
+                #uggg, ACS has time dependent flux zero points.....
+                #going to cheat for now and only use one time, but could imagine this as a loop
+                #https://www.stsci.edu/hst/instrumentation/acs/data-analysis/zeropoints
+                flux, fluxerr = convertACSmagtoflux(time_814[0], filterstring, mag_814, magerr_814)
+                flux = flux *1E3 #convert to mJy
+                fluxerr = fluxerr*1E3 #convert to mJy
+            
+                #put this single object light curves into a pandas multiindex dataframe
+                dfsingle_814 = pd.DataFrame(dict(flux=flux, err=fluxerr, time=time_814, objectid=ccount + 1, band='F814W',label=lab)).set_index(["objectid", "label", "band", "time"])
+
+                #then concatenate each individual df together
+                df_lc.append(dfsingle_814)
+            
+    return(df_lc)
