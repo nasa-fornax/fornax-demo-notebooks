@@ -1,6 +1,9 @@
 import requests
 import numpy as np
 from astropy.table import Table
+import pandas as pd
+from tqdm import tqdm
+from astropy.io import ascii
 
 def ps1cone(ra,dec,radius,table="mean",release="dr1",format="csv",columns=None,
            baseurl="https://catalogs.mast.stsci.edu/api/v0.1/panstarrs", verbose=False,
@@ -158,3 +161,80 @@ def search_lightcurve(objid):
     dresults = ps1search(table='detection',release='dr2',columns=dcolumns,**dconstraints)
     
     return(dresults)
+
+
+#Do a panstarrs search
+def panstarrs_get_lightcurves(df_lc, coords_list, labels_list, radius):
+    """Searches panstarrs for light curves from a list of input coordinates
+    
+    Parameters
+    ----------
+    df_lc : pandas multiindex dataframe
+        the main data structure to store all light curves
+    coords_list : list of astropy skycoords
+        the coordinates of the targets for which a user wants light curves
+    labels_list: list of strings
+        journal articles associated with the target coordinates
+    radius : float
+        search radius, how far from the source should the archives return results
+
+    Returns
+    -------
+    df_lc : pandas dataframe
+        the main data structure to store all light curves
+    """
+        
+    #for all objects in our catalog
+    for ccount, coord in enumerate(tqdm(coords_list)):
+        #doesn't take SkyCoord, convert to floats
+        ra = coords_list.ra.deg[ccount]
+        dec = coords_list.dec.deg[ccount]
+        lab = labels_list[ccount]
+
+        #sometimes there isn't actually a light curve for the target???
+        try:
+            #see if there is an object in panSTARRS at this location
+            results = ps1cone(ra,dec,radius,release='dr2')
+            tab = ascii.read(results)
+    
+            # improve the format of the table
+            tab = improve_filter_format(tab)
+        
+            #in case there is more than one object within 1 arcsec, sort them by match distance
+            tab.sort('distance')
+    
+            #if there is an object at that location
+            if len(tab) > 0:   
+                #got a live one
+                #print( 'for object', ccount + 1, 'there is ',len(tab), 'match in panSTARRS', tab['objID'])
+
+                #take the closest match as the best match
+                objid = tab['objID'][0]
+        
+                #get the actual detections and light curve info for this target
+                dresults = search_lightcurve(objid)
+        
+            ascii.read(dresults)
+       
+    
+        #fix the column names to include filter names
+    
+            dtab = addfilter(ascii.read(dresults))
+    
+            dtab.sort('obsTime')
+
+            #here is the light curve mixed from all 5 bands
+            t_panstarrs = dtab['obsTime']
+            flux_panstarrs = dtab['psfFlux']*1E3  # in mJy
+            err_panstarrs = dtab['psfFluxErr'] *1E3
+            filtername = dtab['filter']
+            
+            #put this single object light curves into a pandas multiindex dataframe
+            dfsingle = pd.DataFrame(dict(flux=flux_panstarrs, err=err_panstarrs, time=t_panstarrs, objectid=ccount + 1, band=filtername, label=lab)).set_index(["objectid","label", "band", "time"])
+            #then concatenate each individual df together
+            df_lc.append(dfsingle)
+        except FileNotFoundError:
+            #print("There is no light curve")
+            pass
+            
+    return(df_lc)
