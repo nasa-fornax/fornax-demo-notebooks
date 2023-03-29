@@ -1,6 +1,7 @@
 #setup to save the light curves in a data structure
 from astropy.timeseries import TimeSeries
 import pandas as pd
+import pickle
 
             
 class MultiIndexDFObject:
