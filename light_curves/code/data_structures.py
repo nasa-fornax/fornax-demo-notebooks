@@ -73,8 +73,7 @@ class MultiIndexDFObject:
         x : `dict`
             contains flux, fluxerr, time, objectid, bandname, reflabel 
         """
-        self.data.drop(x,inplace=True)
-        self.data.reset_index()
+        self.data = self.data.drop(x)
         
 ## From Brigitta as a possible data structure
 ## Not currently in use

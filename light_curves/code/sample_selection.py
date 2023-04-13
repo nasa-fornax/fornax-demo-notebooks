@@ -149,8 +149,15 @@ def get_green_sample(coords, labels, verbose=1):
     verbose : int, optional
         Print out the length of the sample derived from this literature source  
     """
-    green_CSQ = Table.read('https://cfn-live-content-bucket-iop-org.s3.amazonaws.com/journals/0004-637X/933/2/180/revision2/apjac743ft2_mrt.txt?AWSAccessKeyId=AKIAYDKQL6LTV7YY2HIK&Expires=1678235090&Signature=sRu3zJOwgegGTF2iCZvkRxwjT44%3D', format='ascii')
-    green_CSQ = green_CSQ.to_pandas()
+    
+    #try vizier
+    Vizier.ROW_LIMIT = -1
+    catalog_list = Vizier.find_catalogs('J/ApJ/933/180')
+    catalogs = Vizier.get_catalogs(catalog_list.keys())
+    table2 = catalogs[0]
+
+    #go to pandas to manipulate the table
+    green_CSQ = table2.to_pandas()
 
     #filter only those that are confirmed CLQ in the notes column
     green_CSQ = green_CSQ[green_CSQ['Notes'].str.contains("CLQ", na = False)]
@@ -159,7 +166,7 @@ def get_green_sample(coords, labels, verbose=1):
     coord_str = green_CSQ['SDSS']
     coord_str.astype('string')
     test_str = coord_str.str[1:3]+ " "+ coord_str.str[3:5]+ " " + coord_str.str[5:10] + " " + coord_str.str[10:13] + " " + coord_str.str[13:15]+ " " + coord_str.str[15:]
-    green_labels = ['Green 22' for ra in green_CSQ['Notes']]
+    green_labels = ['Green 22' for ra in green_CSQ['SDSS']]
 
     coords.extend(SkyCoord(test_str.values.tolist() , unit=(u.hourangle, u.deg)))#convert from pandas series to list as input to SkyCoord
     labels.extend(green_labels)
