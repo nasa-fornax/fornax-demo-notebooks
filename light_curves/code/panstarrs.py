@@ -5,6 +5,9 @@ import pandas as pd
 from tqdm import tqdm
 from astropy.io import ascii
 
+from .data_structures import MultiIndexDFObject
+
+
 def ps1cone(ra,dec,radius,table="mean",release="dr1",format="csv",columns=None,
            baseurl="https://catalogs.mast.stsci.edu/api/v0.1/panstarrs", verbose=False,
            **kw):
@@ -164,13 +167,11 @@ def search_lightcurve(objid):
 
 
 #Do a panstarrs search
-def panstarrs_get_lightcurves(df_lc, coords_list, labels_list, radius):
+def panstarrs_get_lightcurves(coords_list, labels_list, radius):
     """Searches panstarrs for light curves from a list of input coordinates
     
     Parameters
     ----------
-    df_lc : pandas multiindex dataframe
-        the main data structure to store all light curves
     coords_list : list of astropy skycoords
         the coordinates of the targets for which a user wants light curves
     labels_list: list of strings
@@ -184,6 +185,7 @@ def panstarrs_get_lightcurves(df_lc, coords_list, labels_list, radius):
         the main data structure to store all light curves
     """
         
+    df_lc = MultiIndexDFObject()
     #for all objects in our catalog
     for ccount, coord in enumerate(tqdm(coords_list)):
         #doesn't take SkyCoord, convert to floats

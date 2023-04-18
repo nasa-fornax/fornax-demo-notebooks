@@ -3,13 +3,15 @@ import pandas as pd
 from astropy.coordinates import SkyCoord
 import lightkurve as lk
 
-def TESS_Kepler_get_lightcurves(df_lc, coords_list, labels_list, radius):
+from .clean_filternames import clean_filternames
+from .data_structures import MultiIndexDFObject
+
+
+def TESS_Kepler_get_lightcurves(coords_list, labels_list, radius):
     """Searches TESS, Kepler, and K2 for light curves from a list of input coordinates
     
     Parameters
     ----------
-    df_lc : pandas multiindex dataframe
-        the main data structure to store all light curves
     coords_list : list of astropy skycoords
         the coordinates of the targets for which a user wants light curves
     labels_list: list of strings
@@ -23,8 +25,7 @@ def TESS_Kepler_get_lightcurves(df_lc, coords_list, labels_list, radius):
         the main data structure to store all light curves
     """
     
-        
-    
+    df_lc = MultiIndexDFObject()
     #for all objects
     for ccount, coord in enumerate(tqdm(coords_list)):
     #for testing, this has 79 light curves between the three missions.

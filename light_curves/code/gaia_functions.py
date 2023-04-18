@@ -11,18 +11,16 @@ from astroquery.gaia import Gaia
 
 import matplotlib.pyplot as plt
 
+from .data_structures import MultiIndexDFObject
 
-def Gaia_get_lightcurve(df_lc , coords_list, labels_list, object_names , verbose):
+
+def Gaia_get_lightcurve(coords_list, labels_list, object_names , verbose):
     '''
     Creates a lightcurve Pandas MultiIndex object from Gaia data for a list of coordinates.
     This is the MAIN function.
     
     Parameters
     ----------
-    df_lc : Lightcurve Pandas MultiIndex object
-        Lightcurve object to which to append the Gaia lightcurve. Must be created beforehand,
-        but can be an empty object.
-    
     coords_list : list of Astropy SkyCoord objects
         List of coordinates of the sources
     
@@ -44,7 +42,7 @@ def Gaia_get_lightcurve(df_lc , coords_list, labels_list, object_names , verbose
     of Gaia observations.
     
     '''
-    
+
     ## Retrieve Gaia table with Source IDs and photometry ==============
     gaia_table = Gaia_retrieve_median_photometry(coords_list , labels_list, object_names,
                                          gaia_source_table="gaiaedr3.gaia_source", # Which Table to use
@@ -75,7 +73,7 @@ def Gaia_get_lightcurve(df_lc , coords_list, labels_list, object_names , verbose
                                     gaia_epoch_phot=gaia_epoch_phot ,
                                     verbose = verbose)
 
-    ## Append to existing MultiIndex object that is provided to this function
+    df_lc = MultiIndexDFObject()
     df_lc.append(df_lc_gaia)
     
     
