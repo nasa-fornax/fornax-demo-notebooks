@@ -4,14 +4,16 @@ from astropy.coordinates import SkyCoord
 from unTimely_Catalog_tools import unTimelyCatalogExplorer
 import os
 
+from .data_structures import MultiIndexDFObject
+from .fluxconversions import convert_WISEtoJanskies
+
+
 #WISE
-def WISE_get_lightcurves(df_lc, coords_list, labels_list, radius, bandlist):
+def WISE_get_lightcurves(coords_list, labels_list, radius, bandlist):
     """Searches WISE catalog from meisner et al., 2023 for light curves from a list of input coordinates
     
     Parameters
     ----------
-    df_lc : pandas multiindex dataframe
-        the main data structure to store all light curves
     coords_list : list of astropy skycoords
         the coordinates of the targets for which a user wants light curves
     labels_list: list of strings
@@ -32,6 +34,7 @@ def WISE_get_lightcurves(df_lc, coords_list, labels_list, radius, bandlist):
                                   catalog_base_url='http://unwise.me/data/neo7/untimely-catalog/',
                                   catalog_index_file='untimely_index-neo7.fits')
 
+    df_lc = MultiIndexDFObject()
     #for ccount in range(1):#enumerate(coords_list):
     for ccount, coord in enumerate(tqdm(coords_list)):
         #doesn't take SkyCoord, convert to floats

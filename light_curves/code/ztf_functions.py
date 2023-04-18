@@ -8,6 +8,9 @@ from alerce.core import Alerce
 from astropy.coordinates import SkyCoord, name_resolve
 import astropy.units as u
 
+from .data_structures import MultiIndexDFObject
+
+
 def ZTF_id2coord(object_ids,coords,labels,verbose=1):
     ''' To find and append coordinates of objects with only ZTF obj name'''
     alerce = Alerce()
@@ -20,11 +23,10 @@ def ZTF_id2coord(object_ids,coords,labels,verbose=1):
         print('number of ztf coords added by Objectname:',len(objects['meanra']))
     
 
-def ZTF_get_lightcurve(df_lc, coords_list,labels_list,ztf_radius = 0.000278, plotprint = 1): 
+def ZTF_get_lightcurve(coords_list,labels_list,ztf_radius = 0.000278, plotprint = 1):
     ''' Function to add the ZTF lightcurves in all three bands 
     to a multiframe data structure 
     input:
-     --- a multi-data frame to add the light curves to
      --- list of coordinates
      --- list of labels
      --- ztf_radius default to 0.000278
@@ -36,7 +38,8 @@ def ZTF_get_lightcurve(df_lc, coords_list,labels_list,ztf_radius = 0.000278, plo
 
     count_nomatch = 0 # counter for non matched objects
     count_plots = 0 
-    
+    df_lc = MultiIndexDFObject()
+
     for ccount, coord in enumerate(tqdm(coords_list)):
         #doesn't take SkyCoord
         ra = coord.ra.deg 
