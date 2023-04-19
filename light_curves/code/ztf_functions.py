@@ -23,7 +23,7 @@ def ZTF_id2coord(object_ids,coords,labels,verbose=1):
         print('number of ztf coords added by Objectname:',len(objects['meanra']))
     
 
-def ZTF_get_lightcurve(coords_list,labels_list,ztf_radius = 0.000278, plotprint = 1):
+def ZTF_get_lightcurve(coords_list, labels_list, plotprint=1, ztf_radius=0.000278):
     ''' Function to add the ZTF lightcurves in all three bands 
     to a multiframe data structure 
     input:
