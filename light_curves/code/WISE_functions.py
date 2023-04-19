@@ -38,8 +38,8 @@ def WISE_get_lightcurves(coords_list, labels_list, radius, bandlist):
     #for ccount in range(1):#enumerate(coords_list):
     for ccount, coord in enumerate(tqdm(coords_list)):
         #doesn't take SkyCoord, convert to floats
-        ra = coords_list.ra.deg[ccount]
-        dec = coords_list.dec.deg[ccount]
+        ra = coord.ra.deg 
+        dec = coord.dec.deg 
         lab = labels_list[ccount]
         try:
             #search the untimely catalog

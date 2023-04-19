@@ -189,8 +189,8 @@ def panstarrs_get_lightcurves(coords_list, labels_list, radius):
     #for all objects in our catalog
     for ccount, coord in enumerate(tqdm(coords_list)):
         #doesn't take SkyCoord, convert to floats
-        ra = coords_list.ra.deg[ccount]
-        dec = coords_list.dec.deg[ccount]
+        ra = coord.ra.deg
+        dec = coord.dec.deg
         lab = labels_list[ccount]
 
         #sometimes there isn't actually a light curve for the target???

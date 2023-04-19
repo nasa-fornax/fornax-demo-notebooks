@@ -186,8 +186,8 @@ def HCV_get_lightcurves(coords_list, labels_list, radius):
     for ccount, coord in enumerate(coords_list):
 
         #doesn't take SkyCoord, convert to floats
-        ra = coords_list.ra.deg[ccount]
-        dec = coords_list.dec.deg[ccount]
+        ra = coord.ra.deg
+        dec = coord.dec.deg
         lab = labels_list[ccount]
 
         #IC 1613 from the demo for testing

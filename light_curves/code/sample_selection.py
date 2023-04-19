@@ -386,8 +386,8 @@ def remove_duplicate_coords(skycoordslist, labels, verbose=1):
     uniquerows = table.unique(tjoin, keys = 'sc_id')
 
     #turn back into a list
-    sample_CLQ = uniquerows['sc_1']
-    labels_CLQ = uniquerows['label_1']
+    sample_CLQ = list(uniquerows['sc_1'])
+    labels_CLQ = list(uniquerows['label_1'])
     if verbose:
         print('after duplicates removal, sample size: '+str(len(sample_CLQ)))
         
