@@ -3,7 +3,7 @@ import pandas as pd
 from astropy.coordinates import SkyCoord
 from astroquery.heasarc import Heasarc
 
-from .data_structures import MultiIndexDFObject
+from data_structures import MultiIndexDFObject
 
 
 def HEASARC_get_lightcurves(coords_list,labels_list,radius, mission_list ):

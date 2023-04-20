@@ -3,8 +3,8 @@ import pandas as pd
 from astropy.coordinates import SkyCoord
 import lightkurve as lk
 
-from .clean_filternames import clean_filternames
-from .data_structures import MultiIndexDFObject
+from clean_filternames import clean_filternames
+from data_structures import MultiIndexDFObject
 
 
 def TESS_Kepler_get_lightcurves(coords_list, labels_list, radius):

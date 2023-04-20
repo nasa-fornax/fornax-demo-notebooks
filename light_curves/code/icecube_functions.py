@@ -16,7 +16,7 @@ import pandas as pd
 
 from astropy.time import Time
 
-from .data_structures import MultiIndexDFObject
+from data_structures import MultiIndexDFObject
 
 
 def icecube_get_lightcurve(coords_list, labels_list, object_names , icecube_select_topN , path , verbose):

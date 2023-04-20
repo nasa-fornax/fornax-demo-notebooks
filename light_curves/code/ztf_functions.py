@@ -8,7 +8,7 @@ from alerce.core import Alerce
 from astropy.coordinates import SkyCoord, name_resolve
 import astropy.units as u
 
-from .data_structures import MultiIndexDFObject
+from data_structures import MultiIndexDFObject
 
 
 def ZTF_id2coord(object_ids,coords,labels,verbose=1):

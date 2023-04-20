@@ -4,8 +4,8 @@ from astropy.coordinates import SkyCoord
 from unTimely_Catalog_tools import unTimelyCatalogExplorer
 import os
 
-from .data_structures import MultiIndexDFObject
-from .fluxconversions import convert_WISEtoJanskies
+from data_structures import MultiIndexDFObject
+from fluxconversions import convert_WISEtoJanskies
 
 
 #WISE

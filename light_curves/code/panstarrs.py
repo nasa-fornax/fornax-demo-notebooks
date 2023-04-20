@@ -5,7 +5,7 @@ import pandas as pd
 from tqdm import tqdm
 from astropy.io import ascii
 
-from .data_structures import MultiIndexDFObject
+from data_structures import MultiIndexDFObject
 
 
 def ps1cone(ra,dec,radius,table="mean",release="dr1",format="csv",columns=None,

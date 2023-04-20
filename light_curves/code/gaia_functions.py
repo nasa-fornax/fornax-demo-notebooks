@@ -11,7 +11,7 @@ from astroquery.gaia import Gaia
 
 import matplotlib.pyplot as plt
 
-from .data_structures import MultiIndexDFObject
+from data_structures import MultiIndexDFObject
 
 
 def Gaia_get_lightcurve(coords_list, labels_list, object_names , verbose):

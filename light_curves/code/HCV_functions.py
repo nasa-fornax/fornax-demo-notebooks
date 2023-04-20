@@ -4,8 +4,8 @@ from tqdm import tqdm
 import pandas as pd
 from astropy.coordinates import SkyCoord
 
-from .fluxconversions import convertACSmagtoflux
-from .data_structures import MultiIndexDFObject
+from fluxconversions import convertACSmagtoflux
+from data_structures import MultiIndexDFObject
 
 
 ## Functions related to the HCV.
