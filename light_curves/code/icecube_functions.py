@@ -16,8 +16,10 @@ import pandas as pd
 
 from astropy.time import Time
 
+from data_structures import MultiIndexDFObject
 
-def icecube_get_lightcurve(df_lc , coords_list, labels_list, object_names , icecube_select_topN , path , verbose):
+
+def icecube_get_lightcurve(coords_list, labels_list, object_names , icecube_select_topN , path , verbose):
     '''
     Extracts IceCube Neutrino events for a given source position and saves it into a lightcurve
     Pandas MultiIndex object.
@@ -25,10 +27,6 @@ def icecube_get_lightcurve(df_lc , coords_list, labels_list, object_names , icec
     
     Parameters
     ----------
-    df_lc : Lightcurve Pandas MultiIndex object
-        Lightcurve object to which to append the Gaia lightcurve. Must be created beforehand,
-        but can be an empty object.
-    
     coords_list : list of Astropy SkyCoord objects
         List of coordinates of the sources
     
@@ -84,6 +82,7 @@ def icecube_get_lightcurve(df_lc , coords_list, labels_list, object_names , icec
     icecube_matches = []
     icecube_matched = []
     ii = 0
+    df_lc = MultiIndexDFObject()
     for cc,coord in enumerate(coords_list):
 
         # get all distances

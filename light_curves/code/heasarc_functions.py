@@ -3,16 +3,18 @@ import pandas as pd
 from astropy.coordinates import SkyCoord
 from astroquery.heasarc import Heasarc
 
+from data_structures import MultiIndexDFObject
 
-def HEASARC_get_lightcurves(df_lc, coords_list,radius, mission_list ):
+
+def HEASARC_get_lightcurves(coords_list,labels_list,radius, mission_list ):
     """Searches HEASARC archive for light curves from a specific list of mission catalogs
     
     Parameters
     ----------
-    df_lc : pandas multiindex dataframe
-        the main data structure to store all light curves
     coords_list : list of astropy skycoords
         the coordinates of the targets for which a user wants light curves
+    labels_list: list of strings
+        journal articles associated with the target coordinates
     radius : astropy.units.quantity.Quantity
         search radius, how far from the source should the archives return results
     mission_list : str list
@@ -32,6 +34,7 @@ def HEASARC_get_lightcurves(df_lc, coords_list,radius, mission_list ):
         #to get a bepposax source
         #coord = SkyCoord('14h32m00.0s -88d00m00.0s', frame='icrs')
 
+    df_lc = MultiIndexDFObject()
     for ccount, coord in enumerate(tqdm(coords_list)):
         #use astroquery to search that position for either a Fermi or Beppo Sax trigger
         for mcount, mission in enumerate(mission_list):

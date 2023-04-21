@@ -4,6 +4,10 @@ from tqdm import tqdm
 import pandas as pd
 from astropy.coordinates import SkyCoord
 
+from fluxconversions import convertACSmagtoflux
+from data_structures import MultiIndexDFObject
+
+
 ## Functions related to the HCV.
 def get_hscapiurl():
     """
@@ -160,13 +164,11 @@ def checklegal_hcv(table,release,magtype):
             raise ValueError("Bad value for magtype (must be one of {})".format(
                 ", ".join(magtypelist)))
             
-def HCV_get_lightcurves(df_lc, coords_list, labels_list, radius):
+def HCV_get_lightcurves(coords_list, labels_list, radius):
     """Searches Hubble Catalog of variables for light curves from a list of input coordinates
     
     Parameters
     ----------
-    df_lc : pandas multiindex dataframe
-        the main data structure to store all light curves
     coords_list : list of astropy skycoords
         the coordinates of the targets for which a user wants light curves
     labels_list: list of strings
@@ -180,11 +182,12 @@ def HCV_get_lightcurves(df_lc, coords_list, labels_list, radius):
         the main data structure to store all light curves
     """
 
+    df_lc = MultiIndexDFObject()
     for ccount, coord in enumerate(coords_list):
 
         #doesn't take SkyCoord, convert to floats
-        ra = coords_list.ra.deg[ccount]
-        dec = coords_list.dec.deg[ccount]
+        ra = coord.ra.deg
+        dec = coord.dec.deg
         lab = labels_list[ccount]
 
         #IC 1613 from the demo for testing
