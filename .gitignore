@@ -20,5 +20,8 @@
 #pycache
 __pycache__
 
+# Temporary directory
+./data/tmp/
+
 # untimely github repo
 ./light_curves/unTimely_Catalog_explorer/
