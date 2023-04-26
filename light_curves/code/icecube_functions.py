@@ -83,7 +83,7 @@ def icecube_get_lightcurve(coords_list, labels_list, object_names , icecube_sele
     icecube_matched = []
     ii = 0
     df_lc = MultiIndexDFObject()
-    for cc,coord in enumerate(coords_list):
+    for cc,coord in enumerate(tqdm(coords_list)):
 
         # get all distances
         dist_angle =  coord.separation(c2)
@@ -173,7 +173,7 @@ def icecube_get_catalog(path , verbose):
                    units=[u.d , u.electronvolt*1e9 , u.degree , u.degree , u.degree , u.degree , u.degree ])
     for event_name in event_names:
         if verbose > 0: print("Loading: ", event_name)
-        tmp = ascii.read(os.path.join(path , event_name))
+        tmp = ascii.read(os.path.join(path , "icecube_10year_ps" , "events" , event_name))
         tmp.rename_columns(names=tmp.keys() , new_names=EVENTS.keys() )
 
         EVENTS = vstack([EVENTS , tmp])
@@ -184,8 +184,9 @@ def icecube_get_catalog(path , verbose):
 
 def icecube_download_data(path , verbose):
     '''
-    Download and unzipps the IceCube data (approx. 40MB zipped, 120MB unzipped). Currently,
-    the zip file is stored in my personal Caltech Box directory.
+    Download and unzipps the IceCube data (approx. 40MB zipped, 120MB unzipped). Directly
+    downloaded from the IceCube webpage:
+    https://icecube.wisc.edu/data-releases/2021/01/all-sky-point-source-icecube-data-years-2008-2018/
     
     Parameters
     ----------
@@ -206,12 +207,12 @@ def icecube_download_data(path , verbose):
     if not os.path.exists(os.path.join(path , "icecube_events.zip")):
 
         if verbose > 0: print("Downloading IceCube data to {} | ".format(path) , end=" ")
-        file_url = "https://caltech.box.com/shared/static/k19ipk47dp03cbtv81yqa7hs6b9pxztg"
+        file_url = "http://icecube.wisc.edu/data-releases/20210126_PS-IC40-IC86_VII.zip"
         wget.download(url = file_url , out = path)
 
         ## Unzip
         if verbose > 0: print("Unzipping IceCube data | ", end=" ")
-        with zipfile.ZipFile(os.path.join(path , "icecube_events.zip"), 'r') as zip_ref:
+        with zipfile.ZipFile(os.path.join(path , "20210126_PS-IC40-IC86_VII.zip"), 'r') as zip_ref:
             zip_ref.extractall(path)
 
         if verbose > 0: print("Done.")

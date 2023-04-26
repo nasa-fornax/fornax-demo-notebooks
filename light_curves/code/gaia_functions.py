@@ -1,5 +1,6 @@
 import time
 import numpy as np
+from tqdm import tqdm
 
 import pandas as pd
 
@@ -193,9 +194,8 @@ def Gaia_retrieve_median_photometry(coords_list , labels_list , object_names , g
     # get catalog
     gaia_table = Table()
     t1 = time.time()
-    for cc,coord in enumerate(coords_list):
-        if verbose > 0: print(len(coords_list)-cc , end=" ")
-
+    for cc,coord in enumerate(tqdm(coords_list)):
+        
         gaia_search = Gaia.cone_search_async(coordinate=coord, radius=search_radius , background=True)
         gaia_search.get_data()["dist"].unit = "deg"
         gaia_search.get_data()["dist"] = gaia_search.get_data()["dist"].to(u.arcsec) # Change distance unit from degrees to arcseconds
