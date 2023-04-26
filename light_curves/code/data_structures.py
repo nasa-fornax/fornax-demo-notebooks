@@ -26,7 +26,7 @@ class MultiIndexDFObject:
 
     """
     def __init__(self):
-        pass
+        self.data = pd.DataFrame()
     
     def append(self,x):
         """Add a new band of light curve data to the dataframe
@@ -36,12 +36,12 @@ class MultiIndexDFObject:
         x : `dict`
             contains flux, fluxerr, time, objectid, bandname, reflabel 
         """
-        try:
-            self.data
-        except AttributeError:
-            self.data = x.copy()
+        if isinstance(self.__class__, x):
+            # x is a MultiIndexDFObject. extract the DataFrame and concat
+            pd.concat([self.data , x.data])
         else:
-            self.data = pd.concat([self.data , x])
+            # assume x is a pd.DataFrame and concat
+            pd.concat([self.data , x])
             
     def pickle(self,x):
         """ Save the multiindex data frame to a pickle file
