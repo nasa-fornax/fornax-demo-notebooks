@@ -1,14 +1,13 @@
+import astropy.units as u
+import numpy as np
+from astropy import table
+from astropy.coordinates import SkyCoord
+from astropy.table import Table, join, join_skycoord
 from astroquery.ipac.ned import Ned
+from astroquery.sdss import SDSS
 from astroquery.simbad import Simbad
 from astroquery.vizier import Vizier
-from astroquery.sdss import SDSS
 
-from astropy.table import unique, Table, join, join_skycoord
-from astropy.coordinates import SkyCoord, name_resolve
-import astropy.units as u
-from astropy import table
-
-import numpy as np
 
 #lamassa et al., 2015  1 source
 def get_lamassa_sample(coords, labels, verbose=1):

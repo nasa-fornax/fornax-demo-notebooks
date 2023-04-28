@@ -1,9 +1,11 @@
 #setup to save the light curves in a data structure
-from astropy.timeseries import TimeSeries
-import pandas as pd
 import pickle
 
-            
+import pandas as pd
+from astropy.table import vstack
+from astropy.timeseries import TimeSeries
+
+
 class MultiIndexDFObject:
     """
     Pandas MultiIndex data frame to store & manipulate multiband light curves 

@@ -1,4 +1,7 @@
 ## Plotting stuff
+import matplotlib as mpl
+
+
 def setup_text_plots():
     """
     This function adjusts matplotlib settings so that all figures have a uniform format and look.
