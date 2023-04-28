@@ -1,3 +1,7 @@
+from acstools import acszpt
+from astropy.time import Time
+
+
 #need to convert those magnitudes into mJy to be consistent in data structure.
 #using zeropoints from here: https://wise2.ipac.caltech.edu/docs/release/allsky/expsup/sec4_4h.html
 def convert_WISEtoJanskies(mag, magerr, band):

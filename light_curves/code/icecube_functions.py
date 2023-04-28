@@ -1,20 +1,15 @@
 ## Functions related to IceCube matching
 import os
-import numpy as np
-
-from tqdm import tqdm
-
-import wget
 import zipfile
 
+import astropy.units as u
+import numpy as np
+import pandas as pd
+import wget
+from astropy.coordinates import SkyCoord
 from astropy.io import ascii
 from astropy.table import Table, vstack
-import astropy.units as u
-from astropy.coordinates import SkyCoord
-
-import pandas as pd
-
-from astropy.time import Time
+from tqdm import tqdm
 
 from data_structures import MultiIndexDFObject
 

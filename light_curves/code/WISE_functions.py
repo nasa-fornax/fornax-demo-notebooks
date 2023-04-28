@@ -1,8 +1,8 @@
-from tqdm import tqdm
-import pandas as pd
-from astropy.coordinates import SkyCoord
-from unTimely_Catalog_tools import unTimelyCatalogExplorer
 import os
+
+import pandas as pd
+from tqdm import tqdm
+from unTimely_Catalog_tools import unTimelyCatalogExplorer
 
 from data_structures import MultiIndexDFObject
 from fluxconversions import convert_WISEtoJanskies

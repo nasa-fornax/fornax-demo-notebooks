@@ -1,11 +1,9 @@
+import pandas as pd
 import requests
 from astropy.table import Table
-from tqdm import tqdm
-import pandas as pd
-from astropy.coordinates import SkyCoord
 
-from fluxconversions import convertACSmagtoflux
 from data_structures import MultiIndexDFObject
+from fluxconversions import convertACSmagtoflux
 
 
 ## Functions related to the HCV.

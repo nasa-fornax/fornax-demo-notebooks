@@ -1,7 +1,6 @@
-from tqdm import tqdm
-import pandas as pd
-from astropy.coordinates import SkyCoord
 import lightkurve as lk
+import pandas as pd
+from tqdm import tqdm
 
 from clean_filternames import clean_filternames
 from data_structures import MultiIndexDFObject

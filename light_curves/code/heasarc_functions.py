@@ -1,7 +1,6 @@
-from tqdm import tqdm
 import pandas as pd
-from astropy.coordinates import SkyCoord
 from astroquery.heasarc import Heasarc
+from tqdm import tqdm
 
 from data_structures import MultiIndexDFObject
 
