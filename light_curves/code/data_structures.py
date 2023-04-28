@@ -38,7 +38,7 @@ class MultiIndexDFObject:
         x : `dict`
             contains flux, fluxerr, time, objectid, bandname, reflabel 
         """
-        if isinstance(self.__class__, x):
+        if isinstance(x, self.__class__):
             # x is a MultiIndexDFObject. extract the DataFrame and concat
             pd.concat([self.data , x.data])
         else:
