@@ -1,16 +1,13 @@
 import time
-import numpy as np
-from tqdm import tqdm
 
-import pandas as pd
-
-from astropy.time import Time
-from astropy.table import Table, vstack, hstack
 import astropy.units as u
-
-from astroquery.gaia import Gaia
-
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from astropy.table import Table, hstack, vstack
+from astropy.time import Time
+from astroquery.gaia import Gaia
+from tqdm import tqdm
 
 from data_structures import MultiIndexDFObject
 

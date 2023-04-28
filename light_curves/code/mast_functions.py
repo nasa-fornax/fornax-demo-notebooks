@@ -1,6 +1,9 @@
 ## Functions related to MAST queries.
 import json
 
+import requests
+
+
 def resolve(name):
     """Get the RA and Dec for an object using the MAST name resolver
     

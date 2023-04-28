@@ -1,9 +1,9 @@
-import requests
 import numpy as np
-from astropy.table import Table
 import pandas as pd
-from tqdm import tqdm
+import requests
 from astropy.io import ascii
+from astropy.table import Table
+from tqdm import tqdm
 
 from data_structures import MultiIndexDFObject
 

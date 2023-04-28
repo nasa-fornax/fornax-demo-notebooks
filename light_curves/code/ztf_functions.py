@@ -1,12 +1,11 @@
-from tqdm import tqdm
 import matplotlib.pyplot as plt
 import numpy as np
-import requests
 import pandas as pd
-from astropy.io import fits,ascii
+import requests
 from alerce.core import Alerce
-from astropy.coordinates import SkyCoord, name_resolve
-import astropy.units as u
+from astropy.coordinates import SkyCoord
+from astropy.io import ascii
+from tqdm import tqdm
 
 from data_structures import MultiIndexDFObject
 
