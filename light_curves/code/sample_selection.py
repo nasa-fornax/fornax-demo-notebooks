@@ -352,9 +352,9 @@ def get_SDSS_sample(coords, labels, num, verbose=1):
     
 
     
-#and now a function to remove duplicates from the coordinate list 
-def remove_duplicate_coords(skycoordslist, labels, verbose=1):
-    """Makes a unique sample of skycoords and labels with no repeats
+#and now a function to remove duplicates from the coordinate list and attach an object id
+def clean_sample(skycoordslist, labels, verbose=1):
+    """Makes a unique sample of skycoords and labels with no repeats. Attaches an object ID to the coords.
     
     Parameters
     ----------
@@ -367,10 +367,10 @@ def remove_duplicate_coords(skycoordslist, labels, verbose=1):
         
     Returns
     -------
-    sample_CLQ : list
-        unique skycoords
-    labels_CLQ : list
-        labels associated with unique skycoords list
+    coords_list : list of tuples
+        coords input cleaned of duplicates, with an object ID attached. Tuples contain (objectid, skycoords).
+    labels_list : list
+        labels associated with coords_list
     """
     #first turn the skycoord list into a table to be able to access table functions in astropy
     t = Table([skycoordslist, labels, np.arange(0, len(skycoordslist), 1)], names=['sc', 'label', 'idx'])
@@ -385,9 +385,14 @@ def remove_duplicate_coords(skycoordslist, labels, verbose=1):
     uniquerows = table.unique(tjoin, keys = 'sc_id')
 
     #turn back into a list
-    sample_CLQ = list(uniquerows['sc_1'])
-    labels_CLQ = list(uniquerows['label_1'])
+    raw_coords_list = list(uniquerows['sc_1'])
+    labels_list = list(uniquerows['label_1'])
     if verbose:
-        print('after duplicates removal, sample size: '+str(len(sample_CLQ)))
+        print('after duplicates removal, sample size: '+str(len(raw_coords_list)))
         
-    return(sample_CLQ, labels_CLQ)
+    # attach an object ID.
+    # it would be better to include the label and tie them all together into one object (like a tuple),
+    # but that would require many code changes that are not otherwise necessary at the moment.
+    coords_list = list(enumerate(raw_coords_list))  # list of tuples (objectid, skycoords)
+
+    return coords_list, labels_list
