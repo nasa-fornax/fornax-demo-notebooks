@@ -82,7 +82,7 @@ def ZTF_get_lightcurve(coords_list, labels_list, plotprint=1, ztf_radius=0.00027
                         filtercounter[filternames.index(ztf_lc['filtercode'][sel][0])]+=1
                     elif (filtercounter[filternames.index(ztf_lc['filtercode'][sel][0])]>=1) and (len(flux)>len(filterflux[filternames.index(ztf_lc['filtercode'][sel][0])])):
                         #print('2nd loop, filter'+str(ztf_lc['filtercode'][sel][0])+' len:'+str(len(flux)))
-                        df_lc.remove(df_lc.data.loc[objectid,:,ztf_lc['filtercode'][sel][0],:].index)
+                        df_lc.remove((objectid, lab, ztf_lc["filtercode"][sel][0]))
                         dfsingle = pd.DataFrame(dict(flux=flux, err=fluxerr, time=ztf_lc['mjd'][sel], objectid=objectid, band=ztf_lc['filtercode'][sel][0], label=lab)).set_index(["objectid","label", "band", "time"])
                         df_lc.append(dfsingle)
                     else:
