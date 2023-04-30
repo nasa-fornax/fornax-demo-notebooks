@@ -78,7 +78,7 @@ def icecube_get_lightcurve(coords_list, labels_list, object_names , icecube_sele
     icecube_matched = []
     ii = 0
     df_lc = MultiIndexDFObject()
-    for cc,coord in enumerate(tqdm(coords_list)):
+    for objectid,coord in tqdm(coords_list):
 
         # get all distances
         dist_angle =  coord.separation(c2)
@@ -98,7 +98,7 @@ def icecube_get_lightcurve(coords_list, labels_list, object_names , icecube_sele
             icecube_matches.append(icecube_events[sel[0:this_topN]])
             icecube_matches[ii]["Ang_match"] = dist_angle.to(u.degree).value[sel[0:this_topN]]
             icecube_matches[ii]["Ang_match"].unit = u.degree
-            icecube_matched.append(cc)
+            icecube_matched.append(objectid)
 
             ii += 1
 
@@ -110,15 +110,15 @@ def icecube_get_lightcurve(coords_list, labels_list, object_names , icecube_sele
 
     ## ADD TO LIGHTCURVE OBJECT ####
     ii = 0
-    for cc,coord in enumerate(tqdm(coords_list)):
-        lab = labels_list[cc]
-        if cc in icecube_matched:
+    for objectid,coord in tqdm(coords_list):
+        lab = labels_list[objectid]
+        if objectid in icecube_matched:
             ## Create single instance
             dfsingle = pd.DataFrame(
                                     dict(flux=np.asarray(icecube_matches[ii]["energy_logGeV"]), # in log GeV
                                      err=np.repeat(0,len(icecube_matches[ii])), # in mJy
                                      time=np.asarray(icecube_matches[ii]["mjd"]), # in MJD
-                                     objectid=np.repeat(cc+1, len(icecube_matches[ii])),label=lab,
+                                     objectid=np.repeat(objectid, len(icecube_matches[ii])),label=lab,
                                      band="IceCube"
                                         )
                         ).set_index(["objectid", "label", "band", "time"])

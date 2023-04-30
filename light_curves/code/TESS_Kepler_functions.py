@@ -26,19 +26,19 @@ def TESS_Kepler_get_lightcurves(coords_list, labels_list, radius):
     
     df_lc = MultiIndexDFObject()
     #for all objects
-    for ccount, coord in enumerate(tqdm(coords_list)):
+    for objectid, coord in tqdm(coords_list):
     #for testing, this has 79 light curves between the three missions.
     #for ccount in range(1):
     #    coord = '19:02:43.1 +50:14:28.7'
         try:
         #use lightkurve to search TESS, Kepler and K2
             search_result = lk.search_lightcurve(coord, radius = radius)
-            lab = labels_list[ccount]
+            lab = labels_list[objectid]
 
             #figure out what to do with the results
             if len(search_result) >= 1:
                 #https://docs.lightkurve.org/tutorials/1-getting-started/searching-for-data-products.html
-                print(ccount, 'got a live one')
+                print(objectid, 'got a live one')
                 #download all of the returned light curves from TESS, Kepler, and K2
                 lc_collection = search_result.download_all()
 
@@ -72,7 +72,7 @@ def TESS_Kepler_get_lightcurves(coords_list, labels_list, radius):
 
                     #put this single object light curves into a pandas multiindex dataframe
                     # fluxes are in units of electrons/s and will be scaled to fit the other fluxes when plotting
-                    dfsingle = pd.DataFrame(dict(flux=flux_lc, err=fluxerr_lc, time=time_lc, objectid=ccount + 1, band=filtername,label=lab)).set_index(["objectid", "label", "band", "time"])
+                    dfsingle = pd.DataFrame(dict(flux=flux_lc, err=fluxerr_lc, time=time_lc, objectid=objectid, band=filtername,label=lab)).set_index(["objectid", "label", "band", "time"])
     
                     #then concatenate each individual df together
                     df_lc.append(dfsingle)

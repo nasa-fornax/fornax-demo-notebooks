@@ -187,11 +187,11 @@ def panstarrs_get_lightcurves(coords_list, labels_list, radius):
         
     df_lc = MultiIndexDFObject()
     #for all objects in our catalog
-    for ccount, coord in enumerate(tqdm(coords_list)):
+    for objectid, coord in tqdm(coords_list):
         #doesn't take SkyCoord, convert to floats
         ra = coord.ra.deg
         dec = coord.dec.deg
-        lab = labels_list[ccount]
+        lab = labels_list[objectid]
 
         #sometimes there isn't actually a light curve for the target???
         try:
@@ -232,7 +232,7 @@ def panstarrs_get_lightcurves(coords_list, labels_list, radius):
             filtername = dtab['filter']
             
             #put this single object light curves into a pandas multiindex dataframe
-            dfsingle = pd.DataFrame(dict(flux=flux_panstarrs, err=err_panstarrs, time=t_panstarrs, objectid=ccount + 1, band=filtername, label=lab)).set_index(["objectid","label", "band", "time"])
+            dfsingle = pd.DataFrame(dict(flux=flux_panstarrs, err=err_panstarrs, time=t_panstarrs, objectid=objectid, band=filtername, label=lab)).set_index(["objectid","label", "band", "time"])
             #then concatenate each individual df together
             df_lc.append(dfsingle)
         except FileNotFoundError:

@@ -39,11 +39,11 @@ def ZTF_get_lightcurve(coords_list, labels_list, plotprint=1, ztf_radius=0.00027
     count_plots = 0 
     df_lc = MultiIndexDFObject()
 
-    for ccount, coord in enumerate(tqdm(coords_list)):
+    for objectid, coord in tqdm(coords_list):
         #doesn't take SkyCoord
         ra = coord.ra.deg 
         dec = coord.dec.deg 
-        lab = labels_list[ccount]
+        lab = labels_list[objectid]
         #make the string for the URL query ask for all three bands (g, r, i)
         #don't want data that is flagged as unusable by the ZTF pipeline
         urlstr = 'https://irsa.ipac.caltech.edu/cgi-bin/ZTF/nph_light_curves?POS=CIRCLE %f %f %f&BANDNAME=g,r,i&FORMAT=ipac_table&BAD_CATFLAGS_MASK=32768'%(ra, dec,ztf_radius)
@@ -54,7 +54,7 @@ def ZTF_get_lightcurve(coords_list, labels_list, plotprint=1, ztf_radius=0.00027
                 # reading in indecies of unique IDs to do coordinate match and find dif magnitudes of same objects 
                 idu,inds = np.unique(ztf_lc['oid'],return_index=True)
                 if count_plots<plotprint:
-                    print('object '+str(ccount)+' , unique ztf IDs:'+str(len(np.unique(ztf_lc['oid'])))+',in '+str(len(np.unique(ztf_lc['filtercode'])))+' filters')
+                    print('object '+str(objectid)+' , unique ztf IDs:'+str(len(np.unique(ztf_lc['oid'])))+',in '+str(len(np.unique(ztf_lc['filtercode'])))+' filters')
                     plt.figure(figsize=(6,4))
                 
                 ## Neeeded to remove repeated lightcurves in each band. Will keep only the longest following (Sanchez-Saez et al., 2021)
@@ -82,12 +82,12 @@ def ZTF_get_lightcurve(coords_list, labels_list, plotprint=1, ztf_radius=0.00027
                         filtercounter[filternames.index(ztf_lc['filtercode'][sel][0])]+=1
                     elif (filtercounter[filternames.index(ztf_lc['filtercode'][sel][0])]>=1) and (len(flux)>len(filterflux[filternames.index(ztf_lc['filtercode'][sel][0])])):
                         #print('2nd loop, filter'+str(ztf_lc['filtercode'][sel][0])+' len:'+str(len(flux)))
-                        df_lc.remove(df_lc.data.loc[ccount+1,:,ztf_lc['filtercode'][sel][0],:].index)
-                        dfsingle = pd.DataFrame(dict(flux=flux, err=fluxerr, time=ztf_lc['mjd'][sel], objectid=(ccount+1), band=ztf_lc['filtercode'][sel][0], label=lab)).set_index(["objectid","label", "band", "time"])
+                        df_lc.remove(df_lc.data.loc[objectid,:,ztf_lc['filtercode'][sel][0],:].index)
+                        dfsingle = pd.DataFrame(dict(flux=flux, err=fluxerr, time=ztf_lc['mjd'][sel], objectid=objectid, band=ztf_lc['filtercode'][sel][0], label=lab)).set_index(["objectid","label", "band", "time"])
                         df_lc.append(dfsingle)
                     else:
                         #print('3rd filter'+str(ztf_lc['filtercode'][sel][0])+' len:'+str(len(flux)))
-                        dfsingle = pd.DataFrame(dict(flux=flux, err=fluxerr, time=ztf_lc['mjd'][sel], objectid=(ccount+1), band=ztf_lc['filtercode'][sel][0], label=lab)).set_index(["objectid" ,"label","band", "time"])
+                        dfsingle = pd.DataFrame(dict(flux=flux, err=fluxerr, time=ztf_lc['mjd'][sel], objectid=objectid, band=ztf_lc['filtercode'][sel][0], label=lab)).set_index(["objectid" ,"label","band", "time"])
                         df_lc.append(dfsingle)
                         filtercounter[filternames.index(ztf_lc['filtercode'][sel][0])]+=1
                         filterflux[filternames.index(ztf_lc['filtercode'][sel][0])]=flux
