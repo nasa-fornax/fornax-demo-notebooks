@@ -181,12 +181,12 @@ def HCV_get_lightcurves(coords_list, labels_list, radius):
     """
 
     df_lc = MultiIndexDFObject()
-    for ccount, coord in enumerate(coords_list):
+    for objectid, coord in coords_list:
 
         #doesn't take SkyCoord, convert to floats
         ra = coord.ra.deg
         dec = coord.dec.deg
-        lab = labels_list[ccount]
+        lab = labels_list[objectid]
 
         #IC 1613 from the demo for testing
         #ra = 16.19913
@@ -195,7 +195,7 @@ def HCV_get_lightcurves(coords_list, labels_list, radius):
         #look in the summary table for anything within a radius of our targets
         tab = hcvcone(ra,dec,radius,table="hcvsummary")
         if tab == '':
-            print (ccount, 'no matches')
+            print (objectid, 'no matches')
         else:
             #print(ccount, 'got a live one')
         
@@ -224,7 +224,7 @@ def HCV_get_lightcurves(coords_list, labels_list, radius):
                 fluxerr = fluxerr*1E3 #convert to mJy
             
                 #put this single object light curves into a pandas multiindex dataframe
-                dfsingle_814 = pd.DataFrame(dict(flux=flux, err=fluxerr, time=time_814, objectid=ccount + 1, band='F814W',label=lab)).set_index(["objectid", "label", "band", "time"])
+                dfsingle_814 = pd.DataFrame(dict(flux=flux, err=fluxerr, time=time_814, objectid=objectid, band='F814W',label=lab)).set_index(["objectid", "label", "band", "time"])
 
                 #then concatenate each individual df together
                 df_lc.append(dfsingle_814)

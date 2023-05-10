@@ -36,11 +36,11 @@ def WISE_get_lightcurves(coords_list, labels_list, radius, bandlist):
 
     df_lc = MultiIndexDFObject()
     #for ccount in range(1):#enumerate(coords_list):
-    for ccount, coord in enumerate(tqdm(coords_list)):
+    for objectid, coord in tqdm(coords_list):
         #doesn't take SkyCoord, convert to floats
         ra = coord.ra.deg 
         dec = coord.dec.deg 
-        lab = labels_list[ccount]
+        lab = labels_list[objectid]
         try:
             #search the untimely catalog
             result_table = ucx.search_by_coordinates(ra, dec, box_size=100, cone_radius=radius,
@@ -62,7 +62,7 @@ def WISE_get_lightcurves(coords_list, labels_list, radius, bandlist):
             
                     #plt.figure(figsize=(8, 4))
                     #plt.errorbar(time_mjd, wiseflux, wisefluxerr)
-                    dfsingle = pd.DataFrame(dict(flux=wiseflux, err=wisefluxerr, time=time_mjd, objectid=ccount + 1, band=band,label=lab)).set_index(["objectid","label", "band", "time"])
+                    dfsingle = pd.DataFrame(dict(flux=wiseflux, err=wisefluxerr, time=time_mjd, objectid=objectid, band=band,label=lab)).set_index(["objectid","label", "band", "time"])
 
                     #then concatenate each individual df together
                     df_lc.append(dfsingle)

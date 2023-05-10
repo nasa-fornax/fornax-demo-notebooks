@@ -66,10 +66,9 @@ def Gaia_get_lightcurve(coords_list, labels_list, object_names , verbose):
     gaia_epoch_phot = Gaia_mk_lightcurves(prod_tab , verbose=verbose)
 
     ## Create Gaia Pandas MultiIndex object and append to existing data frame.
-    df_lc_gaia = Gaia_mk_MultiIndex(data=object_names,labels_list=labels_list ,
-                                    gaia_phot=gaia_phot ,
-                                    gaia_epoch_phot=gaia_epoch_phot ,
-                                    verbose = verbose)
+    df_lc_gaia = Gaia_mk_MultiIndex(coords_list=coords_list, object_names=object_names,
+                                    labels_list=labels_list, gaia_phot=gaia_phot ,
+                                    gaia_epoch_phot=gaia_epoch_phot, verbose=verbose)
 
     df_lc = MultiIndexDFObject()
     df_lc.append(df_lc_gaia)
@@ -191,7 +190,7 @@ def Gaia_retrieve_median_photometry(coords_list , labels_list , object_names , g
     # get catalog
     gaia_table = Table()
     t1 = time.time()
-    for cc,coord in enumerate(tqdm(coords_list)):
+    for objectid, coord in tqdm(coords_list):
         
         gaia_search = Gaia.cone_search_async(coordinate=coord, radius=search_radius , background=True)
         gaia_search.get_data()["dist"].unit = "deg"
@@ -200,7 +199,7 @@ def Gaia_retrieve_median_photometry(coords_list , labels_list , object_names , g
 
         # match
         if len(gaia_search.get_data()["dist"]) > 0:
-            gaia_search.get_data()["input_object_name"] = object_names[cc] # add input object name to catalog
+            gaia_search.get_data()["input_object_name"] = object_names[objectid] # add input object name to catalog
             sel_min = np.where( (gaia_search.get_data()["dist"] < 1*u.arcsec) & (gaia_search.get_data()["dist"] == np.nanmin(gaia_search.get_data()["dist"]) ) )[0]
         else:
             sel_min = []
@@ -315,7 +314,7 @@ def Gaia_mk_lightcurves(prod_tab , verbose):
 
 
 
-def Gaia_mk_MultiIndex(data, labels_list, gaia_phot , gaia_epoch_phot , verbose):
+def Gaia_mk_MultiIndex(coords_list, object_names, labels_list, gaia_phot , gaia_epoch_phot , verbose):
     '''
     Creates a MultiIndex Pandas Dataframe for the Gaia observations. Specifically, it 
     returns the epoch photometry as a function of time. For sources without Gaia epoch
@@ -324,7 +323,10 @@ def Gaia_mk_MultiIndex(data, labels_list, gaia_phot , gaia_epoch_phot , verbose)
     
     Parameters
     ----------
-    data : astropy table
+    coords_list : list of Astropy SkyCoord objects
+        List of coordinates of the sources
+
+    object_names : list of strings
         The catalog with the source IDs and names (here: CLAGN)
     
     gaia_phot : dict
@@ -344,15 +346,15 @@ def Gaia_mk_MultiIndex(data, labels_list, gaia_phot , gaia_epoch_phot , verbose)
     frame via df_lc_object.append(df_lc)
     '''
 
-    for ii in range(len(data)):
+    for objectid, _ in coords_list:
         #print("{} matched to: ".format( data["Object Name"][ii])  , end=" ")
 
         ## Check if this object has a Gaia light curve:
 
         # get Gaia source_id
         #sel = np.where(data["Object Name"][ii] == gaia_phot["input_object_name"])[0]
-        sel = np.where(data[ii] == gaia_phot["input_object_name"])[0]
-        lab = labels_list[ii]
+        sel = np.where(object_names[objectid] == gaia_phot["input_object_name"])[0]
+        lab = labels_list[objectid]
         
         if len(sel) > 0:
             source_id = gaia_phot["source_id"][sel[0]]
@@ -379,7 +381,7 @@ def Gaia_mk_MultiIndex(data, labels_list, gaia_phot , gaia_epoch_phot , verbose)
                                  err=np.asarray(dy2), # in mJy
                                  time=t.mjd, # in MJD
                                  #objectid=gaia_phot["input_object_name"][sel],
-                                 objectid=np.repeat(ii+1, len(y)),label=lab,
+                                 objectid=np.repeat(objectid, len(y)),label=lab,
                                  band="Gaia {}".format(band.lower())
                                                 )
                                            ).set_index(["objectid","label", "band", "time"])
@@ -414,7 +416,7 @@ def Gaia_mk_MultiIndex(data, labels_list, gaia_phot , gaia_epoch_phot , verbose)
                                  err=np.asarray(dy2), # in mJy
                                  time=t.mjd, # in MJD
                                  #objectid=gaia_phot["input_object_name"][sel],
-                                 objectid=np.repeat(ii+1, len(y)),label=lab,
+                                 objectid=np.repeat(objectid, len(y)),label=lab,
                                  band="Gaia {}".format(band.lower())
                                     )
                     ).set_index(["objectid", "label", "band", "time"])

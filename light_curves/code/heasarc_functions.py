@@ -34,7 +34,7 @@ def HEASARC_get_lightcurves(coords_list,labels_list,radius, mission_list ):
         #coord = SkyCoord('14h32m00.0s -88d00m00.0s', frame='icrs')
 
     df_lc = MultiIndexDFObject()
-    for ccount, coord in enumerate(tqdm(coords_list)):
+    for objectid, coord in tqdm(coords_list):
         #use astroquery to search that position for either a Fermi or Beppo Sax trigger
         for mcount, mission in enumerate(mission_list):
             try:
@@ -47,10 +47,10 @@ def HEASARC_get_lightcurves(coords_list,labels_list,radius, mission_list ):
                     time_mjd = results['TIME'][0].astype(float)
                 
                 type(time_mjd)
-                lab = labels_list[ccount]
+                lab = labels_list[objectid]
 
                 #really just need to mark this spot with a vertical line in the plot
-                dfsingle = pd.DataFrame(dict(flux=[0.1], err=[0.1], time=[time_mjd], objectid=[ccount + 1], band=[mission], label=lab)).set_index(["objectid", "label", "band", "time"])
+                dfsingle = pd.DataFrame(dict(flux=[0.1], err=[0.1], time=[time_mjd], objectid=[objectid], band=[mission], label=lab)).set_index(["objectid", "label", "band", "time"])
 
                 # Append to existing MultiIndex light curve object
                 df_lc.append(dfsingle)
