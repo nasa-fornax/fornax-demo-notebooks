@@ -14,7 +14,7 @@ from tqdm import tqdm
 from data_structures import MultiIndexDFObject
 
 
-def icecube_get_lightcurve(coords_list, labels_list, object_names , icecube_select_topN , path , verbose):
+def icecube_get_lightcurve(coords_list, labels_list , icecube_select_topN , path , verbose):
     '''
     Extracts IceCube Neutrino events for a given source position and saves it into a lightcurve
     Pandas MultiIndex object.
@@ -23,13 +23,10 @@ def icecube_get_lightcurve(coords_list, labels_list, object_names , icecube_sele
     Parameters
     ----------
     coords_list : list of Astropy SkyCoord objects
-        List of coordinates of the sources
+        List of (id,coordinates) tuples of the sources
     
     labels_list : list of str
         List of labels for each soruce
-        
-    object_names : list of str
-        List of unique names for each source
         
     icecube_select_topN : int
         Number of top events to 
@@ -116,7 +113,7 @@ def icecube_get_lightcurve(coords_list, labels_list, object_names , icecube_sele
             ## Create single instance
             dfsingle = pd.DataFrame(
                                     dict(flux=np.asarray(icecube_matches[ii]["energy_logGeV"]), # in log GeV
-                                     err=np.repeat(0,len(icecube_matches[ii])), # in mJy
+                                     err=np.repeat(0,len(icecube_matches[ii])), # N/A just set to 0
                                      time=np.asarray(icecube_matches[ii]["mjd"]), # in MJD
                                      objectid=np.repeat(objectid, len(icecube_matches[ii])),label=lab,
                                      band="IceCube"
