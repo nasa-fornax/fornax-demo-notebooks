@@ -15,16 +15,30 @@ def ps1cone(ra,dec,radius,table="mean",release="dr1",format="csv",columns=None,
     
     Parameters
     ----------
-    ra (float): (degrees) J2000 Right Ascension
-    dec (float): (degrees) J2000 Declination
-    radius (float): (degrees) Search radius (<= 0.5 degrees)
-    table (string): mean, stack, or detection
-    release (string): dr1 or dr2
-    format: csv, votable, json
-    columns: list of column names to include (None means use defaults)
-    baseurl: base URL for the request
-    verbose: print info about request
-    **kw: other parameters (e.g., 'nDetections.min':2)
+    ra: float (degrees) 
+        J2000 Right Ascension
+    dec: float (degrees) 
+        J2000 Declination
+    radius: float (degrees) 
+        Search radius (<= 0.5 degrees)
+    table: string
+        mean, stack, or detection
+    release: string
+        dr1 or dr2
+    format: string
+        csv, votable, json
+    columns: list of strings 
+        list of column names to include (None means use defaults)
+    baseurl: stirng
+        base URL for the request
+    verbose: int
+        print info about request
+    **kw: 
+        other parameters (e.g., 'nDetections.min':2)
+    
+    Returns
+    -------
+    cone search results
     """
     
     data = kw.copy()
@@ -42,13 +56,24 @@ def ps1search(table="mean",release="dr1",format="csv",columns=None,
     
     Parameters
     ----------
-    table (string): mean, stack, or detection
-    release (string): dr1 or dr2
-    format: csv, votable, json
-    columns: list of column names to include (None means use defaults)
-    baseurl: base URL for the request
-    verbose: print info about request
-    **kw: other parameters (e.g., 'nDetections.min':2).  Note this is required!
+    table: string 
+        mean, stack, or detection
+    release: string 
+        dr1 or dr2
+    format: string
+        csv, votable, json
+    columns: list of strings
+        list of column names to include (None means use defaults)
+    baseurl: string
+        base URL for the request
+    verbose: int
+        print info about request
+    **kw: 
+        other parameters (e.g., 'nDetections.min':2).  Note this is required!
+    
+    Returns
+    -------
+    search results
     """
     
     data = kw.copy()
@@ -89,8 +114,14 @@ def ps1search(table="mean",release="dr1",format="csv",columns=None,
 
 def checklegal(table,release):
     """Checks if this combination of table and release is acceptable
+    Raises a ValueError exception if there is problem
     
-    Raises a VelueError exception if there is problem
+    Parameters
+    ----------
+    table: string
+        mean, stack, or detection
+    release: string
+        dr1 or dr2
     """
     
     releaselist = ("dr1", "dr2")
@@ -110,11 +141,16 @@ def ps1metadata(table="mean",release="dr1",
     
     Parameters
     ----------
-    table (string): mean, stack, or detection
-    release (string): dr1 or dr2
-    baseurl: base URL for the request
+    table: string 
+        mean, stack, or detection
+    release: string 
+        dr1 or dr2
+    baseurl: string 
+        base URL for the request
     
-    Returns an astropy table with columns name, type, description
+    Returns
+    -------
+    astropy table with columns name, type, description
     """
     
     checklegal(table,release)
@@ -133,6 +169,15 @@ def addfilter(dtab):
     
     This modifies the table in place.  If the 'filter' column already exists,
     the table is returned unchanged.
+    
+    Parameters
+    ----------
+    dtab: table
+        detection table
+        
+    Returns
+    -------
+    dtab: table
     """
     if 'filter' not in dtab.colnames:
         # the filterID value goes from 1 to 5 for grizy
@@ -142,7 +187,15 @@ def addfilter(dtab):
     return dtab
 
 def improve_filter_format(tab):
-# column names don't include which filter it is
+    """Add filter string to column name
+    Parameters
+    ----------
+    tab:table
+    
+    Returns
+    -------
+    tab: table
+    """
     for filter in 'grizy':
         col = filter+'MeanPSFMag'
         tab[col].format = ".4f"
@@ -151,7 +204,17 @@ def improve_filter_format(tab):
     return(tab)
 
 def search_lightcurve(objid):
-    #setup to pull light curve info
+    """setup to pull light curve info
+    
+    Parameters
+    ----------
+    objid: string
+    
+    Returns
+    -------
+    dresults: search results
+    
+    """
     dconstraints = {'objID': objid}
     dcolumns = ("""objID,detectID,filterID,obsTime,ra,dec,psfFlux,psfFluxErr,psfMajorFWHM,psfMinorFWHM,
             psfQfPerfect,apFlux,apFluxErr,infoFlag,infoFlag2,infoFlag3""").split(',')
@@ -181,7 +244,7 @@ def panstarrs_get_lightcurves(coords_list, labels_list, radius):
 
     Returns
     -------
-    df_lc : pandas dataframe
+    df_lc : pandas MultiIndexDFObject
         the main data structure to store all light curves
     """
         

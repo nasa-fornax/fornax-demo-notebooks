@@ -38,7 +38,7 @@ class MultiIndexDFObject:
         
         Parameters
         ----------
-        x : `dict`
+        x : Pandas dataframe
             contains flux, fluxerr, time, objectid, bandname, reflabel 
         """
         if isinstance(x, self.__class__):
@@ -53,7 +53,7 @@ class MultiIndexDFObject:
         
         Parameters
         ----------
-        x : `dict`
+        x : Pandas dataframe
             contains flux, fluxerr, time, objectid, bandname, reflabel 
         """
         
@@ -64,7 +64,7 @@ class MultiIndexDFObject:
         
         Parameters
         ----------
-        x : `dict`
+        x : Pandas dataframe
             contains flux, fluxerr, time, objectid, bandname, reflabel 
         """
         with open(x , "rb") as f:
@@ -75,7 +75,7 @@ class MultiIndexDFObject:
         
         Parameters
         ----------
-        x : `dict`
+        x : Pandas dataframe
             contains flux, fluxerr, time, objectid, bandname, reflabel 
         """
         self.data = self.data.drop(x)

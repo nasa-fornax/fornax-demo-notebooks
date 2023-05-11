@@ -23,17 +23,31 @@ def hcvcone(ra,dec,radius,table="hcvsummary",release="v3",format="csv",magtype="
     
     Parameters
     ----------
-    ra (float): (degrees) J2000 Right Ascension
-    dec (float): (degrees) J2000 Declination
-    radius (float): (degrees) Search radius (<= 0.5 degrees)
-    table (string): hcvsummary, hcv, summary, detailed, propermotions, or sourcepositions
-    release (string): v3 or v2
-    magtype (string): magaper2 or magauto (only applies to summary table)
-    format: csv, votable, json
-    columns: list of column names to include (None means use defaults)
-    baseurl: base URL for the request
-    verbose: print info about request
+    ra: float (degrees) 
+        J2000 Right Ascension
+    dec: float (degrees) 
+        J2000 Declination
+    radius: float (degrees) 
+        Search radius (<= 0.5 degrees)
+    table: string
+        hcvsummary, hcv, summary, detailed, propermotions, or sourcepositions
+    release: string
+        v3 or v2
+    magtype: string
+        magaper2 or magauto (only applies to summary table)
+    format: string
+        csv, votable, json
+    columns: list of strings
+        list of column names to include (None means use defaults)
+    baseurl: string
+        base URL for the request
+    verbose: int
+        print info about request
     **kw: other parameters (e.g., 'numimages.gte':2)
+    
+    Returns
+    -------
+    search results
     """
     
     data = kw.copy()
@@ -51,14 +65,25 @@ def hcvsearch(table="hcvsummary",release="v3",magtype="magaper2",format="csv",
     
     Parameters
     ----------
-    table (string): hcvsummary, hcv, summary, detailed, propermotions, or sourcepositions
-    release (string): v3 or v2
-    magtype (string): magaper2 or magauto (only applies to summary table)
-    format: csv, votable, json
-    columns: list of column names to include (None means use defaults)
-    baseurl: base URL for the request
-    verbose: print info about request
+    table: string
+        hcvsummary, hcv, summary, detailed, propermotions, or sourcepositions
+    release: string
+        v3 or v2
+    magtype: string
+        magaper2 or magauto (only applies to summary table)
+    format: string
+        csv, votable, json
+    columns: list of strings
+        list of column names to include (None means use defaults)
+    baseurl: string
+        base URL for the request
+    verbose: int
+        print info about request
     **kw: other parameters (e.g., 'numimages.gte':2).  Note this is required!
+    
+    Returns
+    -------
+    search results
     """
     
     data = kw.copy()
@@ -101,12 +126,18 @@ def hcvmetadata(table="hcvsummary",release="v3",magtype="magaper2",baseurl=get_h
     
     Parameters
     ----------
-    table (string): hcvsummary, hcv, summary, detailed, propermotions, or sourcepositions
-    release (string): v3 or v2
-    magtype (string): magaper2 or magauto (only applies to summary table)
-    baseurl: base URL for the request
+    table: string
+        hcvsummary, hcv, summary, detailed, propermotions, or sourcepositions
+    release: string 
+        v3 or v2
+    magtype: string
+        magaper2 or magauto (only applies to summary table)
+    baseurl: string
+        base URL for the request
     
-    Returns an astropy table with columns name, type, description
+    Returns
+    -------
+    astropy table with columns name, type, description
     """
     url = "{}/metadata".format(cat2url(table,release,magtype,baseurl=baseurl))
     r = requests.get(url)
@@ -123,12 +154,18 @@ def cat2url(table="hcvsummary",release="v3",magtype="magaper2",baseurl=get_hscap
     
     Parameters
     ----------
-    table (string): hcvsummary, hcv, summary, detailed, propermotions, or sourcepositions
-    release (string): v3 or v2
-    magtype (string): magaper2 or magauto (only applies to summary table)
-    baseurl: base URL for the request
+    table : string
+        hcvsummary, hcv, summary, detailed, propermotions, or sourcepositions
+    release: string
+        v3 or v2
+    magtype: string 
+        magaper2 or magauto (only applies to summary table)
+    baseurl: string
+        base URL for the request
     
-    Returns a string with the base URL for this request
+    Returns
+    -------
+    string with the base URL for this request
     """
     checklegal_hcv(table,release,magtype)
     if table == "summary":
@@ -139,9 +176,19 @@ def cat2url(table="hcvsummary",release="v3",magtype="magaper2",baseurl=get_hscap
 
 
 def checklegal_hcv(table,release,magtype):
-    """Checks if this combination of table, release and magtype is acceptable
-    
+    """Checks if this combination of table and release is acceptable
     Raises a ValueError exception if there is problem
+    
+    Parameters
+    ----------
+    table: string list
+        "summary", "detailed", "propermotions", "sourcepositions",
+                    "hcvsummary", "hcv"
+    release: string
+        v2 or v3
+    magtype:string
+        "magaper2", "magauto"
+        
     """
     
     releaselist = ("v2", "v3")
@@ -176,7 +223,7 @@ def HCV_get_lightcurves(coords_list, labels_list, radius):
 
     Returns
     -------
-    df_lc : pandas dataframe
+    df_lc : pandas MultiIndexDFObject
         the main data structure to store all light curves
     """
 

@@ -21,7 +21,7 @@ def HEASARC_get_lightcurves(coords_list,labels_list,radius, mission_list ):
             https://astroquery.readthedocs.io/en/latest/heasarc/heasarc.html#getting-list-of-available-missions
     Returns
     -------
-    df_lc : pandas dataframe
+    df_lc : pandas MultiIndexDFObject
         the main data structure to store all light curves
     """
     
