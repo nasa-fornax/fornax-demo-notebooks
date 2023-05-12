@@ -53,7 +53,7 @@ def ZTF_get_lightcurve(coords_list, labels_list, plotprint=1, ztf_radius=0.00027
     
     Returns
     -------
-    df_lc : pandas MultiIndexDFObject
+    df_lc : MultiIndexDFObject
         the main data structure to store all light curves
     """
 
