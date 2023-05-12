@@ -64,8 +64,8 @@ class MultiIndexDFObject:
         
         Parameters
         ----------
-        x : Pandas dataframe
-            contains flux, fluxerr, time, objectid, bandname, reflabel 
+        x : string or path
+            path of the pickle file to be loaded
         """
         with open(x , "rb") as f:
             self.data = pickle.load(f)
