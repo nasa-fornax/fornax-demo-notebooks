@@ -75,8 +75,8 @@ class MultiIndexDFObject:
         
         Parameters
         ----------
-        x : Pandas dataframe
-            contains flux, fluxerr, time, objectid, bandname, reflabel 
+        x : list of values
+             Index values identifying rows to be dropped.
         """
         self.data = self.data.drop(x)
         
