@@ -244,7 +244,7 @@ def panstarrs_get_lightcurves(coords_list, labels_list, radius):
 
     Returns
     -------
-    df_lc : pandas MultiIndexDFObject
+    df_lc : MultiIndexDFObject
         the main data structure to store all light curves
     """
         
