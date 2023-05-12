@@ -39,7 +39,7 @@ class MultiIndexDFObject:
         Parameters
         ----------
         x : Pandas dataframe
-            contains flux, fluxerr, time, objectid, bandname, reflabel 
+            contains columns [flux, fluxerr] and multi-index [objectid, label, band, time]
         """
         if isinstance(x, self.__class__):
             # x is a MultiIndexDFObject. extract the DataFrame and concat
