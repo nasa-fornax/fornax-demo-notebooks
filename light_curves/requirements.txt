@@ -11,4 +11,6 @@ lightkurve
 acstools
 alerce
 wget
+git+https://github.com/fkiwy/unTimely_Catalog_explorer
+reproject  # needed for untimely
 
