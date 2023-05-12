@@ -53,8 +53,8 @@ class MultiIndexDFObject:
         
         Parameters
         ----------
-        x : Pandas dataframe
-            contains flux, fluxerr, time, objectid, bandname, reflabel 
+        x : string or path
+            where to save the pickle file
         """
         
         self.data.to_pickle(x)  
