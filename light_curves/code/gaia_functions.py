@@ -204,7 +204,7 @@ def Gaia_retrieve_median_photometry(coords_list , labels_list , gaia_source_tabl
             gaia_table = vstack( [gaia_table , gaia_search.get_data()[sel_min]] )
 
     if verbose > 0: print("\nSearch completed in {:.2f} seconds".format((time.time()-t1) ) )
-    if verbose > 0: print("Number of objects mached: {} out of {}.".format(len(gaia_table),len(coords_list) ) )
+    if verbose > 0: print("Number of objects matched: {} out of {}.".format(len(gaia_table),len(coords_list) ) )
     
     return(gaia_table)
     
