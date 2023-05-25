@@ -1,5 +1,29 @@
+import numpy as np
 from acstools import acszpt
 from astropy.time import Time
+
+
+def convert_wise_flux_to_mag(flux, dflux):
+    """Convert WISE fluxes to magnitudes.
+
+    This follows the conversions done for the original Meisner et al., 2023 catalog
+    (see https://github.com/fkiwy/unTimely_Catalog_explorer/blob/main/unTimely_Catalog_tools.py),
+    except that here we support vectorization.
+    """
+    def calculate_magnitude(myflux):
+        # need to allow myflux to be an array, so use np.log10 not math.log10
+        mymag = 22.5 - 2.5 * np.log10(myflux)
+        # if myflux < 0, np.log10(myflux) == nan
+        # if myflux = 0, np.log10(myflux) == -inf. replace with nan to match unTimely_Catalog_tools
+        mymag[np.isinf(mymag)] = np.nan
+        return mymag
+
+    mag = calculate_magnitude(flux)
+    mag_upper = calculate_magnitude(flux - dflux)
+    mag_lower = calculate_magnitude(flux + dflux)
+    dmag = (mag_upper - mag_lower) / 2
+
+    return mag, dmag
 
 
 #need to convert those magnitudes into mJy to be consistent in data structure.
