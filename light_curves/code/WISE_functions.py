@@ -44,7 +44,7 @@ def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, band
         lab = labels_list[objectid]
 
         pixels = hp.query_circle(nside=hp.order_to_nside(5), a=coord.ra.deg, b=coord.dec.deg,
-                                 radius=radius.to(u.deg), nest=True, inclusive=True)
+                                 radius=radius.to(u.deg).value, nest=True, inclusive=True)
         src_tbl = dataset.to_table(columns=["ra", "dec", "band", "flux", "dflux", "MJDMEAN"], 
                                    filter=(pc.field("healpix_k5").isin(pixels)))  # pyarrow table
         src_tbl = arrow_to_astropy(src_tbl)  # astropy table
