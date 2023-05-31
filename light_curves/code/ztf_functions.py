@@ -11,7 +11,22 @@ from data_structures import MultiIndexDFObject
 
 
 def ZTF_id2coord(object_ids,coords,labels,verbose=1):
-    ''' To find and append coordinates of objects with only ZTF obj name'''
+    """ To find and append coordinates of objects with only ZTF obj name
+      
+    Parameters
+    ----------
+    object_ids: list of strings
+        eg., [ "ZTF18accqogs", "ZTF19aakyhxi", "ZTF19abyylzv", "ZTF19acyfpno"]
+    coords : list of astropy skycoords
+        the coordinates of the targets for which a user wants light curves
+    labels: list of strings
+        journal articles associated with the target coordinates
+    verbose: int
+        print out debugging info (1) or not(0)
+    """
+    
+    
+    
     alerce = Alerce()
     objects = alerce.query_objects(oid=object_ids, format="pandas")
     ztf_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(objects['meanra'],objects['meandec'])]
@@ -23,17 +38,24 @@ def ZTF_id2coord(object_ids,coords,labels,verbose=1):
     
 
 def ZTF_get_lightcurve(coords_list, labels_list, plotprint=1, ztf_radius=0.000278):
-    ''' Function to add the ZTF lightcurves in all three bands 
-    to a multiframe data structure 
-    input:
-     --- list of coordinates
-     --- list of labels
-     --- ztf_radius default to 0.000278
-     --- optional plotprint number of objects to plot
+    """ Function to add the ZTF lightcurves in all three bands to a multiframe data structure 
      
-     output:
-      --- the multi-data frame with ztf sources appended.
-      '''
+    Parameters
+    ----------
+    coords_list : list of astropy skycoords
+        the coordinates of the targets for which a user wants light curves
+    labels_list: list of strings
+        journal articles associated with the target coordinates
+    plotprint: int
+        print out plots (1) or not(0)
+    ztf_radius : float
+        search radius, how far from the source should the archives return results
+    
+    Returns
+    -------
+    df_lc : MultiIndexDFObject
+        the main data structure to store all light curves
+    """
 
     count_nomatch = 0 # counter for non matched objects
     count_plots = 0 

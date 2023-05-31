@@ -9,9 +9,12 @@ def resolve(name):
     
     Parameters
     ----------
-    name (str): Name of object
+    name: string 
+        Name of object
 
-    Returns RA, Dec tuple with position
+    Returns 
+    -------
+    RA, Dec:  tuple with position
     """
 
     resolverRequest = {'service':'Mast.Name.Lookup',
@@ -36,10 +39,14 @@ def mastQuery(request, url='https://mast.stsci.edu/api/v0/invoke'):
 
     Parameters
     ----------
-    request (dictionary): The MAST request json object
-    url (string): The service URL
+    request: dictionary
+        The MAST request json object
+    url: string 
+        The service URL
 
-    Returns the returned data content
+    Returns
+    -------
+    the returned data content text
     """
     
     # Encoding the request as a json string

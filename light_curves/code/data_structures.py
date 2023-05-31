@@ -38,8 +38,8 @@ class MultiIndexDFObject:
         
         Parameters
         ----------
-        x : `dict`
-            contains flux, fluxerr, time, objectid, bandname, reflabel 
+        x : Pandas dataframe
+            contains columns [flux, fluxerr] and multi-index [objectid, label, band, time]
         """
         if isinstance(x, self.__class__):
             # x is a MultiIndexDFObject. extract the DataFrame and concat
@@ -53,8 +53,8 @@ class MultiIndexDFObject:
         
         Parameters
         ----------
-        x : `dict`
-            contains flux, fluxerr, time, objectid, bandname, reflabel 
+        x : string or path
+            where to save the pickle file
         """
         
         self.data.to_pickle(x)  
@@ -64,8 +64,8 @@ class MultiIndexDFObject:
         
         Parameters
         ----------
-        x : `dict`
-            contains flux, fluxerr, time, objectid, bandname, reflabel 
+        x : string or path
+            path of the pickle file to be loaded
         """
         with open(x , "rb") as f:
             self.data = pickle.load(f)
@@ -75,8 +75,8 @@ class MultiIndexDFObject:
         
         Parameters
         ----------
-        x : `dict`
-            contains flux, fluxerr, time, objectid, bandname, reflabel 
+        x : list of values
+             Index values identifying rows to be dropped.
         """
         self.data = self.data.drop(x)
         
