@@ -12,7 +12,7 @@ from tqdm import tqdm
 from data_structures import MultiIndexDFObject
 
 
-def Gaia_get_lightcurve(coords_list, labels_list, object_names , verbose):
+def Gaia_get_lightcurve(coords_list, labels_list , verbose):
     '''
     Creates a lightcurve Pandas MultiIndex object from Gaia data for a list of coordinates.
     This is the MAIN function.
@@ -20,13 +20,10 @@ def Gaia_get_lightcurve(coords_list, labels_list, object_names , verbose):
     Parameters
     ----------
     coords_list : list of Astropy SkyCoord objects
-        List of coordinates of the sources
+        List of (id,coordinates) tuples of the sources
     
     labels_list : list of str
         List of labels for each soruce
-        
-    object_names : list of str
-        List of unique names for each source
         
     verbose : int
         How much to talk. 0 = None, 1 = a little bit , 2 = more, 3 = full
@@ -42,7 +39,7 @@ def Gaia_get_lightcurve(coords_list, labels_list, object_names , verbose):
     '''
 
     ## Retrieve Gaia table with Source IDs and photometry ==============
-    gaia_table = Gaia_retrieve_median_photometry(coords_list , labels_list, object_names,
+    gaia_table = Gaia_retrieve_median_photometry(coords_list , labels_list,
                                          gaia_source_table="gaiaedr3.gaia_source", # Which Table to use
                                          search_radius = u.Quantity(20,u.arcsec), # search radius
                                          verbose = verbose
@@ -66,7 +63,7 @@ def Gaia_get_lightcurve(coords_list, labels_list, object_names , verbose):
     gaia_epoch_phot = Gaia_mk_lightcurves(prod_tab , verbose=verbose)
 
     ## Create Gaia Pandas MultiIndex object and append to existing data frame.
-    df_lc_gaia = Gaia_mk_MultiIndex(coords_list=coords_list, object_names=object_names,
+    df_lc_gaia = Gaia_mk_MultiIndex(coords_list=coords_list,
                                     labels_list=labels_list, gaia_phot=gaia_phot ,
                                     gaia_epoch_phot=gaia_epoch_phot, verbose=verbose)
 
@@ -146,20 +143,17 @@ def Gaia_extract_median_photometry(gaia_table):
     return(gaia_phot)
 
 
-def Gaia_retrieve_median_photometry(coords_list , labels_list , object_names , gaia_source_table , search_radius, verbose):
+def Gaia_retrieve_median_photometry(coords_list , labels_list , gaia_source_table , search_radius, verbose):
     '''
     Retrieves the photometry table for a list of sources.
     
     Parameter
     ----------    
     coords_list : list of Astropy SkyCoord objects
-        List of coordinates of the sources
+        List of (id,coordinates) tuples of the sources
     
     labels_list : list of str
         List of labels for each soruce
-        
-    object_names : list of str
-        List of unique names for each source
         
     gaia_source_table : str
         Gaia source table, e.g., "gaiaedr3.gaia_source"
@@ -199,7 +193,7 @@ def Gaia_retrieve_median_photometry(coords_list , labels_list , object_names , g
 
         # match
         if len(gaia_search.get_data()["dist"]) > 0:
-            gaia_search.get_data()["input_object_name"] = object_names[objectid] # add input object name to catalog
+            gaia_search.get_data()["input_object_name"] = objectid # add input object name to catalog
             sel_min = np.where( (gaia_search.get_data()["dist"] < 1*u.arcsec) & (gaia_search.get_data()["dist"] == np.nanmin(gaia_search.get_data()["dist"]) ) )[0]
         else:
             sel_min = []
@@ -210,7 +204,7 @@ def Gaia_retrieve_median_photometry(coords_list , labels_list , object_names , g
             gaia_table = vstack( [gaia_table , gaia_search.get_data()[sel_min]] )
 
     if verbose > 0: print("\nSearch completed in {:.2f} seconds".format((time.time()-t1) ) )
-    if verbose > 0: print("Number of objects mached: {} out of {}.".format(len(gaia_table),len(object_names) ) )
+    if verbose > 0: print("Number of objects matched: {} out of {}.".format(len(gaia_table),len(coords_list) ) )
     
     return(gaia_table)
     
@@ -314,7 +308,7 @@ def Gaia_mk_lightcurves(prod_tab , verbose):
 
 
 
-def Gaia_mk_MultiIndex(coords_list, object_names, labels_list, gaia_phot , gaia_epoch_phot , verbose):
+def Gaia_mk_MultiIndex(coords_list, labels_list, gaia_phot , gaia_epoch_phot , verbose):
     '''
     Creates a MultiIndex Pandas Dataframe for the Gaia observations. Specifically, it 
     returns the epoch photometry as a function of time. For sources without Gaia epoch
@@ -324,10 +318,7 @@ def Gaia_mk_MultiIndex(coords_list, object_names, labels_list, gaia_phot , gaia_
     Parameters
     ----------
     coords_list : list of Astropy SkyCoord objects
-        List of coordinates of the sources
-
-    object_names : list of strings
-        The catalog with the source IDs and names (here: CLAGN)
+        List of (id,coordinates) tuples of the sources
     
     gaia_phot : dict
         The Gaia mean photometry (will be linked by object ID in 'data' catalog)
@@ -353,7 +344,7 @@ def Gaia_mk_MultiIndex(coords_list, object_names, labels_list, gaia_phot , gaia_
 
         # get Gaia source_id
         #sel = np.where(data["Object Name"][ii] == gaia_phot["input_object_name"])[0]
-        sel = np.where(object_names[objectid] == gaia_phot["input_object_name"])[0]
+        sel = np.where(objectid == gaia_phot["input_object_name"])[0]
         lab = labels_list[objectid]
         
         if len(sel) > 0:
