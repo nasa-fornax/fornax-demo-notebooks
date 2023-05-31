@@ -13,3 +13,5 @@ astropy
 astroquery
 nway
 boto3
+tqdm
+
