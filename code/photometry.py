@@ -5,6 +5,7 @@ import warnings
 
 from astropy.stats import sigma_clipped_stats
 import numpy as np
+from typing import NamedTuple
 
 from exceptions import TractorError
 
@@ -17,7 +18,31 @@ except ImportError:
     print("tractor is missing")
     pass
 
+# create a simple class to use as a container for the parameters of a single band
+class Band(NamedTuple):
+    """Container for parameters associated with a single band.
+    
+    Attributes
+    ----------
+    idx : int
+        Identifier for the band/channel.
+        (integer in [0, 1, 2, 3, 4, 5] for the four IRAC bands and two Galex bands)
+    prf : np.ndarray
+        Point spread function for the band/channel.
+    cutout_width : int
+        width of desired cutout in arcseconds
+    flux_conv : float
+        factor used to convert tractor result to microjanskies
+    mosaic_pix_scale: float
+        Pixel scale of the image
+    """
+    idx: int
+    prf: np.ndarray
+    cutout_width: int
+    flux_conv: float
+    mosaic_pix_scale: float
 
+        
 def calc_background(*, bkgsubimage):
     """Measure sky noise and mean level.
 
