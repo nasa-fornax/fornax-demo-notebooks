@@ -3,6 +3,12 @@ from acstools import acszpt
 from astropy.time import Time
 
 
+def convert_wise_flux_to_millijansky(nanomaggy_flux):
+    """seems like should be able to skip the mags and just convert flux units, but not working"""
+    millijansky_per_nanomaggy = 1 / 3.631e-3
+    return nanomaggy_flux * millijansky_per_nanomaggy
+
+
 def convert_wise_flux_to_mag(flux, dflux):
     """Convert WISE fluxes to magnitudes.
 
