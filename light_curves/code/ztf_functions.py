@@ -10,8 +10,8 @@ from astropy.table import Table, vstack
 from data_structures import MultiIndexDFObject
 from tqdm import tqdm
 
-
-URLBASE = "https://irsa.ipac.caltech.edu/data/ZTF/lc/lc_dr17"
+DATARELEASE = "dr17"
+URLBASE = f"https://irsa.ipac.caltech.edu/data/ZTF/lc/lc_{DATARELEASE}"
 # get a list of files in the dataset using the checksums file
 DSFILES = pd.read_table(
         f"{URLBASE}/checksum.md5", sep="\s+", names=["md5", "path"], usecols=["path"]
@@ -23,7 +23,7 @@ def find_files(coord, ztf_radius, service):
     result = service.run_sync(
         # not really using oid right now but will return it anyway
         f"SELECT {', '.join(['oid', 'field', 'ccdid', 'qid'])} "
-        "FROM ztf_objects "
+        f"FROM ztf_objects_{DATARELEASE} "
         "WHERE CONTAINS("
         # must be one of 'J2000', 'ICRS', and 'GALACTIC'
         # guessing icrs, but need to check
@@ -35,7 +35,7 @@ def find_files(coord, ztf_radius, service):
     # now find the files
     files = []
     for field, ccd, quad in list(field_df.to_records(index=False)):
-        fre = re.compile(f"[01]/field{field}/ztf_{field}_z[gri]_c{ccd}_q{quad}_dr17.parquet")
+        fre = re.compile(f"[01]/field0+{field}/ztf_0+{field}_z[gri]_c{ccd}_q{quad}")
         files.extend([f"{URLBASE}/{f}" for f in filter(fre.match, DSFILES)])
 
     return files
@@ -70,7 +70,7 @@ def ZTF_get_lightcurve(coords_list, labels_list, plotprint=1, ztf_radius=0.00027
         lab = labels_list[oid]
 
         # find which files this object is in
-        files = find_files(coord, ztf_radius, service)  # ~30 sec~
+        files = find_files(coord, ztf_radius, service)  # 3 sec. zort takes 30
 
         # load everything in the files and use astropy to find the object
         # these 3 lines take about 1 sec total
