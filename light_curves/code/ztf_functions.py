@@ -4,11 +4,11 @@ import astropy.units as u
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import pyvo
 from astropy.coordinates import SkyCoord
 from astropy.table import Table, vstack
 from data_structures import MultiIndexDFObject
 from tqdm import tqdm
-from zort import radec
 
 
 URLBASE = "https://irsa.ipac.caltech.edu/data/ZTF/lc/lc_dr17"
@@ -16,6 +16,29 @@ URLBASE = "https://irsa.ipac.caltech.edu/data/ZTF/lc/lc_dr17"
 DSFILES = pd.read_table(
         f"{URLBASE}/checksum.md5", sep="\s+", names=["md5", "path"], usecols=["path"]
     ).squeeze().str.removeprefix("./").to_list()
+
+
+def find_files(coord, ztf_radius, service):
+    # get the field, ccdid, and quadrant id using tap
+    result = service.run_sync(
+        # not really using oid right now but will return it anyway
+        f"SELECT {', '.join(['oid', 'field', 'ccdid', 'qid'])} "
+        "FROM ztf_objects "
+        "WHERE CONTAINS("
+        # must be one of 'J2000', 'ICRS', and 'GALACTIC'
+        # guessing icrs, but need to check
+        f"POINT('ICRS',ra, dec), CIRCLE('ICRS',{coord.ra.deg},{coord.dec.deg},{ztf_radius.value})"
+        ")=1"
+    )
+    field_df = result.to_table().to_pandas().set_index("oid").drop_duplicates()
+
+    # now find the files
+    files = []
+    for field, ccd, quad in list(field_df.to_records(index=False)):
+        fre = re.compile(f"[01]/field{field}/ztf_{field}_z[gri]_c{ccd}_q{quad}_dr17.parquet")
+        files.extend([f"{URLBASE}/{f}" for f in filter(fre.match, DSFILES)])
+
+    return files
 
 
 def ZTF_get_lightcurve(coords_list, labels_list, plotprint=1, ztf_radius=0.000278*u.deg):
@@ -42,11 +65,12 @@ def ZTF_get_lightcurve(coords_list, labels_list, plotprint=1, ztf_radius=0.00027
     count_plots = 0 
     df_lc = MultiIndexDFObject()
 
+    service = pyvo.dal.TAPService("https://irsa.ipac.caltech.edu/TAP")
     for oid, coord in tqdm(coords_list):
         lab = labels_list[oid]
 
-        # find which files this object is in. this line takes about 30 sec
-        files = find_files(coord)  # 30 sec
+        # find which files this object is in
+        files = find_files(coord, ztf_radius, service)  # ~30 sec~
 
         # load everything in the files and use astropy to find the object
         # these 3 lines take about 1 sec total
@@ -116,36 +140,3 @@ def ZTF_get_lightcurve(coords_list, labels_list, plotprint=1, ztf_radius=0.00027
             count_nomatch+=1
     print(count_nomatch,' objects did not match to ztf')
     return df_lc
-
-
-def parse_rcid(rcid):
-    """Return CCD and quadrant, where rcid = 4 * (CCD - 1) + (quadrant - 1).
-    See:  https://irsa.ipac.caltech.edu/data/ZTF/docs/common/ztf_focal_plane.jpg
-    """
-    ccd = rcid // 4 + 1
-    quad = rcid % 4 + 1
-    return ccd, quad
-
-
-def find_files(coord):
-    """Return list of files containing this coord.
-    The dataset is partitioned by ztf field, ccd, quadrant, and filter.
-    """
-    # find the ztf field, ccd, and quadrant. needed to id which files contain the object.
-    # radec.return_fields is the specific call that takes 30 seconds
-    fields = radec.return_fields(coord.ra.deg, coord.dec.deg)
-    fcq = []  # will hold tuples of (field, ccd, quadrant)
-    for field in fields:
-        rcid = radec.return_rcid(field, coord.ra.deg, coord.dec.deg)
-        if rcid is not None:
-            fcq.append((str(field).zfill(6), *parse_rcid(rcid)))
-
-    # now find the files
-    files = []
-    for field, ccd, quad in fcq:
-        fre = re.compile(
-            f"[01]/field{field}/ztf_{field}_z[gri]_c{ccd}_q{quad}_dr17.parquet"
-        )
-        files.extend([f"{URLBASE}/{f}" for f in filter(fre.match, DSFILES)])
-
-    return files
