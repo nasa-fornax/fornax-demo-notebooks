@@ -5,6 +5,7 @@ import pandas as pd
 import pyvo
 from data_structures import MultiIndexDFObject
 
+
 DATARELEASE = "dr17"
 URLBASE = f"https://irsa.ipac.caltech.edu/data/ZTF/lc/lc_{DATARELEASE}"
 # get a list of files in the dataset using the checksums file
@@ -94,6 +95,25 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
 
 
 def locate_object(coord, labels_list, ztf_radius, tap_service) -> pd.DataFrame:
+    """Lookup the ZTF field, ccd, and quadrant this coord is located in.
+
+    Parameters
+    ----------
+    coord : tuple
+        the object's ID and astropy skycoords
+    labels_list: list of strings
+        journal articles associated with target coordinates, indexed by object ID
+    ztf_radius : float
+        search radius, how far from the source should the archives return results
+    tap_service : pyvo.dal.TAPService
+        IRSA TAP service
+
+    Returns
+    -------
+    field_df : pd.DataFrame
+        Dataframe with the object's ZTF field, CCD, quadrant and other information useful for
+        locating the object in the parquet files and associating it with this coord.
+    """
     coord_id, ra, dec = coord[0], coord[1].ra.deg, coord[1].dec.deg
     # files are organized by filter, field, ccd, and quadrant
     # look them up using tap. https://irsa.ipac.caltech.edu/docs/program_interface/TAP.html
@@ -111,19 +131,42 @@ def locate_object(coord, labels_list, ztf_radius, tap_service) -> pd.DataFrame:
     field_df = field_df.rename(columns={"oid": "objectid"})
     field_df["oid"] = coord_id
     field_df["label"] = labels_list[coord_id]
-    # field_df = field_df.set_index(["oid", "objectid"])
 
     # field_df may have more than one oid per band (e.g., yang sample coords_list[10])
-    # guessing we'll want to use the one with the closest ra/dec? skipping this for now
+    # guessing we'll want to use the one with the closest ra/dec?
+    # skipping this for now
 
     return field_df
 
 
 def file_name(filtercode, field, ccdid, qid):
+    """Lookup the filename for this filtercode, field, ccdid, qid.
+
+    Parameters
+    ----------
+    filtercode : str
+        ZTF band name
+    field : int
+        ZTF field
+    ccdid : int
+        ZTF CCD
+    qid : int
+        ZTF quadrant
+
+    Returns
+    -------
+    file_name : str
+        Parquet file name containing this filtercode, field, ccdid, and qid.
+
+    Raises
+    ------
+    AssertionError
+        if exactly one matching file name is not found in the DSFILES list
+    """
     # can't quite construct the file name directly because need to know whether the top-level
-    # directory is 0 or 1
+    # directory is 0 or 1. do a regex search through the DSFILES list.
     fre = re.compile(f"[01]/field{field:06}/ztf_{field:06}_{filtercode}_c{ccdid:02}_q{qid}")
     files = [f"{URLBASE}/{f}" for f in filter(fre.match, DSFILES)]
-    # expecting 1 filename. make it fail if there's more.
+    # expecting exactly 1 filename. make it fail if there's more or less.
     assert len(files) == 1, f"found {len(files)} files. expected 1."
     return files[0]
