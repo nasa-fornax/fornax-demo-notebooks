@@ -68,7 +68,7 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
         # need to convert hmjd -> mjd and label it "time". this isn't right but leaving it for now
         ztflc_df = ztflc_df.rename(columns={"hmjd": "time"})
 
-        ztflc_df = ztflc_df.explode(["mjd", "mag", "magerr", "catflags"], ignore_index=True)
+        ztflc_df = ztflc_df.explode(["time", "mag", "magerr", "catflags"], ignore_index=True)
 
         # remove data flagged as bad (catflag = 32768)
         # guessing we want to remove single datapoints, not full light curves just because one point is bad?
