@@ -34,68 +34,57 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
     df_lc : MultiIndexDFObject
         the main data structure to store all light curves
     """
-    df_lc = MultiIndexDFObject()
 
     # get a df of the info needed to locate each object in the parquet files
     service = pyvo.dal.TAPService("https://irsa.ipac.caltech.edu/TAP")
-    locations = pd.concat(
-        [locate_object(coord, labels_list, ztf_radius, service) for coord in coords_list],
-        ignore_index=True,
+    locations = [locate_object(coord, labels_list, ztf_radius, service) for coord in coords_list]
+    locations = pd.concat(locations, ignore_index=True)
+
+    # load light curves by looping over files and filtering for ZTF objectid
+    # the parquet files are organized by filter, field, ccd, and quadrant
+    location_groups = locations.groupby(["filtercode", "field", "ccdid", "qid"])
+    lc_df = [load_lightcurves(keys, locdf) for keys, locdf in location_groups]
+    lc_df = pd.concat(lc_df, ignore_index=True)
+
+    # lc_df might have more than one light curve per (band + coords_list id)
+    # if the ra/dec is close to a CCD-quadrant boundary.
+    # keep only the one with the longest timespan,
+    # following Sánchez-Sáez et al., 2021 (2021AJ....162..206S)
+    lc_df_list = []
+    for _, singleband_object in lc_df.groupby(["oid", "band"]):
+        if len(singleband_object.index) == 1:
+            lc_df_list.append(singleband_object)
+        else:
+            deltat = singleband_object["hmjd"].apply(max) - singleband_object["hmjd"].apply(min)
+            lc_df_list.append(singleband_object.loc[deltat == deltat.max()])
+    lc_df = pd.concat(lc_df_list, ignore_index=True)
+
+    # finish transforming the data into the form expected by a MultiIndexDFObject
+    # need to convert hmjd -> mjd and label it "time". this isn't right but leaving it for now
+    lc_df = lc_df.rename(columns={"hmjd": "time"})
+    # explode the data structure into one row per light curve point
+    lc_df = lc_df.explode(["time", "mag", "magerr", "catflags"], ignore_index=True)
+    # remove data flagged as bad (catflag = 32768)
+    lc_df = lc_df.loc[lc_df["catflags"] != 32768, :]
+    # calc flux [https://arxiv.org/pdf/1902.01872.pdf zeropoint corrections already applied]
+    magupper = lc_df["mag"] + lc_df["magerr"]
+    maglower = lc_df["mag"] - lc_df["magerr"]
+    flux = 10 ** ((lc_df["mag"] - 23.9) / -2.5)  # uJy
+    flux_upper = abs(flux - 10 ** ((magupper - 23.9) / -2.5))
+    flux_lower = abs(flux - 10 ** ((maglower - 23.9) / -2.5))
+    fluxerr = (flux_upper + flux_lower) / 2.0
+    lc_df.loc[:, "flux"] = flux * 1e-3  # now in mJy
+    lc_df.loc[:, "err"] = fluxerr * 1e-3
+
+    return MultiIndexDFObject(
+        lc_df[["flux", "err", "time", "oid", "band", "label"]].set_index(
+            ["oid", "label", "band", "time"]
+        )
     )
-
-    # parquet files are organized by filter, field, ccd, and quadrant
-    # group the locations df by file, loop thru files and load, filtering for objectid
-    for key, df in locations.groupby(["filtercode", "field", "ccdid", "qid"]):
-        ztflc_df = pd.read_parquet(
-            file_name(*key),
-            engine="pyarrow",
-            columns=["objectid", "filterid", "nepochs", "hmjd", "mag", "magerr", "catflags"],
-            filters=[("objectid", "in", df["objectid"].to_list())],
-        )
-
-        # add oid and label columns by mapping from object id
-        oidmap = df.set_index("objectid")["oid"].to_dict()
-        lblmap = df.set_index("objectid")["label"].to_dict()
-        ztflc_df["oid"] = ztflc_df["objectid"].map(oidmap)
-        ztflc_df["label"] = ztflc_df["objectid"].map(lblmap)
-
-        # add the band (filtercode) as a column
-        ztflc_df["band"] = key[0]
-
-        # would the "repeated lightcurve" problem be solved by returning only the single closest
-        # object from locate_object()?
-        # if not, choose the one with the largest nepochs?
-
-        # need to convert hmjd -> mjd and label it "time". this isn't right but leaving it for now
-        ztflc_df = ztflc_df.rename(columns={"hmjd": "time"})
-
-        ztflc_df = ztflc_df.explode(["time", "mag", "magerr", "catflags"], ignore_index=True)
-
-        # remove data flagged as bad (catflag = 32768)
-        # guessing we want to remove single datapoints, not full light curves just because one point is bad?
-        ztflc_df = ztflc_df.query("catflags != 32768")
-
-        # calc flux [https://arxiv.org/pdf/1902.01872.pdf zeropoint corrections already applied]
-        magupper = ztflc_df["mag"] + ztflc_df["magerr"]
-        maglower = ztflc_df["mag"] - ztflc_df["magerr"]
-        flux = 10 ** ((ztflc_df["mag"] - 23.9) / -2.5)  # uJy
-        flux_upper = abs(flux - 10 ** ((magupper - 23.9) / -2.5))
-        flux_lower = abs(flux - 10 ** ((maglower - 23.9) / -2.5))
-        fluxerr = (flux_upper + flux_lower) / 2.0
-        ztflc_df.loc[:, "flux"] = flux * 1e-3  # now in mJy
-        ztflc_df.loc[:, "err"] = fluxerr * 1e-3
-
-        df_lc.append(
-            ztflc_df[["flux", "err", "time", "oid", "band", "label"]].set_index(
-                ["oid", "label", "band", "time"]
-            )
-        )
-
-    return df_lc
 
 
 def locate_object(coord, labels_list, ztf_radius, tap_service) -> pd.DataFrame:
-    """Lookup the ZTF field, ccd, and quadrant this coord is located in.
+    """Lookup the ZTF field, ccd, and quadrant this coord object is located in.
 
     Parameters
     ----------
@@ -111,8 +100,8 @@ def locate_object(coord, labels_list, ztf_radius, tap_service) -> pd.DataFrame:
     Returns
     -------
     field_df : pd.DataFrame
-        Dataframe with the object's ZTF field, CCD, quadrant and other information useful for
-        locating the object in the parquet files and associating it with this coord.
+        Dataframe with ZTF field, CCD, quadrant and other information useful for
+        locating the `coord` object in the parquet files. One row per ZTF objectid.
     """
     coord_id, ra, dec = coord[0], coord[1].ra.deg, coord[1].dec.deg
     # files are organized by filter, field, ccd, and quadrant
@@ -121,22 +110,59 @@ def locate_object(coord, labels_list, ztf_radius, tap_service) -> pd.DataFrame:
         f"SELECT {', '.join(['oid', 'filtercode', 'field', 'ccdid', 'qid', 'ra', 'dec'])} "
         f"FROM ztf_objects_{DATARELEASE} "
         "WHERE CONTAINS("
-        # must be one of 'J2000', 'ICRS', and 'GALACTIC'. guessing icrs, but need to check
         f"POINT('ICRS',ra, dec), CIRCLE('ICRS',{ra},{dec},{ztf_radius.value})"
         ")=1"
     )
     field_df = result.to_table().to_pandas()
 
-    # in the MultiIndexDFObject, "oid" is the name of the coord ID, not the ztf object id
+    # in the MultiIndexDFObject, "oid" is the name of the coord id, not the ztf object id
     field_df = field_df.rename(columns={"oid": "objectid"})
     field_df["oid"] = coord_id
     field_df["label"] = labels_list[coord_id]
 
-    # field_df may have more than one oid per band (e.g., yang sample coords_list[10])
-    # guessing we'll want to use the one with the closest ra/dec?
-    # skipping this for now
+    # field_df may have more than one ZTF object id per band (e.g., yang sample coords_list[10])
+    # following Sánchez-Sáez et al., 2021 (2021AJ....162..206S)
+    # we'll load all the data and then keep the longest light curve (in the main function)
 
     return field_df
+
+
+def load_lightcurves(location_keys, location_df):
+    """Load light curves from the file identified by `location_keys`, for objects in location_df.
+
+    Parameters
+    ----------
+    location_keys : tuple(str, int, int int)
+        Keys that uniquely identify a ZTF location (filtercode, field, CCD, and quadrant).
+        Used to lookup the file name.
+    location_df : pd.DataFrame
+        Dataframe of objects in this location. Used to filter data from this file.
+
+    Returns
+    -------
+    lc_df : pd.DataFrame
+        Dataframe of light curves. Expect one row per objectid in location_df. Each row
+        stores a full light curve. Elements in the columns "mag", "hmjd", etc. are arrays.
+    """
+
+    lc_df = pd.read_parquet(
+        file_name(*location_keys),
+        engine="pyarrow",
+        # columns=["objectid", "filterid", "nepochs", "hmjd", "mag", "magerr", "catflags"],
+        columns=["objectid", "hmjd", "mag", "magerr", "catflags"],
+        filters=[("objectid", "in", location_df["objectid"].to_list())],
+    )
+
+    # add things that will be needed for the MultiIndexDFObject
+    # add the band (filtercode)
+    lc_df["band"] = location_keys[0]
+    # add oid (coords_list id) and label columns by mapping from ZTF object id
+    oidmap = location_df.set_index("objectid")["oid"].to_dict()
+    lblmap = location_df.set_index("objectid")["label"].to_dict()
+    lc_df["oid"] = lc_df["objectid"].map(oidmap)
+    lc_df["label"] = lc_df["objectid"].map(lblmap)
+
+    return lc_df
 
 
 def file_name(filtercode, field, ccdid, qid):
