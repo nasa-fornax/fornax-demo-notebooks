@@ -46,10 +46,10 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
     lc_df = [load_lightcurves(keys, locdf) for keys, locdf in location_groups]
     lc_df = pd.concat(lc_df, ignore_index=True)
 
-    # lc_df might have more than one light curve per (band + coords_list id) if the ra/dec is 
-    # close to a CCD-quadrant boundary. keep the one with the most datapoints.
+    # lc_df might have more than one light curve per (band + coords_list id) if the ra/dec is close
+    # to a CCD-quadrant boundary (Sanchez-Saez et al., 2021). keep the one with the most datapoints
     lc_df_list = []
-    for _, singleband_object in lc_df.groupby(["oid", "band"]):
+    for _, singleband_object in lc_df.groupby(["objectid", "band"]):
         if len(singleband_object.index) == 1:
             lc_df_list.append(singleband_object)
         else:
@@ -77,8 +77,8 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
     lc_df.loc[:, "err"] = fluxerr * 1e-3
 
     return MultiIndexDFObject(
-        lc_df[["flux", "err", "time", "oid", "band", "label"]].set_index(
-            ["oid", "label", "band", "time"]
+        lc_df[["flux", "err", "objectid", "label", "band", "time"]].set_index(
+            ["objectid", "label", "band", "time"]
         )
     )
 
@@ -115,9 +115,8 @@ def locate_object(coord, labels_list, ztf_radius, tap_service) -> pd.DataFrame:
     )
     field_df = result.to_table().to_pandas()
 
-    # in the MultiIndexDFObject, "oid" is the name of the coord id, not the ztf object id
-    field_df = field_df.rename(columns={"oid": "objectid"})
-    field_df["oid"] = coord_id
+    # add fields for the MultiIndexDFObject
+    field_df["objectid"] = coord_id
     field_df["label"] = labels_list[coord_id]
 
     # field_df may have more than one ZTF object id per band (e.g., yang sample coords_list[10])
@@ -141,7 +140,7 @@ def load_lightcurves(location_keys, location_df):
     Returns
     -------
     lc_df : pd.DataFrame
-        Dataframe of light curves. Expect one row per objectid in location_df. Each row
+        Dataframe of light curves. Expect one row per oid in location_df. Each row
         stores a full light curve. Elements in the columns "mag", "hmjd", etc. are arrays.
     """
 
@@ -150,17 +149,20 @@ def load_lightcurves(location_keys, location_df):
         engine="pyarrow",
         # columns=["objectid", "filterid", "nepochs", "hmjd", "mag", "magerr", "catflags"],
         columns=["objectid", "hmjd", "mag", "magerr", "catflags"],
-        filters=[("objectid", "in", location_df["objectid"].to_list())],
+        filters=[("objectid", "in", location_df["oid"].to_list())],
     )
+    
+    # in the MultiIndexDFObject, "objectid" is the name of the coord id, not the ztf object id
+    lc_df = lc_df.rename(columns={"objectid": "oid"})
 
-    # add things that will be needed for the MultiIndexDFObject
+    # add fields for the MultiIndexDFObject
     # add the band (filtercode)
     lc_df["band"] = location_keys[0]
-    # add oid (coords_list id) and label columns by mapping from ZTF object id
-    oidmap = location_df.set_index("objectid")["oid"].to_dict()
-    lblmap = location_df.set_index("objectid")["label"].to_dict()
-    lc_df["oid"] = lc_df["objectid"].map(oidmap)
-    lc_df["label"] = lc_df["objectid"].map(lblmap)
+    # add objectid (coords_list id) and label columns by mapping from ZTF object id
+    oidmap = location_df.set_index("oid")["objectid"].to_dict()
+    lblmap = location_df.set_index("oid")["label"].to_dict()
+    lc_df["objectid"] = lc_df["oid"].map(oidmap)
+    lc_df["label"] = lc_df["oid"].map(lblmap)
 
     return lc_df
 
