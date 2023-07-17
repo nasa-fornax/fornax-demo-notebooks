@@ -46,17 +46,15 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
     lc_df = [load_lightcurves(keys, locdf) for keys, locdf in location_groups]
     lc_df = pd.concat(lc_df, ignore_index=True)
 
-    # lc_df might have more than one light curve per (band + coords_list id)
-    # if the ra/dec is close to a CCD-quadrant boundary.
-    # keep only the one with the longest timespan,
-    # following Sánchez-Sáez et al., 2021 (2021AJ....162..206S)
+    # lc_df might have more than one light curve per (band + coords_list id) if the ra/dec is 
+    # close to a CCD-quadrant boundary. keep the one with the most datapoints.
     lc_df_list = []
     for _, singleband_object in lc_df.groupby(["oid", "band"]):
         if len(singleband_object.index) == 1:
             lc_df_list.append(singleband_object)
         else:
-            deltat = singleband_object["hmjd"].apply(max) - singleband_object["hmjd"].apply(min)
-            lc_df_list.append(singleband_object.loc[deltat == deltat.max()])
+            npoints = singleband_object['mag'].str.len()
+            lc_df_list.append(singleband_object.loc[npoints == npoints.max()])
     lc_df = pd.concat(lc_df_list, ignore_index=True)
 
     # finish transforming the data into the form expected by a MultiIndexDFObject
