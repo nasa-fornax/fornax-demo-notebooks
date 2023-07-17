@@ -58,7 +58,9 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
     lc_df = pd.concat(lc_df_list, ignore_index=True)
 
     # finish transforming the data into the form expected by a MultiIndexDFObject
-    # need to convert hmjd -> mjd and label it "time". this isn't right but leaving it for now
+    # store "hmjd" as "time". 
+    # note that other light curves in this notebook will have "time" as MJD instead of HMJD.
+    # if your science depends on precise times, this will need to be corrected.
     lc_df = lc_df.rename(columns={"hmjd": "time"})
     # explode the data structure into one row per light curve point
     lc_df = lc_df.explode(["time", "mag", "magerr", "catflags"], ignore_index=True)
