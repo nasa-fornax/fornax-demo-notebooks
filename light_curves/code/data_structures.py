@@ -38,9 +38,6 @@ class MultiIndexDFObject:
         index = ["objectid", "label", "band", "time"]
         columns = ["flux", "err"]
         self.data = pd.DataFrame(columns=index + columns).set_index(index)
-        index = ["objectid", "label", "band", "time"]
-        columns = ["flux", "err"]
-        self.data = pd.DataFrame(columns=index + columns).set_index(index)
         if data is not None:
             self.append(data)
     
