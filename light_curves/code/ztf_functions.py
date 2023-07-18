@@ -74,8 +74,8 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
     lc_df = lc_df.rename(columns={"hmjd": "time"})
     # explode the data structure into one row per light curve point
     lc_df = lc_df.explode(["time", "mag", "magerr", "catflags"], ignore_index=True)
-    # remove data flagged as bad (catflag = 32768)
-    lc_df = lc_df.loc[lc_df["catflags"] != 32768, :]
+    # remove data flagged as bad
+    lc_df = lc_df.loc[lc_df["catflags"] < 32768, :]
     # calc flux [https://arxiv.org/pdf/1902.01872.pdf zeropoint corrections already applied]
     magupper = lc_df["mag"] + lc_df["magerr"]
     maglower = lc_df["mag"] - lc_df["magerr"]
