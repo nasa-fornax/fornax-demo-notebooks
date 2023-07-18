@@ -54,7 +54,17 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
             lc_df_list.append(singleband_object)
         else:
             npoints = singleband_object['mag'].str.len()
-            lc_df_list.append(singleband_object.loc[npoints == npoints.max()])
+            npointsmax_object = singleband_object.loc[npoints == npoints.max()]
+            # this may still have more than one light curve if they happen to have the same number
+            # of datapoints (e.g., Yang sample coords_list[6], band 'zr').
+            # arbitrarily pick the one with the min oid.
+            # depending on your science, you may want (e.g.,) the largest timespan instead
+            if len(npointsmax_object.index) == 1:
+                lc_df_list.append(npointsmax_object)
+            else:
+                minoid = npointsmax_object.oid.min()
+                lc_df_list.append(npointsmax_object.loc[npointsmax_object.oid == minoid])
+
     lc_df = pd.concat(lc_df_list, ignore_index=True)
 
     # finish transforming the data into the form expected by a MultiIndexDFObject
