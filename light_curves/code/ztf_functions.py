@@ -6,7 +6,7 @@ import pyvo
 from data_structures import MultiIndexDFObject
 
 
-DATARELEASE = "dr17"
+DATARELEASE = "dr18"
 URLBASE = f"https://irsa.ipac.caltech.edu/data/ZTF/lc/lc_{DATARELEASE}"
 # get a list of files in the dataset using the checksums file
 DSFILES = (
