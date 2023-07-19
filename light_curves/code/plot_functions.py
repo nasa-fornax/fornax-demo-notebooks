@@ -38,7 +38,7 @@ def setup_text_plots():
     mpl.rcParams['ytick.right'] = True
     mpl.rcParams['hatch.linewidth'] = 1
 
-def create_figures(coords_list , df_lc, output_dir , show_figure):
+def create_figures(coords_list , df_lc, show_nbr_figures, save_output_dir):
     '''
     Creates figures of the lightcurves for each source in the coordinate list.
     
@@ -50,23 +50,37 @@ def create_figures(coords_list , df_lc, output_dir , show_figure):
     df_lc : lightcurve object
         Lightcurve objects from which to create the lightcurve figures.
         
-    output_dir: str
+    show_nbr_figures : int
+        Number of figures to show inline. For example, `show_nbr_figures = 5' would
+        show the first 5 figures inline.
+        
+    save_output_dir: str
         Output directory to which to save the lightcurve figures. If set to `none`, the figures
         are not saved.
-    
-    show_figure: boolean
-        Set to `True` to show the display the figures in-line. Set to `False` and no figures
-        will be displayed.
         
     
     Returns
     -------
     Saves the figures in the output directory (`output_dir`)
     
+    
+    Notes
+    -----
+    By default, if save_output_dir is set to a valid output directory, figures are
+    made and saved for *all* sources. If that is too much, the user can create a selection
+    in `coords_list' of which sources they like to plot (and save).
+    
     '''
     
-    for objectid, coord in tqdm(coords_list):
+    if (show_nbr_figures == 0) & (save_output_dir == "none"):
+        print("No figures are shown or saved.")
+        return(False)
     
+    cc = 0
+    for objectid, coord in tqdm(coords_list):
+        
+        cc += 1 # counter (1-indexed)
+        
         ## Set up =================
         # choose whether to plot data from the serial or parallel calls
         singleobj = df_lc.data.loc[objectid]
@@ -204,15 +218,24 @@ def create_figures(coords_list , df_lc, output_dir , show_figure):
 
         plt.legend(handles=leg_handles_A , bbox_to_anchor=(1.2,3.5))
         plt.tight_layout()
-        
-        if output_dir != "none":
-            savename = os.path.join(output_dir , "lightcurve_{}.pdf".format(objectid) ) 
+
+        if save_output_dir != "none":
+            savename = os.path.join(save_output_dir , "lightcurve_{}.pdf".format(objectid) ) 
             plt.savefig(savename, bbox_inches="tight")
-        
-        if show_figure:
+
+        if cc <= show_nbr_figures:
             plt.show()
         else:
             plt.close()
             
             
+        # If figures are not saved, we only have to loop over the 
+        # number of figures that are shown to the user.
+        if (save_output_dir == "none") & (cc == show_nbr_figures):
+            print("Done")
+            return(True)
+        else:
+            pass
+            
+    print("Done")
     return(True)
