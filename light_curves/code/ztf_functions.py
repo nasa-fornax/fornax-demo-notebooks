@@ -1,10 +1,16 @@
 import re
 
 import astropy.units as u
+import hpgeom
 import pandas as pd
+import pyarrow
+import pyarrow.compute
+import pyarrow.dataset
 import pyvo
+import s3fs
+from astropy.coordinates import SkyCoord
 from data_structures import MultiIndexDFObject
-
+from pyarrow.fs import S3FileSystem
 
 DATARELEASE = "dr18"
 URLBASE = f"https://irsa.ipac.caltech.edu/data/ZTF/lc/lc_{DATARELEASE}"
@@ -16,8 +22,11 @@ DSFILES = (
     .to_list()
 )
 
+# temporary location
+BUCKET = "irsa-parquet-raen-test"
 
-def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
+
+def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg, s3=True):
     """Function to add the ZTF lightcurves in all three bands to a multiframe data structure
 
     Parameters
@@ -34,16 +43,21 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
     df_lc : MultiIndexDFObject
         the main data structure to store all light curves
     """
-
     # get a df of the info needed to locate each object in the parquet files
-    service = pyvo.dal.TAPService("https://irsa.ipac.caltech.edu/TAP")
-    locations = [locate_object(coord, labels_list, ztf_radius, service) for coord in coords_list]
-    locations = pd.concat(locations, ignore_index=True)
+    if s3:
+        locations = locate_objects(coords_list, labels_list, ztf_radius)
+        location_groups = locations.groupby(["filtercode", "field", "ccdid", "qid", "basedir"])
+    else:
+        service = pyvo.dal.TAPService("https://irsa.ipac.caltech.edu/TAP")
+        locations = [
+            locate_object(coord, labels_list, ztf_radius, service) for coord in coords_list
+        ]
+        locations = pd.concat(locations, ignore_index=True)
+        location_groups = locations.groupby(["filtercode", "field", "ccdid", "qid"])
 
     # load light curves by looping over files and filtering for ZTF objectid
     # the parquet files are organized by filter, field, ccd, and quadrant
-    location_groups = locations.groupby(["filtercode", "field", "ccdid", "qid"])
-    lc_df = [load_lightcurves(keys, locdf) for keys, locdf in location_groups]
+    lc_df = [load_lightcurves(keys, locdf, s3=s3) for keys, locdf in location_groups]
     lc_df = pd.concat(lc_df, ignore_index=True)
 
     # lc_df might have more than one light curve per (band + coords_list id) if the ra/dec is close
@@ -53,7 +67,7 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
         if len(singleband_object.index) == 1:
             lc_df_list.append(singleband_object)
         else:
-            npoints = singleband_object['mag'].str.len()
+            npoints = singleband_object["mag"].str.len()
             npointsmax_object = singleband_object.loc[npoints == npoints.max()]
             # this may still have more than one light curve if they happen to have the same number
             # of datapoints (e.g., Yang sample coords_list[6], band 'zr').
@@ -68,7 +82,7 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
     lc_df = pd.concat(lc_df_list, ignore_index=True)
 
     # finish transforming the data into the form expected by a MultiIndexDFObject
-    # store "hmjd" as "time". 
+    # store "hmjd" as "time".
     # note that other light curves in this notebook will have "time" as MJD instead of HMJD.
     # if your science depends on precise times, this will need to be corrected.
     lc_df = lc_df.rename(columns={"hmjd": "time"})
@@ -136,7 +150,7 @@ def locate_object(coord, labels_list, ztf_radius, tap_service) -> pd.DataFrame:
     return field_df
 
 
-def load_lightcurves(location_keys, location_df):
+def load_lightcurves(location_keys, location_df, s3=False):
     """Load light curves from the file identified by `location_keys`, for objects in location_df.
 
     Parameters
@@ -154,14 +168,20 @@ def load_lightcurves(location_keys, location_df):
         stores a full light curve. Elements in the columns "mag", "hmjd", etc. are arrays.
     """
 
+    if s3:
+        FS = s3fs.S3FileSystem()
+    else:
+        FS = None
+
     lc_df = pd.read_parquet(
-        file_name(*location_keys),
+        file_name(*location_keys, s3=s3),
         engine="pyarrow",
+        filesystem=FS,
         # columns=["objectid", "filterid", "nepochs", "hmjd", "mag", "magerr", "catflags"],
         columns=["objectid", "hmjd", "mag", "magerr", "catflags"],
         filters=[("objectid", "in", location_df["oid"].to_list())],
     )
-    
+
     # in the MultiIndexDFObject, "objectid" is the name of the coord id, not the ztf object id
     lc_df = lc_df.rename(columns={"objectid": "oid"})
 
@@ -177,7 +197,7 @@ def load_lightcurves(location_keys, location_df):
     return lc_df
 
 
-def file_name(filtercode, field, ccdid, qid):
+def file_name(filtercode, field, ccdid, qid, basedir=None, s3=False):
     """Lookup the filename for this filtercode, field, ccdid, qid.
 
     Parameters
@@ -201,6 +221,11 @@ def file_name(filtercode, field, ccdid, qid):
     AssertionError
         if exactly one matching file name is not found in the DSFILES list
     """
+    if s3:
+        root = f"{BUCKET}/ztf/lc_{DATARELEASE}"
+        # return f"{BUCKET}/ztf/{files[0].removeprefix('https://irsa.ipac.caltech.edu/data/ZTF/lc/')}"
+        return f"{root}/{basedir}/field{field:06}/ztf_{field:06}_{filtercode}_c{ccdid:02}_q{qid}_{DATARELEASE}.parquet"
+
     # can't quite construct the file name directly because need to know whether the top-level
     # directory is 0 or 1. do a regex search through the DSFILES list.
     fre = re.compile(f"[01]/field{field:06}/ztf_{field:06}_{filtercode}_c{ccdid:02}_q{qid}")
@@ -208,3 +233,48 @@ def file_name(filtercode, field, ccdid, qid):
     # expecting exactly 1 filename. make it fail if there's more or less.
     assert len(files) == 1, f"found {len(files)} files. expected 1."
     return files[0]
+
+
+def locate_objects(coords_list, labels_list, ztf_radius):
+    my_coords_list = []
+    for objectid, coord in coords_list:
+        cone_pixels = hpgeom.query_circle(
+            a=coord.ra.deg,
+            b=coord.dec.deg,
+            radius=ztf_radius.value,
+            nside=hpgeom.order_to_nside(5),  # catalog is partitioned by HEALPix order 5
+            nest=True,  # catalog uses nested ordering scheme for pixel index
+            inclusive=True,  # return all pixels that overlap with the circle, and maybe a few more
+        )
+        my_coords_list.append((objectid, coord, labels_list[objectid], cone_pixels))
+    locations = pd.DataFrame(my_coords_list, columns=["objectid", "coord", "label", "pixel"])
+    locations = locations.explode(["pixel"], ignore_index=True)
+
+    FS = pyarrow.fs.S3FileSystem(region="us-west-1")
+    LOCATIONS_DS = pyarrow.dataset.parquet_dataset(
+        f"{BUCKET}/ztf/object-locations.parquet/_metadata", filesystem=FS, partitioning="hive"
+    )
+
+    locations_list = []
+    for pixel, locs_df in locations.groupby("pixel"):
+        region_tbl = LOCATIONS_DS.to_table(filter=(pyarrow.compute.field("healpix_k5") == pixel))
+        region_skycoords = SkyCoord(ra=region_tbl["ra"] * u.deg, dec=region_tbl["dec"] * u.deg)
+        objects_skycoords = SkyCoord(locs_df.coord.to_list())
+
+        region_ilocs, object_ilocs, _, _ = objects_skycoords.search_around_sky(region_skycoords, ztf_radius
+        )
+        match_df = region_tbl.take(region_ilocs).to_pandas()
+        # in the MultiIndexDFObject, "objectid" is the name of the coord id, not the ztf object id
+        match_df = match_df.rename(columns={"objectid": "oid"})
+
+        match_df["object_ilocs"] = object_ilocs
+        locations_list.append(
+            match_df.set_index("object_ilocs").join(locs_df.reset_index(drop=True))
+        )
+    locations = pd.concat(locations_list, ignore_index=True)
+
+    # locations may have more than one ZTF object id per band (e.g., yang sample coords_list[10])
+    # following Sánchez-Sáez et al., 2021 (2021AJ....162..206S)
+    # we'll load all the data and then keep the longest light curve in the main function
+    columns = ["oid", "filtercode", "field", "ccdid", "qid", "ra", "dec", "objectid", "label"]
+    return locations[columns]
