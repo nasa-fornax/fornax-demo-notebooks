@@ -68,45 +68,8 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
     lc_df = [load_lightcurves(keys, locdf) for keys, locdf in location_groups]
     lc_df = pd.concat(lc_df, ignore_index=True)
 
-    # lc_df might have more than one light curve per (band + coords_list id) if the ra/dec is close
-    # to a CCD-quadrant boundary (Sanchez-Saez et al., 2021). keep the one with the most datapoints
-    lc_df_list = []
-    for _, singleband_object in lc_df.groupby(["objectid", "band"]):
-        if len(singleband_object.index) == 1:
-            lc_df_list.append(singleband_object)
-        else:
-            npoints = singleband_object["mag"].str.len()
-            npointsmax_object = singleband_object.loc[npoints == npoints.max()]
-            # this may still have more than one light curve if they happen to have the same number
-            # of datapoints (e.g., Yang sample coords_list[6], band 'zr').
-            # arbitrarily pick the one with the min oid.
-            # depending on your science, you may want (e.g.,) the largest timespan instead
-            if len(npointsmax_object.index) == 1:
-                lc_df_list.append(npointsmax_object)
-            else:
-                minoid = npointsmax_object.oid.min()
-                lc_df_list.append(npointsmax_object.loc[npointsmax_object.oid == minoid])
-
-    lc_df = pd.concat(lc_df_list, ignore_index=True)
-
-    # finish transforming the data into the form expected by a MultiIndexDFObject
-    # store "hmjd" as "time".
-    # note that other light curves in this notebook will have "time" as MJD instead of HMJD.
-    # if your science depends on precise times, this will need to be corrected.
-    lc_df = lc_df.rename(columns={"hmjd": "time"})
-    # explode the data structure into one row per light curve point
-    lc_df = lc_df.explode(["time", "mag", "magerr", "catflags"], ignore_index=True)
-    # remove data flagged as bad
-    lc_df = lc_df.loc[lc_df["catflags"] < 32768, :]
-    # calc flux [https://arxiv.org/pdf/1902.01872.pdf zeropoint corrections already applied]
-    magupper = lc_df["mag"] + lc_df["magerr"]
-    maglower = lc_df["mag"] - lc_df["magerr"]
-    flux = 10 ** ((lc_df["mag"] - 23.9) / -2.5)  # uJy
-    flux_upper = abs(flux - 10 ** ((magupper - 23.9) / -2.5))
-    flux_lower = abs(flux - 10 ** ((maglower - 23.9) / -2.5))
-    fluxerr = (flux_upper + flux_lower) / 2.0
-    lc_df.loc[:, "flux"] = flux * 1e-3  # now in mJy
-    lc_df.loc[:, "err"] = fluxerr * 1e-3
+    # clean and transform the data into the form expected for a MultiIndexDFObject
+    lc_df = transform_lightcurves(lc_df)
 
     return MultiIndexDFObject(
         lc_df[["flux", "err", "objectid", "label", "band", "time"]].set_index(
@@ -115,8 +78,8 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
     )
 
 
-def locate_object(coord, labels_list, ztf_radius, tap_service) -> pd.DataFrame:
-    """Lookup the ZTF field, ccd, and quadrant this coord object is located in.
+def locate_object(coord, labels_list, ztf_radius, tap_service):
+    """Use TAP to lookup the ZTF field, ccd, and quadrant this coord object is located in.
 
     Parameters
     ----------
@@ -131,7 +94,7 @@ def locate_object(coord, labels_list, ztf_radius, tap_service) -> pd.DataFrame:
 
     Returns
     -------
-    field_df : pd.DataFrame
+    locations : pd.DataFrame
         Dataframe with ZTF field, CCD, quadrant and other information useful for
         locating the `coord` object in the parquet files. One row per ZTF objectid.
     """
@@ -145,16 +108,17 @@ def locate_object(coord, labels_list, ztf_radius, tap_service) -> pd.DataFrame:
         f"POINT('ICRS',ra, dec), CIRCLE('ICRS',{ra},{dec},{ztf_radius.value})"
         ")=1"
     )
-    field_df = result.to_table().to_pandas()
+    locations = result.to_table().to_pandas()
 
     # add fields for the MultiIndexDFObject
-    field_df["objectid"] = coord_id
-    field_df["label"] = labels_list[coord_id]
+    locations["objectid"] = coord_id
+    locations["label"] = labels_list[coord_id]
 
-    # field_df may have more than one ZTF object id per band (e.g., yang sample coords_list[10])
+    # locations may have more than one ZTF object id per band (e.g., yang sample coords_list[10])
     # following Sánchez-Sáez et al., 2021 (2021AJ....162..206S)
     # we'll load all the data and then keep the longest light curve (in the main function)
 
+    return locations
 
 
 def locate_objects(coords_list, labels_list, ztf_radius):
@@ -295,3 +259,59 @@ def load_lightcurves(location_keys, location_df):
     return lc_df
 
 
+def transform_lightcurves(lc_df):
+    """Clean and transform the data into the form expected for a `MultiIndexDFObject`.
+
+    Parameters
+    ----------
+    lc_df : pd.DataFrame
+        Dataframe of light curves as returned by `load_lightcurves`.
+
+    Returns
+    -------
+    lc_df : pd.DataFrame
+        The input dataframe, cleaned and transformed.
+    """
+    # lc_df might have more than one light curve per (band + coords_list id) if the ra/dec is close
+    # to a CCD-quadrant boundary (Sanchez-Saez et al., 2021). keep the one with the most datapoints
+    lc_df_list = []
+    for _, singleband_object in lc_df.groupby(["objectid", "band"]):
+        if len(singleband_object.index) == 1:
+            lc_df_list.append(singleband_object)
+        else:
+            npoints = singleband_object["mag"].str.len()
+            npointsmax_object = singleband_object.loc[npoints == npoints.max()]
+            # this may still have more than one light curve if they happen to have the same number
+            # of datapoints (e.g., Yang sample coords_list[6], band 'zr').
+            # arbitrarily pick the one with the min oid.
+            # depending on your science, you may want (e.g.,) the largest timespan instead
+            if len(npointsmax_object.index) == 1:
+                lc_df_list.append(npointsmax_object)
+            else:
+                minoid = npointsmax_object.oid.min()
+                lc_df_list.append(npointsmax_object.loc[npointsmax_object.oid == minoid])
+
+    lc_df = pd.concat(lc_df_list, ignore_index=True)
+
+    # store "hmjd" as "time".
+    # note that other light curves in this notebook will have "time" as MJD instead of HMJD.
+    # if your science depends on precise times, this will need to be corrected.
+    lc_df = lc_df.rename(columns={"hmjd": "time"})
+
+    # explode the data structure into one row per light curve point
+    lc_df = lc_df.explode(["time", "mag", "magerr", "catflags"], ignore_index=True)
+
+    # remove data flagged as bad
+    lc_df = lc_df.loc[lc_df["catflags"] < 32768, :]
+
+    # calc flux [https://arxiv.org/pdf/1902.01872.pdf zeropoint corrections already applied]
+    magupper = lc_df["mag"] + lc_df["magerr"]
+    maglower = lc_df["mag"] - lc_df["magerr"]
+    flux = 10 ** ((lc_df["mag"] - 23.9) / -2.5)  # uJy
+    flux_upper = abs(flux - 10 ** ((magupper - 23.9) / -2.5))
+    flux_lower = abs(flux - 10 ** ((maglower - 23.9) / -2.5))
+    fluxerr = (flux_upper + flux_lower) / 2.0
+    lc_df.loc[:, "flux"] = flux * 1e-3  # now in mJy
+    lc_df.loc[:, "err"] = fluxerr * 1e-3
+
+    return lc_df
