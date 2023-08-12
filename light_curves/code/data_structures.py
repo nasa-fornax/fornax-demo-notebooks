@@ -27,11 +27,19 @@ class MultiIndexDFObject:
 
 
     """
-    def __init__(self):
-        """Create an empty MultiIndex DataFrame."""
+    def __init__(self, data=None):
+        """Create a MultiIndex DataFrame that is empty if data is None, else contains the data.
+        
+        Parameters
+        ----------
+        data : pd.DataFrame, optional
+            Dataframe to store in the `data` attribute.
+        """
         index = ["objectid", "label", "band", "time"]
         columns = ["flux", "err"]
         self.data = pd.DataFrame(columns=index + columns).set_index(index)
+        if data is not None:
+            self.append(data)
     
     def append(self,x):
         """Add a new band of light curve data to the dataframe
