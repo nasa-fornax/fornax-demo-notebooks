@@ -82,7 +82,7 @@ def HEASARC_get_lightcurves(heasarc_cat, max_error_radius, xml_filename):
     heasarc_cat : str list
         list of catalogs within HEASARC to search for light curves.  Must be one of the catalogs listed here: 
             https://astroquery.readthedocs.io/en/latest/heasarc/heasarc.html#getting-list-of-available-missions
-    max_error_radius : flt
+    max_error_radius : flt list
         maximum error radius to include in the returned catalog of objects 
         ie., we are not interested in GRBs with a 90degree error radius because they will fit all of our objects
     xml_filename: str
@@ -106,26 +106,28 @@ def HEASARC_get_lightcurves(heasarc_cat, max_error_radius, xml_filename):
     # create the query for FERMIGTRIG, searching for the sources defined in sources.xml from HEASARC_make_VOTable;
     # Note that the sources.xml file is uploaded when we run the query with run_sync
     
-    #can I use an f string to make this accept a variable, and then not need two functions for the 2 missions?
-    fermiquery=f"""
-        SELECT cat.name, cat.ra, cat.dec, cat.error_radius, cat.time,  mt.ID, mt.name
-        FROM {heasarc_cat} cat, tap_upload.mytable mt
-        WHERE
-        cat.error_radius < {max_error_radius} AND
-        CONTAINS(POINT('ICRS',mt.ra,mt.dec),CIRCLE('ICRS',cat.ra,cat.dec,cat.error_radius))=1
-         """
-    fermiresult = heasarc_tap.service.run_sync(fermiquery, uploads={'mytable': xml_filename})
+    for m in tqdm(range(len(heasarc_cat))):    
+        print('working on mission', heasarc_cat[m])
 
-    #  Convert the result to an Astropy Table
-    fermiresulttable = fermiresult.to_table()
+        fermiquery=f"""
+            SELECT cat.name, cat.ra, cat.dec, cat.error_radius, cat.time,  mt.ID, mt.name
+            FROM {heasarc_cat[m]} cat, tap_upload.mytable mt
+            WHERE
+            cat.error_radius < {max_error_radius[m]} AND
+            CONTAINS(POINT('ICRS',mt.ra,mt.dec),CIRCLE('ICRS',cat.ra,cat.dec,cat.error_radius))=1
+             """
+        fermiresult = heasarc_tap.service.run_sync(fermiquery, uploads={'mytable': xml_filename})
 
-    #add results to multiindex_df
-    #really just need to mark this spot with a vertical line in the plot, it's not actually a light curve
-    #so making up a flux and an error, but the time stamp and mission are the real variables we want to keep
-    df_fermi = pd.DataFrame(dict(flux=np.full(len(fermiresulttable),0.1), err=np.full(len(fermiresulttable),0.1), time=fermiresulttable['time'], objectid = fermiresulttable['id'], band=np.full(len(fermiresulttable),'Fermi GRB'), label=fermiresulttable['name2'])).set_index(["objectid", "label", "band", "time"])
+        #  Convert the result to an Astropy Table
+        fermiresulttable = fermiresult.to_table()
 
-    # Append to existing MultiIndex light curve object
-    df_lc.append(df_fermi)
+        #add results to multiindex_df
+        #really just need to mark this spot with a vertical line in the plot, it's not actually a light curve
+        #so making up a flux and an error, but the time stamp and mission are the real variables we want to keep
+        df_fermi = pd.DataFrame(dict(flux=np.full(len(fermiresulttable),0.1), err=np.full(len(fermiresulttable),0.1), time=fermiresulttable['time'], objectid = fermiresulttable['id'], band=np.full(len(fermiresulttable),'Fermi GRB'), label=fermiresulttable['name2'])).set_index(["objectid", "label", "band", "time"])
+
+        # Append to existing MultiIndex light curve object
+        df_lc.append(df_fermi)
     
     return df_lc
 
