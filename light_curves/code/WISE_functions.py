@@ -1,10 +1,10 @@
 import astropy.units as u
-import hpgeom as hp
+import hpgeom
 import pandas as pd
-import pyarrow.compute as pc
-import pyarrow.dataset as ds
+import pyarrow.compute
+import pyarrow.dataset
+import pyarrow.fs
 from astropy.coordinates import SkyCoord
-from pyarrow.fs import S3FileSystem
 from tqdm import tqdm
 
 from data_structures import MultiIndexDFObject
@@ -33,20 +33,20 @@ def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, band
         the main data structure to store all light curves
     """
 
-    fs = S3FileSystem(region="us-west-1")
-    # bucket = "nasa-irsa-wise"
-    bucket = "irsa-parquet-raen-test"
-    catalog_root = f"{bucket}/wise/neowiser/catalogs/meisner-etal-23/parquet/meisner-etal-23.parquet"
-    dataset = ds.parquet_dataset(f"{catalog_root}/_metadata", filesystem=fs, partitioning="hive")
+    fs = pyarrow.fs.S3FileSystem(region="us-east-1")
+    bucket = "irsa-mast-tike-spitzer-data"
+    catalog_root = f"{bucket}/data/NEOWISE/healpix_k5/meisner-etal/neo7/meisner-etal-neo7.parquet"
+    dataset = pyarrow.dataset.parquet_dataset(f"{catalog_root}/_metadata", filesystem=fs, partitioning="hive")
+    k = 5  # order at which dataset is partitioned
 
     df_lc = MultiIndexDFObject()
     for objectid, coord in tqdm(coords_list):
         lab = labels_list[objectid]
 
-        pixels = hp.query_circle(nside=hp.order_to_nside(5), a=coord.ra.deg, b=coord.dec.deg,
-                                 radius=radius.to(u.deg).value, nest=True, inclusive=True)
+        pixels = hpgeom.query_circle(nside=hpgeom.order_to_nside(k), a=coord.ra.deg, b=coord.dec.deg,
+                                     radius=radius.to(u.deg).value, nest=True, inclusive=True)
         src_tbl = dataset.to_table(columns=["ra", "dec", "band", "flux", "dflux", "MJDMEAN"], 
-                                   filter=(pc.field("healpix_k5").isin(pixels)))  # pyarrow table
+                                   filter=(pyarrow.compute.field(f"healpix_k{k}").isin(pixels)))  # pyarrow table
         src_tbl = arrow_to_astropy(src_tbl)  # astropy table
         wise_coords = SkyCoord(ra=src_tbl["ra"] * u.degree, dec=src_tbl["dec"] * u.degree)
         
