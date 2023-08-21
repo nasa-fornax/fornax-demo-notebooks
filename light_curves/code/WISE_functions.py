@@ -35,10 +35,6 @@ def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, band
         the main data structure to store all light curves
     """
 
-    fs = pyarrow.fs.S3FileSystem(region="us-east-1")
-    bucket = "irsa-mast-tike-spitzer-data"
-    catalog_root = f"{bucket}/data/NEOWISE/healpix_k5/meisner-etal/neo7/meisner-etal-neo7.parquet"
-    dataset = pyarrow.dataset.parquet_dataset(f"{catalog_root}/_metadata", filesystem=fs, partitioning="hive")
     k = 5  # order at which dataset is partitioned
 
     # per coord: find pixels
@@ -46,6 +42,25 @@ def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, band
     # per pixel group: load file, search for all coords in pixel
     
     # locate the WISE partitions/pixels each coords_list object is in
+    locations = locate_objects(coords_list, labels_list, radius, k)
+
+    # load the data
+    wise_df = load_data(locations, radius, k)
+
+    # transform the data
+    mag, magerr = convert_wise_flux_to_mag(wise_df['flux'], wise_df['dflux'])
+    wiseflux, wisefluxerr = convert_WISEtoJanskies(mag, magerr, wise_df["band"])
+    time_mjd = wise_df['MJDMEAN']
+    band = wise_df["band"].map(BANDMAP)
+    objectid = wise_df["objectid"]
+    lab = wise_df["label"]
+
+    return MultiIndexDFObject(data=pd.DataFrame(dict(flux=wiseflux, err=wisefluxerr, time=time_mjd, 
+                                             objectid=objectid, band=band,label=lab)
+                                       ).set_index(["objectid","label", "band", "time"]))
+
+
+def locate_objects(coords_list, labels_list, radius, k):
     my_coords_list = []
     for objectid, coord in coords_list:
         cone_pixels = hpgeom.query_circle(
@@ -59,16 +74,22 @@ def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, band
         my_coords_list.append((objectid, coord, labels_list[objectid], cone_pixels))
     locations = pd.DataFrame(my_coords_list, columns=["objectid", "coord", "label", "pixel"])
     # query_circle returned a list of pixels. explode the dataframe into one row per pixel per object
-    locations = locations.explode(["pixel"], ignore_index=True)
+    return locations.explode(["pixel"], ignore_index=True)
 
+def load_data(locations, radius, k):
     # iterate over partitions/pixels, load data, and find the coords_list objects
+    fs = pyarrow.fs.S3FileSystem(region="us-east-1")
+    bucket = "irsa-mast-tike-spitzer-data"
+    catalog_root = f"{bucket}/data/NEOWISE/healpix_k{k}/meisner-etal/neo7/meisner-etal-neo7.parquet"
+    dataset = pyarrow.dataset.parquet_dataset(f"{catalog_root}/_metadata", filesystem=fs, partitioning="hive")
+
     wise_df_list = []
     columns = ["flux", "dflux", "ra", "dec", "band", 'MJDMIN', 'MJDMAX', 'MJDMEAN']
     for pixel, locs_df in locations.groupby("pixel"):
         objects_skycoords = SkyCoord(locs_df["coord"].to_list())
         
         # load all sources (rows) in the partition
-        pixel_tbl = dataset.to_table(filter=(pyarrow.compute.field("healpix_k5") == pixel), columns=columns)
+        pixel_tbl = dataset.to_table(filter=(pyarrow.compute.field(f"healpix_k{k}") == pixel), columns=columns)
         pixel_skycoords = SkyCoord(ra=pixel_tbl["ra"] * u.deg, dec=pixel_tbl["dec"] * u.deg)
 
         # find sources that are within radius of an object
@@ -82,14 +103,4 @@ def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, band
         
         wise_df_list.append(match_df)
     wise_df = pd.concat(wise_df_list, ignore_index=True)
-
-    # transform the data
-    mag, magerr = convert_wise_flux_to_mag(wise_df['flux'], wise_df['dflux'])
-    wiseflux, wisefluxerr = convert_WISEtoJanskies(mag, magerr, wise_df["band"])
-    time_mjd = wise_df['MJDMEAN']
-    band = wise_df["band"].map(BANDMAP)
-    lab = wise_df["label"]
-
-    return MultiIndexDFObject(data=pd.DataFrame(dict(flux=wiseflux, err=wisefluxerr, time=time_mjd, 
-                                             objectid=objectid, band=band,label=lab)
-                                       ).set_index(["objectid","label", "band", "time"]))
+    return wise_df
