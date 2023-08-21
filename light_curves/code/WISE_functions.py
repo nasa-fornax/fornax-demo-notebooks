@@ -13,6 +13,7 @@ from lsst_formatters import arrow_to_astropy
 
 
 BANDMAP = {1: "w1", 2: "w2"}
+K = 5  # order at which dataset is partitioned
 
 #WISE
 def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, bandlist = ['w1', 'w2']):
@@ -35,17 +36,11 @@ def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, band
         the main data structure to store all light curves
     """
 
-    k = 5  # order at which dataset is partitioned
-
-    # per coord: find pixels
-    # groupby pixels
-    # per pixel group: load file, search for all coords in pixel
-    
     # locate the WISE partitions/pixels each coords_list object is in
-    locations = locate_objects(coords_list, labels_list, radius, k)
+    locations = locate_objects(coords_list, labels_list, radius)
 
     # load the data
-    wise_df = load_data(locations, radius, k)
+    wise_df = load_data(locations, radius, bandlist)
 
     # transform the data
     mag, magerr = convert_wise_flux_to_mag(wise_df['flux'], wise_df['dflux'])
@@ -60,14 +55,14 @@ def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, band
                                        ).set_index(["objectid","label", "band", "time"]))
 
 
-def locate_objects(coords_list, labels_list, radius, k):
+def locate_objects(coords_list, labels_list, radius):
     my_coords_list = []
     for objectid, coord in coords_list:
         cone_pixels = hpgeom.query_circle(
             a=coord.ra.deg,
             b=coord.dec.deg,
             radius=radius.to(u.deg).value,
-            nside=hpgeom.order_to_nside(k),
+            nside=hpgeom.order_to_nside(K),
             nest=True,  # catalog uses nested ordering scheme for pixel index
             inclusive=True,  # return all pixels that overlap with the circle, and maybe a few more
         )
@@ -76,31 +71,34 @@ def locate_objects(coords_list, labels_list, radius, k):
     # query_circle returned a list of pixels. explode the dataframe into one row per pixel per object
     return locations.explode(["pixel"], ignore_index=True)
 
-def load_data(locations, radius, k):
+def load_data(locations, radius, bandlist):
     # iterate over partitions/pixels, load data, and find the coords_list objects
     fs = pyarrow.fs.S3FileSystem(region="us-east-1")
     bucket = "irsa-mast-tike-spitzer-data"
-    catalog_root = f"{bucket}/data/NEOWISE/healpix_k{k}/meisner-etal/neo7/meisner-etal-neo7.parquet"
+    catalog_root = f"{bucket}/data/NEOWISE/healpix_k{K}/meisner-etal/neo7/meisner-etal-neo7.parquet"
     dataset = pyarrow.dataset.parquet_dataset(f"{catalog_root}/_metadata", filesystem=fs, partitioning="hive")
 
     wise_df_list = []
     columns = ["flux", "dflux", "ra", "dec", "band", 'MJDMIN', 'MJDMAX', 'MJDMEAN']
     for pixel, locs_df in locations.groupby("pixel"):
-        objects_skycoords = SkyCoord(locs_df["coord"].to_list())
-        
-        # load all sources (rows) in the partition
-        pixel_tbl = dataset.to_table(filter=(pyarrow.compute.field(f"healpix_k{k}") == pixel), columns=columns)
-        pixel_skycoords = SkyCoord(ra=pixel_tbl["ra"] * u.deg, dec=pixel_tbl["dec"] * u.deg)
+        # filter for partition
+        filters = (pyarrow.compute.field(f"healpix_k{K}") == pixel)
+        # filter for bandlist. if all bands are requested, skip this
+        if len(set(BANDMAP.values()) - set(bandlist)) > 0:
+            filters = filters & (pyarrow.compute.field("band").isin(bandlist))
+        # load
+        pixel_tbl = dataset.to_table(filter=filters, columns=columns)
 
-        # find sources that are within radius of an object
+        # find sources that are within radius of any object
+        pixel_skycoords = SkyCoord(ra=pixel_tbl["ra"] * u.deg, dec=pixel_tbl["dec"] * u.deg)
+        objects_skycoords = SkyCoord(locs_df["coord"].to_list())
         object_ilocs, pixel_ilocs, _, _ = pixel_skycoords.search_around_sky(objects_skycoords, radius)
         
-        # create a dataframe with all sources
+        # create a dataframe with all matched sources
         match_df = pixel_tbl.take(pixel_ilocs).to_pandas()
-        # attach the objectid, etc.
+        # attach the objectid, etc. by joining with locs_df
         match_df["object_ilocs"] = object_ilocs
         match_df = match_df.set_index("object_ilocs").join(locs_df.reset_index(drop=True))
         
         wise_df_list.append(match_df)
-    wise_df = pd.concat(wise_df_list, ignore_index=True)
-    return wise_df
+    return pd.concat(wise_df_list, ignore_index=True)
