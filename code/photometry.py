@@ -5,6 +5,7 @@ import warnings
 
 from astropy.stats import sigma_clipped_stats
 import numpy as np
+from typing import NamedTuple
 
 from exceptions import TractorError
 
@@ -17,7 +18,46 @@ except ImportError:
     print("tractor is missing")
     pass
 
-
+# create a simple class to use as a container for the parameters of a single band
+class Band(NamedTuple):
+    """Container for parameters associated with a single band.
+    
+    Attributes
+    ----------
+    idx : int
+        Identifier for the band/channel.
+        (integer in [0, 1, 2, 3, 4, 5] for the four IRAC bands and two Galex bands)
+    prf : np.ndarray
+        Point spread function for the band/channel.
+    cutout_width : int
+        width of desired cutout in arcseconds
+    flux_conv : float
+        factor used to convert tractor result to microjanskies
+    mosaic_pix_scale: float
+        Pixel scale of the image
+    """
+    idx: int
+    prf: np.ndarray
+    cutout_width: int
+    flux_conv: float
+    mosaic_pix_scale: float
+        
+# the input file pairs are not necessarily one-to-one with the bands, 
+# so we'll write a function to look up the correct pair
+def lookup_img_pair(img_pairs, band_idx, galex_image=None):
+    """<need function description.>"""
+    if band_idx < 4:
+        pair_index = band_idx
+    elif band_idx == 4: # galex NUV: need to figure out which galex mosaic to use
+        choices = {'COSMOS_01': 4, 'COSMOS_02': 6, 'COSMOS_03': 8, 'COSMOS_04': 10}
+        pair_index = choices.get(galex_image, 'default')
+    elif band_idx == 5: # galex FUV: need to figure out which galex mosaic to use
+        choices = {'COSMOS_01': 5, 'COSMOS_02': 7, 'COSMOS_03': 9, 'COSMOS_04': 11}
+        pair_index = choices.get(galex_image,'default')
+    else:
+        raise ValueError("Unrecognized value for bandidx.")
+    return img_pairs[pair_index] 
+        
 def calc_background(*, bkgsubimage):
     """Measure sky noise and mean level.
 

@@ -1,17 +1,17 @@
 # List python dependencies here to be installed at the start of the
 # notebook. Libraries can be removed from the list when they get shipped in
 # the container supporting the science use case in question.
-numpy
-matplotlib
-scikit-image
-pandas
-seaborn
-statsmodels
-mpld3
-firefly_client
+acstools
 astropy
 astroquery
-nway
-boto3
+git+https://github.com/fkiwy/unTimely_Catalog_explorer
+hpgeom
+lightkurve
+matplotlib
+numpy
+pandas
+pyvo
+reproject  # needed for untimely
+s3fs
 tqdm
-
+wget

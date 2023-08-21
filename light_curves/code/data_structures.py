@@ -27,19 +27,27 @@ class MultiIndexDFObject:
 
 
     """
-    def __init__(self):
-        """Create an empty MultiIndex DataFrame."""
+    def __init__(self, data=None):
+        """Create a MultiIndex DataFrame that is empty if data is None, else contains the data.
+        
+        Parameters
+        ----------
+        data : pd.DataFrame, optional
+            Dataframe to store in the `data` attribute.
+        """
         index = ["objectid", "label", "band", "time"]
         columns = ["flux", "err"]
         self.data = pd.DataFrame(columns=index + columns).set_index(index)
+        if data is not None:
+            self.append(data)
     
     def append(self,x):
         """Add a new band of light curve data to the dataframe
         
         Parameters
         ----------
-        x : `dict`
-            contains flux, fluxerr, time, objectid, bandname, reflabel 
+        x : Pandas dataframe
+            contains columns [flux, fluxerr] and multi-index [objectid, label, band, time]
         """
         if isinstance(x, self.__class__):
             # x is a MultiIndexDFObject. extract the DataFrame and concat
@@ -53,8 +61,8 @@ class MultiIndexDFObject:
         
         Parameters
         ----------
-        x : `dict`
-            contains flux, fluxerr, time, objectid, bandname, reflabel 
+        x : string or path
+            where to save the pickle file
         """
         
         self.data.to_pickle(x)  
@@ -64,8 +72,8 @@ class MultiIndexDFObject:
         
         Parameters
         ----------
-        x : `dict`
-            contains flux, fluxerr, time, objectid, bandname, reflabel 
+        x : string or path
+            path of the pickle file to be loaded
         """
         with open(x , "rb") as f:
             self.data = pickle.load(f)
@@ -75,8 +83,8 @@ class MultiIndexDFObject:
         
         Parameters
         ----------
-        x : `dict`
-            contains flux, fluxerr, time, objectid, bandname, reflabel 
+        x : list of values
+             Index values identifying rows to be dropped.
         """
         self.data = self.data.drop(x)
         

@@ -31,7 +31,7 @@ def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, band
         
     Returns
     -------
-    df_lc : pandas dataframe
+    df_lc : MultiIndexDFObject
         the main data structure to store all light curves
     """
 

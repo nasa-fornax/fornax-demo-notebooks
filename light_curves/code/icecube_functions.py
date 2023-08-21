@@ -40,7 +40,7 @@ def icecube_get_lightcurve(coords_list, labels_list , icecube_select_topN , path
     
     Returns
     --------
-    IceCube Neutrino events in a Light curve Pandas MultiIndex object for all the input sources.
+    MultiIndexDFObject: IceCube Neutrino events for all the input sources.
     
     '''
     

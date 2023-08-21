@@ -339,17 +339,38 @@ def get_SDSS_sample(coords, labels, num, verbose=1):
     #making up redshift range here, but should look at redshift distribution of the CLQ
 
     #use astroquery to return an astropy table of results
-    res = SDSS.query_sql(query, data_release = 16)
+    if num>0:
+        res = SDSS.query_sql(query, data_release = 16)
 
-    SDSS_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(res['ra'], res['dec'])]
-    SDSS_labels = ['SDSS' for ra in res['ra']]
+        SDSS_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(res['ra'], res['dec'])]
+        SDSS_labels = ['SDSS' for ra in res['ra']]
     
-    coords.extend(SDSS_coords)
-    labels.extend(SDSS_labels)
+        coords.extend(SDSS_coords)
+        labels.extend(SDSS_labels)
     
     if verbose:
         print('SDSS Quasar: '+str(num))
     
+def get_paper_sample(paper_link,label,coords,labels,verbose=1):
+    """Looks for RA,DEC in a paper using Ned query and returns list of coords and lables
+    
+    Parameters
+    ----------
+    coords : list
+        list of Astropy SkyCoords derived from literature sources, shared amongst functions
+    lables : list
+        List of the first author name and publication year for tracking the sources, shared amongst functions
+    verbose : int, optional
+        Print out the length of the sample derived from this literature source  
+    """
+    paper = Ned.query_refcode(paper_link)
+
+    paper_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(paper['RA'], paper['DEC'])]
+    paper_labels = [label for ra in paper['RA']]
+    coords.extend(paper_coords)
+    labels.extend(paper_labels)
+    if verbose:
+        print("number of sources added from "+str(label)+" :"+str(len(paper_coords)))
 
     
 #and now a function to remove duplicates from the coordinate list and attach an object id

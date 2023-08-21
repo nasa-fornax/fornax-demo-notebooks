@@ -31,7 +31,7 @@ def Gaia_get_lightcurve(coords_list, labels_list , verbose):
     
     Returns
     --------
-    Light curve Pandas MultiIndex object including all the sources with matches
+    MultiIndexDFObject  including all the sources with matches
     in Gaia. This includes median photometry as well as epoch photometry. If no
     epoch photometry was found, the median photoemtry is used at a median time
     of Gaia observations.
