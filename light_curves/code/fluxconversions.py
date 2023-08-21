@@ -43,8 +43,8 @@ def convert_WISEtoJanskies(mag, magerr, band):
         array of WISE magnitudes
     magerr : array-like
         array of WISE uncertainties on the magnitudes
-    band : str {'w1', 'w2'}
-        name of the WISE band to be converted
+    band : array-like
+        array of integers representing the WISE band (1 == W1; 2 == W2). determines the zeropoint.
         
     Returns
     -------
@@ -53,11 +53,9 @@ def convert_WISEtoJanskies(mag, magerr, band):
     flux uncertaintiy: array
         uncertainty on the returned flux corresponding to input magerr
     """
-    if band == 'w1':
-        zpt = 309.54
-    elif band == 'w2':
-        zpt = 171.787
-            
+    zptmap = {1: 309.54, 2: 171.787}
+    zpt = band.map(zptmap)
+
     flux_Jy = zpt*(10**(-mag/2.5))
     
     #calculate the error
