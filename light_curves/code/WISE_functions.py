@@ -76,6 +76,7 @@ def locate_objects(coords_list, labels_list, radius):
     # query_circle returned a list of pixels. explode the dataframe into one row per pixel per object
     return locations.explode(["pixel"], ignore_index=True)
 
+
 def load_data(locations, radius, bandlist):
     # iterate over partitions/pixels, load data, and find the coords_list objects
     fs = pyarrow.fs.S3FileSystem(region="us-east-1")
@@ -84,7 +85,8 @@ def load_data(locations, radius, bandlist):
     dataset = pyarrow.dataset.parquet_dataset(f"{catalog_root}/_metadata", filesystem=fs, partitioning="hive")
 
     wise_df_list = []
-    columns = ["flux", "dflux", "ra", "dec", "band", 'MJDMIN', 'MJDMAX', 'MJDMEAN']
+    # columns = ["flux", "dflux", "ra", "dec", "band", 'MJDMIN', 'MJDMAX', 'MJDMEAN', "coadd_id"]
+    columns = ["flux", "dflux", "ra", "dec", "band", 'MJDMEAN']
     for pixel, locs_df in locations.groupby("pixel"):
         # filter for partition
         filters = (pyarrow.compute.field(f"healpix_k{K}") == pixel)
