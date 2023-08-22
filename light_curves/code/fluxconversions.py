@@ -3,35 +3,6 @@ from acstools import acszpt
 from astropy.time import Time
 
 
-def convert_wise_flux_to_millijansky(nanomaggy_flux):
-    """seems like should be able to skip the mags and just convert flux units, but not working"""
-    millijansky_per_nanomaggy = 1 / 3.631e-3
-    return nanomaggy_flux * millijansky_per_nanomaggy
-
-
-def convert_wise_flux_to_mag(flux, dflux):
-    """Convert WISE fluxes to magnitudes.
-
-    This follows the conversions done for the original Meisner et al., 2023 catalog
-    (see https://github.com/fkiwy/unTimely_Catalog_explorer/blob/main/unTimely_Catalog_tools.py),
-    except that here we support vectorization.
-    """
-    def calculate_magnitude(myflux):
-        # need to allow myflux to be an array, so use np.log10 not math.log10
-        mymag = 22.5 - 2.5 * np.log10(myflux)
-        # if myflux < 0, np.log10(myflux) == nan
-        # if myflux = 0, np.log10(myflux) == -inf. replace with nan to match unTimely_Catalog_tools
-        mymag[np.isinf(mymag)] = np.nan
-        return mymag
-
-    mag = calculate_magnitude(flux)
-    mag_upper = calculate_magnitude(flux - dflux)
-    mag_lower = calculate_magnitude(flux + dflux)
-    dmag = (mag_upper - mag_lower) / 2
-
-    return mag, dmag
-
-
 #need to convert those magnitudes into mJy to be consistent in data structure.
 #using zeropoints from here: https://wise2.ipac.caltech.edu/docs/release/allsky/expsup/sec4_4h.html
 def convert_WISEtoJanskies(wise_df):
@@ -53,25 +24,55 @@ def convert_WISEtoJanskies(wise_df):
     flux uncertaintiy: array
         uncertainty on the returned flux corresponding to input magerr
     """
-    zptmap = {1: 309.54, 2: 171.787}
-    zpt = wise_df["band"].map(zptmap)
+    # wise_df["flux"] = convert_wise_flux_to_millijansky(nanomaggy_flux=wise_df["flux"])
+    # wise_df["dflux"] = convert_wise_flux_to_millijansky(nanomaggy_flux=wise_df["dflux"])
 
-    mag, magerr = convert_wise_flux_to_mag(wise_df['flux'], wise_df['dflux'])
+    zeropoint_map = {1: 309.54, 2: 171.787}
+    zeropoints = wise_df["band"].map(zeropoint_map)
 
-    flux_Jy = zpt*(10**(-mag/2.5))
+    # calculate 
+    mags, magerrs = convert_wise_flux_to_mag(wise_df['flux'], wise_df['dflux'])
+    flux_Jy = zeropoints * (10**(-mags/2.5))
     
-    #calculate the error
-    magupper = mag + magerr
-    maglower = mag - magerr
-    flux_upper = abs(flux_Jy - (zpt*(10**(-magupper/2.5))))
-    flux_lower = abs(flux_Jy - (zpt*(10**(-maglower/2.5))))
-    
+    #calculate the errors
+    mags_upper = mags + magerrs
+    mags_lower = mags - magerrs
+    flux_upper = abs(flux_Jy - (zeropoints * (10**(-mags_upper/2.5))))
+    flux_lower = abs(flux_Jy - (zeropoints * (10**(-mags_lower/2.5))))
     fluxerr_Jy = (flux_upper + flux_lower) / 2.0
 
-    wise_df["flux"], wise_df["dflux"] = flux_Jy*1E3, fluxerr_Jy*1E3  #now in mJy
-    
-    # return flux_Jy*1E3, fluxerr_Jy*1E3  #now in mJy
+    wise_df["flux"], wise_df["dflux"] = flux_Jy*1E3, fluxerr_Jy*1E3  # now in mJy
     return wise_df
+
+
+def convert_wise_flux_to_millijansky(nanomaggy_flux):
+    """Conver nanomaggy to millijansky. This function is not currently used."""
+    millijansky_per_nanomaggy = 1 / 3.631e-3
+    return nanomaggy_flux * millijansky_per_nanomaggy
+
+
+def convert_wise_flux_to_mag(flux, dflux):
+    """Convert WISE fluxes to magnitudes.
+
+    This follows the conversions done for the original Meisner et al., 2023 catalog
+    (https://github.com/fkiwy/unTimely_Catalog_explorer/blob/main/unTimely_Catalog_tools.py),
+    except that here we support vectorization.
+    """
+    def calculate_magnitude(myflux):
+        # need to allow myflux to be an array, so use np.log10 not math.log10
+        mymag = 22.5 - 2.5 * np.log10(myflux)
+        # if myflux < 0, np.log10(myflux) == nan
+        # if myflux = 0, np.log10(myflux) == -inf. replace with nan to match unTimely_Catalog_tools
+        mymag[np.isinf(mymag)] = np.nan
+        return mymag
+
+    mag = calculate_magnitude(flux)
+    mag_upper = calculate_magnitude(flux - dflux)
+    mag_lower = calculate_magnitude(flux + dflux)
+    dmag = (mag_upper - mag_lower) / 2
+
+    return mag, dmag
+
 
 def convertACSmagtoflux(date, filterstring, mag, magerr):
     """converts HST ACS magnitudes into flux units of Janskies 

@@ -5,17 +5,15 @@ import pyarrow.compute
 import pyarrow.dataset
 import pyarrow.fs
 from astropy.coordinates import SkyCoord
-from tqdm import tqdm
 
 from data_structures import MultiIndexDFObject
-from fluxconversions import convert_wise_flux_to_mag, convert_WISEtoJanskies
-from lsst_formatters import arrow_to_astropy
+from fluxconversions import convert_WISEtoJanskies
 
 
 BANDMAP = {1: "w1", 2: "w2"}
-K = 5  # order at which dataset is partitioned
+K = 5  # HEALPix order at which the dataset is partitioned
 
-#WISE
+
 def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, bandlist = ['w1', 'w2']):
     """Searches WISE catalog from meisner et al., 2023 for light curves from a list of input coordinates
     
@@ -25,7 +23,7 @@ def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, band
         the coordinates of the targets for which a user wants light curves
     labels_list: list of strings
         journal articles associated with the target coordinates
-    radius : float
+    radius : astropy Quantity
         search radius, how far from the source should the archives return results
     bandlist: list of strings
         which WISE bands to search for, example: ['w1', 'w2']
@@ -36,31 +34,37 @@ def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, band
         the main data structure to store all light curves
     """
 
-    # locate the WISE partitions/pixels each coords_list object is in
+    # locate the partitions/pixels each coords_list object is in
     locations = locate_objects(coords_list, labels_list, radius)
 
     # load the data
     wise_df = load_data(locations, radius, bandlist)
 
-    # transform the data
-    # mag, magerr = convert_wise_flux_to_mag(wise_df['flux'], wise_df['dflux'])
-    # wiseflux, wisefluxerr = convert_WISEtoJanskies(mag, magerr, wise_df["band"])
+    # transform the data for a MultiIndexDFObject
     wise_df = convert_WISEtoJanskies(wise_df)
-    # time_mjd = wise_df['MJDMEAN']
-    # band = wise_df["band"].map(BANDMAP)
     wise_df["band"] = wise_df["band"].map(BANDMAP)
     wise_df = wise_df.rename(columns={"MJDMEAN": "time", "dflux": "err"})
-    # objectid = wise_df["objectid"]
-    # lab = wise_df["label"]
 
     return MultiIndexDFObject(data=wise_df.set_index(["objectid","label", "band", "time"])["flux", "err"])
 
-    # return MultiIndexDFObject(data=pd.DataFrame(dict(flux=wiseflux, err=wisefluxerr, time=time_mjd, 
-    #                                          objectid=objectid, band=band,label=lab)
-    #                                    ).set_index(["objectid","label", "band", "time"]))
-
 
 def locate_objects(coords_list, labels_list, radius):
+    """Locate the partitions (HEALPix order 5 pixels) each coords_list object is in.
+    
+    Parameters
+    ----------
+    coords_list : list of astropy skycoords
+        the coordinates of the targets for which a user wants light curves
+    labels_list: list of strings
+        journal articles associated with the target coordinates
+    radius : astropy Quantity
+        search radius, how far from the source should the archives return results
+        
+    Returns
+    -------
+    locations : pd.DataFrame
+        dataframe of location info including ["objectid", "coord", "label", "pixel"]
+    """
     my_coords_list = []
     for objectid, coord in coords_list:
         cone_pixels = hpgeom.query_circle(
@@ -78,14 +82,29 @@ def locate_objects(coords_list, labels_list, radius):
 
 
 def load_data(locations, radius, bandlist):
-    # iterate over partitions/pixels, load data, and find the coords_list objects
+    """Load light curve data from the Parquet version of the Meisner et al. (2023) catalog.
+    
+    Parameters
+    ----------
+    locations : pd.DataFrame
+        dataframe of location info as returned by `locate_objects`
+    radius : astropy Quantity
+        search radius, how far from the source should the archives return results
+    bandlist: list of strings
+        which WISE bands to search for, example: ['w1', 'w2']
+        
+    Returns
+    -------
+    wise_df : pd.DataFrame
+        dataframe of light curve data for all objects in `locations`
+    """
     fs = pyarrow.fs.S3FileSystem(region="us-east-1")
     bucket = "irsa-mast-tike-spitzer-data"
     catalog_root = f"{bucket}/data/NEOWISE/healpix_k{K}/meisner-etal/neo7/meisner-etal-neo7.parquet"
     dataset = pyarrow.dataset.parquet_dataset(f"{catalog_root}/_metadata", filesystem=fs, partitioning="hive")
 
+    # iterate over partitions/pixels, load data, and find the coords_list objects
     wise_df_list = []
-    # columns = ["flux", "dflux", "ra", "dec", "band", 'MJDMIN', 'MJDMAX', 'MJDMEAN', "coadd_id"]
     columns = ["flux", "dflux", "ra", "dec", "band", 'MJDMEAN']
     for pixel, locs_df in locations.groupby("pixel"):
         # filter for partition
@@ -96,7 +115,7 @@ def load_data(locations, radius, bandlist):
         # load
         pixel_tbl = dataset.to_table(filter=filters, columns=columns)
 
-        # find sources that are within radius of any object
+        # find sources that are within `radius` of any object
         pixel_skycoords = SkyCoord(ra=pixel_tbl["ra"] * u.deg, dec=pixel_tbl["dec"] * u.deg)
         objects_skycoords = SkyCoord(locs_df["coord"].to_list())
         object_ilocs, pixel_ilocs, _, _ = pixel_skycoords.search_around_sky(objects_skycoords, radius)
