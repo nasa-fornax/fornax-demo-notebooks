@@ -34,7 +34,7 @@ def convert_wise_flux_to_mag(flux, dflux):
 
 #need to convert those magnitudes into mJy to be consistent in data structure.
 #using zeropoints from here: https://wise2.ipac.caltech.edu/docs/release/allsky/expsup/sec4_4h.html
-def convert_WISEtoJanskies(mag, magerr, band):
+def convert_WISEtoJanskies(wise_df):
     """converts WISE telescope magnitudes into flux units of Jansies in mJy
     
     Parameters
@@ -54,7 +54,9 @@ def convert_WISEtoJanskies(mag, magerr, band):
         uncertainty on the returned flux corresponding to input magerr
     """
     zptmap = {1: 309.54, 2: 171.787}
-    zpt = band.map(zptmap)
+    zpt = wise_df["band"].map(zptmap)
+
+    mag, magerr = convert_wise_flux_to_mag(wise_df['flux'], wise_df['dflux'])
 
     flux_Jy = zpt*(10**(-mag/2.5))
     
@@ -65,8 +67,11 @@ def convert_WISEtoJanskies(mag, magerr, band):
     flux_lower = abs(flux_Jy - (zpt*(10**(-maglower/2.5))))
     
     fluxerr_Jy = (flux_upper + flux_lower) / 2.0
+
+    wise_df["flux"], wise_df["dflux"] = flux_Jy*1E3, fluxerr_Jy*1E3  #now in mJy
     
-    return flux_Jy*1E3, fluxerr_Jy*1E3  #now in mJy
+    # return flux_Jy*1E3, fluxerr_Jy*1E3  #now in mJy
+    return wise_df
 
 def convertACSmagtoflux(date, filterstring, mag, magerr):
     """converts HST ACS magnitudes into flux units of Janskies 

@@ -43,16 +43,21 @@ def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, band
     wise_df = load_data(locations, radius, bandlist)
 
     # transform the data
-    mag, magerr = convert_wise_flux_to_mag(wise_df['flux'], wise_df['dflux'])
-    wiseflux, wisefluxerr = convert_WISEtoJanskies(mag, magerr, wise_df["band"])
-    time_mjd = wise_df['MJDMEAN']
-    band = wise_df["band"].map(BANDMAP)
-    objectid = wise_df["objectid"]
-    lab = wise_df["label"]
+    # mag, magerr = convert_wise_flux_to_mag(wise_df['flux'], wise_df['dflux'])
+    # wiseflux, wisefluxerr = convert_WISEtoJanskies(mag, magerr, wise_df["band"])
+    wise_df = convert_WISEtoJanskies(wise_df)
+    # time_mjd = wise_df['MJDMEAN']
+    # band = wise_df["band"].map(BANDMAP)
+    wise_df["band"] = wise_df["band"].map(BANDMAP)
+    wise_df = wise_df.rename(columns={"MJDMEAN": "time", "dflux": "err"})
+    # objectid = wise_df["objectid"]
+    # lab = wise_df["label"]
 
-    return MultiIndexDFObject(data=pd.DataFrame(dict(flux=wiseflux, err=wisefluxerr, time=time_mjd, 
-                                             objectid=objectid, band=band,label=lab)
-                                       ).set_index(["objectid","label", "band", "time"]))
+    return MultiIndexDFObject(data=wise_df.set_index(["objectid","label", "band", "time"])["flux", "err"])
+
+    # return MultiIndexDFObject(data=pd.DataFrame(dict(flux=wiseflux, err=wisefluxerr, time=time_mjd, 
+    #                                          objectid=objectid, band=band,label=lab)
+    #                                    ).set_index(["objectid","label", "band", "time"]))
 
 
 def locate_objects(coords_list, labels_list, radius):
