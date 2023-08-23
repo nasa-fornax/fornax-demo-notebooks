@@ -45,7 +45,7 @@ def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, band
     wise_df["band"] = wise_df["band"].map(BANDMAP)
     wise_df = wise_df.rename(columns={"MJDMEAN": "time", "dflux": "err"})
 
-    return MultiIndexDFObject(data=wise_df.set_index(["objectid","label", "band", "time"])["flux", "err"])
+    return MultiIndexDFObject(data=wise_df.set_index(["objectid","label", "band", "time"])[["flux", "err"]])
 
 
 def locate_objects(coords_list, labels_list, radius):
