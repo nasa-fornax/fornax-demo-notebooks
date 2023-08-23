@@ -30,7 +30,7 @@ def convert_WISEtoJanskies(wise_df):
     zeropoint_map = {1: 309.54, 2: 171.787}
     zeropoints = wise_df["band"].map(zeropoint_map)
 
-    # calculate 
+    # convert to magnitudes, then back to fluxes
     mags, magerrs = convert_wise_flux_to_mag(wise_df['flux'], wise_df['dflux'])
     flux_Jy = zeropoints * (10**(-mags/2.5))
     
