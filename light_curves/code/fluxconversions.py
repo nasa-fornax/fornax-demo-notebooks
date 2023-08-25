@@ -46,8 +46,11 @@ def convert_WISEtoJanskies(wise_df):
 
 
 def convert_wise_flux_to_millijansky(nanomaggy_flux):
-    """Conver nanomaggy to millijansky. This function is not currently used."""
-    millijansky_per_nanomaggy = 1 / 3.631e-3
+    """Convert nanomaggy to millijansky. This function is not currently used.
+    
+    See https://www.sdss3.org/dr8/algorithms/magnitudes.php
+    """
+    millijansky_per_nanomaggy = 3.631e-3
     return nanomaggy_flux * millijansky_per_nanomaggy
 
 
