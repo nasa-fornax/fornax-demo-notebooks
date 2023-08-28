@@ -41,10 +41,10 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
     df_lc : MultiIndexDFObject
         the main data structure to store all light curves
     """
-    #  get the info needed to locate each object in the parquet files
-    # the parquet files are organized by filter, field, ccd, and quadrant
-    locations = locate_objects(coords_list, labels_list, ztf_radius)
-    location_groups = locations.groupby(["filtercode", "field", "ccdid", "qid", "basedir"])
+    # light curves are stored in parquet files that are organized by filter, field, ccd, and quadrant
+    # locate which files each object is in
+    locations_df = locate_objects(coords_list, labels_list, ztf_radius)
+    location_groups = locations_df.groupby(["filtercode", "field", "ccdid", "qid", "basedir"])
 
     # load light curves by looping over files and filtering for ZTF objectid
     lc_df = [load_lightcurves(keys, locdf) for keys, locdf in location_groups]
@@ -58,6 +58,46 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
             ["objectid", "label", "band", "time"]
         )
     )
+
+
+def file_name(filtercode, field, ccdid, qid, basedir=None):
+    """Lookup the filename for this filtercode, field, ccdid, qid.
+
+    Parameters
+    ----------
+    filtercode : str
+        ZTF band name
+    field : int
+        ZTF field
+    ccdid : int
+        ZTF CCD
+    qid : int
+        ZTF quadrant
+    basedir : int, optional
+        Either 0 or 1. The base directory this file is located in.
+
+    Returns
+    -------
+    file_name : str
+        Parquet file name containing this filtercode, field, ccdid, and qid.
+
+    Raises
+    ------
+    AssertionError
+        if exactly one matching file name is not found in the CATALOG_FILES list
+    """
+    # if this comes from a TAP query, we won't know the basedir
+    if basedir is None:
+        # can't quite construct the file name directly because need to know whether the top-level
+        # directory is 0 or 1. do a regex search through the CATALOG_FILES list.
+        fre = re.compile(f"[01]/field{field:06}/ztf_{field:06}_{filtercode}_c{ccdid:02}_q{qid}")
+        files = [CATALOG_ROOT + f for f in filter(fre.match, CATALOG_FILES)]
+        # expecting exactly 1 filename. make it fail if there's more or less.
+        assert len(files) == 1, f"found {len(files)} files. expected 1."
+        return files[0]
+
+    f = f"{basedir}/field{field:06}/ztf_{field:06}_{filtercode}_c{ccdid:02}_q{qid}_{DATARELEASE}.parquet"
+    return CATALOG_ROOT + f
 
 
 def locate_objects(coords_list, labels_list, radius):
@@ -103,46 +143,6 @@ def locate_objects(coords_list, labels_list, radius):
     # Sánchez-Sáez et al., 2021 (2021AJ....162..206S)
     # return all the data -- transform_lightcurves will choose which to keep
     return result.to_table().to_pandas()
-
-
-def file_name(filtercode, field, ccdid, qid, basedir=None):
-    """Lookup the filename for this filtercode, field, ccdid, qid.
-
-    Parameters
-    ----------
-    filtercode : str
-        ZTF band name
-    field : int
-        ZTF field
-    ccdid : int
-        ZTF CCD
-    qid : int
-        ZTF quadrant
-    basedir : int, optional
-        Either 0 or 1. The base directory this file is located in.
-
-    Returns
-    -------
-    file_name : str
-        Parquet file name containing this filtercode, field, ccdid, and qid.
-
-    Raises
-    ------
-    AssertionError
-        if exactly one matching file name is not found in the CATALOG_FILES list
-    """
-    # if this comes from a TAP query, we won't know the basedir
-    if basedir is None:
-        # can't quite construct the file name directly because need to know whether the top-level
-        # directory is 0 or 1. do a regex search through the CATALOG_FILES list.
-        fre = re.compile(f"[01]/field{field:06}/ztf_{field:06}_{filtercode}_c{ccdid:02}_q{qid}")
-        files = [CATALOG_ROOT + f for f in filter(fre.match, CATALOG_FILES)]
-        # expecting exactly 1 filename. make it fail if there's more or less.
-        assert len(files) == 1, f"found {len(files)} files. expected 1."
-        return files[0]
-
-    f = f"{basedir}/field{field:06}/ztf_{field:06}_{filtercode}_c{ccdid:02}_q{qid}_{DATARELEASE}.parquet"
-    return CATALOG_ROOT + f
 
 
 def load_lightcurves(location_keys, location_df):
