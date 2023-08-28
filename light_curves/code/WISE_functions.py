@@ -41,6 +41,7 @@ def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, band
     wise_df = load_data(locations, radius, bandlist)
 
     # transform the data for a MultiIndexDFObject
+    wise_df = wise_df[wise_df['flux'] > 0]
     wise_df = convert_WISEtoJanskies(wise_df)
     wise_df["band"] = wise_df["band"].map(BANDMAP)
     wise_df = wise_df.rename(columns={"MJDMEAN": "time", "dflux": "err"})
