@@ -1,14 +1,9 @@
 import re
 
 import astropy.units as u
-import hpgeom
 import pandas as pd
-import pyarrow
-import pyarrow.compute
-import pyarrow.dataset
 import pyvo
 import s3fs
-from astropy.coordinates import SkyCoord
 from astropy.table import Table
 
 from data_structures import MultiIndexDFObject
@@ -28,12 +23,6 @@ CATALOG_FILES = (
     .to_list()
 )
 
-# load the "helper" dataset used to locate objects in the CATALOG_FILES
-LOCATIONS_DS = False  # this dataset doesn't exist yet. load locations from a TAP query instead
-# LOCATIONS_DS = pyarrow.dataset.parquet_dataset(
-#         CATALOG_ROOT + "object-locations.parquet/_metadata", filesystem=FS, partitioning="hive"
-#     )
-
 
 def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
     """Function to add the ZTF lightcurves in all three bands to a multiframe data structure
@@ -52,20 +41,10 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
     df_lc : MultiIndexDFObject
         the main data structure to store all light curves
     """
+    #  get the info needed to locate each object in the parquet files
     # the parquet files are organized by filter, field, ccd, and quadrant
-    # get a df of the info needed to locate each object in the parquet files
     locations = locate_objects(coords_list, labels_list, ztf_radius)
     location_groups = locations.groupby(["filtercode", "field", "ccdid", "qid", "basedir"])
-    # if LOCATIONS_DS:
-    #     locations = locate_objects_using_helper(coords_list, labels_list, ztf_radius)
-    #     location_groups = locations.groupby(["filtercode", "field", "ccdid", "qid", "basedir"])
-    # else:
-    #     service = pyvo.dal.TAPService("https://irsa.ipac.caltech.edu/TAP")
-    #     locations = [
-    #         locate_object(coord, labels_list, ztf_radius, service) for coord in coords_list
-    #     ]
-    #     locations = pd.concat(locations, ignore_index=True)
-    #     location_groups = locations.groupby(["filtercode", "field", "ccdid", "qid"])
 
     # load light curves by looping over files and filtering for ZTF objectid
     lc_df = [load_lightcurves(keys, locdf) for keys, locdf in location_groups]
@@ -79,49 +58,6 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
             ["objectid", "label", "band", "time"]
         )
     )
-
-
-def locate_object(coord, labels_list, ztf_radius, tap_service):
-    """Use TAP to lookup the ZTF field, ccd, and quadrant this coord object is located in.
-
-    Parameters
-    ----------
-    coord : tuple
-        the object's ID and astropy skycoords
-    labels_list: list of strings
-        journal articles associated with target coordinates, indexed by object ID
-    ztf_radius : float
-        search radius, how far from the source should the archives return results
-    tap_service : pyvo.dal.TAPService
-        IRSA TAP service
-
-    Returns
-    -------
-    locations : pd.DataFrame
-        Dataframe with ZTF field, CCD, quadrant and other information useful for
-        locating the `coord` object in the parquet files. One row per ZTF objectid.
-    """
-    coord_id, ra, dec = coord[0], coord[1].ra.deg, coord[1].dec.deg
-    # files are organized by filter, field, ccd, and quadrant
-    # look them up using tap. https://irsa.ipac.caltech.edu/docs/program_interface/TAP.html
-    result = tap_service.run_sync(
-        f"SELECT {', '.join(['oid', 'filtercode', 'field', 'ccdid', 'qid', 'ra', 'dec'])} "
-        f"FROM ztf_objects_{DATARELEASE} "
-        "WHERE CONTAINS("
-        f"POINT('ICRS',ra, dec), CIRCLE('ICRS',{ra},{dec},{ztf_radius.value})"
-        ")=1"
-    )
-    locations = result.to_table().to_pandas()
-
-    # add fields for the MultiIndexDFObject
-    locations["objectid"] = coord_id
-    locations["label"] = labels_list[coord_id]
-
-    # locations may have more than one ZTF object id per band (e.g., yang sample coords_list[10])
-    # following Sánchez-Sáez et al., 2021 (2021AJ....162..206S)
-    # we'll load all the data and then keep the longest light curve (in the main function)
-
-    return locations
 
 
 def locate_objects(coords_list, labels_list, radius):
@@ -167,64 +103,6 @@ def locate_objects(coords_list, labels_list, radius):
     # Sánchez-Sáez et al., 2021 (2021AJ....162..206S)
     # return all the data -- transform_lightcurves will choose which to keep
     return result.to_table().to_pandas()
-
-
-def locate_objects_using_helper(coords_list, labels_list, ztf_radius):
-    """Use LOCATIONS_DS to lookup the ZTF field, ccd, and quadrant this coord object is located in.
-
-    Parameters
-    ----------
-    coord : tuple
-        the object's ID and astropy skycoords
-    labels_list: list of strings
-        journal articles associated with target coordinates, indexed by object ID
-    ztf_radius : float
-        search radius, how far from the source should the archives return results
-
-    Returns
-    -------
-    locations : pd.DataFrame
-        Dataframe with ZTF field, CCD, quadrant and other information useful for
-        locating the `coord` object in the parquet files. One row per ZTF objectid.
-    """
-    my_coords_list = []
-    for objectid, coord in coords_list:
-        cone_pixels = hpgeom.query_circle(
-            a=coord.ra.deg,
-            b=coord.dec.deg,
-            radius=ztf_radius.value,
-            nside=hpgeom.order_to_nside(5),  # catalog is partitioned by HEALPix order 5
-            nest=True,  # catalog uses nested ordering scheme for pixel index
-            inclusive=True,  # return all pixels that overlap with the circle, and maybe a few more
-        )
-        my_coords_list.append((objectid, coord, labels_list[objectid], cone_pixels))
-    locations = pd.DataFrame(my_coords_list, columns=["objectid", "coord", "label", "pixel"])
-    locations = locations.explode(["pixel"], ignore_index=True)
-
-    locations_list = []
-    for pixel, locs_df in locations.groupby("pixel"):
-        region_tbl = LOCATIONS_DS.to_table(filter=(pyarrow.compute.field("healpix_k5") == pixel))
-        region_skycoords = SkyCoord(ra=region_tbl["ra"] * u.deg, dec=region_tbl["dec"] * u.deg)
-        objects_skycoords = SkyCoord(locs_df.coord.to_list())
-
-        region_ilocs, object_ilocs, _, _ = objects_skycoords.search_around_sky(
-            region_skycoords, ztf_radius
-        )
-        match_df = region_tbl.take(region_ilocs).to_pandas()
-        # in the MultiIndexDFObject, "objectid" is the name of the coord id, not the ztf object id
-        match_df = match_df.rename(columns={"objectid": "oid"})
-
-        match_df["object_ilocs"] = object_ilocs
-        locations_list.append(
-            match_df.set_index("object_ilocs").join(locs_df.reset_index(drop=True))
-        )
-    locations = pd.concat(locations_list, ignore_index=True)
-
-    # locations may have more than one ZTF object id per band (e.g., yang sample coords_list[10])
-    # following Sánchez-Sáez et al., 2021 (2021AJ....162..206S)
-    # we'll load all the data and then keep the longest light curve in the main function
-    columns = ["oid", "filtercode", "field", "ccdid", "qid", "ra", "dec", "objectid", "label"]
-    return locations[columns]
 
 
 def file_name(filtercode, field, ccdid, qid, basedir=None):
