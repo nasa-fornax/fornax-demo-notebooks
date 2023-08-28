@@ -9,6 +9,7 @@ import pyarrow.dataset
 import pyvo
 import s3fs
 from astropy.coordinates import SkyCoord
+from astropy.table import Table
 
 from data_structures import MultiIndexDFObject
 
@@ -53,16 +54,18 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
     """
     # the parquet files are organized by filter, field, ccd, and quadrant
     # get a df of the info needed to locate each object in the parquet files
-    if LOCATIONS_DS:
-        locations = locate_objects(coords_list, labels_list, ztf_radius)
-        location_groups = locations.groupby(["filtercode", "field", "ccdid", "qid", "basedir"])
-    else:
-        service = pyvo.dal.TAPService("https://irsa.ipac.caltech.edu/TAP")
-        locations = [
-            locate_object(coord, labels_list, ztf_radius, service) for coord in coords_list
-        ]
-        locations = pd.concat(locations, ignore_index=True)
-        location_groups = locations.groupby(["filtercode", "field", "ccdid", "qid"])
+    locations = locate_objects(coords_list, labels_list, ztf_radius)
+    location_groups = locations.groupby(["filtercode", "field", "ccdid", "qid", "basedir"])
+    # if LOCATIONS_DS:
+    #     locations = locate_objects_using_helper(coords_list, labels_list, ztf_radius)
+    #     location_groups = locations.groupby(["filtercode", "field", "ccdid", "qid", "basedir"])
+    # else:
+    #     service = pyvo.dal.TAPService("https://irsa.ipac.caltech.edu/TAP")
+    #     locations = [
+    #         locate_object(coord, labels_list, ztf_radius, service) for coord in coords_list
+    #     ]
+    #     locations = pd.concat(locations, ignore_index=True)
+    #     location_groups = locations.groupby(["filtercode", "field", "ccdid", "qid"])
 
     # load light curves by looping over files and filtering for ZTF objectid
     lc_df = [load_lightcurves(keys, locdf) for keys, locdf in location_groups]
@@ -121,7 +124,52 @@ def locate_object(coord, labels_list, ztf_radius, tap_service):
     return locations
 
 
-def locate_objects(coords_list, labels_list, ztf_radius):
+def locate_objects(coords_list, labels_list, radius):
+    """Parquet files are organized by filter, field, ccd, and quadrant. Use TAP to look them up.
+
+    https://irsa.ipac.caltech.edu/docs/program_interface/TAP.html
+
+    Parameters
+    ----------
+    coords_list : list of tuples
+        one tuple per target: (objectid, SkyCoord)
+    labels_list: list of strings
+        journal articles associated with target coordinates, indexed by object ID
+    radius : float
+        search radius, how far from the source should the archives return results
+
+    Returns
+    -------
+    locations : pd.DataFrame
+        Dataframe with ZTF field, CCD, quadrant and other information useful for
+        locating the `coord` object in the parquet files. One row per ZTF objectid.
+    """
+    coords_tbl = Table(
+        rows=[  # encode for tap
+            (objectid, labels_list[objectid].encode(), coord.ra.deg, coord.dec.deg)
+            for objectid, coord in coords_list
+        ],
+        names=["objectid", "label", "ra", "dec"],
+    )
+
+    coordscols = [f"coords.{c}" for c in ["objectid", "label"]]
+    ztfcols = [f"ztf.{c}" for c in ["oid", "filtercode", "field", "ccdid", "qid", "ra", "dec"]]
+    query = f"""SELECT {', '.join(coordscols + ztfcols)} 
+        FROM ztf_objects_{DATARELEASE} ztf, TAP_UPLOAD.coords coords 
+        WHERE CONTAINS(
+            POINT('ICRS', coords.ra, coords.dec), CIRCLE('ICRS', ztf.ra, ztf.dec, {radius.value})
+        )=1"""
+
+    tap_service = pyvo.dal.TAPService("https://irsa.ipac.caltech.edu/TAP")
+    result = tap_service.run_sync(query, uploads={"coords": coords_tbl})
+
+    # result may contain more than one ZTF object id per band (e.g., yang sample coords_list[10])
+    # Sánchez-Sáez et al., 2021 (2021AJ....162..206S)
+    # return all the data -- transform_lightcurves will choose which to keep
+    return result.to_table().to_pandas()
+
+
+def locate_objects_using_helper(coords_list, labels_list, ztf_radius):
     """Use LOCATIONS_DS to lookup the ZTF field, ccd, and quadrant this coord object is located in.
 
     Parameters
