@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from data_structures import MultiIndexDFObject
+from sample_selection import make_coordsTable
 
 #need to know the distribution of error radii for the catalogs of interest
 #this will inform the ligh curve query, as we are not interested in 
