@@ -53,25 +53,6 @@ def make_hist_error_radii(missioncat):
     #in case anyone wants to look further at the data
     return heasarcresulttable
     
-def make_coordsTable(coords_list, labels_list):
-    """convert the coords and labels into an astropy table for input to ADQL catalog search
-    
-    Parameters
-    ----------
-    coords_list : list of astropy skycoords
-        the coordinates of the targets for which a user wants light curves
-    labels_list: list of strings
-        journal articles associated with the target coordinates
-    """
-    
-    coordstab = Table({
-        'name': [label.encode() for label in labels_list],  # encode strings for TAP
-        'ra': [coord.ra for objectid, coord in coords_list],
-        'dec': [coord.dec for objectid, coord in coords_list],
-        'ID': [objectid for objectid, coord in coords_list]
-    })
-
-    return coordstab
 
 def HEASARC_get_lightcurves(coords_list, labels_list, heasarc_cat, max_error_radius):
     """Searches HEASARC archive for light curves from a specific list of mission catalogs
