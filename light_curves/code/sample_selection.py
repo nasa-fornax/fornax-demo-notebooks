@@ -428,11 +428,12 @@ def make_coordsTable(coords_list, labels_list):
         journal articles associated with the target coordinates
     """
     
-    coordstab = Table({
-        'name': [label.encode() for label in labels_list],  # encode strings for TAP
-        'ra': [coord.ra for objectid, coord in coords_list],
-        'dec': [coord.dec for objectid, coord in coords_list],
-        'ID': [objectid for objectid, coord in coords_list]
-    })
+    coordstab = Table(
+            rows=[  # encode strings for tap
+                (objectid, labels_list[objectid].encode(), coord.ra.value, coord.dec.value)
+                for objectid, coord in coords_list
+            ],
+            names=["objectid", "label", "ra", "dec"],
+        )
 
     return coordstab
