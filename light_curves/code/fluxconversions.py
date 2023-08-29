@@ -1,80 +1,14 @@
-import numpy as np
 from acstools import acszpt
 from astropy.time import Time
 
 
-#need to convert those magnitudes into mJy to be consistent in data structure.
-#using zeropoints from here: https://wise2.ipac.caltech.edu/docs/release/allsky/expsup/sec4_4h.html
-def convert_WISEtoJanskies(wise_df):
-    """converts WISE telescope magnitudes into flux units of Jansies in mJy
-    
-    Parameters
-    ----------
-    mag : array-like
-        array of WISE magnitudes
-    magerr : array-like
-        array of WISE uncertainties on the magnitudes
-    band : array-like
-        array of integers representing the WISE band (1 == W1; 2 == W2). determines the zeropoint.
-        
-    Returns
-    -------
-    flux: array
-        flux in mJy corresponding to the input magnitudes
-    flux uncertaintiy: array
-        uncertainty on the returned flux corresponding to input magerr
-    """
-    # wise_df["flux"] = convert_wise_flux_to_millijansky(nanomaggy_flux=wise_df["flux"])
-    # wise_df["dflux"] = convert_wise_flux_to_millijansky(nanomaggy_flux=wise_df["dflux"])
-
-    zeropoint_map = {1: 309.54, 2: 171.787}
-    zeropoints = wise_df["band"].map(zeropoint_map)
-
-    # convert to magnitudes, then back to fluxes
-    mags, magerrs = convert_wise_flux_to_mag(wise_df['flux'], wise_df['dflux'])
-    flux_Jy = zeropoints * (10**(-mags/2.5))
-    
-    #calculate the errors
-    mags_upper = mags + magerrs
-    mags_lower = mags - magerrs
-    flux_upper = abs(flux_Jy - (zeropoints * (10**(-mags_upper/2.5))))
-    flux_lower = abs(flux_Jy - (zeropoints * (10**(-mags_lower/2.5))))
-    fluxerr_Jy = (flux_upper + flux_lower) / 2.0
-
-    wise_df["flux"], wise_df["dflux"] = flux_Jy*1E3, fluxerr_Jy*1E3  # now in mJy
-    return wise_df
-
-
 def convert_wise_flux_to_millijansky(nanomaggy_flux):
-    """Convert nanomaggy to millijansky. This function is not currently used.
+    """unWISE light curves flux is stored in nanomaggy. Convert to millijansky.
     
     See https://www.sdss3.org/dr8/algorithms/magnitudes.php
     """
     millijansky_per_nanomaggy = 3.631e-3
     return nanomaggy_flux * millijansky_per_nanomaggy
-
-
-def convert_wise_flux_to_mag(flux, dflux):
-    """Convert WISE fluxes to magnitudes.
-
-    This follows the conversions done for the original Meisner et al., 2023 catalog
-    (https://github.com/fkiwy/unTimely_Catalog_explorer/blob/main/unTimely_Catalog_tools.py),
-    except that here we support vectorization.
-    """
-    def calculate_magnitude(myflux):
-        # need to allow myflux to be an array, so use np.log10 not math.log10
-        mymag = 22.5 - 2.5 * np.log10(myflux)
-        # if myflux < 0, np.log10(myflux) == nan
-        # if myflux = 0, np.log10(myflux) == -inf. replace with nan to match unTimely_Catalog_tools
-        mymag[np.isinf(mymag)] = np.nan
-        return mymag
-
-    mag = calculate_magnitude(flux)
-    mag_upper = calculate_magnitude(flux - dflux)
-    mag_lower = calculate_magnitude(flux + dflux)
-    dmag = (mag_upper - mag_lower) / 2
-
-    return mag, dmag
 
 
 def convertACSmagtoflux(date, filterstring, mag, magerr):
