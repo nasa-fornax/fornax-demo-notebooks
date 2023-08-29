@@ -9,8 +9,10 @@ import numpy as np
 from data_structures import MultiIndexDFObject
 
 #need to know the distribution of error radii for the catalogs of interest
-#this will inform the ligh curve query, as we are not intertsted in 
-#error radii which are 'too large' so we need a way of defining what that is
+#this will inform the ligh curve query, as we are not interested in 
+#error radii which are 'too large' so we need a way of defining what that is.
+#leaving this code here in case user wants to change the cutoff error radii 
+#based on their science goals.  It is not currently used anywhere in the code
 def make_hist_error_radii(missioncat):
     """plots a histogram of error radii from a HEASARC catalog
    
@@ -51,8 +53,8 @@ def make_hist_error_radii(missioncat):
     #in case anyone wants to look further at the data
     return heasarcresulttable
     
-def make_VOTable(coords_list, labels_list, sourcefilename):
-    """convert the coords and labels into a VOTable for input to ADQL catalog search
+def make_coordsTable(coords_list, labels_list):
+    """convert the coords and labels into an astropy table for input to ADQL catalog search
     
     Parameters
     ----------
@@ -60,22 +62,18 @@ def make_VOTable(coords_list, labels_list, sourcefilename):
         the coordinates of the targets for which a user wants light curves
     labels_list: list of strings
         journal articles associated with the target coordinates
-    sourcefilename: str
-        name of the output file; must be .xml
     """
     
-    tab = Table({
-        'name': labels_list,
+    coordstab = Table({
+        'name': [label.encode() for label in labels_list],  # encode strings for TAP
         'ra': [coord.ra for objectid, coord in coords_list],
         'dec': [coord.dec for objectid, coord in coords_list],
         'ID': [objectid for objectid, coord in coords_list]
     })
-    #write out to an .xml file
-    tab.write(sourcefilename, format='votable', overwrite=True)
-    
-    return sourcefilename
 
-def HEASARC_get_lightcurves(coords_list, labels_list, heasarc_cat, max_error_radius, xmlfilename):
+    return coordstab
+
+def HEASARC_get_lightcurves(coords_list, labels_list, heasarc_cat, max_error_radius):
     """Searches HEASARC archive for light curves from a specific list of mission catalogs
     
     Parameters
@@ -100,9 +98,9 @@ def HEASARC_get_lightcurves(coords_list, labels_list, heasarc_cat, max_error_rad
     df_lc : MultiIndexDFObject
         the main data structure to store all light curves
     """
-    #first make a VOTable from our master list of coordinates
-    #we need a VOTable as input to the pyvo TAP query 
-    xmlfilename = make_VOTable(coords_list, labels_list,xmlfilename)
+    #first make an astropy table from our master list of coordinates
+    # as input to the pyvo TAP query 
+    coordstab = make_coordsTable(coords_list, labels_list)
 
     #setup to store the data
     df_lc = MultiIndexDFObject()
@@ -110,13 +108,11 @@ def HEASARC_get_lightcurves(coords_list, labels_list, heasarc_cat, max_error_rad
     # get the pyvo HEASARC service.
     heasarc_tap = pyvo.regsearch(servicetype='tap',keywords=['heasarc'])[0]
 
-    #Fermi:
-    # create the query for FERMIGTRIG, searching for the sources defined in sources.xml from HEASARC_make_VOTable;
-    # Note that the sources.xml file is uploaded when we run the query with run_sync
-    
+    # Note that the astropy table is uploaded when we run the query with run_sync
     for m in tqdm(range(len(heasarc_cat))):    
         print('working on mission', heasarc_cat[m])
 
+        
         fermiquery=f"""
             SELECT cat.name, cat.ra, cat.dec, cat.error_radius, cat.time,  mt.ID, mt.name
             FROM {heasarc_cat[m]} cat, tap_upload.mytable mt
@@ -124,7 +120,8 @@ def HEASARC_get_lightcurves(coords_list, labels_list, heasarc_cat, max_error_rad
             cat.error_radius < {max_error_radius[m]} AND
             CONTAINS(POINT('ICRS',mt.ra,mt.dec),CIRCLE('ICRS',cat.ra,cat.dec,cat.error_radius))=1
              """
-        fermiresult = heasarc_tap.service.run_sync(fermiquery, uploads={'mytable': xmlfilename})
+        
+        fermiresult = heasarc_tap.service.run_sync(fermiquery, uploads={'mytable': coordstab})
 
         #  Convert the result to an Astropy Table
         fermiresulttable = fermiresult.to_table()
