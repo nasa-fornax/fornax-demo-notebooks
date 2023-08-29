@@ -7,7 +7,7 @@ import pyarrow.fs
 from astropy.coordinates import SkyCoord
 
 from data_structures import MultiIndexDFObject
-from fluxconversions import convert_WISEtoJanskies
+from fluxconversions import convert_wise_flux_to_millijansky
 
 
 BANDMAP = {1: "w1", 2: "w2"}
@@ -41,10 +41,12 @@ def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, band
     wise_df = load_data(locations, radius, bandlist)
 
     # transform the data for a MultiIndexDFObject
-    wise_df = wise_df[wise_df['flux'] > 0]
-    wise_df = convert_WISEtoJanskies(wise_df)
-    wise_df["band"] = wise_df["band"].map(BANDMAP)
     wise_df = wise_df.rename(columns={"MJDMEAN": "time", "dflux": "err"})
+    wise_df = wise_df[wise_df["flux"] > 0]
+    # wise_df = convert_WISEtoJanskies(wise_df)
+    wise_df["flux"] = convert_wise_flux_to_millijansky(nanomaggy_flux=wise_df["flux"])
+    wise_df["err"] = convert_wise_flux_to_millijansky(nanomaggy_flux=wise_df["err"])
+    wise_df["band"] = wise_df["band"].map(BANDMAP)
 
     return MultiIndexDFObject(data=wise_df.set_index(["objectid","label", "band", "time"])[["flux", "err"]])
 
