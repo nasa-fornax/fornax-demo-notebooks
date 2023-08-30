@@ -10,6 +10,7 @@ from astroquery.gaia import Gaia
 from tqdm import tqdm
 
 from data_structures import MultiIndexDFObject
+from sample_selection import make_coordsTable
 
 
 def Gaia_get_lightcurve(coords_list, labels_list , verbose):
@@ -73,6 +74,51 @@ def Gaia_get_lightcurve(coords_list, labels_list , verbose):
     
     return(df_lc)
 
+def Gaia_retrieve_median_photometry(coords_list , labels_list , search_radius, verbose):
+    '''
+    Retrieves the photometry table for a list of sources.
+    
+    Parameter
+    ----------    
+    coords_list : list of Astropy SkyCoord objects
+        List of (id,coordinates) tuples of the sources
+    
+    labels_list : list of str
+        List of labels for each soruce
+                
+    search_radius : float 
+        Search radius in degrees, e.g., 1/3600.
+        suggested search radius is 1 arcsecond or 1/3600.
+        
+    verbose : int
+        How much to talk. 0 = None, 1 = a little bit , 2 = more, 3 = full
+        
+    Returns
+    --------
+    Astropy table with the Gaia photometry for each source.
+    
+    '''
+    #first make an astropy table from our master list of coordinates
+    # as input to the pyvo TAP query 
+    coordstab = make_coordsTable(coords_list, labels_list)
+
+    
+    querystr = f"""
+        SELECT gaia.ra, gaia.dec, gaia.random_index, mt.ra, mt.dec
+        FROM tap_upload.table_test AS mt
+        JOIN gaiadr3.gaia_source_lite AS gaia
+        ON 1=CONTAINS(POINT('ICRS',mt.ra,mt.dec),CIRCLE('ICRS',gaia.ra,gaia.dec,{search_radius}))
+        """
+    #use an asynchronous query of the Gaia database
+    #cross match with our uploaded table
+    j = Gaia.launch_job_async(query=querystr, upload_resource=coordstab, upload_table_name="table_test")
+    
+    results = j.get_results()
+    
+    if verbose : print("\nSearch completed in {:.2f} seconds".format((time.time()-t1) ) )
+    if verbose : print("Number of objects matched: {} out of {}.".format(len(results),len(coords_list) ) )
+
+    return results
 
 def Gaia_extract_median_photometry(gaia_table):
     '''
@@ -143,72 +189,7 @@ def Gaia_extract_median_photometry(gaia_table):
     return(gaia_phot)
 
 
-def Gaia_retrieve_median_photometry(coords_list , labels_list , gaia_source_table , search_radius, verbose):
-    '''
-    Retrieves the photometry table for a list of sources.
-    
-    Parameter
-    ----------    
-    coords_list : list of Astropy SkyCoord objects
-        List of (id,coordinates) tuples of the sources
-    
-    labels_list : list of str
-        List of labels for each soruce
-        
-    gaia_source_table : str
-        Gaia source table, e.g., "gaiaedr3.gaia_source"
-        
-    search_radius : float (as astropy Quantity with unit u.arcsec)
-        Search radius in arcseconds, e.g., 20*u.arcsec
-        
-    verbose : int
-        How much to talk. 0 = None, 1 = a little bit , 2 = more, 3 = full
-        
-    Returns
-    --------
-    Astropy table with the Gaia photometry for each source.
-    
-    '''
-    
-    ## Log in (apparently not necessary for small queries) 
-    #Gaia.login(user=None , password=None)
-    
-    ## Select Gaia table (DR3)
-    Gaia.MAIN_GAIA_TABLE = gaia_source_table
 
-
-    ## Search and Cross match.
-    # This can be done in a smarter way by matching catalogs on the Gaia server, or grouping the
-    # sources and search a larger area.
-
-    # get catalog
-    gaia_table = Table()
-    t1 = time.time()
-    for objectid, coord in tqdm(coords_list):
-        
-        gaia_search = Gaia.cone_search_async(coordinate=coord, radius=search_radius , background=True)
-        gaia_search.get_data()["dist"].unit = "deg"
-        gaia_search.get_data()["dist"] = gaia_search.get_data()["dist"].to(u.arcsec) # Change distance unit from degrees to arcseconds
-
-
-        # match
-        if len(gaia_search.get_data()["dist"]) > 0:
-            gaia_search.get_data()["input_object_name"] = objectid # add input object name to catalog
-            sel_min = np.where( (gaia_search.get_data()["dist"] < 1*u.arcsec) & (gaia_search.get_data()["dist"] == np.nanmin(gaia_search.get_data()["dist"]) ) )[0]
-        else:
-            sel_min = []
-
-        if len(sel_min) > 0:
-            gaia_table = vstack( [gaia_table , gaia_search.get_data()[sel_min]] )
-        else:
-            gaia_table = vstack( [gaia_table , gaia_search.get_data()[sel_min]] )
-
-    if verbose > 0: print("\nSearch completed in {:.2f} seconds".format((time.time()-t1) ) )
-    if verbose > 0: print("Number of objects matched: {} out of {}.".format(len(gaia_table),len(coords_list) ) )
-    
-    return(gaia_table)
-    
-    
 
 
 ## Define function to retrieve epoch photometry
