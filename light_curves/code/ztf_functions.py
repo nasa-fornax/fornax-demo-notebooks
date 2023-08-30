@@ -129,7 +129,7 @@ def locate_objects(coords_list, labels_list, radius):
             POINT('ICRS', coords.ra, coords.dec), CIRCLE('ICRS', ztf.ra, ztf.dec, {radius.value})
         )=1"""
 
-    result = tap_service.run_sync(
+    result = tap_service.run_async(
         query, uploads={"coords": make_coordsTable(coords_list, labels_list)}
     )
 
