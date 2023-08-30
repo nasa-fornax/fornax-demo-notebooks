@@ -4,9 +4,9 @@ import astropy.units as u
 import pandas as pd
 import pyvo
 import s3fs
-from astropy.table import Table
 
 from data_structures import MultiIndexDFObject
+from sample_selection import make_coordsTable
 
 DATARELEASE = "dr18"
 BUCKET = "irsa-mast-tike-spitzer-data"
@@ -120,14 +120,7 @@ def locate_objects(coords_list, labels_list, radius):
         Dataframe with ZTF field, CCD, quadrant and other information useful for
         locating the `coord` object in the parquet files. One row per ZTF objectid.
     """
-    coords_tbl = Table(
-        rows=[  # encode for tap
-            (objectid, labels_list[objectid].encode(), coord.ra.deg, coord.dec.deg)
-            for objectid, coord in coords_list
-        ],
-        names=["objectid", "label", "ra", "dec"],
-    )
-
+    tap_service = pyvo.dal.TAPService("https://irsa.ipac.caltech.edu/TAP")
     coordscols = [f"coords.{c}" for c in ["objectid", "label"]]
     ztfcols = [f"ztf.{c}" for c in ["oid", "filtercode", "field", "ccdid", "qid", "ra", "dec"]]
     query = f"""SELECT {', '.join(coordscols + ztfcols)} 
@@ -136,8 +129,9 @@ def locate_objects(coords_list, labels_list, radius):
             POINT('ICRS', coords.ra, coords.dec), CIRCLE('ICRS', ztf.ra, ztf.dec, {radius.value})
         )=1"""
 
-    tap_service = pyvo.dal.TAPService("https://irsa.ipac.caltech.edu/TAP")
-    result = tap_service.run_sync(query, uploads={"coords": coords_tbl})
+    result = tap_service.run_sync(
+        query, uploads={"coords": make_coordsTable(coords_list, labels_list)}
+    )
 
     # result may contain more than one ZTF object id per band (e.g., yang sample coords_list[10])
     # Sánchez-Sáez et al., 2021 (2021AJ....162..206S)
