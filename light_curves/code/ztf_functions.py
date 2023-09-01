@@ -116,11 +116,13 @@ def locate_objects(coords_list, labels_list, radius):
 
     Returns
     -------
-    locations : pd.DataFrame
+    locations_df : pd.DataFrame
         Dataframe with ZTF field, CCD, quadrant and other information useful for
         locating the `coord` object in the parquet files. One row per ZTF objectid.
     """
+    # setup for tap query
     tap_service = pyvo.dal.TAPService("https://irsa.ipac.caltech.edu/TAP")
+    coords_tbl = make_coordsTable(coords_list, labels_list)
     coordscols = [f"coords.{c}" for c in ["objectid", "label"]]
     ztfcols = [f"ztf.{c}" for c in ["oid", "filtercode", "field", "ccdid", "qid", "ra", "dec"]]
     query = f"""SELECT {', '.join(coordscols + ztfcols)} 
@@ -129,14 +131,21 @@ def locate_objects(coords_list, labels_list, radius):
             POINT('ICRS', coords.ra, coords.dec), CIRCLE('ICRS', ztf.ra, ztf.dec, {radius.value})
         )=1"""
 
-    result = tap_service.run_async(
-        query, uploads={"coords": make_coordsTable(coords_list, labels_list)}
-    )
+    # tap query is much faster when submitting less than ~10,000 coords at a time
+    # so iterate over chunks of coords_tbl and then concat results
+    i, chunksize = 0, 10_000
+    locations = []
+    while i * chunksize < len(coords_tbl):
+        result = tap_service.run_async(
+            query, uploads={"coords": coords_tbl[i * chunksize : (i + 1) * chunksize]}
+        )
+        locations.append(result.to_table().to_pandas())
+        i += 1
 
-    # result may contain more than one ZTF object id per band (e.g., yang sample coords_list[10])
+    # results may contain more than one ZTF object id per band (e.g., yang sample coords_list[10])
     # Sánchez-Sáez et al., 2021 (2021AJ....162..206S)
     # return all the data -- transform_lightcurves will choose which to keep
-    return result.to_table().to_pandas()
+    return pd.concat(locations, ignore_index=True)
 
 
 def load_lightcurves(location_keys, location_df):
