@@ -52,8 +52,6 @@ def Gaia_get_lightcurve(coords_list, labels_list , verbose):
     prod_tab = Gaia_retrieve_EPOCH_PHOTOMETRY(ids=list(gaia_table["source_id"]) , verbose=verbose)
 
     ## Create light curves =================
-    # Note that epoch photometry is used unless there is none, in which case
-    # the median photometry is used with a median time of all Gaia observations.
     gaia_epoch_phot = Gaia_mk_lightcurves(prod_tab , verbose=verbose)
 
     ## Create Gaia Pandas MultiIndex object and append to existing data frame.
@@ -221,15 +219,16 @@ def Gaia_mk_lightcurves(prod_tab , verbose):
 def Gaia_mk_MultiIndex(coords_list, labels_list, gaia_phot, gaia_epoch_phot , verbose):
     '''
     Creates a MultiIndex Pandas Dataframe for the Gaia observations. Specifically, it 
-    returns the epoch photometry as a function of time. For sources without Gaia epoch
-    photometry, it just returns the mean photometry a epoch 2015-09-24T19:40:33.468, which
-    is the average epoch of the observations of sources with multi-epoch photometry.
+    returns the epoch photometry as a function of time. 
     
     Parameters
     ----------
     coords_list : list of Astropy SkyCoord objects
         List of (id,coordinates) tuples of the sources
     
+    labels_list : list of str
+        List of labels for each soruce
+                
     gaia_phot : dict
         The Gaia mean photometry (will be linked by object ID in 'data' catalog)
     
@@ -311,6 +310,7 @@ def Gaia_mk_MultiIndex(coords_list, labels_list, gaia_phot, gaia_epoch_phot , ve
 def Gaia_plot_lightcurves(df_lc , nbr_objects):
     '''
     Plots the Gaia light curves for a select number of sources.
+    This function is currently not being used.
     
     Parameter
     ---------
@@ -360,6 +360,8 @@ def Gaia_plot_lightcurves(df_lc , nbr_objects):
 def Gaia_extract_median_photometry(gaia_table):
     '''
     Extract the median photometry from a Gaia table produced by `Gaia_retrieve_median_photometry`.
+    
+    This function is currently not being used
     
     Parameter
     ---------
