@@ -1,4 +1,5 @@
 import re
+from multiprocessing import Pool
 
 import astropy.units as u
 import pandas as pd
@@ -11,7 +12,6 @@ from sample_selection import make_coordsTable
 DATARELEASE = "dr18"
 BUCKET = "irsa-mast-tike-spitzer-data"
 CATALOG_ROOT = f"{BUCKET}/data/ZTF/lc/lc_{DATARELEASE}/"
-FS = s3fs.S3FileSystem()
 
 # get a list of files in the dataset using the checksums file
 CATALOG_FILES = (
@@ -44,11 +44,9 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
     # light curves are stored in parquet files that are organized by filter, field, ccd, and quadrant
     # locate which files each object is in
     locations_df = locate_objects(coords_list, labels_list, ztf_radius)
-    location_groups = locations_df.groupby(["filtercode", "field", "ccdid", "qid", "basedir"])
 
     # load light curves by looping over files and filtering for ZTF objectid
-    lc_df = [load_lightcurves(keys, locdf) for keys, locdf in location_groups]
-    lc_df = pd.concat(lc_df, ignore_index=True)
+    lc_df = load_lightcurves(locations_df)
 
     # clean and transform the data into the form expected for a MultiIndexDFObject
     lc_df = transform_lightcurves(lc_df)
@@ -148,7 +146,30 @@ def locate_objects(coords_list, labels_list, radius):
     return pd.concat(locations, ignore_index=True)
 
 
-def load_lightcurves(location_keys, location_df):
+def load_lightcurves(locations_df, npool=6):
+    """"""
+    # one group per parquet file
+    location_grps = locations_df.groupby(["filtercode", "field", "ccdid", "qid"])
+    # number of files to send to a background process as one "chunk" of work
+    chunksize=100
+
+    # load the light curve data
+    # if not doing at least 2 chunks it's not worth the multiprocessing overhead. just do them serially
+    # else, use multiprocessing and do chunks in parallel
+    if len(location_grps) < 2*chunksize:
+        lightcurves = [load_lightcurves_one_file(keys, locdf) for keys, locdf in location_grps]
+    else:
+        with Pool(npool) as pool:
+            lightcurves = []
+            # imap because [TODO]
+            # unordered because [TODO]
+            for lc_df in pool.imap_unordered(load_lightcurves_one_file, location_grps, chunksize=chunksize):
+                lightcurves.append(lc_df)
+        
+    return pd.concat(lightcurves, ignore_index=True)
+
+
+def load_lightcurves_one_file(locations):
     """Load light curves from the file identified by `location_keys`, for objects in location_df.
 
     Parameters
@@ -165,10 +186,13 @@ def load_lightcurves(location_keys, location_df):
         Dataframe of light curves. Expect one row per oid in location_df. Each row
         stores a full light curve. Elements in the columns "mag", "hmjd", etc. are arrays.
     """
+    location_keys, location_df = locations
+    
+    # [TODO] this fails in a background process
     lc_df = pd.read_parquet(
         file_name(*location_keys),
         engine="pyarrow",
-        filesystem=FS,
+        filesystem=s3fs.S3FileSystem(),
         columns=["objectid", "hmjd", "mag", "magerr", "catflags"],
         filters=[("objectid", "in", location_df["oid"].to_list())],
     )
