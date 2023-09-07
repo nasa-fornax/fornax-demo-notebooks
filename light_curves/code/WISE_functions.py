@@ -10,11 +10,11 @@ from data_structures import MultiIndexDFObject
 from fluxconversions import convert_wise_flux_to_millijansky
 
 
-BANDMAP = {1: "w1", 2: "w2"}
+BANDMAP = {1: "W1", 2: "W2"}  # map the band values stored in the catalog to their common names
 K = 5  # HEALPix order at which the dataset is partitioned
 
 
-def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, bandlist = ['w1', 'w2']):
+def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, bandlist = ['W1', 'W2']):
     """Searches WISE catalog from meisner et al., 2023 for light curves from a list of input coordinates
     
     Parameters
@@ -26,7 +26,7 @@ def WISE_get_lightcurves(coords_list, labels_list, radius = 1.0 * u.arcsec, band
     radius : astropy Quantity
         search radius, how far from the source should the archives return results
     bandlist: list of strings
-        which WISE bands to search for, example: ['w1', 'w2']
+        which WISE bands to search for, example: ['W1', 'W2']
         
     Returns
     -------
@@ -93,7 +93,7 @@ def load_data(locations, radius, bandlist):
     radius : astropy Quantity
         search radius, how far from the source should the archives return results
     bandlist: list of strings
-        which WISE bands to search for, example: ['w1', 'w2']
+        which WISE bands to search for, example: ['W1', 'W2']
         
     Returns
     -------
