@@ -163,7 +163,7 @@ def load_lightcurves(locations_df, nworkers=6):
     if len(location_grps) < nworkers * chunksize:
         chunksize = len(location_grps) // nworkers + 1
 
-    # "spawn" new processes because it uses less memory and is thread safe
+    # "spawn" new processes because it uses less memory and is thread safe (req'd for pd.read_parquet)
     # https://stackoverflow.com/questions/64095876/multiprocessing-fork-vs-spawn
     mp.set_start_method("spawn", force=True)
     
@@ -172,13 +172,14 @@ def load_lightcurves(locations_df, nworkers=6):
         lightcurves = []
         # use imap because it's lazier than map and can reduce memory usage for long iterables
         # use unordered because we don't care about the order in which results are returned
+        # using a large chunksize can make it much faster than the default of 1
         for ztf_df in pool.imap_unordered(load_lightcurves_one_file, location_grps, chunksize=chunksize):
             lightcurves.append(ztf_df)
 
     return pd.concat(lightcurves, ignore_index=True)
 
 
-def load_lightcurves_one_file(locations):
+def load_lightcurves_one_file(location):
     """Load light curves from the file identified by `location_keys`, for objects in location_df.
 
     Parameters
@@ -195,7 +196,7 @@ def load_lightcurves_one_file(locations):
         Dataframe of light curves. Expect one row per oid in location_df. Each row
         stores a full light curve. Elements in the columns "mag", "hmjd", etc. are arrays.
     """
-    location_keys, location_df = locations
+    location_keys, location_df = location
 
     ztf_df = pd.read_parquet(
         file_name(*location_keys),
