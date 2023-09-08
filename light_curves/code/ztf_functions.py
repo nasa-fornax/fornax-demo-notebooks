@@ -146,28 +146,25 @@ def load_lightcurves(locations_df, npool=6):
     """"""
     # one group per parquet file
     location_grps = locations_df.groupby(["filtercode", "field", "ccdid", "qid"])
+    
     # number of files to send to a background process as one "chunk" of work
     chunksize = 100
+    # make sure we use all the available processes
+    if len(location_grps) < npool * chunksize:
+        chunksize = len(location_grps) // npool + 1
 
-    # load the light curve data
-    # if not doing at least 2 chunks it's not worth the multiprocessing overhead. just do them serially
-    # else, use multiprocessing and do chunks in parallel
-    if len(location_grps) < 2 * chunksize:
-        lightcurves = [load_lightcurves_one_file(group) for group in location_grps]
-
-    else:
-        # "spawn" new processes because it uses less memory and is thread safe
-        # https://stackoverflow.com/questions/64095876/multiprocessing-fork-vs-spawn
-        mp.set_start_method("spawn", force=True)
-        with mp.Pool(npool) as pool:
-            lightcurves = []
-            # use imap because it's lazier than map and can reduce memory usage for long iterables
-            # (using a large chunksize can make it much faster)
-            # use unordered because we don't care about the order in which results are returned
-            for lc_df in pool.imap_unordered(
-                load_lightcurves_one_file, location_grps, chunksize=chunksize
-            ):
-                lightcurves.append(lc_df)
+    # "spawn" new processes because it uses less memory and is thread safe
+    # https://stackoverflow.com/questions/64095876/multiprocessing-fork-vs-spawn
+    mp.set_start_method("spawn", force=True)
+    
+    # start a pool of background processes to load data in parallel
+    with mp.Pool(npool) as pool:
+        lightcurves = []
+        # use imap because it's lazier than map and can reduce memory usage for long iterables
+        # (using a large chunksize can make it much faster than the default of 1)
+        # use unordered because we don't care about the order in which results are returned
+        for ztf_df in pool.imap_unordered(load_lightcurves_one_file, location_grps, chunksize=chunksize):
+            lightcurves.append(ztf_df)
 
     return pd.concat(lightcurves, ignore_index=True)
 
@@ -203,7 +200,7 @@ def load_lightcurves_one_file(locations):
     # rename the ztf object id to avoid confusion
     ztf_df = ztf_df.rename(columns={"objectid": "oid"})
 
-    # add objectid (coords_list id) and label columns by mapping from ZTF object id
+    # add objectid (coords id) and label columns by mapping from ZTF object id
     oidmap = location_df.set_index("oid")["objectid"].to_dict()
     lblmap = location_df.set_index("oid")["label"].to_dict()
     ztf_df["objectid"] = ztf_df["oid"].map(oidmap)
