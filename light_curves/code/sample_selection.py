@@ -417,3 +417,23 @@ def clean_sample(skycoordslist, labels, verbose=1):
     coords_list = list(enumerate(raw_coords_list))  # list of tuples (objectid, skycoords)
 
     return coords_list, labels_list
+def make_coordsTable(coords_list, labels_list):
+    """convert the coords and labels into an astropy table for input to ADQL catalog search
+    
+    Parameters
+    ----------
+    coords_list : list of astropy skycoords
+        the coordinates of the targets for which a user wants light curves
+    labels_list: list of strings
+        journal articles associated with the target coordinates
+    """
+    
+    coordstab = Table(
+            rows=[  # encode strings for tap
+                (objectid, labels_list[objectid].encode(), coord.ra.value, coord.dec.value)
+                for objectid, coord in coords_list
+            ],
+            names=["objectid", "label", "ra", "dec"],
+        )
+
+    return coordstab
