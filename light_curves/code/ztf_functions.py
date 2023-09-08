@@ -1,5 +1,5 @@
+import multiprocessing as mp
 import re
-from multiprocessing import Pool
 
 import astropy.units as u
 import pandas as pd
@@ -18,7 +18,7 @@ CATALOG_FILES = (
     pd.read_table(
         f"s3://{CATALOG_ROOT}checksum.md5", sep="\s+", names=["md5", "path"], usecols=["path"]
     )
-    .squeeze()
+    .squeeze()  # there's only 1 column. squeeze it into a Series
     .str.removeprefix("./")
     .to_list()
 )
@@ -151,21 +151,28 @@ def load_lightcurves(locations_df, npool=6):
     # one group per parquet file
     location_grps = locations_df.groupby(["filtercode", "field", "ccdid", "qid"])
     # number of files to send to a background process as one "chunk" of work
-    chunksize=100
+    chunksize = 100
 
     # load the light curve data
     # if not doing at least 2 chunks it's not worth the multiprocessing overhead. just do them serially
     # else, use multiprocessing and do chunks in parallel
-    if len(location_grps) < 2*chunksize:
-        lightcurves = [load_lightcurves_one_file(keys, locdf) for keys, locdf in location_grps]
+    if len(location_grps) < 2 * chunksize:
+        lightcurves = [load_lightcurves_one_file(group) for group in location_grps]
+
     else:
-        with Pool(npool) as pool:
+        # "spawn" new processes because it uses less memory and is thread safe
+        # https://stackoverflow.com/questions/64095876/multiprocessing-fork-vs-spawn
+        mp.set_start_method("spawn", force=True)
+        with mp.Pool(npool) as pool:
             lightcurves = []
-            # imap because [TODO]
-            # unordered because [TODO]
-            for lc_df in pool.imap_unordered(load_lightcurves_one_file, location_grps, chunksize=chunksize):
+            # use imap because it's lazier than map and can reduce memory usage for long iterables
+            # (using a large chunksize can make it much faster)
+            # use unordered because we don't care about the order in which results are returned
+            for lc_df in pool.imap_unordered(
+                load_lightcurves_one_file, location_grps, chunksize=chunksize
+            ):
                 lightcurves.append(lc_df)
-        
+
     return pd.concat(lightcurves, ignore_index=True)
 
 
@@ -187,8 +194,7 @@ def load_lightcurves_one_file(locations):
         stores a full light curve. Elements in the columns "mag", "hmjd", etc. are arrays.
     """
     location_keys, location_df = locations
-    
-    # [TODO] this fails in a background process
+
     lc_df = pd.read_parquet(
         file_name(*location_keys),
         engine="pyarrow",
@@ -198,16 +204,16 @@ def load_lightcurves_one_file(locations):
     )
 
     # in the MultiIndexDFObject, "objectid" is the name of the coord id, not the ztf object id
+    # rename the ztf object id to avoid confusion
     lc_df = lc_df.rename(columns={"objectid": "oid"})
 
-    # add fields for the MultiIndexDFObject
-    # add the band (filtercode)
-    lc_df["band"] = location_keys[0]
     # add objectid (coords_list id) and label columns by mapping from ZTF object id
     oidmap = location_df.set_index("oid")["objectid"].to_dict()
     lblmap = location_df.set_index("oid")["label"].to_dict()
     lc_df["objectid"] = lc_df["oid"].map(oidmap)
     lc_df["label"] = lc_df["oid"].map(lblmap)
+    # add the band (filtercode)
+    lc_df["band"] = location_keys[0]
 
     return lc_df
 
