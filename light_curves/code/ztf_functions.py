@@ -23,7 +23,7 @@ CATALOG_FILES = (
 )
 
 
-def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
+def ZTF_get_lightcurve(coords_list, labels_list, nworkers=6, ztf_radius=0.000278 * u.deg):
     """Function to add the ZTF lightcurves in all three bands to a multiframe data structure
 
     Parameters
@@ -32,6 +32,10 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
         the coordinates of the targets for which a user wants light curves
     labels_list: list of strings
         journal articles associated with the target coordinates
+    nworkers : int or None
+        number of workers in the multiprocessing pool used in the load_lightcurves function. 
+        This must be None if this function is being called from within a child process already. 
+        (This function does not support nested multiprocessing.)
     ztf_radius : float
         search radius, how far from the source should the archives return results
 
@@ -44,9 +48,8 @@ def ZTF_get_lightcurve(coords_list, labels_list, ztf_radius=0.000278 * u.deg):
     # locate which files each object is in
     locations_df = locate_objects(coords_list, labels_list, ztf_radius)
 
-    # the catalog is stored in an AWS S3 bucket
-    # loop over the files and load the light curves
-    ztf_df = load_lightcurves(locations_df)
+    # the catalog is stored in an AWS S3 bucket. loop over the files and load the light curves
+    ztf_df = load_lightcurves(locations_df, nworkers=nworkers)
 
     # clean and transform the data into the form needed for a MultiIndexDFObject
     ztf_df = transform_lightcurves(ztf_df)
@@ -142,26 +145,32 @@ def locate_objects(coords_list, labels_list, radius):
     return pd.concat(locations, ignore_index=True)
 
 
-def load_lightcurves(locations_df, npool=6):
+def load_lightcurves(locations_df, nworkers=6):
     """"""
     # one group per parquet file
     location_grps = locations_df.groupby(["filtercode", "field", "ccdid", "qid"])
+
+    # if no multiprocessing requested, loop over files serially and load data. return immediately
+    if nworkers is None:
+        lightcurves = [load_lightcurves_one_file(location) for location in location_grps]
+        return pd.concat(lightcurves, ignore_index=True)
     
-    # number of files to send to a background process as one "chunk" of work
+    # if we get here, multiprocessing has been requested
+
+    # number of files to be sent in as one "chunk" of work
     chunksize = 100
-    # make sure we use all the available processes
-    if len(location_grps) < npool * chunksize:
-        chunksize = len(location_grps) // npool + 1
+    # make sure the chunksize isn't so big that some workers will sit idle
+    if len(location_grps) < nworkers * chunksize:
+        chunksize = len(location_grps) // nworkers + 1
 
     # "spawn" new processes because it uses less memory and is thread safe
     # https://stackoverflow.com/questions/64095876/multiprocessing-fork-vs-spawn
     mp.set_start_method("spawn", force=True)
     
     # start a pool of background processes to load data in parallel
-    with mp.Pool(npool) as pool:
+    with mp.Pool(nworkers) as pool:
         lightcurves = []
         # use imap because it's lazier than map and can reduce memory usage for long iterables
-        # (using a large chunksize can make it much faster than the default of 1)
         # use unordered because we don't care about the order in which results are returned
         for ztf_df in pool.imap_unordered(load_lightcurves_one_file, location_grps, chunksize=chunksize):
             lightcurves.append(ztf_df)
