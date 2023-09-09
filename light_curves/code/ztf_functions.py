@@ -36,7 +36,7 @@ def ZTF_get_lightcurve(coords_list, labels_list, nworkers=6, ztf_radius=0.000278
         number of workers in the multiprocessing pool used in the load_lightcurves function. 
         This must be None if this function is being called from within a child process already. 
         (This function does not support nested multiprocessing.)
-    ztf_radius : float
+    ztf_radius : astropy Quantity
         search radius, how far from the source should the archives return results
 
     Returns
@@ -45,7 +45,7 @@ def ZTF_get_lightcurve(coords_list, labels_list, nworkers=6, ztf_radius=0.000278
         the main data structure to store all light curves
     """
     # the catalog is in parquet format with one file per ZTF filter, field, ccd, and quadrant
-    # locate which files each object is in
+    # use a TAP query to locate which files each object is in
     locations_df = locate_objects(coords_list, labels_list, ztf_radius)
 
     # the catalog is stored in an AWS S3 bucket. loop over the files and load the light curves
@@ -61,6 +61,8 @@ def ZTF_get_lightcurve(coords_list, labels_list, nworkers=6, ztf_radius=0.000278
 
 def file_name(filtercode, field, ccdid, qid, basedir=None):
     """Lookup the filename for this filtercode, field, ccdid, qid.
+
+    File name syntax starts with: {basedir}/field{field}/ztf_{field}_{filtercode}_c{ccdid}_q{qid}
 
     Parameters
     ----------
@@ -85,10 +87,9 @@ def file_name(filtercode, field, ccdid, qid, basedir=None):
     AssertionError
         if exactly one matching file name is not found in the CATALOG_FILES list
     """
-    # if this comes from a TAP query, we won't know the basedir
+    # if this comes from a TAP query we won't know the basedir,
+    # so do a regex search through the CATALOG_FILES list instead
     if basedir is None:
-        # can't quite construct the file name directly because need to know whether the top-level
-        # directory is 0 or 1. do a regex search through the CATALOG_FILES list.
         fre = re.compile(f"[01]/field{field:06}/ztf_{field:06}_{filtercode}_c{ccdid:02}_q{qid}")
         files = [CATALOG_ROOT + f for f in filter(fre.match, CATALOG_FILES)]
         # expecting exactly 1 filename. make it fail if there's more or less.
@@ -100,7 +101,7 @@ def file_name(filtercode, field, ccdid, qid, basedir=None):
 
 
 def locate_objects(coords_list, labels_list, radius):
-    """Parquet files are organized by filter, field, ccd, and quadrant. Use TAP to look them up.
+    """The catalog's parquet files are organized by filter, field, CCD, and quadrant. Use TAP to look them up.
 
     https://irsa.ipac.caltech.edu/docs/program_interface/TAP.html
 
@@ -109,15 +110,15 @@ def locate_objects(coords_list, labels_list, radius):
     coords_list : list of tuples
         one tuple per target: (objectid, SkyCoord)
     labels_list: list of strings
-        journal articles associated with target coordinates, indexed by object ID
-    radius : float
+        journal articles associated with target coordinates, indexed by objectid
+    radius : astropy Quantity
         search radius, how far from the source should the archives return results
 
     Returns
     -------
     locations_df : pd.DataFrame
-        Dataframe with ZTF field, CCD, quadrant and other information useful for
-        locating the `coord` object in the parquet files. One row per ZTF objectid.
+        Dataframe with ZTF field, CCD, quadrant and other information that identifies each `coords_list` 
+        object and which parquet files it is in. One row per ZTF objectid.
     """
     # setup for tap query
     tap_service = pyvo.dal.TAPService("https://irsa.ipac.caltech.edu/TAP")
@@ -130,7 +131,7 @@ def locate_objects(coords_list, labels_list, radius):
             POINT('ICRS', coords.ra, coords.dec), CIRCLE('ICRS', ztf.ra, ztf.dec, {radius.value})
         )=1"""
 
-    # tap query is much faster when submitting less than ~10,000 coords at a time
+    # this tap query is much faster when submitting less than ~10,000 coords at a time
     # so iterate over chunks of coords_tbl and then concat results
     i, chunksize = 0, 10_000
     locations = []
@@ -146,7 +147,23 @@ def locate_objects(coords_list, labels_list, radius):
 
 
 def load_lightcurves(locations_df, nworkers=6):
-    """"""
+    """Loop over the catalog's parquet files (stored in an AWS S3 bucket) and load light curves.
+
+    Parameters
+    ----------
+    locations_df : pd.DataFrame
+        Dataframe with ZTF field, CCD, quadrant and other information that identifies each `coord` object
+        and which parquet files it is in.
+    nworkers : int or None
+        Number of workers in the multiprocessing pool. Use None to turn off multiprocessing. This must be None 
+        if this function is being called from within a child process (no nested multiprocessing).
+
+    Returns
+    -------
+    ztf_df : pd.DataFrame
+        Dataframe of light curves. Expect one row per oid in locations_df. Each row
+        stores a full light curve. Elements in the columns "mag", "hmjd", etc. are arrays.
+    """
     # one group per parquet file
     location_grps = locations_df.groupby(["filtercode", "field", "ccdid", "qid"])
 
@@ -180,15 +197,17 @@ def load_lightcurves(locations_df, nworkers=6):
 
 
 def load_lightcurves_one_file(location):
-    """Load light curves from the file identified by `location_keys`, for objects in location_df.
+    """Load light curves from one file.
 
     Parameters
     ----------
-    location_keys : tuple(str, int, int int)
-        Keys that uniquely identify a ZTF location (filtercode, field, CCD, and quadrant).
-        Used to lookup the file name.
-    location_df : pd.DataFrame
-        Dataframe of objects in this location. Used to filter data from this file.
+    location : tuple
+        tuple containing two elements that describe one parquet file. the elements are:
+            location_keys : tuple(str, int, int int)
+                Keys that uniquely identify a ZTF location (filtercode, field, CCD, and quadrant).
+                Used to lookup the file name.
+            location_df : pd.DataFrame
+                Dataframe of objects in this location. Used to filter data from this file.
 
     Returns
     -------
@@ -198,6 +217,7 @@ def load_lightcurves_one_file(location):
     """
     location_keys, location_df = location
 
+    # load light curves from this file, filtering for the ZTF object IDs in location_df
     ztf_df = pd.read_parquet(
         file_name(*location_keys),
         engine="pyarrow",
@@ -206,16 +226,18 @@ def load_lightcurves_one_file(location):
         filters=[("objectid", "in", location_df["oid"].to_list())],
     )
 
-    # in the MultiIndexDFObject, "objectid" is the name of the coord id, not the ztf object id
-    # rename the ztf object id to avoid confusion
+    # in the parquet files, "objectid" is the ZTF object ID
+    # in the MultiIndexDFObject, "objectid" is the ID of a coords_list object
+    # rename the ZTF object ID that just got loaded to avoid confusion
     ztf_df = ztf_df.rename(columns={"objectid": "oid"})
 
-    # add objectid (coords id) and label columns by mapping from ZTF object id
+    # add the coords_list object ID and label columns by mapping thru the ZTF object ID
     oidmap = location_df.set_index("oid")["objectid"].to_dict()
     lblmap = location_df.set_index("oid")["label"].to_dict()
     ztf_df["objectid"] = ztf_df["oid"].map(oidmap)
     ztf_df["label"] = ztf_df["oid"].map(lblmap)
-    # add the band (filtercode)
+    
+    # add the band (i.e., filtercode)
     ztf_df["band"] = location_keys[0]
 
     return ztf_df
@@ -260,7 +282,7 @@ def transform_lightcurves(ztf_df):
     # if your science depends on precise times, this will need to be corrected.
     ztf_df = ztf_df.rename(columns={"hmjd": "time"})
 
-    # explode the data structure into one row per light curve point
+    # "explode" the data structure into one row per light curve point
     ztf_df = ztf_df.explode(["time", "mag", "magerr", "catflags"], ignore_index=True)
 
     # remove data flagged as bad
