@@ -4,10 +4,9 @@ import astropy.units as u
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from astropy.table import Table, hstack, vstack
+from astropy.table import Table, hstack
 from astropy.time import Time
 from astroquery.gaia import Gaia
-from tqdm import tqdm
 
 from data_structures import MultiIndexDFObject
 from sample_selection import make_coordsTable
