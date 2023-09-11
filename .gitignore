@@ -2,6 +2,9 @@
 ./**/*.fits
 *.fits
 
+*.gzip
+./**/*.gzip
+
 # Jupyter Notebook
 .ipynb_checkpoints
 
