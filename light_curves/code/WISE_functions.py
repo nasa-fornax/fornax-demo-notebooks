@@ -10,7 +10,7 @@ from data_structures import MultiIndexDFObject
 from fluxconversions import convert_wise_flux_to_millijansky
 
 
-BANDMAP = {1: "W1", 2: "W2"}  # map the band values as stored in the catalog to their common names
+BANDMAP = {"W1": 1, "W2": 2}  # map the common names to the values actually stored in the catalog
 K = 5  # HEALPix order at which the dataset is partitioned
 
 
@@ -127,8 +127,8 @@ def load_data(locations, radius, bandlist):
         # coadd's primary region (to avoid duplicates when an object is near the coadd boundary)
         filters = (pyarrow.compute.field(f"healpix_k{K}") == pixel) & (pyarrow.compute.field("primary") == 1)
         # add a filter for the bandlist. if all bands are requested, skip this to avoid the overhead
-        if len(set(BANDMAP.values()) - set(bandlist)) > 0:
-            filters = filters & (pyarrow.compute.field("band").isin(bandlist))
+        if len(set(BANDMAP.keys()) - set(bandlist)) > 0:
+            filters = filters & (pyarrow.compute.field("band").isin([BANDMAP[band] for band in bandlist]))
 
         # query the dataset and load the light curve data
         pixel_tbl = dataset.to_table(filter=filters, columns=columns)
