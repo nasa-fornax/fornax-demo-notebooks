@@ -39,10 +39,9 @@ def WISE_get_lightcurves(coords_list, labels_list, radius=1.0 * u.arcsec, bandli
 
     # the catalog is stored in an AWS S3 bucket
     # loop over the partitions and load the light curves
-    wise_df = load_data(locations_df, radius, bandlist)
+    wise_df = load_lightcurves(locations_df, radius, bandlist)
 
     # clean and transform the data into the form needed for a MultiIndexDFObject
-    
     wise_df = transform_lightcurves(wise_df)
 
     # return the light curves as a MultiIndexDFObject
@@ -90,7 +89,7 @@ def locate_objects(coords_list, labels_list, radius):
     return locations.explode(["pixel"], ignore_index=True)
 
 
-def load_data(locations, radius, bandlist):
+def load_lightcurves(locations, radius, bandlist):
     """Load data from the unWISE light curve catalog (Meisner et al., 2023AJ....165...36M).
 
     Parameters
@@ -125,13 +124,13 @@ def load_data(locations, radius, bandlist):
     for pixel, locs_df in locations.groupby("pixel"):
         # create a filter to pick out sources that are (1) in this partition; and (2) within the
         # coadd's primary region (to avoid duplicates when an object is near the coadd boundary)
-        filters = (pyarrow.compute.field(f"healpix_k{K}") == pixel) & (pyarrow.compute.field("primary") == 1)
+        filter = (pyarrow.compute.field(f"healpix_k{K}") == pixel) & (pyarrow.compute.field("primary") == 1)
         # add a filter for the bandlist. if all bands are requested, skip this to avoid the overhead
         if len(set(BANDMAP.keys()) - set(bandlist)) > 0:
-            filters = filters & (pyarrow.compute.field("band").isin([BANDMAP[band] for band in bandlist]))
+            filter = filter & (pyarrow.compute.field("band").isin([BANDMAP[band] for band in bandlist]))
 
         # query the dataset and load the light curve data
-        pixel_tbl = dataset.to_table(filter=filters, columns=columns)
+        pixel_tbl = dataset.to_table(filter=filter, columns=columns)
 
         # do a cone search using astropy to select sources belonging to each object
         pixel_skycoords = SkyCoord(ra=pixel_tbl["ra"] * u.deg, dec=pixel_tbl["dec"] * u.deg)
