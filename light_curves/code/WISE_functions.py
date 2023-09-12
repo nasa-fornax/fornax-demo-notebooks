@@ -123,9 +123,9 @@ def load_data(locations, radius, bandlist):
     # iterate over partitions, load data, and find each object
     wise_df_list = []
     for pixel, locs_df in locations.groupby("pixel"):
-        # create a filter to pick out this partition
-        # the pixel index at (e.g.,) order 5 can be accessed as a column called "kealpix_k5"
-        filters = pyarrow.compute.field(f"healpix_k{K}") == pixel
+        # create a filter to pick out sources that are (1) in this partition; and (2) within the
+        # coadd's primary region (to avoid duplicates when an object is near the coadd boundary)
+        filters = (pyarrow.compute.field(f"healpix_k{K}") == pixel) & (pyarrow.compute.field("primary") == 1)
         # add a filter for the bandlist. if all bands are requested, skip this to avoid the overhead
         if len(set(BANDMAP.values()) - set(bandlist)) > 0:
             filters = filters & (pyarrow.compute.field("band").isin(bandlist))
