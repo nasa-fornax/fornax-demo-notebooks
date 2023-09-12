@@ -114,8 +114,8 @@ def load_lightcurves(locations, radius, bandlist):
     dataset = pyarrow.dataset.parquet_dataset(f"{catalog_root}/_metadata", filesystem=fs, partitioning="hive")
 
     # specify which columns will be loaded
-    # for a complete list of columns, use: `dataset.schema.names`
-    # to load the complete schema, use:
+    # for a complete list of column names, use: `dataset.schema.names`
+    # to load the complete schema, including units and descriptions, use:
     # schema = pyarrow.dataset.parquet_dataset(f"{catalog_root}/_common_metadata", filesystem=fs).schema
     columns = ["flux", "dflux", "ra", "dec", "band", "MJDMEAN"]
 
@@ -169,6 +169,6 @@ def transform_lightcurves(wise_df):
     # convert units
     wise_df["flux"] = convert_wise_flux_to_millijansky(nanomaggy_flux=wise_df["flux"])
     wise_df["err"] = convert_wise_flux_to_millijansky(nanomaggy_flux=wise_df["err"])
-    # convert the band to its common name ("W1" or "W2")
-    wise_df["band"] = wise_df["band"].map(BANDMAP)
+    # convert the band to its common name ("W1" or "W2"). need to invert the BANDMAP dict.
+    wise_df["band"] = wise_df["band"].map({value: key for key, value in BANDMAP.items()})
     return wise_df
