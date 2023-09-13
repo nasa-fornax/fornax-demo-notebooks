@@ -360,7 +360,9 @@ def Gaia_extract_median_photometry(gaia_table):
     '''
     Extract the median photometry from a Gaia table produced by `Gaia_retrieve_median_photometry`.
     
-    This function is currently not being used
+    This function is currently not being used but might be useful to some users to be able to plot a single
+    datapoint of Gaia photometry, perhaps in comparison with other observations in similar bands to generate
+    a cross-instrument light curve.  This is beyond the scope of the current demo notebook.
     
     Parameter
     ---------
