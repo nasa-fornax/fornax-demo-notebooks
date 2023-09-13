@@ -1,13 +1,12 @@
-import pandas as pd
-from astroquery.heasarc import Heasarc
-from tqdm import tqdm
-from astropy.table import Table
-import pyvo
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import pyvo
+from tqdm import tqdm
 
 from data_structures import MultiIndexDFObject
 from sample_selection import make_coordsTable
+
 
 #need to know the distribution of error radii for the catalogs of interest
 #this will inform the ligh curve query, as we are not interested in 

@@ -1,15 +1,11 @@
 import os
-import numpy as np
-from tqdm import tqdm
-
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-
+import numpy as np
 from astropy.table import Table
-import pandas as pd
 from scipy import stats
-
+from tqdm import tqdm
 
 
 def setup_text_plots():
