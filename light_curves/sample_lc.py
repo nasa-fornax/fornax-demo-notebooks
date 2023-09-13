@@ -145,12 +145,6 @@ def parallel_lc(coords_list,labels_list):
     parallel_df_lc.data.to_parquet(parquet_savename)
     print("file saved!")
     return parallel_df_lc
-
-def unify_lc(dflc):
-    '''To bring the light curve data frames into a unified interpolated grid, a preprocessing for ML routines'''
-    
-    return
-    
     
     
 def main():
