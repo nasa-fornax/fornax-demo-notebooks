@@ -20,6 +20,9 @@
 #pycache
 __pycache__
 
+# directory created by notebooks to store results
+output/
+
 # Temporary directory
 ./data/tmp/
 
