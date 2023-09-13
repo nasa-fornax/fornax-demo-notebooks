@@ -146,6 +146,13 @@ def parallel_lc(coords_list,labels_list):
     print("file saved!")
     return parallel_df_lc
 
+def unify_lc(dflc):
+    '''To bring the light curve data frames into a unified interpolated grid, a preprocessing for ML routines'''
+    
+    return
+    
+    
+    
 def main():
     c,l = build_sample()
     dflc = parallel_lc(c,l)
