@@ -146,13 +146,16 @@ def normalize_max_objects(data):
     row_sums = data.max(axis=1)
     return data / row_sums[:, np.newaxis]
 
-def normalize_clipmax_objects(data,maxarr):
+def normalize_clipmax_objects(data,maxarr,band =1):
     '''
     normalize combined data array by by max value after clipping the outliers in one band (second band here).
     '''
     d2 = np.zeros_like(data)
     for i,d in enumerate(data):
-        d2[i] = (d/maxarr[1,i])
+        if band<=np.shape(maxarr)[0]:
+            d2[i] = (d/maxarr[band,i])
+        else:
+            d2[i] = (d/maxarr[0,i])
     return d2
 
 # Shuffle before feeding to umap
@@ -207,3 +210,17 @@ def dtw_distance(series1, series2):
                 E[i][j] = v3 + v
 
     return np.sqrt(E[-1][-1])
+
+def stretch_small_values_arctan(data, factor=1.0):
+    """
+    Stretch small values in an array using the arctan function.
+
+    Parameters:
+    - data (numpy.ndarray): The input array.
+    - factor (float): A factor to control the stretching. Larger values will stretch more.
+
+    Returns:
+    - numpy.ndarray: The stretched array.
+    """
+    stretched_data = np.arctan(data * factor)
+    return stretched_data
