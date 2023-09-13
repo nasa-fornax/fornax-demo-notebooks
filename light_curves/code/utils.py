@@ -111,7 +111,9 @@ def mean_fractional_variation(lc,dlc):
     '''A common way of defining variability'''
     meanf = np.mean(lc) #mean flux of all points
     varf = np.std(lc)**2
-    deltaf = np.mean(dlc)**2 
+    deltaf = np.mean(dlc)**2
+    if meanf<=0:
+        meanf = 0.0001
     fvar = (np.sqrt(varf-deltaf))/meanf
     return fvar
 
