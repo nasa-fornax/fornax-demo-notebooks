@@ -30,7 +30,7 @@ def autopct_format(values):
     
 def unify_lc(df_lc,bands_inlc=['zr','zi','zg'],xres=160,numplots=1):
     x_ztf = np.linspace(0,1600,xres) # X array for interpolation
-    x_wise = np.linspace(0,4000,int(xres*2)) # X array for interpolation
+    x_wise = np.linspace(0,4000,xres) # X array for interpolation
 
     printcounter = 0
     objects,dobjects,flabels = [],[],[]

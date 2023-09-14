@@ -58,7 +58,7 @@ def build_sample():
     #there are ~500K of these, so choose the number based on
     #a balance between speed of running the light curves and whatever 
     #the ML algorithms would like to have
-    num_normal_QSO = 1000 
+    num_normal_QSO = 2000 
     get_SDSS_sample(coords, labels, num_normal_QSO)
 
     ## ADD TDEs to the sample, manually copied the TDE ZTF names from Hammerstein et al. 2023
@@ -75,8 +75,8 @@ def build_sample():
 
     #remove duplicates from the list if combining multiple references
     coords_list, labels_list = clean_sample(coords, labels)
-    print('final sample: ',len(coords_list))
-    return coords_list,labels_list
+    print('final sample: ',len(coords))
+    return coords,labels#coords_list,labels_list   I want repeats!
 
 def parallel_lc(coords_list,labels_list):
     ''' Check all the archives for the light curve data of the 
