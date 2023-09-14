@@ -1,3 +1,6 @@
+# directory created by notebooks to store results
+output/
+
 # .fits files
 ./**/*.fits
 *.fits
@@ -19,12 +22,3 @@
 
 #pycache
 __pycache__
-
-# directory created by notebooks to store results
-output/
-
-# Temporary directory
-./data/tmp/
-
-# untimely github repo
-./light_curves/unTimely_Catalog_explorer/
