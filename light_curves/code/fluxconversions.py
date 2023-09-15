@@ -95,4 +95,22 @@ def convertACSmagtoflux(date, filterstring, mag, magerr):
     fluxerr = fluxerr * (1E-23) # now in Jy
 
     return flux, fluxerr
-            
+
+def mjd_to_jd(mjd):
+    """
+    Convert Modified Julian Day to Julian Day.
+        
+    Parameters
+    ----------
+    mjd : float
+        Modified Julian Day
+        
+    Returns
+    -------
+    jd : float
+        Julian Day
+    
+        
+    """
+    return mjd + 2400000.5
+
