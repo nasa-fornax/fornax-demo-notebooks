@@ -20,7 +20,7 @@ from panstarrs import panstarrs_get_lightcurves
 from gaia_functions import Gaia_get_lightcurve
 from HCV_functions import HCV_get_lightcurves
 from icecube_functions import icecube_get_lightcurve
-from sample_selection import get_lamassa_sample, get_macleod16_sample, get_ruan_sample, get_macleod19_sample, get_sheng_sample, get_green_sample, get_lyu_sample, get_lopeznavas_sample, get_hon_sample, get_yang_sample,get_SDSS_sample, get_paper_sample, clean_sample,TDE_id2coord
+from sample_selection import get_lamassa_sample, get_macleod16_sample, get_ruan_sample, get_macleod19_sample, get_sheng_sample, get_green_sample, get_lyu_sample, get_lopeznavas_sample, get_hon_sample, get_yang_sample,get_SDSS_sample, get_paper_sample, clean_sample,noclean_sample,TDE_id2coord
 from data_structures import MultiIndexDFObject
 from heasarc_functions import HEASARC_get_lightcurves
 from TESS_Kepler_functions import TESS_Kepler_get_lightcurves
@@ -74,9 +74,9 @@ def build_sample():
     get_paper_sample('2020ApJ...896...10B','Palomar variable 20',coords,labels)
 
     #remove duplicates from the list if combining multiple references
-    coords_list, labels_list = clean_sample(coords, labels)
+    coords_list, labels_list = noclean_sample(coords, labels) #!!!!
     print('final sample: ',len(coords))
-    return coords,labels#coords_list,labels_list   I want repeats!
+    return coords_list,labels_list
 
 def parallel_lc(coords_list,labels_list):
     ''' Check all the archives for the light curve data of the 

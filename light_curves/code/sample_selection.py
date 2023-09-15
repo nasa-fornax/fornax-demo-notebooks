@@ -443,6 +443,36 @@ def clean_sample(skycoordslist, labels, verbose=1):
     coords_list = list(enumerate(raw_coords_list))  # list of tuples (objectid, skycoords)
 
     return coords_list, labels_list
+
+def noclean_sample(skycoordslist, labels, verbose=1):
+    """Makes a sample of skycoords and labels with repeats. Attaches an object ID to the coords.
+    
+    Parameters
+    ----------
+    skycoordslist : list
+        list of Astropy SkyCoords derived from literature sources
+    lables : list
+        List of the first author name and publication year for tracking the sources
+    verbose : int, optional
+        Print out the length of the sample after applying this function
+        
+    Returns
+    -------
+    coords_list : list of tuples
+        coords input cleaned of duplicates, with an object ID attached. Tuples contain (objectid, skycoords).
+    labels_list : list
+        labels associated with coords_list
+    """
+    #first turn the skycoord list into a table to be able to access table functions in astropy
+    t = Table([skycoordslist, labels, np.arange(0, len(skycoordslist), 1)], names=['sc', 'label', 'idx'])
+    uniquerows = t#table.unique(tjoin, keys = 'sc_id')
+    raw_coords_list = list(t['sc'])
+    labels_list = list(t['label'])
+    if verbose:
+        print('without duplicates removal, sample size: '+str(len(raw_coords_list)))
+    coords_list = list(enumerate(raw_coords_list))  # list of tuples (objectid, skycoords)
+    return coords_list, labels_list
+
 def make_coordsTable(coords_list, labels_list):
     """convert the coords and labels into an astropy table for input to ADQL catalog search
     
