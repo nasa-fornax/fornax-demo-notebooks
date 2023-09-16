@@ -1,8 +1,0 @@
-Comparing output located in: /home/jovyan/raen/issue28/tests/pr49/output
-Generated from branches:
-	troyraenissue28 - HEAD SHA: 2e622ba40d018f154b8fc948038d123ec56abf2d
-    fornaxnavomain - HEAD SHA: 67a2e624830f5957834688ab45e7232534444216
-Running equality tests...
-PASSED : Band params -- branches produced identical output
-PASSED : Source params -- branches produced identical output
-PASSED : calc_instrflux output -- branches produced identical output
