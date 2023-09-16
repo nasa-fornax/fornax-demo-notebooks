@@ -1,6 +1,9 @@
 # directory created by notebooks to store results
 output/
 
+# cache directory created by nway in forced photometry notebook
+cache/
+
 # .fits files
 ./**/*.fits
 *.fits
