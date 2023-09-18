@@ -1,7 +1,10 @@
-# directory created by notebooks to store results
+# Directories created by notebooks to store data, results, etc.
+# "data" dir to store any data that is downloaded or otherwise needs to be made available to the notebook
+# occasionally, data may need to be checked into the repo (e.g., forced_photometry/data), but this should be rare
+data/
+# "output" dir used to store results, figures, etc.
 output/
-
-# cache directory created by nway in forced photometry notebook
+# "cache" dir is created by nway in the forced photometry notebook. ignore it and any other "cache" directory
 cache/
 
 # .fits files
