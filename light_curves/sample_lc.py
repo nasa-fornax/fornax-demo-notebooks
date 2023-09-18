@@ -84,7 +84,7 @@ def build_sample():
     
 def main():
     c,l = build_sample()
-    dflc = parallel_lc(c,lparquet_savename = 'data/df_lc_wfermi.parquet.gzip')
+    dflc = parallel_lc(c,l,parquet_savename = 'data/df_lc_wfermi.parquet.gzip')
     # Unify for ML and save
     
 if __name__ == "__main__":
