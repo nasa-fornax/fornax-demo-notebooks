@@ -102,7 +102,7 @@ def create_figures(coords_list , df_lc, show_nbr_figures, save_output_dir):
 
             # first clean dataframe to remove erroneous rows
             band_lc_clean = band_lc[band_lc['time'] < 65000]
-
+            
             # Do some sigma-clipping, but only if more than 10 data points.
             if len(band_lc_clean) >= 10:
                 band_lc_clean = band_lc_clean[np.abs(stats.zscore(band_lc_clean.flux.values.astype(float))) < 3.0]
@@ -114,10 +114,13 @@ def create_figures(coords_list , df_lc, show_nbr_figures, save_output_dir):
                 #bandlc_clip = band_lc_clean[(np.abs(stats.zscore(band_lc_clean['flux'])) < 3.0)]
 
                 #find the maximum value of 'other bands'
-                max_electrons = max(band_lc_clean.flux)
-                factor = np.mean(max_list)/ max_electrons
-                lh = axes["A"].errorbar(bandlc_clip.time, bandlc_clip.flux * factor, bandlc_clip.err* factor,
-                                        capsize = 3.0,label = band)
+                if len(band_lc_clean) > 0:  
+                    max_electrons = max(band_lc_clean.flux)
+                    factor = np.mean(max_list)/ max_electrons
+                    #lh = axes["A"].errorbar(bandlc_clip.time, bandlc_clip.flux * factor, bandlc_clip.err* factor,
+                    #                        capsize = 3.0,label = band)
+                    lh = axes["A"].errorbar(band_lc_clean.time, band_lc_clean.flux * factor, band_lc_clean.err* factor,
+                                            capsize = 3.0,label = band)
 
             # ZTF is special because we are plotting the data also in "B" zoom-in
             elif band in ['zg','zr','zi']: # for ZTF

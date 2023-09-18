@@ -4,12 +4,12 @@ import astropy.units as u
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from astropy.table import Table, hstack, vstack
+from astropy.table import Table, hstack
 from astropy.time import Time
 from astroquery.gaia import Gaia
-from tqdm import tqdm
 
 from data_structures import MultiIndexDFObject
+from sample_selection import make_coordsTable
 
 
 def Gaia_get_lightcurve(coords_list, labels_list , verbose):
@@ -32,39 +32,30 @@ def Gaia_get_lightcurve(coords_list, labels_list , verbose):
     Returns
     --------
     MultiIndexDFObject  including all the sources with matches
-    in Gaia. This includes median photometry as well as epoch photometry. If no
-    epoch photometry was found, the median photoemtry is used at a median time
-    of Gaia observations.
+    in Gaia. This includes epoch photometry.
     
     '''
 
-    ## Retrieve Gaia table with Source IDs and photometry ==============
-    gaia_table = Gaia_retrieve_median_photometry(coords_list , labels_list,
-                                         gaia_source_table="gaiaedr3.gaia_source", # Which Table to use
-                                         search_radius = u.Quantity(20,u.arcsec), # search radius
+    ## Retrieve Gaia table with Source IDs ==============
+    gaia_table = Gaia_retrieve_catalog(coords_list , labels_list,
+                                         search_radius = 1/3600.,
                                          verbose = verbose
                                          )
     
-    
-    ## Extract Median Photometry ==============
-    # Produced for each object in the Gaia table output by `Gaia_retrieve_photometry()`.
-    gaia_phot = Gaia_extract_median_photometry(gaia_table)
-    
+    print(gaia_table.columns)   
     
     ## Extract Light curves ===============
     # For each of the objects, request the EPOCH_PHOTOMETRY from the Gaia DataLink Service
 
     ## Run search
-    prod_tab = Gaia_retrieve_EPOCH_PHOTOMETRY(ids=list(gaia_phot["source_id"]) , verbose=verbose)
+    prod_tab = Gaia_retrieve_EPOCH_PHOTOMETRY(ids=list(gaia_table["source_id"]) , verbose=verbose)
 
-    ## Create light curves
-    # Note that epoch photometry is used unless there is none, in which case
-    # the median photometry is used with a median time of all Gaia observations.
+    ## Create light curves =================
     gaia_epoch_phot = Gaia_mk_lightcurves(prod_tab , verbose=verbose)
 
     ## Create Gaia Pandas MultiIndex object and append to existing data frame.
     df_lc_gaia = Gaia_mk_MultiIndex(coords_list=coords_list,
-                                    labels_list=labels_list, gaia_phot=gaia_phot ,
+                                    labels_list=labels_list, gaia_phot = gaia_table,
                                     gaia_epoch_phot=gaia_epoch_phot, verbose=verbose)
 
     df_lc = MultiIndexDFObject()
@@ -73,77 +64,7 @@ def Gaia_get_lightcurve(coords_list, labels_list , verbose):
     
     return(df_lc)
 
-
-def Gaia_extract_median_photometry(gaia_table):
-    '''
-    Extract the median photometry from a Gaia table produced by `Gaia_retrieve_median_photometry`.
-    
-    Parameter
-    ---------
-    gaia_table : astropy table
-        Gaia table including photometry produced by `Gaia_retrieve_median_photometry`.
-        
-        
-    Returns
-    --------
-    Astropy table containing median photometry.
-    
-    '''
-    
-    # Once we matched the objects, we have to extract the photometry for them. Here we extract
-    # the mean photometry (later we will do the time series).
-    # Note that the fluxes are in e/s, not very useful. However, there are magnitudes (what unit??) but without errors.
-    # We can get the errors from the flux errors?
-    # Also note that we should include the source_id in order to search for epoch photometry
-
-    ## Define keys (columns) that will be used later. Also add wavelength in angstroms for each filter
-    other_keys = ["source_id","phot_g_n_obs","phot_rp_n_obs","phot_bp_n_obs","input_object_name"] # some other useful info
-    mag_keys = ["phot_bp_mean_mag" , "phot_g_mean_mag" , "phot_rp_mean_mag"]
-    magerr_keys = ["phot_bp_mean_mag_error" , "phot_g_mean_mag_error" , "phot_rp_mean_mag_error"]
-    flux_keys = ["phot_bp_mean_flux" , "phot_g_mean_flux" , "phot_rp_mean_flux"]
-    fluxerr_keys = ["phot_bp_mean_flux_error" , "phot_g_mean_flux_error" , "phot_rp_mean_flux_error"]
-    mag_lambda = ["5319.90" , "6735.42" , "7992.90"]
-
-    ## Get photometry. Note that this includes only objects that are 
-    # matched to the catalog. We have to add the missing ones later.
-    _phot = gaia_table[mag_keys]
-    _err = hstack( [ 2.5/np.log(10) * gaia_table[e]/gaia_table[f] for e,f in zip(fluxerr_keys,flux_keys) ] )
-    gaia_phot2 = hstack( [_phot , _err] )
-
-    ## Clean up (change units and column names)
-    _ = [gaia_phot2.rename_column(f,m) for m,f in zip(magerr_keys,fluxerr_keys)]
-    for key in magerr_keys:
-        gaia_phot2[key].unit = "mag"
-    gaia_phot2["input_object_name"] = gaia_table["input_object_name"].copy()
-
-    ## Add Some other useful information
-    for key in other_keys:
-        gaia_phot2[key] = gaia_table[key]
-
-    gaia_phot = gaia_phot2.copy()
-
-    '''## Also add object for which we don't have photometry.
-    # Add Nan for now, need to think about proper format. Also, there are probably smarter ways to do this.
-    # We do this by matching the object names from the original catalog to the photometry catalog. Then add
-    # an entry [np.nan, ...] if it does not exist. To make life easier, we add a dummy entry as the first
-    # row so we can compy all the 
-    gaia_phot = Table( names=gaia_phot2.keys() , dtype=gaia_phot2.dtype )
-    for ii in range(len(object_names)):
-        #sel = np.where( CLAGN["Object Name"][ii] == gaia_phot2["input_object_name"] )[0]
-        sel = np.where( object_names[ii] == gaia_phot2["input_object_name"] )[0]
-        if len(sel) > 0:
-            gaia_phot = vstack([gaia_phot , gaia_phot2[sel] ])
-        else:
-            tmp = Table( np.repeat(np.NaN , len(gaia_phot2.keys())) , names=gaia_phot2.keys() , dtype=gaia_phot2.dtype )
-            gaia_phot = vstack([gaia_phot , tmp ])
-
-    ## Some cleanup:
-    gaia_phot["source_id"][gaia_phot["source_id"] < 0] = 0'''
-    
-    return(gaia_phot)
-
-
-def Gaia_retrieve_median_photometry(coords_list , labels_list , gaia_source_table , search_radius, verbose):
+def Gaia_retrieve_catalog(coords_list , labels_list , search_radius, verbose):
     '''
     Retrieves the photometry table for a list of sources.
     
@@ -154,12 +75,10 @@ def Gaia_retrieve_median_photometry(coords_list , labels_list , gaia_source_tabl
     
     labels_list : list of str
         List of labels for each soruce
-        
-    gaia_source_table : str
-        Gaia source table, e.g., "gaiaedr3.gaia_source"
-        
-    search_radius : float (as astropy Quantity with unit u.arcsec)
-        Search radius in arcseconds, e.g., 20*u.arcsec
+                
+    search_radius : float 
+        Search radius in degrees, e.g., 1/3600.
+        suggested search radius is 1 arcsecond or 1/3600.
         
     verbose : int
         How much to talk. 0 = None, 1 = a little bit , 2 = more, 3 = full
@@ -169,46 +88,34 @@ def Gaia_retrieve_median_photometry(coords_list , labels_list , gaia_source_tabl
     Astropy table with the Gaia photometry for each source.
     
     '''
-    
-    ## Log in (apparently not necessary for small queries) 
-    #Gaia.login(user=None , password=None)
-    
-    ## Select Gaia table (DR3)
-    Gaia.MAIN_GAIA_TABLE = gaia_source_table
-
-
-    ## Search and Cross match.
-    # This can be done in a smarter way by matching catalogs on the Gaia server, or grouping the
-    # sources and search a larger area.
-
-    # get catalog
-    gaia_table = Table()
     t1 = time.time()
-    for objectid, coord in tqdm(coords_list):
-        
-        gaia_search = Gaia.cone_search_async(coordinate=coord, radius=search_radius , background=True)
-        gaia_search.get_data()["dist"].unit = "deg"
-        gaia_search.get_data()["dist"] = gaia_search.get_data()["dist"].to(u.arcsec) # Change distance unit from degrees to arcseconds
-
-
-        # match
-        if len(gaia_search.get_data()["dist"]) > 0:
-            gaia_search.get_data()["input_object_name"] = objectid # add input object name to catalog
-            sel_min = np.where( (gaia_search.get_data()["dist"] < 1*u.arcsec) & (gaia_search.get_data()["dist"] == np.nanmin(gaia_search.get_data()["dist"]) ) )[0]
-        else:
-            sel_min = []
-
-        if len(sel_min) > 0:
-            gaia_table = vstack( [gaia_table , gaia_search.get_data()[sel_min]] )
-        else:
-            gaia_table = vstack( [gaia_table , gaia_search.get_data()[sel_min]] )
-
-    if verbose > 0: print("\nSearch completed in {:.2f} seconds".format((time.time()-t1) ) )
-    if verbose > 0: print("Number of objects matched: {} out of {}.".format(len(gaia_table),len(coords_list) ) )
     
-    return(gaia_table)
+    #first make an astropy table from our master list of coordinates
+    # as input to the pyvo TAP query 
+    coordstab = make_coordsTable(coords_list, labels_list)
+
+    #this query is too slow without gaia.random_index.  
+    #Gaia helpdesk is aware of this bug somewhere on their end
+    querystr = f"""
+        SELECT gaia.ra, gaia.dec, gaia.random_index, gaia.source_id, mt.ra, mt.dec, mt.objectid
+        FROM tap_upload.table_test AS mt
+        JOIN gaiadr3.gaia_source_lite AS gaia
+        ON 1=CONTAINS(POINT('ICRS',mt.ra,mt.dec),CIRCLE('ICRS',gaia.ra,gaia.dec,{search_radius}))
+        """
+    #use an asynchronous query of the Gaia database
+    #cross match with our uploaded table
+    j = Gaia.launch_job_async(query=querystr, upload_resource=coordstab, upload_table_name="table_test")
     
+    results = j.get_results()
     
+    if verbose : print("\nSearch completed in {:.2f} seconds".format((time.time()-t1) ) )
+    if verbose : print("Number of objects matched: {} out of {}.".format(len(results),len(coords_list) ) )
+
+    return results
+
+
+
+
 
 
 ## Define function to retrieve epoch photometry
@@ -308,18 +215,19 @@ def Gaia_mk_lightcurves(prod_tab , verbose):
 
 
 
-def Gaia_mk_MultiIndex(coords_list, labels_list, gaia_phot , gaia_epoch_phot , verbose):
+def Gaia_mk_MultiIndex(coords_list, labels_list, gaia_phot, gaia_epoch_phot , verbose):
     '''
     Creates a MultiIndex Pandas Dataframe for the Gaia observations. Specifically, it 
-    returns the epoch photometry as a function of time. For sources without Gaia epoch
-    photometry, it just returns the mean photometry a epoch 2015-09-24T19:40:33.468, which
-    is the average epoch of the observations of sources with multi-epoch photometry.
+    returns the epoch photometry as a function of time. 
     
     Parameters
     ----------
     coords_list : list of Astropy SkyCoord objects
         List of (id,coordinates) tuples of the sources
     
+    labels_list : list of str
+        List of labels for each soruce
+                
     gaia_phot : dict
         The Gaia mean photometry (will be linked by object ID in 'data' catalog)
     
@@ -344,7 +252,7 @@ def Gaia_mk_MultiIndex(coords_list, labels_list, gaia_phot , gaia_epoch_phot , v
 
         # get Gaia source_id
         #sel = np.where(data["Object Name"][ii] == gaia_phot["input_object_name"])[0]
-        sel = np.where(objectid == gaia_phot["input_object_name"])[0]
+        sel = np.where(objectid == gaia_phot["objectid"])[0]
         lab = labels_list[objectid]
         
         if len(sel) > 0:
@@ -387,41 +295,11 @@ def Gaia_mk_MultiIndex(coords_list, labels_list, gaia_phot , gaia_epoch_phot , v
                         #this_df_lc_gaia exists
                         this_df_lc = pd.concat([this_df_lc, dfsingle])
 
-            else: # No match to Gaia multi-epoch catalog: use single epoch photometry
-                if verbose > 1: print("No Gaia epoch photometry, append single epoch photometry ")
+            else: # No match to Gaia multi-epoch catalog: can safely ignore this object
+                
+                if verbose > 1: print("No Gaia epoch photometry ")
 
-                for band in ["G","BP","RP"]:
-
-                    # get data
-                    t = Time("2015-09-24T19:40:33.468" , format="isot") # just random date: FIXME: NEED TO GET ACTUAL OBSERVATION TIME!
-                    y = gaia_phot["phot_{}_mean_mag".format(band.lower())][sel]
-                    dy = gaia_phot["phot_{}_mean_mag_error".format(band.lower())][sel]
-
-                    # compute flux and flux error in mJy
-                    y2 = 10**(-0.4*(y - 23.9))/1e3 # in mJy
-                    dy2 = dy / 2.5 * np.log(10) * y2 # in mJy
-
-                    # create single instance
-                    dfsingle = pd.DataFrame(
-                                dict(flux=np.asarray(y2), # in mJy
-                                 err=np.asarray(dy2), # in mJy
-                                 time=t.mjd, # in MJD
-                                 #objectid=gaia_phot["input_object_name"][sel],
-                                 objectid=np.repeat(objectid, len(y)),label=lab,
-                                 band="Gaia {}".format(band.lower())
-                                    )
-                    ).set_index(["objectid", "label", "band", "time"])
-
-                    # add to table
-                    try:
-                        this_df_lc
-                    except NameError:
-                        #this_df_lc doesn't exist (yet)
-                        this_df_lc = dfsingle.copy()
-                    else:
-                        #this_df_lc_gaia exists
-                        this_df_lc = pd.concat([this_df_lc, dfsingle])
-
+ 
         else: # no match to Gaia
             if verbose > 1: print("none")
             
@@ -431,6 +309,7 @@ def Gaia_mk_MultiIndex(coords_list, labels_list, gaia_phot , gaia_epoch_phot , v
 def Gaia_plot_lightcurves(df_lc , nbr_objects):
     '''
     Plots the Gaia light curves for a select number of sources.
+    This function is currently not being used.
     
     Parameter
     ---------
@@ -477,3 +356,57 @@ def Gaia_plot_lightcurves(df_lc , nbr_objects):
     plt.show()
     
     return(True)
+def Gaia_extract_median_photometry(gaia_table):
+    '''
+    Extract the median photometry from a Gaia table produced by `Gaia_retrieve_median_photometry`.
+    
+    This function is currently not being used but might be useful to some users to be able to plot a single
+    datapoint of Gaia photometry, perhaps in comparison with other observations in similar bands to generate
+    a cross-instrument light curve.  This is beyond the scope of the current demo notebook.
+    
+    Parameter
+    ---------
+    gaia_table : astropy table
+        Gaia table including photometry produced by `Gaia_retrieve_median_photometry`.
+        
+        
+    Returns
+    --------
+    Astropy table containing median photometry.
+    
+    '''
+    
+    # Once we matched the objects, we have to extract the photometry for them. Here we extract
+    # the mean photometry (later we will do the time series).
+    # Note that the fluxes are in e/s, not very useful. However, there are magnitudes (what unit??) but without errors.
+    # We can get the errors from the flux errors?
+    # Also note that we should include the source_id in order to search for epoch photometry
+
+    ## Define keys (columns) that will be used later. Also add wavelength in angstroms for each filter
+    other_keys = ["source_id","phot_g_n_obs","phot_rp_n_obs","phot_bp_n_obs","input_object_name"] # some other useful info
+    mag_keys = ["phot_bp_mean_mag" , "phot_g_mean_mag" , "phot_rp_mean_mag"]
+    magerr_keys = ["phot_bp_mean_mag_error" , "phot_g_mean_mag_error" , "phot_rp_mean_mag_error"]
+    flux_keys = ["phot_bp_mean_flux" , "phot_g_mean_flux" , "phot_rp_mean_flux"]
+    fluxerr_keys = ["phot_bp_mean_flux_error" , "phot_g_mean_flux_error" , "phot_rp_mean_flux_error"]
+    mag_lambda = ["5319.90" , "6735.42" , "7992.90"]
+
+    ## Get photometry. Note that this includes only objects that are 
+    # matched to the catalog. We have to add the missing ones later.
+    _phot = gaia_table[mag_keys]
+    _err = hstack( [ 2.5/np.log(10) * gaia_table[e]/gaia_table[f] for e,f in zip(fluxerr_keys,flux_keys) ] )
+    gaia_phot2 = hstack( [_phot , _err] )
+
+    ## Clean up (change units and column names)
+    _ = [gaia_phot2.rename_column(f,m) for m,f in zip(magerr_keys,fluxerr_keys)]
+    for key in magerr_keys:
+        gaia_phot2[key].unit = "mag"
+    gaia_phot2["input_object_name"] = gaia_table["input_object_name"].copy()
+
+    ## Add Some other useful information
+    for key in other_keys:
+        gaia_phot2[key] = gaia_table[key]
+
+    gaia_phot = gaia_phot2.copy()
+
+      
+    return(gaia_phot)
