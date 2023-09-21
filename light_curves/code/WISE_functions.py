@@ -5,6 +5,7 @@ import pyarrow.compute
 import pyarrow.dataset
 import pyarrow.fs
 from astropy.coordinates import SkyCoord
+from tqdm import tqdm
 
 from data_structures import MultiIndexDFObject
 from fluxconversions import convert_wise_flux_to_millijansky
@@ -121,7 +122,7 @@ def load_lightcurves(locations, radius, bandlist):
 
     # iterate over partitions, load data, and find each object
     wise_df_list = []
-    for pixel, locs_df in locations.groupby("pixel"):
+    for pixel, locs_df in tqdm(locations.groupby("pixel")):
         # create a filter to pick out sources that are (1) in this partition; and (2) within the
         # coadd's primary region (to avoid duplicates when an object is near the coadd boundary)
         filter = (pyarrow.compute.field(f"healpix_k{K}") == pixel) & (pyarrow.compute.field("primary") == 1)
