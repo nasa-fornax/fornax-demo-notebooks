@@ -22,6 +22,8 @@ import time
 import warnings
 from math import ceil
 from multiprocessing import Pool
+from scipy.spatial import ConvexHull
+from scipy.interpolate import griddata
 
 import astropy.units as u
 from astropy.coordinates import SkyCoord
@@ -58,14 +60,15 @@ def autopct_format(values):
 def unify_lc(df_lc,bands_inlc=['zr','zi','zg'],xres=160,numplots=1):
     x_ztf = np.linspace(0,1600,xres) # X array for interpolation
     x_wise = np.linspace(0,4000,xres) # X array for interpolation
-
+    objids = df_lc.data.index.get_level_values('objectid')[:].unique()
+    
     printcounter = 0
     objects,dobjects,flabels = [],[],[]
-    for obj in tqdm(df_lc.data.count(axis=0,level=0).index):
-
-        singleobj = df_lc.data.loc[obj,:,:,:]    
+    for obj in tqdm(objids):
+    
+        singleobj = df_lc.data.loc[obj,:,:,:]  
         label = singleobj.index.unique('label')
-        bands = singleobj.loc[obj,label[0],:,:].index.get_level_values('band')[:].unique()
+        bands = singleobj.loc[label[0],:,:].index.get_level_values('band')[:].unique()
         keepobj = 0
         if len(np.intersect1d(bands,bands_inlc))==len(bands_inlc):
             if printcounter<numplots:
@@ -76,7 +79,7 @@ def unify_lc(df_lc,bands_inlc=['zr','zi','zg'],xres=160,numplots=1):
 
             keepobj = 1 # 
             for l,band in enumerate(bands_inlc):
-                band_lc = singleobj.loc[obj,label[0], band, :]
+                band_lc = singleobj.loc[label[0], band, :]
                 band_lc_clean = band_lc[band_lc.index.get_level_values('time') < 65000]
                 x,y,dy = np.array(band_lc_clean.index.get_level_values('time')-band_lc_clean.index.get_level_values('time')[0]),np.array(band_lc_clean.flux),np.array(band_lc_clean.err)
 
@@ -253,6 +256,66 @@ def stretch_small_values_arctan(data, factor=1.0):
     """
     stretched_data = np.arctan(data * factor)
     return stretched_data
+
+def remove_outliers(x, y, z, factor=1.5):
+    """
+    Remove outliers based on the interquartile range.
+
+    Parameters:
+    x (array-like): x-coordinates.
+    y (array-like): y-coordinates.
+    z (array-like): Values associated with each point.
+    factor (float, optional): Outlier removal factor based on the interquartile range. Default is 1.5.
+
+    Returns:
+    tuple: A tuple containing the filtered x, y, and z arrays after outlier removal.
+    """
+    q1 = np.percentile(z, 25)
+    q3 = np.percentile(z, 75)
+    iqr = q3 - q1
+    lower_bound = q1 - factor * iqr
+    upper_bound = q3 + factor * iqr
+
+    mask = (z >= lower_bound) & (z <= upper_bound)
+
+    return x[mask], y[mask], z[mask]
+
+def interpolate_umap(x, y, z, grid_resolution=100, method='cubic', padding_factor=0.1, outlier_factor=1.5):
+    """
+    Interpolate values on a UMAP grid within the convex hull of the given data.
+
+    Parameters:
+    x (array-like): UMAP x-coordinates.
+    y (array-like): UMAP y-coordinates.
+    z (array-like): Values associated with each UMAP point.
+    grid_resolution (int, optional): Resolution of the grid for interpolation. Default is 100.
+    method (str, optional): Interpolation method ('linear', 'nearest', 'cubic'). Default is 'cubic'.
+    padding_factor (float, optional): Factor to extend the grid beyond the convex hull. Default is 0.1.
+    outlier_factor (float, optional): Outlier removal factor based on the interquartile range. Default is 1.5.
+
+    Returns:
+    tuple: A tuple containing the interpolated grid (x_pred, y_pred) and the interpolated values (interp_values).
+    """
+    # Remove outliers
+    x_filtered, y_filtered, z_filtered = remove_outliers(x, y, z, factor=outlier_factor)
+
+    # Reshape the data for interpolation
+    points = np.column_stack((x_filtered, y_filtered))
+
+    # Find the convex hull of the data
+    hull = ConvexHull(points)
+
+    # Extend the grid slightly beyond the convex hull
+    min_x, max_x = np.min(hull.points[:, 0]), np.max(hull.points[:, 0])
+    min_y, max_y = np.min(hull.points[:, 1]), np.max(hull.points[:, 1])
+    x_pred = np.linspace(min_x - padding_factor * (max_x - min_x), max_x + padding_factor * (max_x - min_x), grid_resolution)
+    y_pred = np.linspace(min_y - padding_factor * (max_y - min_y), max_y + padding_factor * (max_y - min_y), grid_resolution)
+    x_pred, y_pred = np.meshgrid(x_pred, y_pred)
+
+    # Perform interpolation using griddata within the convex hull
+    interp_values = griddata(points[hull.vertices, :], z_filtered[hull.vertices], (x_pred, y_pred), method=method)
+
+    return x_pred, y_pred, interp_values
 
 def parallel_lc(coords_list,labels_list,parquet_savename = 'data/df_lc_.parquet.gzip'):
     ''' Check all the archives for the light curve data of the 
