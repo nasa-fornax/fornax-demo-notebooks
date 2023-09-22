@@ -1,6 +1,6 @@
 # .fits files
-./**/*.fits
-*.fits
+#./**/*.fits
+#*.fits
 
 *.gzip
 ./**/*.gzip
