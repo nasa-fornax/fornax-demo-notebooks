@@ -2,43 +2,14 @@ from acstools import acszpt
 from astropy.time import Time
 
 
-#need to convert those magnitudes into mJy to be consistent in data structure.
-#using zeropoints from here: https://wise2.ipac.caltech.edu/docs/release/allsky/expsup/sec4_4h.html
-def convert_WISEtoJanskies(mag, magerr, band):
-    """converts WISE telescope magnitudes into flux units of Jansies in mJy
+def convert_wise_flux_to_millijansky(nanomaggy_flux):
+    """unWISE light curves flux is stored in nanomaggy. Convert to millijansky.
     
-    Parameters
-    ----------
-    mag : array-like
-        array of WISE magnitudes
-    magerr : array-like
-        array of WISE uncertainties on the magnitudes
-    band : str {'w1', 'w2'}
-        name of the WISE band to be converted
-        
-    Returns
-    -------
-    flux: array
-        flux in mJy corresponding to the input magnitudes
-    flux uncertaintiy: array
-        uncertainty on the returned flux corresponding to input magerr
+    See https://www.sdss3.org/dr8/algorithms/magnitudes.php
     """
-    if band == 'w1':
-        zpt = 309.54
-    elif band == 'w2':
-        zpt = 171.787
-            
-    flux_Jy = zpt*(10**(-mag/2.5))
-    
-    #calculate the error
-    magupper = mag + magerr
-    maglower = mag - magerr
-    flux_upper = abs(flux_Jy - (zpt*(10**(-magupper/2.5))))
-    flux_lower = abs(flux_Jy - (zpt*(10**(-maglower/2.5))))
-    
-    fluxerr_Jy = (flux_upper + flux_lower) / 2.0
-    
-    return flux_Jy*1E3, fluxerr_Jy*1E3  #now in mJy
+    millijansky_per_nanomaggy = 3.631e-3
+    return nanomaggy_flux * millijansky_per_nanomaggy
+
 
 def convertACSmagtoflux(date, filterstring, mag, magerr):
     """converts HST ACS magnitudes into flux units of Janskies 

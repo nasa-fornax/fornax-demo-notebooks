@@ -1,3 +1,9 @@
+# directory created by notebooks to store results
+output/
+
+# cache directory created by nway in forced photometry notebook
+cache/
+
 # .fits files
 #./**/*.fits
 #*.fits
@@ -22,9 +28,3 @@
 
 #pycache
 __pycache__
-
-# Temporary directory
-./data/tmp/
-
-# untimely github repo
-./light_curves/unTimely_Catalog_explorer/
