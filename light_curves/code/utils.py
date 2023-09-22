@@ -24,6 +24,7 @@ from math import ceil
 from multiprocessing import Pool
 from scipy.spatial import ConvexHull
 from scipy.interpolate import griddata
+import multiprocessing as mp
 
 # local code imports
 sys.path.append('code/')
@@ -36,7 +37,7 @@ from data_structures import MultiIndexDFObject
 from heasarc_functions import HEASARC_get_lightcurves
 from TESS_Kepler_functions import TESS_Kepler_get_lightcurves
 from WISE_functions import WISE_get_lightcurves
-from ztf_functions_old import ZTF_get_lightcurve
+from ztf_functions import ZTF_get_lightcurve
 
 from tqdm import tqdm
 
@@ -253,30 +254,31 @@ def parallel_lc(coords_list,labels_list,parquet_savename = 'data/df_lc_.parquet.
     list of coordinates given in input in parallel and return a 
     muldidimensional lightcurve dataframe.'''
     
-    mission_list = ["FERMIGTRIG", "SAXGRBMGRB"]
-    heasarc_radius = 0.1 * u.degree
-    bandlist = ["w1", "w2"]
-    wise_radius = 1.0
+    max_fermi_error_radius = str(1.0)  
+    max_sax_error_radius = str(3.0)
+    heasarc_cat = ["FERMIGTRIG", "SAXGRBMGRB"]
+    error_radius = [max_fermi_error_radius , max_sax_error_radius]
+    bandlist = ["W1", "W2"]
+    wise_radius = 1.0 * u.arcsec
     panstarrs_radius = 1.0 / 3600.0  # search radius = 1 arcsec
     lk_radius = 1.0  # arcseconds
     hcv_radius = 1.0 / 3600.0  # radius = 1 arcsec
-    n_single_archives, n_multiple_archives = 6, 2  # must sum to total number of archives called
-    n_chunks_per_archive = 5  # will make one api call per chunk per 'multiple' archive
-    n_workers = n_single_archives + n_multiple_archives * n_chunks_per_archive
-    
+    n_workers = 8  # this should equal the total number of archives called
+    ztf_nworkers = None
+
     parallel_starttime = time.time()
 
     # start a multiprocessing pool and run all the archive queries
     parallel_df_lc = MultiIndexDFObject()  # to collect the results
     callback = parallel_df_lc.append  # will be called once on the result returned by each archive
-    with Pool(processes=n_workers) as pool:
+    with mp.Pool(processes=n_workers) as pool:
 
-        # start the processes that call the fast archives
+        # start the processes that call the archives
         pool.apply_async(
-            Gaia_get_lightcurve, (coords_list, labels_list, 1), callback=callback
+            Gaia_get_lightcurve, (coords_list,  labels_list , 1), callback=callback
         )
         pool.apply_async(
-            HEASARC_get_lightcurves, (coords_list, labels_list, heasarc_radius, mission_list), callback=callback
+            HEASARC_get_lightcurves, (coords_list, labels_list, heasarc_cat, error_radius), callback=callback
         )
         pool.apply_async(
             HCV_get_lightcurves, (coords_list, labels_list, hcv_radius), callback=callback
@@ -290,19 +292,12 @@ def parallel_lc(coords_list,labels_list,parquet_savename = 'data/df_lc_.parquet.
         pool.apply_async(
             TESS_Kepler_get_lightcurves, (coords_list, labels_list, lk_radius), callback=callback
         )
-
-        # split coords_list into smaller chunks and call remaining archives
-        chunksize = ceil(len(coords_list) / n_chunks_per_archive)  # num coords per api call
-        for n in range(0, len(coords_list), chunksize):
-            coords = coords_list[n : n + chunksize]
-
-            # start the processes that call the slow archives
-            pool.apply_async(
-                WISE_get_lightcurves, (coords, labels_list, wise_radius, bandlist), callback=callback
-            )
-            pool.apply_async(
-                ZTF_get_lightcurve, (coords, labels_list, 0), callback=callback
-            )
+        pool.apply_async(
+            WISE_get_lightcurves, (coords_list, labels_list, wise_radius, bandlist), callback=callback
+        )
+        pool.apply_async(
+            ZTF_get_lightcurve, (coords_list, labels_list, ztf_nworkers), callback=callback
+        )
 
         pool.close()  # signal that no more jobs will be submitted to the pool
         pool.join()  # wait for all jobs to complete, including the callback

@@ -25,7 +25,7 @@ from data_structures import MultiIndexDFObject
 from heasarc_functions import HEASARC_get_lightcurves
 from TESS_Kepler_functions import TESS_Kepler_get_lightcurves
 from WISE_functions import WISE_get_lightcurves
-from ztf_functions_old import ZTF_get_lightcurve
+from ztf_functions import ZTF_get_lightcurve
 from utils import *
 
 

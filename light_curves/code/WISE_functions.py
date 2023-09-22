@@ -44,7 +44,6 @@ def WISE_get_lightcurves(coords_list, labels_list, radius=1.0 * u.arcsec, bandli
 
     # clean and transform the data into the form needed for a MultiIndexDFObject
     wise_df = transform_lightcurves(wise_df)
-
     # return the light curves as a MultiIndexDFObject
     indexes, columns = ["objectid", "label", "band", "time"], ["flux", "err"]
     return MultiIndexDFObject(data=wise_df.set_index(indexes)[columns])
@@ -83,7 +82,6 @@ def locate_objects(coords_list, labels_list, radius):
 
     # my_coords_list is a list of tuples. turn it into a dataframe
     locations = pd.DataFrame(my_coords_list, columns=["objectid", "coord", "label", "pixel"])
-
     # locations contains one row per object, and the pixel column stores arrays of ints
     # "explode" the dataframe into one row per object per pixel
     # this may create multiple rows per object, the pixel column will now store single ints
