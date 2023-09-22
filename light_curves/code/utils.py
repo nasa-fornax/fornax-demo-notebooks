@@ -25,15 +25,6 @@ from multiprocessing import Pool
 from scipy.spatial import ConvexHull
 from scipy.interpolate import griddata
 
-import astropy.units as u
-from astropy.coordinates import SkyCoord
-import matplotlib.pyplot as plt
-import numpy as np
-from astropy.table import Table
-from scipy import stats
-import pandas as pd
-
-
 # local code imports
 sys.path.append('code/')
 from panstarrs import panstarrs_get_lightcurves
@@ -46,7 +37,6 @@ from heasarc_functions import HEASARC_get_lightcurves
 from TESS_Kepler_functions import TESS_Kepler_get_lightcurves
 from WISE_functions import WISE_get_lightcurves
 from ztf_functions_old import ZTF_get_lightcurve
-from utils import *
 
 from tqdm import tqdm
 
@@ -257,65 +247,6 @@ def stretch_small_values_arctan(data, factor=1.0):
     stretched_data = np.arctan(data * factor)
     return stretched_data
 
-def remove_outliers(x, y, z, factor=1.5):
-    """
-    Remove outliers based on the interquartile range.
-
-    Parameters:
-    x (array-like): x-coordinates.
-    y (array-like): y-coordinates.
-    z (array-like): Values associated with each point.
-    factor (float, optional): Outlier removal factor based on the interquartile range. Default is 1.5.
-
-    Returns:
-    tuple: A tuple containing the filtered x, y, and z arrays after outlier removal.
-    """
-    q1 = np.percentile(z, 25)
-    q3 = np.percentile(z, 75)
-    iqr = q3 - q1
-    lower_bound = q1 - factor * iqr
-    upper_bound = q3 + factor * iqr
-
-    mask = (z >= lower_bound) & (z <= upper_bound)
-
-    return x[mask], y[mask], z[mask]
-
-def interpolate_umap(x, y, z, grid_resolution=100, method='cubic', padding_factor=0.1, outlier_factor=1.5):
-    """
-    Interpolate values on a UMAP grid within the convex hull of the given data.
-
-    Parameters:
-    x (array-like): UMAP x-coordinates.
-    y (array-like): UMAP y-coordinates.
-    z (array-like): Values associated with each UMAP point.
-    grid_resolution (int, optional): Resolution of the grid for interpolation. Default is 100.
-    method (str, optional): Interpolation method ('linear', 'nearest', 'cubic'). Default is 'cubic'.
-    padding_factor (float, optional): Factor to extend the grid beyond the convex hull. Default is 0.1.
-    outlier_factor (float, optional): Outlier removal factor based on the interquartile range. Default is 1.5.
-
-    Returns:
-    tuple: A tuple containing the interpolated grid (x_pred, y_pred) and the interpolated values (interp_values).
-    """
-    # Remove outliers
-    x_filtered, y_filtered, z_filtered = remove_outliers(x, y, z, factor=outlier_factor)
-
-    # Reshape the data for interpolation
-    points = np.column_stack((x_filtered, y_filtered))
-
-    # Find the convex hull of the data
-    hull = ConvexHull(points)
-
-    # Extend the grid slightly beyond the convex hull
-    min_x, max_x = np.min(hull.points[:, 0]), np.max(hull.points[:, 0])
-    min_y, max_y = np.min(hull.points[:, 1]), np.max(hull.points[:, 1])
-    x_pred = np.linspace(min_x - padding_factor * (max_x - min_x), max_x + padding_factor * (max_x - min_x), grid_resolution)
-    y_pred = np.linspace(min_y - padding_factor * (max_y - min_y), max_y + padding_factor * (max_y - min_y), grid_resolution)
-    x_pred, y_pred = np.meshgrid(x_pred, y_pred)
-
-    # Perform interpolation using griddata within the convex hull
-    interp_values = griddata(points[hull.vertices, :], z_filtered[hull.vertices], (x_pred, y_pred), method=method)
-
-    return x_pred, y_pred, interp_values
 
 def parallel_lc(coords_list,labels_list,parquet_savename = 'data/df_lc_.parquet.gzip'):
     ''' Check all the archives for the light curve data of the 
