@@ -16,3 +16,4 @@ s3fs
 tqdm
 wget
 alerce
+umap-learn[plot]

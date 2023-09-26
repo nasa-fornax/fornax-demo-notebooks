@@ -325,7 +325,7 @@ def build_sample():
     get_macleod19_sample(coords, labels)  #2019ApJ...874....8M
     get_sheng_sample(coords, labels)  #2020ApJ...889...46S
     get_green_sample(coords, labels)  #2022ApJ...933..180G
-    get_lyu_sample(coords, labels)  #z32022ApJ...927..227L
+    get_lyu_sample(coords, labels)  #2022ApJ...927..227L
     get_lopeznavas_sample(coords, labels)  #2022MNRAS.513L..57L
     get_hon_sample(coords, labels)  #2022MNRAS.511...54H
     get_yang_sample(coords, labels)   #2018ApJ...862..109Y
