@@ -81,7 +81,68 @@ def build_sample():
     print('final sample: ',len(coords))
     return coords_list,labels_list
  
+
+def parallel_lc(coords_list,labels_list,parquet_savename = 'data/df_lc_.parquet.gzip'):
+    ''' Check all the archives for the light curve data of the 
+    list of coordinates given in input in parallel and return a 
+    muldidimensional lightcurve dataframe.'''
     
+    max_fermi_error_radius = str(1.0)  
+    max_sax_error_radius = str(3.0)
+    heasarc_cat = ["FERMIGTRIG", "SAXGRBMGRB"]
+    error_radius = [max_fermi_error_radius , max_sax_error_radius]
+    bandlist = ["W1", "W2"]
+    wise_radius = 1.0 * u.arcsec
+    panstarrs_radius = 1.0 / 3600.0  # search radius = 1 arcsec
+    lk_radius = 1.0  # arcseconds
+    hcv_radius = 1.0 / 3600.0  # radius = 1 arcsec
+    n_workers = 8  # this should equal the total number of archives called
+    ztf_nworkers = None
+
+    parallel_starttime = time.time()
+
+    # start a multiprocessing pool and run all the archive queries
+    parallel_df_lc = MultiIndexDFObject()  # to collect the results
+    callback = parallel_df_lc.append  # will be called once on the result returned by each archive
+    with mp.Pool(processes=n_workers) as pool:
+
+        # start the processes that call the archives
+        pool.apply_async(
+            Gaia_get_lightcurve, (coords_list,  labels_list , 1), callback=callback
+        )
+        pool.apply_async(
+            HEASARC_get_lightcurves, (coords_list, labels_list, heasarc_cat, error_radius), callback=callback
+        )
+        pool.apply_async(
+            HCV_get_lightcurves, (coords_list, labels_list, hcv_radius), callback=callback
+        )
+        pool.apply_async(
+            icecube_get_lightcurve, (coords_list, labels_list, 3, "./data/", 1), callback=callback
+        )
+        pool.apply_async(
+            panstarrs_get_lightcurves, (coords_list, labels_list, panstarrs_radius), callback=callback
+        )
+        pool.apply_async(
+            TESS_Kepler_get_lightcurves, (coords_list, labels_list, lk_radius), callback=callback
+        )
+        pool.apply_async(
+            WISE_get_lightcurves, (coords_list, labels_list, wise_radius, bandlist), callback=callback
+        )
+        pool.apply_async(
+            ZTF_get_lightcurve, (coords_list, labels_list, ztf_nworkers), callback=callback
+        )
+
+        pool.close()  # signal that no more jobs will be submitted to the pool
+        pool.join()  # wait for all jobs to complete, including the callback
+
+    parallel_endtime = time.time()
+    print('parallel processing took', parallel_endtime - parallel_starttime, 's')
+    
+    # # Save the data for future use with ML notebook
+    parallel_df_lc.data.to_parquet(parquet_savename)
+    print("file saved!")
+    return parallel_df_lc
+
 def main():
     c,l = build_sample()
     dflc = parallel_lc(c,l,parquet_savename = 'data/df_lc_wfermi.parquet.gzip')
