@@ -41,9 +41,7 @@ def Gaia_get_lightcurve(coords_list, labels_list , verbose):
                                          search_radius = 1/3600.,
                                          verbose = verbose
                                          )
-    
-    print(gaia_table.columns)   
-    
+        
     ## Extract Light curves ===============
     # For each of the objects, request the EPOCH_PHOTOMETRY from the Gaia DataLink Service
 
@@ -58,9 +56,9 @@ def Gaia_get_lightcurve(coords_list, labels_list , verbose):
                                     labels_list=labels_list, gaia_phot = gaia_table,
                                     gaia_epoch_phot=gaia_epoch_phot, verbose=verbose)
 
+
     df_lc = MultiIndexDFObject()
     df_lc.append(df_lc_gaia)
-    
     
     return(df_lc)
 
@@ -147,33 +145,63 @@ def Gaia_retrieve_EPOCH_PHOTOMETRY(ids, verbose):
     retrieval_type = 'EPOCH_PHOTOMETRY'# Options are: 'EPOCH_PHOTOMETRY', 'MCMC_GSPPHOT', 'MCMC_MSC', 'XP_SAMPLED', 'XP_CONTINUOUS', 'RVS', 'ALL'
     data_structure = 'INDIVIDUAL'   # Options are: 'INDIVIDUAL', 'COMBINED', 'RAW'
     data_release   = 'Gaia DR3'     # Options are: 'Gaia DR3' (default), 'Gaia DR2'
+    dl_threshold = 5000  #Datalink server threshold
+    ids_chunks = list(gaia_chunks(ids, dl_threshold))
+    datalink_all = []
+    prod_tab = dict() # Dictionary to save the light curves. The key is the source_id
+
+    print(f'* Input list contains {len(ids)} source_IDs')
+    print(f'* This list is split into {len(ids_chunks)} chunks of <= {dl_threshold} elements each')
 
     ## Get the files
-    datalink = Gaia.load_data(ids=ids,
+    ii = 0
+    for chunk in ids_chunks:
+        ii = ii + 1
+        datalink = Gaia.load_data(ids=chunk,
                               data_release = data_release,
                               retrieval_type=retrieval_type,
-                              data_structure = data_structure, verbose = False, output_file = None , overwrite_output_file=True)
-    dl_keys  = list(datalink.keys())
+                              data_structure = data_structure, 
+                              verbose = False, output_file = None , 
+                              overwrite_output_file=True)
+        print('len of datalink', len(datalink))
+        datalink_all.append(datalink)
+            
     
-    if verbose > 2:
-        print(f'The following Datalink products have been downloaded:')
-        for dl_key in dl_keys:
-            print(f' * {dl_key}')
+        dl_keys  = list(datalink.keys())
+        print('len of dl_keys', len(dl_keys))
+
+        if verbose > 2:
+            print(f'The following Datalink products have been downloaded:')
+            for dl_key in dl_keys:
+                print(f' * {dl_key}')
     
-    ## Extract the info
-    prod_tab = dict() # Dictionary to save the light curves. The key is the source_id
-    for dd in ids:
-        if verbose > 2: print("{}: ".format(dd) , end=" ")
-        this_dl_key = 'EPOCH_PHOTOMETRY-Gaia DR3 {}.xml'.format(dd)
-        if this_dl_key in datalink.keys():
-            prod_tab[str(dd)] = datalink[this_dl_key][0].to_table()
-            if verbose > 2: print("found")
-        else:
-            pass
-            if verbose > 2: print("not found")
+        ## Extract the info
+        for dd in chunk:
+            if verbose > 2: print("{}: ".format(dd) , end=" ")
+            this_dl_key = 'EPOCH_PHOTOMETRY-Gaia DR3 {}.xml'.format(dd)
+            if this_dl_key in datalink.keys():
+                prod_tab[str(dd)] = datalink[this_dl_key][0].to_table()
+                if verbose > 2: print("found")
+            else:
+                pass
+                if verbose > 2: print("not found")
     
     return(prod_tab)
 
+def gaia_chunks(lst, n):
+    """
+    "Split an input list into multiple chunks of size =< n"
+    
+    Parameters
+    ----------
+    lst: list of gaia Ids
+    n: int = maximum size of the desired chunk
+    
+    """
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+        
+        
 ## Define function to extract light curve from product table.
 def Gaia_mk_lightcurves(prod_tab , verbose):
     """
