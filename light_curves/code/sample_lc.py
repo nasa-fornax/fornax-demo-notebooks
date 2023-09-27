@@ -148,7 +148,7 @@ def parallel_lc(coords_list,labels_list,parquet_savename = '../output/df_lc_.par
 
 def main():
     c,l = build_sample()
-    dflc = parallel_lc(c,l,parquet_savename = 'data/df_lc_smalltest.parquet.gzip')
+    dflc = parallel_lc(c,l,parquet_savename = '../output/df_lc_smalltest.parquet')
     # Unify for ML and save
     
 if __name__ == "__main__":
