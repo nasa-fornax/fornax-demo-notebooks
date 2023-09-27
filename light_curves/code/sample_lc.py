@@ -81,7 +81,7 @@ def build_sample():
     return coords_list,labels_list
  
 
-def parallel_lc(coords_list,labels_list,parquet_savename = 'data/df_lc_.parquet.gzip'):
+def parallel_lc(coords_list,labels_list,parquet_savename = '../output/df_lc_.parquet'):
     ''' Check all the archives for the light curve data of the 
     list of coordinates given in input in parallel and return a 
     muldidimensional lightcurve dataframe.'''
