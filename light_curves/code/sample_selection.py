@@ -444,8 +444,8 @@ def clean_sample(skycoordslist, labels, verbose=1):
 
     return coords_list, labels_list
 
-def noclean_sample(skycoordslist, labels, verbose=1):
-    """Makes a sample of skycoords and labels with repeats. Attaches an object ID to the coords.
+def nonunique_sample(skycoordslist, labels, verbose=1):
+    """Changes the structure of the coordinates to a list of SkyCoords and a list of labels. 
     
     Parameters
     ----------

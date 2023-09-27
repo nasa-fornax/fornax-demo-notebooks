@@ -3,7 +3,6 @@ import time
 import warnings
 from math import ceil
 from multiprocessing import Pool
-
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 import matplotlib.pyplot as plt
@@ -11,22 +10,19 @@ import numpy as np
 from astropy.table import Table
 from scipy import stats
 import pandas as pd
-
-warnings.filterwarnings('ignore')
-
-# local code imports
-sys.path.append('code/')
 from panstarrs import panstarrs_get_lightcurves
 from gaia_functions import Gaia_get_lightcurve
 from HCV_functions import HCV_get_lightcurves
 from icecube_functions import icecube_get_lightcurve
-from sample_selection import get_lamassa_sample, get_macleod16_sample, get_ruan_sample, get_macleod19_sample, get_sheng_sample, get_green_sample, get_lyu_sample, get_lopeznavas_sample, get_hon_sample, get_yang_sample,get_SDSS_sample, get_paper_sample, clean_sample,noclean_sample,TDE_id2coord
+from sample_selection import get_lamassa_sample, get_macleod16_sample, get_ruan_sample, get_macleod19_sample, get_sheng_sample, get_green_sample, get_lyu_sample, get_lopeznavas_sample, get_hon_sample, get_yang_sample,get_SDSS_sample, get_paper_sample, clean_sample,nonunique_sample,TDE_id2coord
 from data_structures import MultiIndexDFObject
 from heasarc_functions import HEASARC_get_lightcurves
 from TESS_Kepler_functions import TESS_Kepler_get_lightcurves
 from WISE_functions import WISE_get_lightcurves
 from ztf_functions import ZTF_get_lightcurve
-from utils import *
+from ML_utils import unify_lc, stat_bands, autopct_format, combine_bands,\
+mean_fractional_variation, normalize_mean_objects, normalize_max_objects, \
+normalize_clipmax_objects, shuffle_datalabel, dtw_distance, stretch_small_values_arctan
 
 
 def build_sample():
@@ -59,15 +55,11 @@ def build_sample():
     #there are ~500K of these, so choose the number based on
     #a balance between speed of running the light curves and whatever 
     #the ML algorithms would like to have
-    num_normal_QSO = 2000 
+    num_normal_QSO = 2000
     get_SDSS_sample(coords, labels, num_normal_QSO)
 
     ## ADD TDEs to the sample, manually copied the TDE ZTF names from Hammerstein et al. 2023
-    tde_names = ['ZTF18aabtxvd','ZTF18aahqkbt','ZTF18abxftqm','ZTF18acaqdaa','ZTF18acpdvos','ZTF18actaqdw','ZTF19aabbnzo',
-                 'ZTF18acnbpmd','ZTF19aakiwze','ZTF19aakswrb','ZTF17aaazdba','ZTF19aapreis','ZTF19aarioci','ZTF19abhejal',
-                 'ZTF19abhhjcc','ZTF19abidbya','ZTF19abzrhgq','ZTF19accmaxo','ZTF20aabqihu','ZTF19acspeuw','ZTF20aamqmfk',
-                 'ZTF18aakelin','ZTF20abjwvae','ZTF20abfcszi','ZTF20abefeab','ZTF20abowque','ZTF20abrnwfc','ZTF20acitpfz',
-                 'ZTF20acqoiyt', 'ZTF20abnorit']
+    tde_names = ['ZTF18aabtxvd','ZTF18aahqkbt','ZTF18abxftqm','ZTF18acaqdaa','ZTF18acpdvos','ZTF18actaqdw','ZTF19aabbnzo','ZTF18acnbpmd','ZTF19aakiwze','ZTF19aakswrb','ZTF17aaazdba','ZTF19aapreis','ZTF19aarioci','ZTF19abhejal','ZTF19abhhjcc','ZTF19abidbya','ZTF19abzrhgq','ZTF19accmaxo','ZTF20aabqihu','ZTF19acspeuw','ZTF20aamqmfk','ZTF18aakelin','ZTF20abjwvae','ZTF20abfcszi','ZTF20abefeab','ZTF20abowque','ZTF20abrnwfc','ZTF20acitpfz','ZTF20acqoiyt', 'ZTF20abnorit']
     TDE_id2coord(tde_names,coords,labels)
     
 
@@ -76,8 +68,9 @@ def build_sample():
     get_paper_sample('2022ApJ...933...37W','Galex variable 22',coords,labels)
     get_paper_sample('2020ApJ...896...10B','Palomar variable 20',coords,labels)
 
-    #remove duplicates from the list if combining multiple references
-    coords_list, labels_list = noclean_sample(coords, labels) #!!!!
+    #To remove duplicates from the list if combining multiple references clean_sample can be used 
+    # the call below with nonunique_sample just changes the structure to mimic the output of clean sample
+    coords_list, labels_list = nonunique_sample(coords, labels) 
     print('final sample: ',len(coords))
     return coords_list,labels_list
  
@@ -145,7 +138,7 @@ def parallel_lc(coords_list,labels_list,parquet_savename = 'data/df_lc_.parquet.
 
 def main():
     c,l = build_sample()
-    dflc = parallel_lc(c,l,parquet_savename = 'data/df_lc_wfermi.parquet.gzip')
+    dflc = parallel_lc(c,l,parquet_savename = 'data/df_lc_smalltest.parquet.gzip')
     # Unify for ML and save
     
 if __name__ == "__main__":

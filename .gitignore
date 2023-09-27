@@ -4,9 +4,12 @@ output/
 # cache directory created by nway in forced photometry notebook
 cache/
 
-# .fits files
-#./**/*.fits
-#*.fits
+# large files
+./**/*.fits
+*.fits
+
+*.csv
+./**/*.csv
 
 *.gzip
 ./**/*.gzip
