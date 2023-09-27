@@ -51,7 +51,7 @@ def build_sample():
     get_yang_sample(coords, labels)   #2018ApJ...862..109Y
 
     # Variable AGN sample from Ranga/Andreas:
-    VAGN = pd.read_csv('data/WISE_MIR_variable_AGN_with_PS1_photometry_and_SDSS_redshift.csv')
+    VAGN = pd.read_csv('../data/WISE_MIR_variable_AGN_with_PS1_photometry_and_SDSS_redshift.csv')
     vagn_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(VAGN['SDSS_RA'], VAGN['SDSS_Dec'])]
     vagn_labels = ['WISE-Variable' for ra in VAGN['SDSS_RA']]
     coords.extend(vagn_coords)
