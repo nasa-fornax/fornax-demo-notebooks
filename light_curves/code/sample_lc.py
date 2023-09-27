@@ -95,6 +95,10 @@ def parallel_lc(coords_list,labels_list,parquet_savename = 'data/df_lc_.parquet.
     parallel_starttime = time.time()
 
     # start a multiprocessing pool and run all the archive queries
+    # "spawn" new processes because it uses less memory and is thread safe
+    # in particular, this is required for pd.read_parquet (used by ZTF_get_lightcurve)
+    # https://stackoverflow.com/questions/64095876/multiprocessing-fork-vs-spawn
+    mp.set_start_method("spawn", force=True)
     parallel_df_lc = MultiIndexDFObject()  # to collect the results
     callback = parallel_df_lc.append  # will be called once on the result returned by each archive
     with mp.Pool(processes=n_workers) as pool:
