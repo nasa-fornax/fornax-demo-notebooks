@@ -14,6 +14,11 @@ cache/
 *.gzip
 ./**/*.gzip
 
+*.parquet
+./**/*.parquet
+
+./data/*
+
 # Jupyter Notebook
 .ipynb_checkpoints
 
