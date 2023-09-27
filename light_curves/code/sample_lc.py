@@ -26,6 +26,11 @@ mean_fractional_variation, normalize_mean_objects, normalize_max_objects, \
 normalize_clipmax_objects, shuffle_datalabel, dtw_distance, stretch_small_values_arctan
 
 
+# make sure the data and output directories exist so that we can write to them
+os.makedirs("../data", exist_ok=True)
+os.makedirs("../output", exist_ok=True)
+
+
 def build_sample():
     '''Putting together a sample of SDSS quasars, WISE variable AGNs,
     TDEs, Changing look AGNs, .. coordinates from different 
