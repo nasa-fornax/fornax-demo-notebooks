@@ -120,7 +120,7 @@ def parallel_lc(coords_list,labels_list,parquet_savename = '../output/df_lc_.par
             HCV_get_lightcurves, (coords_list, labels_list, hcv_radius), callback=callback
         )
         pool.apply_async(
-            icecube_get_lightcurve, (coords_list, labels_list, 3, "./data/", 1), callback=callback
+            icecube_get_lightcurve, (coords_list, labels_list, 3, "../data/", 1), callback=callback
         )
         pool.apply_async(
             panstarrs_get_lightcurves, (coords_list, labels_list, panstarrs_radius), callback=callback
