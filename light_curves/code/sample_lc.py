@@ -2,7 +2,7 @@ import sys
 import time
 import warnings
 from math import ceil
-from multiprocessing import Pool
+import multiprocessing as mp
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 import matplotlib.pyplot as plt
