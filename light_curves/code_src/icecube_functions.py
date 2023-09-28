@@ -14,7 +14,7 @@ from tqdm import tqdm
 from data_structures import MultiIndexDFObject
 
 
-def icecube_get_lightcurve(coords_list, labels_list , icecube_select_topN , path , verbose):
+def icecube_get_lightcurve(coords_list, labels_list , icecube_select_topN , verbose):
     '''
     Extracts IceCube Neutrino events for a given source position and saves it into a lightcurve
     Pandas MultiIndex object.
@@ -31,9 +31,6 @@ def icecube_get_lightcurve(coords_list, labels_list , icecube_select_topN , path
     icecube_select_topN : int
         Number of top events to 
         
-    path : str
-        Path to temporary directory where to save the downloaded IceCube data.
-        
     verbose : int
         How much to talk. 0 = None, 1 = a little bit , 2 = more, 3 = full
     
@@ -48,12 +45,12 @@ def icecube_get_lightcurve(coords_list, labels_list , icecube_select_topN , path
     # Downloads the IceCube data (currently from my personal Caltech Box directory) and
     # unzipps it. Only does it if the files have not yet been downloaded. The total file
     # size is about 30MB (zipped) and 110MB unzipped.
-    icecube_download_data(path = path , verbose = verbose)
+    icecube_download_data(verbose = verbose)
     
     ## LOAD ICECUBE CATALOG ###
     # This loads the IceCube catalog, which is dispersed in different files.
     # Each file has a list of events with their energy, time, and approximate direction.
-    icecube_events , _ = icecube_get_catalog(path = path , verbose = verbose)
+    icecube_events , _ = icecube_get_catalog(verbose = verbose)
 
     # sort by Neutrino energy that way it is easier to get the top N events.
     icecube_events.sort(keys="energy_logGeV" , reverse=True)
@@ -130,15 +127,12 @@ def icecube_get_lightcurve(coords_list, labels_list , icecube_select_topN , path
     return(df_lc)
     
     
-def icecube_get_catalog(path , verbose):
+def icecube_get_catalog(verbose):
     '''
     Creates the combined IceCube catalog based on the yearly catalog.
     
     Parameters
     -----------
-    path : str
-        Path to the directory where the icecube catalogs are saved.
-                
     verbose : int
         How much to talk. 0 = None, 1 = a little bit , 2 = more, 3 = full
     
@@ -165,7 +159,7 @@ def icecube_get_catalog(path , verbose):
                    units=[u.d , u.electronvolt*1e9 , u.degree , u.degree , u.degree , u.degree , u.degree ])
     for event_name in event_names:
         if verbose > 0: print("Loading: ", event_name)
-        tmp = ascii.read(os.path.join(path , "icecube_10year_ps" , "events" , event_name))
+        tmp = ascii.read(os.path.join("data" , "icecube_10year_ps" , "events" , event_name))
         tmp.rename_columns(names=tmp.keys() , new_names=EVENTS.keys() )
 
         EVENTS = vstack([EVENTS , tmp])
@@ -174,7 +168,7 @@ def icecube_get_catalog(path , verbose):
 
 
 
-def icecube_download_data(path , verbose):
+def icecube_download_data(verbose):
     '''
     Download and unzipps the IceCube data (approx. 40MB zipped, 120MB unzipped). Directly
     downloaded from the IceCube webpage:
@@ -182,18 +176,16 @@ def icecube_download_data(path , verbose):
     
     Parameters
     ----------
-    path : str
-        Path to temporary directory where to save the downloaded IceCube data.
-        
     verbose : int
         How much to talk. 0 = None, 1 = a little bit , 2 = more, 3 = full
         
     Returns
     -------
-    Unzipped IceCube event tables in the `path` directory.
+    Unzipped IceCube event tables in the data directory.
     
     
     '''
+    path = "data"
 
     ## Download
     if not os.path.exists(os.path.join(path , "icecube_events.zip")):
