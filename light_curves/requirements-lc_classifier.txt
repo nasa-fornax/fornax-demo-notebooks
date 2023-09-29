@@ -1,0 +1,6 @@
+# List python dependencies here to be installed at the start of the
+# notebook. Libraries can be removed from the list when they get shipped in
+# the container supporting the science use case in question.
+sktime
+tqdm
+googledrivedownloader
