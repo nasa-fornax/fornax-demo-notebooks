@@ -34,7 +34,7 @@ def setup_text_plots():
     mpl.rcParams['ytick.right'] = True
     mpl.rcParams['hatch.linewidth'] = 1
 
-def create_figures(coords_list , df_lc, show_nbr_figures, save_output_dir):
+def create_figures(coords_list , df_lc, show_nbr_figures, save_output):
     '''
     Creates figures of the lightcurves for each source in the coordinate list.
     
@@ -50,25 +50,24 @@ def create_figures(coords_list , df_lc, show_nbr_figures, save_output_dir):
         Number of figures to show inline. For example, `show_nbr_figures = 5' would
         show the first 5 figures inline.
         
-    save_output_dir: str
-        Output directory to which to save the lightcurve figures. If set to `none`, the figures
-        are not saved.
+    save_output: bool
+        Whether to save the lightcurve figures. If saved, they will be in the "output" directory.
         
     
     Returns
     -------
-    Saves the figures in the output directory (`output_dir`)
+    Saves the figures in the output directory
     
     
     Notes
     -----
-    By default, if save_output_dir is set to a valid output directory, figures are
+    By default, if save_output is True, figures are
     made and saved for *all* sources. If that is too much, the user can create a selection
     in `coords_list' of which sources they like to plot (and save).
     
     '''
     
-    if (show_nbr_figures == 0) & (save_output_dir == "none"):
+    if (show_nbr_figures == 0) & (not save_output):
         print("No figures are shown or saved.")
         return(False)
     
@@ -218,8 +217,8 @@ def create_figures(coords_list , df_lc, show_nbr_figures, save_output_dir):
         plt.legend(handles=leg_handles_A , bbox_to_anchor=(1.2,3.5))
         plt.tight_layout()
 
-        if save_output_dir != "none":
-            savename = os.path.join(save_output_dir , "lightcurve_{}.pdf".format(objectid) ) 
+        if save_output:
+            savename = os.path.join("output" , "lightcurve_{}.pdf".format(objectid) ) 
             plt.savefig(savename, bbox_inches="tight")
 
         if cc <= show_nbr_figures:
@@ -230,7 +229,7 @@ def create_figures(coords_list , df_lc, show_nbr_figures, save_output_dir):
             
         # If figures are not saved, we only have to loop over the 
         # number of figures that are shown to the user.
-        if (save_output_dir == "none") & (cc == show_nbr_figures):
+        if (not save_output) & (cc == show_nbr_figures):
             print("Done")
             return(True)
         else:
