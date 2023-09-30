@@ -1,18 +1,18 @@
 # Directories created by notebooks to store data, results, etc.
 # "data" dir to store any data that is downloaded or otherwise needs to be made available to the notebook
-# occasionally, data may need to be checked into the repo (e.g., forced_photometry/data), but this should be rare
 data/
-# "output" dir used to store results, figures, etc.
+# "output" dir used to store results, figures, logs, etc.
 output/
 # "cache" dir is created by nway in the forced photometry notebook. ignore it and any other "cache" directory
 cache/
 
 # Data and Output files
-# data and output files (e.g., figures, logs) should not be committed to the code repository
+# data and output files should not be committed to the code repository
 # these files *should* end up in one of the directories listed above and thus already ignored
 # but we list them explicitly here in case they end up in a different directory
 *.bz2
 *.csv
+*.ecsv
 *.fits
 *.gzip
 *.jpg
