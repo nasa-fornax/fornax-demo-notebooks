@@ -1,23 +1,26 @@
-# directory created by notebooks to store results
+# Directories created by notebooks to store data, results, etc.
+# "data" dir to store any data that is downloaded or otherwise needs to be made available to the notebook
+data/
+# "output" dir used to store results, figures, logs, etc.
 output/
-
-# cache directory created by nway in forced photometry notebook
+# "cache" dir is created by nway in the forced photometry notebook. ignore it and any other "cache" directory
 cache/
 
-# large files
-./**/*.fits
-*.fits
-
+# Data and Output files
+# data and output files should not be committed to the code repository
+# these files *should* end up in one of the directories listed above and thus already ignored
+# but we list them explicitly here in case they end up in a different directory
+*.bz2
 *.csv
-./**/*.csv
-
+*.ecsv
+*.fits
 *.gzip
-./**/*.gzip
-
+*.jpg
+*.jpeg
+*.log
 *.parquet
-./**/*.parquet
-
-./data/*
+*.pdf
+*.png
 
 # Jupyter Notebook
 .ipynb_checkpoints

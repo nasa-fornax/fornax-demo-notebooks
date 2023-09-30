@@ -4,14 +4,12 @@
 acstools
 astropy
 astroquery
-git+https://github.com/fkiwy/unTimely_Catalog_explorer
 hpgeom
 lightkurve
 matplotlib
 numpy
 pandas
 pyvo
-reproject  # needed for untimely
 s3fs
 tqdm
 wget
