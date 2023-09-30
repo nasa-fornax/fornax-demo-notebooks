@@ -1,5 +1,6 @@
 import astropy.units as u
 import numpy as np
+from alerce.core import Alerce
 from astropy import table
 from astropy.coordinates import SkyCoord
 from astropy.table import Table, join, join_skycoord
@@ -7,7 +8,7 @@ from astroquery.ipac.ned import Ned
 from astroquery.sdss import SDSS
 from astroquery.simbad import Simbad
 from astroquery.vizier import Vizier
-from alerce.core import Alerce
+
 
 def TDE_id2coord(object_ids,coords,labels,verbose=1):
     """ To find and append coordinates of objects with only ZTF obj name
