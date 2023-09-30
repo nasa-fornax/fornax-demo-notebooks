@@ -5,6 +5,7 @@ import pyarrow.compute
 import pyarrow.dataset
 import pyarrow.fs
 from astropy.coordinates import SkyCoord
+from tqdm import tqdm
 
 from data_structures import MultiIndexDFObject
 from fluxconversions import convert_wise_flux_to_millijansky
@@ -43,7 +44,6 @@ def WISE_get_lightcurves(coords_list, labels_list, radius=1.0 * u.arcsec, bandli
 
     # clean and transform the data into the form needed for a MultiIndexDFObject
     wise_df = transform_lightcurves(wise_df)
-
     # return the light curves as a MultiIndexDFObject
     indexes, columns = ["objectid", "label", "band", "time"], ["flux", "err"]
     return MultiIndexDFObject(data=wise_df.set_index(indexes)[columns])
@@ -82,7 +82,6 @@ def locate_objects(coords_list, labels_list, radius):
 
     # my_coords_list is a list of tuples. turn it into a dataframe
     locations = pd.DataFrame(my_coords_list, columns=["objectid", "coord", "label", "pixel"])
-
     # locations contains one row per object, and the pixel column stores arrays of ints
     # "explode" the dataframe into one row per object per pixel
     # this may create multiple rows per object, the pixel column will now store single ints
@@ -121,7 +120,7 @@ def load_lightcurves(locations, radius, bandlist):
 
     # iterate over partitions, load data, and find each object
     wise_df_list = []
-    for pixel, locs_df in locations.groupby("pixel"):
+    for pixel, locs_df in tqdm(locations.groupby("pixel")):
         # create a filter to pick out sources that are (1) in this partition; and (2) within the
         # coadd's primary region (to avoid duplicates when an object is near the coadd boundary)
         filter = (pyarrow.compute.field(f"healpix_k{K}") == pixel) & (pyarrow.compute.field("primary") == 1)

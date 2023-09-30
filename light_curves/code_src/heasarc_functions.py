@@ -103,17 +103,17 @@ def HEASARC_get_lightcurves(coords_list, labels_list, heasarc_cat, max_error_rad
              """
         
         hresult = heasarc_tap.service.run_sync(hquery, uploads={'mytable': coordstab})
-
+        print(f'length of {heasarc_cat[m]} catalog:', len(hresult))
         #  Convert the result to an Astropy Table
         hresulttable = hresult.to_table()
 
         #add results to multiindex_df
         #really just need to mark this spot with a vertical line in the plot, it's not actually a light curve
         #so making up a flux and an error, but the time stamp and mission are the real variables we want to keep
-        df_fermi = pd.DataFrame(dict(flux=np.full(len(hresulttable),0.1), err=np.full(len(hresulttable),0.1), time=hresulttable['time'], objectid = hresulttable['objectid'], band=np.full(len(hresulttable),'Fermi GRB'), label=hresulttable['label'])).set_index(["objectid", "label", "band", "time"])
+        df_heasarc = pd.DataFrame(dict(flux=np.full(len(hresulttable),0.1), err=np.full(len(hresulttable),0.1), time=hresulttable['time'], objectid = hresulttable['objectid'], band=np.full(len(hresulttable),heasarc_cat[m]), label=hresulttable['label'])).set_index(["objectid", "label", "band", "time"])
 
         # Append to existing MultiIndex light curve object
-        df_lc.append(df_fermi)
+        df_lc.append(df_heasarc)
     
     return df_lc
 

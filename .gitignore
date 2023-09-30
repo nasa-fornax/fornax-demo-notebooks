@@ -7,9 +7,20 @@ output/
 # "cache" dir is created by nway in the forced photometry notebook. ignore it and any other "cache" directory
 cache/
 
-# .fits files
+# large files
 ./**/*.fits
 *.fits
+
+*.csv
+./**/*.csv
+
+*.gzip
+./**/*.gzip
+
+*.parquet
+./**/*.parquet
+
+./data/*
 
 # Jupyter Notebook
 .ipynb_checkpoints

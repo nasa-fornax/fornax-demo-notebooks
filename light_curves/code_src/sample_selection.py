@@ -7,8 +7,34 @@ from astroquery.ipac.ned import Ned
 from astroquery.sdss import SDSS
 from astroquery.simbad import Simbad
 from astroquery.vizier import Vizier
+from alerce.core import Alerce
 
-
+def TDE_id2coord(object_ids,coords,labels,verbose=1):
+    """ To find and append coordinates of objects with only ZTF obj name
+      
+    Parameters
+    ----------
+    object_ids: list of strings
+        eg., [ "ZTF18accqogs", "ZTF19aakyhxi", "ZTF19abyylzv", "ZTF19acyfpno"]
+    coords : list of astropy skycoords
+        the coordinates of the targets for which a user wants light curves
+    labels: list of strings
+        journal articles associated with the target coordinates
+    verbose: int
+        print out debugging info (1) or not(0)
+    """
+    
+    
+    
+    alerce = Alerce()
+    objects = alerce.query_objects(oid=object_ids, format="pandas")
+    tde_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(objects['meanra'],objects['meandec'])]
+    tde_labels = ['ZTF-Objname' for ra in objects['meanra']]
+    coords.extend(tde_coords)
+    labels.extend(tde_labels)
+    if verbose:
+        print('number of ztf coords added by Objectname:',len(objects['meanra']))
+ 
 #lamassa et al., 2015  1 source
 def get_lamassa_sample(coords, labels, verbose=1):
     """Automatically grabs changing look AGN from LaMassa et al 2015 sample.
@@ -417,6 +443,36 @@ def clean_sample(skycoordslist, labels, verbose=1):
     coords_list = list(enumerate(raw_coords_list))  # list of tuples (objectid, skycoords)
 
     return coords_list, labels_list
+
+def nonunique_sample(skycoordslist, labels, verbose=1):
+    """Changes the structure of the coordinates to a list of SkyCoords and a list of labels. 
+    
+    Parameters
+    ----------
+    skycoordslist : list
+        list of Astropy SkyCoords derived from literature sources
+    lables : list
+        List of the first author name and publication year for tracking the sources
+    verbose : int, optional
+        Print out the length of the sample after applying this function
+        
+    Returns
+    -------
+    coords_list : list of tuples
+        coords input cleaned of duplicates, with an object ID attached. Tuples contain (objectid, skycoords).
+    labels_list : list
+        labels associated with coords_list
+    """
+    #first turn the skycoord list into a table to be able to access table functions in astropy
+    t = Table([skycoordslist, labels, np.arange(0, len(skycoordslist), 1)], names=['sc', 'label', 'idx'])
+    uniquerows = t#table.unique(tjoin, keys = 'sc_id')
+    raw_coords_list = list(t['sc'])
+    labels_list = list(t['label'])
+    if verbose:
+        print('without duplicates removal, sample size: '+str(len(raw_coords_list)))
+    coords_list = list(enumerate(raw_coords_list))  # list of tuples (objectid, skycoords)
+    return coords_list, labels_list
+
 def make_coordsTable(coords_list, labels_list):
     """convert the coords and labels into an astropy table for input to ADQL catalog search
     

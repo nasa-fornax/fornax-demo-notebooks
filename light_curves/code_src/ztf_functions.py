@@ -5,6 +5,7 @@ import astropy.units as u
 import pandas as pd
 import pyvo
 import s3fs
+from tqdm import tqdm
 
 from data_structures import MultiIndexDFObject
 from sample_selection import make_coordsTable
@@ -133,12 +134,17 @@ def locate_objects(coords_list, labels_list, radius):
 
     # this tap query is much faster when submitting less than ~10,000 coords at a time
     # so iterate over chunks of coords_tbl and then concat results
-    i, chunksize = 0, 10_000
+    chunksize = 10_000
+    # calculate the number of iterations needed. it would be easier to just use this while loop directly
+    # for the tap calls, but we want to use tqdm and that's easier in a for loop
+    niterations = 0
+    while niterations * chunksize < len(coords_tbl):
+        niterations += 1
+    # do the tap calls
     locations = []
-    while i * chunksize < len(coords_tbl):
+    for i in tqdm(range(niterations)):
         result = tap_service.run_async(query, uploads={"coords": coords_tbl[i * chunksize : (i + 1) * chunksize]})
         locations.append(result.to_table().to_pandas())
-        i += 1
 
     # locations may contain more than one ZTF object id per band (e.g., yang sample coords_list[10])
     # Sánchez-Sáez et al., 2021 (2021AJ....162..206S)
@@ -169,7 +175,9 @@ def load_lightcurves(locations_df, nworkers=6):
 
     # if no multiprocessing requested, loop over files serially and load data. return immediately
     if nworkers is None:
-        lightcurves = [load_lightcurves_one_file(location) for location in location_grps]
+        lightcurves = []
+        for location in tqdm(location_grps):
+            lightcurves.append(load_lightcurves_one_file(location))
         return pd.concat(lightcurves, ignore_index=True)
     
     # if we get here, multiprocessing has been requested
@@ -190,7 +198,10 @@ def load_lightcurves(locations_df, nworkers=6):
         # use imap because it's lazier than map and can reduce memory usage for long iterables
         # use unordered because we don't care about the order in which results are returned
         # using a large chunksize can make it much faster than the default of 1
-        for ztf_df in pool.imap_unordered(load_lightcurves_one_file, location_grps, chunksize=chunksize):
+        for ztf_df in tqdm(
+            pool.imap_unordered(load_lightcurves_one_file, location_grps, chunksize=chunksize),
+            total=len(location_grps)  # must tell tqdm how many files we're iterating over
+        ):
             lightcurves.append(ztf_df)
 
     return pd.concat(lightcurves, ignore_index=True)
