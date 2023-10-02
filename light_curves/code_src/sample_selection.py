@@ -392,12 +392,12 @@ def clean_sample(coords_list, labels_list, verbose=1):
         sample cleaned of duplicates, with an object ID attached.
     """
 
-    sample_table = Table([coords_list, labels_list], names=['coords', 'labels'])
+    sample_table = Table([coords_list, labels_list], names=['coord', 'label'])
 
     # now join the table with itself within a defined radius.
     # We keep one set of original column names to avoid later need for renaming
-    tjoin = join(sample_table, sample_table, keys='coords',
-                 join_funcs={'coords': join_skycoord(0.005 * u.deg)},
+    tjoin = join(sample_table, sample_table, keys='coord',
+                 join_funcs={'coord': join_skycoord(0.005 * u.deg)},
                  uniq_col_name='{col_name}{table_name}', table_names=['', '_2'])
 
     # this join will return 4 entries for each redundant coordinate:
@@ -406,8 +406,8 @@ def clean_sample(coords_list, labels_list, verbose=1):
     # these 4 will have the same id in the new 'coords_id' column
 
     # keep only those entries in the resulting table which are unique
-    uniqued_table = unique(tjoin, keys='coords_id')['coords_id', 'coords', 'labels']
-    uniqued_table.rename_column('coords_id', 'object_ID')
+    uniqued_table = unique(tjoin, keys='coord_id')['coord_id', 'coord', 'label']
+    uniqued_table.rename_column('coord_id', 'object_id')
 
     if verbose:
         print(f'after duplicates removal, sample size: {len(uniqued_table)}')
@@ -443,25 +443,3 @@ def nonunique_sample(skycoordslist, labels, verbose=1):
         print('without duplicates removal, sample size: '+str(len(raw_coords_list)))
     coords_list = list(enumerate(raw_coords_list))  # list of tuples (objectid, skycoords)
     return coords_list, labels_list
-
-
-def make_coordsTable(coords_list, labels_list):
-    """convert the coords and labels into an astropy table for input to ADQL catalog search
-
-    Parameters
-    ----------
-    coords_list : list of astropy skycoords
-        the coordinates of the targets for which a user wants light curves
-    labels_list: list of strings
-        journal articles associated with the target coordinates
-    """
-
-    coordstab = Table(
-            rows=[  # encode strings for tap
-                (objectid, labels_list[objectid].encode(), coord.ra.value, coord.dec.value)
-                for objectid, coord in coords_list
-            ],
-            names=["objectid", "label", "ra", "dec"],
-        )
-
-    return coordstab
