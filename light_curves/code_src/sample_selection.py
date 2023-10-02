@@ -443,3 +443,7 @@ def nonunique_sample(skycoordslist, labels, verbose=1):
         print('without duplicates removal, sample size: '+str(len(raw_coords_list)))
     coords_list = list(enumerate(raw_coords_list))  # list of tuples (objectid, skycoords)
     return coords_list, labels_list
+
+
+def make_coordsTable():
+    pass
