@@ -54,15 +54,13 @@ def make_hist_error_radii(missioncat):
     return heasarcresulttable
     
 
-def HEASARC_get_lightcurves(coords_list, labels_list, heasarc_cat, max_error_radius):
+def HEASARC_get_lightcurves(source_table, heasarc_cat, max_error_radius):
     """Searches HEASARC archive for light curves from a specific list of mission catalogs
     
     Parameters
     ----------
-    coords_list : list of astropy skycoords
-        the coordinates of the targets for which a user wants light curves
-    labels_list: list of strings
-        journal articles associated with the target coordinates
+    source_table : `~astropy.table.Table`
+        Table with the coordinates and journal reference labels of the sources
     heasarc_cat : str list
         list of catalogs within HEASARC to search for light curves.  Must be one of the catalogs listed here: 
             https://astroquery.readthedocs.io/en/latest/heasarc/heasarc.html#getting-list-of-available-missions
@@ -79,38 +77,44 @@ def HEASARC_get_lightcurves(coords_list, labels_list, heasarc_cat, max_error_rad
     df_lc : MultiIndexDFObject
         the main data structure to store all light curves
     """
-    #first make an astropy table from our master list of coordinates
-    # as input to the pyvo TAP query 
-    coordstab = make_coordsTable(coords_list, labels_list)
+
+    # Prepping source_table with float R.A. and DEC column instead of SkyCoord mixin for TAP upload
+
+    upload_table = source_table['object_id', 'label']
+    upload_table['ra'] = source_table['coord'].ra.deg
+    upload_table['dec'] = source_table['coord'].dec.deg
 
     #setup to store the data
     df_lc = MultiIndexDFObject()
 
     # get the pyvo HEASARC service.
-    heasarc_tap = pyvo.regsearch(servicetype='tap',keywords=['heasarc'])[0]
+    heasarc_tap = pyvo.regsearch(servicetype='tap', keywords=['heasarc'])[0]
 
     # Note that the astropy table is uploaded when we run the query with run_sync
     for m in tqdm(range(len(heasarc_cat))):    
         print('working on mission', heasarc_cat[m])
-
         
-        hquery=f"""
-            SELECT cat.name, cat.ra, cat.dec, cat.error_radius, cat.time,  mt.objectid, mt.label
+        hquery = f"""
+            SELECT cat.name, cat.ra, cat.dec, cat.error_radius, cat.time, mt.object_ID, mt.label
             FROM {heasarc_cat[m]} cat, tap_upload.mytable mt
             WHERE
             cat.error_radius < {max_error_radius[m]} AND
             CONTAINS(POINT('ICRS',mt.ra,mt.dec),CIRCLE('ICRS',cat.ra,cat.dec,cat.error_radius))=1
              """
         
-        hresult = heasarc_tap.service.run_sync(hquery, uploads={'mytable': coordstab})
+        hresult = heasarc_tap.service.run_sync(hquery, uploads={'mytable': upload_table})
         print(f'length of {heasarc_cat[m]} catalog:', len(hresult))
+
         #  Convert the result to an Astropy Table
         hresulttable = hresult.to_table()
 
         #add results to multiindex_df
         #really just need to mark this spot with a vertical line in the plot, it's not actually a light curve
         #so making up a flux and an error, but the time stamp and mission are the real variables we want to keep
-        df_heasarc = pd.DataFrame(dict(flux=np.full(len(hresulttable),0.1), err=np.full(len(hresulttable),0.1), time=hresulttable['time'], objectid = hresulttable['objectid'], band=np.full(len(hresulttable),heasarc_cat[m]), label=hresulttable['label'])).set_index(["objectid", "label", "band", "time"])
+        df_heasarc = pd.DataFrame(dict(flux=np.full(len(hresulttable), 0.1), err=np.full(len(hresulttable), 0.1),
+                                       time=hresulttable['time'], object_id=hresulttable['object_id'],
+                                       band=np.full(len(hresulttable), heasarc_cat[m]),
+                                       label=hresulttable['label'])).set_index(["object_id", "label", "band", "time"])
 
         # Append to existing MultiIndex light curve object
         df_lc.append(df_heasarc)
