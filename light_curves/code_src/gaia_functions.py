@@ -44,6 +44,11 @@ def Gaia_get_lightcurve(coords_list, labels_list , verbose):
     
     print(gaia_table.columns)   
     
+    # if none of the objects were found, there's nothing to load and the Gaia_retrieve_EPOCH_PHOTOMETRY fnc
+    # will raise an HTTPError. just return an empty dataframe instead of proceeding
+    if len(gaia_table) == 0:
+        return MultiIndexDFObject()
+
     ## Extract Light curves ===============
     # For each of the objects, request the EPOCH_PHOTOMETRY from the Gaia DataLink Service
 
@@ -58,8 +63,7 @@ def Gaia_get_lightcurve(coords_list, labels_list , verbose):
                                     labels_list=labels_list, gaia_phot = gaia_table,
                                     gaia_epoch_phot=gaia_epoch_phot, verbose=verbose)
 
-    df_lc = MultiIndexDFObject()
-    df_lc.append(df_lc_gaia)
+    df_lc = MultiIndexDFObject(data=df_lc_gaia)
     
     
     return(df_lc)

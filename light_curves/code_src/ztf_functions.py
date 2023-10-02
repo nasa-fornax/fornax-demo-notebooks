@@ -49,6 +49,11 @@ def ZTF_get_lightcurve(coords_list, labels_list, nworkers=6, ztf_radius=0.000278
     # use a TAP query to locate which files each object is in
     locations_df = locate_objects(coords_list, labels_list, ztf_radius)
 
+    # if none of the objects were found, there's nothing to load and the load_lightcurves fnc will raise a ValueError
+    # just return an empty dataframe instead of proceeding
+    if len(locations_df.index) == 0:
+        return MultiIndexDFObject()
+
     # the catalog is stored in an AWS S3 bucket. loop over the files and load the light curves
     ztf_df = load_lightcurves(locations_df, nworkers=nworkers)
 
