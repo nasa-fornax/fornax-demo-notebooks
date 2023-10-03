@@ -52,6 +52,11 @@ def ZTF_get_lightcurve(coords_list, labels_list, nworkers=6, ztf_radius=0.000278
     # the catalog is stored in an AWS S3 bucket. loop over the files and load the light curves
     ztf_df = load_lightcurves(locations_df, nworkers=nworkers)
 
+    # if none of the objects were found, the transform_lightcurves function will raise a ValueError
+    # so return an empty dataframe now instead of proceeding
+    if len(ztf_df.index) == 0:
+        return MultiIndexDFObject()
+
     # clean and transform the data into the form needed for a MultiIndexDFObject
     ztf_df = transform_lightcurves(ztf_df)
 
@@ -170,6 +175,12 @@ def load_lightcurves(locations_df, nworkers=6):
         Dataframe of light curves. Expect one row per oid in locations_df. Each row
         stores a full light curve. Elements in the columns "mag", "hmjd", etc. are arrays.
     """
+    # We need to return an empty dataframe if no matches are found. If the TAP query returned matches 
+    # but none of them are found in the parquet files, this function will naturally return an empty dataframe.
+    # But if the TAP query found no matches, pd.concat (below) will throw a ValueError. Return now to avoid this.
+    if len(locations_df.index) == 0:
+        return pd.DataFrame()
+
     # one group per parquet file
     location_grps = locations_df.groupby(["filtercode", "field", "ccdid", "qid"])
 
