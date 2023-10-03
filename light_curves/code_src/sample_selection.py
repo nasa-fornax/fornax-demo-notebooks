@@ -407,7 +407,7 @@ def clean_sample(coords_list, labels_list, verbose=1):
 
     # keep only those entries in the resulting table which are unique
     uniqued_table = unique(tjoin, keys='coord_id')['coord_id', 'coord', 'label']
-    uniqued_table.rename_column('coord_id', 'object_id')
+    uniqued_table.rename_column('coord_id', 'objectid')
 
     if verbose:
         print(f'after duplicates removal, sample size: {len(uniqued_table)}')
