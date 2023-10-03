@@ -2,10 +2,12 @@
 import os
 import zipfile
 
+from urllib.parse import urlparse
+from urllib.request import urlretrieve
+
 import astropy.units as u
 import numpy as np
 import pandas as pd
-import wget
 from astropy.coordinates import SkyCoord
 from astropy.io import ascii
 from astropy.table import Table, vstack
@@ -167,8 +169,8 @@ def icecube_get_catalog(verbose):
     return(EVENTS , event_names)
 
 
-
-def icecube_download_data(verbose):
+def icecube_download_data(url="http://icecube.wisc.edu/data-releases/20210126_PS-IC40-IC86_VII.zip",
+                          path="data", verbose=False):
     '''
     Download and unzipps the IceCube data (approx. 40MB zipped, 120MB unzipped). Directly
     downloaded from the IceCube webpage:
@@ -176,34 +178,39 @@ def icecube_download_data(verbose):
     
     Parameters
     ----------
-    verbose : int
-        How much to talk. 0 = None, 1 = a little bit , 2 = more, 3 = full
+    path : str
+        Path to download data to.
+    verbose : bool
+        Default False. Display extra info and warnings if true.
         
     Returns
     -------
     Unzipped IceCube event tables in the data directory.
     
-    
     '''
-    path = "data"
 
-    ## Download
-    if not os.path.exists(os.path.join(path , "icecube_events.zip")):
+    file_path = os.path.join(path, os.path.basename(urlparse(url).path))
 
-        if verbose > 0: print("Downloading IceCube data to {} | ".format(path) , end=" ")
-        file_url = "http://icecube.wisc.edu/data-releases/20210126_PS-IC40-IC86_VII.zip"
-        wget.download(url = file_url , out = path)
+    if not os.path.exists(file_path):
 
-        ## Unzip
-        if verbose > 0: print("Unzipping IceCube data | ", end=" ")
-        with zipfile.ZipFile(os.path.join(path , "20210126_PS-IC40-IC86_VII.zip"), 'r') as zip_ref:
+        # Download
+        if verbose:
+            print(f"Downloading IceCube data to {file_path}.")
+
+        _ = urlretrieve(url, file_path)
+
+        # Unzip
+        if verbose:
+            print("Unzipping IceCube data.")
+
+        with zipfile.ZipFile(os.path.join(file_path) as zip_ref:
             zip_ref.extractall(path)
 
-        if verbose > 0: print("Done.")
+        if verbose:
+            print("Done.")
 
     else:
-        if verbose > 0: print("Data already downloaded.")
-    
-    return(True)
+        if verbose:
+            print(f"Data is already downloaded, see {path}")
         
     
