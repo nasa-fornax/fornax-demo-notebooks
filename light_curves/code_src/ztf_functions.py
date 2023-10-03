@@ -5,7 +5,7 @@ import astropy.units as u
 import pandas as pd
 import pyvo
 import s3fs
-from tqdm import tqdm
+import tqdm
 
 from data_structures import MultiIndexDFObject
 from sample_selection import make_coordsTable
@@ -34,8 +34,8 @@ def ZTF_get_lightcurve(coords_list, labels_list, nworkers=6, ztf_radius=0.000278
     labels_list: list of strings
         journal articles associated with the target coordinates
     nworkers : int or None
-        number of workers in the multiprocessing pool used in the load_lightcurves function. 
-        This must be None if this function is being called from within a child process already. 
+        number of workers in the multiprocessing pool used in the load_lightcurves function.
+        This must be None if this function is being called from within a child process already.
         (This function does not support nested multiprocessing.)
     ztf_radius : astropy Quantity
         search radius, how far from the source should the archives return results
@@ -101,7 +101,7 @@ def file_name(filtercode, field, ccdid, qid, basedir=None):
     return CATALOG_ROOT + f
 
 
-def locate_objects(coords_list, labels_list, radius):
+def locate_objects(coords_list, labels_list, radius, chunksize=10000):
     """The catalog's parquet files are organized by filter, field, CCD, and quadrant. Use TAP to look them up.
 
     https://irsa.ipac.caltech.edu/docs/program_interface/TAP.html
@@ -114,11 +114,14 @@ def locate_objects(coords_list, labels_list, radius):
         journal articles associated with target coordinates, indexed by objectid
     radius : astropy Quantity
         search radius, how far from the source should the archives return results
+     chunksize : int
+        This tap query is much faster when submitting less than ~10,000 coords at a time
+        so iterate over chunks of coords_tbl and then concat results.
 
     Returns
     -------
     locations_df : pd.DataFrame
-        Dataframe with ZTF field, CCD, quadrant and other information that identifies each `coords_list` 
+        Dataframe with ZTF field, CCD, quadrant and other information that identifies each `coords_list`
         object and which parquet files it is in. One row per ZTF objectid.
     """
     # setup for tap query
@@ -126,24 +129,16 @@ def locate_objects(coords_list, labels_list, radius):
     coords_tbl = make_coordsTable(coords_list, labels_list)
     coordscols = [f"coords.{c}" for c in ["objectid", "label"]]
     ztfcols = [f"ztf.{c}" for c in ["oid", "filtercode", "field", "ccdid", "qid", "ra", "dec"]]
-    query = f"""SELECT {', '.join(coordscols + ztfcols)} 
-        FROM ztf_objects_{DATARELEASE} ztf, TAP_UPLOAD.coords coords 
+    query = f"""SELECT {', '.join(coordscols + ztfcols)}
+        FROM ztf_objects_{DATARELEASE} ztf, TAP_UPLOAD.coords coords
         WHERE CONTAINS(
             POINT('ICRS', coords.ra, coords.dec), CIRCLE('ICRS', ztf.ra, ztf.dec, {radius.value})
         )=1"""
 
-    # this tap query is much faster when submitting less than ~10,000 coords at a time
-    # so iterate over chunks of coords_tbl and then concat results
-    chunksize = 10_000
-    # calculate the number of iterations needed. it would be easier to just use this while loop directly
-    # for the tap calls, but we want to use tqdm and that's easier in a for loop
-    niterations = 0
-    while niterations * chunksize < len(coords_tbl):
-        niterations += 1
     # do the tap calls
     locations = []
-    for i in tqdm(range(niterations)):
-        result = tap_service.run_async(query, uploads={"coords": coords_tbl[i * chunksize : (i + 1) * chunksize]})
+    for i in tqdm.trange(0, len(coords_tbl), chunksize):
+        result = tap_service.run_async(query, uploads={"coords": coords_tbl[i:i + chunksize]})
         locations.append(result.to_table().to_pandas())
 
     # locations may contain more than one ZTF object id per band (e.g., yang sample coords_list[10])
@@ -152,7 +147,7 @@ def locate_objects(coords_list, labels_list, radius):
     return pd.concat(locations, ignore_index=True)
 
 
-def load_lightcurves(locations_df, nworkers=6):
+def load_lightcurves(locations_df, nworkers=6, chunksize=100):
     """Loop over the catalog's parquet files (stored in an AWS S3 bucket) and load light curves.
 
     Parameters
@@ -161,8 +156,10 @@ def load_lightcurves(locations_df, nworkers=6):
         Dataframe with ZTF field, CCD, quadrant and other information that identifies each `coord` object
         and which parquet files it is in.
     nworkers : int or None
-        Number of workers in the multiprocessing pool. Use None to turn off multiprocessing. This must be None 
+        Number of workers in the multiprocessing pool. Use None to turn off multiprocessing. This must be None
         if this function is being called from within a child process (no nested multiprocessing).
+    chunksize : int
+        Number of files sent to the workers.
 
     Returns
     -------
@@ -179,11 +176,9 @@ def load_lightcurves(locations_df, nworkers=6):
         for location in tqdm(location_grps):
             lightcurves.append(load_lightcurves_one_file(location))
         return pd.concat(lightcurves, ignore_index=True)
-    
+
     # if we get here, multiprocessing has been requested
 
-    # number of files to be sent in as one "chunk" of work
-    chunksize = 100
     # make sure the chunksize isn't so big that some workers will sit idle
     if len(location_grps) < nworkers * chunksize:
         chunksize = len(location_grps) // nworkers + 1
@@ -191,7 +186,7 @@ def load_lightcurves(locations_df, nworkers=6):
     # "spawn" new processes because it uses less memory and is thread safe (req'd for pd.read_parquet)
     # https://stackoverflow.com/questions/64095876/multiprocessing-fork-vs-spawn
     mp.set_start_method("spawn", force=True)
-    
+
     # start a pool of background processes to load data in parallel
     with mp.Pool(nworkers) as pool:
         lightcurves = []
@@ -247,7 +242,7 @@ def load_lightcurves_one_file(location):
     lblmap = location_df.set_index("oid")["label"].to_dict()
     ztf_df["objectid"] = ztf_df["oid"].map(oidmap)
     ztf_df["label"] = ztf_df["oid"].map(lblmap)
-    
+
     # add the band (i.e., filtercode)
     ztf_df["band"] = location_keys[0]
 
