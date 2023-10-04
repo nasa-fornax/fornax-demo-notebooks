@@ -18,6 +18,7 @@ cache/
 ./**/*.parquet
 
 ./data/*
+./**/data/*
 
 # Jupyter Notebook
 .ipynb_checkpoints
