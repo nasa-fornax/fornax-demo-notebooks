@@ -255,6 +255,7 @@ def get_hon_sample(coords, labels, verbose=1):
     coords : list
         list of Astropy SkyCoords derived from literature sources, shared amongst functions
     lables : list
+    
         List of the first author name and publication year for tracking the sources, shared amongst functions
     verbose : int, optional
         Print out the length of the sample derived from this literature source  

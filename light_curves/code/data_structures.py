@@ -55,7 +55,39 @@ class MultiIndexDFObject:
         else:
             # assume x is a pd.DataFrame and concat
             self.data = pd.concat([self.data, x])
-            
+
+    def concat(self, other_df):
+        """Concatenate the data of two MultiIndexDFObject instances.
+
+        Parameters
+        ----------
+        other_df : MultiIndexDFObject
+            The MultiIndexDFObject instance to concatenate with.
+
+        Returns
+        -------
+        MultiIndexDFObject
+            A new MultiIndexDFObject instance with concatenated data.
+        """
+        if not isinstance(other_df, self.__class__):
+            raise ValueError("Input must be an instance of MultiIndexDFObject")
+        
+        # Get the length of the initial DataFrame's object IDs
+        initial_object_ids_length = self.data.index.get_level_values('objectid').max() + 1
+
+        # Update the object IDs in the second DataFrame
+        other_df.data.index = other_df.data.index.set_levels(
+            other_df.data.index.levels[0] + initial_object_ids_length,
+            level='objectid'
+        )
+        # Concatenate the dataframes
+        concatenated_data = pd.concat([self.data, other_df.data])
+
+        # Create a new MultiIndexDFObject with the concatenated data
+        concatenated_df_obj = self.__class__(data=concatenated_data)
+
+        return concatenated_df_obj
+    
     def pickle(self,x):
         """ Save the multiindex data frame to a pickle file
         

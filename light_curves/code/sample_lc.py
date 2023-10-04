@@ -41,32 +41,39 @@ def build_sample():
 
     get_lamassa_sample(coords, labels)  #2015ApJ...800..144L
     get_macleod16_sample(coords, labels) #2016MNRAS.457..389M
-    get_ruan_sample(coords, labels) #2016ApJ...826..188R
+    get_ruan_sample(coords, labels) #2016ApJ...826..188R    
+    get_yang_sample(coords, labels)   #2018ApJ...862..109Y
     get_macleod19_sample(coords, labels)  #2019ApJ...874....8M
     get_sheng_sample(coords, labels)  #2020ApJ...889...46S
     get_green_sample(coords, labels)  #2022ApJ...933..180G
     get_lyu_sample(coords, labels)  #z32022ApJ...927..227L
     get_lopeznavas_sample(coords, labels)  #2022MNRAS.513L..57L
     get_hon_sample(coords, labels)  #2022MNRAS.511...54H
-    get_yang_sample(coords, labels)   #2018ApJ...862..109Y
 
     # Variable AGN sample from Ranga/Andreas:
     VAGN = pd.read_csv('../data/WISE_MIR_variable_AGN_with_PS1_photometry_and_SDSS_redshift.csv')
     vagn_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(VAGN['SDSS_RA'], VAGN['SDSS_Dec'])]
     vagn_labels = ['WISE-Variable' for ra in VAGN['SDSS_RA']]
     coords.extend(vagn_coords)
-    labels.extend(vagn_labels)    
+    labels.extend(vagn_labels) 
+    
+    # George's sample with low radio to IR:
+    f = pd.read_csv('../data/george2.csv')
+    f_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(f['Right Ascension'], f['Declination'])]
+    f_labels = ['this proposal' for ra in f['Right Ascension']]
+    coords.extend(f_coords)
+    labels.extend(f_labels) 
 
     #now get some "normal" QSOs for use in the classifier
     #there are ~500K of these, so choose the number based on
     #a balance between speed of running the light curves and whatever 
     #the ML algorithms would like to have
-    num_normal_QSO = 2000
+    num_normal_QSO = 0#2000
     get_SDSS_sample(coords, labels, num_normal_QSO)
 
     ## ADD TDEs to the sample, manually copied the TDE ZTF names from Hammerstein et al. 2023
-    #tde_names = ['ZTF18aabtxvd','ZTF18aahqkbt','ZTF18abxftqm','ZTF18acaqdaa','ZTF18acpdvos','ZTF18actaqdw','ZTF19aabbnzo','ZTF18acnbpmd','ZTF19aakiwze','ZTF19aakswrb','ZTF17aaazdba','ZTF19aapreis','ZTF19aarioci','ZTF19abhejal','ZTF19abhhjcc','ZTF19abidbya','ZTF19abzrhgq','ZTF19accmaxo','ZTF20aabqihu','ZTF19acspeuw','ZTF20aamqmfk','ZTF18aakelin','ZTF20abjwvae','ZTF20abfcszi','ZTF20abefeab','ZTF20abowque','ZTF20abrnwfc','ZTF20acitpfz','ZTF20acqoiyt', 'ZTF20abnorit']
-    #TDE_id2coord(tde_names,coords,labels)
+    tde_names = ['ZTF18aabtxvd','ZTF18aahqkbt','ZTF18abxftqm','ZTF18acaqdaa','ZTF18acpdvos','ZTF18actaqdw','ZTF19aabbnzo','ZTF18acnbpmd','ZTF19aakiwze','ZTF19aakswrb','ZTF17aaazdba','ZTF19aapreis','ZTF19aarioci','ZTF19abhejal','ZTF19abhhjcc','ZTF19abidbya','ZTF19abzrhgq','ZTF19accmaxo','ZTF20aabqihu','ZTF19acspeuw','ZTF20aamqmfk','ZTF18aakelin','ZTF20abjwvae','ZTF20abfcszi','ZTF20abefeab','ZTF20abowque','ZTF20abrnwfc','ZTF20acitpfz','ZTF20acqoiyt', 'ZTF20abnorit']
+    TDE_id2coord(tde_names,coords,labels)
     
 
     get_paper_sample('2015ApJ...810...14A','FermiBL',coords,labels)
@@ -148,7 +155,7 @@ def parallel_lc(coords_list,labels_list,parquet_savename = '../output/df_lc_.par
 
 def main():
     c,l = build_sample()
-    dflc = parallel_lc(c,l,parquet_savename = '../output/df_lc_smalltest.parquet')
+    dflc = parallel_lc(c,l,parquet_savename = '../output/df_lc_george.parquet')
     # Unify for ML and save
     
 if __name__ == "__main__":
