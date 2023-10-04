@@ -11,9 +11,10 @@ from HCV_functions import HCV_get_lightcurves
 from heasarc_functions import HEASARC_get_lightcurves
 from icecube_functions import icecube_get_lightcurve
 from panstarrs import panstarrs_get_lightcurves
-from sample_selection import (clean_sample, get_green_sample, get_hon_sample, get_lamassa_sample, 
-    get_lopeznavas_sample, get_lyu_sample, get_macleod16_sample, get_macleod19_sample, get_paper_sample, 
-    get_ruan_sample, get_SDSS_sample, get_sheng_sample, get_yang_sample, nonunique_sample, TDE_id2coord)
+from sample_selection import (clean_sample, get_green_sample, get_hon_sample, get_lamassa_sample,
+                              get_lopeznavas_sample, get_lyu_sample, get_macleod16_sample, get_macleod19_sample, get_paper_sample,
+                              get_ruan_sample, get_SDSS_sample, get_sheng_sample, get_yang_sample, nonunique_sample)
+# from tde_functions import TDE_id2coord
 from TESS_Kepler_functions import TESS_Kepler_get_lightcurves
 from WISE_functions import WISE_get_lightcurves
 from ztf_functions import ZTF_get_lightcurve

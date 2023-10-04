@@ -12,7 +12,6 @@ pandas
 pyvo
 s3fs
 tqdm
-wget
 alerce
 umap-learn[plot]
 git+https://github.com/sevamoo/SOMPY
