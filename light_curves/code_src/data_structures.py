@@ -6,20 +6,20 @@ from astropy.timeseries import TimeSeries
 
 class MultiIndexDFObject:
     """
-    Pandas MultiIndex data frame to store & manipulate multiband light curves 
+    Pandas MultiIndex data frame to store & manipulate multiband light curves
 
     Examples
     --------
     # Initialize Pandas MultiIndex data frame for storing the light curve
     df_lc = MultiIndexDFObject()
-            
+
     #make a single multiindex dataframe
     dfsingle = pd.DataFrame(dict(flux=[0.1], err=[0.1], time=[time_mjd], objectid=[ccount + 1], /
         band=[mission], label=lab)).set_index(["objectid", "label", "band", "time"])
 
     # Append to existing MultiIndex light curve object
     df_lc.append(dfsingle)
-    
+
     #Show the contents
     df_lc.data
 
@@ -27,7 +27,7 @@ class MultiIndexDFObject:
     """
     def __init__(self, data=None):
         """Create a MultiIndex DataFrame that is empty if data is None, else contains the data.
-        
+
         Parameters
         ----------
         data : pd.DataFrame, optional
@@ -38,10 +38,10 @@ class MultiIndexDFObject:
         self.data = pd.DataFrame(columns=index + columns).set_index(index)
         if data is not None:
             self.append(data)
-    
-    def append(self,x):
+
+    def append(self, x):
         """Add a new band of light curve data to the dataframe
-        
+
         Parameters
         ----------
         x : Pandas dataframe
@@ -53,7 +53,7 @@ class MultiIndexDFObject:
         else:
             # assume x is a pd.DataFrame
             new_data = x
-        
+
         # if either new_data or self.data is empty we should not try to concat
         if new_data.empty:
             # leave self.data as is
@@ -62,20 +62,52 @@ class MultiIndexDFObject:
             # replace self.data with new_data
             self.data = new_data
             return
-        
+
         # if we get here, both new_data and self.data contain data, so concat
         self.data = pd.concat([self.data, new_data])
-            
-    def remove(self,x):
+
+    def concat(self, other_df):
+        """Concatenate the data of two MultiIndexDFObject instances.
+
+        Parameters
+        ----------
+        other_df : MultiIndexDFObject
+            The MultiIndexDFObject instance to concatenate with.
+
+        Returns
+        -------
+        MultiIndexDFObject
+            A new MultiIndexDFObject instance with concatenated data.
+        """
+        if not isinstance(other_df, self.__class__):
+            raise ValueError("Input must be an instance of MultiIndexDFObject")
+
+        # Get the length of the initial DataFrame's object IDs
+        initial_object_ids_length = self.data.index.get_level_values('objectid').max() + 1
+
+        # Update the object IDs in the second DataFrame
+        other_df.data.index = other_df.data.index.set_levels(
+            other_df.data.index.levels[0] + initial_object_ids_length,
+            level='objectid'
+        )
+        # Concatenate the dataframes
+        concatenated_data = pd.concat([self.data, other_df.data])
+
+        # Create a new MultiIndexDFObject with the concatenated data
+        concatenated_df_obj = self.__class__(data=concatenated_data)
+
+        return concatenated_df_obj
+
+    def remove(self, x):
         """ Drop a light curve from the dataframe
-        
+
         Parameters
         ----------
         x : list of values
              Index values identifying rows to be dropped.
         """
         self.data = self.data.drop(x)
-        
+
 ## From Brigitta as a possible data structure
 ## Not currently in use
 class MultibandTimeSeries(TimeSeries):
@@ -84,7 +116,7 @@ class MultibandTimeSeries(TimeSeries):
         # but we dont explicitly use. Ideally they are spelt out if we have docstrings here.
         # Also using keyword only arguments everywhere to force being explicit.
         super().__init__(data=data, time=time, **kwargs)
-                
+
     def add_band(self, *, time=None, data=None, band_name="None"):
         '''Add a time, flux/mag data set and resort the arrays. ``time`` can be a TimeSeries instance'''
         if 'time' not in self.colnames:
@@ -97,11 +129,8 @@ class MultibandTimeSeries(TimeSeries):
                 # this assumes ``band_name`` fluxes are taken at the very same times as the already exitsing bands
                 # TODO: include checks for sizes and other assumptions
                 self[band_name] = data
-                return 
+                return
             elif not isinstance(time, TimeSeries):
                 # TODO: handle band_name=None case
                 time = TimeSeries(time=time, data={band_name: data})
             super().__init__(vstack([self, time]))
-            
-
-            
