@@ -361,7 +361,7 @@ def get_SDSS_sample(coords, labels, num, verbose=1):
     """
     # Define the query
     query = "SELECT TOP " + str(num) + " specObjID, ra, dec, z FROM SpecObj \
-    WHERE ( z > 0.0 AND z < 2.0 AND class='QSO' AND zWARNING=0 )"
+    WHERE ( z > 0.0 AND z < 1.0 AND class='QSO' AND zWARNING=0 )"
 
     #making up redshift range here, but should look at redshift distribution of the CLQ
 

@@ -54,8 +54,8 @@ def unify_lc(df_lc,bands_inlc=['zr','zi','zg'],xres=160,numplots=1):
     objids = df_lc.data.index.get_level_values('objectid')[:].unique()
     
     printcounter = 0
-    objects,dobjects,flabels = [],[],[]
-    for obj in tqdm(objids):
+    objects,dobjects,flabels,keeps = [],[],[],[]
+    for keepindex,obj in tqdm(enumerate(objids)):
     
         singleobj = df_lc.data.loc[obj,:,:,:]  
         label = singleobj.index.unique('label')
@@ -113,7 +113,8 @@ def unify_lc(df_lc,bands_inlc=['zr','zi','zg'],xres=160,numplots=1):
             objects.append(obj_newy)
             dobjects.append(obj_newdy)
             flabels.append(label[0])
-    return np.array(objects),np.array(dobjects),flabels
+            keeps.append(keepindex)
+    return np.array(objects),np.array(dobjects),flabels,keeps
 
 def combine_bands(objects,bands):
     '''
