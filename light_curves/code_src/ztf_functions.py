@@ -184,7 +184,7 @@ def load_lightcurves(locations_df, nworkers=6, chunksize=100):
     # if no multiprocessing requested, loop over files serially and load data. return immediately
     if nworkers is None:
         lightcurves = []
-        for location in tqdm(location_grps):
+        for location in tqdm.tqdm(location_grps):
             lightcurves.append(load_lightcurves_one_file(location))
         return pd.concat(lightcurves, ignore_index=True)
 
@@ -204,7 +204,7 @@ def load_lightcurves(locations_df, nworkers=6, chunksize=100):
         # use imap because it's lazier than map and can reduce memory usage for long iterables
         # use unordered because we don't care about the order in which results are returned
         # using a large chunksize can make it much faster than the default of 1
-        for ztf_df in tqdm(
+        for ztf_df in tqdm.tqdm(
             pool.imap_unordered(load_lightcurves_one_file, location_grps, chunksize=chunksize),
             total=len(location_grps)  # must tell tqdm how many files we're iterating over
         ):
