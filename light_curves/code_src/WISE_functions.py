@@ -15,15 +15,13 @@ BANDMAP = {"W1": 1, "W2": 2}  # map the common names to the values actually stor
 K = 5  # HEALPix order at which the dataset is partitioned
 
 
-def WISE_get_lightcurves(coords_list, labels_list, radius=1.0 * u.arcsec, bandlist=["W1", "W2"]):
+def WISE_get_lightcurves(sample_table, radius=1.0 * u.arcsec, bandlist=["W1", "W2"]):
     """Loads WISE data by searching the unWISE light curve catalog (Meisner et al., 2023AJ....165...36M).
 
     Parameters
     ----------
-    coords_list : list of astropy skycoords
-        the coordinates of the targets for which a user wants light curves
-    labels_list: list of strings
-        journal articles associated with the target coordinates
+    source_table : `~astropy.table.Table`
+        Table with the coordinates and journal reference labels of the sources
     radius : astropy Quantity
         radius for the cone search to determine whether a particular detection is associated with an object
     bandlist: list of strings
@@ -36,7 +34,7 @@ def WISE_get_lightcurves(coords_list, labels_list, radius=1.0 * u.arcsec, bandli
     """
     # the catalog is in parquet format, partitioned by HEALPix pixel index at order k=5
     # locate the pixels/partitions each object is in
-    locations_df = locate_objects(coords_list, labels_list, radius)
+    locations_df = locate_objects(sample_table, radius)
 
     # the catalog is stored in an AWS S3 bucket
     # loop over the partitions and load the light curves
@@ -49,15 +47,13 @@ def WISE_get_lightcurves(coords_list, labels_list, radius=1.0 * u.arcsec, bandli
     return MultiIndexDFObject(data=wise_df.set_index(indexes)[columns])
 
 
-def locate_objects(coords_list, labels_list, radius):
+def locate_objects(source_table, radius):
     """Locate the partitions (HEALPix order 5 pixels) each coords_list object is in.
 
     Parameters
     ----------
-    coords_list : list of astropy skycoords
-        the coordinates of the targets for which a user wants light curves
-    labels_list: list of strings
-        journal articles associated with the target coordinates
+    source_table : `~astropy.table.Table`
+        Table with the coordinates and journal reference labels of the sources
     radius : astropy Quantity
         radius for the cone search to determine which pixels overlap with each object
 
@@ -68,20 +64,16 @@ def locate_objects(coords_list, labels_list, radius):
     """
     # loop over objects and determine which HEALPix pixels overlap with a circle of r=`radius` around it
     # this determines which catalog partitions contain each object
-    my_coords_list = []
-    for objectid, coord in coords_list:
-        cone_pixels = hpgeom.query_circle(
-            a=coord.ra.deg,
-            b=coord.dec.deg,
-            radius=radius.to(u.deg).value,
-            nside=hpgeom.order_to_nside(K),
-            nest=True,  # catalog uses nested ordering scheme for pixel index
-            inclusive=True,  # return all pixels that overlap with the circle, and maybe a few more
-        )
-        my_coords_list.append((objectid, coord, labels_list[objectid], cone_pixels))
+    healpix_pixel = [hpgeom.query_circle(a=row['coord'].ra.deg, b=row['coord'].dec.deg,
+                                         radius=radius.to(u.deg).value,
+                                         nside=hpgeom.order_to_nside(K), nest=True, inclusive=True)
+                     for row in source_table]
 
-    # my_coords_list is a list of tuples. turn it into a dataframe
-    locations = pd.DataFrame(my_coords_list, columns=["objectid", "coord", "label", "pixel"])
+    # TODO: simplify, e.g. avoid switching between Table and DF
+    locations_table = source_table.copy()
+    locations_table['pixel'] = healpix_pixel
+
+    locations = locations_table.to_pandas()
     # locations contains one row per object, and the pixel column stores arrays of ints
     # "explode" the dataframe into one row per object per pixel
     # this may create multiple rows per object, the pixel column will now store single ints
@@ -133,7 +125,7 @@ def load_lightcurves(locations, radius, bandlist):
 
         # do a cone search using astropy to select sources belonging to each object
         pixel_skycoords = SkyCoord(ra=pixel_tbl["ra"] * u.deg, dec=pixel_tbl["dec"] * u.deg)
-        objects_skycoords = SkyCoord(locs_df["coord"].to_list())
+        objects_skycoords = SkyCoord(locs_df["coord.ra"], locs_df["coord.dec"], unit=u.deg)
         object_ilocs, pixel_ilocs, _, _ = pixel_skycoords.search_around_sky(objects_skycoords, radius)
 
         # create a dataframe with all matched sources
