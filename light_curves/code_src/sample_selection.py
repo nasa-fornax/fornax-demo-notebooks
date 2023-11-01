@@ -188,7 +188,7 @@ def get_lyu_sample(coords, labels, verbose=1):
     """
     CLQ = Ned.query_refcode('2022ApJ...927..227L')
     lyu_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(CLQ['RA'], CLQ['DEC'])]
-    lyu_labels = ['Lyu 21' for ra in CLQ['RA']]
+    lyu_labels = ['Lyu 22' for ra in CLQ['RA']]
 
     coords.extend(lyu_coords)
     labels.extend(lyu_labels)
