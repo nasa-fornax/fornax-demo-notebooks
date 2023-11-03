@@ -16,4 +16,16 @@ management structure for coordinating this work across all three archives and NA
 we will use these experiences in further consultation with NASA to create an FY23 plan for
 building an operational science platform within the NASA Cloud.
 
-[![astropy](http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat)](http://www.astropy.org/)
+
+### Content contributing
+
+In this repository we use Jupytext and MyST Markdown Notebooks. You will need ``jupytext`` installed
+for your browser to recognise the markdown files as notebooks (see more about the motivation and
+technicalities e.g. here: https://numpy.org/numpy-tutorials/content/pairing.html).
+
+If you already have an ``ipynb`` file, convert it to Markdown using the following command, and commit
+only the markdown file to the repo:
+
+```
+jupytext --from notebook --to myst yournotebook.ipynb
+```
