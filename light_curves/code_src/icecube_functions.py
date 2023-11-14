@@ -16,7 +16,7 @@ from tqdm import tqdm
 from data_structures import MultiIndexDFObject
 
 
-def icecube_get_lightcurve(coords_list, labels_list, icecube_select_topN=3, verbose=False):
+def icecube_get_lightcurve(sample_table, icecube_select_topN=3):
     '''
     Extracts IceCube Neutrino events for a given source position and saves it into a lightcurve
     Pandas MultiIndex object.
@@ -24,18 +24,13 @@ def icecube_get_lightcurve(coords_list, labels_list, icecube_select_topN=3, verb
 
     Parameters
     ----------
-    coords_list : list of Astropy SkyCoord objects
-        List of (id,coordinates) tuples of the sources
-
-    labels_list : list of str
-        List of labels for each soruce
+    sample_table : Astropy Table
+        main source catalog with coordinates, labels, and objectids
 
     icecube_select_topN : int
         Number of top events to
 
-    verbose : bool
-        Default False. Display extra info and warnings if true.
-
+ 
     Returns
     --------
     MultiIndexDFObject: IceCube Neutrino events for all the input sources.
@@ -44,67 +39,52 @@ def icecube_get_lightcurve(coords_list, labels_list, icecube_select_topN=3, verb
 
     # Downloads the IceCube data and unzipps it. Only does it if the files have not yet been downloaded. The
     # total file size is about 30MB (zipped) and 110MB unzipped.
-    icecube_download_data(verbose=verbose)
+    icecube_download_data(verbose=False)
 
     # This loads the IceCube catalog, which is dispersed in different files.
     # Each file has a list of events with their energy, time, and approximate direction.
-    icecube_events, _ = icecube_get_catalog(verbose=verbose)
+    icecube_events, _ = icecube_get_catalog(verbose=False)
 
     # sort by Neutrino energy that way it is easier to get the top N events.
     icecube_events.sort(keys="energy_logGeV", reverse=True)
 
-    # create SkyCoord objects from event coordinates
-    c2 = SkyCoord(icecube_events["ra"], icecube_events["dec"], unit="deg", frame='icrs')
+    # create SkyCoord objects from icecube event coordinates
+    icecube_skycoords = SkyCoord(icecube_events["ra"], icecube_events["dec"], unit="deg", frame='icrs')
 
-    # Match
-    icecube_matches = []
-    icecube_matched = []
-    df_lc = MultiIndexDFObject()
+    #here are the skycoords from mysample defined above
+    mysample_skycoords = sample_table['coord']
 
-    for index, (objectid, coord) in enumerate(tqdm(coords_list)):
+    #Match
+    idx_icecube, idx_mysample, d2d, d3d = icecube_skycoords.search_around_sky(mysample_skycoords, 1*u.deg)
 
-        # get all distances
-        dist_angle = coord.separation(c2)
+    #need to filter reponse based on position error circles
+    #really want d2d to be less than the error circle of icecube = icecube_events["AngErr"] in degrees
+    filter_arr = d2d < icecube_events["AngErr"][idx_mysample]
+    filter_idx_icecube = idx_icecube[filter_arr]
+    filter_idx_mysample = idx_mysample[filter_arr]
+    filter_d2d = d2d[filter_arr]
 
-        # make selection: here we have to also include errors on the
-        # angles somehow.
-        sel = np.where((dist_angle.to(u.degree).value - icecube_events["AngErr"]) <= 0.0)[0]
+    #keep these matches together with objectid and lebal as new entries in the df.
+    obid_match = sample_table['objectid'][filter_idx_icecube]
+    label_match = sample_table['label'][filter_idx_icecube]
+    time_icecube= icecube_events['mjd'][filter_idx_mysample]
+    flux_icecube = icecube_events['energy_logGeV'][filter_idx_mysample]
 
-        # select the top N events in energy. Note that we already sorted the table
-        # by energy_logGeV. Hence we only have to pick the top N here.
-        if len(sel) < icecube_select_topN:
-            this_topN = len(sel)
-        else:
-            this_topN = icecube_select_topN * 1
+    #save the icecube info in correct format for the rest of the data
+    icecube_df = pd.DataFrame({'flux': flux_icecube, 
+                               'err': np.zeros(len(obid_match)), 
+                               'time': time_icecube, 
+                               'objectid': obid_match, 
+                               'label': label_match, 
+                               'band': "IceCube"})
 
-        if len(sel) > 0:
-            icecube_matches.append(icecube_events[sel[0:this_topN]])
-            icecube_matches[index]["Ang_match"] = dist_angle.to(u.degree).value[sel[0:this_topN]]
-            icecube_matches[index]["Ang_match"].unit = u.degree
-            icecube_matched.append(objectid)
+    #now can use a groupby to only keep the top N (by GeV flux) icecube matches for each object
+    filter_icecube_df = icecube_df.groupby('objectid').head(icecube_select_topN).reset_index(drop=True)
 
-        else:
-            if verbose:
-                print("No match found.")
-
-    # Add to lightcurve object
-    for index, (objectid, coord) in enumerate(tqdm(coords_list)):
-        label = labels_list[index]
-        if objectid in icecube_matched:
-            # Create single instance. flux in log GeV, error is N/A & set to 0, time is MJD
-            dfsingle = pd.DataFrame({'flux': np.asarray(icecube_matches[index]["energy_logGeV"]),
-                                     'err': np.repeat(0, len(icecube_matches[index])),
-                                     'time': np.asarray(icecube_matches[index]["mjd"]),
-                                     'objectid': np.repeat(objectid, len(icecube_matches[index])),
-                                     'label': label,
-                                     'band': "IceCube"}).set_index(["objectid", "label", "band", "time"])
-
-            df_lc.append(dfsingle)
-
-    if verbose:
-        print("IceCube Matched and added to lightcurve object.")
-
-    return (df_lc)
+    #put the index in to match with df_lc
+    filter_icecube_df.set_index(["objectid", "label", "band", "time"])
+    
+    return (filter_icecube_df)
 
 
 def icecube_get_catalog(path="data", verbose=False):
