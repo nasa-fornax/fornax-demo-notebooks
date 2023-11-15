@@ -1,0 +1,93 @@
+Traceback (most recent call last):
+  File "/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages/jupyter_cache/executors/utils.py", line 58, in single_nb_execution
+    executenb(
+  File "/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages/nbclient/client.py", line 1265, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages/jupyter_core/utils/__init__.py", line 160, in wrapped
+    return loop.run_until_complete(inner)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/asyncio/base_events.py", line 650, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages/nbclient/client.py", line 648, in async_setup_kernel
+    yield
+  File "/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages/nbclient/client.py", line 703, in async_execute
+    await self.async_execute_cell(
+  File "/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages/nbclient/client.py", line 1021, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages/nbclient/client.py", line 915, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+# standard lib imports
+
+import math
+import time
+import warnings
+import concurrent.futures
+import sys
+import os
+import re
+from typing import NamedTuple
+
+# Third party imports
+
+import numpy as np
+import matplotlib.pyplot as plt
+from skimage.transform import rotate
+import pandas as pd
+import seaborn as sns
+import statsmodels
+import mpld3
+from tqdm import tqdm
+
+from astropy.nddata import Cutout2D
+from astropy.io import fits
+from astropy.table import Table
+from astropy.coordinates import SkyCoord
+import astropy.units as u
+
+from astroquery.ipac.irsa import Irsa
+from astroquery.heasarc import Heasarc
+from astroquery.mast import Observations
+import pyvo
+
+# Local code imports
+sys.path.append('code_src/')
+
+from display_images import display_images
+import cutout
+from exceptions import TractorError
+import photometry
+from plot_SED import plot_SED
+from nway_write_header import nway_write_header
+from photometry import Band
+from photometry import lookup_img_pair
+#from prepare_prf import prepare_prf
+
+# temporarily let the notebook start without tractor as dependency
+try:
+    from find_nconfsources import find_nconfsources
+except ImportError:
+    print("tractor is missing")
+    pass
+
+
+%matplotlib inline
+------------------
+
+[0;31m---------------------------------------------------------------------------[0m
+[0;31mModuleNotFoundError[0m                       Traceback (most recent call last)
+Cell [0;32mIn [2], line 19[0m
+[1;32m     17[0m [38;5;28;01mimport[39;00m [38;5;21;01mpandas[39;00m [38;5;28;01mas[39;00m [38;5;21;01mpd[39;00m
+[1;32m     18[0m [38;5;28;01mimport[39;00m [38;5;21;01mseaborn[39;00m [38;5;28;01mas[39;00m [38;5;21;01msns[39;00m
+[0;32m---> 19[0m [38;5;28;01mimport[39;00m [38;5;21;01mstatsmodels[39;00m
+[1;32m     20[0m [38;5;28;01mimport[39;00m [38;5;21;01mmpld3[39;00m
+[1;32m     21[0m [38;5;28;01mfrom[39;00m [38;5;21;01mtqdm[39;00m [38;5;28;01mimport[39;00m tqdm
+
+[0;31mModuleNotFoundError[0m: No module named 'statsmodels'
+ModuleNotFoundError: No module named 'statsmodels'
+
