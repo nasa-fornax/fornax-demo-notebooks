@@ -24,15 +24,13 @@ CATALOG_FILES = (
 )
 
 
-def ZTF_get_lightcurve(coords_list, labels_list, nworkers=6, ztf_radius=0.000278 * u.deg):
+def ZTF_get_lightcurve(sample_table, nworkers=6, ztf_radius=0.000278 * u.deg):
     """Function to add the ZTF lightcurves in all three bands to a multiframe data structure
 
     Parameters
     ----------
-    coords_list : list of astropy skycoords
-        the coordinates of the targets for which a user wants light curves
-    labels_list: list of strings
-        journal articles associated with the target coordinates
+    sample_table : `~astropy.table.Table`
+        Table with the coordinates and journal reference labels of the sources
     nworkers : int or None
         number of workers in the multiprocessing pool used in the load_lightcurves function.
         This must be None if this function is being called from within a child process already.
@@ -47,7 +45,7 @@ def ZTF_get_lightcurve(coords_list, labels_list, nworkers=6, ztf_radius=0.000278
     """
     # the catalog is in parquet format with one file per ZTF filter, field, ccd, and quadrant
     # use a TAP query to locate which files each object is in
-    locations_df = locate_objects(coords_list, labels_list, ztf_radius)
+    locations_df = locate_objects(sample_table, ztf_radius)
 
     # the catalog is stored in an AWS S3 bucket. loop over the files and load the light curves
     ztf_df = load_lightcurves(locations_df, nworkers=nworkers)
@@ -106,17 +104,15 @@ def file_name(filtercode, field, ccdid, qid, basedir=None):
     return CATALOG_ROOT + f
 
 
-def locate_objects(coords_list, labels_list, radius, chunksize=10000):
+def locate_objects(sample_table, radius, chunksize=10000):
     """The catalog's parquet files are organized by filter, field, CCD, and quadrant. Use TAP to look them up.
 
     https://irsa.ipac.caltech.edu/docs/program_interface/TAP.html
 
     Parameters
     ----------
-    coords_list : list of tuples
-        one tuple per target: (objectid, SkyCoord)
-    labels_list: list of strings
-        journal articles associated with target coordinates, indexed by objectid
+    sample_table : `~astropy.table.Table`
+        Table with the coordinates and journal reference labels of the sources
     radius : astropy Quantity
         search radius, how far from the source should the archives return results
      chunksize : int
@@ -131,19 +127,25 @@ def locate_objects(coords_list, labels_list, radius, chunksize=10000):
     """
     # setup for tap query
     tap_service = pyvo.dal.TAPService("https://irsa.ipac.caltech.edu/TAP")
-    coords_tbl = make_coordsTable(coords_list, labels_list)
-    coordscols = [f"coords.{c}" for c in ["objectid", "label"]]
-    ztfcols = [f"ztf.{c}" for c in ["oid", "filtercode", "field", "ccdid", "qid", "ra", "dec"]]
-    query = f"""SELECT {', '.join(coordscols + ztfcols)}
-        FROM ztf_objects_{DATARELEASE} ztf, TAP_UPLOAD.coords coords
+    # construct table to be uploaded
+    upload_table = sample_table["objectid", "label"]
+    upload_table.convert_unicode_to_bytestring()  # TAP requires strings to be encoded
+    upload_table["ra"] = sample_table["coord"].ra.deg
+    upload_table["dec"] = sample_table["coord"].dec.deg
+    # construct the query
+    sample_cols = [f"sample.{c}" for c in ["objectid", "label"]]
+    ztf_cols = [f"ztf.{c}" for c in ["oid", "filtercode", "field", "ccdid", "qid", "ra", "dec"]]
+    select_cols = ', '.join(sample_cols + ztf_cols)
+    query = f"""SELECT {select_cols}
+        FROM ztf_objects_{DATARELEASE} ztf, TAP_UPLOAD.sample sample
         WHERE CONTAINS(
-            POINT('ICRS', coords.ra, coords.dec), CIRCLE('ICRS', ztf.ra, ztf.dec, {radius.value})
+            POINT('ICRS', sample.ra, sample.dec), CIRCLE('ICRS', ztf.ra, ztf.dec, {radius.value})
         )=1"""
 
     # do the tap calls
     locations = []
-    for i in tqdm.trange(0, len(coords_tbl), chunksize):
-        result = tap_service.run_async(query, uploads={"coords": coords_tbl[i:i + chunksize]})
+    for i in tqdm.trange(0, len(upload_table), chunksize):
+        result = tap_service.run_async(query, uploads={"sample": upload_table[i : i + chunksize]})
         locations.append(result.to_table().to_pandas())
 
     # locations may contain more than one ZTF object id per band (e.g., yang sample coords_list[10])

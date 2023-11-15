@@ -198,7 +198,7 @@ df_lc.append(df_lc_fermi)
 
 ```{code-cell} ipython3
 # use the nworkers arg to control the amount of parallelization in the data loading step
-df_lc_ZTF = ZTF_get_lightcurve(coords_list, labels_list, nworkers=6)
+df_lc_ZTF = ZTF_get_lightcurve(sample_table, nworkers=6)
 
 #add the resulting dataframe to all other archives
 df_lc.append(df_lc_ZTF)
@@ -382,7 +382,7 @@ with mp.Pool(processes=n_workers) as pool:
         WISE_get_lightcurves, (coords_list, labels_list, wise_radius, bandlist), callback=callback
     )
     pool.apply_async(
-        ZTF_get_lightcurve, (coords_list, labels_list, ztf_nworkers), callback=callback
+        ZTF_get_lightcurve, (sample_table, ztf_nworkers), callback=callback
     )
 
     pool.close()  # signal that no more jobs will be submitted to the pool
