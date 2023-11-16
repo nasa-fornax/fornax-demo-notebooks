@@ -86,7 +86,7 @@ from TESS_Kepler_functions import TESS_Kepler_get_lightcurves
 # Note: WISE and ZTF data are temporarily located in a non-public AWS S3 bucket. It is automatically
 # available from the Fornax SMCE, but will require user credentials for access outside the SMCE.
 from WISE_functions import WISE_get_lightcurves
-#from ztf_functions import ZTF_get_lightcurve
+from ztf_functions import ZTF_get_lightcurve
 ```
 
 ## 1. Define the Sample
@@ -103,15 +103,15 @@ labels = []
 
 #choose your own adventure:
 
-get_lamassa_sample(coords, labels)  #2015ApJ...800..144L
-get_macleod16_sample(coords, labels) #2016MNRAS.457..389M
-get_ruan_sample(coords, labels) #2016ApJ...826..188R
-get_macleod19_sample(coords, labels)  #2019ApJ...874....8M
-get_sheng_sample(coords, labels)  #2020ApJ...889...46S
-get_green_sample(coords, labels)  #2022ApJ...933..180G
-get_lyu_sample(coords, labels)  #z32022ApJ...927..227L
-get_lopeznavas_sample(coords, labels)  #2022MNRAS.513L..57L
-get_hon_sample(coords, labels)  #2022MNRAS.511...54H
+#get_lamassa_sample(coords, labels)  #2015ApJ...800..144L
+#get_macleod16_sample(coords, labels) #2016MNRAS.457..389M
+#get_ruan_sample(coords, labels) #2016ApJ...826..188R
+#get_macleod19_sample(coords, labels)  #2019ApJ...874....8M
+#get_sheng_sample(coords, labels)  #2020ApJ...889...46S
+#get_green_sample(coords, labels)  #2022ApJ...933..180G
+#get_lyu_sample(coords, labels)  #z32022ApJ...927..227L
+#get_lopeznavas_sample(coords, labels)  #2022MNRAS.513L..57L
+#get_hon_sample(coords, labels)  #2022MNRAS.511...54H
 get_yang_sample(coords, labels)   #2018ApJ...862..109Y
 
 #now get some "normal" QSOs for use in the classifier
