@@ -54,7 +54,6 @@ Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, D
 Suvi Gezari, Antara Basu-zych,Stephanie LaMassa\
 MAST, HEASARC, & IRSA Fornax teams
 
-
 ```{code-cell} ipython3
 #ensure all dependencies are installed
 !pip install -r requirements.txt
@@ -120,12 +119,11 @@ get_yang_sample(coords, labels)   #2018ApJ...862..109Y
 #a balance between speed of running the light curves and whatever 
 #the ML algorithms would like to have
 
-#num_normal_QSO = 50
+#num_normal_QSO = 5000
 #get_SDSS_sample(coords, labels, num_normal_QSO)
 
 # remove duplicates and attach an objectid to the coords
 sample_table = clean_sample(coords, labels)
-
 ```
 
 ### 1.1 Build your own Sample
@@ -135,7 +133,7 @@ To build your own sample, you can follow the examples of functions above to grab
 or
 
 You can use [astropy's read](https://docs.astropy.org/en/stable/io/ascii/read.html) function to read in an input table
-and then convert that table into a list of [skycoords](https://docs.astropy.org/en/stable/api/astropy.coordinates.SkyCoord.html) 
+and then convert that table into a list of [skycoords](https://docs.astropy.org/en/stable/api/astropy.coordinates.SkyCoord.html)
 
 +++
 
@@ -238,14 +236,12 @@ df_lc.append(df_lc_panstarrs)
      2. it is only accessible with casjobs, not through python notebooks.  
      3. magnitude range (g, r, i) < 19mag makes it not relevant for this use case
  
-One path forward if this catalog becomes scientifically interesting is to put in a MAST helpdesk ticket to see if 1) they do have the light curves, and 2) they could switch the catalog to a searchable with python version.  There are some ways of [accessing casjobs with python](<https://github.com/spacetelescope/notebooks/blob/master/notebooks/MAST/HSC/HCV_CASJOBS/HCV_casjobs_demo.ipynb), but not this particular catalog.  
- 
+One path forward if this catalog becomes scientifically interesting is to put in a MAST helpdesk ticket to see if 1) they do have the light curves, and 2) they could switch the catalog to a searchable with python version.  There are some ways of [accessing casjobs with python](<https://github.com/spacetelescope/notebooks/blob/master/notebooks/MAST/HSC/HCV_CASJOBS/HCV_casjobs_demo.ipynb), but not this particular catalog.
 
 +++
 
 ### 2.6 MAST: TESS, Kepler and K2
  - use [`lightKurve`](https://docs.lightkurve.org/index.html) to search all 3 missions and download light curves
- 
 
 ```{code-cell} ipython3
 #go get the lightcurves using lightkurve
@@ -273,7 +269,7 @@ df_lc.append(df_lc_HCV)
 
 +++
 
-### 3.1 Gaia 
+### 3.1 Gaia
 
 ```{code-cell} ipython3
 gaiastarttime = time.time()
@@ -289,7 +285,6 @@ print('gaia search took:', time.time() - gaiastarttime, 's')
 - Has a [website](https://asas-sn.osu.edu/photometry) that can be manually searched; but no API which would allow automatic searches from within this notebook
 - Magnitude range of this survey is not consistent with the magnitude range of our CLAGN.  If this catalog becomes scientifically interesting, one path forward would be to ask ASAS-SN team about implementing an API
 
-
 +++
 
 ### 3.3 Icecube Neutrinos
@@ -298,12 +293,11 @@ There are several [catalogs](https://icecube.wisc.edu/data-releases/2021/01/all-
 all the yearly catalogs.
 The IceCube catalog contains Neutrino detections with associated energy and time and approximate direction (which is uncertain by half-degree scales....). Usually, for active events only one or two Neutrinos are detected, which makes matching quite different compared to "photons". For our purpose, we will list the top 3 events in energy that are within a given distance to the target.
 
-This time series (time vs. neutrino energy) information is similar to photometry. We choose to storing time and energy in our data structure, leaving error = 0. What is __not__ stored in this format is the distance or angular uncertainty of the event direction. 
+This time series (time vs. neutrino energy) information is similar to photometry. We choose to storing time and energy in our data structure, leaving error = 0. What is __not__ stored in this format is the distance or angular uncertainty of the event direction.
 
 ```{code-cell} ipython3
-df_lc_icecube = icecube_get_lightcurve(coords_list , labels_list ,
-                                   icecube_select_topN = 3,
-                                   verbose = 1)
+df_lc_icecube = icecube_get_lightcurve(sample_table ,
+                                   icecube_select_topN = 3)
 
 #add the resulting dataframe to all other archives
 df_lc.append(df_lc_icecube)
@@ -364,13 +358,13 @@ with mp.Pool(processes=n_workers) as pool:
         Gaia_get_lightcurve, (sample_table, 1/3600., 0), callback=callback
     )
     pool.apply_async(
-        HEASARC_get_lightcurves, (coords_list, labels_list, heasarc_cat, error_radius), callback=callback
+        HEASARC_get_lightcurves, (sample_table, heasarc_cat, error_radius), callback=callback
     )
     pool.apply_async(
         HCV_get_lightcurves, (coords_list, labels_list, hcv_radius), callback=callback
     )
     pool.apply_async(
-        icecube_get_lightcurve, (coords_list, labels_list, 3, 1), callback=callback
+        icecube_get_lightcurve, (sample_table , 3), callback=callback
     )
     pool.apply_async(
         panstarrs_get_lightcurves, (coords_list, labels_list, panstarrs_radius), callback=callback
@@ -379,7 +373,7 @@ with mp.Pool(processes=n_workers) as pool:
         TESS_Kepler_get_lightcurves, (coords_list, labels_list, lk_radius), callback=callback
     )
     pool.apply_async(
-        WISE_get_lightcurves, (coords_list, labels_list, wise_radius, bandlist), callback=callback
+        WISE_get_lightcurves, (sample_table,  wise_radius, bandlist), callback=callback
     )
     pool.apply_async(
         ZTF_get_lightcurve, (coords_list, labels_list, ztf_nworkers), callback=callback
