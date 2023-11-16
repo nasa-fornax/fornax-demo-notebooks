@@ -45,9 +45,6 @@ def icecube_get_lightcurve(sample_table, icecube_select_topN=3):
     # Each file has a list of events with their energy, time, and approximate direction.
     icecube_events, _ = icecube_get_catalog(verbose=False)
 
-    # sort by Neutrino energy that way it is easier to get the top N events.
-    icecube_events.sort(keys="energy_logGeV", reverse=True)
-
     # create SkyCoord objects from icecube event coordinates
     icecube_skycoords = SkyCoord(icecube_events["ra"], icecube_events["dec"], unit="deg", frame='icrs')
 
@@ -78,6 +75,9 @@ def icecube_get_lightcurve(sample_table, icecube_select_topN=3):
                                'label': label_match, 
                                'band': "IceCube"})
 
+    # sort by Neutrino energy that way it is easier to get the top N events.
+    icecube_df = icecube_df.sort_values(['objectid', 'flux'], ascending=[True, False])
+    
     #now can use a groupby to only keep the top N (by GeV flux) icecube matches for each object
     filter_icecube_df = icecube_df.groupby('objectid').head(icecube_select_topN).reset_index(drop=True)
 
