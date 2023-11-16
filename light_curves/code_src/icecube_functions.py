@@ -57,15 +57,15 @@ def icecube_get_lightcurve(sample_table, icecube_select_topN=3):
     #need to filter reponse based on position error circles
     #really want d2d to be less than the error circle of icecube = icecube_events["AngErr"] in degrees
     filter_arr = d2d < icecube_events["AngErr"][idx_icecube]
-    filter_idx_icecube = idx_mysample[filter_arr]
-    filter_idx_mysample = idx_icecubefilter_arr]
+    filter_idx_mysample = idx_mysample[filter_arr]
+    filter_idx_icecube = idx_icecube[filter_arr]
     filter_d2d = d2d[filter_arr]
 
     #keep these matches together with objectid and lebal as new entries in the df.
-    obid_match = sample_table['objectid'][filter_idx_icecube]
-    label_match = sample_table['label'][filter_idx_icecube]
-    time_icecube= icecube_events['mjd'][filter_idx_mysample]
-    flux_icecube = icecube_events['energy_logGeV'][filter_idx_mysample]
+    obid_match = sample_table['objectid'][filter_idx_mysample]
+    label_match = sample_table['label'][filter_idx_mysample]
+    time_icecube= icecube_events['mjd'][filter_idx_icecube]
+    flux_icecube = icecube_events['energy_logGeV'][filter_idx_icecube]
 
     #save the icecube info in correct format for the rest of the data
     icecube_df = pd.DataFrame({'flux': flux_icecube, 
@@ -82,7 +82,7 @@ def icecube_get_lightcurve(sample_table, icecube_select_topN=3):
     filter_icecube_df = icecube_df.groupby('objectid').head(icecube_select_topN).reset_index(drop=True)
 
     #put the index in to match with df_lc
-    filter_icecube_df.set_index(["objectid", "label", "band", "time"])
+    filter_icecube_df.set_index(["objectid", "label", "band", "time"], inplace = True)
     
     return (filter_icecube_df)
 
