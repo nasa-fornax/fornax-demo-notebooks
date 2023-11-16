@@ -55,13 +55,13 @@ def icecube_get_lightcurve(sample_table, icecube_select_topN=3):
     mysample_skycoords = sample_table['coord']
 
     #Match
-    idx_icecube, idx_mysample, d2d, d3d = icecube_skycoords.search_around_sky(mysample_skycoords, 1*u.deg)
+    idx_mysample, idx_icecube, d2d, d3d = icecube_skycoords.search_around_sky(mysample_skycoords, 1*u.deg)
 
     #need to filter reponse based on position error circles
     #really want d2d to be less than the error circle of icecube = icecube_events["AngErr"] in degrees
-    filter_arr = d2d < icecube_events["AngErr"][idx_mysample]
-    filter_idx_icecube = idx_icecube[filter_arr]
-    filter_idx_mysample = idx_mysample[filter_arr]
+    filter_arr = d2d < icecube_events["AngErr"][idx_icecube]
+    filter_idx_icecube = idx_mysample[filter_arr]
+    filter_idx_mysample = idx_icecubefilter_arr]
     filter_d2d = d2d[filter_arr]
 
     #keep these matches together with objectid and lebal as new entries in the df.
