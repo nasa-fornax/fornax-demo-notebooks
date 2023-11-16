@@ -119,7 +119,7 @@ get_yang_sample(coords, labels)   #2018ApJ...862..109Y
 #a balance between speed of running the light curves and whatever 
 #the ML algorithms would like to have
 
-#num_normal_QSO = 50
+#num_normal_QSO = 5000
 #get_SDSS_sample(coords, labels, num_normal_QSO)
 
 # remove duplicates and attach an objectid to the coords
@@ -296,7 +296,6 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 This time series (time vs. neutrino energy) information is similar to photometry. We choose to storing time and energy in our data structure, leaving error = 0. What is __not__ stored in this format is the distance or angular uncertainty of the event direction.
 
 ```{code-cell} ipython3
-%%time
 df_lc_icecube = icecube_get_lightcurve(sample_table ,
                                    icecube_select_topN = 3)
 
