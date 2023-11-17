@@ -34,14 +34,14 @@ def setup_text_plots():
     mpl.rcParams['ytick.right'] = True
     mpl.rcParams['hatch.linewidth'] = 1
 
-def create_figures(coords_list , df_lc, show_nbr_figures, save_output):
+def create_figures(sample_table , df_lc, show_nbr_figures, save_output):
     '''
-    Creates figures of the lightcurves for each source in the coordinate list.
+    Creates figures of the lightcurves for each source in the sample_table.
     
     Parameters
     ----------
-    coords_list : list of ID and Astropy SkyCoord objects typles
-        List of (id,coordinates) tuples of the sources.
+    sample_table : `~astropy.table.Table`
+        Table with the coordinates, objectid's and journal reference labels of the sources
         
     df_lc : lightcurve object
         Lightcurve objects from which to create the lightcurve figures.
@@ -63,7 +63,7 @@ def create_figures(coords_list , df_lc, show_nbr_figures, save_output):
     -----
     By default, if save_output is True, figures are
     made and saved for *all* sources. If that is too much, the user can create a selection
-    in `coords_list' of which sources they like to plot (and save).
+    from the sample of which sources they like to plot (and save).
     
     '''
     
@@ -72,8 +72,8 @@ def create_figures(coords_list , df_lc, show_nbr_figures, save_output):
         return(False)
     
     cc = 0
-    for objectid, coord in tqdm(coords_list):
-        
+    for row in sample_table:
+        objectid = row['objectid']
         cc += 1 # counter (1-indexed)
         
         ## Set up =================

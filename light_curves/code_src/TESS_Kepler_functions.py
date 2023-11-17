@@ -34,7 +34,7 @@ def clean_filternames(search_result, numlc):
         filtername = 'K2'
     return(filtername)
 
-def TESS_Kepler_get_lightcurves(coords_list, labels_list, radius):
+def TESS_Kepler_get_lightcurves(sample_table, radius):
     """Searches TESS, Kepler, and K2 for light curves from a list of input coordinates
     
     Parameters
@@ -53,6 +53,11 @@ def TESS_Kepler_get_lightcurves(coords_list, labels_list, radius):
     """
     
     df_lc = MultiIndexDFObject()
+    
+    #first convert sample_table to coords_list, labels_list
+    coords_list = [(row['objectid'] - 1, row['coord']) for row in sample_table]
+    labels_list = [row['label'] for row in sample_table]
+    
     #for all objects
     for objectid, coord in tqdm(coords_list):
     #for testing, this has 79 light curves between the three missions.

@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.15.2
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  display_name: science_demo
   language: python
-  name: python3
+  name: conda-env-science_demo-py
 ---
 
 # Make multiwavelength light curves using archival data
@@ -77,8 +77,8 @@ from data_structures import MultiIndexDFObject
 from gaia_functions import Gaia_get_lightcurve
 from HCV_functions import HCV_get_lightcurves
 from heasarc_functions import HEASARC_get_lightcurves
-from icecube_functions import icecube_get_lightcurve
-from panstarrs import panstarrs_get_lightcurves
+from icecube_functions import Icecube_get_lightcurve
+from panstarrs import Panstarrs_get_lightcurves
 from plot_functions import create_figures
 from sample_selection import (clean_sample, get_green_sample, get_hon_sample, get_lamassa_sample, get_lopeznavas_sample,
     get_lyu_sample, get_macleod16_sample, get_macleod19_sample, get_ruan_sample, get_SDSS_sample, get_sheng_sample, get_yang_sample)
@@ -144,7 +144,7 @@ At this point you may wish to write out your sample to disk and reuse that in fu
 We would suggest to choose from various formats that fully supports the astropy objects, such as SkyCoord, in the so-called Mixin columns. E.g  Enhanced Character-Separated Values or 'ecsv' is one such format: https://docs.astropy.org/en/stable/io/ascii/ecsv.html
 
 ```{code-cell} ipython3
-sample_table.write('data/input_sample.ecsv', format='ascii.ecsv')
+sample_table.write('data/input_sample.ecsv', format='ascii.ecsv', overwrite = True)
 ```
 
 ### 1.3 Load the sample table from disk
@@ -153,14 +153,6 @@ Do only this step from this section when you have a previously generated sample 
 
 ```{code-cell} ipython3
 sample_table = Table.read('data/input_sample.ecsv', format='ascii.ecsv')
-```
-
-### Temporary cell, remove when all functions take a Table sample_table rather than lists
-
-```{code-cell} ipython3
-coords_list = [(row['objectid'] - 1, row['coord']) for row in sample_table]
-
-labels_list = [row['label'] for row in sample_table]
 ```
 
 ## 2. Find light curves for these targets in NASA catalogs
@@ -194,7 +186,7 @@ df_lc.append(df_lc_fermi)
 
 ### 2.2 IRSA: ZTF
 
-```{code-cell} ipython3
+```{raw-cell}
 # use the nworkers arg to control the amount of parallelization in the data loading step
 df_lc_ZTF = ZTF_get_lightcurve(coords_list, labels_list, nworkers=6)
 
@@ -223,7 +215,7 @@ Query the Pan-STARRS API; based on this [example](https://ps1images.stsci.edu/ps
 ```{code-cell} ipython3
 #Do a panstarrs search
 panstarrs_radius = 1.0/3600.0    # search radius = 1 arcsec
-df_lc_panstarrs = panstarrs_get_lightcurves(coords_list, labels_list, panstarrs_radius)
+df_lc_panstarrs = Panstarrs_get_lightcurves(sample_table, panstarrs_radius)
 
 #add the resulting dataframe to all other archives
 df_lc.append(df_lc_panstarrs)
@@ -246,10 +238,13 @@ One path forward if this catalog becomes scientifically interesting is to put in
 ```{code-cell} ipython3
 #go get the lightcurves using lightkurve
 TESS_radius = 1.0  #arcseconds
-df_lc_TESS = TESS_Kepler_get_lightcurves(coords_list, labels_list, TESS_radius)
+df_lc_TESS = TESS_Kepler_get_lightcurves(sample_table, TESS_radius)
 
 #add the resulting dataframe to all other archives
 df_lc.append(df_lc_TESS)
+
+#LightKurve will return an "Error" when it doesn't find a match for a target
+#These are not real errors and can be safely ignored.
 ```
 
 ### 2.7 MAST: HCV
@@ -259,7 +254,7 @@ df_lc.append(df_lc_TESS)
 ```{code-cell} ipython3
 #Do an HCV search
 HCV_radius = 1.0/3600.0 # radius = 1 arcsec
-df_lc_HCV = HCV_get_lightcurves(coords_list, labels_list, HCV_radius)
+df_lc_HCV = HCV_get_lightcurves(sample_table, HCV_radius)
 
 #add the resulting dataframe to all other archives
 df_lc.append(df_lc_HCV)
@@ -273,7 +268,7 @@ df_lc.append(df_lc_HCV)
 
 ```{code-cell} ipython3
 gaiastarttime = time.time()
-df_lc_gaia = gaia_get_lightcurve(sample_table, 1/3600., 0)
+df_lc_gaia = Gaia_get_lightcurve(sample_table, 1/3600., 0)
 
 #add the resulting dataframe to all other archives
 df_lc.append(df_lc_gaia)
@@ -296,7 +291,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 This time series (time vs. neutrino energy) information is similar to photometry. We choose to storing time and energy in our data structure, leaving error = 0. What is __not__ stored in this format is the distance or angular uncertainty of the event direction.
 
 ```{code-cell} ipython3
-df_lc_icecube = icecube_get_lightcurve(sample_table ,
+df_lc_icecube = Icecube_get_lightcurve(sample_table ,
                                    icecube_select_topN = 3)
 
 #add the resulting dataframe to all other archives
@@ -361,16 +356,16 @@ with mp.Pool(processes=n_workers) as pool:
         HEASARC_get_lightcurves, (sample_table, heasarc_cat, error_radius), callback=callback
     )
     pool.apply_async(
-        HCV_get_lightcurves, (coords_list, labels_list, hcv_radius), callback=callback
+        HCV_get_lightcurves, (sample_table, hcv_radius), callback=callback
     )
     pool.apply_async(
-        icecube_get_lightcurve, (sample_table , 3), callback=callback
+        Icecube_get_lightcurve, (sample_table , 3), callback=callback
     )
     pool.apply_async(
-        panstarrs_get_lightcurves, (coords_list, labels_list, panstarrs_radius), callback=callback
+        Panstarrs_get_lightcurves, (sample_table, panstarrs_radius), callback=callback
     )
     pool.apply_async(
-        TESS_Kepler_get_lightcurves, (coords_list, labels_list, lk_radius), callback=callback
+        TESS_Kepler_get_lightcurves, (sample_table, lk_radius), callback=callback
     )
     pool.apply_async(
         WISE_get_lightcurves, (sample_table,  wise_radius, bandlist), callback=callback
@@ -413,7 +408,7 @@ Model plots after [van Velzen et al., 2021](https://arxiv.org/pdf/2111.09391.pdf
 __Note__ that in the following, we can either plot the results from `df_lc` (from the serial call) or `parallel_df_lc` (from the parallel call). By default (see next cell) the output of the parallel call is used.
 
 ```{code-cell} ipython3
-_ = create_figures(coords_list = coords_list ,
+_ = create_figures(sample_table ,
                    df_lc = parallel_df_lc, # either df_lc (serial call) or parallel_df_lc (parallel call)
                    show_nbr_figures = 5,
                    save_output = True ,
