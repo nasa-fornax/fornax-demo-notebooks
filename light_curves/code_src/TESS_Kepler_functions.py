@@ -55,7 +55,7 @@ def TESS_Kepler_get_lightcurves(sample_table, radius):
     df_lc = MultiIndexDFObject()
     
     #first convert sample_table to coords_list, labels_list
-    coords_list = [(row['objectid'] - 1, row['coord']) for row in sample_table]
+    coords_list = [(row['objectid'], row['coord']) for row in sample_table]
     labels_list = [row['label'] for row in sample_table]
     
     #for all objects
