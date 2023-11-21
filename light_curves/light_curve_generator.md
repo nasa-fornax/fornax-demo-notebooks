@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.15.2
 kernelspec:
-  display_name: science_demo
+  display_name: Python 3 (ipykernel)
   language: python
-  name: conda-env-science_demo-py
+  name: python3
 ---
 
 # Make multiwavelength light curves using archival data
@@ -186,7 +186,7 @@ df_lc.append(df_lc_fermi)
 
 ### 2.2 IRSA: ZTF
 
-```{raw-cell}
+```{code-cell} ipython3
 # use the nworkers arg to control the amount of parallelization in the data loading step
 df_lc_ZTF = ZTF_get_lightcurve(coords_list, labels_list, nworkers=6)
 
