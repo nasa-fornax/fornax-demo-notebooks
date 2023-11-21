@@ -38,6 +38,8 @@ from heasarc_functions import HEASARC_get_lightcurves
 from TESS_Kepler_functions import TESS_Kepler_get_lightcurves
 from WISE_functions import WISE_get_lightcurves
 from ztf_functions import ZTF_get_lightcurve
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.gaussian_process.kernels import RBF
 
 from tqdm import tqdm
 
@@ -56,7 +58,6 @@ def unify_lc(df_lc,bands_inlc=['zr','zi','zg'],xres=160,numplots=1):
     printcounter = 0
     objects,dobjects,flabels,keeps = [],[],[],[]
     for keepindex,obj in tqdm(enumerate(objids)):
-    
         singleobj = df_lc.data.loc[obj,:,:,:]  
         label = singleobj.index.unique('label')
         bands = singleobj.loc[label[0],:,:].index.get_level_values('band')[:].unique()
@@ -116,6 +117,77 @@ def unify_lc(df_lc,bands_inlc=['zr','zi','zg'],xres=160,numplots=1):
             keeps.append(keepindex)
     return np.array(objects),np.array(dobjects),flabels,keeps
 
+def unify_lc_gp(df_lc,bands_inlc=['zr','zi','zg'],xres=160,numplots=1):
+    x_ztf = np.linspace(0,1600,xres).reshape(-1, 1) # X array for interpolation
+    x_wise = np.linspace(0,4000,xres).reshape(-1, 1) # X array for interpolation
+    objids = df_lc.data.index.get_level_values('objectid')[:].unique()
+
+    printcounter = 0
+    objects,dobjects,flabels,keeps = [],[],[],[]
+    for keepindex,obj in tqdm(enumerate(objids)):
+    
+        singleobj = df_lc.data.loc[obj,:,:,:]  
+        label = singleobj.index.unique('label')
+        bands = singleobj.loc[label[0],:,:].index.get_level_values('band')[:].unique()
+        keepobj = 0
+        if len(np.intersect1d(bands,bands_inlc))==len(bands_inlc):
+            if printcounter<numplots:
+                fig= plt.subplots(figsize=(15,5))
+                    
+            obj_newy = [ [] for _ in range(len(bands_inlc))]
+            obj_newdy = [ [] for _ in range(len(bands_inlc))]
+
+            keepobj = 1 # 
+            for l,band in enumerate(bands_inlc):
+                band_lc = singleobj.loc[label[0], band, :]
+                band_lc_clean = band_lc[band_lc.index.get_level_values('time') < 65000]
+                x,y,dy = np.array(band_lc_clean.index.get_level_values('time')-band_lc_clean.index.get_level_values('time')[0]),np.array(band_lc_clean.flux),np.array(band_lc_clean.err)
+
+                x2,y2,dy2 = x[np.argsort(x)],y[np.argsort(x)],dy[np.argsort(x)]
+                if len(x2)>5:
+
+                    n = np.sum(x2==0)
+                    for b in range(1,n): # this is a hack of shifting time of different lightcurves by a bit so I can interpolate! 
+                        x2[::b+1]=x2[::b+1]+1*0.001 
+                    X = x2.reshape(-1, 1)
+                    if band =='W1' or band=='W2':
+                        kernel = 1.0 * RBF(length_scale=200)
+                        gpw = GaussianProcessRegressor(kernel=kernel, alpha=(dy2)**2)
+                        gpw.fit(X, y2)
+                        obj_newy[l],obj_newdy[l] = gpw.predict(x_wise, return_std=True)
+                    else:
+                        kernel = 1.0 * RBF(length_scale=len(x_ztf)/len(x2))
+                        gp = GaussianProcessRegressor(kernel=kernel, alpha=dy2**2)
+                        gp.fit(X, y2)
+                        obj_newy[l],obj_newdy[l] = gp.predict(x_ztf, return_std=True)
+                                           
+                    if printcounter<numplots:    
+                        plt.errorbar(x2,y2,dy2 , capsize = 1.0,marker='.',linestyle='', label = label[0]+band)
+                        if band=='W1' or band=='W2':
+                            y_pred,sigma = gpw.predict(x_wise, return_std=True)
+                            plt.plot(x_wise,y_pred,'--',label='Gaussian Process Reg.'+str(band))
+                            plt.fill_between(x_wise.flatten(), y_pred - 1.96 * sigma,y_pred + 1.96 * sigma, alpha=0.2, color='r')
+                        else:
+                            kernel = 1.0 * RBF(length_scale=len(x_ztf)/len(x2))
+                            y_pred,sigma = gp.predict(x_ztf, return_std=True)
+                            plt.plot(x_ztf,y_pred,'--',label='Gaussian Process Reg.'+str(band))
+                            plt.fill_between(x_ztf.flatten(), y_pred - 1.96 * sigma,y_pred + 1.96 * sigma, alpha=0.2, color='r') 
+                else:
+                    keepobj=0
+            if (printcounter<numplots):
+                plt.title('Object '+str(obj)+' from '+label[0]+' et al.')
+                plt.xlabel('Time(MJD)')
+                plt.ylabel('Flux(mJy)')
+                plt.legend()
+                plt.show()
+                printcounter+=1
+        if keepobj:
+            objects.append(obj_newy)
+            dobjects.append(obj_newdy)
+            flabels.append(label[0])
+            keeps.append(keepindex)
+    return np.array(objects),np.array(dobjects),flabels,keeps
+                                       
 def combine_bands(objects,bands):
     '''
     combine all lightcurves in individual bands of an object
@@ -146,8 +218,8 @@ def stat_bands(objects,dobjects,bands):
     fvar,maxarray,meanarray = np.zeros((len(bands),len(objects))),np.zeros((len(bands),len(objects))),np.zeros((len(bands),len(objects)))
     for o,ob in enumerate(objects):
         for b in range(len(bands)):
-            clipped_arr,l,u = stats.sigmaclip(ob[b], low=5.0, high=5.0)
-            clipped_varr,l,u = stats.sigmaclip(dobjects[o,b,:], low=5.0, high=5.0)
+            clipped_arr,l,u = stats.sigmaclip(ob[b], low=9.0, high=9.0)
+            clipped_varr,l,u = stats.sigmaclip(dobjects[o,b,:], low=9.0, high=9.0)
             maxarray[b,o] = clipped_arr.max()
             meanarray[b,o] = clipped_arr.mean()
             fvar[b,o] = mean_fractional_variation(clipped_arr,clipped_varr)
