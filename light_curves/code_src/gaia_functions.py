@@ -99,7 +99,7 @@ def Gaia_retrieve_catalog(source_table , search_radius, verbose):
     results = j.get_results()
     
     if verbose : print("\nSearch completed in {:.2f} seconds".format((time.time()-t1) ) )
-    if verbose : print("Number of objects matched: {} out of {}.".format(len(results),len(coords_list) ) )
+    if verbose : print("Number of objects matched: {} out of {}.".format(len(results),len(sample_table) ) )
 
     return results
 
