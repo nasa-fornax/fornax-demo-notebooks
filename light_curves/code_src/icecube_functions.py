@@ -16,7 +16,7 @@ from tqdm import tqdm
 from data_structures import MultiIndexDFObject
 
 
-def icecube_get_lightcurve(sample_table, icecube_select_topN=3):
+def Icecube_get_lightcurve(sample_table, icecube_select_topN=3):
     '''
     Extracts IceCube Neutrino events for a given source position and saves it into a lightcurve
     Pandas MultiIndex object.

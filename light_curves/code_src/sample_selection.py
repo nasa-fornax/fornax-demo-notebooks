@@ -445,5 +445,3 @@ def nonunique_sample(skycoordslist, labels, verbose=1):
     return coords_list, labels_list
 
 
-def make_coordsTable():
-    pass

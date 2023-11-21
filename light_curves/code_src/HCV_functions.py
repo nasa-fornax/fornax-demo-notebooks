@@ -209,15 +209,13 @@ def checklegal_hcv(table,release,magtype):
             raise ValueError("Bad value for magtype (must be one of {})".format(
                 ", ".join(magtypelist)))
             
-def HCV_get_lightcurves(coords_list, labels_list, radius):
+def HCV_get_lightcurves(sample_table, radius):
     """Searches Hubble Catalog of variables for light curves from a list of input coordinates
     
     Parameters
     ----------
-    coords_list : list of astropy skycoords
-        the coordinates of the targets for which a user wants light curves
-    labels_list: list of strings
-        journal articles associated with the target coordinates
+    sample_table:  `~astropy.table.Table`
+        Table with the coordinates and journal reference labels of the sources
     radius : float
         search radius, how far from the source should the archives return results
 
@@ -228,13 +226,16 @@ def HCV_get_lightcurves(coords_list, labels_list, radius):
     """
 
     df_lc = MultiIndexDFObject()
-    for objectid, coord in coords_list:
+    
 
-        #doesn't take SkyCoord, convert to floats
-        ra = coord.ra.deg
-        dec = coord.dec.deg
-        lab = labels_list[objectid]
+    
+    for row in sample_table:
 
+        ra = row['coord'].ra.deg
+        dec = row['coord'].dec.deg
+        lab = row['label']
+        objectid = row['objectid']
+       
         #IC 1613 from the demo for testing
         #ra = 16.19913
         #dec = 2.11778

@@ -230,7 +230,7 @@ def search_lightcurve(objid):
 
 
 #Do a panstarrs search
-def panstarrs_get_lightcurves(coords_list, labels_list, radius):
+def Panstarrs_get_lightcurves(sample_table, radius):
     """Searches panstarrs for light curves from a list of input coordinates
     
     Parameters
@@ -249,6 +249,11 @@ def panstarrs_get_lightcurves(coords_list, labels_list, radius):
     """
         
     df_lc = MultiIndexDFObject()
+    
+    #first convert sample_table to coords_list, labels_list
+    coords_list = [(row['objectid'], row['coord']) for row in sample_table]
+    labels_list = [row['label'] for row in sample_table]
+    
     #for all objects in our catalog
     for objectid, coord in tqdm(coords_list):
         #doesn't take SkyCoord, convert to floats

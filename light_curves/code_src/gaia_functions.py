@@ -9,7 +9,6 @@ from astropy.time import Time
 from astroquery.gaia import Gaia
 
 from data_structures import MultiIndexDFObject
-from sample_selection import make_coordsTable
 
 
 def Gaia_get_lightcurve(sample_table, search_radius, verbose):
@@ -33,7 +32,7 @@ def Gaia_get_lightcurve(sample_table, search_radius, verbose):
     '''
 
     # Retrieve Gaia table with Source IDs ==============
-    gaia_table = Gaia_retrieve_catalog(sample_table , labels_list,
+    gaia_table = Gaia_retrieve_catalog(sample_table , 
                                          search_radius = search_radius,
                                          verbose = verbose
                                          )
@@ -100,7 +99,7 @@ def Gaia_retrieve_catalog(source_table , search_radius, verbose):
     results = j.get_results()
     
     if verbose : print("\nSearch completed in {:.2f} seconds".format((time.time()-t1) ) )
-    if verbose : print("Number of objects matched: {} out of {}.".format(len(results),len(coords_list) ) )
+    if verbose : print("Number of objects matched: {} out of {}.".format(len(results),len(sample_table) ) )
 
     return results
 
