@@ -1,7 +1,6 @@
 # Functions related to IceCube matching
 import os
 import zipfile
-
 from urllib.parse import urlparse
 from urllib.request import urlretrieve
 
@@ -11,7 +10,6 @@ import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy.io import ascii
 from astropy.table import Table, vstack
-from tqdm import tqdm
 
 from data_structures import MultiIndexDFObject
 

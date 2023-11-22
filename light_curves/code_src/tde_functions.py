@@ -1,6 +1,6 @@
+from alerce.core import Alerce
 from astropy.coordinates import SkyCoord
 
-from alerce.core import Alerce
 
 def TDE_id2coord(object_ids, coords, labels, verbose=1):
     """ To find and append coordinates of objects with only ZTF obj name

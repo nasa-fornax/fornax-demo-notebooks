@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from astropy.table import Table
 from scipy import stats
-from tqdm import tqdm
 
 
 def setup_text_plots():
