@@ -345,7 +345,7 @@ def get_graham_sample(coords, labels, verbose=1):
         
 #SDSS QSO sample of any desired number
 #These are "normal" QSOs to use in the classifier
-def get_SDSS_sample(coords, labels, num, verbose=1):
+def get_SDSS_sample(coords, labels, num,zmin=0,zmax=1, verbose=1):
     """Automatically grabs SDSS quasar sample.
     
     Parameters
@@ -361,7 +361,7 @@ def get_SDSS_sample(coords, labels, num, verbose=1):
     """
     # Define the query
     query = "SELECT TOP " + str(num) + " specObjID, ra, dec, z FROM SpecObj \
-    WHERE ( z > 0.0 AND z < 1.0 AND class='QSO' AND zWARNING=0 )"
+    WHERE ( z > " + str(zmin) + "AND z < " + str(zmax) + " AND class='QSO' AND zWARNING=0 )"
 
     #making up redshift range here, but should look at redshift distribution of the CLQ
 

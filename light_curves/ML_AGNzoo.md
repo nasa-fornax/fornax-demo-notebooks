@@ -62,7 +62,7 @@ import matplotlib.pyplot as plt
 sys.path.append('code/')
 from data_structures import MultiIndexDFObject
 from sample_lc import build_sample
-from ML_utils import unify_lc,unify_lc_gp, stat_bands, autopct_format, combine_bands,\
+from ML_utils import unify_lc, unify_lc_gp, stat_bands, autopct_format, combine_bands,\
 mean_fractional_variation, normalize_mean_objects, normalize_max_objects, \
 normalize_clipmax_objects, shuffle_datalabel, dtw_distance, stretch_small_values_arctan
 from collections import Counter,OrderedDict
@@ -207,15 +207,20 @@ While from the histogram plot we see which bands have the highest number of obse
 
 ## 2) Preprocess data for ML (ZTF bands)
 
-We first look at this sample only in ZTF bands which have the largest number of visits. We start by unifying the time grid of the light curves so oobjects with different start time or number of observations can be compared. We do this by interpolation to a new grid. The choice of the grid resolution and baseline is strictly dependent on the input data, in this case ZTF, to preserve as much as possible all the information from the observations. We measure basic statistics and combine the tree observed ZTF bands into one longer array as input to dimensionailty reduction after deciding on normalization. We also do a shuffling of the sample to be sure that the separations of different classes by ML are not simply due to the order they are seen in training (in case it is not done by the ML routine itself).
+We first look at this sample only in ZTF bands which have the largest number of visits. We start by unifying the time grid of the light curves so oobjects with different start time or number of observations can be compared. We do this by interpolation to a new grid. The choice of the grid resolution and baseline is strictly dependent on the input data, in this case ZTF, to preserve as much as possible all the information from the observations. 
+The unify_lc, or unify_lc_gp functions do the unification of the lightcurve arrays. For details please see the codes. The time arrays are chosen based on the average duration of observations, with ZTF and WISE covering 1600, 4000 days respectively. We note that we disregard the time of observation of each source, by subtracting the initial time from the array and bringing all lightcurves to the same footing. This has to be taken into account if it influences the science of interest. We then interoplate the time arrays with linear or Gaussian Process regression (unift_lc/ unify_lc_gp respectively). We also remove from the sample objects with less than 5 datapoints in their light curve. We measure basic statistics and combine the tree observed ZTF bands into one longer array as input to dimensionailty reduction after deciding on normalization. We also do a shuffling of the sample to be sure that the separations of different classes by ML are not simply due to the order they are seen in training (in case it is not done by the ML routine itself).
 
 ```python
 bands_inlc = ['zg','zr','zi']
-#objects,dobjects,flabels,keeps = unify_lc_gp(parallel_df_lc,bands_inlc,xres=60,numplots=5) #Gaussian process unification
-objects,dobjects,flabels,keeps = unify_lc(parallel_df_lc,bands_inlc,xres=60,numplots=5) #nearest neightbor linear interpolation
 
-# calculate some basic statistics
-fvar, maxarray, meanarray = stat_bands(objects,dobjects,bands_inlc)
+objects,dobjects,flabels,keeps = unify_lc(parallel_df_lc,bands_inlc,xres=60,numplots=5,low_limit_size=5) #nearest neightbor linear interpolation
+#objects,dobjects,flabels,keeps = unify_lc_gp(parallel_df_lc,bands_inlc,xres=60,numplots=5,low_limit_size=5) #Gaussian process unification
+
+## keeps can be used as index of objects that are kept in "objects" from 
+##the initial "df_lc", in case information about some properties of samplen(e.g., redshifts) is of interest this array of indecies would be helpful
+
+# calculate some basic statistics with a sigmaclipping with width 5sigma
+fvar, maxarray, meanarray = stat_bands(objects,dobjects,bands_inlc,sigmacl=5)
 
 # combine different waveband into one array
 dat_notnormal = combine_bands(objects,bands_inlc)
@@ -605,7 +610,7 @@ plt.tight_layout()
 skipping the normalization of lightcurves, can show for example how the Cicco et al. 2019 sample, from the 3year VLT observations of the COSMOS field are all fainter compared to the rest.
 
 
-## Repeating the above, this time with Panstarrs observations
+## 4) Repeating the above, this time with Panstarrs observations
 
 ```python
 bands_inlc = ['panstarrs g','panstarrs r','panstarrs i','panstarrs z', 'panstarrs y']
@@ -696,7 +701,7 @@ ax0.axis('off')
 plt.tight_layout()
 ```
 
-## ZTF + WISE manifold
+## 5) ZTF + WISE manifold
 
 ```python
 bands_inlc = ['zg','zr','zi','W1','W2']
@@ -778,7 +783,7 @@ plt.tight_layout()
 plt.savefig('ztf+wise.png')
 ```
 
-## Wise bands alone
+## 6) Wise bands alone
 
 ```python
 bands_inlc = ['W1','W2']

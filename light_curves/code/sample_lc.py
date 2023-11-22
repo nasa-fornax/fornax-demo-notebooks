@@ -57,13 +57,6 @@ def build_sample():
     coords.extend(vagn_coords)
     labels.extend(vagn_labels) 
     
-    # George's sample with low radio to IR:
-    f = pd.read_csv('../data/george2.csv')
-    f_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(f['Right Ascension'], f['Declination'])]
-    f_labels = ['this proposal' for ra in f['Right Ascension']]
-    coords.extend(f_coords)
-    labels.extend(f_labels) 
-
     #now get some "normal" QSOs for use in the classifier
     #there are ~500K of these, so choose the number based on
     #a balance between speed of running the light curves and whatever 
