@@ -82,7 +82,7 @@ def Icecube_get_lightcurve(sample_table, icecube_select_topN=3):
     #put the index in to match with df_lc
     filter_icecube_df.set_index(["objectid", "label", "band", "time"], inplace = True)
     
-    return (filter_icecube_df)
+    return (MultiIndexDFObject(data=filter_icecube_df))
 
 
 def icecube_get_catalog(path="data", verbose=False):
