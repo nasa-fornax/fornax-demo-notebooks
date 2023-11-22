@@ -20,7 +20,7 @@ def WISE_get_lightcurves(sample_table, radius=1.0 * u.arcsec, bandlist=["W1", "W
 
     Parameters
     ----------
-    source_table : `~astropy.table.Table`
+    sample_table : `~astropy.table.Table`
         Table with the coordinates and journal reference labels of the sources
     radius : astropy Quantity
         radius for the cone search to determine whether a particular detection is associated with an object
@@ -47,12 +47,12 @@ def WISE_get_lightcurves(sample_table, radius=1.0 * u.arcsec, bandlist=["W1", "W
     return MultiIndexDFObject(data=wise_df.set_index(indexes)[columns])
 
 
-def locate_objects(source_table, radius):
+def locate_objects(sample_table, radius):
     """Locate the partitions (HEALPix order 5 pixels) each coords_list object is in.
 
     Parameters
     ----------
-    source_table : `~astropy.table.Table`
+    sample_table : `~astropy.table.Table`
         Table with the coordinates and journal reference labels of the sources
     radius : astropy Quantity
         radius for the cone search to determine which pixels overlap with each object
@@ -67,10 +67,10 @@ def locate_objects(source_table, radius):
     healpix_pixel = [hpgeom.query_circle(a=row['coord'].ra.deg, b=row['coord'].dec.deg,
                                          radius=radius.to(u.deg).value,
                                          nside=hpgeom.order_to_nside(K), nest=True, inclusive=True)
-                     for row in source_table]
+                     for row in sample_table]
 
     # TODO: simplify, e.g. avoid switching between Table and DF
-    locations_table = source_table.copy()
+    locations_table = sample_table.copy()
     locations_table['pixel'] = healpix_pixel
 
     locations = locations_table.to_pandas()

@@ -51,7 +51,7 @@ def Gaia_get_lightcurve(sample_table, search_radius, verbose):
 
     return df_lc
 
-def Gaia_retrieve_catalog(source_table , search_radius, verbose):
+def Gaia_retrieve_catalog(sample_table , search_radius, verbose):
     '''
     Retrieves the photometry table for a list of sources.
     
@@ -76,9 +76,9 @@ def Gaia_retrieve_catalog(source_table , search_radius, verbose):
     
     #first make an astropy table from our master list of coordinates
     # as input to the pyvo TAP query 
-    upload_table = source_table['objectid', 'label']
-    upload_table['ra'] = source_table['coord'].ra.deg
-    upload_table['dec'] = source_table['coord'].dec.deg
+    upload_table = sample_table['objectid', 'label']
+    upload_table['ra'] = sample_table['coord'].ra.deg
+    upload_table['dec'] = sample_table['coord'].dec.deg
 
     #this query is too slow without gaia.random_index.  
     #Gaia helpdesk is aware of this bug somewhere on their end
