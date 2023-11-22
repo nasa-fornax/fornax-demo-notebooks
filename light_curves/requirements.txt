@@ -3,14 +3,14 @@
 # the container supporting the science use case in question.
 acstools
 astropy
-astroquery
+astroquery>=0.4.7dev8948
 hpgeom
 lightkurve
 matplotlib
 numpy
 pandas
 pyvo
-s3fs
+s3fs>=23.10.0
 tqdm
 alerce
 umap-learn[plot]
