@@ -48,7 +48,7 @@ def WISE_get_lightcurves(sample_table, radius=1.0 * u.arcsec, bandlist=["W1", "W
 
 
 def locate_objects(sample_table, radius):
-    """Locate the partitions (HEALPix order 5 pixels) each coords_list object is in.
+    """Locate the partitions (HEALPix order 5 pixels) each sample_table object is in.
 
     Parameters
     ----------

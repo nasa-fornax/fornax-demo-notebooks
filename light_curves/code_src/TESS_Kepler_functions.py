@@ -39,10 +39,8 @@ def TESS_Kepler_get_lightcurves(sample_table, radius):
     
     Parameters
     ----------
-    coords_list : list of astropy skycoords
-        the coordinates of the targets for which a user wants light curves
-    labels_list: list of strings
-        journal articles associated with the target coordinates
+    sample_table : `~astropy.table.Table`
+        Table with the coordinates and journal reference labels of the sources
     radius : float
         search radius, how far from the source should the archives return results
 
@@ -53,25 +51,21 @@ def TESS_Kepler_get_lightcurves(sample_table, radius):
     """
     
     df_lc = MultiIndexDFObject()
-    
-    #first convert sample_table to coords_list, labels_list
-    coords_list = [(row['objectid'], row['coord']) for row in sample_table]
-    labels_list = [row['label'] for row in sample_table]
-    
+        
     #for all objects
-    for objectid, coord in tqdm(coords_list):
+    for row in tqdm(sample_table):
     #for testing, this has 79 light curves between the three missions.
     #for ccount in range(1):
     #    coord = '19:02:43.1 +50:14:28.7'
         try:
         #use lightkurve to search TESS, Kepler and K2
-            search_result = lk.search_lightcurve(coord, radius = radius)
-            lab = labels_list[objectid]
+            search_result = lk.search_lightcurve(row["coord"], radius = radius)
+            lab = row["label"]
 
             #figure out what to do with the results
             if len(search_result) >= 1:
                 #https://docs.lightkurve.org/tutorials/1-getting-started/searching-for-data-products.html
-                print(objectid, 'got a live one')
+                print(row["objectid"], 'got a live one')
                 #download all of the returned light curves from TESS, Kepler, and K2
                 lc_collection = search_result.download_all()
 
@@ -105,7 +99,7 @@ def TESS_Kepler_get_lightcurves(sample_table, radius):
 
                     #put this single object light curves into a pandas multiindex dataframe
                     # fluxes are in units of electrons/s and will be scaled to fit the other fluxes when plotting
-                    dfsingle = pd.DataFrame(dict(flux=flux_lc, err=fluxerr_lc, time=time_lc, objectid=objectid, band=filtername,label=lab)).set_index(["objectid", "label", "band", "time"])
+                    dfsingle = pd.DataFrame(dict(flux=flux_lc, err=fluxerr_lc, time=time_lc, objectid=row["objectid"], band=filtername,label=lab)).set_index(["objectid", "label", "band", "time"])
     
                     #then concatenate each individual df together
                     df_lc.append(dfsingle)

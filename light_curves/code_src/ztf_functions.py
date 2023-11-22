@@ -122,7 +122,7 @@ def locate_objects(sample_table, radius, chunksize=10000):
     Returns
     -------
     locations_df : pd.DataFrame
-        Dataframe with ZTF field, CCD, quadrant and other information that identifies each `coords_list`
+        Dataframe with ZTF field, CCD, quadrant and other information that identifies each `sample_table`
         object and which parquet files it is in. One row per ZTF objectid.
     """
     # setup for tap query
@@ -148,7 +148,7 @@ def locate_objects(sample_table, radius, chunksize=10000):
         result = tap_service.run_async(query, uploads={"sample": upload_table[i : i + chunksize]})
         locations.append(result.to_table().to_pandas())
 
-    # locations may contain more than one ZTF object id per band (e.g., yang sample coords_list[10])
+    # locations may contain more than one ZTF object id per band (e.g., yang sample sample_table[11])
     # Sánchez-Sáez et al., 2021 (2021AJ....162..206S)
     # return all the data -- transform_lightcurves will choose which to keep
     return pd.concat(locations, ignore_index=True)
@@ -246,11 +246,11 @@ def load_lightcurves_one_file(location):
     )
 
     # in the parquet files, "objectid" is the ZTF object ID
-    # in the MultiIndexDFObject, "objectid" is the ID of a coords_list object
+    # in the MultiIndexDFObject, "objectid" is the ID of a sample_table object
     # rename the ZTF object ID that just got loaded to avoid confusion
     ztf_df = ztf_df.rename(columns={"objectid": "oid"})
 
-    # add the coords_list object ID and label columns by mapping thru the ZTF object ID
+    # add the sample_table object ID and label columns by mapping thru the ZTF object ID
     oidmap = location_df.set_index("oid")["objectid"].to_dict()
     lblmap = location_df.set_index("oid")["label"].to_dict()
     ztf_df["objectid"] = ztf_df["oid"].map(oidmap)
@@ -275,7 +275,7 @@ def transform_lightcurves(ztf_df):
     ztf_df : pd.DataFrame
         The input dataframe, cleaned and transformed.
     """
-    # ztf_df might have more than one light curve per (band + coords_list id) if the ra/dec is close
+    # ztf_df might have more than one light curve per (band + objectid) if the ra/dec is close
     # to a CCD-quadrant boundary (Sanchez-Saez et al., 2021). keep the one with the most datapoints
     ztf_df_list = []
     for _, singleband_object in ztf_df.groupby(["objectid", "band"]):
@@ -285,7 +285,7 @@ def transform_lightcurves(ztf_df):
             npoints = singleband_object["mag"].str.len()
             npointsmax_object = singleband_object.loc[npoints == npoints.max()]
             # this may still have more than one light curve if they happen to have the same number
-            # of datapoints (e.g., Yang sample coords_list[6], band 'zr').
+            # of datapoints (e.g., Yang sample sample_table[7], band 'zr').
             # arbitrarily pick the one with the min oid.
             # depending on your science, you may want (e.g.,) the largest timespan instead
             if len(npointsmax_object.index) == 1:
