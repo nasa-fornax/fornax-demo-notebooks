@@ -1,6 +1,4 @@
 #setup to save the light curves in a data structure
-import pickle
-
 import pandas as pd
 from astropy.table import vstack
 from astropy.timeseries import TimeSeries
@@ -67,28 +65,6 @@ class MultiIndexDFObject:
         
         # if we get here, both new_data and self.data contain data, so concat
         self.data = pd.concat([self.data, new_data])
-            
-    def pickle(self,x):
-        """ Save the multiindex data frame to a pickle file
-        
-        Parameters
-        ----------
-        x : string or path
-            where to save the pickle file
-        """
-        
-        self.data.to_pickle(x)  
-        
-    def load_pickle(self,x):
-        """ Load the multiindex data frame from a pickle file
-        
-        Parameters
-        ----------
-        x : string or path
-            path of the pickle file to be loaded
-        """
-        with open(x , "rb") as f:
-            self.data = pickle.load(f)
             
     def remove(self,x):
         """ Drop a light curve from the dataframe
