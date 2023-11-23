@@ -50,11 +50,23 @@ class MultiIndexDFObject:
             contains columns [flux, fluxerr] and multi-index [objectid, label, band, time]
         """
         if isinstance(x, self.__class__):
-            # x is a MultiIndexDFObject. extract the DataFrame and concat
-            self.data = pd.concat([self.data, x.data])
+            # x is a MultiIndexDFObject. extract the DataFrame
+            new_data = x.data
         else:
-            # assume x is a pd.DataFrame and concat
-            self.data = pd.concat([self.data, x])
+            # assume x is a pd.DataFrame
+            new_data = x
+        
+        # if either new_data or self.data is empty we should not try to concat
+        if new_data.empty:
+            # leave self.data as is
+            return
+        if self.data.empty:
+            # replace self.data with new_data
+            self.data = new_data
+            return
+        
+        # if we get here, both new_data and self.data contain data, so concat
+        self.data = pd.concat([self.data, new_data])
             
     def pickle(self,x):
         """ Save the multiindex data frame to a pickle file
