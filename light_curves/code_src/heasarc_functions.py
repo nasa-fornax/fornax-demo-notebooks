@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from astropy.table import vstack
 import pyvo
 from tqdm import tqdm
 
@@ -78,6 +79,7 @@ def HEASARC_get_lightcurves(sample_table, heasarc_cat, max_error_radius):
     """
 
     # Prepping sample_table with float R.A. and DEC column instead of SkyCoord mixin for TAP upload
+    nchunk = 50000
 
     upload_table = sample_table['objectid', 'label']
     upload_table['ra'] = sample_table['coord'].ra.deg
@@ -101,11 +103,13 @@ def HEASARC_get_lightcurves(sample_table, heasarc_cat, max_error_radius):
             CONTAINS(POINT('ICRS',mt.ra,mt.dec),CIRCLE('ICRS',cat.ra,cat.dec,cat.error_radius))=1
              """
 
-        hresult = heasarc_tap.service.run_sync(hquery, uploads={'mytable': upload_table})
-        print(f'length of {heasarc_cat[m]} catalog:', len(hresult))
+        ids = [g.index.values for k,g in upload_table.to_pandas().groupby(
+            np.arange(len(upload_table)) // nchunk)]
+        upload_tables = [upload_table[idd] for idd in ids]
 
-        #  Convert the result to an Astropy Table
-        hresulttable = hresult.to_table()
+        hresult = [heasarc_tap.service.run_sync(hquery, uploads={'mytable': upload_table})
+                  for upload_table in upload_tables]
+        hresulttable = vstack([hr.to_table() for hr in hresult])
 
         #add results to multiindex_df
         #really just need to mark this spot with a vertical line in the plot, it's not actually a light curve
