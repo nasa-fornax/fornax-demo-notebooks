@@ -8,7 +8,6 @@ import s3fs
 import tqdm
 
 from data_structures import MultiIndexDFObject
-from sample_selection import make_coordsTable
 
 # the catalog is stored in an AWS S3 bucket
 DATARELEASE = "dr18"
