@@ -14,7 +14,7 @@ from astropy.table import Table, vstack
 from data_structures import MultiIndexDFObject
 
 
-def Icecube_get_lightcurve(sample_table, icecube_select_topN=3):
+def Icecube_get_lightcurve(sample_table, icecube_select_topN=3, max_search_radius=2*u.deg):
     '''
     Extracts IceCube Neutrino events for a given source position and saves it into a lightcurve
     Pandas MultiIndex object.
@@ -26,8 +26,14 @@ def Icecube_get_lightcurve(sample_table, icecube_select_topN=3):
         main source catalog with coordinates, labels, and objectids
 
     icecube_select_topN : int
-        Number of top events to
+        Maximum number of events to return for a single object in sample_table. The brightest events
+        within the match radius will be returned.
 
+    max_search_radius : int
+        Maximum radius to look for matches in IceCube. Actual match radius will not exceed the 
+        IceCube error of an individual event. Beware that setting this to a high number can cause
+        the code to look through a large number of potential matches for each object, which may
+        impact performance.
  
     Returns
     --------
@@ -50,7 +56,7 @@ def Icecube_get_lightcurve(sample_table, icecube_select_topN=3):
     mysample_skycoords = sample_table['coord']
 
     #Match
-    idx_mysample, idx_icecube, d2d, d3d = icecube_skycoords.search_around_sky(mysample_skycoords, 1*u.deg)
+    idx_mysample, idx_icecube, d2d, d3d = icecube_skycoords.search_around_sky(mysample_skycoords, max_search_radius)
 
     #need to filter reponse based on position error circles
     #really want d2d to be less than the error circle of icecube = icecube_events["AngErr"] in degrees
