@@ -53,12 +53,12 @@ def make_hist_error_radii(missioncat):
     return heasarcresulttable
 
 
-def HEASARC_get_lightcurves(source_table, heasarc_cat, max_error_radius):
+def HEASARC_get_lightcurves(sample_table, heasarc_cat, max_error_radius):
     """Searches HEASARC archive for light curves from a specific list of mission catalogs
 
     Parameters
     ----------
-    source_table : `~astropy.table.Table`
+    sample_table : `~astropy.table.Table`
         Table with the coordinates and journal reference labels of the sources
     heasarc_cat : str list
         list of catalogs within HEASARC to search for light curves.  Must be one of the catalogs listed here:
@@ -77,11 +77,11 @@ def HEASARC_get_lightcurves(source_table, heasarc_cat, max_error_radius):
         the main data structure to store all light curves
     """
 
-    # Prepping source_table with float R.A. and DEC column instead of SkyCoord mixin for TAP upload
+    # Prepping sample_table with float R.A. and DEC column instead of SkyCoord mixin for TAP upload
 
-    upload_table = source_table['objectid', 'label']
-    upload_table['ra'] = source_table['coord'].ra.deg
-    upload_table['dec'] = source_table['coord'].dec.deg
+    upload_table = sample_table['objectid', 'label']
+    upload_table['ra'] = sample_table['coord'].ra.deg
+    upload_table['dec'] = sample_table['coord'].dec.deg
 
     #setup to store the data
     df_lc = MultiIndexDFObject()

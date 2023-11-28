@@ -1,9 +1,7 @@
+import astropy.units as u
 import numpy as np
-
 from astropy.coordinates import SkyCoord
 from astropy.table import Table, join, join_skycoord, unique
-import astropy.units as u
-
 from astroquery.ipac.ned import Ned
 from astroquery.sdss import SDSS
 from astroquery.simbad import Simbad

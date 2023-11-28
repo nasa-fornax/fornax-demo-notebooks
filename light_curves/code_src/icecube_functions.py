@@ -1,7 +1,6 @@
 # Functions related to IceCube matching
 import os
 import zipfile
-
 from urllib.parse import urlparse
 from urllib.request import urlretrieve
 
@@ -11,7 +10,6 @@ import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy.io import ascii
 from astropy.table import Table, vstack
-from tqdm import tqdm
 
 from data_structures import MultiIndexDFObject
 
@@ -84,7 +82,7 @@ def Icecube_get_lightcurve(sample_table, icecube_select_topN=3):
     #put the index in to match with df_lc
     filter_icecube_df.set_index(["objectid", "label", "band", "time"], inplace = True)
     
-    return (filter_icecube_df)
+    return (MultiIndexDFObject(data=filter_icecube_df))
 
 
 def icecube_get_catalog(path="data", verbose=False):

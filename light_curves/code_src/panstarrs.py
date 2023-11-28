@@ -235,10 +235,8 @@ def Panstarrs_get_lightcurves(sample_table, radius):
     
     Parameters
     ----------
-    coords_list : list of astropy skycoords
-        the coordinates of the targets for which a user wants light curves
-    labels_list: list of strings
-        journal articles associated with the target coordinates
+    sample_table : `~astropy.table.Table`
+        Table with the coordinates and journal reference labels of the sources
     radius : float
         search radius, how far from the source should the archives return results
 
@@ -250,16 +248,13 @@ def Panstarrs_get_lightcurves(sample_table, radius):
         
     df_lc = MultiIndexDFObject()
     
-    #first convert sample_table to coords_list, labels_list
-    coords_list = [(row['objectid'], row['coord']) for row in sample_table]
-    labels_list = [row['label'] for row in sample_table]
-    
     #for all objects in our catalog
-    for objectid, coord in tqdm(coords_list):
+    for row in tqdm(sample_table):
         #doesn't take SkyCoord, convert to floats
-        ra = coord.ra.deg
-        dec = coord.dec.deg
-        lab = labels_list[objectid]
+        ra = row["coord"].ra.deg
+        dec = row["coord"].dec.deg
+        lab = row["label"]
+        objectid = row["objectid"]
 
         #sometimes there isn't actually a light curve for the target???
         try:
