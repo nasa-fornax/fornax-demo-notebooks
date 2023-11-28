@@ -146,7 +146,7 @@ def transform_lightcurves(wise_df):
     Parameters
     ----------
     wise_df : pd.DataFrame
-        dataframe of light curves as returned by `load_data`.
+        dataframe of light curves as returned by `load_lightcurves`.
 
     Returns
     -------
