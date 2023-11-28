@@ -60,7 +60,7 @@ def ZTF_get_lightcurve(sample_table, nworkers=6, ztf_radius=0.000278 * u.deg):
 
     # return the light curves as a MultiIndexDFObject
     indexes, columns = ["objectid", "label", "band", "time"], ["flux", "err"]
-    return MultiIndexDFObject(data=ztf_df.set_index(indexes)[columns])
+    return MultiIndexDFObject(data=ztf_df.set_index(indexes)[columns].sort_index())
 
 
 def file_name(filtercode, field, ccdid, qid, basedir=None):

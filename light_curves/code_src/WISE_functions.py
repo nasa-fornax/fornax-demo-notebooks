@@ -44,7 +44,7 @@ def WISE_get_lightcurves(sample_table, radius=1.0 * u.arcsec, bandlist=["W1", "W
     wise_df = transform_lightcurves(wise_df)
     # return the light curves as a MultiIndexDFObject
     indexes, columns = ["objectid", "label", "band", "time"], ["flux", "err"]
-    return MultiIndexDFObject(data=wise_df.set_index(indexes)[columns])
+    return MultiIndexDFObject(data=wise_df.set_index(indexes)[columns].sort_index())
 
 
 def locate_objects(sample_table, radius):

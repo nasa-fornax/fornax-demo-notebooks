@@ -76,9 +76,8 @@ def create_figures(sample_table , df_lc, show_nbr_figures, save_output):
         cc += 1 # counter (1-indexed)
         
         ## Set up =================
-        # choose whether to plot data from the serial or parallel calls
-        singleobj = df_lc.data.loc[objectid]
-        # singleobj = parallel_df_lc.data.loc[objectid]
+        # sort so that time increases monotonically within each band
+        singleobj = df_lc.data.loc[objectid].sort_index()
 
         # Set up for plotting. We use the "mosaic" method so we can plot
         # the ZTF data in a subplot for better visibility.
