@@ -212,7 +212,7 @@ def create_figures(sample_table , df_lc, show_nbr_figures, save_output):
         axes["B"].tick_params(axis="both", which="major",direction='in', length=6, width=1)
         axes["B"].tick_params(axis="both", which="minor",direction='in', length=3, width=1)
 
-        plt.legend(handles=leg_handles_A , bbox_to_anchor=(1.2,3.5))
+        plt.legend(handles=leg_handles_A , bbox_to_anchor=(1.2,3.5), title=f"objectid: {objectid}")
         plt.tight_layout()
 
         if save_output:
