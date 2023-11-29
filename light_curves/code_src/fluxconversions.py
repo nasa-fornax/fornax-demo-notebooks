@@ -1,14 +1,44 @@
+import numpy as np
 from acstools import acszpt
 from astropy.time import Time
 
 
-def convert_wise_flux_to_millijansky(nanomaggy_flux):
+def convert_wise_flux_to_millijansky(flux_nanomaggy, *, band=None):
     """unWISE light curves flux is stored in nanomaggy. Convert to millijansky.
-    
-    See https://www.sdss3.org/dr8/algorithms/magnitudes.php
+
+    See https://www.sdss3.org/dr8/algorithms/magnitudes.php and Meisner et al. (2023, https://iopscience.iop.org/article/10.3847/1538-3881/aca2ab/pdf).
+    For Vega to AB conversion for WISE see https://wise2.ipac.caltech.edu/docs/release/allsky/expsup/sec4_4h.html
+
+    Parameters
+    ----------
+    flux_nanomaggy : float or iterable of floats
+        Flux in nanomaggy.
+    band : str
+        WISE band name corresponding to flux_nanomaggy. One of "W1", "W2", "W3", "W4", or None.
+        If None, band will be set to the name attribute of flux_nanomaggy. Useful when applying this 
+        transform to a DataFrame grouped by band.
+
+    Returns
+    -------
+    flux_mjy : float or iterable of floats 
+        flux_nanomaggy converted to millijansky.
     """
-    millijansky_per_nanomaggy = 3.631e-3
-    return nanomaggy_flux * millijansky_per_nanomaggy
+    if band is None:
+        band = flux_nanomaggy.name
+
+    # Vega to AB magnitude conversions
+    vega_to_ab_conv = {"W1": 2.699, "W2": 3.339, "W3": 5.174, "W4": 6.620}
+
+    # get Vega magnitude from nanomaggy flux as described in Meisner et al. (2023)
+    mag_vega = 22.5 - np.log10(flux_nanomaggy)
+
+    # convert Vega magnitude to AB magnitude
+    mag_ab = mag_vega + vega_to_ab_conv[band]
+
+    # convert AB magnitude to mJy
+    flux_mjy = 10**(-0.4*(mag_ab - 23.9) )  / 1e3
+
+    return flux_mjy
 
 
 def convertACSmagtoflux(date, filterstring, mag, magerr):

@@ -42,6 +42,7 @@ def WISE_get_lightcurves(sample_table, radius=1.0 * u.arcsec, bandlist=["W1", "W
 
     # clean and transform the data into the form needed for a MultiIndexDFObject
     wise_df = transform_lightcurves(wise_df)
+    
     # return the light curves as a MultiIndexDFObject
     indexes, columns = ["objectid", "label", "band", "time"], ["flux", "err"]
     return MultiIndexDFObject(data=wise_df.set_index(indexes)[columns].sort_index())
@@ -155,11 +156,12 @@ def transform_lightcurves(wise_df):
     """
     # rename columns to match a MultiIndexDFObject
     wise_df = wise_df.rename(columns={"MJDMEAN": "time", "dflux": "err"})
-    # filter for only positive fluxes
-    wise_df = wise_df[wise_df["flux"] > 0]
-    # convert units
-    wise_df["flux"] = convert_wise_flux_to_millijansky(nanomaggy_flux=wise_df["flux"])
-    wise_df["err"] = convert_wise_flux_to_millijansky(nanomaggy_flux=wise_df["err"])
     # convert the band to its common name ("W1" or "W2"). need to invert the BANDMAP dict.
     wise_df["band"] = wise_df["band"].map({value: key for key, value in BANDMAP.items()})
+    # filter for only positive fluxes
+    wise_df = wise_df[wise_df["flux"] > 0]
+    # convert units, per band
+    grouped_wise_df = wise_df.groupby("band")
+    wise_df["flux"] = grouped_wise_df["flux"].transform(convert_wise_flux_to_millijansky)
+    wise_df["err"] = grouped_wise_df["err"].transform(convert_wise_flux_to_millijansky)
     return wise_df
