@@ -76,9 +76,8 @@ def create_figures(sample_table , df_lc, show_nbr_figures, save_output):
         cc += 1 # counter (1-indexed)
         
         ## Set up =================
-        # choose whether to plot data from the serial or parallel calls
-        singleobj = df_lc.data.loc[objectid]
-        # singleobj = parallel_df_lc.data.loc[objectid]
+        # sort so that time increases monotonically within each band
+        singleobj = df_lc.data.loc[objectid].sort_index()
 
         # Set up for plotting. We use the "mosaic" method so we can plot
         # the ZTF data in a subplot for better visibility.
@@ -213,7 +212,7 @@ def create_figures(sample_table , df_lc, show_nbr_figures, save_output):
         axes["B"].tick_params(axis="both", which="major",direction='in', length=6, width=1)
         axes["B"].tick_params(axis="both", which="minor",direction='in', length=3, width=1)
 
-        plt.legend(handles=leg_handles_A , bbox_to_anchor=(1.2,3.5))
+        plt.legend(handles=leg_handles_A , bbox_to_anchor=(1.2,3.5), title=f"objectid: {objectid}")
         plt.tight_layout()
 
         if save_output:
