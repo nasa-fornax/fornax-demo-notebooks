@@ -301,8 +301,9 @@ def transform_lightcurves(ztf_df):
     # if your science depends on precise times, this will need to be corrected.
     ztf_df = ztf_df.rename(columns={"hmjd": "time"})
 
-    # "explode" the data structure into one row per light curve point
+    # "explode" the data structure into one row per light curve point and set the correct dtypes
     ztf_df = ztf_df.explode(["time", "mag", "magerr", "catflags"], ignore_index=True)
+    ztf_df = ztf_df.astype({"time": "float", "mag": "float", "magerr": "float", "catflags": "int"})
 
     # remove data flagged as bad
     ztf_df = ztf_df.loc[ztf_df["catflags"] < 32768, :]
