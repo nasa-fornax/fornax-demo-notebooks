@@ -47,7 +47,7 @@ Here are the libraries used in this network. They are also mostly mentioned in t
 - *umap* and *sompy* for manifold learning, dimensionality reduction and visualization
 
 
-```python
+```{code-cell} ipython3
 #!pip install -r requirements.txt
 import sys
 import os
@@ -102,7 +102,7 @@ colors = [
 ## 1) Loading data
 Here we load a parquet file of light curves generated using the multiband_lc notebook. One can build the sample from different sources in the literature and grab the data from archives of interes.
 
-```python
+```{code-cell} ipython3
 # To build a sample and generate the multiindex lc dataframe the code below is used, which takes long:
 #!python sample_lc.py
 #c,l = build_sample() # if coordinates and labels of the sample are needed separately
@@ -120,7 +120,7 @@ parallel_df_lc.data = pd.read_parquet(parquet_loadname)
 
 ```
 
-```python
+```{code-cell} ipython3
 parallel_df_lc.data
 ```
 
@@ -128,7 +128,7 @@ parallel_df_lc.data
 
 To effectively undertake machine learning (ML) in addressing a specific question, it's imperative to have a clear understanding of the data we'll be utilizing. This understanding aids in selecting the appropriate ML approach and, critically, allows for informed and necessary data preprocessing. For example whether a normalization is needed, and what band to choose for normalization.
 
-```python
+```{code-cell} ipython3
 objid = parallel_df_lc.data.index.get_level_values('objectid')[:].unique()
 seen = Counter()
 
@@ -158,7 +158,7 @@ h = plt.pie(new_queue.values(),labels=new_queue.keys(),autopct=autopct_format(ne
 
 In this particular example, the largest three subsamples are AGNs selected from [gamma ray observations by the Fermi Large Area Telescope](https://ui.adsabs.harvard.edu/abs/2015yCat..18100014A/similar) (with more than 98% blazars), AGNs from the optical spectra by the [SDSS quasar sample DR16Q](https://www.sdss4.org/dr17/algorithms/qso_catalog/) with a criteria on redshift (z<2), and a subset of AGNs selected in MIR WISE bands based on their variability ([csv in data folder credit RChary](https://ui.adsabs.harvard.edu/abs/2019AAS...23333004P/abstract)). We also include some smaller samples from the literature to see where they sit compared to the rest of the population and if they are localized on the 2D projection. These include the Changing Look AGNs from the literature (e.g., [LaMassa et al. 2015](https://ui.adsabs.harvard.edu/abs/2015ApJ...800..144L/abstract), [Lyu et al. 2022](https://ui.adsabs.harvard.edu/abs/2022ApJ...927..227L/abstract), [Hon et al. 2022](https://ui.adsabs.harvard.edu/abs/2022MNRAS.511...54H/abstract)), a sample which showed variability in Galex UV images ([Wasleske et al. 2022](https://ui.adsabs.harvard.edu/abs/2022ApJ...933...37W/abstract)), a sample of variable sources identified in optical Palomar observarions ([Baldassare et al. 2020](https://ui.adsabs.harvard.edu/abs/2020ApJ...896...10B/abstract)), and the optically variable AGNs in the COSMOS field from a three year program on VLT([De Cicco et al. 2019](https://ui.adsabs.harvard.edu/abs/2019A%26A...627A..33D/abstract)). We also include 30 Tidal Disruption Event coordinates identified from ZTF light curves [Hammerstein et al. 2023](https://iopscience.iop.org/article/10.3847/1538-4357/aca283/meta).
 
-```python
+```{code-cell} ipython3
 seen = Counter()
 for b in objid:
     singleobj = parallel_df_lc.data.loc[b,:,:,:]
@@ -174,7 +174,7 @@ plt.ylabel(r'#',size=20)
 
 The histogram shows the number of lightcurves which ended up in the multi-index data frame from each of the archive calls in different wavebands/filters. We note that the IceCube peak should be corrected as it also include non detections in the figure above.
 
-```python
+```{code-cell} ipython3
 cadence = dict((el,[]) for el in seen.keys())
 timerange = dict((el,[]) for el in seen.keys())
 
@@ -215,7 +215,7 @@ While from the histogram plot we see which bands have the highest number of obse
 We first look at this sample only in ZTF bands which have the largest number of visits. We start by unifying the time grid of the light curves so oobjects with different start time or number of observations can be compared. We do this by interpolation to a new grid. The choice of the grid resolution and baseline is strictly dependent on the input data, in this case ZTF, to preserve as much as possible all the information from the observations.
 The unify_lc, or unify_lc_gp functions do the unification of the lightcurve arrays. For details please see the codes. The time arrays are chosen based on the average duration of observations, with ZTF and WISE covering 1600, 4000 days respectively. We note that we disregard the time of observation of each source, by subtracting the initial time from the array and bringing all lightcurves to the same footing. This has to be taken into account if it influences the science of interest. We then interoplate the time arrays with linear or Gaussian Process regression (unift_lc/ unify_lc_gp respectively). We also remove from the sample objects with less than 5 datapoints in their light curve. We measure basic statistics and combine the tree observed ZTF bands into one longer array as input to dimensionailty reduction after deciding on normalization. We also do a shuffling of the sample to be sure that the separations of different classes by ML are not simply due to the order they are seen in training (in case it is not done by the ML routine itself).
 
-```python
+```{code-cell} ipython3
 bands_inlc = ['zg','zr','zi']
 
 objects,dobjects,flabels,keeps = unify_lc(parallel_df_lc,bands_inlc,xres=60,numplots=5,low_limit_size=5) #nearest neightbor linear interpolation
@@ -252,7 +252,7 @@ for i,l in enumerate(fzr):
 The combination of the tree bands into one longer arrays in order of increasing wavelength, can be seen as providing both the SED shape as well as variability in each from the light curve. Figure below demonstrates this as well as our normalization choice. We normalize the data in ZTF R band as it has a higher average numbe of visits compared to G and I band. We remove outliers before measuring the mean and max of the light curve and normalizing by it. This normalization can be skipped if one is mearly interested in comparing brightnesses of the data in this sample, but as dependence on flux is strong to look for variability and compare shapes of light curves a normalization helps.
 
 
-```python
+```{code-cell} ipython3
 r = np.random.randint(np.shape(dat)[1])
 plt.figure(figsize=(18,4))
 plt.subplot(1,3,1)
@@ -291,7 +291,7 @@ plt.ylabel(r'Normalized Flux (mean r band)',size=15)
 
 Now we can train a UMAP with the processed data vectors above. Different choices for the number of neighbors, minimum distance and metric can be made and a parameter space can be explored. We show here our preferred combination given this data. We choose manhattan distance (also called [the L1 distance](https://en.wikipedia.org/wiki/Taxicab_geometry)) as it is optimal for the kind of grid we interpolated on, for instance we want the distance to not change if there are observations missing. Another metric appropriate for our purpose in time domain analysis is Dynamic Time Warping ([DTW](https://en.wikipedia.org/wiki/Dynamic_time_warping)), which is insensitive to a shift in time. This is helpful as we interpolate the observations onto a grid starting from time 0 and when discussing variability we care less about when it happens and more about whether and how strong it happened. As the measurement of the DTW distance takes longer compared to the other metrics we show examples here with manhattan and only show one example exploring the parameter space including a DTW metric in the last cell of this notebook.
 
-```python
+```{code-cell} ipython3
 plt.figure(figsize=(18,6))
 markersize=200
 mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='manhattan',random_state=20).fit(data)
@@ -324,7 +324,7 @@ plt.tight_layout()
 
 The left panel is colorcoded by the origin of the sample. The middle panel shows the sum of mean brightnesses in three bands (arbitrary unit) demonstrating that after normalization we see no correlation with brightness. The panel on the right is color coded by a statistical measure of variability (i.e. the fractional variation [see here](https://ned.ipac.caltech.edu/level5/Sept01/Peterson2/Peter2_1.html)). As with the plotting above it is not easy to see all the data points and correlations in the next two cells measure probability of belonging to each original sample as well as the mean statistical property on an interpolated grid on this reduced 2D projected surface.
 
-```python
+```{code-cell} ipython3
 # Define a grid
 grid_resolution = 25# Number of cells in the grid
 x_min, x_max = mapper.embedding_[:, 0].min(), mapper.embedding_[:, 0].max()
@@ -367,7 +367,7 @@ plt.colorbar()
 
 ### 3.1) Sample comparison on the UMAP
 
-```python
+```{code-cell} ipython3
 # Calculate 2D histogram
 hist, x_edges, y_edges = np.histogram2d(mapper.embedding_[:, 0], mapper.embedding_[:, 1], bins=12)
 
@@ -403,13 +403,13 @@ Figure above shows how with ZTF light curves alone we can separate some of these
 
 ### 3.2) Reduced dimensions on a SOM grid
 
-```python
+```{code-cell} ipython3
 msz0,msz1 = 12,12
 sm = sompy.SOMFactory.build(data, mapsize=[msz0,msz1], mapshape='planar', lattice='rect', initialization='pca')
 sm.train(n_job=4, shared_memory = 'no')
 ```
 
-```python
+```{code-cell} ipython3
 a=sm.bmu_ind_to_xy(sm.project_data(data))
 x,y=np.zeros(len(a)),np.zeros(len(a))
 k=0
@@ -506,7 +506,7 @@ plt.tight_layout()
 The above SOMs are colored by the mean fractional variation of the lightcurves in all bands (a measure of AGN variability). The crosses are different samples mapped to the trained SOM to see if they are distinguishable on a normalized lightcurve som.
 
 
-```python
+```{code-cell} ipython3
 # shuffle data incase the ML routines are sensitive to order
 data,fzr,p = shuffle_datalabel(dat_notnormal,flabels)
 fvar_arr,maximum_arr,average_arr = fvar[:,p],maxarray[:,p],meanarray[:,p]
@@ -520,7 +520,7 @@ sm = sompy.SOMFactory.build(data, mapsize=[10,10], mapshape='planar', lattice='r
 sm.train(n_job=4, shared_memory = 'no')
 ```
 
-```python
+```{code-cell} ipython3
 a=sm.bmu_ind_to_xy(sm.project_data(data))
 x,y=np.zeros(len(a)),np.zeros(len(a))
 k=0
@@ -619,7 +619,7 @@ skipping the normalization of lightcurves, can show for example how the Cicco et
 
 ## 4) Repeating the above, this time with Panstarrs observations
 
-```python
+```{code-cell} ipython3
 bands_inlc = ['panstarrs g','panstarrs r','panstarrs i','panstarrs z', 'panstarrs y']
 objects,dobjects,flabels = unify_lc(parallel_df_lc,bands_inlc,xres=30)
 
@@ -648,7 +648,7 @@ for i,l in enumerate(fzr):
         fzr[i] = 'TDE'
 ```
 
-```python
+```{code-cell} ipython3
 plt.figure(figsize=(18,6))
 markersize=200
 mapper = umap.UMAP(n_neighbors=50,min_dist=0.5,metric='manhattan',random_state=20).fit(data)
@@ -678,7 +678,7 @@ plt.tight_layout()
 #plt.savefig('umap-Panstarrs.png')
 ```
 
-```python
+```{code-cell} ipython3
 # Calculate 2D histogram
 hist, x_edges, y_edges = np.histogram2d(mapper.embedding_[:, 0], mapper.embedding_[:, 1], bins=12)
 
@@ -710,7 +710,7 @@ plt.tight_layout()
 
 ## 5) ZTF + WISE manifold
 
-```python
+```{code-cell} ipython3
 bands_inlc = ['zg','zr','zi','W1','W2']
 objects,dobjects,flabels = unify_lc(parallel_df_lc,bands_inlc,xres=30,numplots=3)
 # calculate some basic statistics
@@ -729,7 +729,7 @@ for i,l in enumerate(fzr):
         fzr[i] = 'TDE'
 ```
 
-```python
+```{code-cell} ipython3
 plt.figure(figsize=(18,6))
 markersize=200
 mapper = umap.UMAP(n_neighbors=200,min_dist=1,metric='manhattan',random_state=12).fit(data)
@@ -760,7 +760,7 @@ plt.tight_layout()
 plt.savefig('umap-ztfwise.png')
 ```
 
-```python
+```{code-cell} ipython3
 # Calculate 2D histogram
 hist, x_edges, y_edges = np.histogram2d(mapper.embedding_[:, 0], mapper.embedding_[:, 1], bins=12)
 
@@ -793,7 +793,7 @@ plt.savefig('ztf+wise.png')
 
 ## 6) Wise bands alone
 
-```python
+```{code-cell} ipython3
 bands_inlc = ['W1','W2']
 objects,dobjects,flabels = unify_lc(parallel_df_lc,bands_inlc,xres=30)
 # calculate some basic statistics
@@ -812,7 +812,7 @@ for i,l in enumerate(fzr):
         fzr[i] = 'TDE'
 ```
 
-```python
+```{code-cell} ipython3
 plt.figure(figsize=(18,6))
 markersize=200
 mapper = umap.UMAP(n_neighbors=200,min_dist=1,metric='manhattan',random_state=5).fit(data)
@@ -842,7 +842,7 @@ plt.tight_layout()
 plt.savefig('umap-wise.png')
 ```
 
-```python
+```{code-cell} ipython3
 # Calculate 2D histogram
 hist, x_edges, y_edges = np.histogram2d(mapper.embedding_[:, 0], mapper.embedding_[:, 1], bins=12)
 
@@ -873,7 +873,7 @@ plt.tight_layout()
 plt.savefig('wise.png')
 ```
 
-```python
+```{code-cell} ipython3
 plt.figure(figsize=(16,12))
 markersize=200
 
