@@ -79,6 +79,8 @@ def HEASARC_get_lightcurves(sample_table, heasarc_cat, max_error_radius):
     """
 
     # Prepping sample_table with float R.A. and DEC column instead of SkyCoord mixin for TAP upload
+
+    # set the maximum number of rows in sample_table that can be uploaded in one go.
     nchunk = 50000
 
     upload_table = sample_table['objectid', 'label']
@@ -103,10 +105,16 @@ def HEASARC_get_lightcurves(sample_table, heasarc_cat, max_error_radius):
             CONTAINS(POINT('ICRS',mt.ra,mt.dec),CIRCLE('ICRS',cat.ra,cat.dec,cat.error_radius))=1
              """
 
+        # instead of uploading upload_table in one go, split it
+        # into several tables with a maximum size of nchunk.
+        # upload_tables: is a list of tables to be uploaded one at a time.
+        # We use groupby in pandas to do the split
         ids = [g.index.values for k,g in upload_table.to_pandas().groupby(
             np.arange(len(upload_table)) // nchunk)]
         upload_tables = [upload_table[idd] for idd in ids]
 
+        # hresult: is a list of query results corresponding to upload_tables.
+        # hresulttable: is the stacked table of all the results from individual calls.
         hresult = [heasarc_tap.service.run_sync(hquery, uploads={'mytable': upload_table})
                   for upload_table in upload_tables]
         hresulttable = vstack([hr.to_table() for hr in hresult])
