@@ -440,11 +440,6 @@ df_interpol = pd.DataFrame(lc_interpol)
 # "explode" the dataframe to get one row per light curve point. time and flux columns will now store floats.
 df_lc = df_interpol.explode(["time", "flux","err"], ignore_index=True)
 df_lc = df_lc.astype({col: "float" for col in ["time", "flux", "err"]})
-
-#somehow data types for some columns are coming in as 'object' which sktime doesn't like
-#instead make them numeric data types
-cols = ["time", "flux", "err"]
-df_lc[cols] = df_lc[cols].apply(pd.to_numeric, errors='coerce')
 ```
 
 ### 2.6  Restructure dataframe in format expected by sktime
