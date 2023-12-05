@@ -61,7 +61,7 @@ def locate_objects(sample_table, radius):
     Returns
     -------
     locations : pd.DataFrame
-        dataframe of location info including ["objectid", "coord", "label", "pixel"]
+        dataframe of location info including ["objectid", "coord.ra", "coord.dec", "label", "pixel"]
     """
     # loop over objects and determine which HEALPix pixels overlap with a circle of r=`radius` around it
     # this determines which catalog partitions contain each object
@@ -70,11 +70,9 @@ def locate_objects(sample_table, radius):
                                          nside=hpgeom.order_to_nside(K), nest=True, inclusive=True)
                      for row in sample_table]
 
-    # TODO: simplify, e.g. avoid switching between Table and DF
-    locations_table = sample_table.copy()
-    locations_table['pixel'] = healpix_pixel
+    locations = sample_table.to_pandas()
+    locations['pixel'] = healpix_pixel
 
-    locations = locations_table.to_pandas()
     # locations contains one row per object, and the pixel column stores arrays of ints
     # "explode" the dataframe into one row per object per pixel
     # this may create multiple rows per object, the pixel column will now store single ints
