@@ -795,44 +795,15 @@ title="Print to PDF"
 <h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#ensure all dependencies are installed</span>
-<span class="o">!</span>pip install -r requirements-lc_classifier.txt
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: sktime in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements-lc_classifier.txt (line 4)) (0.24.1)
-Requirement already satisfied: tqdm in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements-lc_classifier.txt (line 5)) (4.66.1)
-Requirement already satisfied: googledrivedownloader in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements-lc_classifier.txt (line 6)) (0.4)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: numpy&lt;1.27,&gt;=1.21 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from sktime-&gt;-r requirements-lc_classifier.txt (line 4)) (1.25.0)
-Requirement already satisfied: packaging in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from sktime-&gt;-r requirements-lc_classifier.txt (line 4)) (23.1)
-Requirement already satisfied: pandas&lt;2.2.0,&gt;=1.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from sktime-&gt;-r requirements-lc_classifier.txt (line 4)) (2.1.1)
-Requirement already satisfied: scikit-base&lt;0.7.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from sktime-&gt;-r requirements-lc_classifier.txt (line 4)) (0.6.1)
-Requirement already satisfied: scikit-learn&lt;1.4.0,&gt;=0.24 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from sktime-&gt;-r requirements-lc_classifier.txt (line 4)) (1.2.2)
-Requirement already satisfied: scipy&lt;2.0.0,&gt;=1.2 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from sktime-&gt;-r requirements-lc_classifier.txt (line 4)) (1.12.0.dev0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: python-dateutil&gt;=2.8.2 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from pandas&lt;2.2.0,&gt;=1.1-&gt;sktime-&gt;-r requirements-lc_classifier.txt (line 4)) (2.8.2)
-Requirement already satisfied: pytz&gt;=2020.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from pandas&lt;2.2.0,&gt;=1.1-&gt;sktime-&gt;-r requirements-lc_classifier.txt (line 4)) (2022.6)
-Requirement already satisfied: tzdata&gt;=2022.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from pandas&lt;2.2.0,&gt;=1.1-&gt;sktime-&gt;-r requirements-lc_classifier.txt (line 4)) (2023.3)
-Requirement already satisfied: joblib&gt;=1.1.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from scikit-learn&lt;1.4.0,&gt;=0.24-&gt;sktime-&gt;-r requirements-lc_classifier.txt (line 4)) (1.2.0)
-Requirement already satisfied: threadpoolctl&gt;=2.0.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from scikit-learn&lt;1.4.0,&gt;=0.24-&gt;sktime-&gt;-r requirements-lc_classifier.txt (line 4)) (3.1.0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: six&gt;=1.5 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from python-dateutil&gt;=2.8.2-&gt;pandas&lt;2.2.0,&gt;=1.1-&gt;sktime-&gt;-r requirements-lc_classifier.txt (line 4)) (1.16.0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">[</span><span class=" -Color -Color-Blue">notice</span><span class=" -Color -Color-Bold">]</span> A new release of pip available: <span class=" -Color -Color-Red">22.3</span> -&gt; <span class=" -Color -Color-Green">23.3.1</span>
-<span class=" -Color -Color-Bold">[</span><span class=" -Color -Color-Blue">notice</span><span class=" -Color -Color-Bold">]</span> To update, run: <span class=" -Color -Color-Green">pip install --upgrade pip</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>#ensure all dependencies are installed
+!pip install -r requirements-lc_classifier.txt
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -866,19 +837,13 @@ Requirement already satisfied: threadpoolctl&gt;=2.0.0 in /Users/bsipocz/.pyenv/
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages/dask/dataframe/_pyarrow_compat.py:23: UserWarning: You are using pyarrow version 13.0.0 which is known to be insecure. See https://www.cve.org/CVERecord?id=CVE-2023-47248 for further details. Please upgrade to pyarrow&gt;=14.0.1 or install pyarrow-hotfix to patch your current version.
-  warnings.warn(
-</pre></div>
-</div>
-</div>
 </div>
 </section>
 <section id="read-in-a-dataset-of-archival-light-curves">
 <h2>1. Read in a dataset of archival light curves<a class="headerlink" href="#read-in-a-dataset-of-archival-light-curves" title="Permalink to this headline">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#access structure of light curves made in the light curve notebook</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#access structure of light curves made in the light curve notebook</span>
 <span class="c1"># has CLAGN &amp; SDSS small sample, all bands</span>
 <span class="c1">#https://drive.google.com/file/d/13RiPODiz2kI8j1OKpP1vfh6ByIUNsKEz/view?usp=share_link</span>
 
@@ -900,142 +865,11 @@ Requirement already satisfied: threadpoolctl&gt;=2.0.0 in /Users/bsipocz/.pyenv/
 <p>This dataset needs significant work before it can be fed into a ML algorithm</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#what does the dataset look like anyway?</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#what does the dataset look like anyway?</span>
 <span class="n">df_lc</span>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output text_html"><div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>objectid</th>
-      <th>label</th>
-      <th>band</th>
-      <th>time</th>
-      <th>flux</th>
-      <th>err</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>112</td>
-      <td>Lopez-Navas 22</td>
-      <td>FERMIGTRIG</td>
-      <td>56371.813768</td>
-      <td>0.100000</td>
-      <td>0.100000</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>218</td>
-      <td>SDSS</td>
-      <td>FERMIGTRIG</td>
-      <td>59568.171278</td>
-      <td>0.100000</td>
-      <td>0.100000</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>395</td>
-      <td>SDSS</td>
-      <td>FERMIGTRIG</td>
-      <td>54699.331556</td>
-      <td>0.100000</td>
-      <td>0.100000</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>414</td>
-      <td>SDSS</td>
-      <td>FERMIGTRIG</td>
-      <td>56369.455916</td>
-      <td>0.100000</td>
-      <td>0.100000</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>434</td>
-      <td>SDSS</td>
-      <td>FERMIGTRIG</td>
-      <td>58941.402522</td>
-      <td>0.100000</td>
-      <td>0.100000</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>426627</th>
-      <td>183</td>
-      <td>SDSS</td>
-      <td>w2</td>
-      <td>55230.410156</td>
-      <td>6.717855</td>
-      <td>0.019561</td>
-    </tr>
-    <tr>
-      <th>426628</th>
-      <td>183</td>
-      <td>SDSS</td>
-      <td>w2</td>
-      <td>57054.886719</td>
-      <td>6.715584</td>
-      <td>0.023281</td>
-    </tr>
-    <tr>
-      <th>426629</th>
-      <td>183</td>
-      <td>SDSS</td>
-      <td>w2</td>
-      <td>57247.308594</td>
-      <td>7.572342</td>
-      <td>0.024136</td>
-    </tr>
-    <tr>
-      <th>426630</th>
-      <td>183</td>
-      <td>SDSS</td>
-      <td>w2</td>
-      <td>57977.214844</td>
-      <td>7.876407</td>
-      <td>0.023734</td>
-    </tr>
-    <tr>
-      <th>426631</th>
-      <td>183</td>
-      <td>SDSS</td>
-      <td>w2</td>
-      <td>58706.855469</td>
-      <td>7.558403</td>
-      <td>0.024963</td>
-    </tr>
-  </tbody>
-</table>
-<p>426632 rows × 6 columns</p>
-</div></div></div>
 </div>
 <section id="remove-bands-with-not-enough-data">
 <h3>2.1 Remove bands with not enough data<a class="headerlink" href="#remove-bands-with-not-enough-data" title="Permalink to this headline">#</a></h3>
@@ -1043,23 +877,15 @@ Requirement already satisfied: threadpoolctl&gt;=2.0.0 in /Users/bsipocz/.pyenv/
 that are known to be sparse.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">##what are the unique set of bands included in our light curves</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">##what are the unique set of bands included in our light curves</span>
 <span class="n">df_lc</span><span class="o">.</span><span class="n">band</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([&#39;FERMIGTRIG&#39;, &#39;IceCube&#39;, &#39;zg&#39;, &#39;zr&#39;, &#39;zi&#39;, &#39;panstarrs i&#39;,
-       &#39;panstarrs y&#39;, &#39;panstarrs z&#39;, &#39;panstarrs g&#39;, &#39;panstarrs r&#39;,
-       &#39;Gaia g&#39;, &#39;Gaia bp&#39;, &#39;Gaia rp&#39;, &#39;K2&#39;, &#39;TESS&#39;, &#39;w1&#39;, &#39;w2&#39;],
-      dtype=object)
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># get rid of some of the bands that don&#39;t have enough data for all the sources</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># get rid of some of the bands that don&#39;t have enough data for all the sources</span>
 
 <span class="n">bands_to_drop</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;IceCube&quot;</span><span class="p">,</span> <span class="s2">&quot;TESS&quot;</span><span class="p">,</span> <span class="s2">&quot;FERMIGTRIG&quot;</span><span class="p">,</span> <span class="s2">&quot;K2&quot;</span><span class="p">]</span>
 <span class="n">df_lc</span> <span class="o">=</span> <span class="n">df_lc</span><span class="p">[</span><span class="o">~</span><span class="n">df_lc</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">bands_to_drop</span><span class="p">)]</span>
@@ -1073,7 +899,7 @@ that are known to be sparse.</p>
 <p>All CLAGN start in the dataset as having labels based on their discovery paper.  Because we want one sample with all known CLAGN, change those discoery names to be simply “CLAGN” for all CLAGN, regardless of origin</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_lc</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;MacLeod 16&#39;</span><span class="p">,</span> <span class="s1">&#39;CLAGN&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df_lc</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;MacLeod 16&#39;</span><span class="p">,</span> <span class="s1">&#39;CLAGN&#39;</span><span class="p">)</span>
 <span class="n">df_lc</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;LaMassa 15&#39;</span><span class="p">,</span> <span class="s1">&#39;CLAGN&#39;</span><span class="p">)</span>
 <span class="n">df_lc</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;Yang 18&#39;</span><span class="p">,</span> <span class="s1">&#39;CLAGN&#39;</span><span class="p">)</span>
 <span class="n">df_lc</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;Lyu 21&#39;</span><span class="p">,</span> <span class="s1">&#39;CLAGN&#39;</span><span class="p">)</span>
@@ -1082,66 +908,6 @@ that are known to be sparse.</p>
 <span class="n">df_lc</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;MacLeod 19&#39;</span><span class="p">,</span> <span class="s1">&#39;CLAGN&#39;</span><span class="p">)</span>
 <span class="n">df_lc</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;Green 22&#39;</span><span class="p">,</span> <span class="s1">&#39;CLAGN&#39;</span><span class="p">)</span>
 <span class="n">df_lc</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;Lopez-Navas 22&#39;</span><span class="p">,</span> <span class="s1">&#39;CLAGN&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/ipykernel_73745/669698915.py:1: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df_lc[&#39;label&#39;] = df_lc.label.str.replace(&#39;MacLeod 16&#39;, &#39;CLAGN&#39;)
-/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/ipykernel_73745/669698915.py:2: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df_lc[&#39;label&#39;] = df_lc.label.str.replace(&#39;LaMassa 15&#39;, &#39;CLAGN&#39;)
-/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/ipykernel_73745/669698915.py:3: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df_lc[&#39;label&#39;] = df_lc.label.str.replace(&#39;Yang 18&#39;, &#39;CLAGN&#39;)
-/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/ipykernel_73745/669698915.py:4: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df_lc[&#39;label&#39;] = df_lc.label.str.replace(&#39;Lyu 21&#39;, &#39;CLAGN&#39;)
-/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/ipykernel_73745/669698915.py:5: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df_lc[&#39;label&#39;] = df_lc.label.str.replace(&#39;Hon 22&#39;, &#39;CLAGN&#39;)
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/ipykernel_73745/669698915.py:6: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df_lc[&#39;label&#39;] = df_lc.label.str.replace(&#39;Sheng 20&#39;, &#39;CLAGN&#39;)
-/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/ipykernel_73745/669698915.py:7: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df_lc[&#39;label&#39;] = df_lc.label.str.replace(&#39;MacLeod 19&#39;, &#39;CLAGN&#39;)
-/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/ipykernel_73745/669698915.py:8: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df_lc[&#39;label&#39;] = df_lc.label.str.replace(&#39;Green 22&#39;, &#39;CLAGN&#39;)
-/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/ipykernel_73745/669698915.py:9: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df_lc[&#39;label&#39;] = df_lc.label.str.replace(&#39;Lopez-Navas 22&#39;, &#39;CLAGN&#39;)
 </pre></div>
 </div>
 </div>
@@ -1160,7 +926,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#find and drop bad rows</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#find and drop bad rows</span>
 
 <span class="c1">#one panstarrs z has a crazy err value of -999000, definitely don&#39;t want to include that one</span>
 <span class="n">querystring</span> <span class="o">=</span> <span class="s1">&#39;err &lt; -100&#39;</span>
@@ -1179,7 +945,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#consider Removing all rows with uncertainties well outside of a normal distribution</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#consider Removing all rows with uncertainties well outside of a normal distribution</span>
 <span class="c1">#plot histograms to see what these distributions look like</span>
 <span class="c1">#This is a tricky job because we want to keep astrophysical outliers of variable objects, but </span>
 <span class="c1">#remove instrumental noise and CR (ground based)</span>
@@ -1213,13 +979,10 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<img alt="../_images/cd7896197e76b90638038886c7cdc5064a9a28ae93f4f18c72dfbe73f237d2c2.png" src="../_images/cd7896197e76b90638038886c7cdc5064a9a28ae93f4f18c72dfbe73f237d2c2.png" />
-</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#remove data that are outside the sigmaclip_value</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#remove data that are outside the sigmaclip_value</span>
 <span class="k">for</span> <span class="n">bandname</span><span class="p">,</span> <span class="n">cut</span> <span class="ow">in</span> <span class="n">nsigmaonmean</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
     <span class="n">querystring</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;band == </span><span class="si">{</span><span class="n">bandname</span><span class="si">!r}</span><span class="s1"> &amp; err &gt; </span><span class="si">{</span><span class="n">cut</span><span class="si">}</span><span class="s1">&#39;</span>
     <span class="n">df_lc</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">df_lc</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">querystring</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
@@ -1229,7 +992,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#how much data did we remove with this sigma clipping?</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#how much data did we remove with this sigma clipping?</span>
 <span class="c1">#This should inform our choice of sigmaclip_value.</span>
 
 <span class="n">end_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_lc</span><span class="p">)</span>
@@ -1238,15 +1001,10 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>This 10.0 sigma clipping removed 0.01239000995250949% of the rows in df_lc
-</pre></div>
-</div>
-</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Remove objects which do not have fluxes measured in the band with which we want to normalize</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Remove objects which do not have fluxes measured in the band with which we want to normalize</span>
 <span class="c1">#which band has the most data?</span>
 
 <span class="c1">#Later in the code we will need to noramalize fluxes by one of the bands</span>
@@ -1263,27 +1021,10 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.8713968957871396  have  Gaia bp  fluxes
-0.8758314855875832  have  Gaia g  fluxes
-0.8713968957871396  have  Gaia rp  fluxes
-0.9068736141906873  have  panstarrs g  fluxes
-0.9312638580931264  have  panstarrs i  fluxes
-0.9223946784922394  have  panstarrs r  fluxes
-0.8913525498891353  have  panstarrs y  fluxes
-0.926829268292683  have  panstarrs z  fluxes
-0.9667405764966741  have  w1  fluxes
-0.9512195121951219  have  w2  fluxes
-0.8625277161862528  have  zg  fluxes
-0.7139689578713969  have  zi  fluxes
-0.9002217294900222  have  zr  fluxes
-</pre></div>
-</div>
-</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#this argues for normalizing by w1 fluxes (later)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#this argues for normalizing by w1 fluxes (later)</span>
 <span class="c1">#We will therefore need to get rid of the 4% of light curves which do not have W1 data</span>
 <span class="c1">#as there will be nothing to normalize those light curves with and we don&#39;t want to </span>
 <span class="c1">#have un-normalized data or data that has been normalized by a different band.  </span>
@@ -1310,11 +1051,6 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>15 objects do not have W1 fluxes and were removed
-</pre></div>
-</div>
-</div>
 </div>
 </section>
 <section id="incomplete-data">
@@ -1323,7 +1059,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 <p>Another way of saying this is that we choose to remove those light curves with 3 or fewer data points.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Define what the threshold is for too few datapoints.</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Define what the threshold is for too few datapoints.</span>
 <span class="n">thresh_too_few</span> <span class="o">=</span> <span class="mi">3</span>
 
 <span class="c1">#how many groups do we have before we start</span>
@@ -1339,12 +1075,6 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>5117 n groups before
-4160 n groups after
-</pre></div>
-</div>
-</div>
 </div>
 </section>
 <section id="missing-data">
@@ -1353,7 +1083,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 <p>We will add light curves with zero flux and err values for the missing data.  SKtime does not like NaNs, so we chose zeros.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">make_zero_lc</span><span class="p">(</span><span class="n">oid</span><span class="p">,</span> <span class="n">band</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">make_zero_lc</span><span class="p">(</span><span class="n">oid</span><span class="p">,</span> <span class="n">band</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
     <span class="c1">#randomly choose some times during the WISE survey</span>
     <span class="c1">#these will all get fleshed out in the section on making uniform length time arrays</span>
     <span class="c1">#so the specifics are not important now</span>
@@ -1370,7 +1100,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#for the case where there is no photometry in a band:</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#for the case where there is no photometry in a band:</span>
 <span class="c1">#make light curves with flux, err set to zeros</span>
 
 <span class="c1">#what is the full set of unique band names?</span>
@@ -1423,146 +1153,15 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#what does it look like?</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#what does it look like?</span>
 <span class="n">df_lc</span>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output text_html"><div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>objectid</th>
-      <th>label</th>
-      <th>band</th>
-      <th>time</th>
-      <th>flux</th>
-      <th>err</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>1379</th>
-      <td>92</td>
-      <td>CLAGN</td>
-      <td>zg</td>
-      <td>58202.309236</td>
-      <td>0.736736</td>
-      <td>0.010347</td>
-    </tr>
-    <tr>
-      <th>1380</th>
-      <td>92</td>
-      <td>CLAGN</td>
-      <td>zg</td>
-      <td>58202.31456</td>
-      <td>0.730595</td>
-      <td>0.01029</td>
-    </tr>
-    <tr>
-      <th>1381</th>
-      <td>92</td>
-      <td>CLAGN</td>
-      <td>zg</td>
-      <td>58205.302651</td>
-      <td>0.658396</td>
-      <td>0.009634</td>
-    </tr>
-    <tr>
-      <th>1382</th>
-      <td>92</td>
-      <td>CLAGN</td>
-      <td>zg</td>
-      <td>58205.320949</td>
-      <td>0.681111</td>
-      <td>0.00984</td>
-    </tr>
-    <tr>
-      <th>1383</th>
-      <td>92</td>
-      <td>CLAGN</td>
-      <td>zg</td>
-      <td>58208.357257</td>
-      <td>0.589205</td>
-      <td>0.009014</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>7405</th>
-      <td>457</td>
-      <td>SDSS</td>
-      <td>Gaia rp</td>
-      <td>55230.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-    </tr>
-    <tr>
-      <th>7406</th>
-      <td>457</td>
-      <td>SDSS</td>
-      <td>Gaia rp</td>
-      <td>57054.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-    </tr>
-    <tr>
-      <th>7407</th>
-      <td>457</td>
-      <td>SDSS</td>
-      <td>Gaia rp</td>
-      <td>57247.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-    </tr>
-    <tr>
-      <th>7408</th>
-      <td>457</td>
-      <td>SDSS</td>
-      <td>Gaia rp</td>
-      <td>57977.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-    </tr>
-    <tr>
-      <th>7409</th>
-      <td>457</td>
-      <td>SDSS</td>
-      <td>Gaia rp</td>
-      <td>58707.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-    </tr>
-  </tbody>
-</table>
-<p>401615 rows × 6 columns</p>
-</div></div></div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#this cell takes 13seconds to run on the sample of 458 sources</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#this cell takes 13seconds to run on the sample of 458 sources</span>
 
 <span class="c1">#change this to change the frequency of the time array</span>
 <span class="n">final_freq_int</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1">#this is the timescale of interpolation in units of days</span>
@@ -1634,9 +1233,6 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<img alt="../_images/1206a058b7b2646b89e6efc178ec350b946fbec02a47728babbe42f9192a2cb5.png" src="../_images/1206a058b7b2646b89e6efc178ec350b946fbec02a47728babbe42f9192a2cb5.png" />
-</div>
 </div>
 </section>
 <section id="restructure-dataframe-in-format-expected-by-sktime">
@@ -1647,145 +1243,14 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_lc</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df_lc</span>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output text_html"><div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>objectid</th>
-      <th>label</th>
-      <th>band</th>
-      <th>time</th>
-      <th>flux</th>
-      <th>err</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>0</td>
-      <td>CLAGN</td>
-      <td>Gaia bp</td>
-      <td>54985.275796</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>0</td>
-      <td>CLAGN</td>
-      <td>Gaia bp</td>
-      <td>55015.275796</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>0</td>
-      <td>CLAGN</td>
-      <td>Gaia bp</td>
-      <td>55045.275796</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>0</td>
-      <td>CLAGN</td>
-      <td>Gaia bp</td>
-      <td>55075.275796</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>0</td>
-      <td>CLAGN</td>
-      <td>Gaia bp</td>
-      <td>55105.275796</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>947851</th>
-      <td>457</td>
-      <td>SDSS</td>
-      <td>zr</td>
-      <td>59875.275796</td>
-      <td>0.830931</td>
-      <td>0.013213</td>
-    </tr>
-    <tr>
-      <th>947852</th>
-      <td>457</td>
-      <td>SDSS</td>
-      <td>zr</td>
-      <td>59905.275796</td>
-      <td>0.830027</td>
-      <td>0.013213</td>
-    </tr>
-    <tr>
-      <th>947853</th>
-      <td>457</td>
-      <td>SDSS</td>
-      <td>zr</td>
-      <td>59935.275796</td>
-      <td>0.741216</td>
-      <td>0.013213</td>
-    </tr>
-    <tr>
-      <th>947854</th>
-      <td>457</td>
-      <td>SDSS</td>
-      <td>zr</td>
-      <td>59965.275796</td>
-      <td>0.813474</td>
-      <td>0.013213</td>
-    </tr>
-    <tr>
-      <th>947855</th>
-      <td>457</td>
-      <td>SDSS</td>
-      <td>zr</td>
-      <td>59995.275796</td>
-      <td>0.766961</td>
-      <td>0.013213</td>
-    </tr>
-  </tbody>
-</table>
-<p>947856 rows × 6 columns</p>
-</div></div></div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#keep some columns out of the mix when doing the pivot by bandname</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#keep some columns out of the mix when doing the pivot by bandname</span>
 <span class="c1">#set them as indices and they won&#39;t get pivoted into</span>
 <span class="n">df_lc</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s2">&quot;objectid&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">])</span>
 
@@ -1807,324 +1272,13 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#look at a single object to see what this array looks like</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#look at a single object to see what this array looks like</span>
 <span class="n">ob_of_interest</span> <span class="o">=</span> <span class="mi">4</span>
 <span class="n">singleob</span> <span class="o">=</span> <span class="n">df_lc</span><span class="p">[</span><span class="n">df_lc</span><span class="p">[</span><span class="s1">&#39;objectid&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ob_of_interest</span><span class="p">]</span>
 <span class="n">singleob</span>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output text_html"><div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>objectid</th>
-      <th>label</th>
-      <th>time</th>
-      <th>flux_Gaia_bp</th>
-      <th>flux_Gaia_g</th>
-      <th>flux_Gaia_rp</th>
-      <th>flux_panstarrs_g</th>
-      <th>flux_panstarrs_i</th>
-      <th>flux_panstarrs_r</th>
-      <th>flux_panstarrs_y</th>
-      <th>...</th>
-      <th>err_panstarrs_g</th>
-      <th>err_panstarrs_i</th>
-      <th>err_panstarrs_r</th>
-      <th>err_panstarrs_y</th>
-      <th>err_panstarrs_z</th>
-      <th>err_w1</th>
-      <th>err_w2</th>
-      <th>err_zg</th>
-      <th>err_zi</th>
-      <th>err_zr</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>672</th>
-      <td>4</td>
-      <td>CLAGN</td>
-      <td>54985.275796</td>
-      <td>0.075968</td>
-      <td>0.058815</td>
-      <td>0.173102</td>
-      <td>0.032355</td>
-      <td>0.085156</td>
-      <td>0.053759</td>
-      <td>0.159406</td>
-      <td>...</td>
-      <td>0.001867</td>
-      <td>0.002682</td>
-      <td>0.0018</td>
-      <td>0.011534</td>
-      <td>0.003545</td>
-      <td>0.006379</td>
-      <td>0.014269</td>
-      <td>0.00415</td>
-      <td>0.007337</td>
-      <td>0.005625</td>
-    </tr>
-    <tr>
-      <th>673</th>
-      <td>4</td>
-      <td>CLAGN</td>
-      <td>55015.275796</td>
-      <td>0.075968</td>
-      <td>0.058815</td>
-      <td>0.173102</td>
-      <td>0.032355</td>
-      <td>0.085156</td>
-      <td>0.053759</td>
-      <td>0.159406</td>
-      <td>...</td>
-      <td>0.001867</td>
-      <td>0.002682</td>
-      <td>0.0018</td>
-      <td>0.011534</td>
-      <td>0.003545</td>
-      <td>0.006379</td>
-      <td>0.014269</td>
-      <td>0.00415</td>
-      <td>0.007337</td>
-      <td>0.005625</td>
-    </tr>
-    <tr>
-      <th>674</th>
-      <td>4</td>
-      <td>CLAGN</td>
-      <td>55045.275796</td>
-      <td>0.075968</td>
-      <td>0.058815</td>
-      <td>0.173102</td>
-      <td>0.032355</td>
-      <td>0.085156</td>
-      <td>0.053759</td>
-      <td>0.159406</td>
-      <td>...</td>
-      <td>0.001867</td>
-      <td>0.002682</td>
-      <td>0.0018</td>
-      <td>0.011534</td>
-      <td>0.003545</td>
-      <td>0.006379</td>
-      <td>0.014269</td>
-      <td>0.00415</td>
-      <td>0.007337</td>
-      <td>0.005625</td>
-    </tr>
-    <tr>
-      <th>675</th>
-      <td>4</td>
-      <td>CLAGN</td>
-      <td>55075.275796</td>
-      <td>0.075968</td>
-      <td>0.058815</td>
-      <td>0.173102</td>
-      <td>0.032355</td>
-      <td>0.085156</td>
-      <td>0.053759</td>
-      <td>0.159406</td>
-      <td>...</td>
-      <td>0.001867</td>
-      <td>0.002682</td>
-      <td>0.0018</td>
-      <td>0.011534</td>
-      <td>0.003545</td>
-      <td>0.006379</td>
-      <td>0.014269</td>
-      <td>0.00415</td>
-      <td>0.007337</td>
-      <td>0.005625</td>
-    </tr>
-    <tr>
-      <th>676</th>
-      <td>4</td>
-      <td>CLAGN</td>
-      <td>55105.275796</td>
-      <td>0.075968</td>
-      <td>0.058815</td>
-      <td>0.173102</td>
-      <td>0.032355</td>
-      <td>0.085156</td>
-      <td>0.053759</td>
-      <td>0.159406</td>
-      <td>...</td>
-      <td>0.001867</td>
-      <td>0.002682</td>
-      <td>0.0018</td>
-      <td>0.011534</td>
-      <td>0.003545</td>
-      <td>0.006379</td>
-      <td>0.014269</td>
-      <td>0.00415</td>
-      <td>0.007337</td>
-      <td>0.005625</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>835</th>
-      <td>4</td>
-      <td>CLAGN</td>
-      <td>59875.275796</td>
-      <td>0.083895</td>
-      <td>0.082534</td>
-      <td>0.190779</td>
-      <td>0.028789</td>
-      <td>0.142836</td>
-      <td>0.068780</td>
-      <td>0.118329</td>
-      <td>...</td>
-      <td>0.001867</td>
-      <td>0.002682</td>
-      <td>0.0018</td>
-      <td>0.011534</td>
-      <td>0.003545</td>
-      <td>0.006379</td>
-      <td>0.014269</td>
-      <td>0.00415</td>
-      <td>0.007337</td>
-      <td>0.005625</td>
-    </tr>
-    <tr>
-      <th>836</th>
-      <td>4</td>
-      <td>CLAGN</td>
-      <td>59905.275796</td>
-      <td>0.083895</td>
-      <td>0.082534</td>
-      <td>0.190779</td>
-      <td>0.028789</td>
-      <td>0.142836</td>
-      <td>0.068780</td>
-      <td>0.118329</td>
-      <td>...</td>
-      <td>0.001867</td>
-      <td>0.002682</td>
-      <td>0.0018</td>
-      <td>0.011534</td>
-      <td>0.003545</td>
-      <td>0.006379</td>
-      <td>0.014269</td>
-      <td>0.00415</td>
-      <td>0.007337</td>
-      <td>0.005625</td>
-    </tr>
-    <tr>
-      <th>837</th>
-      <td>4</td>
-      <td>CLAGN</td>
-      <td>59935.275796</td>
-      <td>0.083895</td>
-      <td>0.082534</td>
-      <td>0.190779</td>
-      <td>0.028789</td>
-      <td>0.142836</td>
-      <td>0.068780</td>
-      <td>0.118329</td>
-      <td>...</td>
-      <td>0.001867</td>
-      <td>0.002682</td>
-      <td>0.0018</td>
-      <td>0.011534</td>
-      <td>0.003545</td>
-      <td>0.006379</td>
-      <td>0.014269</td>
-      <td>0.00415</td>
-      <td>0.007337</td>
-      <td>0.005625</td>
-    </tr>
-    <tr>
-      <th>838</th>
-      <td>4</td>
-      <td>CLAGN</td>
-      <td>59965.275796</td>
-      <td>0.083895</td>
-      <td>0.082534</td>
-      <td>0.190779</td>
-      <td>0.028789</td>
-      <td>0.142836</td>
-      <td>0.068780</td>
-      <td>0.118329</td>
-      <td>...</td>
-      <td>0.001867</td>
-      <td>0.002682</td>
-      <td>0.0018</td>
-      <td>0.011534</td>
-      <td>0.003545</td>
-      <td>0.006379</td>
-      <td>0.014269</td>
-      <td>0.00415</td>
-      <td>0.007337</td>
-      <td>0.005625</td>
-    </tr>
-    <tr>
-      <th>839</th>
-      <td>4</td>
-      <td>CLAGN</td>
-      <td>59995.275796</td>
-      <td>0.083895</td>
-      <td>0.082534</td>
-      <td>0.190779</td>
-      <td>0.028789</td>
-      <td>0.142836</td>
-      <td>0.068780</td>
-      <td>0.118329</td>
-      <td>...</td>
-      <td>0.001867</td>
-      <td>0.002682</td>
-      <td>0.0018</td>
-      <td>0.011534</td>
-      <td>0.003545</td>
-      <td>0.006379</td>
-      <td>0.014269</td>
-      <td>0.00415</td>
-      <td>0.007337</td>
-      <td>0.005625</td>
-    </tr>
-  </tbody>
-</table>
-<p>168 rows × 29 columns</p>
-</div></div></div>
 </div>
 </section>
 <section id="normalize">
@@ -2144,7 +1298,7 @@ which goes into the ML algorithms.</p></li>
 <p>Idea here is that we normalize across each object.  So the algorithms will know, for example, that within one object W1 will be brighter than ZTF bands but from one object to the next, it will not know that one is brighter than the other.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># make a new column with max_r_flux for each objectid</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># make a new column with max_r_flux for each objectid</span>
 <span class="n">df_lc</span><span class="p">[</span><span class="s1">&#39;max_W1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;objectid&#39;</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="s2">&quot;flux_w1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="s1">&#39;max&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -2152,7 +1306,7 @@ which goes into the ML algorithms.</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#figure out which columns in the dataframe are flux columns</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#figure out which columns in the dataframe are flux columns</span>
 <span class="n">flux_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="s1">&#39;flux&#39;</span> <span class="ow">in</span> <span class="n">col</span><span class="p">]</span>
 
 <span class="c1"># make new normalized flux columns for all fluxes</span>
@@ -2168,7 +1322,7 @@ which goes into the ML algorithms.</p></li>
 <p>SKTime wants a datetime column</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#need to convert df_lc time into datetime</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#need to convert df_lc time into datetime</span>
 <span class="n">mjd</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">time</span>
 
 <span class="c1">#convert to JD</span>
@@ -2189,7 +1343,7 @@ which goes into the ML algorithms.</p></li>
 <h3>2.9 Save this dataframe<a class="headerlink" href="#save-this-dataframe" title="Permalink to this headline">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#save this dataframe to use for the ML below so we don&#39;t have to make it every time</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#save this dataframe to use for the ML below so we don&#39;t have to make it every time</span>
 <span class="n">parquet_savename</span> <span class="o">=</span> <span class="s1">&#39;output/df_lc_ML.parquet&#39;</span>
 <span class="n">df_lc</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">parquet_savename</span><span class="p">)</span>
 <span class="c1">#print(&quot;file saved!&quot;)</span>
@@ -2202,7 +1356,7 @@ which goes into the ML algorithms.</p></li>
 <h3>2.10 make into multi-index which is what SKTime expects as input<a class="headerlink" href="#make-into-multi-index-which-is-what-sktime-expects-as-input" title="Permalink to this headline">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_lc</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s2">&quot;objectid&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="s2">&quot;datetime&quot;</span><span class="p">])</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df_lc</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s2">&quot;objectid&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="s2">&quot;datetime&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -2213,7 +1367,7 @@ which goes into the ML algorithms.</p></li>
 <h2>3. Prep for ML algorithms in sktime<a class="headerlink" href="#prep-for-ml-algorithms-in-sktime" title="Permalink to this headline">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># could load a previously saved file in order to plot</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># could load a previously saved file in order to plot</span>
 <span class="c1">#parquet_loadname = &#39;output/df_lc_ML.parquet&#39;</span>
 <span class="c1">#df_lc = MultiIndexDFObject()</span>
 <span class="c1">#df_lc.data = pd.read_parquet(parquet_loadname)</span>
@@ -2244,359 +1398,14 @@ which goes into the ML algorithms.</p></li>
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_lc</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df_lc</span>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output text_html"><div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th></th>
-      <th></th>
-      <th>time</th>
-      <th>flux_Gaia_bp</th>
-      <th>flux_Gaia_g</th>
-      <th>flux_Gaia_rp</th>
-      <th>flux_panstarrs_g</th>
-      <th>flux_panstarrs_i</th>
-      <th>flux_panstarrs_r</th>
-      <th>flux_panstarrs_y</th>
-      <th>flux_panstarrs_z</th>
-      <th>flux_w1</th>
-      <th>...</th>
-      <th>err_panstarrs_i</th>
-      <th>err_panstarrs_r</th>
-      <th>err_panstarrs_y</th>
-      <th>err_panstarrs_z</th>
-      <th>err_w1</th>
-      <th>err_w2</th>
-      <th>err_zg</th>
-      <th>err_zi</th>
-      <th>err_zr</th>
-      <th>max_W1</th>
-    </tr>
-    <tr>
-      <th>objectid</th>
-      <th>label</th>
-      <th>datetime</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th rowspan="5" valign="top">0</th>
-      <th rowspan="5" valign="top">CLAGN</th>
-      <th>2009-06-03 06:37:08.765742</th>
-      <td>54985.275796</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.137015</td>
-      <td>0.323656</td>
-      <td>0.261700</td>
-      <td>0.450450</td>
-      <td>0.453979</td>
-      <td>1.000000</td>
-      <td>...</td>
-      <td>0.001906</td>
-      <td>0.001850</td>
-      <td>0.010021</td>
-      <td>0.004148</td>
-      <td>0.007419</td>
-      <td>0.016513</td>
-      <td>0.004032</td>
-      <td>0.008675</td>
-      <td>0.005757</td>
-      <td>0.287714</td>
-    </tr>
-    <tr>
-      <th>2009-07-03 06:37:08.765742</th>
-      <td>55015.275796</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.137015</td>
-      <td>0.323656</td>
-      <td>0.261700</td>
-      <td>0.450450</td>
-      <td>0.453979</td>
-      <td>1.000000</td>
-      <td>...</td>
-      <td>0.001906</td>
-      <td>0.001850</td>
-      <td>0.010021</td>
-      <td>0.004148</td>
-      <td>0.007419</td>
-      <td>0.016513</td>
-      <td>0.004032</td>
-      <td>0.008675</td>
-      <td>0.005757</td>
-      <td>0.287714</td>
-    </tr>
-    <tr>
-      <th>2009-08-02 06:37:08.765742</th>
-      <td>55045.275796</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.137015</td>
-      <td>0.323656</td>
-      <td>0.261700</td>
-      <td>0.450450</td>
-      <td>0.453979</td>
-      <td>1.000000</td>
-      <td>...</td>
-      <td>0.001906</td>
-      <td>0.001850</td>
-      <td>0.010021</td>
-      <td>0.004148</td>
-      <td>0.007419</td>
-      <td>0.016513</td>
-      <td>0.004032</td>
-      <td>0.008675</td>
-      <td>0.005757</td>
-      <td>0.287714</td>
-    </tr>
-    <tr>
-      <th>2009-09-01 06:37:08.765742</th>
-      <td>55075.275796</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.137015</td>
-      <td>0.323656</td>
-      <td>0.261700</td>
-      <td>0.450450</td>
-      <td>0.453979</td>
-      <td>1.000000</td>
-      <td>...</td>
-      <td>0.001906</td>
-      <td>0.001850</td>
-      <td>0.010021</td>
-      <td>0.004148</td>
-      <td>0.007419</td>
-      <td>0.016513</td>
-      <td>0.004032</td>
-      <td>0.008675</td>
-      <td>0.005757</td>
-      <td>0.287714</td>
-    </tr>
-    <tr>
-      <th>2009-10-01 06:37:08.765742</th>
-      <td>55105.275796</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.137015</td>
-      <td>0.323656</td>
-      <td>0.261700</td>
-      <td>0.450450</td>
-      <td>0.453979</td>
-      <td>1.000000</td>
-      <td>...</td>
-      <td>0.001906</td>
-      <td>0.001850</td>
-      <td>0.010021</td>
-      <td>0.004148</td>
-      <td>0.007419</td>
-      <td>0.016513</td>
-      <td>0.004032</td>
-      <td>0.008675</td>
-      <td>0.005757</td>
-      <td>0.287714</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <th>...</th>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th rowspan="5" valign="top">457</th>
-      <th rowspan="5" valign="top">SDSS</th>
-      <th>2022-10-23 06:37:08.765742</th>
-      <td>59875.275796</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.115842</td>
-      <td>0.404488</td>
-      <td>0.214667</td>
-      <td>0.384747</td>
-      <td>0.396744</td>
-      <td>0.787245</td>
-      <td>...</td>
-      <td>0.004698</td>
-      <td>0.003252</td>
-      <td>0.011305</td>
-      <td>0.006535</td>
-      <td>0.008490</td>
-      <td>0.017671</td>
-      <td>0.007774</td>
-      <td>0.016106</td>
-      <td>0.013213</td>
-      <td>2.730457</td>
-    </tr>
-    <tr>
-      <th>2022-11-22 06:37:08.765742</th>
-      <td>59905.275796</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.115842</td>
-      <td>0.404488</td>
-      <td>0.214667</td>
-      <td>0.384747</td>
-      <td>0.396744</td>
-      <td>0.787245</td>
-      <td>...</td>
-      <td>0.004698</td>
-      <td>0.003252</td>
-      <td>0.011305</td>
-      <td>0.006535</td>
-      <td>0.008490</td>
-      <td>0.017671</td>
-      <td>0.007774</td>
-      <td>0.016106</td>
-      <td>0.013213</td>
-      <td>2.730457</td>
-    </tr>
-    <tr>
-      <th>2022-12-22 06:37:08.765742</th>
-      <td>59935.275796</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.115842</td>
-      <td>0.404488</td>
-      <td>0.214667</td>
-      <td>0.384747</td>
-      <td>0.396744</td>
-      <td>0.787245</td>
-      <td>...</td>
-      <td>0.004698</td>
-      <td>0.003252</td>
-      <td>0.011305</td>
-      <td>0.006535</td>
-      <td>0.008490</td>
-      <td>0.017671</td>
-      <td>0.007774</td>
-      <td>0.016106</td>
-      <td>0.013213</td>
-      <td>2.730457</td>
-    </tr>
-    <tr>
-      <th>2023-01-21 06:37:08.765742</th>
-      <td>59965.275796</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.115842</td>
-      <td>0.404488</td>
-      <td>0.214667</td>
-      <td>0.384747</td>
-      <td>0.396744</td>
-      <td>0.787245</td>
-      <td>...</td>
-      <td>0.004698</td>
-      <td>0.003252</td>
-      <td>0.011305</td>
-      <td>0.006535</td>
-      <td>0.008490</td>
-      <td>0.017671</td>
-      <td>0.007774</td>
-      <td>0.016106</td>
-      <td>0.013213</td>
-      <td>2.730457</td>
-    </tr>
-    <tr>
-      <th>2023-02-20 06:37:08.765742</th>
-      <td>59995.275796</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.115842</td>
-      <td>0.404488</td>
-      <td>0.214667</td>
-      <td>0.384747</td>
-      <td>0.396744</td>
-      <td>0.787245</td>
-      <td>...</td>
-      <td>0.004698</td>
-      <td>0.003252</td>
-      <td>0.011305</td>
-      <td>0.006535</td>
-      <td>0.008490</td>
-      <td>0.017671</td>
-      <td>0.007774</td>
-      <td>0.016106</td>
-      <td>0.013213</td>
-      <td>2.730457</td>
-    </tr>
-  </tbody>
-</table>
-<p>72912 rows × 28 columns</p>
-</div></div></div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#y is defined to be the labels</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#y is defined to be the labels</span>
 <span class="n">y</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="s1">&#39;datetime&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_series</span><span class="p">()</span>
 
 <span class="c1">#want a stratified split based on label</span>
@@ -2608,18 +1417,10 @@ which goes into the ML algorithms.</p></li>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages/sklearn/utils/validation.py:605: FutureWarning: is_sparse is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.SparseDtype)` instead.
-  if is_sparse(pd_dtype):
-/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages/sklearn/utils/validation.py:614: FutureWarning: is_sparse is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.SparseDtype)` instead.
-  if is_sparse(pd_dtype) or not is_extension_array_dtype(pd_dtype):
-</pre></div>
-</div>
-</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#plot to show how many of each type of object in the test dataset</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#plot to show how many of each type of object in the test dataset</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Objects in the Test dataset&quot;</span><span class="p">)</span>
@@ -2627,13 +1428,10 @@ which goes into the ML algorithms.</p></li>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<img alt="../_images/fa53bde4d500cf74b268111230ee55b2eaf24c02a483a2e9931413cd1a78c74f.png" src="../_images/fa53bde4d500cf74b268111230ee55b2eaf24c02a483a2e9931413cd1a78c74f.png" />
-</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#divide the dataframe into X and y for ML algorithms </span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#divide the dataframe into X and y for ML algorithms </span>
 
 <span class="c1">#X is the multiindex light curve without the labels</span>
 <span class="n">X_train</span>  <span class="o">=</span> <span class="n">train_df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">)</span>
@@ -2651,34 +1449,13 @@ which goes into the ML algorithms.</p></li>
 <h3>3.2 Check that the data types are ok for sktime<a class="headerlink" href="#check-that-the-data-types-are-ok-for-sktime" title="Permalink to this headline">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#ask sktime if it likes the data type of X_train</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#ask sktime if it likes the data type of X_train</span>
 <span class="kn">from</span> <span class="nn">sktime.datatypes</span> <span class="kn">import</span> <span class="n">check_is_mtype</span>
 
 <span class="n">check_is_mtype</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">mtype</span><span class="o">=</span><span class="s2">&quot;pd-multiindex&quot;</span><span class="p">,</span> <span class="n">scitype</span><span class="o">=</span><span class="s2">&quot;Panel&quot;</span><span class="p">,</span> <span class="n">return_metadata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="c1">#check_is_mtype(X_test, mtype=&quot;pd-multiindex&quot;, scitype=&quot;Panel&quot;, return_metadata=True)</span>
 
 <span class="c1">#This test needs to pass in order for sktime to run</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages/sktime/datatypes/_panel/_check.py:270: FutureWarning: Creating a Groupby object with a length-1 list-like level parameter will yield indexes as tuples in a future version. To keep indexes as scalars, create Groupby objects with a scalar level parameter instead.
-  metadata[&quot;is_equally_spaced&quot;] = all(
-</pre></div>
-</div>
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(True,
- None,
- {&#39;is_univariate&#39;: False,
-  &#39;is_empty&#39;: False,
-  &#39;has_nans&#39;: True,
-  &#39;n_instances&#39;: 325,
-  &#39;is_one_series&#39;: False,
-  &#39;is_equal_length&#39;: True,
-  &#39;is_equally_spaced&#39;: True,
-  &#39;n_panels&#39;: 1,
-  &#39;is_one_panel&#39;: True,
-  &#39;mtype&#39;: &#39;pd-multiindex&#39;,
-  &#39;scitype&#39;: &#39;Panel&#39;})
 </pre></div>
 </div>
 </div>
@@ -2692,70 +1469,10 @@ which goes into the ML algorithms.</p></li>
 <p>This notebook will invert the actual workflow and show you a single example of the algorithm which best fits the data and has the most accurate classifier. Then it will show how to write a for loop over a bunch of classifiers before narrowing it down to the most accurate.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#what is the list of all possible classifiers that work with multivariate data</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#what is the list of all possible classifiers that work with multivariate data</span>
 <span class="c1">#all_tags(estimator_types = &#39;classifier&#39;)</span>
 <span class="n">classifiers</span> <span class="o">=</span> <span class="n">all_estimators</span><span class="p">(</span><span class="s2">&quot;classifier&quot;</span><span class="p">,</span> <span class="n">filter_tags</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;capability:multivariate&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">})</span>
 <span class="n">classifiers</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[(&#39;Arsenal&#39;, sktime.classification.kernel_based._arsenal.Arsenal),
- (&#39;BaggingClassifier&#39;,
-  sktime.classification.ensemble._bagging.BaggingClassifier),
- (&#39;CNNClassifier&#39;, sktime.classification.deep_learning.cnn.CNNClassifier),
- (&#39;CanonicalIntervalForest&#39;,
-  sktime.classification.interval_based._cif.CanonicalIntervalForest),
- (&#39;Catch22Classifier&#39;,
-  sktime.classification.feature_based._catch22_classifier.Catch22Classifier),
- (&#39;ColumnEnsembleClassifier&#39;,
-  sktime.classification.compose._column_ensemble.ColumnEnsembleClassifier),
- (&#39;DrCIF&#39;, sktime.classification.interval_based._drcif.DrCIF),
- (&#39;DummyClassifier&#39;, sktime.classification.dummy._dummy.DummyClassifier),
- (&#39;FCNClassifier&#39;, sktime.classification.deep_learning.fcn.FCNClassifier),
- (&#39;FreshPRINCE&#39;,
-  sktime.classification.feature_based._fresh_prince.FreshPRINCE),
- (&#39;HIVECOTEV2&#39;, sktime.classification.hybrid._hivecote_v2.HIVECOTEV2),
- (&#39;InceptionTimeClassifier&#39;,
-  sktime.classification.deep_learning.inceptiontime.InceptionTimeClassifier),
- (&#39;IndividualTDE&#39;, sktime.classification.dictionary_based._tde.IndividualTDE),
- (&#39;KNeighborsTimeSeriesClassifier&#39;,
-  sktime.classification.distance_based._time_series_neighbors.KNeighborsTimeSeriesClassifier),
- (&#39;LSTMFCNClassifier&#39;,
-  sktime.classification.deep_learning.lstmfcn.LSTMFCNClassifier),
- (&#39;MACNNClassifier&#39;,
-  sktime.classification.deep_learning.macnn.MACNNClassifier),
- (&#39;MCDCNNClassifier&#39;,
-  sktime.classification.deep_learning.mcdcnn.MCDCNNClassifier),
- (&#39;MLPClassifier&#39;, sktime.classification.deep_learning.mlp.MLPClassifier),
- (&#39;MUSE&#39;, sktime.classification.dictionary_based._muse.MUSE),
- (&#39;ProbabilityThresholdEarlyClassifier&#39;,
-  sktime.classification.early_classification._probability_threshold.ProbabilityThresholdEarlyClassifier),
- (&#39;RandomIntervalClassifier&#39;,
-  sktime.classification.feature_based._random_interval_classifier.RandomIntervalClassifier),
- (&#39;ResNetClassifier&#39;,
-  sktime.classification.deep_learning.resnet.ResNetClassifier),
- (&#39;RocketClassifier&#39;,
-  sktime.classification.kernel_based._rocket_classifier.RocketClassifier),
- (&#39;ShapeletTransformClassifier&#39;,
-  sktime.classification.shapelet_based._stc.ShapeletTransformClassifier),
- (&#39;SignatureClassifier&#39;,
-  sktime.classification.feature_based._signature_classifier.SignatureClassifier),
- (&#39;SimpleRNNClassifier&#39;,
-  sktime.classification.deep_learning.rnn.SimpleRNNClassifier),
- (&#39;SklearnClassifierPipeline&#39;,
-  sktime.classification.compose._pipeline.SklearnClassifierPipeline),
- (&#39;SummaryClassifier&#39;,
-  sktime.classification.feature_based._summary_classifier.SummaryClassifier),
- (&#39;TSFreshClassifier&#39;,
-  sktime.classification.feature_based._tsfresh_classifier.TSFreshClassifier),
- (&#39;TapNetClassifier&#39;,
-  sktime.classification.deep_learning.tapnet.TapNetClassifier),
- (&#39;TemporalDictionaryEnsemble&#39;,
-  sktime.classification.dictionary_based._tde.TemporalDictionaryEnsemble),
- (&#39;TimeSeriesSVC&#39;, sktime.classification.kernel_based._svc.TimeSeriesSVC),
- (&#39;WeightedEnsembleClassifier&#39;,
-  sktime.classification.ensemble._weighted.WeightedEnsembleClassifier)]
 </pre></div>
 </div>
 </div>
@@ -2765,7 +1482,7 @@ which goes into the ML algorithms.</p></li>
 <p>See section 4.2 for how we landed with this algorithm</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
 <span class="c1">#looks like RandomIntervalClassifier is performing the best for the CLAGN (not for the SDSS)</span>
 
 <span class="c1">#setup the classifier</span>
@@ -2788,27 +1505,6 @@ which goes into the ML algorithms.</p></li>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">ValueError</span><span class="g g-Whitespace">                                </span>Traceback (most recent call last)
-<span class="n">File</span> <span class="o">&lt;</span><span class="n">timed</span> <span class="n">exec</span><span class="o">&gt;</span><span class="p">:</span><span class="mi">7</span>
-
-<span class="nn">File ~/.pyenv/versions/3.11.0/lib/python3.11/site-packages/sktime/classification/base.py:175,</span> in <span class="ni">BaseClassifier.fit</span><span class="nt">(self, X, y)</span>
-<span class="g g-Whitespace">    </span><span class="mi">172</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_metadata</span> <span class="o">=</span> <span class="n">X_metadata</span>
-<span class="g g-Whitespace">    </span><span class="mi">174</span> <span class="c1"># Check this classifier can handle characteristics</span>
-<span class="ne">--&gt; </span><span class="mi">175</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_capabilities</span><span class="p">(</span><span class="n">missing</span><span class="p">,</span> <span class="n">multivariate</span><span class="p">,</span> <span class="n">unequal</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">177</span> <span class="c1"># remember class labels</span>
-<span class="g g-Whitespace">    </span><span class="mi">178</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-
-<span class="nn">File ~/.pyenv/versions/3.11.0/lib/python3.11/site-packages/sktime/classification/base.py:666,</span> in <span class="ni">BaseClassifier._check_capabilities</span><span class="nt">(self, missing, multivariate, unequal)</span>
-<span class="g g-Whitespace">    </span><span class="mi">664</span>     <span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">665</span> <span class="k">else</span><span class="p">:</span>
-<span class="ne">--&gt; </span><span class="mi">666</span>     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-<span class="ne">ValueError</span>: Data seen by RandomIntervalClassifier instance has missing values, but this RandomIntervalClassifier instance cannot handle missing values. Calls with missing values may result in error or unreliable results.
-</pre></div>
-</div>
-</div>
 </div>
 </section>
 <section id="loop-over-a-bunch-of-classifiers">
@@ -2816,7 +1512,7 @@ which goes into the ML algorithms.</p></li>
 <p>Our method is to do a cursory check of a bunch of classifiers and then later drill down deeper on anything with good initial results.  We choose to run a loop over ~10 classifiers that seem promising and check the accuracy scores for each one.  Any classifier with a promising accuracy score could then be followed up with detailed hyperparameter tuning, or potentially with considering other classifiers in that same type.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
 <span class="c1">#which classifiers are we interestd in</span>
 <span class="c1">#roughly one from each type of classifier</span>
 
@@ -2878,46 +1574,11 @@ which goes into the ML algorithms.</p></li>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0it [00:00, ?it/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0it [00:00, ?it/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">ValueError</span><span class="g g-Whitespace">                                </span>Traceback (most recent call last)
-<span class="n">File</span> <span class="o">&lt;</span><span class="n">timed</span> <span class="n">exec</span><span class="o">&gt;</span><span class="p">:</span><span class="mi">40</span>
-
-<span class="nn">File ~/.pyenv/versions/3.11.0/lib/python3.11/site-packages/sktime/classification/base.py:175,</span> in <span class="ni">BaseClassifier.fit</span><span class="nt">(self, X, y)</span>
-<span class="g g-Whitespace">    </span><span class="mi">172</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_metadata</span> <span class="o">=</span> <span class="n">X_metadata</span>
-<span class="g g-Whitespace">    </span><span class="mi">174</span> <span class="c1"># Check this classifier can handle characteristics</span>
-<span class="ne">--&gt; </span><span class="mi">175</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_capabilities</span><span class="p">(</span><span class="n">missing</span><span class="p">,</span> <span class="n">multivariate</span><span class="p">,</span> <span class="n">unequal</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">177</span> <span class="c1"># remember class labels</span>
-<span class="g g-Whitespace">    </span><span class="mi">178</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-
-<span class="nn">File ~/.pyenv/versions/3.11.0/lib/python3.11/site-packages/sktime/classification/base.py:666,</span> in <span class="ni">BaseClassifier._check_capabilities</span><span class="nt">(self, missing, multivariate, unequal)</span>
-<span class="g g-Whitespace">    </span><span class="mi">664</span>     <span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">665</span> <span class="k">else</span><span class="p">:</span>
-<span class="ne">--&gt; </span><span class="mi">666</span>     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-<span class="ne">ValueError</span>: Data seen by Arsenal instance has missing values, but this Arsenal instance cannot handle missing values. Calls with missing values may result in error or unreliable results.
-</pre></div>
-</div>
-</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#show the summary of the algorithms used and their accuracy score</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#show the summary of the algorithms used and their accuracy score</span>
 <span class="n">accscore_dict</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{}
 </pre></div>
 </div>
 </div>
@@ -2983,7 +1644,7 @@ which goes into the ML algorithms.</p></li>
   
     By Fornax developers<br/>
   
-      &copy; Copyright 2021-2023, Fornax developers.<br/>
+      &copy; Copyright 2022-2023, Fornax developers.<br/>
 </p>
         </footer>
     </div>

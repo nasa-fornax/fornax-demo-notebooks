@@ -773,190 +773,15 @@ title="Print to PDF"
 MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#ensure all dependencies are installed</span>
-<span class="o">!</span>pip install -r requirements.txt
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Collecting git+https://github.com/sevamoo/SOMPY (from -r requirements.txt (line 17))
-  Cloning https://github.com/sevamoo/SOMPY to /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-req-build-v9tvs56t
-  Running command git clone --filter=blob:none --quiet https://github.com/sevamoo/SOMPY /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-req-build-v9tvs56t
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Resolved https://github.com/sevamoo/SOMPY to commit 6aca604b06e5eea1391ecf507810c7aabafc3f8b
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Preparing metadata (setup.py) ... ?25l-
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> done
-?25hRequirement already satisfied: acstools in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 4)) (3.6.1)
-Requirement already satisfied: astropy in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 5)) (6.0.dev560+gf2a40ddd0)
-Requirement already satisfied: astroquery in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 6)) (0.4.7.dev8947)
-Requirement already satisfied: hpgeom in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 7)) (1.0.0)
-Requirement already satisfied: lightkurve in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 8)) (2.4.2)
-Requirement already satisfied: matplotlib in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 9)) (3.7.1)
-Requirement already satisfied: numpy in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 10)) (1.25.0)
-Requirement already satisfied: pandas in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 11)) (2.1.1)
-Requirement already satisfied: pyvo in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 12)) (1.5.dev192+g75bcb73)
-Requirement already satisfied: s3fs in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 13)) (2022.11.0)
-Requirement already satisfied: tqdm in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 14)) (4.66.1)
-Requirement already satisfied: alerce in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 15)) (1.2.0)
-Requirement already satisfied: umap-learn[plot] in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 16)) (0.5.5)
-Requirement already satisfied: requests in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from acstools-&gt;-r requirements.txt (line 4)) (2.28.1)
-Requirement already satisfied: PyYAML in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from acstools-&gt;-r requirements.txt (line 4)) (6.0)
-Requirement already satisfied: pyerfa&gt;=2.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from astropy-&gt;-r requirements.txt (line 5)) (2.0.0.1)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: astropy-iers-data&gt;=0.2023.7.31.0.32.45 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from astropy-&gt;-r requirements.txt (line 5)) (0.2023.9.18.0.29.41)
-Requirement already satisfied: packaging&gt;=19.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from astropy-&gt;-r requirements.txt (line 5)) (23.1)
-Requirement already satisfied: beautifulsoup4&gt;=4.8 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from astroquery-&gt;-r requirements.txt (line 6)) (4.11.1)
-Requirement already satisfied: html5lib&gt;=0.999 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from astroquery-&gt;-r requirements.txt (line 6)) (1.1)
-Requirement already satisfied: keyring&gt;=15.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from astroquery-&gt;-r requirements.txt (line 6)) (23.11.0)
-Requirement already satisfied: bokeh&gt;=2.0.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from lightkurve-&gt;-r requirements.txt (line 8)) (3.3.1)
-Requirement already satisfied: fbpca&gt;=1.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from lightkurve-&gt;-r requirements.txt (line 8)) (1.0)
-Requirement already satisfied: memoization&gt;=0.3.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from lightkurve-&gt;-r requirements.txt (line 8)) (0.4.0)
-Requirement already satisfied: oktopus&gt;=0.1.2 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from lightkurve-&gt;-r requirements.txt (line 8)) (0.1.2)
-Requirement already satisfied: patsy&gt;=0.5.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from lightkurve-&gt;-r requirements.txt (line 8)) (0.5.4)
-Requirement already satisfied: scikit-learn&gt;=0.24.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from lightkurve-&gt;-r requirements.txt (line 8)) (1.2.2)
-Requirement already satisfied: uncertainties&gt;=3.1.4 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from lightkurve-&gt;-r requirements.txt (line 8)) (3.1.7)
-Requirement already satisfied: urllib3&gt;=1.23 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from lightkurve-&gt;-r requirements.txt (line 8)) (1.26.13)
-Requirement already satisfied: contourpy&gt;=1.0.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from matplotlib-&gt;-r requirements.txt (line 9)) (1.0.6)
-Requirement already satisfied: cycler&gt;=0.10 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from matplotlib-&gt;-r requirements.txt (line 9)) (0.11.0)
-Requirement already satisfied: fonttools&gt;=4.22.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from matplotlib-&gt;-r requirements.txt (line 9)) (4.38.0)
-Requirement already satisfied: kiwisolver&gt;=1.0.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from matplotlib-&gt;-r requirements.txt (line 9)) (1.4.4)
-Requirement already satisfied: pillow&gt;=6.2.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from matplotlib-&gt;-r requirements.txt (line 9)) (9.3.0)
-Requirement already satisfied: pyparsing&gt;=2.3.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from matplotlib-&gt;-r requirements.txt (line 9)) (3.0.9)
-Requirement already satisfied: python-dateutil&gt;=2.7 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from matplotlib-&gt;-r requirements.txt (line 9)) (2.8.2)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: pytz&gt;=2020.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from pandas-&gt;-r requirements.txt (line 11)) (2022.6)
-Requirement already satisfied: tzdata&gt;=2022.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from pandas-&gt;-r requirements.txt (line 11)) (2023.3)
-Requirement already satisfied: aiobotocore~=2.4.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from s3fs-&gt;-r requirements.txt (line 13)) (2.4.1)
-Requirement already satisfied: fsspec==2022.11.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from s3fs-&gt;-r requirements.txt (line 13)) (2022.11.0)
-Requirement already satisfied: aiohttp!=4.0.0a0,!=4.0.0a1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from s3fs-&gt;-r requirements.txt (line 13)) (3.8.3)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: scipy&gt;=1.3.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from umap-learn[plot]-&gt;-r requirements.txt (line 16)) (1.12.0.dev0)
-Requirement already satisfied: numba&gt;=0.51.2 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from umap-learn[plot]-&gt;-r requirements.txt (line 16)) (0.58.1)
-Requirement already satisfied: pynndescent&gt;=0.5 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from umap-learn[plot]-&gt;-r requirements.txt (line 16)) (0.5.11)
-Requirement already satisfied: datashader in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from umap-learn[plot]-&gt;-r requirements.txt (line 16)) (0.16.0)
-Requirement already satisfied: holoviews in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from umap-learn[plot]-&gt;-r requirements.txt (line 16)) (1.18.1)
-Requirement already satisfied: colorcet in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from umap-learn[plot]-&gt;-r requirements.txt (line 16)) (3.0.1)
-Requirement already satisfied: seaborn in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from umap-learn[plot]-&gt;-r requirements.txt (line 16)) (0.13.0)
-Requirement already satisfied: scikit-image in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from umap-learn[plot]-&gt;-r requirements.txt (line 16)) (0.22.0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: numexpr&gt;=2.5 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from SOMPY==1.1.1-&gt;-r requirements.txt (line 17)) (2.8.7)
-Requirement already satisfied: botocore&lt;1.27.60,&gt;=1.27.59 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from aiobotocore~=2.4.0-&gt;s3fs-&gt;-r requirements.txt (line 13)) (1.27.59)
-Requirement already satisfied: wrapt&gt;=1.10.10 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from aiobotocore~=2.4.0-&gt;s3fs-&gt;-r requirements.txt (line 13)) (1.14.1)
-Requirement already satisfied: aioitertools&gt;=0.5.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from aiobotocore~=2.4.0-&gt;s3fs-&gt;-r requirements.txt (line 13)) (0.11.0)
-Requirement already satisfied: attrs&gt;=17.3.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from aiohttp!=4.0.0a0,!=4.0.0a1-&gt;s3fs-&gt;-r requirements.txt (line 13)) (21.4.0)
-Requirement already satisfied: charset-normalizer&lt;3.0,&gt;=2.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from aiohttp!=4.0.0a0,!=4.0.0a1-&gt;s3fs-&gt;-r requirements.txt (line 13)) (2.1.1)
-Requirement already satisfied: multidict&lt;7.0,&gt;=4.5 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from aiohttp!=4.0.0a0,!=4.0.0a1-&gt;s3fs-&gt;-r requirements.txt (line 13)) (6.0.3)
-Requirement already satisfied: async-timeout&lt;5.0,&gt;=4.0.0a3 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from aiohttp!=4.0.0a0,!=4.0.0a1-&gt;s3fs-&gt;-r requirements.txt (line 13)) (4.0.2)
-Requirement already satisfied: yarl&lt;2.0,&gt;=1.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from aiohttp!=4.0.0a0,!=4.0.0a1-&gt;s3fs-&gt;-r requirements.txt (line 13)) (1.8.2)
-Requirement already satisfied: frozenlist&gt;=1.1.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from aiohttp!=4.0.0a0,!=4.0.0a1-&gt;s3fs-&gt;-r requirements.txt (line 13)) (1.3.3)
-Requirement already satisfied: aiosignal&gt;=1.1.2 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from aiohttp!=4.0.0a0,!=4.0.0a1-&gt;s3fs-&gt;-r requirements.txt (line 13)) (1.3.1)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: soupsieve&gt;1.2 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from beautifulsoup4&gt;=4.8-&gt;astroquery-&gt;-r requirements.txt (line 6)) (2.3.2.post1)
-Requirement already satisfied: Jinja2&gt;=2.9 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from bokeh&gt;=2.0.0-&gt;lightkurve-&gt;-r requirements.txt (line 8)) (3.1.2)
-Requirement already satisfied: tornado&gt;=5.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from bokeh&gt;=2.0.0-&gt;lightkurve-&gt;-r requirements.txt (line 8)) (6.2)
-Requirement already satisfied: xyzservices&gt;=2021.09.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from bokeh&gt;=2.0.0-&gt;lightkurve-&gt;-r requirements.txt (line 8)) (2023.10.1)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: six&gt;=1.9 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from html5lib&gt;=0.999-&gt;astroquery-&gt;-r requirements.txt (line 6)) (1.16.0)
-Requirement already satisfied: webencodings in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from html5lib&gt;=0.999-&gt;astroquery-&gt;-r requirements.txt (line 6)) (0.5.1)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: jaraco.classes in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from keyring&gt;=15.0-&gt;astroquery-&gt;-r requirements.txt (line 6)) (3.2.3)
-Requirement already satisfied: importlib-metadata&gt;=4.11.4 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from keyring&gt;=15.0-&gt;astroquery-&gt;-r requirements.txt (line 6)) (5.1.0)
-Requirement already satisfied: llvmlite&lt;0.42,&gt;=0.41.0dev0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from numba&gt;=0.51.2-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (0.41.1)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: autograd in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from oktopus&gt;=0.1.2-&gt;lightkurve-&gt;-r requirements.txt (line 8)) (1.6.2)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: joblib&gt;=0.11 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from pynndescent&gt;=0.5-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (1.2.0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: idna&lt;4,&gt;=2.5 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from requests-&gt;acstools-&gt;-r requirements.txt (line 4)) (3.4)
-Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from requests-&gt;acstools-&gt;-r requirements.txt (line 4)) (2022.9.24)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: threadpoolctl&gt;=2.0.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from scikit-learn&gt;=0.24.0-&gt;lightkurve-&gt;-r requirements.txt (line 8)) (3.1.0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: future in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from uncertainties&gt;=3.1.4-&gt;lightkurve-&gt;-r requirements.txt (line 8)) (0.18.3)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: pyct&gt;=0.4.4 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from colorcet-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (0.5.0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: dask in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from datashader-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (2023.11.0)
-Requirement already satisfied: multipledispatch in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from datashader-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (1.0.0)
-Requirement already satisfied: param in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from datashader-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (2.0.1)
-Requirement already satisfied: toolz in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from datashader-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (0.12.0)
-Requirement already satisfied: xarray in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from datashader-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (2023.11.0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: pyviz-comms&gt;=0.7.4 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from holoviews-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (3.0.0)
-Requirement already satisfied: panel&gt;=1.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from holoviews-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (1.3.4)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: networkx&gt;=2.8 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from scikit-image-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (2.8.8)
-Requirement already satisfied: imageio&gt;=2.27 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from scikit-image-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (2.33.0)
-Requirement already satisfied: tifffile&gt;=2022.8.12 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from scikit-image-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (2023.9.26)
-Requirement already satisfied: lazy_loader&gt;=0.3 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from scikit-image-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (0.3)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: jmespath&lt;2.0.0,&gt;=0.7.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from botocore&lt;1.27.60,&gt;=1.27.59-&gt;aiobotocore~=2.4.0-&gt;s3fs-&gt;-r requirements.txt (line 13)) (1.0.1)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: zipp&gt;=0.5 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from importlib-metadata&gt;=4.11.4-&gt;keyring&gt;=15.0-&gt;astroquery-&gt;-r requirements.txt (line 6)) (3.11.0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: MarkupSafe&gt;=2.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from Jinja2&gt;=2.9-&gt;bokeh&gt;=2.0.0-&gt;lightkurve-&gt;-r requirements.txt (line 8)) (2.1.1)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: markdown in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from panel&gt;=1.0-&gt;holoviews-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (3.5.1)
-Requirement already satisfied: markdown-it-py in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from panel&gt;=1.0-&gt;holoviews-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (2.2.0)
-Requirement already satisfied: linkify-it-py in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from panel&gt;=1.0-&gt;holoviews-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (1.0.3)
-Requirement already satisfied: mdit-py-plugins in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from panel&gt;=1.0-&gt;holoviews-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (0.3.3)
-Requirement already satisfied: bleach in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from panel&gt;=1.0-&gt;holoviews-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (5.0.1)
-Requirement already satisfied: typing-extensions in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from panel&gt;=1.0-&gt;holoviews-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (4.4.0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: click&gt;=8.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from dask-&gt;datashader-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (8.1.3)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: cloudpickle&gt;=1.5.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from dask-&gt;datashader-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (2.2.1)
-Requirement already satisfied: partd&gt;=1.2.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from dask-&gt;datashader-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (1.4.1)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: more-itertools in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from jaraco.classes-&gt;keyring&gt;=15.0-&gt;astroquery-&gt;-r requirements.txt (line 6)) (9.0.0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: locket in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from partd&gt;=1.2.0-&gt;dask-&gt;datashader-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (1.0.0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: uc-micro-py in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from linkify-it-py-&gt;panel&gt;=1.0-&gt;holoviews-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (1.0.1)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: mdurl~=0.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from markdown-it-py-&gt;panel&gt;=1.0-&gt;holoviews-&gt;umap-learn[plot]-&gt;-r requirements.txt (line 16)) (0.1.2)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">[</span><span class=" -Color -Color-Blue">notice</span><span class=" -Color -Color-Bold">]</span> A new release of pip available: <span class=" -Color -Color-Red">22.3</span> -&gt; <span class=" -Color -Color-Green">23.3.1</span>
-<span class=" -Color -Color-Bold">[</span><span class=" -Color -Color-Blue">notice</span><span class=" -Color -Color-Bold">]</span> To update, run: <span class=" -Color -Color-Green">pip install --upgrade pip</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>#ensure all dependencies are installed
+!pip install -r requirements.txt
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
@@ -995,7 +820,7 @@ Requirement already satisfied: partd&gt;=1.2.0 in /Users/bsipocz/.pyenv/versions
 <p>Functions used to grab the samples from the papers use Astroquery, NED, SIMBAD, Vizier, and in a few cases grab the tables from the html versions of the paper.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#build up the sample</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#build up the sample</span>
 <span class="n">coords</span> <span class="o">=</span><span class="p">[]</span>
 <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -1025,12 +850,6 @@ Requirement already satisfied: partd&gt;=1.2.0 in /Users/bsipocz/.pyenv/versions
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Changing Look AGN- Yang et al:  31
-after duplicates removal, sample size: 30
-</pre></div>
-</div>
-</div>
 </div>
 <section id="build-your-own-sample">
 <h3>1.1 Build your own Sample<a class="headerlink" href="#build-your-own-sample" title="Permalink to this headline">#</a></h3>
@@ -1045,41 +864,7 @@ and then convert that table into a list of <a class="reference external" href="h
 <p>We would suggest to choose from various formats that fully supports the astropy objects, such as SkyCoord, in the so-called Mixin columns. E.g  Enhanced Character-Separated Values or ‘ecsv’ is one such format: https://docs.astropy.org/en/stable/io/ascii/ecsv.html</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sample_table</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;data/input_sample.ecsv&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;ascii.ecsv&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">OSError</span><span class="g g-Whitespace">                                   </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">sample_table</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;data/input_sample.ecsv&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;ascii.ecsv&#39;</span><span class="p">)</span>
-
-<span class="nn">File ~/.pyenv/versions/3.11.0/lib/python3.11/site-packages/astropy/table/connect.py:130,</span> in <span class="ni">TableWrite.__call__</span><span class="nt">(self, serialize_method, *args, **kwargs)</span>
-<span class="g g-Whitespace">    </span><span class="mi">128</span> <span class="n">instance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span>
-<span class="g g-Whitespace">    </span><span class="mi">129</span> <span class="k">with</span> <span class="n">serialize_method_as</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">serialize_method</span><span class="p">):</span>
-<span class="ne">--&gt; </span><span class="mi">130</span>     <span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-<span class="nn">File ~/.pyenv/versions/3.11.0/lib/python3.11/site-packages/astropy/io/registry/core.py:382,</span> in <span class="ni">UnifiedOutputRegistry.write</span><span class="nt">(self, data, format, *args, **kwargs)</span>
-<span class="g g-Whitespace">    </span><span class="mi">377</span>     <span class="nb">format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_valid_format</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">378</span>         <span class="s2">&quot;write&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">fileobj</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span>
-<span class="g g-Whitespace">    </span><span class="mi">379</span>     <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">381</span> <span class="n">writer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_writer</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">382</span> <span class="k">return</span> <span class="n">writer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-<span class="nn">File ~/.pyenv/versions/3.11.0/lib/python3.11/site-packages/astropy/io/ascii/connect.py:28,</span> in <span class="ni">io_write</span><span class="nt">(format, table, filename, **kwargs)</span>
-<span class="g g-Whitespace">     </span><span class="mi">26</span>     <span class="nb">format</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^ascii\.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">27</span>     <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">format</span>
-<span class="ne">---&gt; </span><span class="mi">28</span> <span class="k">return</span> <span class="n">write</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-<span class="nn">File ~/.pyenv/versions/3.11.0/lib/python3.11/site-packages/astropy/io/ascii/ui.py:938,</span> in <span class="ni">write</span><span class="nt">(table, output, format, Writer, fast_writer, overwrite, **kwargs)</span>
-<span class="g g-Whitespace">    </span><span class="mi">936</span>     <span class="n">output</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">937</span>     <span class="k">if</span> <span class="ow">not</span> <span class="n">overwrite</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">lexists</span><span class="p">(</span><span class="n">output</span><span class="p">):</span>
-<span class="ne">--&gt; </span><span class="mi">938</span>         <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="n">NOT_OVERWRITING_MSG</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
-<span class="g g-Whitespace">    </span><span class="mi">940</span> <span class="k">if</span> <span class="n">output</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">941</span>     <span class="n">output</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
-
-<span class="ne">OSError</span>: File data/input_sample.ecsv already exists. If you mean to replace it then use the argument &quot;overwrite=True&quot;.
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sample_table</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;data/input_sample.ecsv&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;ascii.ecsv&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1090,7 +875,7 @@ and then convert that table into a list of <a class="reference external" href="h
 <p>Do only this step from this section when you have a previously generated sample table</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sample_table</span> <span class="o">=</span> <span class="n">Table</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;data/input_sample.ecsv&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;ascii.ecsv&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sample_table</span> <span class="o">=</span> <span class="n">Table</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;data/input_sample.ecsv&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;ascii.ecsv&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1100,7 +885,7 @@ and then convert that table into a list of <a class="reference external" href="h
 <h3>Temporary cell, remove when all functions take a Table sample_table rather than lists<a class="headerlink" href="#temporary-cell-remove-when-all-functions-take-a-table-sample-table-rather-than-lists" title="Permalink to this headline">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">coords_list</span> <span class="o">=</span> <span class="p">[(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;objectid&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;coord&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">sample_table</span><span class="p">]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">coords_list</span> <span class="o">=</span> <span class="p">[(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;objectid&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;coord&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">sample_table</span><span class="p">]</span>
 
 <span class="n">labels_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">sample_table</span><span class="p">]</span>
 </pre></div>
@@ -1116,7 +901,7 @@ and then convert that table into a list of <a class="reference external" href="h
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">### Initialize Pandas MultiIndex data frame for storing the light curves</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">### Initialize Pandas MultiIndex data frame for storing the light curves</span>
 <span class="n">df_lc</span> <span class="o">=</span> <span class="n">MultiIndexDFObject</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -1126,7 +911,7 @@ and then convert that table into a list of <a class="reference external" href="h
 <h3>2.1 HEASARC: FERMI &amp; Beppo SAX<a class="headerlink" href="#heasarc-fermi-beppo-sax" title="Permalink to this headline">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">start_serial</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">start_serial</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
 <span class="c1">#what is the size of error_radius for the fermi catalog that we will accept for our cross-matching?</span>
 <span class="c1">#in degrees; chosen based on histogram of all values for these catalogs</span>
@@ -1151,7 +936,7 @@ and then convert that table into a list of <a class="reference external" href="h
 <h3>2.2 IRSA: ZTF<a class="headerlink" href="#irsa-ztf" title="Permalink to this headline">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># use the nworkers arg to control the amount of parallelization in the data loading step</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># use the nworkers arg to control the amount of parallelization in the data loading step</span>
 <span class="n">df_lc_ZTF</span> <span class="o">=</span> <span class="n">ZTF_get_lightcurve</span><span class="p">(</span><span class="n">coords_list</span><span class="p">,</span> <span class="n">labels_list</span><span class="p">,</span> <span class="n">nworkers</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
 
 <span class="c1">#add the resulting dataframe to all other archives</span>
@@ -1169,7 +954,7 @@ and then convert that table into a list of <a class="reference external" href="h
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bandlist</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;W1&#39;</span><span class="p">,</span> <span class="s1">&#39;W2&#39;</span><span class="p">]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bandlist</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;W1&#39;</span><span class="p">,</span> <span class="s1">&#39;W2&#39;</span><span class="p">]</span>
 <span class="n">WISE_radius</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">arcsec</span>
 
 <span class="n">df_lc_WISE</span> <span class="o">=</span> <span class="n">WISE_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">WISE_radius</span><span class="p">,</span> <span class="n">bandlist</span><span class="p">)</span>
@@ -1186,7 +971,7 @@ and then convert that table into a list of <a class="reference external" href="h
 <p>Query the Pan-STARRS API; based on this <a class="reference external" href="https://ps1images.stsci.edu/ps1_dr2_api.html">example</a></p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Do a panstarrs search</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Do a panstarrs search</span>
 <span class="n">panstarrs_radius</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="mf">3600.0</span>    <span class="c1"># search radius = 1 arcsec</span>
 <span class="n">df_lc_panstarrs</span> <span class="o">=</span> <span class="n">panstarrs_get_lightcurves</span><span class="p">(</span><span class="n">coords_list</span><span class="p">,</span> <span class="n">labels_list</span><span class="p">,</span> <span class="n">panstarrs_radius</span><span class="p">)</span>
 
@@ -1218,7 +1003,7 @@ and then convert that table into a list of <a class="reference external" href="h
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#go get the lightcurves using lightkurve</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#go get the lightcurves using lightkurve</span>
 <span class="n">TESS_radius</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1">#arcseconds</span>
 <span class="n">df_lc_TESS</span> <span class="o">=</span> <span class="n">TESS_Kepler_get_lightcurves</span><span class="p">(</span><span class="n">coords_list</span><span class="p">,</span> <span class="n">labels_list</span><span class="p">,</span> <span class="n">TESS_radius</span><span class="p">)</span>
 
@@ -1237,7 +1022,7 @@ and then convert that table into a list of <a class="reference external" href="h
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Do an HCV search</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Do an HCV search</span>
 <span class="n">HCV_radius</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="mf">3600.0</span> <span class="c1"># radius = 1 arcsec</span>
 <span class="n">df_lc_HCV</span> <span class="o">=</span> <span class="n">HCV_get_lightcurves</span><span class="p">(</span><span class="n">coords_list</span><span class="p">,</span> <span class="n">labels_list</span><span class="p">,</span> <span class="n">HCV_radius</span><span class="p">)</span>
 
@@ -1255,7 +1040,7 @@ and then convert that table into a list of <a class="reference external" href="h
 <h3>3.1 Gaia<a class="headerlink" href="#gaia" title="Permalink to this headline">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gaiastarttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">gaiastarttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 <span class="n">df_lc_gaia</span> <span class="o">=</span> <span class="n">gaia_get_lightcurve</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">3600.</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 <span class="c1">#add the resulting dataframe to all other archives</span>
@@ -1282,7 +1067,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 <p>This time series (time vs. neutrino energy) information is similar to photometry. We choose to storing time and energy in our data structure, leaving error = 0. What is <strong>not</strong> stored in this format is the distance or angular uncertainty of the event direction.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_lc_icecube</span> <span class="o">=</span> <span class="n">icecube_get_lightcurve</span><span class="p">(</span><span class="n">coords_list</span> <span class="p">,</span> <span class="n">labels_list</span> <span class="p">,</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df_lc_icecube</span> <span class="o">=</span> <span class="n">icecube_get_lightcurve</span><span class="p">(</span><span class="n">coords_list</span> <span class="p">,</span> <span class="n">labels_list</span> <span class="p">,</span>
                                    <span class="n">icecube_select_topN</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
                                    <span class="n">verbose</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
 
@@ -1295,7 +1080,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#benchmarking</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#benchmarking</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;total time for serial archive calls is &#39;</span><span class="p">,</span> <span class="n">end_serial</span> <span class="o">-</span> <span class="n">start_serial</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1307,7 +1092,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 <h2>4. Parallel Processing the archive calls<a class="headerlink" href="#parallel-processing-the-archive-calls" title="Permalink to this headline">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># define some variables in case the above serial cells are not run</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># define some variables in case the above serial cells are not run</span>
 <span class="n">max_fermi_error_radius</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>  
 <span class="n">max_sax_error_radius</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
 <span class="n">heasarc_cat</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;FERMIGTRIG&quot;</span><span class="p">,</span> <span class="s2">&quot;SAXGRBMGRB&quot;</span><span class="p">]</span>
@@ -1323,7 +1108,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># number of workers to use in the parallel processing pool</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># number of workers to use in the parallel processing pool</span>
 <span class="c1"># this should equal the total number of archives called</span>
 <span class="n">n_workers</span> <span class="o">=</span> <span class="mi">8</span>
 
@@ -1337,7 +1122,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># the ZTF call can be parallelized internally, separate from the pool launched below.</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># the ZTF call can be parallelized internally, separate from the pool launched below.</span>
 <span class="c1"># these parallelizations are mutually exclusive, so we must turn off the internal parallelization.</span>
 <span class="n">ztf_nworkers</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -1350,7 +1135,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">parallel_starttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parallel_starttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
 <span class="c1"># start a multiprocessing pool and run all the archive queries</span>
 <span class="n">parallel_df_lc</span> <span class="o">=</span> <span class="n">MultiIndexDFObject</span><span class="p">()</span>  <span class="c1"># to collect the results</span>
@@ -1393,7 +1178,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># How long did parallel processing take?</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># How long did parallel processing take?</span>
 <span class="c1"># and look at the results</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;parallel processing took&#39;</span><span class="p">,</span> <span class="n">parallel_endtime</span> <span class="o">-</span> <span class="n">parallel_starttime</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
 <span class="n">parallel_df_lc</span><span class="o">.</span><span class="n">data</span>
@@ -1403,7 +1188,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save the data for future use with ML notebook</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save the data for future use with ML notebook</span>
 <span class="c1">#parquet_savename = &#39;output/df_lc_090723_yang.parquet&#39;</span>
 <span class="c1">#parallel_df_lc.data.to_parquet(parquet_savename)</span>
 <span class="c1">#print(&quot;file saved!&quot;)</span>
@@ -1413,7 +1198,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># could load a previously saved file in order to plot</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># could load a previously saved file in order to plot</span>
 <span class="c1">#parquet_loadname = &#39;output/df_lc_090723_yang.parquet&#39;</span>
 <span class="c1">#parallel_df_lc = MultiIndexDFObject()</span>
 <span class="c1">#parallel_df_lc.data = pd.read_parquet(parquet_loadname)</span>
@@ -1429,7 +1214,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 <p><strong>Note</strong> that in the following, we can either plot the results from <code class="docutils literal notranslate"><span class="pre">df_lc</span></code> (from the serial call) or <code class="docutils literal notranslate"><span class="pre">parallel_df_lc</span></code> (from the parallel call). By default (see next cell) the output of the parallel call is used.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">_</span> <span class="o">=</span> <span class="n">create_figures</span><span class="p">(</span><span class="n">coords_list</span> <span class="o">=</span> <span class="n">coords_list</span> <span class="p">,</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">_</span> <span class="o">=</span> <span class="n">create_figures</span><span class="p">(</span><span class="n">coords_list</span> <span class="o">=</span> <span class="n">coords_list</span> <span class="p">,</span>
                    <span class="n">df_lc</span> <span class="o">=</span> <span class="n">parallel_df_lc</span><span class="p">,</span> <span class="c1"># either df_lc (serial call) or parallel_df_lc (parallel call)</span>
                    <span class="n">show_nbr_figures</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
                    <span class="n">save_output</span> <span class="o">=</span> <span class="kc">True</span> <span class="p">,</span>
@@ -1484,7 +1269,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
   
     By Fornax developers<br/>
   
-      &copy; Copyright 2021-2023, Fornax developers.<br/>
+      &copy; Copyright 2022-2023, Fornax developers.<br/>
 </p>
         </footer>
     </div>

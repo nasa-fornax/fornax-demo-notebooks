@@ -751,954 +751,15 @@ title="Print to PDF"
 MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#ensure all dependencies are installed</span>
-<span class="o">!</span>pip install -r requirements.txt
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: numpy in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 4)) (1.25.0)
-Requirement already satisfied: matplotlib in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 5)) (3.7.1)
-Requirement already satisfied: scikit-image in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 6)) (0.22.0)
-Requirement already satisfied: pandas in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 7)) (2.1.1)
-Requirement already satisfied: seaborn in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 8)) (0.13.0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Collecting statsmodels
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Using cached statsmodels-0.14.0-cp311-cp311-macosx_11_0_arm64.whl (9.4 MB)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Collecting mpld3
-  Using cached mpld3-0.5.9-py3-none-any.whl (201 kB)
-Collecting firefly_client
-  Using cached firefly_client-2.9.0-py2.py3-none-any.whl (28 kB)
-Requirement already satisfied: astropy in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 12)) (6.0.dev560+gf2a40ddd0)
-Requirement already satisfied: astroquery in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 13)) (0.4.7.dev8947)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Collecting nway
-  Using cached nway-4.5.4-py2.py3-none-any.whl (49 kB)
-Requirement already satisfied: boto3 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 15)) (1.26.16)
-Requirement already satisfied: tqdm in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from -r requirements.txt (line 16)) (4.66.1)
-Requirement already satisfied: contourpy&gt;=1.0.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from matplotlib-&gt;-r requirements.txt (line 5)) (1.0.6)
-Requirement already satisfied: cycler&gt;=0.10 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from matplotlib-&gt;-r requirements.txt (line 5)) (0.11.0)
-Requirement already satisfied: fonttools&gt;=4.22.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from matplotlib-&gt;-r requirements.txt (line 5)) (4.38.0)
-Requirement already satisfied: kiwisolver&gt;=1.0.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from matplotlib-&gt;-r requirements.txt (line 5)) (1.4.4)
-Requirement already satisfied: packaging&gt;=20.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from matplotlib-&gt;-r requirements.txt (line 5)) (23.1)
-Requirement already satisfied: pillow&gt;=6.2.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from matplotlib-&gt;-r requirements.txt (line 5)) (9.3.0)
-Requirement already satisfied: pyparsing&gt;=2.3.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from matplotlib-&gt;-r requirements.txt (line 5)) (3.0.9)
-Requirement already satisfied: python-dateutil&gt;=2.7 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from matplotlib-&gt;-r requirements.txt (line 5)) (2.8.2)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: scipy&gt;=1.8 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from scikit-image-&gt;-r requirements.txt (line 6)) (1.12.0.dev0)
-Requirement already satisfied: networkx&gt;=2.8 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from scikit-image-&gt;-r requirements.txt (line 6)) (2.8.8)
-Requirement already satisfied: imageio&gt;=2.27 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from scikit-image-&gt;-r requirements.txt (line 6)) (2.33.0)
-Requirement already satisfied: tifffile&gt;=2022.8.12 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from scikit-image-&gt;-r requirements.txt (line 6)) (2023.9.26)
-Requirement already satisfied: lazy_loader&gt;=0.3 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from scikit-image-&gt;-r requirements.txt (line 6)) (0.3)
-Requirement already satisfied: pytz&gt;=2020.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from pandas-&gt;-r requirements.txt (line 7)) (2022.6)
-Requirement already satisfied: tzdata&gt;=2022.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from pandas-&gt;-r requirements.txt (line 7)) (2023.3)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: patsy&gt;=0.5.2 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from statsmodels-&gt;-r requirements.txt (line 9)) (0.5.4)
-Requirement already satisfied: jinja2 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from mpld3-&gt;-r requirements.txt (line 10)) (3.1.2)
-Requirement already satisfied: websocket-client in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from firefly_client-&gt;-r requirements.txt (line 11)) (1.4.2)
-Requirement already satisfied: requests in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from firefly_client-&gt;-r requirements.txt (line 11)) (2.28.1)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: pyerfa&gt;=2.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from astropy-&gt;-r requirements.txt (line 12)) (2.0.0.1)
-Requirement already satisfied: astropy-iers-data&gt;=0.2023.7.31.0.32.45 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from astropy-&gt;-r requirements.txt (line 12)) (0.2023.9.18.0.29.41)
-Requirement already satisfied: PyYAML&gt;=3.13 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from astropy-&gt;-r requirements.txt (line 12)) (6.0)
-Requirement already satisfied: beautifulsoup4&gt;=4.8 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from astroquery-&gt;-r requirements.txt (line 13)) (4.11.1)
-Requirement already satisfied: html5lib&gt;=0.999 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from astroquery-&gt;-r requirements.txt (line 13)) (1.1)
-Requirement already satisfied: keyring&gt;=15.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from astroquery-&gt;-r requirements.txt (line 13)) (23.11.0)
-Requirement already satisfied: pyvo&gt;=1.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from astroquery-&gt;-r requirements.txt (line 13)) (1.5.dev192+g75bcb73)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Collecting healpy
-  Using cached healpy-1.16.6.tar.gz (4.4 MB)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Installing build dependencies ... ?25l-
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> \
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> |
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> /
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> -
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> \
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> done
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>?25h  Getting requirements to build wheel ... ?25l-
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> \
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> done
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>?25h  Preparing metadata (pyproject.toml) ... ?25l-
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> \
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> done
-?25hRequirement already satisfied: joblib in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from nway-&gt;-r requirements.txt (line 14)) (1.2.0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Collecting botocore&lt;1.30.0,&gt;=1.29.16
-  Using cached botocore-1.29.165-py3-none-any.whl (11.0 MB)
-Requirement already satisfied: jmespath&lt;2.0.0,&gt;=0.7.1 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from boto3-&gt;-r requirements.txt (line 15)) (1.0.1)
-Requirement already satisfied: s3transfer&lt;0.7.0,&gt;=0.6.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from boto3-&gt;-r requirements.txt (line 15)) (0.6.0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: soupsieve&gt;1.2 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from beautifulsoup4&gt;=4.8-&gt;astroquery-&gt;-r requirements.txt (line 13)) (2.3.2.post1)
-Requirement already satisfied: urllib3&lt;1.27,&gt;=1.25.4 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from botocore&lt;1.30.0,&gt;=1.29.16-&gt;boto3-&gt;-r requirements.txt (line 15)) (1.26.13)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: six&gt;=1.9 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from html5lib&gt;=0.999-&gt;astroquery-&gt;-r requirements.txt (line 13)) (1.16.0)
-Requirement already satisfied: webencodings in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from html5lib&gt;=0.999-&gt;astroquery-&gt;-r requirements.txt (line 13)) (0.5.1)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: jaraco.classes in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from keyring&gt;=15.0-&gt;astroquery-&gt;-r requirements.txt (line 13)) (3.2.3)
-Requirement already satisfied: importlib-metadata&gt;=4.11.4 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from keyring&gt;=15.0-&gt;astroquery-&gt;-r requirements.txt (line 13)) (5.1.0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: charset-normalizer&lt;3,&gt;=2 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from requests-&gt;firefly_client-&gt;-r requirements.txt (line 11)) (2.1.1)
-Requirement already satisfied: idna&lt;4,&gt;=2.5 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from requests-&gt;firefly_client-&gt;-r requirements.txt (line 11)) (3.4)
-Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from requests-&gt;firefly_client-&gt;-r requirements.txt (line 11)) (2022.9.24)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: MarkupSafe&gt;=2.0 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from jinja2-&gt;mpld3-&gt;-r requirements.txt (line 10)) (2.1.1)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: zipp&gt;=0.5 in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from importlib-metadata&gt;=4.11.4-&gt;keyring&gt;=15.0-&gt;astroquery-&gt;-r requirements.txt (line 13)) (3.11.0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: more-itertools in /Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages (from jaraco.classes-&gt;keyring&gt;=15.0-&gt;astroquery-&gt;-r requirements.txt (line 13)) (9.0.0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Building wheels for collected packages: healpy
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Building wheel for healpy (pyproject.toml) ... ?25l-
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> \
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> |
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> /
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> -
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> \
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> |
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> /
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> -
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> \
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> |
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> /
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> -
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> \
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> |
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> /
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> -
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> \
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> |
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> /
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> -
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> \
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> |
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> /
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> -
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> \
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> |
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> /
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> -
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> \
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> |
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> /
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> -
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> \
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> |
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> /
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> -
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> \
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> |
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> /
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> -
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> \
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> |
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> /
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> - error
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  <span class=" -Color -Color-Bold -Color-Bold-Red">error</span>: <span class=" -Color -Color-Bold">subprocess-exited-with-error</span>
-  
-  <span class=" -Color -Color-Red">×</span> <span class=" -Color -Color-Green">Building wheel for healpy </span><span class=" -Color -Color-Bold -Color-Bold-Green">(</span><span class=" -Color -Color-Green">pyproject.toml</span><span class=" -Color -Color-Bold -Color-Bold-Green">)</span> did not run successfully.
-  <span class=" -Color -Color-Red">│</span> exit code: <span class=" -Color -Color-Bold -Color-Bold-Cyan">1</span>
-  <span class=" -Color -Color-Red">╰─&gt;</span> <span class=" -Color -Color-Red">[645 lines of output]</span>
-  <span class=" -Color -Color-Red">   </span> /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/_distutils/extension.py:134: UserWarning: Unknown Extension options: &#39;cython_directives&#39;
-  <span class=" -Color -Color-Red">   </span>   warnings.warn(msg)
-  <span class=" -Color -Color-Red">   </span> running bdist_wheel
-  <span class=" -Color -Color-Red">   </span> running build
-  <span class=" -Color -Color-Red">   </span> running build_py
-  <span class=" -Color -Color-Red">   </span> creating build
-  <span class=" -Color -Color-Red">   </span> creating build/lib.macosx-12.5-arm64-cpython-311
-  <span class=" -Color -Color-Red">   </span> creating build/lib.macosx-12.5-arm64-cpython-311/healpy
-  <span class=" -Color -Color-Red">   </span> copying healpy/__init__.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy
-  <span class=" -Color -Color-Red">   </span> copying healpy/pixelfunc.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy
-  <span class=" -Color -Color-Red">   </span> copying healpy/sphtfunc.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy
-  <span class=" -Color -Color-Red">   </span> copying healpy/visufunc.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy
-  <span class=" -Color -Color-Red">   </span> copying healpy/fitsfunc.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy
-  <span class=" -Color -Color-Red">   </span> copying healpy/projector.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy
-  <span class=" -Color -Color-Red">   </span> copying healpy/rotator.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy
-  <span class=" -Color -Color-Red">   </span> copying healpy/projaxes.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy
-  <span class=" -Color -Color-Red">   </span> creating build/lib.macosx-12.5-arm64-cpython-311/healpy/utils
-  <span class=" -Color -Color-Red">   </span> copying healpy/utils/__init__.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/utils
-  <span class=" -Color -Color-Red">   </span> copying healpy/utils/deprecation.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/utils
-  <span class=" -Color -Color-Red">   </span> copying healpy/version.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy
-  <span class=" -Color -Color-Red">   </span> copying healpy/zoomtool.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy
-  <span class=" -Color -Color-Red">   </span> copying healpy/version.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy
-  <span class=" -Color -Color-Red">   </span> copying healpy/cookbook.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy
-  <span class=" -Color -Color-Red">   </span> copying healpy/newvisufunc.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy
-  <span class=" -Color -Color-Red">   </span> creating build/lib.macosx-12.5-arm64-cpython-311/healpy/test
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/test_pixelweights.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/test_deprecation.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/test_query_disc.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/conftest.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/test_cookbook.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/test_visufunc.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/__init__.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/test_line_integral_convolution.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/test_fitsfunc.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/test_rotator.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/test_pixelfunc.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/test_spinfunc.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/test_sphtfunc.py -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test
-  <span class=" -Color -Color-Red">   </span> running egg_info
-  <span class=" -Color -Color-Red">   </span> writing healpy.egg-info/PKG-INFO
-  <span class=" -Color -Color-Red">   </span> writing dependency_links to healpy.egg-info/dependency_links.txt
-  <span class=" -Color -Color-Red">   </span> writing requirements to healpy.egg-info/requires.txt
-  <span class=" -Color -Color-Red">   </span> writing top-level names to healpy.egg-info/top_level.txt
-  <span class=" -Color -Color-Red">   </span> checking if configure script for library &#39;cfitsio&#39; exists
-  <span class=" -Color -Color-Red">   </span> checking if configure script for library &#39;sharp&#39; exists
-  <span class=" -Color -Color-Red">   </span> checking if configure script for library &#39;healpix_cxx&#39; exists
-  <span class=" -Color -Color-Red">   </span> ERROR setuptools_scm._file_finders.git listing git files failed - pretending there aren&#39;t any
-  <span class=" -Color -Color-Red">   </span> reading manifest file &#39;healpy.egg-info/SOURCES.txt&#39;
-  <span class=" -Color -Color-Red">   </span> reading manifest template &#39;MANIFEST.in&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no previously-included files found matching &#39;healpy/test/data/ipython*&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no previously-included files found matching &#39;cfitsio/*pdf&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no previously-included files found matching &#39;cfitsio/*ps&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no previously-included files found matching &#39;cfitsio/*doc&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no previously-included files found matching &#39;cfitsio/*tex&#39;
-  <span class=" -Color -Color-Red">   </span> no previously-included directories found matching &#39;cfitsio/docs&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no previously-included files found matching &#39;*.so&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no previously-included files found matching &#39;*.a&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no previously-included files found matching &#39;.gitignore&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no previously-included files found matching &#39;.gitmodules&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no previously-included files found matching &#39;.travis.yml&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no previously-included files found matching &#39;clean.sh&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no files found matching &#39;ez_setup.py&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no files found matching &#39;run_pykg_config.py&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no files found matching &#39;healpy/src/_line_integral_convolution_lib.h&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no files found matching &#39;healpy/src/_query_disc.cpp&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no files found matching &#39;healpy/src/_sphtools.cpp&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no files found matching &#39;healpy/src/_pixelfunc.cpp&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no files found matching &#39;healpy/src/_masktools.cpp&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no files found matching &#39;healpy/src/_hotspots.cpp&#39;
-  <span class=" -Color -Color-Red">   </span> warning: no files found matching &#39;healpy/src/_line_integral_convolution.cpp&#39;
-  <span class=" -Color -Color-Red">   </span> adding license file &#39;COPYING&#39;
-  <span class=" -Color -Color-Red">   </span> writing manifest file &#39;healpy.egg-info/SOURCES.txt&#39;
-  <span class=" -Color -Color-Red">   </span> /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/command/build_py.py:207: _Warning: Package &#39;healpy.data&#39; is absent from the `packages` configuration.
-  <span class=" -Color -Color-Red">   </span> !!
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         ********************************************************************************
-  <span class=" -Color -Color-Red">   </span>         ############################
-  <span class=" -Color -Color-Red">   </span>         # Package would be ignored #
-  <span class=" -Color -Color-Red">   </span>         ############################
-  <span class=" -Color -Color-Red">   </span>         Python recognizes &#39;healpy.data&#39; as an importable package[^1],
-  <span class=" -Color -Color-Red">   </span>         but it is absent from setuptools&#39; `packages` configuration.
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         This leads to an ambiguous overall configuration. If you want to distribute this
-  <span class=" -Color -Color-Red">   </span>         package, please make sure that &#39;healpy.data&#39; is explicitly added
-  <span class=" -Color -Color-Red">   </span>         to the `packages` configuration field.
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         Alternatively, you can also rely on setuptools&#39; discovery methods
-  <span class=" -Color -Color-Red">   </span>         (for example by using `find_namespace_packages(...)`/`find_namespace:`
-  <span class=" -Color -Color-Red">   </span>         instead of `find_packages(...)`/`find:`).
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         You can read more about &quot;package discovery&quot; on setuptools documentation page:
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         - https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         If you don&#39;t want &#39;healpy.data&#39; to be distributed and are
-  <span class=" -Color -Color-Red">   </span>         already explicitly excluding &#39;healpy.data&#39; via
-  <span class=" -Color -Color-Red">   </span>         `find_namespace_packages(...)/find_namespace` or `find_packages(...)/find`,
-  <span class=" -Color -Color-Red">   </span>         you can try to use `exclude_package_data`, or `include-package-data=False` in
-  <span class=" -Color -Color-Red">   </span>         combination with a more fine grained `package-data` configuration.
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         You can read more about &quot;package data files&quot; on setuptools documentation page:
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         - https://setuptools.pypa.io/en/latest/userguide/datafiles.html
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         [^1]: For Python, any directory (with suitable naming) can be imported,
-  <span class=" -Color -Color-Red">   </span>               even if it does not contain any `.py` files.
-  <span class=" -Color -Color-Red">   </span>               On the other hand, currently there is no concept of package data
-  <span class=" -Color -Color-Red">   </span>               directory, all directories are treated like packages.
-  <span class=" -Color -Color-Red">   </span>         ********************************************************************************
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span> !!
-  <span class=" -Color -Color-Red">   </span>   check.warn(importable)
-  <span class=" -Color -Color-Red">   </span> /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/command/build_py.py:207: _Warning: Package &#39;healpy.src&#39; is absent from the `packages` configuration.
-  <span class=" -Color -Color-Red">   </span> !!
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         ********************************************************************************
-  <span class=" -Color -Color-Red">   </span>         ############################
-  <span class=" -Color -Color-Red">   </span>         # Package would be ignored #
-  <span class=" -Color -Color-Red">   </span>         ############################
-  <span class=" -Color -Color-Red">   </span>         Python recognizes &#39;healpy.src&#39; as an importable package[^1],
-  <span class=" -Color -Color-Red">   </span>         but it is absent from setuptools&#39; `packages` configuration.
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         This leads to an ambiguous overall configuration. If you want to distribute this
-  <span class=" -Color -Color-Red">   </span>         package, please make sure that &#39;healpy.src&#39; is explicitly added
-  <span class=" -Color -Color-Red">   </span>         to the `packages` configuration field.
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         Alternatively, you can also rely on setuptools&#39; discovery methods
-  <span class=" -Color -Color-Red">   </span>         (for example by using `find_namespace_packages(...)`/`find_namespace:`
-  <span class=" -Color -Color-Red">   </span>         instead of `find_packages(...)`/`find:`).
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         You can read more about &quot;package discovery&quot; on setuptools documentation page:
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         - https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         If you don&#39;t want &#39;healpy.src&#39; to be distributed and are
-  <span class=" -Color -Color-Red">   </span>         already explicitly excluding &#39;healpy.src&#39; via
-  <span class=" -Color -Color-Red">   </span>         `find_namespace_packages(...)/find_namespace` or `find_packages(...)/find`,
-  <span class=" -Color -Color-Red">   </span>         you can try to use `exclude_package_data`, or `include-package-data=False` in
-  <span class=" -Color -Color-Red">   </span>         combination with a more fine grained `package-data` configuration.
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         You can read more about &quot;package data files&quot; on setuptools documentation page:
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         - https://setuptools.pypa.io/en/latest/userguide/datafiles.html
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         [^1]: For Python, any directory (with suitable naming) can be imported,
-  <span class=" -Color -Color-Red">   </span>               even if it does not contain any `.py` files.
-  <span class=" -Color -Color-Red">   </span>               On the other hand, currently there is no concept of package data
-  <span class=" -Color -Color-Red">   </span>               directory, all directories are treated like packages.
-  <span class=" -Color -Color-Red">   </span>         ********************************************************************************
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span> !!
-  <span class=" -Color -Color-Red">   </span>   check.warn(importable)
-  <span class=" -Color -Color-Red">   </span> /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/command/build_py.py:207: _Warning: Package &#39;healpy.test.data&#39; is absent from the `packages` configuration.
-  <span class=" -Color -Color-Red">   </span> !!
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         ********************************************************************************
-  <span class=" -Color -Color-Red">   </span>         ############################
-  <span class=" -Color -Color-Red">   </span>         # Package would be ignored #
-  <span class=" -Color -Color-Red">   </span>         ############################
-  <span class=" -Color -Color-Red">   </span>         Python recognizes &#39;healpy.test.data&#39; as an importable package[^1],
-  <span class=" -Color -Color-Red">   </span>         but it is absent from setuptools&#39; `packages` configuration.
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         This leads to an ambiguous overall configuration. If you want to distribute this
-  <span class=" -Color -Color-Red">   </span>         package, please make sure that &#39;healpy.test.data&#39; is explicitly added
-  <span class=" -Color -Color-Red">   </span>         to the `packages` configuration field.
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         Alternatively, you can also rely on setuptools&#39; discovery methods
-  <span class=" -Color -Color-Red">   </span>         (for example by using `find_namespace_packages(...)`/`find_namespace:`
-  <span class=" -Color -Color-Red">   </span>         instead of `find_packages(...)`/`find:`).
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         You can read more about &quot;package discovery&quot; on setuptools documentation page:
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         - https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         If you don&#39;t want &#39;healpy.test.data&#39; to be distributed and are
-  <span class=" -Color -Color-Red">   </span>         already explicitly excluding &#39;healpy.test.data&#39; via
-  <span class=" -Color -Color-Red">   </span>         `find_namespace_packages(...)/find_namespace` or `find_packages(...)/find`,
-  <span class=" -Color -Color-Red">   </span>         you can try to use `exclude_package_data`, or `include-package-data=False` in
-  <span class=" -Color -Color-Red">   </span>         combination with a more fine grained `package-data` configuration.
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         You can read more about &quot;package data files&quot; on setuptools documentation page:
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         - https://setuptools.pypa.io/en/latest/userguide/datafiles.html
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         [^1]: For Python, any directory (with suitable naming) can be imported,
-  <span class=" -Color -Color-Red">   </span>               even if it does not contain any `.py` files.
-  <span class=" -Color -Color-Red">   </span>               On the other hand, currently there is no concept of package data
-  <span class=" -Color -Color-Red">   </span>               directory, all directories are treated like packages.
-  <span class=" -Color -Color-Red">   </span>         ********************************************************************************
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span> !!
-  <span class=" -Color -Color-Red">   </span>   check.warn(importable)
-  <span class=" -Color -Color-Red">   </span> /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/command/build_py.py:207: _Warning: Package &#39;healpy.utils&#39; is absent from the `packages` configuration.
-  <span class=" -Color -Color-Red">   </span> !!
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         ********************************************************************************
-  <span class=" -Color -Color-Red">   </span>         ############################
-  <span class=" -Color -Color-Red">   </span>         # Package would be ignored #
-  <span class=" -Color -Color-Red">   </span>         ############################
-  <span class=" -Color -Color-Red">   </span>         Python recognizes &#39;healpy.utils&#39; as an importable package[^1],
-  <span class=" -Color -Color-Red">   </span>         but it is absent from setuptools&#39; `packages` configuration.
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         This leads to an ambiguous overall configuration. If you want to distribute this
-  <span class=" -Color -Color-Red">   </span>         package, please make sure that &#39;healpy.utils&#39; is explicitly added
-  <span class=" -Color -Color-Red">   </span>         to the `packages` configuration field.
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         Alternatively, you can also rely on setuptools&#39; discovery methods
-  <span class=" -Color -Color-Red">   </span>         (for example by using `find_namespace_packages(...)`/`find_namespace:`
-  <span class=" -Color -Color-Red">   </span>         instead of `find_packages(...)`/`find:`).
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         You can read more about &quot;package discovery&quot; on setuptools documentation page:
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         - https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         If you don&#39;t want &#39;healpy.utils&#39; to be distributed and are
-  <span class=" -Color -Color-Red">   </span>         already explicitly excluding &#39;healpy.utils&#39; via
-  <span class=" -Color -Color-Red">   </span>         `find_namespace_packages(...)/find_namespace` or `find_packages(...)/find`,
-  <span class=" -Color -Color-Red">   </span>         you can try to use `exclude_package_data`, or `include-package-data=False` in
-  <span class=" -Color -Color-Red">   </span>         combination with a more fine grained `package-data` configuration.
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         You can read more about &quot;package data files&quot; on setuptools documentation page:
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         - https://setuptools.pypa.io/en/latest/userguide/datafiles.html
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span>         [^1]: For Python, any directory (with suitable naming) can be imported,
-  <span class=" -Color -Color-Red">   </span>               even if it does not contain any `.py` files.
-  <span class=" -Color -Color-Red">   </span>               On the other hand, currently there is no concept of package data
-  <span class=" -Color -Color-Red">   </span>               directory, all directories are treated like packages.
-  <span class=" -Color -Color-Red">   </span>         ********************************************************************************
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span> !!
-  <span class=" -Color -Color-Red">   </span>   check.warn(importable)
-  <span class=" -Color -Color-Red">   </span> creating build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/pixel_window_n0002.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/pixel_window_n0004.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/pixel_window_n0008.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/pixel_window_n0016.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/pixel_window_n0032.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/pixel_window_n0064.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/pixel_window_n0128.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/pixel_window_n0256.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/pixel_window_n0512.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/pixel_window_n1024.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/pixel_window_n2048.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/pixel_window_n4096.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/pixel_window_n8192.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/planck_cmap.dat -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/planck_log_cmap.dat -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/totcls.dat -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/weight_ring_n00002.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/weight_ring_n00004.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/weight_ring_n00008.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/weight_ring_n00016.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/weight_ring_n00032.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/weight_ring_n00064.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/weight_ring_n00128.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/weight_ring_n00256.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/weight_ring_n00512.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/weight_ring_n01024.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/weight_ring_n02048.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/weight_ring_n04096.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/weight_ring_n08192.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/data/wmap_cmap.dat -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/data
-  <span class=" -Color -Color-Red">   </span> creating build/lib.macosx-12.5-arm64-cpython-311/healpy/src
-  <span class=" -Color -Color-Red">   </span> copying healpy/src/_common.pxd -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/src
-  <span class=" -Color -Color-Red">   </span> copying healpy/src/_healpy_hotspots_lib.cc -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/src
-  <span class=" -Color -Color-Red">   </span> copying healpy/src/_healpy_hotspots_lib.h -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/src
-  <span class=" -Color -Color-Red">   </span> copying healpy/src/_healpy_pixel_lib.cc -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/src
-  <span class=" -Color -Color-Red">   </span> copying healpy/src/_healpy_sph_transform_lib.cc -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/src
-  <span class=" -Color -Color-Red">   </span> copying healpy/src/_healpy_utils.h -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/src
-  <span class=" -Color -Color-Red">   </span> copying healpy/src/_hotspots.pyx -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/src
-  <span class=" -Color -Color-Red">   </span> copying healpy/src/_line_integral_convolution.pyx -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/src
-  <span class=" -Color -Color-Red">   </span> copying healpy/src/_masktools.pyx -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/src
-  <span class=" -Color -Color-Red">   </span> copying healpy/src/_pixelfunc.pyx -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/src
-  <span class=" -Color -Color-Red">   </span> copying healpy/src/_query_disc.pyx -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/src
-  <span class=" -Color -Color-Red">   </span> copying healpy/src/_sphtools.pyx -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/src
-  <span class=" -Color -Color-Red">   </span> creating build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/wmap_band_iqumap_r9_7yr_W_v4_udgraded32.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/gaussbeam_10arcmin_lmax512_pol.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/wmap_band_iqumap_r9_7yr_W_v4_udgraded32_smoothed10deg_fortran.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/cl_wmap_band_iqumap_r9_7yr_WVxspec_v4_udgraded32_II_lmax64_rmmono_3iter.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/wmap_band_iqumap_r9_7yr_V_v4_udgraded32_masked.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/cl_wmap_band_iqumap_r9_7yr_W_v4_udgraded32_II_lmax64_rmmono_3iter.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/cl_wmap_band_iqumap_r9_7yr_W_v4_udgraded32_II_lmax64_rmmono_3iter_nomask.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/wmap_band_iqumap_r9_7yr_W_v4_udgraded32_masked_smoothed10deg_fortran.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/map_synfast_seed12345.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/wmap_band_iqumap_r9_7yr_W_v4_udgraded32_masked.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/cl_wmap_band_iqumap_r9_7yr_W_v4_udgraded32_IQU_lmax64_rmmono_3iter.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/wmap_band_iqumap_r9_7yr_V_v4_udgraded32.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/wmap_temperature_analysis_mask_r9_7yr_v4_udgraded32.fits -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/justq_gal2ecl.fits.gz -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/anafast_3_11_config_test_anafast.par -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/anafast_3_11_config_test_anafast_nomask.par -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/anafast_3_11_config_test_anafast_xspectra.par -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/smoothing_3_11_config_test_smoothing_masked.par -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/smoothing_3_11_config_test_smoothing_notmasked.par -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> copying healpy/test/data/synfast_3_11_config_test_synfast.par -&gt; build/lib.macosx-12.5-arm64-cpython-311/healpy/test/data
-  <span class=" -Color -Color-Red">   </span> running build_clib
-  <span class=" -Color -Color-Red">   </span> checking if library &#39;cfitsio&#39; is installed
-  <span class=" -Color -Color-Red">   </span> found &#39;cfitsio&#39; installed, using it
-  <span class=" -Color -Color-Red">   </span> checking if library &#39;sharp&#39; is installed
-  <span class=" -Color -Color-Red">   </span> Package libsharp was not found in the pkg-config search path.
-  <span class=" -Color -Color-Red">   </span> Perhaps you should add the directory containing `libsharp.pc&#39;
-  <span class=" -Color -Color-Red">   </span> to the PKG_CONFIG_PATH environment variable
-  <span class=" -Color -Color-Red">   </span> No package &#39;libsharp&#39; found
-  <span class=" -Color -Color-Red">   </span> building library &#39;sharp&#39; from source
-  <span class=" -Color -Color-Red">   </span> creating /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311
-  <span class=" -Color -Color-Red">   </span> creating /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311/sharp
-  <span class=" -Color -Color-Red">   </span> /bin/sh /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/healpixsubmodule/src/common_libraries/libsharp/configure --prefix=/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311 --disable-shared --with-pic --disable-maintainer-mode
-  <span class=" -Color -Color-Red">   </span> checking for a BSD-compatible install... /usr/bin/install -c
-  <span class=" -Color -Color-Red">   </span> checking whether build environment is sane... yes
-  <span class=" -Color -Color-Red">   </span> checking for a race-free mkdir -p... /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/healpixsubmodule/src/common_libraries/libsharp/install-sh -c -d
-  <span class=" -Color -Color-Red">   </span> checking for gawk... gawk
-  <span class=" -Color -Color-Red">   </span> checking whether make sets $(MAKE)... yes
-  <span class=" -Color -Color-Red">   </span> checking whether make supports nested variables... yes
-  <span class=" -Color -Color-Red">   </span> checking whether to enable maintainer-specific portions of Makefiles... no
-  <span class=" -Color -Color-Red">   </span> checking whether make supports the include directive... yes (GNU style)
-  <span class=" -Color -Color-Red">   </span> checking for gcc... clang
-  <span class=" -Color -Color-Red">   </span> checking whether the C compiler works... yes
-  <span class=" -Color -Color-Red">   </span> checking for C compiler default output file name... a.out
-  <span class=" -Color -Color-Red">   </span> checking for suffix of executables...
-  <span class=" -Color -Color-Red">   </span> checking whether we are cross compiling... no
-  <span class=" -Color -Color-Red">   </span> checking for suffix of object files... o
-  <span class=" -Color -Color-Red">   </span> checking whether the compiler supports GNU C... yes
-  <span class=" -Color -Color-Red">   </span> checking whether clang accepts -g... yes
-  <span class=" -Color -Color-Red">   </span> checking for clang option to enable C11 features... none needed
-  <span class=" -Color -Color-Red">   </span> checking whether clang understands -c and -o together... rm: conftest.dSYM: is a directory
-  <span class=" -Color -Color-Red">   </span> yes
-  <span class=" -Color -Color-Red">   </span> checking dependency style of clang... gcc3
-  <span class=" -Color -Color-Red">   </span> checking for ar... ar
-  <span class=" -Color -Color-Red">   </span> checking the archiver (ar) interface... ar
-  <span class=" -Color -Color-Red">   </span> checking build system type... aarch64-apple-darwin21.6.0
-  <span class=" -Color -Color-Red">   </span> checking host system type... aarch64-apple-darwin21.6.0
-  <span class=" -Color -Color-Red">   </span> checking how to print strings... printf
-  <span class=" -Color -Color-Red">   </span> checking for a sed that does not truncate output... /opt/homebrew/bin/gsed
-  <span class=" -Color -Color-Red">   </span> checking for grep that handles long lines and -e... /opt/homebrew/bin/ggrep
-  <span class=" -Color -Color-Red">   </span> checking for egrep... /opt/homebrew/bin/ggrep -E
-  <span class=" -Color -Color-Red">   </span> checking for fgrep... /opt/homebrew/bin/ggrep -F
-  <span class=" -Color -Color-Red">   </span> checking for ld used by clang... /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld
-  <span class=" -Color -Color-Red">   </span> checking if the linker (/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld) is GNU ld... no
-  <span class=" -Color -Color-Red">   </span> checking for BSD- or MS-compatible name lister (nm)... /usr/bin/nm -B
-  <span class=" -Color -Color-Red">   </span> checking the name lister (/usr/bin/nm -B) interface... rm: conftest.dSYM: is a directory
-  <span class=" -Color -Color-Red">   </span> BSD nm
-  <span class=" -Color -Color-Red">   </span> checking whether ln -s works... yes
-  <span class=" -Color -Color-Red">   </span> checking the maximum length of command line arguments... 786432
-  <span class=" -Color -Color-Red">   </span> checking how to convert aarch64-apple-darwin21.6.0 file names to aarch64-apple-darwin21.6.0 format... func_convert_file_noop
-  <span class=" -Color -Color-Red">   </span> checking how to convert aarch64-apple-darwin21.6.0 file names to toolchain format... func_convert_file_noop
-  <span class=" -Color -Color-Red">   </span> checking for /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld option to reload object files... -r
-  <span class=" -Color -Color-Red">   </span> checking for file... file
-  <span class=" -Color -Color-Red">   </span> checking for objdump... objdump
-  <span class=" -Color -Color-Red">   </span> checking how to recognize dependent libraries... pass_all
-  <span class=" -Color -Color-Red">   </span> checking for dlltool... no
-  <span class=" -Color -Color-Red">   </span> checking how to associate runtime and link libraries... printf %s\n
-  <span class=" -Color -Color-Red">   </span> checking for archiver @FILE support... rm: conftest.dSYM: is a directory
-  <span class=" -Color -Color-Red">   </span> no
-  <span class=" -Color -Color-Red">   </span> checking for strip... strip
-  <span class=" -Color -Color-Red">   </span> checking for ranlib... ranlib
-  <span class=" -Color -Color-Red">   </span> checking command to parse /usr/bin/nm -B output from clang object... rm: conftest.dSYM: is a directory
-  <span class=" -Color -Color-Red">   </span> ok
-  <span class=" -Color -Color-Red">   </span> checking for sysroot... no
-  <span class=" -Color -Color-Red">   </span> checking for a working dd... /bin/dd
-  <span class=" -Color -Color-Red">   </span> checking how to truncate binary pipes... /bin/dd bs=4096 count=1
-  <span class=" -Color -Color-Red">   </span> checking for mt... no
-  <span class=" -Color -Color-Red">   </span> checking if : is a manifest tool... no
-  <span class=" -Color -Color-Red">   </span> checking for dsymutil... dsymutil
-  <span class=" -Color -Color-Red">   </span> checking for nmedit... nmedit
-  <span class=" -Color -Color-Red">   </span> checking for lipo... lipo
-  <span class=" -Color -Color-Red">   </span> checking for otool... otool
-  <span class=" -Color -Color-Red">   </span> checking for otool64... no
-  <span class=" -Color -Color-Red">   </span> checking for -single_module linker flag... yes
-  <span class=" -Color -Color-Red">   </span> checking for -exported_symbols_list linker flag... yes
-  <span class=" -Color -Color-Red">   </span> checking for -force_load linker flag... yes
-  <span class=" -Color -Color-Red">   </span> checking for stdio.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for stdlib.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for string.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for inttypes.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for stdint.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for strings.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for sys/stat.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for sys/types.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for unistd.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for dlfcn.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for objdir... .libs
-  <span class=" -Color -Color-Red">   </span> checking if clang supports -fno-rtti -fno-exceptions... yes
-  <span class=" -Color -Color-Red">   </span> checking for clang option to produce PIC... -fno-common -DPIC
-  <span class=" -Color -Color-Red">   </span> checking if clang PIC flag -fno-common -DPIC works... yes
-  <span class=" -Color -Color-Red">   </span> checking if clang static flag -static works... no
-  <span class=" -Color -Color-Red">   </span> checking if clang supports -c -o file.o... yes
-  <span class=" -Color -Color-Red">   </span> checking if clang supports -c -o file.o... (cached) yes
-  <span class=" -Color -Color-Red">   </span> checking whether the clang linker (/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld) supports shared libraries... yes
-  <span class=" -Color -Color-Red">   </span> checking dynamic linker characteristics... darwin21.6.0 dyld
-  <span class=" -Color -Color-Red">   </span> checking how to hardcode library paths into programs... immediate
-  <span class=" -Color -Color-Red">   </span> checking whether stripping libraries is possible... yes
-  <span class=" -Color -Color-Red">   </span> checking if libtool supports shared libraries... yes
-  <span class=" -Color -Color-Red">   </span> checking whether to build shared libraries... no
-  <span class=" -Color -Color-Red">   </span> checking whether to build static libraries... yes
-  <span class=" -Color -Color-Red">   </span> checking whether make supports nested variables... (cached) yes
-  <span class=" -Color -Color-Red">   </span> checking for gcc... (cached) clang
-  <span class=" -Color -Color-Red">   </span> checking whether the compiler supports GNU C... (cached) yes
-  <span class=" -Color -Color-Red">   </span> checking whether clang accepts -g... (cached) yes
-  <span class=" -Color -Color-Red">   </span> checking for clang option to enable C11 features... (cached) none needed
-  <span class=" -Color -Color-Red">   </span> checking whether clang understands -c and -o together... (cached) yes
-  <span class=" -Color -Color-Red">   </span> checking dependency style of clang... (cached) gcc3
-  <span class=" -Color -Color-Red">   </span> checking for clang option to support OpenMP... unsupported
-  <span class=" -Color -Color-Red">   </span> checking our pkgconfig libname... libsharp
-  <span class=" -Color -Color-Red">   </span> checking our pkgconfig version... 1.0.0
-  <span class=" -Color -Color-Red">   </span> checking our pkgconfig_libdir... ${libdir}/pkgconfig
-  <span class=" -Color -Color-Red">   </span> expanded our pkgconfig_libdir... /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311/lib/pkgconfig
-  <span class=" -Color -Color-Red">   </span> checking our pkgconfig_libfile... libsharp.pc
-  <span class=" -Color -Color-Red">   </span> checking our package / suffix... libsharp /
-  <span class=" -Color -Color-Red">   </span> checking our pkgconfig description... libsharp Library
-  <span class=" -Color -Color-Red">   </span> checking our pkgconfig requires...
-  <span class=" -Color -Color-Red">   </span> checking our pkgconfig ext libs... -lsharp -lm
-  <span class=" -Color -Color-Red">   </span> checking our pkgconfig cppflags...
-  <span class=" -Color -Color-Red">   </span> checking our pkgconfig ldflags...
-  <span class=" -Color -Color-Red">   </span> noninstalled pkgconfig -L /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311/sharp/.libs
-  <span class=" -Color -Color-Red">   </span> noninstalled pkgconfig -I //private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/healpixsubmodule/src/common_libraries/libsharp
-  <span class=" -Color -Color-Red">   </span> checking that generated files are newer than configure... done
-  <span class=" -Color -Color-Red">   </span> configure: creating ./config.status
-  <span class=" -Color -Color-Red">   </span> config.status: creating Makefile
-  <span class=" -Color -Color-Red">   </span> config.status: executing depfiles commands
-  <span class=" -Color -Color-Red">   </span> config.status: executing libtool commands
-  <span class=" -Color -Color-Red">   </span> config.status: executing libsharp.pc commands
-  <span class=" -Color -Color-Red">   </span> config.status: creating libsharp.pc.in
-  <span class=" -Color -Color-Red">   </span> config.status: creating libsharp.pc
-  <span class=" -Color -Color-Red">   </span> config.status: creating libsharp-uninstalled.pc
-  <span class=" -Color -Color-Red">   </span> config.status: creating libsharp-uninstalled.sh
-  <span class=" -Color -Color-Red">   </span> make install
-  <span class=" -Color -Color-Red">   </span>   CC       c_utils/c_utils.lo
-  <span class=" -Color -Color-Red">   </span>   CC       c_utils/walltime_c.lo
-  <span class=" -Color -Color-Red">   </span>   CC       pocketfft/pocketfft.lo
-  <span class=" -Color -Color-Red">   </span>   CC       libsharp/sharp.lo
-  <span class=" -Color -Color-Red">   </span>   CC       libsharp/sharp_almhelpers.lo
-  <span class=" -Color -Color-Red">   </span>   CC       libsharp/sharp_core.lo
-  <span class=" -Color -Color-Red">   </span>   CC       libsharp/sharp_geomhelpers.lo
-  <span class=" -Color -Color-Red">   </span>   CC       libsharp/sharp_legendre_roots.lo
-  <span class=" -Color -Color-Red">   </span>   CC       libsharp/sharp_ylmgen_c.lo
-  <span class=" -Color -Color-Red">   </span>   CCLD     libsharp.la
-  <span class=" -Color -Color-Red">   </span>  /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/healpixsubmodule/src/common_libraries/libsharp/install-sh -c -d &#39;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311/lib&#39;
-  <span class=" -Color -Color-Red">   </span>  /bin/sh ./libtool   --mode=install /usr/bin/install -c   libsharp.la &#39;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311/lib&#39;
-  <span class=" -Color -Color-Red">   </span> libtool: install: /usr/bin/install -c .libs/libsharp.lai /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311/lib/libsharp.la
-  <span class=" -Color -Color-Red">   </span> libtool: install: /usr/bin/install -c .libs/libsharp.a /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311/lib/libsharp.a
-  <span class=" -Color -Color-Red">   </span> libtool: install: chmod 644 /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311/lib/libsharp.a
-  <span class=" -Color -Color-Red">   </span> libtool: install: ranlib /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311/lib/libsharp.a
-  <span class=" -Color -Color-Red">   </span>  /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/healpixsubmodule/src/common_libraries/libsharp/install-sh -c -d &#39;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311/include&#39;
-  <span class=" -Color -Color-Red">   </span>  /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/healpixsubmodule/src/common_libraries/libsharp/install-sh -c -d &#39;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311/include/libsharp&#39;
-  <span class=" -Color -Color-Red">   </span>  /usr/bin/install -c -m 644  /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/healpixsubmodule/src/common_libraries/libsharp/libsharp/sharp.h /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/healpixsubmodule/src/common_libraries/libsharp/libsharp/sharp_geomhelpers.h /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/healpixsubmodule/src/common_libraries/libsharp/libsharp/sharp_almhelpers.h /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/healpixsubmodule/src/common_libraries/libsharp/libsharp/sharp_cxx.h &#39;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311/include/libsharp&#39;
-  <span class=" -Color -Color-Red">   </span>  /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/healpixsubmodule/src/common_libraries/libsharp/install-sh -c -d &#39;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311/lib/pkgconfig&#39;
-  <span class=" -Color -Color-Red">   </span>  /usr/bin/install -c -m 644 libsharp.pc &#39;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311/lib/pkgconfig&#39;
-  <span class=" -Color -Color-Red">   </span> checking if library &#39;healpix_cxx&#39; is installed
-  <span class=" -Color -Color-Red">   </span> Package healpix_cxx was not found in the pkg-config search path.
-  <span class=" -Color -Color-Red">   </span> Perhaps you should add the directory containing `healpix_cxx.pc&#39;
-  <span class=" -Color -Color-Red">   </span> to the PKG_CONFIG_PATH environment variable
-  <span class=" -Color -Color-Red">   </span> No package &#39;healpix_cxx&#39; found
-  <span class=" -Color -Color-Red">   </span> building library &#39;healpix_cxx&#39; from source
-  <span class=" -Color -Color-Red">   </span> creating /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311/healpix_cxx
-  <span class=" -Color -Color-Red">   </span> /bin/sh /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/healpixsubmodule/src/cxx/configure --prefix=/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311 --disable-shared --with-pic --disable-maintainer-mode
-  <span class=" -Color -Color-Red">   </span> checking for a BSD-compatible install... /usr/bin/install -c
-  <span class=" -Color -Color-Red">   </span> checking whether build environment is sane... yes
-  <span class=" -Color -Color-Red">   </span> checking for a race-free mkdir -p... /private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/healpixsubmodule/src/cxx/install-sh -c -d
-  <span class=" -Color -Color-Red">   </span> checking for gawk... gawk
-  <span class=" -Color -Color-Red">   </span> checking whether make sets $(MAKE)... yes
-  <span class=" -Color -Color-Red">   </span> checking whether make supports nested variables... yes
-  <span class=" -Color -Color-Red">   </span> checking whether to enable maintainer-specific portions of Makefiles... no
-  <span class=" -Color -Color-Red">   </span> checking whether make supports the include directive... yes (GNU style)
-  <span class=" -Color -Color-Red">   </span> checking for gcc... clang
-  <span class=" -Color -Color-Red">   </span> checking whether the C compiler works... yes
-  <span class=" -Color -Color-Red">   </span> checking for C compiler default output file name... a.out
-  <span class=" -Color -Color-Red">   </span> checking for suffix of executables...
-  <span class=" -Color -Color-Red">   </span> checking whether we are cross compiling... no
-  <span class=" -Color -Color-Red">   </span> checking for suffix of object files... o
-  <span class=" -Color -Color-Red">   </span> checking whether the compiler supports GNU C... yes
-  <span class=" -Color -Color-Red">   </span> checking whether clang accepts -g... yes
-  <span class=" -Color -Color-Red">   </span> checking for clang option to enable C11 features... none needed
-  <span class=" -Color -Color-Red">   </span> checking whether clang understands -c and -o together... rm: conftest.dSYM: is a directory
-  <span class=" -Color -Color-Red">   </span> yes
-  <span class=" -Color -Color-Red">   </span> checking dependency style of clang... gcc3
-  <span class=" -Color -Color-Red">   </span> checking for ar... ar
-  <span class=" -Color -Color-Red">   </span> checking the archiver (ar) interface... ar
-  <span class=" -Color -Color-Red">   </span> checking build system type... aarch64-apple-darwin21.6.0
-  <span class=" -Color -Color-Red">   </span> checking host system type... aarch64-apple-darwin21.6.0
-  <span class=" -Color -Color-Red">   </span> checking how to print strings... printf
-  <span class=" -Color -Color-Red">   </span> checking for a sed that does not truncate output... /opt/homebrew/bin/gsed
-  <span class=" -Color -Color-Red">   </span> checking for grep that handles long lines and -e... /opt/homebrew/bin/ggrep
-  <span class=" -Color -Color-Red">   </span> checking for egrep... /opt/homebrew/bin/ggrep -E
-  <span class=" -Color -Color-Red">   </span> checking for fgrep... /opt/homebrew/bin/ggrep -F
-  <span class=" -Color -Color-Red">   </span> checking for ld used by clang... /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld
-  <span class=" -Color -Color-Red">   </span> checking if the linker (/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld) is GNU ld... no
-  <span class=" -Color -Color-Red">   </span> checking for BSD- or MS-compatible name lister (nm)... /usr/bin/nm -B
-  <span class=" -Color -Color-Red">   </span> checking the name lister (/usr/bin/nm -B) interface... rm: conftest.dSYM: is a directory
-  <span class=" -Color -Color-Red">   </span> BSD nm
-  <span class=" -Color -Color-Red">   </span> checking whether ln -s works... yes
-  <span class=" -Color -Color-Red">   </span> checking the maximum length of command line arguments... 786432
-  <span class=" -Color -Color-Red">   </span> checking how to convert aarch64-apple-darwin21.6.0 file names to aarch64-apple-darwin21.6.0 format... func_convert_file_noop
-  <span class=" -Color -Color-Red">   </span> checking how to convert aarch64-apple-darwin21.6.0 file names to toolchain format... func_convert_file_noop
-  <span class=" -Color -Color-Red">   </span> checking for /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld option to reload object files... -r
-  <span class=" -Color -Color-Red">   </span> checking for file... file
-  <span class=" -Color -Color-Red">   </span> checking for objdump... objdump
-  <span class=" -Color -Color-Red">   </span> checking how to recognize dependent libraries... pass_all
-  <span class=" -Color -Color-Red">   </span> checking for dlltool... no
-  <span class=" -Color -Color-Red">   </span> checking how to associate runtime and link libraries... printf %s\n
-  <span class=" -Color -Color-Red">   </span> checking for archiver @FILE support... rm: conftest.dSYM: is a directory
-  <span class=" -Color -Color-Red">   </span> no
-  <span class=" -Color -Color-Red">   </span> checking for strip... strip
-  <span class=" -Color -Color-Red">   </span> checking for ranlib... ranlib
-  <span class=" -Color -Color-Red">   </span> checking command to parse /usr/bin/nm -B output from clang object... rm: conftest.dSYM: is a directory
-  <span class=" -Color -Color-Red">   </span> ok
-  <span class=" -Color -Color-Red">   </span> checking for sysroot... no
-  <span class=" -Color -Color-Red">   </span> checking for a working dd... /bin/dd
-  <span class=" -Color -Color-Red">   </span> checking how to truncate binary pipes... /bin/dd bs=4096 count=1
-  <span class=" -Color -Color-Red">   </span> checking for mt... no
-  <span class=" -Color -Color-Red">   </span> checking if : is a manifest tool... no
-  <span class=" -Color -Color-Red">   </span> checking for dsymutil... dsymutil
-  <span class=" -Color -Color-Red">   </span> checking for nmedit... nmedit
-  <span class=" -Color -Color-Red">   </span> checking for lipo... lipo
-  <span class=" -Color -Color-Red">   </span> checking for otool... otool
-  <span class=" -Color -Color-Red">   </span> checking for otool64... no
-  <span class=" -Color -Color-Red">   </span> checking for -single_module linker flag... yes
-  <span class=" -Color -Color-Red">   </span> checking for -exported_symbols_list linker flag... yes
-  <span class=" -Color -Color-Red">   </span> checking for -force_load linker flag... yes
-  <span class=" -Color -Color-Red">   </span> checking for stdio.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for stdlib.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for string.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for inttypes.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for stdint.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for strings.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for sys/stat.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for sys/types.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for unistd.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for dlfcn.h... yes
-  <span class=" -Color -Color-Red">   </span> checking for objdir... .libs
-  <span class=" -Color -Color-Red">   </span> checking if clang supports -fno-rtti -fno-exceptions... yes
-  <span class=" -Color -Color-Red">   </span> checking for clang option to produce PIC... -fno-common -DPIC
-  <span class=" -Color -Color-Red">   </span> checking if clang PIC flag -fno-common -DPIC works... yes
-  <span class=" -Color -Color-Red">   </span> checking if clang static flag -static works... no
-  <span class=" -Color -Color-Red">   </span> checking if clang supports -c -o file.o... yes
-  <span class=" -Color -Color-Red">   </span> checking if clang supports -c -o file.o... (cached) yes
-  <span class=" -Color -Color-Red">   </span> checking whether the clang linker (/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld) supports shared libraries... yes
-  <span class=" -Color -Color-Red">   </span> checking dynamic linker characteristics... darwin21.6.0 dyld
-  <span class=" -Color -Color-Red">   </span> checking how to hardcode library paths into programs... immediate
-  <span class=" -Color -Color-Red">   </span> checking whether stripping libraries is possible... yes
-  <span class=" -Color -Color-Red">   </span> checking if libtool supports shared libraries... yes
-  <span class=" -Color -Color-Red">   </span> checking whether to build shared libraries... no
-  <span class=" -Color -Color-Red">   </span> checking whether to build static libraries... yes
-  <span class=" -Color -Color-Red">   </span> checking whether make supports nested variables... (cached) yes
-  <span class=" -Color -Color-Red">   </span> checking for gcc... (cached) clang
-  <span class=" -Color -Color-Red">   </span> checking whether the compiler supports GNU C... (cached) yes
-  <span class=" -Color -Color-Red">   </span> checking whether clang accepts -g... (cached) yes
-  <span class=" -Color -Color-Red">   </span> checking for clang option to enable C11 features... (cached) none needed
-  <span class=" -Color -Color-Red">   </span> checking whether clang understands -c and -o together... (cached) yes
-  <span class=" -Color -Color-Red">   </span> checking dependency style of clang... (cached) gcc3
-  <span class=" -Color -Color-Red">   </span> checking for clang option to support OpenMP... unsupported
-  <span class=" -Color -Color-Red">   </span> checking whether the compiler supports GNU C++... yes
-  <span class=" -Color -Color-Red">   </span> checking whether clang++ accepts -g... yes
-  <span class=" -Color -Color-Red">   </span> checking for clang++ option to enable C++11 features... -std=gnu++11
-  <span class=" -Color -Color-Red">   </span> checking dependency style of clang++ -std=gnu++11... gcc3
-  <span class=" -Color -Color-Red">   </span> checking how to run the C++ preprocessor... clang++ -std=gnu++11 -E
-  <span class=" -Color -Color-Red">   </span> checking for ld used by clang++ -std=gnu++11... /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld
-  <span class=" -Color -Color-Red">   </span> checking if the linker (/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld) is GNU ld... no
-  <span class=" -Color -Color-Red">   </span> checking whether the clang++ -std=gnu++11 linker (/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld) supports shared libraries... yes
-  <span class=" -Color -Color-Red">   </span> checking for clang++ -std=gnu++11 option to produce PIC... -fno-common -DPIC
-  <span class=" -Color -Color-Red">   </span> checking if clang++ -std=gnu++11 PIC flag -fno-common -DPIC works... yes
-  <span class=" -Color -Color-Red">   </span> checking if clang++ -std=gnu++11 static flag -static works... no
-  <span class=" -Color -Color-Red">   </span> checking if clang++ -std=gnu++11 supports -c -o file.o... yes
-  <span class=" -Color -Color-Red">   </span> checking if clang++ -std=gnu++11 supports -c -o file.o... (cached) yes
-  <span class=" -Color -Color-Red">   </span> checking whether the clang++ -std=gnu++11 linker (/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld) supports shared libraries... yes
-  <span class=" -Color -Color-Red">   </span> checking dynamic linker characteristics... darwin21.6.0 dyld
-  <span class=" -Color -Color-Red">   </span> checking how to hardcode library paths into programs... immediate
-  <span class=" -Color -Color-Red">   </span> checking whether clang++ -std=gnu++11 supports C++11 features by default... yes
-  <span class=" -Color -Color-Red">   </span> checking for clang++ -std=gnu++11 option to support OpenMP... unsupported
-  <span class=" -Color -Color-Red">   </span> checking pkg-config is at least version 0.9.0... yes
-  <span class=" -Color -Color-Red">   </span> checking for zlib... yes
-  <span class=" -Color -Color-Red">   </span> checking for cfitsio... yes
-  <span class=" -Color -Color-Red">   </span> checking for ffgnrwll in -lcfitsio... no
-  <span class=" -Color -Color-Red">   </span> configure: error: could not find the cfitsio library
-  <span class=" -Color -Color-Red">   </span> Traceback (most recent call last):
-  <span class=" -Color -Color-Red">   </span>   File &quot;&lt;string&gt;&quot;, line 142, in build_library
-  <span class=" -Color -Color-Red">   </span>   File &quot;&lt;string&gt;&quot;, line 107, in pkgconfig
-  <span class=" -Color -Color-Red">   </span>   File &quot;/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/subprocess.py&quot;, line 465, in check_output
-  <span class=" -Color -Color-Red">   </span>     return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
-  <span class=" -Color -Color-Red">   </span>            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  <span class=" -Color -Color-Red">   </span>   File &quot;/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/subprocess.py&quot;, line 569, in run
-  <span class=" -Color -Color-Red">   </span>     raise CalledProcessError(retcode, process.args,
-  <span class=" -Color -Color-Red">   </span> subprocess.CalledProcessError: Command &#39;(&#39;pkg-config&#39;, &#39;--cflags-only-I&#39;, &#39;healpix_cxx &gt;= 3.80.0&#39;)&#39; returned non-zero exit status 1.
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span> During handling of the above exception, another exception occurred:
-  <span class=" -Color -Color-Red">   </span> 
-  <span class=" -Color -Color-Red">   </span> Traceback (most recent call last):
-  <span class=" -Color -Color-Red">   </span>   File &quot;/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages/pip/_vendor/pep517/in_process/_in_process.py&quot;, line 351, in &lt;module&gt;
-  <span class=" -Color -Color-Red">   </span>     main()
-  <span class=" -Color -Color-Red">   </span>   File &quot;/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages/pip/_vendor/pep517/in_process/_in_process.py&quot;, line 333, in main
-  <span class=" -Color -Color-Red">   </span>     json_out[&#39;return_val&#39;] = hook(**hook_input[&#39;kwargs&#39;])
-  <span class=" -Color -Color-Red">   </span>                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  <span class=" -Color -Color-Red">   </span>   File &quot;/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/site-packages/pip/_vendor/pep517/in_process/_in_process.py&quot;, line 249, in build_wheel
-  <span class=" -Color -Color-Red">   </span>     return _build_backend().build_wheel(wheel_directory, config_settings,
-  <span class=" -Color -Color-Red">   </span>            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  <span class=" -Color -Color-Red">   </span>   File &quot;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/build_meta.py&quot;, line 404, in build_wheel
-  <span class=" -Color -Color-Red">   </span>     return self._build_with_temp_dir(
-  <span class=" -Color -Color-Red">   </span>            ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  <span class=" -Color -Color-Red">   </span>   File &quot;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/build_meta.py&quot;, line 389, in _build_with_temp_dir
-  <span class=" -Color -Color-Red">   </span>     self.run_setup()
-  <span class=" -Color -Color-Red">   </span>   File &quot;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/build_meta.py&quot;, line 311, in run_setup
-  <span class=" -Color -Color-Red">   </span>     exec(code, locals())
-  <span class=" -Color -Color-Red">   </span>   File &quot;&lt;string&gt;&quot;, line 320, in &lt;module&gt;
-  <span class=" -Color -Color-Red">   </span>   File &quot;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/__init__.py&quot;, line 103, in setup
-  <span class=" -Color -Color-Red">   </span>     return distutils.core.setup(**attrs)
-  <span class=" -Color -Color-Red">   </span>            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  <span class=" -Color -Color-Red">   </span>   File &quot;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/_distutils/core.py&quot;, line 185, in setup
-  <span class=" -Color -Color-Red">   </span>     return run_commands(dist)
-  <span class=" -Color -Color-Red">   </span>            ^^^^^^^^^^^^^^^^^^
-  <span class=" -Color -Color-Red">   </span>   File &quot;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/_distutils/core.py&quot;, line 201, in run_commands
-  <span class=" -Color -Color-Red">   </span>     dist.run_commands()
-  <span class=" -Color -Color-Red">   </span>   File &quot;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/_distutils/dist.py&quot;, line 969, in run_commands
-  <span class=" -Color -Color-Red">   </span>     self.run_command(cmd)
-  <span class=" -Color -Color-Red">   </span>   File &quot;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/dist.py&quot;, line 963, in run_command
-  <span class=" -Color -Color-Red">   </span>     super().run_command(command)
-  <span class=" -Color -Color-Red">   </span>   File &quot;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/_distutils/dist.py&quot;, line 988, in run_command
-  <span class=" -Color -Color-Red">   </span>     cmd_obj.run()
-  <span class=" -Color -Color-Red">   </span>   File &quot;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/wheel/bdist_wheel.py&quot;, line 368, in run
-  <span class=" -Color -Color-Red">   </span>     self.run_command(&quot;build&quot;)
-  <span class=" -Color -Color-Red">   </span>   File &quot;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/_distutils/cmd.py&quot;, line 318, in run_command
-  <span class=" -Color -Color-Red">   </span>     self.distribution.run_command(command)
-  <span class=" -Color -Color-Red">   </span>   File &quot;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/dist.py&quot;, line 963, in run_command
-  <span class=" -Color -Color-Red">   </span>     super().run_command(command)
-  <span class=" -Color -Color-Red">   </span>   File &quot;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/_distutils/dist.py&quot;, line 988, in run_command
-  <span class=" -Color -Color-Red">   </span>     cmd_obj.run()
-  <span class=" -Color -Color-Red">   </span>   File &quot;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/_distutils/command/build.py&quot;, line 131, in run
-  <span class=" -Color -Color-Red">   </span>     self.run_command(cmd_name)
-  <span class=" -Color -Color-Red">   </span>   File &quot;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/_distutils/cmd.py&quot;, line 318, in run_command
-  <span class=" -Color -Color-Red">   </span>     self.distribution.run_command(command)
-  <span class=" -Color -Color-Red">   </span>   File &quot;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/dist.py&quot;, line 963, in run_command
-  <span class=" -Color -Color-Red">   </span>     super().run_command(command)
-  <span class=" -Color -Color-Red">   </span>   File &quot;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/_distutils/dist.py&quot;, line 988, in run_command
-  <span class=" -Color -Color-Red">   </span>     cmd_obj.run()
-  <span class=" -Color -Color-Red">   </span>   File &quot;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-build-env-g0rlko6_/overlay/lib/python3.11/site-packages/setuptools/_distutils/command/build_clib.py&quot;, line 111, in run
-  <span class=" -Color -Color-Red">   </span>     self.build_libraries(self.libraries)
-  <span class=" -Color -Color-Red">   </span>   File &quot;&lt;string&gt;&quot;, line 272, in build_libraries
-  <span class=" -Color -Color-Red">   </span>   File &quot;&lt;string&gt;&quot;, line 194, in build_library
-  <span class=" -Color -Color-Red">   </span>   File &quot;/Users/bsipocz/.pyenv/versions/3.11.0/lib/python3.11/subprocess.py&quot;, line 413, in check_call
-  <span class=" -Color -Color-Red">   </span>     raise CalledProcessError(retcode, cmd)
-  <span class=" -Color -Color-Red">   </span> subprocess.CalledProcessError: Command &#39;[&#39;/bin/sh&#39;, &#39;/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/healpixsubmodule/src/cxx/configure&#39;, &#39;--prefix=/private/var/folders/9s/070g0pd502q70k3gffpxv8km0000gq/T/pip-install-xvs87ft4/healpy_b62a0cd5b3a3405aae11b091d17cda44/build/temp.macosx-12.5-arm64-cpython-311&#39;, &#39;--disable-shared&#39;, &#39;--with-pic&#39;, &#39;--disable-maintainer-mode&#39;]&#39; returned non-zero exit status 1.
-  <span class=" -Color -Color-Red">   </span> <span class=" -Color -Color-Red">[end of output]</span>
-  
-  <span class=" -Color -Color-Bold -Color-Bold-Magenta">note</span>: This error originates from a subprocess, and is likely not a problem with pip.
-<span class=" -Color -Color-Red">  ERROR: Failed building wheel for healpy</span>
-?25hFailed to build healpy
-<span class=" -Color -Color-Red">ERROR: Could not build wheels for healpy, which is required to install pyproject.toml-based projects</span>
-
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">[</span><span class=" -Color -Color-Blue">notice</span><span class=" -Color -Color-Bold">]</span> A new release of pip available: <span class=" -Color -Color-Red">22.3</span> -&gt; <span class=" -Color -Color-Green">23.3.1</span>
-<span class=" -Color -Color-Bold">[</span><span class=" -Color -Color-Blue">notice</span><span class=" -Color -Color-Bold">]</span> To update, run: <span class=" -Color -Color-Green">pip install --upgrade pip</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>#ensure all dependencies are installed
+!pip install -r requirements.txt
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># standard lib imports</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># standard lib imports</span>
 
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">time</span>
@@ -1752,21 +813,7 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
     <span class="k">pass</span>
 
 
-<span class="o">%</span><span class="k">matplotlib</span> inline
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">ModuleNotFoundError</span><span class="g g-Whitespace">                       </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">19</span>
-<span class="g g-Whitespace">     </span><span class="mi">17</span> <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="g g-Whitespace">     </span><span class="mi">18</span> <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
-<span class="ne">---&gt; </span><span class="mi">19</span> <span class="kn">import</span> <span class="nn">statsmodels</span>
-<span class="g g-Whitespace">     </span><span class="mi">20</span> <span class="kn">import</span> <span class="nn">mpld3</span>
-<span class="g g-Whitespace">     </span><span class="mi">21</span> <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-
-<span class="ne">ModuleNotFoundError</span>: No module named &#39;statsmodels&#39;
+<span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
 </pre></div>
 </div>
 </div>
@@ -1781,13 +828,13 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#pull a COSMOS catalog from IRSA using pyVO</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#pull a COSMOS catalog from IRSA using pyVO</span>
 
 <span class="c1">#what is the central RA and DEC of the desired catalog</span>
 <span class="n">coords</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="s1">&#39;150.01d 2.2d&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s1">&#39;icrs&#39;</span><span class="p">)</span>  <span class="c1">#COSMOS center acording to Simbad</span>
 
 <span class="c1">#how large is the search radius, in arcmin</span>
-<span class="n">radius</span> <span class="o">=</span> <span class="mf">48.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">arcmin</span>
+<span class="n">radius</span> <span class="o">=</span> <span class="mf">48.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">arcmin</span>  
 
 <span class="c1">#specify only select columns to limit the size of the catalog</span>
 <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span>
@@ -1821,7 +868,7 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#an example of how to filter the catalog to</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#an example of how to filter the catalog to </span>
 <span class="c1">#select those rows with either chandra fluxes or Galex NUV fluxes</span>
 
 <span class="c1">#example_table = cosmos_table[(cosmos_table[&#39;flux_chandra_05_10&#39;]&gt; 0) | (cosmos_table[&#39;flux_galex_fuv&#39;] &gt; 0)]</span>
@@ -1838,21 +885,21 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
 <p>Details here may change as the prototype code is being added to the appropriate libraries, as well as the data holding to the appropriate NGAP storage as opposed to IRSA resources.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Temporary solution, remove when the fornax API is added to the image</span>
-<span class="c1"># This relies on the assumption that https://github.com/fornax-navo/fornax-cloud-access-API is being cloned to this environment.</span>
-<span class="c1"># If it&#39;s not, then run a ``git clone https://github.com/fornax-navo/fornax-cloud-access-API --depth=1`` from a terminal at the highest directory root.</span>
-<span class="c1"># You may need to update the fork if you forked it in the past</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span># Temporary solution, remove when the fornax API is added to the image
+# This relies on the assumption that https://github.com/fornax-navo/fornax-cloud-access-API is being cloned to this environment. 
+# If it&#39;s not, then run a ``git clone https://github.com/fornax-navo/fornax-cloud-access-API --depth=1`` from a terminal at the highest directory root.
+# You may need to update the fork if you forked it in the past
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;../../fornax-cloud-access-API&#39;</span><span class="p">):</span>
-    <span class="o">!</span> git clone https://github.com/fornax-navo/fornax-cloud-access-API --depth<span class="o">=</span><span class="m">1</span> ../../fornax-cloud-access-API
+import os
+if not os.path.exists(&#39;../../fornax-cloud-access-API&#39;):
+    ! git clone https://github.com/fornax-navo/fornax-cloud-access-API --depth=1 ../../fornax-cloud-access-API
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;../../fornax-cloud-access-API&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;../../fornax-cloud-access-API&#39;</span><span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">pyvo</span>
 <span class="kn">import</span> <span class="nn">fornax</span>
@@ -1862,7 +909,7 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Getting the COSMOS address from the registry to follow PyVO user case approach. We could hardwire it.</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Getting the COSMOS address from the registry to follow PyVO user case approach. We could hardwire it.</span>
 <span class="n">image_services</span> <span class="o">=</span> <span class="n">pyvo</span><span class="o">.</span><span class="n">regsearch</span><span class="p">(</span><span class="n">servicetype</span><span class="o">=</span><span class="s1">&#39;image&#39;</span><span class="p">)</span>
 <span class="n">irsa_cosmos</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">image_services</span> <span class="k">if</span> <span class="s1">&#39;irsa&#39;</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">ivoid</span> <span class="ow">and</span> <span class="s1">&#39;cosmos&#39;</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">ivoid</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
@@ -1878,7 +925,7 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Temporarily add the cloud_access metadata to the Atlas response.</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Temporarily add the cloud_access metadata to the Atlas response. </span>
 <span class="c1"># This dataset has limited acces, thus &#39;region&#39; should be used instead of &#39;open&#39;.</span>
 <span class="c1"># S3 access should be available from the daskhub and those who has their IRSA token set up.</span>
 
@@ -1893,12 +940,12 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Adding function to download multiple files using the fornax API.</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Adding function to download multiple files using the fornax API. </span>
 <span class="c1"># Requires https://github.com/fornax-navo/fornax-cloud-access-API/pull/4</span>
 <span class="k">def</span> <span class="nf">fornax_download</span><span class="p">(</span><span class="n">data_table</span><span class="p">,</span> <span class="n">data_subdirectory</span><span class="p">,</span> <span class="n">access_url_column</span><span class="o">=</span><span class="s1">&#39;access_url&#39;</span><span class="p">,</span>
                     <span class="n">fname_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">working_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-
+    
     <span class="n">data_directory</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;data/</span><span class="si">{</span><span class="n">data_subdirectory</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">data_directory</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data_table</span><span class="p">:</span>
@@ -1909,7 +956,7 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
         <span class="c1"># on-prem download returns temp file path, s3 download downloads file</span>
         <span class="k">if</span> <span class="n">temp_file</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">temp_file</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;fname&#39;</span><span class="p">]))</span>
-
+        
     <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">working_dir</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1917,7 +964,7 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fornax_download</span><span class="p">(</span><span class="n">spitzer</span><span class="p">,</span> <span class="n">access_url_column</span><span class="o">=</span><span class="s1">&#39;sia_url&#39;</span><span class="p">,</span> <span class="n">fname_filter</span><span class="o">=</span><span class="s1">&#39;go2_sci&#39;</span><span class="p">,</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fornax_download</span><span class="p">(</span><span class="n">spitzer</span><span class="p">,</span> <span class="n">access_url_column</span><span class="o">=</span><span class="s1">&#39;sia_url&#39;</span><span class="p">,</span> <span class="n">fname_filter</span><span class="o">=</span><span class="s1">&#39;go2_sci&#39;</span><span class="p">,</span> 
                 <span class="n">data_subdirectory</span><span class="o">=</span><span class="s1">&#39;IRAC&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1928,7 +975,7 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
 <h3>Use IVOA image search and Fornax download to obtain Galex from the MAST archive<a class="headerlink" href="#use-ivoa-image-search-and-fornax-download-to-obtain-galex-from-the-mast-archive" title="Permalink to this headline">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#the Galex mosaic of COSMOS is broken into 4 seperate images</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#the Galex mosaic of COSMOS is broken into 4 seperate images</span>
 <span class="c1">#need to know which Galex image the targets are nearest to.</span>
 <span class="c1">#make a new column in dataframe which figures this out</span>
 
@@ -1957,7 +1004,7 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 76k with 15arcmin diameter IRAC images</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 76k with 15arcmin diameter IRAC images</span>
 <span class="n">df</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -1965,7 +1012,7 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Assign the endpoint for the MAST Galex Simple Image Access service.</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Assign the endpoint for the MAST Galex Simple Image Access service.</span>
 <span class="n">galex_sia_url</span> <span class="o">=</span> <span class="s1">&#39;https://mast.stsci.edu/portal_vo/Mashup/VoQuery.asmx/SiaV1?MISSION=GALEX&amp;&#39;</span>
 
 <span class="c1"># Query the Galex SIA service using the COSMOS coordinates defined above.</span>
@@ -1988,7 +1035,7 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the GALEX sky background fits files in addition to the mosaics</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the GALEX sky background fits files in addition to the mosaics</span>
 <span class="n">skybg_products</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="n">skybkg_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;COSMOS_0[1-4]-[fn]d-skybg&quot;</span><span class="p">)</span>
 
@@ -2005,7 +1052,7 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#make sure there aren&#39;t any troublesome rows in the catalog</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#make sure there aren&#39;t any troublesome rows in the catalog</span>
 <span class="c1">#are there missing values in any rows?</span>
 <span class="n">df</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
@@ -2017,7 +1064,7 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#out of curiosity how many of each type of source are in this catalog</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#out of curiosity how many of each type of source are in this catalog</span>
 <span class="c1">#Type: 0 = galaxy, 1 = star, 2 = X-ray source, -9 is failure to fit</span>
 <span class="n">df</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 </pre></div>
@@ -2040,7 +1087,7 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># initialize columns in data frame for photometry results</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># initialize columns in data frame for photometry results</span>
 <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ch1flux&quot;</span><span class="p">,</span> <span class="s2">&quot;ch1flux_unc&quot;</span><span class="p">,</span> <span class="s2">&quot;ch2flux&quot;</span><span class="p">,</span> <span class="s2">&quot;ch2flux_unc&quot;</span><span class="p">,</span> <span class="s2">&quot;ch3flux&quot;</span><span class="p">,</span> <span class="s2">&quot;ch3flux_unc&quot;</span><span class="p">,</span>
         <span class="s2">&quot;ch4flux&quot;</span><span class="p">,</span> <span class="s2">&quot;ch4flux_unc&quot;</span><span class="p">,</span> <span class="s2">&quot;ch5flux&quot;</span><span class="p">,</span> <span class="s2">&quot;ch5flux_unc&quot;</span><span class="p">,</span> <span class="s2">&quot;ch6flux&quot;</span><span class="p">,</span> <span class="s2">&quot;ch6flux_unc&quot;</span><span class="p">]</span>
 <span class="n">df</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -2053,7 +1100,7 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># IRAC channels</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># IRAC channels</span>
 
 <span class="n">irac_band_indexes</span> <span class="o">=</span> <span class="p">[</span>
     <span class="mi">0</span><span class="p">,</span>  <span class="c1"># ch1</span>
@@ -2089,7 +1136,7 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># GALEX bands</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># GALEX bands</span>
 
 <span class="n">galex_band_indexes</span> <span class="o">=</span> <span class="p">[</span>
     <span class="mi">4</span><span class="p">,</span>  <span class="c1"># nuv</span>
@@ -2133,7 +1180,7 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Collect input images</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Collect input images</span>
 <span class="c1"># collect the files in pairs: (science image, sky-background image)</span>
 <span class="c1"># if the same file should be used for both, just send it once</span>
 <span class="n">sci_bkg_pairs</span> <span class="o">=</span> <span class="p">[</span>
@@ -2161,15 +1208,15 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
 <h3>3b. Main Function to do the Forced Photometry<a class="headerlink" href="#b-main-function-to-do-the-forced-photometry" title="Permalink to this headline">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calc_instrflux</span><span class="p">(</span><span class="n">band</span><span class="p">,</span> <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">stype</span><span class="p">,</span> <span class="n">ks_flux_aper2</span><span class="p">,</span> <span class="n">img_pair</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calc_instrflux</span><span class="p">(</span><span class="n">band</span><span class="p">,</span> <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">stype</span><span class="p">,</span> <span class="n">ks_flux_aper2</span><span class="p">,</span> <span class="n">img_pair</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate single-band instrumental fluxes and uncertainties at the given ra, dec</span>
+<span class="sd">    Calculate single-band instrumental fluxes and uncertainties at the given ra, dec </span>
 <span class="sd">    using tractor.</span>
 
 <span class="sd">    Parameters:</span>
 <span class="sd">    -----------</span>
 <span class="sd">    band : `Band`</span>
-<span class="sd">        Collection of parameters for a single band.</span>
+<span class="sd">        Collection of parameters for a single band. </span>
 <span class="sd">        A `Band` is a named tuple with the following attributes:</span>
 <span class="sd">            idx : int</span>
 <span class="sd">                Identifier for the band/channel.</span>
@@ -2212,7 +1259,7 @@ Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/bsipocz/.pyenv/ve
     <span class="n">subimage</span><span class="p">,</span> <span class="n">bkgsubimage</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">subimage_wcs</span> <span class="o">=</span> <span class="n">cutout</span><span class="o">.</span><span class="n">extract_pair</span><span class="p">(</span>
         <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">img_pair</span><span class="o">=</span><span class="n">img_pair</span><span class="p">,</span> <span class="n">cutout_width</span><span class="o">=</span><span class="n">band</span><span class="o">.</span><span class="n">cutout_width</span><span class="p">,</span> <span class="n">mosaic_pix_scale</span><span class="o">=</span><span class="n">band</span><span class="o">.</span><span class="n">mosaic_pix_scale</span>
     <span class="p">)</span>
-
+    
     <span class="c1"># find nearby sources that are possible contaminants</span>
     <span class="n">objsrc</span><span class="p">,</span> <span class="n">nconfsrcs</span> <span class="o">=</span> <span class="n">find_nconfsources</span><span class="p">(</span>
         <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">stype</span><span class="p">,</span> <span class="n">ks_flux_aper2</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">band</span><span class="o">.</span><span class="n">cutout_width</span><span class="p">,</span> <span class="n">subimage_wcs</span><span class="p">,</span> <span class="n">df</span>
@@ -2255,7 +1302,7 @@ as well as the increase in speed when going to parallelization</p></li>
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">paramlist</span> <span class="o">=</span> <span class="p">[]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">paramlist</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">itertuples</span><span class="p">():</span>
     <span class="k">for</span> <span class="n">band</span> <span class="ow">in</span> <span class="n">all_bands</span><span class="p">:</span>
         <span class="n">img_pair</span> <span class="o">=</span> <span class="n">lookup_img_pair</span><span class="p">(</span><span class="n">sci_bkg_pairs</span><span class="p">,</span> <span class="n">band</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">galex_image</span><span class="p">)</span>  <span class="c1"># file paths only</span>
@@ -2269,7 +1316,7 @@ as well as the increase in speed when going to parallelization</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#proove we can do this for one object</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#proove we can do this for one object</span>
 <span class="n">calc_instrflux</span><span class="p">(</span><span class="o">*</span><span class="n">paramlist</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span>
 
 <span class="c1">#same thing, different syntax</span>
@@ -2280,7 +1327,7 @@ as well as the increase in speed when going to parallelization</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#wrapper to measure the photometry on a single object, single band</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#wrapper to measure the photometry on a single object, single band</span>
 <span class="k">def</span> <span class="nf">calculate_flux</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate flux.&quot;&quot;&quot;</span>
     <span class="n">val</span> <span class="o">=</span> <span class="n">calc_instrflux</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
@@ -2294,7 +1341,7 @@ as well as the increase in speed when going to parallelization</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># if results were previously saved to this location, load them</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># if results were previously saved to this location, load them</span>
 <span class="c1"># else start a pool of workers to calculate results in parallel, and save them here</span>
 <span class="n">fname</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;output/results_</span><span class="si">{</span><span class="n">radius</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">.npz&#39;</span>
 
@@ -2316,7 +1363,7 @@ as well as the increase in speed when going to parallelization</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## put the results into the main daraframe</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">## put the results into the main daraframe</span>
 <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
     <span class="n">idx</span><span class="p">,(</span><span class="n">ich</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span> <span class="o">=</span> <span class="n">res</span>
     <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;ch</span><span class="si">{</span><span class="n">ich</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">flux&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
@@ -2327,7 +1374,7 @@ as well as the increase in speed when going to parallelization</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Count the number of non-zero ch1 fluxes</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Count the number of non-zero ch1 fluxes</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Parallel calculation: number of ch1 fluxes filled in =&#39;</span><span class="p">,</span>
       <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">ch1flux</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span>
 </pre></div>
@@ -2339,7 +1386,7 @@ as well as the increase in speed when going to parallelization</p></li>
 <h3>3e. Cleanup<a class="headerlink" href="#e-cleanup" title="Permalink to this headline">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#had to call the galex flux columns ch5 and ch6</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#had to call the galex flux columns ch5 and ch6</span>
 <span class="c1">#fix that by renaming them now</span>
 <span class="n">cols</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ch5flux&#39;</span><span class="p">:</span><span class="s1">&#39;nuvflux&#39;</span><span class="p">,</span> <span class="s1">&#39;ch5flux_unc&#39;</span><span class="p">:</span><span class="s1">&#39;nuvflux_unc&#39;</span><span class="p">,</span><span class="s1">&#39;ch6flux&#39;</span><span class="p">:</span><span class="s1">&#39;fuvflux&#39;</span><span class="p">,</span> <span class="s1">&#39;ch6flux_unc&#39;</span><span class="p">:</span><span class="s1">&#39;fuvflux_unc&#39;</span><span class="p">}</span>
 <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span> <span class="n">inplace</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
@@ -2349,7 +1396,7 @@ as well as the increase in speed when going to parallelization</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#When doing a large run of a large area, save the dataframe with the forced photometry</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#When doing a large run of a large area, save the dataframe with the forced photometry </span>
 <span class="c1"># so we don&#39;t have to do the forced photometry every time</span>
 
 <span class="n">df</span><span class="o">.</span><span class="n">to_pickle</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;output/COSMOS_</span><span class="si">{</span><span class="n">radius</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">arcmin.pkl&#39;</span><span class="p">)</span>
@@ -2359,7 +1406,7 @@ as well as the increase in speed when going to parallelization</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#If you are not runnig the forced photometry, then read in the catalog from a previous run</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#If you are not runnig the forced photometry, then read in the catalog from a previous run</span>
 
 <span class="c1">#df = pd.read_pickle(&#39;output/COSMOS_48.0arcmin.pkl&#39;)</span>
 </pre></div>
@@ -2374,7 +1421,7 @@ as well as the increase in speed when going to parallelization</p></li>
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
 <span class="c1">#plot tractor fluxes vs. catalog splash fluxes</span>
 <span class="c1">#should see a straightline with a slope of 1</span>
 
@@ -2383,8 +1430,8 @@ as well as the increase in speed when going to parallelization</p></li>
 <span class="n">fluxmax</span> <span class="o">=</span> <span class="mi">200</span>
 <span class="n">ymax</span> <span class="o">=</span> <span class="mi">100</span>
 <span class="n">xmax</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="c1">#ch1</span>
-<span class="c1">#first shrink the dataframe to only those rows where I have tractor photometry</span>
+<span class="c1">#ch1 </span>
+<span class="c1">#first shrink the dataframe to only those rows where I have tractor photometry </span>
 <span class="n">df_tractor</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">splash_1_flux</span><span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">splash_1_flux</span> <span class="o">&lt;</span> <span class="n">fluxmax</span><span class="p">)]</span> <span class="c1">#200</span>
 <span class="c1">#sns.regplot(data = df_tractor, x = &quot;splash_1_flux&quot;, y = &quot;ch1flux&quot;, ax = ax1, robust = True)</span>
 <span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">df_tractor</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="s2">&quot;splash_1_flux&quot;</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="s2">&quot;ch1flux&quot;</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">ax1</span><span class="p">)</span>
@@ -2402,8 +1449,8 @@ as well as the increase in speed when going to parallelization</p></li>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="p">])</span>
 
 
-<span class="c1">#ch2</span>
-<span class="c1">#first shrink the dataframe to only those rows where I have tractor photometry</span>
+<span class="c1">#ch2 </span>
+<span class="c1">#first shrink the dataframe to only those rows where I have tractor photometry </span>
 <span class="n">df_tractor</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">splash_2_flux</span><span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">splash_2_flux</span> <span class="o">&lt;</span> <span class="n">fluxmax</span><span class="p">)]</span>
 <span class="c1">#sns.regplot(data = df_tractor, x = &quot;splash_2_flux&quot;, y = &quot;ch2flux&quot;, ax = ax2, robust = True)</span>
 <span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">df_tractor</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="s2">&quot;splash_2_flux&quot;</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="s2">&quot;ch2flux&quot;</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">ax2</span><span class="p">)</span>
@@ -2421,7 +1468,7 @@ as well as the increase in speed when going to parallelization</p></li>
 <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="p">])</span>
 
 
-<span class="c1">#ch3</span>
+<span class="c1">#ch3 </span>
 <span class="c1">#first shrink the dataframe to only those rows where I have tractor photometry</span>
 <span class="n">df_tractor</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">splash_3_flux</span><span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">splash_3_flux</span> <span class="o">&lt;</span> <span class="n">fluxmax</span><span class="p">)]</span>
 
@@ -2441,8 +1488,8 @@ as well as the increase in speed when going to parallelization</p></li>
 <span class="n">ax3</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="p">])</span>
 
 
-<span class="c1">#ch4</span>
-<span class="c1">#first shrink the dataframe to only those rows where I have tractor photometry</span>
+<span class="c1">#ch4 </span>
+<span class="c1">#first shrink the dataframe to only those rows where I have tractor photometry </span>
 <span class="n">df_tractor</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">splash_4_flux</span><span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">splash_4_flux</span> <span class="o">&lt;</span> <span class="n">fluxmax</span><span class="p">)]</span>
 
 <span class="c1">#sns.regplot(data = df_tractor, x = &quot;splash_4_flux&quot;, y = &quot;ch4flux&quot;, ax = ax4, robust = True)</span>
@@ -2482,11 +1529,11 @@ as well as the increase in speed when going to parallelization</p></li>
 <h3>4a. Retrieve the HEASARC Catalog<a class="headerlink" href="#a-retrieve-the-heasarc-catalog" title="Permalink to this headline">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#first get an X-ray catalog from Heasarc</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#first get an X-ray catalog from Heasarc</span>
 <span class="n">heasarc</span> <span class="o">=</span> <span class="n">Heasarc</span><span class="p">()</span>
 <span class="n">table</span> <span class="o">=</span> <span class="n">heasarc</span><span class="o">.</span><span class="n">query_mission_list</span><span class="p">()</span>
 <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="s1">&#39;Mission&#39;</span><span class="p">]</span> <span class="o">==</span><span class="s2">&quot;CHANDRA&quot;</span><span class="p">)</span>
-<span class="n">chandratable</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+<span class="n">chandratable</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>  
 
 <span class="c1">#find out which tables exist on Heasarc</span>
 <span class="c1">#chandratable.pprint(max_lines = 200, max_width = 130)</span>
@@ -2505,12 +1552,12 @@ as well as the increase in speed when going to parallelization</p></li>
 <h3>4b. Run <code class="docutils literal notranslate"><span class="pre">nway</span></code> to do the Cross-Match<a class="headerlink" href="#b-run-nway-to-do-the-cross-match" title="Permalink to this headline">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#setup:</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#setup:</span>
 
 <span class="c1">#astropy doesn&#39;t recognize capitalized units</span>
 <span class="c1">#so there might be some warnings here on writing out the file, but we can safely ignore those</span>
 
-<span class="c1">#need to make the chandra catalog into a fits table</span>
+<span class="c1">#need to make the chandra catalog into a fits table </span>
 <span class="c1">#and needs to include area of the survey.</span>
 <span class="n">nway_write_header</span><span class="p">(</span><span class="s1">&#39;data/Chandra/COSMOS_chandra.fits&#39;</span><span class="p">,</span> <span class="s1">&#39;CHANDRA&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">ccosmoscat_rad</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span>
 
@@ -2528,17 +1575,17 @@ as well as the increase in speed when going to parallelization</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># call nway</span>
-<span class="o">!</span>/home/jovyan/.local/bin/nway.py <span class="s1">&#39;data/Chandra/COSMOS_chandra.fits&#39;</span> :ERROR_RADIUS <span class="s1">&#39;data/multiband_phot.fits&#39;</span> <span class="m">0</span>.1 --out<span class="o">=</span>data/Chandra/chandra_multiband.fits --radius <span class="m">15</span> --prior-completeness <span class="m">0</span>.9
-
-<span class="c1">#!/opt/conda/bin/nway.py &#39;data/Chandra/COSMOS_chandra.fits&#39; :ERROR_RADIUS &#39;data/multiband_phot.fits&#39; 0.1 --out=data/Chandra/chandra_multiband.fits --radius 15 --prior-completeness 0.9</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span># call nway
+!/home/jovyan/.local/bin/nway.py &#39;data/Chandra/COSMOS_chandra.fits&#39; :ERROR_RADIUS &#39;data/multiband_phot.fits&#39; 0.1 --out=data/Chandra/chandra_multiband.fits --radius 15 --prior-completeness 0.9
+    
+#!/opt/conda/bin/nway.py &#39;data/Chandra/COSMOS_chandra.fits&#39; :ERROR_RADIUS &#39;data/multiband_phot.fits&#39; 0.1 --out=data/Chandra/chandra_multiband.fits --radius 15 --prior-completeness 0.9
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Clean up the cross match results and merge them back into main pandas dataframe</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Clean up the cross match results and merge them back into main pandas dataframe</span>
 
 <span class="c1">#read in the nway matched catalog</span>
 <span class="n">xmatch</span> <span class="o">=</span> <span class="n">Table</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;data/Chandra/chandra_multiband.fits&#39;</span><span class="p">,</span> <span class="n">hdu</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
@@ -2555,7 +1602,7 @@ as well as the increase in speed when going to parallelization</p></li>
 <span class="c1">#remove all the rows which start with &quot;OPT&quot; because they are duplications of the original catalog</span>
 <span class="n">merged</span> <span class="o">=</span> <span class="n">merged</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="o">~</span><span class="n">merged</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;OPT&#39;</span><span class="p">)]</span>
 
-<span class="c1">#somehow the matching is giving negative fluxes in the band where there is no detection</span>
+<span class="c1">#somehow the matching is giving negative fluxes in the band where there is no detection </span>
 <span class="c1">#if there is a detection in the other band</span>
 <span class="c1">#clean that up to make those negative fluxes = 0</span>
 
@@ -2567,7 +1614,7 @@ as well as the increase in speed when going to parallelization</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#How many Chandra sources are there?</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#How many Chandra sources are there?</span>
 <span class="c1">#How many Galex sources are there?</span>
 
 <span class="c1">#make a new column which is a bool of existing chandra measurements</span>
@@ -2598,12 +1645,12 @@ as well as the increase in speed when going to parallelization</p></li>
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#IRAC color color plots akin to Lacy et al. 2004</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#IRAC color color plots akin to Lacy et al. 2004</span>
 <span class="c1">#overplot galex sources</span>
 <span class="c1">#overplot xray sources</span>
 
-<span class="c1">#first select on 24 micron</span>
-<span class="n">merged_24</span> <span class="o">=</span> <span class="n">merged</span><span class="p">[(</span><span class="n">merged</span><span class="o">.</span><span class="n">flux_24</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">]</span>
+<span class="c1">#first select on 24 micron </span>
+<span class="n">merged_24</span> <span class="o">=</span> <span class="n">merged</span><span class="p">[(</span><span class="n">merged</span><span class="o">.</span><span class="n">flux_24</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">]</span> 
 
 <span class="c1">#negative Galex fluxes are causing problems, so set those to zero</span>
 <span class="n">merged_24</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">merged_24</span><span class="o">.</span><span class="n">fuvflux</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;fuvflux&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
@@ -2647,7 +1694,7 @@ as well as the increase in speed when going to parallelization</p></li>
 <p>This figure shows an IRAC color color plot akin to the seminal work by Lacy et al. 2004.  Points are color coded for those with Galex UV detections and those with Chandra x-ray detections. Note that the different populations are seperating out in this color color space.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#UV IR color color plot akin to Bouquin et al. 2015</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#UV IR color color plot akin to Bouquin et al. 2015</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
 <span class="n">merged</span><span class="p">[</span><span class="s1">&#39;FUV-NUV&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged</span><span class="o">.</span><span class="n">mag_galex_fuv</span> <span class="o">-</span> <span class="n">merged</span><span class="o">.</span><span class="n">mag_galex_nuv</span>
 <span class="n">merged</span><span class="p">[</span><span class="s1">&#39;NUV-3.6&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged</span><span class="o">.</span><span class="n">mag_galex_nuv</span> <span class="o">-</span> <span class="n">merged</span><span class="o">.</span><span class="n">splash_1_mag</span>
@@ -2686,7 +1733,7 @@ as well as the increase in speed when going to parallelization</p></li>
 <span class="c1">#plt.legend([],[], frameon=False)</span>
 
 <span class="c1">#fig.savefig(&quot;output/color_color.png&quot;)</span>
-<span class="c1">#mpld3.display(fig)</span>
+<span class="c1">#mpld3.display(fig)  </span>
 </pre></div>
 </div>
 </div>
@@ -2738,7 +1785,7 @@ as well as the increase in speed when going to parallelization</p></li>
   
     By Fornax developers<br/>
   
-      &copy; Copyright 2021-2023, Fornax developers.<br/>
+      &copy; Copyright 2022-2023, Fornax developers.<br/>
 </p>
         </footer>
     </div>
