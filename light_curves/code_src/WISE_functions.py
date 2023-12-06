@@ -74,8 +74,7 @@ def locate_objects(sample_table, radius):
     locations['pixel'] = healpix_pixel
 
     # locations contains one row per object, and the pixel column stores arrays of ints
-    # "explode" the dataframe into one row per object per pixel
-    # this may create multiple rows per object, the pixel column will now store single ints
+    # "explode" the dataframe into one row per object per pixel. may create multiple rows per object
     return locations.explode(["pixel"], ignore_index=True)
 
 

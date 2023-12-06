@@ -353,6 +353,7 @@ df_empty = pd.DataFrame(zerosingle_list)
 # df_empty has one row per dict. time,flux, and err columns store arrays.
 # "explode" the dataframe to get one row per light curve point. time, flux, and err columns will now store floats.
 df_empty = df_empty.explode(["time", "flux","err"], ignore_index=True)
+df_empty = df_empty.astype({col: "float" for col in ["time", "flux", "err"]})
 
 
 #now put the empty light curves back together with the main light curve dataframe
@@ -438,11 +439,7 @@ df_interpol = pd.DataFrame(lc_interpol)
 # df_lc_interpol has one row per dict in lc_interpol. time and flux columns store arrays.
 # "explode" the dataframe to get one row per light curve point. time and flux columns will now store floats.
 df_lc = df_interpol.explode(["time", "flux","err"], ignore_index=True)
-
-#somehow data types for some columns are coming in as 'object' which sktime doesn't like
-#instead make them numeric data types
-cols = ["time", "flux", "err"]
-df_lc[cols] = df_lc[cols].apply(pd.to_numeric, errors='coerce')
+df_lc = df_lc.astype({col: "float" for col in ["time", "flux", "err"]})
 ```
 
 ### 2.6  Restructure dataframe in format expected by sktime
