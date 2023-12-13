@@ -3,7 +3,7 @@
 # the container supporting the science use case in question.
 acstools
 astropy
-astroquery
+astroquery>=0.4.7.dev0
 hpgeom
 lightkurve
 matplotlib
