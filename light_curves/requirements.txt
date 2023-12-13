@@ -3,7 +3,7 @@
 # the container supporting the science use case in question.
 acstools
 astropy
-astroquery==0.4.7dev8479 # pinned for Gaia bug astropy/astroquery#2844
+astroquery
 hpgeom
 lightkurve
 matplotlib
