@@ -15,3 +15,4 @@ tqdm
 alerce
 umap-learn[plot]
 git+https://github.com/sevamoo/SOMPY
+numba
