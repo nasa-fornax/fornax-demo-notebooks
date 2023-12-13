@@ -1,6 +1,4 @@
-# Fornax Demo Notebooks
-
-## Content
+# Table of Content
 
 ```{toctree}
 ---
@@ -12,14 +10,8 @@ light_curves/README
 ```
 
 
-## Additional resources
+% Including the main repo README as is
 
-```{toctree}
----
-maxdepth: 1
----
+```{include} README.md
 
-README
 ```
-
-## Contributing

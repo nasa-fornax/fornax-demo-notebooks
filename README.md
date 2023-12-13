@@ -1,7 +1,6 @@
-# fornax-demo-notebooks
-Demo notebooks for the Fornax project
+# Demo notebooks for the Fornax project
 
-### Executive Summary
+## Summary
 HEASARC, IRSA, and MAST jointly propose an FY22 project to demonstrate how NASA
 Astrophysics mission data can be accessed from the cloud or on premises through a science
 platform environment. We will center this demonstration on a limited set of data that will be
@@ -17,7 +16,7 @@ we will use these experiences in further consultation with NASA to create an FY2
 building an operational science platform within the NASA Cloud.
 
 
-### Content contributing
+## Content contributing
 
 In this repository we use Jupytext and MyST Markdown Notebooks. You will need ``jupytext`` installed
 for your browser to recognise the markdown files as notebooks (see more about the motivation and
