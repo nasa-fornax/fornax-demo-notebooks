@@ -9,3 +9,5 @@ sktime
 tqdm
 googledrivedownloader
 scikit-learn
+acstools
+requests
