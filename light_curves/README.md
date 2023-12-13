@@ -10,10 +10,7 @@ them with machine learning tools.
 ---
 maxdepth: 1
 ---
-
-multiband_lc
+light_curve_generator
 lc_classifier
-ML_AGNzoo
-
 
 ```
