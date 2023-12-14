@@ -11,51 +11,53 @@ kernelspec:
   name: python3
 ---
 
-# Make multiwavelength light curves using archival data
+# Make Multiwavelength Light Curves Using Archival Data
 ***
 
 ## Learning Goals    
-By the end of this tutorial, you will be able to:
- - automatically load a catalog of sources
- - automatically search NASA and non-NASA resources for light curves
- - store light curves in a Pandas multiindex dataframe
- - plot all light curves on the same plot
+By the end of this tutorial, you will be able to:  
+  &bull; Automatically load a catalog of sources  
+  &bull; Automatically search NASA and non-NASA resources for light curves  
+  &bull; Store light curves in a Pandas multiindex dataframe  
+  &bull; Plot all light curves on the same plot
  
  
-## Introduction:
- - A user has a sample of interesting targets for which they would like to see a plot of available archival light curves.  We start with a small set of changing look AGN from Yang et al., 2018, which are automatically downloaded. Changing look AGN are cases where the broad emission lines appear or disappear (and not just that the flux is variable). 
- - We model light curve plots after van Velzen et al. 2021.  We search through a curated list of time-domain NASA holdings as well as non-NASA sources.  HEASARC catalogs used are Fermi and Beppo-Sax, IRSA catalogs used are ZTF and WISE, and MAST catalogs used are Pan-Starrs, TESS, Kepler, and K2.  Non-NASA sources are Gaia and IceCube. This list is generalized enough to include many types of targets to make this notebook interesting for many types of science.  All of these time-domain archives are searched in an automated fashion using astroquery or APIs.
- - Light curve data storage is a tricky problem.  Currently we are using a multi-index Pandas dataframe, as the best existing choice for right now.  One downside is that we need to manually track the units of flux and time instead of relying on an astropy storage scheme which would be able to do some of the units worrying for us (even astropy can't do all magnitude to flux conversions).  Astropy does not currently have a good option for multi-band light curve storage.
- - We intend to explore a ML classifier for these changing look AGN light curves.
+## Introduction:  
+ &bull; A user has a sample of interesting targets for which they would like to see a plot of available archival light curves.  We start with a small set of changing look AGN from Yang et al., 2018, which are automatically downloaded. Changing look AGN are cases where the broad emission lines appear or disappear (and not just that the flux is variable). 
+ 
+ &bull; We model light curve plots after van Velzen et al. 2021.  We search through a curated list of time-domain NASA holdings as well as non-NASA sources.  HEASARC catalogs used are Fermi and Beppo-Sax, IRSA catalogs used are ZTF and WISE, and MAST catalogs used are Pan-Starrs, TESS, Kepler, and K2.  Non-NASA sources are Gaia and IceCube. This list is generalized enough to include many types of targets to make this notebook interesting for many types of science.  All of these time-domain archives are searched in an automated fashion using astroquery or APIs.
+ 
+ &bull; Light curve data storage is a tricky problem.  Currently we are using a multi-index Pandas dataframe, as the best existing choice for right now.  One downside is that we need to manually track the units of flux and time instead of relying on an astropy storage scheme which would be able to do some of the units worrying for us (even astropy can't do all magnitude to flux conversions).  Astropy does not currently have a good option for multi-band light curve storage.
+ 
+ &bull; We intend to explore a ML classifier for these changing look AGN light curves.
  
 ## Input:
- - choose from a list of known changing look AGN from the literature
- 
-  OR - 
- - input your own sample
+ &bull; choose from a list of known changing look AGN from the literature  
+  OR -    
+ &bull; input your own sample
 
 ## Output:
- - an archival optical + IR + neutrino light curve
+ &bull; an archival optical + IR + neutrino light curve  
  
 ## Non-standard Imports:
-- `acstools` to work with HST magnitude to flux conversion
-- `astropy` to work with coordinates/units and data structures
-- `astroquery` to interface with archives APIs
-- `hpgeom` to locate coordinates in HEALPix space
-- `lightkurve` to search TESSS, Kepler, and K2 archives
-- `pyarrow` to work with Parquet files for WISE and ZTF
-- `s3fs` to connect to AWS S3 buckets
-- `urllib` to handle archive searches with website interface
+ &bull; `acstools` to work with HST magnitude to flux conversion  
+ &bull; `astropy` to work with coordinates/units and data structures  
+ &bull; `astroquery` to interface with archives APIs  
+ &bull; `hpgeom` to locate coordinates in HEALPix space  
+ &bull; `lightkurve` to search TESSS, Kepler, and K2 archives  
+ &bull; `pyarrow` to work with Parquet files for WISE and ZTF  
+ &bull; `s3fs` to connect to AWS S3 buckets  
+ &bull; `urllib` to handle archive searches with website interface
 
 ## Authors:
 Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, Dave Shupe
 
 ## Acknowledgements:
-Suvi Gezari, Antara Basu-zych,Stephanie LaMassa\
+Suvi Gezari, Antara Basu-zych, Stephanie LaMassa  
 MAST, HEASARC, & IRSA Fornax teams
 
 ```{code-cell} ipython3
-#ensure all dependencies are installed
+# Ensure all dependencies are installed
 !pip install -r requirements.txt
 ```
 
@@ -89,19 +91,18 @@ from WISE_functions import WISE_get_lightcurves
 from ztf_functions import ZTF_get_lightcurve
 ```
 
-## 1. Define the Sample
- We define here a "gold" sample of spectroscopically confirmed changing look AGN and quasars. This sample includes both objects which change from type 1 to type 2 and also the opposite.  Future studies may want to treat these as seperate objects or seperate QSOs from AGN.
+## 1. Define the sample
+We define here a "gold" sample of spectroscopically confirmed changing look AGN and quasars. This sample includes both objects which change from type 1 to type 2 and also the opposite.  Future studies may want to treat these as seperate objects or seperate QSOs from AGN.  Bibcodes for the samples used are listed next to their functions for reference.  
  
- Bibcodes for the samples used are listed next to their functions for reference.  
- 
- Functions used to grab the samples from the papers use Astroquery, NED, SIMBAD, Vizier, and in a few cases grab the tables from the html versions of the paper.
+Significant work went into the functions which grab the samples from the papers.  They use Astroquery, NED, SIMBAD, Vizier, and in a few cases grab the tables from the html versions of the paper.  There are trickeries involved in accessing coordinates from tables in the literature. Not every literature table is stored in its entirety in all of these resrources, so be sure to check that your chosen method is actually getting the information that you see in the paper table.  Warning: You will get false results if using NED or SIMBAD on a table that has more rows than are printed in the journal.
 
 ```{code-cell} ipython3
-#build up the sample
+# Build up the sample
+# Initially set up lists to hold the coordinates and their reference paper name as a label
 coords =[]
 labels = []
 
-#choose your own adventure:
+# Choose your own adventure:
 
 #get_lamassa_sample(coords, labels)  #2015ApJ...800..144L
 #get_macleod16_sample(coords, labels) #2016MNRAS.457..389M
@@ -114,26 +115,27 @@ labels = []
 #get_hon_sample(coords, labels)  #2022MNRAS.511...54H
 get_yang_sample(coords, labels)   #2018ApJ...862..109Y
 
-#now get some "normal" QSOs for use in the classifier
-#there are ~500K of these, so choose the number based on
-#a balance between speed of running the light curves and whatever 
-#the ML algorithms would like to have
+# Get some "normal" QSOs 
+# there are ~500K of these, so choose the number based on
+# a balance between speed of running the light curves and whatever 
+# the ML algorithms would like to have
 
 #num_normal_QSO = 5000
 #get_SDSS_sample(coords, labels, num_normal_QSO)
 
-# remove duplicates and attach an objectid to the coords
+# Remove duplicates, attach an objectid to the coords,
+# convert to astropy table to keep all relevant info together
 sample_table = clean_sample(coords, labels)
 ```
 
-### 1.1 Build your own Sample
+### 1.1 Build your own sample
 
 To build your own sample, you can follow the examples of functions above to grab coordinates from your favorite literature resource, 
 
 or
 
 You can use [astropy's read](https://docs.astropy.org/en/stable/io/ascii/read.html) function to read in an input table
-and then convert that table into a list of [skycoords](https://docs.astropy.org/en/stable/api/astropy.coordinates.SkyCoord.html)
+to an [astropy table](https://docs.astropy.org/en/stable/table/)
 
 +++
 
@@ -141,7 +143,7 @@ and then convert that table into a list of [skycoords](https://docs.astropy.org/
 
 At this point you may wish to write out your sample to disk and reuse that in future work sessions, instead of creating it from scratch again.
 
-We would suggest to choose from various formats that fully supports the astropy objects, such as SkyCoord, in the so-called Mixin columns. E.g  Enhanced Character-Separated Values or 'ecsv' is one such format: https://docs.astropy.org/en/stable/io/ascii/ecsv.html
+For the format of the save file, we would suggest to choose from various formats that fully support astropy objects(eg., SkyCoord).  One example that works is Enhanced Character-Separated Values or ['ecsv'](https://docs.astropy.org/en/stable/io/ascii/ecsv.html)
 
 ```{code-cell} ipython3
 sample_table.write('data/input_sample.ecsv', format='ascii.ecsv', overwrite = True)
@@ -155,109 +157,131 @@ Do only this step from this section when you have a previously generated sample 
 sample_table = Table.read('data/input_sample.ecsv', format='ascii.ecsv')
 ```
 
-## 2. Find light curves for these targets in NASA catalogs
-  - We search a curated list of time-domain catalogs from all NASA astrophysics archives
+### 1.4 Initialize data structure to hold the light curves
 
 ```{code-cell} ipython3
-### Initialize Pandas MultiIndex data frame for storing the light curves
+# We wrote our own class for a Pandas MultiIndex [DataFrame](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html) for storing the light curves
+# This class helps simplify coding of common uses for the DataFrame.
 df_lc = MultiIndexDFObject()
 ```
 
+## 2. Find light curves for these targets in NASA catalogs
+We search a curated list of time-domain catalogs from NASA astrophysics archives.  Because each archive is different, and in many cases each catalog is different, each function to access a catalog is necesarily specialized to the location and format of that particular catalog.
+
++++
+
 ### 2.1 HEASARC: FERMI & Beppo SAX
+The function to retrieve HEASARC data accesses the HEASARC archive using a pyvo search with a table upload.  This is the fastest way to access data from HEASARC catalogs at scale.  
+
+While these aren't strictly light curves, we would like to track if there are gamma rays detected in advance of any change in the CLAGN light curves. We store these gamma ray detections as single datapoints.  Because gamma ray detections typically have very large error radii, our current technique is to keep matches in the catalogs within some manually selected error radius, currently defaulting to 1 degree for Fermi and 3 degrees for Beppo SAX.  These values are chosen based on a histogram of all values for those catalogs.
 
 ```{code-cell} ipython3
-start_serial = time.time()
+start_serial = time.time()  #keep track of all serial archive calls to compare later with parallel archive call time
+heasarcstarttime = time.time()
 
-#what is the size of error_radius for the fermi catalog that we will accept for our cross-matching?
-#in degrees; chosen based on histogram of all values for these catalogs
+# What is the size of error_radius for the catalogs that we will accept for our cross-matching?
+# in degrees; chosen based on histogram of all values for these catalogs
 max_fermi_error_radius = str(1.0)  
 max_sax_error_radius = str(3.0)
 
-#list of missions to query and their corresponding error radii
+# List of missions to query and their corresponding error radii
 heasarc_cat = ["FERMIGTRIG", "SAXGRBMGRB"]
 error_radius = [max_fermi_error_radius , max_sax_error_radius]
 
-
-#go out and find all light curves in the above curated list which match our target positions
+# get heasarc light curves in the above curated list of missions 
 df_lc_fermi = HEASARC_get_lightcurves(sample_table, heasarc_cat, error_radius)
+
+#add the resulting dataframe to all other archives
 df_lc.append(df_lc_fermi)
-    
+
+print('heasarc search took:', time.time() - heasarcstarttime, 's')
 ```
 
 ### 2.2 IRSA: ZTF
+The function to retrieve ZTF light curves accesses a parquet version of the ZTF catalog stored in the cloud using pyarrow.  This is the fastest way to access the ZTF catalog at scale.  The ZTF [API](https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html) is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself.
 
 ```{code-cell} ipython3
+ZTFstarttime = time.time()
+
+#get ZTF lightcurves
 # use the nworkers arg to control the amount of parallelization in the data loading step
 df_lc_ZTF = ZTF_get_lightcurve(sample_table, nworkers=6)
 
 #add the resulting dataframe to all other archives
 df_lc.append(df_lc_ZTF)
+
+print('ZTF search took:', time.time() - ZTFstarttime, 's')
 ```
 
 ### 2.3 IRSA: WISE
 
-- use the unWISE light curves catalog which ties together all WISE & NEOWISE 2010 - 2020 epochs.  Specifically it combined all observations at a single epoch to achieve deeper mag limits than individual observations alone.
-- [Meisner et al., 2023, 2023AJ....165...36M](https://ui.adsabs.harvard.edu/abs/2023AJ....165...36M/abstract)
+We use the unWISE light curves catalog ([Meisner et al., 2023](https://ui.adsabs.harvard.edu/abs/2023AJ....165...36M/abstract)) which ties together all WISE & NEOWISE 2010 - 2020 epochs.  Specifically it combines all observations at a single epoch to achieve deeper mag limits than individual observations alone.
+
+The function to retrieve WISE light curves accesses an IRSA generated version of the catalog in parquet format being stored in the AWS cloud [Open Data Repository](https://registry.opendata.aws/collab/nasa/)
 
 ```{code-cell} ipython3
-bandlist = ['W1', 'W2']
-WISE_radius = 1.0 * u.arcsec
+WISEstarttime = time.time()
 
+bandlist = ['W1', 'W2']  #list of the WISE band names
+WISE_radius = 1.0 * u.arcsec
+#get WISE light curves
 df_lc_WISE = WISE_get_lightcurves(sample_table, WISE_radius, bandlist)
 
 #add the resulting dataframe to all other archives
 df_lc.append(df_lc_WISE)
+
+print('WISE search took:', time.time() - WISEstarttime, 's')
 ```
 
 ### 2.4 MAST: Pan-STARRS
-Query the Pan-STARRS API; based on this [example](https://ps1images.stsci.edu/ps1_dr2_api.html)
+The function to retrieve lightcurves from Pan-STARRS currently uses their API; based on this [example](https://ps1images.stsci.edu/ps1_dr2_api.html).  This search is not efficient at scale and we expect it to be replaced in the future.  
 
 ```{code-cell} ipython3
-#Do a panstarrs search
-panstarrs_radius = 1.0/3600.0    # search radius = 1 arcsec
-df_lc_panstarrs = Panstarrs_get_lightcurves(sample_table, panstarrs_radius)
+panstarrsstarttime = time.time()
+
+panstarrs_search_radius = 1.0/3600.0    # search radius = 1 arcsec
+#get panstarrs light curves
+df_lc_panstarrs = Panstarrs_get_lightcurves(sample_table, panstarrs_search_radius)
 
 #add the resulting dataframe to all other archives
 df_lc.append(df_lc_panstarrs)
+
+print('Panstarrs search took:', time.time() - panstarrsstarttime, 's')
 ```
 
-### 2.5 MAST: Asteroid Terrestrial-impact Last Alert System (ATLAS)
- - All-sky stellar reference catalog 
- -  MAST hosts this catalog but there are three barriers to using it
-     1. it is unclear if the MAST [holdings]( https://archive.stsci.edu/hlsp/atlas-refcat2#section-a737bc3e-2d56-4827-9ab4-838fbf8d67c1) include the individual epoch photometry and 
-     2. it is only accessible with casjobs, not through python notebooks.  
-     3. magnitude range (g, r, i) < 19mag makes it not relevant for this use case
- 
-One path forward if this catalog becomes scientifically interesting is to put in a MAST helpdesk ticket to see if 1) they do have the light curves, and 2) they could switch the catalog to a searchable with python version.  There are some ways of [accessing casjobs with python](<https://github.com/spacetelescope/notebooks/blob/master/notebooks/MAST/HSC/HCV_CASJOBS/HCV_casjobs_demo.ipynb), but not this particular catalog.
-
-+++
-
-### 2.6 MAST: TESS, Kepler and K2
- - use [`lightKurve`](https://docs.lightkurve.org/index.html) to search all 3 missions and download light curves
+### 2.5 MAST: TESS, Kepler and K2
+The function to retrieve lightcurves from these three missions currently uses the open source package [`lightKurve`](https://docs.lightkurve.org/index.html).  This search is not efficient at scale and we expect it to be replaced in the future.  
 
 ```{code-cell} ipython3
-#go get the lightcurves using lightkurve
-TESS_radius = 1.0  #arcseconds
-df_lc_TESS = TESS_Kepler_get_lightcurves(sample_table, TESS_radius)
+lightkurvestarttime = time.time()
+
+TESS_search_radius = 1.0  #arcseconds
+#get TESS/Kepler/K2 light curves
+df_lc_TESS = TESS_Kepler_get_lightcurves(sample_table, TESS_search_radius)
 
 #add the resulting dataframe to all other archives
 df_lc.append(df_lc_TESS)
 
-#LightKurve will return an "Error" when it doesn't find a match for a target
-#These are not real errors and can be safely ignored.
+print('TESS/Kepler/K2 search took:', time.time() - lightkurvestarttime, 's')
+
+# LightKurve will return an "Error" when it doesn't find a match for a target
+# These are not real errors and can be safely ignored.
 ```
 
-### 2.7 MAST: HCV
- - [hubble catalog of variables](https://archive.stsci.edu/hlsp/hcv) 
- - using [this notebook](https://archive.stsci.edu/hst/hsc/help/HCV/HCV_API_demo.html) as a reference to search and download light curves via API
+### 2.6 MAST: Hubble Catalog of Variables ([HCV](https://archive.stsci.edu/hlsp/hcv))
+The function to retrieve lightcurves from HCV currently uses their API; based on this [example](https://archive.stsci.edu/hst/hsc/help/HCV/HCV_API_demo.html). This search is not efficient at scale and we expect it to be replaced in the future.
 
 ```{code-cell} ipython3
-#Do an HCV search
+HCVstarttime = time.time()
+
 HCV_radius = 1.0/3600.0 # radius = 1 arcsec
+#get HCV light curves
 df_lc_HCV = HCV_get_lightcurves(sample_table, HCV_radius)
 
 #add the resulting dataframe to all other archives
 df_lc.append(df_lc_HCV)
+
+print('HCV search took:', time.time() - HCVstarttime, 's')
 ```
 
 ## 3. Find light curves for these targets in relevant, non-NASA catalogs
@@ -265,9 +289,12 @@ df_lc.append(df_lc_HCV)
 +++
 
 ### 3.1 Gaia
+The function to retrieve Gaia light curves accesses the Gaia DR3 "source lite" catalog using an astroquery search with a table upload to do the join with the Gaia phtometry. This is currently the fastest way to access light curves from Gaia at scale.
 
 ```{code-cell} ipython3
 gaiastarttime = time.time()
+
+#get Gaia light curves
 df_lc_gaia = Gaia_get_lightcurve(sample_table, 1/3600., 0)
 
 #add the resulting dataframe to all other archives
@@ -276,13 +303,7 @@ df_lc.append(df_lc_gaia)
 print('gaia search took:', time.time() - gaiastarttime, 's')
 ```
 
-### 3.2 ASAS-SN (all sky automated survey for supernovae) 
-- Has a [website](https://asas-sn.osu.edu/photometry) that can be manually searched; but no API which would allow automatic searches from within this notebook
-- Magnitude range of this survey is not consistent with the magnitude range of our CLAGN.  If this catalog becomes scientifically interesting, one path forward would be to ask ASAS-SN team about implementing an API
-
-+++
-
-### 3.3 Icecube Neutrinos
+### 3.3 Icecube neutrinos
 
 There are several [catalogs](https://icecube.wisc.edu/data-releases/2021/01/all-sky-point-source-icecube-data-years-2008-2018) (basically one for each year of IceCube data from 2008 - 2018). The following code creates a large catalog by combining
 all the yearly catalogs.
@@ -291,11 +312,16 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 This time series (time vs. neutrino energy) information is similar to photometry. We choose to storing time and energy in our data structure, leaving error = 0. What is __not__ stored in this format is the distance or angular uncertainty of the event direction.
 
 ```{code-cell} ipython3
+icecubestarttime = time.time()
+
+#get icecube datapoints
 df_lc_icecube = Icecube_get_lightcurve(sample_table ,
                                    icecube_select_topN = 3)
 
 #add the resulting dataframe to all other archives
 df_lc.append(df_lc_icecube)
+
+print('icecube search took:', time.time() - icecubestarttime, 's')
 end_serial = time.time()
 ```
 
@@ -304,7 +330,7 @@ end_serial = time.time()
 print('total time for serial archive calls is ', end_serial - start_serial, 's')
 ```
 
-## 4. Parallel Processing the archive calls
+## 4. Parallel processing the archive calls
 
 ```{code-cell} ipython3
 # define some variables in case the above serial cells are not run
@@ -419,14 +445,13 @@ _ = create_figures(sample_table ,
 
 This work made use of:
 
-- Astroquery; Ginsburg et al., 2019, 2019AJ....157...98G
+&bull; Astroquery; Ginsburg et al., 2019, 2019AJ....157...98G  
+&bull; Astropy; Astropy Collaboration 2022, Astropy Collaboration 2018, Astropy Collaboration 2013, 2022ApJ...935..167A, 2018AJ....156..123A, 2013A&A...558A..33A  
+&bull; Lightkurve; Lightkurve Collaboration 2018, 2018ascl.soft12013L  
+&bull; acstools; https://zenodo.org/record/7406933#.ZBH1HS-B0eY  
+&bull; unWISE light curves; Meisner et al., 2023, 2023AJ....165...36M  
+&bull; Alerce; Forster et al., 2021, 2021AJ....161..242F
 
-- Astropy; Astropy Collaboration 2022, Astropy Collaboration 2018, Astropy Collaboration 2013, 2022ApJ...935..167A, 2018AJ....156..123A, 2013A&A...558A..33A
+```{code-cell} ipython3
 
-- Lightkurve; Lightkurve Collaboration 2018, 2018ascl.soft12013L
-
-- acstools; https://zenodo.org/record/7406933#.ZBH1HS-B0eY
-
-- unWISE light curves; Meisner et al., 2023, 2023AJ....165...36M
-
-- Alerce; Forster et al., 2021, 2021AJ....161..242F
+```
