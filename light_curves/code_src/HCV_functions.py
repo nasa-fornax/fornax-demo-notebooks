@@ -1,15 +1,18 @@
 import pandas as pd
 import requests
 from astropy.table import Table
-
 from data_structures import MultiIndexDFObject
 from fluxconversions import convertACSmagtoflux
 
+# Functions related to the HCV.
+# Code partially taken from https://archive.stsci.edu/hst/hsc/help/HCV/HCV_API_demo.html
 
-## Functions related to the HCV.
 def get_hscapiurl():
-    """
-    Returns the HSC API Url
+    """ Return the url to use for the HSC API
+    
+    Returns
+    -------
+    the HSC API Url
     
     """
     
@@ -33,10 +36,10 @@ def hcvcone(ra,dec,radius,table="hcvsummary",release="v3",format="csv",magtype="
         hcvsummary, hcv, summary, detailed, propermotions, or sourcepositions
     release: string
         v3 or v2
-    magtype: string
-        magaper2 or magauto (only applies to summary table)
     format: string
         csv, votable, json
+    magtype: string
+        magaper2 or magauto (only applies to summary table)
     columns: list of strings
         list of column names to include (None means use defaults)
     baseurl: string
@@ -47,7 +50,8 @@ def hcvcone(ra,dec,radius,table="hcvsummary",release="v3",format="csv",magtype="
     
     Returns
     -------
-    search results
+    search results: Table
+        
     """
     
     data = kw.copy()
@@ -165,7 +169,7 @@ def cat2url(table="hcvsummary",release="v3",magtype="magaper2",baseurl=get_hscap
     
     Returns
     -------
-    string with the base URL for this request
+    base URL for this request: string
     """
     checklegal_hcv(table,release,magtype)
     if table == "summary":
@@ -226,8 +230,6 @@ def HCV_get_lightcurves(sample_table, radius):
     """
 
     df_lc = MultiIndexDFObject()
-    
-
     
     for row in sample_table:
 

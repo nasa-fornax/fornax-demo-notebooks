@@ -25,7 +25,7 @@ CATALOG_FILES = (
 
 
 def ZTF_get_lightcurve(sample_table, nworkers=6, ztf_radius=0.000278 * u.deg):
-    """Function to add the ZTF lightcurves in all three bands to a multiframe data structure
+    """Function to add the ZTF lightcurves in all three bands to a multiframe data structure.  This is the MAIN function.
 
     Parameters
     ----------

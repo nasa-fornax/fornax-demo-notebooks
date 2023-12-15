@@ -39,14 +39,22 @@ By the end of this tutorial, you will be able to:
 ## Output:
  &bull; an archival optical + IR + neutrino light curve  
  
-## Non-standard Imports:
+## Imports:
  &bull; `acstools` to work with HST magnitude to flux conversion  
  &bull; `astropy` to work with coordinates/units and data structures  
  &bull; `astroquery` to interface with archives APIs  
  &bull; `hpgeom` to locate coordinates in HEALPix space  
  &bull; `lightkurve` to search TESSS, Kepler, and K2 archives  
+ &bull; `matplotlib` for plotting  
+ &bull; `multiprocessing` to use the power of multiple CPUs to get work done faster  
+ &bull; `numpy` for numerical processing  
+ &bull; `pandas` for their data structure DataFrame and all the accompanying functions  
  &bull; `pyarrow` to work with Parquet files for WISE and ZTF  
+ &bull; `pyvo` for acessing Virtual Observatory(VO) standard data  
+ &bull; `requests` to get information from URLs  
  &bull; `s3fs` to connect to AWS S3 buckets  
+ &bull; `scipy` to do statistics  
+ &bull; `tqdm` to track progress on long running jobs  
  &bull; `urllib` to handle archive searches with website interface
 
 ## Authors:
@@ -191,7 +199,7 @@ error_radius = [max_fermi_error_radius , max_sax_error_radius]
 # get heasarc light curves in the above curated list of missions 
 df_lc_fermi = HEASARC_get_lightcurves(sample_table, heasarc_cat, error_radius)
 
-#add the resulting dataframe to all other archives
+# add the resulting dataframe to all other archives
 df_lc.append(df_lc_fermi)
 
 print('heasarc search took:', time.time() - heasarcstarttime, 's')
@@ -203,11 +211,11 @@ The function to retrieve ZTF light curves accesses a parquet version of the ZTF 
 ```{code-cell} ipython3
 ZTFstarttime = time.time()
 
-#get ZTF lightcurves
+# get ZTF lightcurves
 # use the nworkers arg to control the amount of parallelization in the data loading step
 df_lc_ZTF = ZTF_get_lightcurve(sample_table, nworkers=6)
 
-#add the resulting dataframe to all other archives
+# add the resulting dataframe to all other archives
 df_lc.append(df_lc_ZTF)
 
 print('ZTF search took:', time.time() - ZTFstarttime, 's')
@@ -224,42 +232,42 @@ WISEstarttime = time.time()
 
 bandlist = ['W1', 'W2']  #list of the WISE band names
 WISE_radius = 1.0 * u.arcsec
-#get WISE light curves
+# get WISE light curves
 df_lc_WISE = WISE_get_lightcurves(sample_table, WISE_radius, bandlist)
 
-#add the resulting dataframe to all other archives
+# add the resulting dataframe to all other archives
 df_lc.append(df_lc_WISE)
 
 print('WISE search took:', time.time() - WISEstarttime, 's')
 ```
 
 ### 2.4 MAST: Pan-STARRS
-The function to retrieve lightcurves from Pan-STARRS currently uses their API; based on this [example](https://ps1images.stsci.edu/ps1_dr2_api.html).  This search is not efficient at scale and we expect it to be replaced in the future.  
+The function to retrieve lightcurves from Pan-STARRS currently uses their API; based on this [example](https://ps1images.stsci.edu/ps1_dr2_api.html).  This search is not efficient at scale and we expect it to be replaced in the future.
 
 ```{code-cell} ipython3
 panstarrsstarttime = time.time()
 
 panstarrs_search_radius = 1.0/3600.0    # search radius = 1 arcsec
-#get panstarrs light curves
+# get panstarrs light curves
 df_lc_panstarrs = Panstarrs_get_lightcurves(sample_table, panstarrs_search_radius)
 
-#add the resulting dataframe to all other archives
+# add the resulting dataframe to all other archives
 df_lc.append(df_lc_panstarrs)
 
 print('Panstarrs search took:', time.time() - panstarrsstarttime, 's')
 ```
 
 ### 2.5 MAST: TESS, Kepler and K2
-The function to retrieve lightcurves from these three missions currently uses the open source package [`lightKurve`](https://docs.lightkurve.org/index.html).  This search is not efficient at scale and we expect it to be replaced in the future.  
+The function to retrieve lightcurves from these three missions currently uses the open source package [`lightKurve`](https://docs.lightkurve.org/index.html).  This search is not efficient at scale and we expect it to be replaced in the future.
 
 ```{code-cell} ipython3
 lightkurvestarttime = time.time()
 
 TESS_search_radius = 1.0  #arcseconds
-#get TESS/Kepler/K2 light curves
+# get TESS/Kepler/K2 light curves
 df_lc_TESS = TESS_Kepler_get_lightcurves(sample_table, TESS_search_radius)
 
-#add the resulting dataframe to all other archives
+# add the resulting dataframe to all other archives
 df_lc.append(df_lc_TESS)
 
 print('TESS/Kepler/K2 search took:', time.time() - lightkurvestarttime, 's')
@@ -275,10 +283,10 @@ The function to retrieve lightcurves from HCV currently uses their API; based on
 HCVstarttime = time.time()
 
 HCV_radius = 1.0/3600.0 # radius = 1 arcsec
-#get HCV light curves
+# get HCV light curves
 df_lc_HCV = HCV_get_lightcurves(sample_table, HCV_radius)
 
-#add the resulting dataframe to all other archives
+# add the resulting dataframe to all other archives
 df_lc.append(df_lc_HCV)
 
 print('HCV search took:', time.time() - HCVstarttime, 's')
@@ -294,10 +302,10 @@ The function to retrieve Gaia light curves accesses the Gaia DR3 "source lite" c
 ```{code-cell} ipython3
 gaiastarttime = time.time()
 
-#get Gaia light curves
+# get Gaia light curves
 df_lc_gaia = Gaia_get_lightcurve(sample_table, 1/3600., 0)
 
-#add the resulting dataframe to all other archives
+# add the resulting dataframe to all other archives
 df_lc.append(df_lc_gaia)
 
 print('gaia search took:', time.time() - gaiastarttime, 's')
@@ -314,11 +322,11 @@ This time series (time vs. neutrino energy) information is similar to photometry
 ```{code-cell} ipython3
 icecubestarttime = time.time()
 
-#get icecube datapoints
+# get icecube datapoints
 df_lc_icecube = Icecube_get_lightcurve(sample_table ,
                                    icecube_select_topN = 3)
 
-#add the resulting dataframe to all other archives
+# add the resulting dataframe to all other archives
 df_lc.append(df_lc_icecube)
 
 print('icecube search took:', time.time() - icecubestarttime, 's')
@@ -326,7 +334,7 @@ end_serial = time.time()
 ```
 
 ```{code-cell} ipython3
-#benchmarking
+# benchmarking
 print('total time for serial archive calls is ', end_serial - start_serial, 's')
 ```
 
@@ -421,7 +429,7 @@ parallel_df_lc.data
 ```
 
 ```{code-cell} ipython3
-# could load a previously saved file in order to plot
+# Could load a previously saved file in order to plot
 #parquet_loadname = 'output/df_lc_090723_yang.parquet'
 #parallel_df_lc = MultiIndexDFObject()
 #parallel_df_lc.data = pd.read_parquet(parquet_loadname)
@@ -429,15 +437,15 @@ parallel_df_lc.data
 ```
 
 ## 5. Make plots of luminosity as a function of time
-Model plots after [van Velzen et al., 2021](https://arxiv.org/pdf/2111.09391.pdf).
+These plots are modelled after [van Velzen et al., 2021](https://arxiv.org/pdf/2111.09391.pdf). We show flux in mJy as a function of time for all available bands for each object. `show_nbr_figures` controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with `save_ouptut`, they will be put in the output directory and labelled by sample number.
 
 __Note__ that in the following, we can either plot the results from `df_lc` (from the serial call) or `parallel_df_lc` (from the parallel call). By default (see next cell) the output of the parallel call is used.
 
 ```{code-cell} ipython3
 _ = create_figures(sample_table ,
                    df_lc = parallel_df_lc, # either df_lc (serial call) or parallel_df_lc (parallel call)
-                   show_nbr_figures = 5,
-                   save_output = True ,
+                   show_nbr_figures = 5,  # how many plots do you actually want to see?
+                   save_output = True ,  # should the resulting plots be saved?
                   )
 ```
 

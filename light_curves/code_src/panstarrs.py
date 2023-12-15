@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 from data_structures import MultiIndexDFObject
 
-
+# code partially taken from https://ps1images.stsci.edu/ps1_dr2_api.html
 def ps1cone(ra,dec,radius,table="mean",release="dr1",format="csv",columns=None,
            baseurl="https://catalogs.mast.stsci.edu/api/v0.1/panstarrs", verbose=False,
            **kw):
@@ -231,7 +231,7 @@ def search_lightcurve(objid):
 
 #Do a panstarrs search
 def Panstarrs_get_lightcurves(sample_table, radius):
-    """Searches panstarrs for light curves from a list of input coordinates
+    """Searches panstarrs for light curves from a list of input coordinates.  This is the MAIN function.
     
     Parameters
     ----------

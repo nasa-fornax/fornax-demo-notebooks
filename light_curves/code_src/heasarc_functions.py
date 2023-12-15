@@ -8,11 +8,7 @@ from tqdm import tqdm
 from data_structures import MultiIndexDFObject
 
 
-#need to know the distribution of error radii for the catalogs of interest
-#this will inform the ligh curve query, as we are not interested in
-#error radii which are 'too large' so we need a way of defining what that is.
-#leaving this code here in case user wants to change the cutoff error radii
-#based on their science goals.  It is not currently used anywhere in the code
+
 def make_hist_error_radii(missioncat):
     """plots a histogram of error radii from a HEASARC catalog
 
@@ -32,6 +28,12 @@ def make_hist_error_radii(missioncat):
         results of the heasarc search including name, ra, dec, error_radius
 
     """
+    # need to know the distribution of error radii for the catalogs of interest
+    # this will inform the ligh curve query, as we are not interested in
+    # error radii which are 'too large' so we need a way of defining what that is.
+    # leaving this code here in case user wants to change the cutoff error radii
+    # based on their science goals.  It is not currently used anywhere in the code
+    
     # get the pyvo HEASARC service.
     heasarc_tap = pyvo.regsearch(servicetype='tap',keywords=['heasarc'])[0]
 
