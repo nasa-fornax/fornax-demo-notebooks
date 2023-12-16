@@ -1,746 +1,505 @@
 
+
 <!DOCTYPE html>
 
-<html>
+
+<html lang="en" data-content_root="" >
+
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>Light Curve Classifier &#8212; Fornax Demo Notebooks</title>
-    
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
 
-    
-  <link rel="stylesheet"
-    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
-    
+  
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/clipboard.min.js"></script>
     <script src="../_static/copybutton.js"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'light_curves/lc_classifier';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="How do AGNs selected with different techniques compare?" href="ML_AGNzoo.html" />
-    <link rel="prev" title="Make multiwavelength light curves using archival data" href="multiband_lc.html" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="docsearch:language" content="None">
-    
-
-    <!-- Google Analytics -->
-    
+    <link rel="prev" title="Make multiwavelength light curves using archival data" href="light_curve_generator.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
-<!-- Checkboxes to toggle the left sidebar -->
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
-<label class="overlay overlay-navbar" for="__navigation">
-    <div class="visually-hidden">Toggle navigation sidebar</div>
-</label>
-<!-- Checkboxes to toggle the in-page toc -->
-<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
-<label class="overlay overlay-pagetoc" for="__page-toc">
-    <div class="visually-hidden">Toggle in-page Table of Contents</div>
-</label>
-<!-- Headers at the top -->
-<div class="announcement header-item noprint"></div>
-<div class="header header-item noprint"></div>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
 
-    
-    <div class="container-fluid" id="banner"></div>
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
 
-    
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
 
-    <div class="container-xl">
-      <div class="row">
-          
-<!-- Sidebar -->
-<div class="bd-sidebar noprint" id="site-navigation">
-    <div class="bd-sidebar__content">
-        <div class="bd-sidebar__top"><div class="navbar-brand-box">
-    <a class="navbar-brand text-wrap" href="../index.html">
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
       
-        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+      <div class="bd-sidebar-primary bd-sidebar">
         
-      
-      
-      <img src="../_static/fornax_logo.png" class="logo" alt="logo">
-      
-      
-      <h1 class="site-logo" id="site-title">Fornax Demo Notebooks</h1>
-      
-    </a>
-</div><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
-  <i class="icon fas fa-search"></i>
-  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
-</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
-    <div class="bd-toc-item active">
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">Fornax Demo Notebooks</p>
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/fornax-navo/fornax-demo-notebooks" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
         
         <ul class="nav bd-sidenav bd-sidenav__home-link">
             <li class="toctree-l1">
                 <a class="reference internal" href="../index.html">
-                    Fornax Demo Notebooks
+                    Table of Content
                 </a>
             </li>
         </ul>
         <ul class="current nav bd-sidenav">
- <li class="toctree-l1 has-children">
-  <a class="reference internal" href="../forced_photometry/README.html">
-   Multi-band forced photometry
-  </a>
-  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
-  <label for="toctree-checkbox-1">
-   <i class="fas fa-chevron-down">
-   </i>
-  </label>
-  <ul>
-   <li class="toctree-l2">
-    <a class="reference internal" href="../forced_photometry/multiband_photometry.html">
-     Automated Multiband Forced Photometry on Large Datasets
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toctree-l1 current active has-children">
-  <a class="reference internal" href="README.html">
-   Time Domain
-  </a>
-  <input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
-  <label for="toctree-checkbox-2">
-   <i class="fas fa-chevron-down">
-   </i>
-  </label>
-  <ul class="current">
-   <li class="toctree-l2">
-    <a class="reference internal" href="multiband_lc.html">
-     Make multiwavelength light curves using archival data
-    </a>
-   </li>
-   <li class="toctree-l2 current active">
-    <a class="current reference internal" href="#">
-     Light Curve Classifier
-    </a>
-   </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="ML_AGNzoo.html">
-     How do AGNs selected with different techniques compare?
-    </a>
-   </li>
-  </ul>
- </li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../forced_photometry/README.html">Multi-band forced photometry</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../forced_photometry/multiband_photometry.html">Automated Multiband Forced Photometry on Large Datasets</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="README.html">Time Domain</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="light_curve_generator.html">Make multiwavelength light curves using archival data</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Light Curve Classifier</a></li>
+</ul>
+</li>
 </ul>
 
     </div>
 </nav></div>
-        <div class="bd-sidebar__bottom">
-             <!-- To handle the deprecated key -->
-            
-            <div class="navbar_extra_footer">
-            Theme by the <a href="https://ebp.jupyterbook.org">Executable Book Project</a>
-            </div>
-            
-        </div>
     </div>
-    <div id="rtd-footer-container"></div>
-</div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
-          
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
 
-
-          
-<!-- A tiny helper pixel to detect if we've scrolled -->
 <div class="sbt-scroll-pixel-helper"></div>
-<!-- Main content -->
-<div class="col py-0 content-container">
-    
-    <div class="header-article row sticky-top noprint">
-        
 
-
-
-<div class="col py-1 d-flex header-article-main">
-    <div class="header-article__left">
-        
-        <label for="__navigation"
-  class="headerbtn"
-  data-toggle="tooltip"
-data-placement="right"
-title="Toggle navigation"
->
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
   
-
-<span class="headerbtn__icon-container">
-  <i class="fas fa-bars"></i>
-  </span>
-
-</label>
-
-        
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
     </div>
-    <div class="header-article__right">
-<div class="menu-dropdown menu-dropdown-launch-buttons">
-  <button class="headerbtn menu-dropdown__trigger"
-      aria-label="Launch interactive content">
-      <i class="fas fa-rocket"></i>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
   </button>
-  <div class="menu-dropdown__content">
-    <ul>
-      <li>
-        <a href="https://mybinder.org/v2/gh/fornax-navo/fornax-demo-notebooks/main?urlpath=tree/light_curves/lc_classifier.md"
-   class="headerbtn"
-   data-toggle="tooltip"
-data-placement="left"
-title="Launch on Binder"
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/fornax-navo/fornax-demo-notebooks/main?urlpath=tree/light_curves/lc_classifier.md" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch onBinder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
 >
   
 
-<span class="headerbtn__icon-container">
+<span class="btn__icon-container">
   
     <img src="../_static/images/logo_binder.svg">
   </span>
-<span class="headerbtn__text-container">Binder</span>
+<span class="btn__text-container">Binder</span>
 </a>
-
-      </li>
+</li>
       
-      <li>
-        <a href="https://colab.research.google.com/github/fornax-navo/fornax-demo-notebooks/blob/main/light_curves/lc_classifier.md"
-   class="headerbtn"
-   data-toggle="tooltip"
-data-placement="left"
-title="Launch on Colab"
+      
+      
+      
+      <li><a href="https://colab.research.google.com/github/fornax-navo/fornax-demo-notebooks/blob/main/light_curves/lc_classifier.md" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch onColab"
+   data-bs-placement="left" data-bs-toggle="tooltip"
 >
   
 
-<span class="headerbtn__icon-container">
+<span class="btn__icon-container">
   
     <img src="../_static/images/logo_colab.png">
   </span>
-<span class="headerbtn__text-container">Colab</span>
+<span class="btn__text-container">Colab</span>
 </a>
-
-      </li>
+</li>
       
-    </ul>
-  </div>
+  </ul>
 </div>
 
-<button onclick="toggleFullScreen()"
-  class="headerbtn"
-  data-toggle="tooltip"
-data-placement="bottom"
-title="Fullscreen mode"
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/fornax-navo/fornax-demo-notebooks" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
 >
   
 
-<span class="headerbtn__icon-container">
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/fornax-navo/fornax-demo-notebooks/edit/main/light_curves/lc_classifier.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/fornax-navo/fornax-demo-notebooks/issues/new?title=Issue%20on%20page%20%2Flight_curves/lc_classifier.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/light_curves/lc_classifier.ipynb" target="_blank"
+   class="btn btn-sm btn-download-notebook-button dropdown-item"
+   title="Download notebook file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="../_sources/light_curves/lc_classifier.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
   <i class="fas fa-expand"></i>
   </span>
 
 </button>
 
-<div class="menu-dropdown menu-dropdown-repository-buttons">
-  <button class="headerbtn menu-dropdown__trigger"
-      aria-label="Source repositories">
-      <i class="fab fa-github"></i>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
   </button>
-  <div class="menu-dropdown__content">
-    <ul>
-      <li>
-        <a href="https://github.com/fornax-navo/fornax-demo-notebooks"
-   class="headerbtn"
-   data-toggle="tooltip"
-data-placement="left"
-title="Source repository"
->
-  
+`);
+</script>
 
-<span class="headerbtn__icon-container">
-  <i class="fab fa-github"></i>
-  </span>
-<span class="headerbtn__text-container">repository</span>
-</a>
 
-      </li>
-      
-      <li>
-        <a href="https://github.com/fornax-navo/fornax-demo-notebooks/issues/new?title=Issue%20on%20page%20%2Flight_curves/lc_classifier.html&body=Your%20issue%20content%20here."
-   class="headerbtn"
-   data-toggle="tooltip"
-data-placement="left"
-title="Open an issue"
->
-  
-
-<span class="headerbtn__icon-container">
-  <i class="fas fa-lightbulb"></i>
-  </span>
-<span class="headerbtn__text-container">open issue</span>
-</a>
-
-      </li>
-      
-      <li>
-        <a href="https://github.com/fornax-navo/fornax-demo-notebooks/edit/main/light_curves/lc_classifier.md"
-   class="headerbtn"
-   data-toggle="tooltip"
-data-placement="left"
-title="Edit this page"
->
-  
-
-<span class="headerbtn__icon-container">
-  <i class="fas fa-pencil-alt"></i>
-  </span>
-<span class="headerbtn__text-container">suggest edit</span>
-</a>
-
-      </li>
-      
-    </ul>
-  </div>
-</div>
-
-<div class="menu-dropdown menu-dropdown-download-buttons">
-  <button class="headerbtn menu-dropdown__trigger"
-      aria-label="Download this page">
-      <i class="fas fa-download"></i>
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
   </button>
-  <div class="menu-dropdown__content">
-    <ul>
-      <li>
-        <a href="../_sources/light_curves/lc_classifier.ipynb"
-   class="headerbtn"
-   data-toggle="tooltip"
-data-placement="left"
-title="Download notebook file"
->
-  
-
-<span class="headerbtn__icon-container">
-  <i class="fas fa-code"></i>
-  </span>
-<span class="headerbtn__text-container">.ipynb</span>
-</a>
-
-      </li>
-      
-      <li>
-        <a href="../_sources/light_curves/lc_classifier.md.txt"
-   class="headerbtn"
-   data-toggle="tooltip"
-data-placement="left"
-title="Download source file"
->
-  
-
-<span class="headerbtn__icon-container">
-  <i class="fas fa-file"></i>
-  </span>
-<span class="headerbtn__text-container">.md</span>
-</a>
-
-      </li>
-      
-      <li>
-        
-<button onclick="printPdf(this)"
-  class="headerbtn"
-  data-toggle="tooltip"
-data-placement="left"
-title="Print to PDF"
->
-  
-
-<span class="headerbtn__icon-container">
-  <i class="fas fa-file-pdf"></i>
-  </span>
-<span class="headerbtn__text-container">.pdf</span>
-</button>
-
-      </li>
-      
-    </ul>
-  </div>
-</div>
-<label for="__page-toc"
-  class="headerbtn headerbtn-page-toc"
-  
->
-  
-
-<span class="headerbtn__icon-container">
-  <i class="fas fa-list"></i>
-  </span>
-
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
 </label>
-
+</div></div>
+      
     </div>
+  
 </div>
-
-<!-- Table of contents -->
-<div class="col-md-3 bd-toc show noprint">
-    <div class="tocsection onthispage pt-5 pb-3">
-        <i class="fas fa-list"></i> Contents
-    </div>
-    <nav id="bd-toc-nav" aria-label="Page">
-        <ul class="visible nav section-nav flex-column">
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#learning-goals">
-   Learning Goals
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#introduction">
-   Introduction
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#input">
-   Input
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#output">
-   Output
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#imports">
-   Imports
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#authors">
-   Authors
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#acknowledgements">
-   Acknowledgements
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#read-in-a-dataset-of-archival-light-curves">
-   1. Read in a dataset of archival light curves
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#data-prep">
-   2. Data Prep
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#remove-bands-with-not-enough-data">
-     2.1 Remove bands with not enough data
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#combine-labels-for-a-simpler-classification">
-     2.2 Combine Labels for a Simpler Classification
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#remove-bad-data">
-     2.3 Remove “bad”  data
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#incomplete-data">
-     2.4 Incomplete Data
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#missing-data">
-     2.5 Missing Data
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#make-all-objects-and-bands-have-identical-time-arrays-uniform-length-and-spacing">
-     2.5  Make all objects and bands have identical time arrays (uniform length and spacing)
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#restructure-dataframe-in-format-expected-by-sktime">
-     2.6  Restructure dataframe in format expected by sktime
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#normalize">
-     2.7 Normalize
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#make-datetime-time-column">
-     2.8 Make datetime time column
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#save-this-dataframe">
-     2.9 Save this dataframe
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#make-into-multi-index-which-is-what-sktime-expects-as-input">
-     2.10 make into multi-index which is what SKTime expects as input
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#prep-for-ml-algorithms-in-sktime">
-   3. Prep for ML algorithms in sktime
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#consider-data-augmentation">
-     3.0 Consider data augmentation
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#train-test-split">
-     3.1 Train test split
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#check-that-the-data-types-are-ok-for-sktime">
-     3.2 Check that the data types are ok for sktime
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#run-machine-learning-algorithms-on-the-light-curves">
-   4. Run Machine Learning Algorithms on the light curves
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#the-most-accurate-classifier">
-     4.1 The Most Accurate Classifier
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#loop-over-a-bunch-of-classifiers">
-     4.2 Loop over a bunch of classifiers
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#conclusions">
-   5.0 Conclusions:
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#potential-areas-of-improvement">
-     5.1 Potential Areas of improvement
-    </a>
-   </li>
-  </ul>
- </li>
-</ul>
-
-    </nav>
 </div>
-    </div>
-    <div class="article row">
-        <div class="col pl-md-3 pl-lg-5 content-container">
-            <!-- Table of contents that is only displayed when printing the page -->
-            <div id="jb-print-docs-body" class="onlyprint">
-                <h1>Light Curve Classifier</h1>
-                <!-- Table of contents -->
-                <div id="print-main-content">
-                    <div id="jb-print-toc">
-                        
-                        <div>
-                            <h2> Contents </h2>
-                        </div>
-                        <nav aria-label="Page">
-                            <ul class="visible nav section-nav flex-column">
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#learning-goals">
-   Learning Goals
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#introduction">
-   Introduction
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#input">
-   Input
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#output">
-   Output
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#imports">
-   Imports
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#authors">
-   Authors
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#acknowledgements">
-   Acknowledgements
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#read-in-a-dataset-of-archival-light-curves">
-   1. Read in a dataset of archival light curves
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#data-prep">
-   2. Data Prep
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#remove-bands-with-not-enough-data">
-     2.1 Remove bands with not enough data
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#combine-labels-for-a-simpler-classification">
-     2.2 Combine Labels for a Simpler Classification
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#remove-bad-data">
-     2.3 Remove “bad”  data
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#incomplete-data">
-     2.4 Incomplete Data
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#missing-data">
-     2.5 Missing Data
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#make-all-objects-and-bands-have-identical-time-arrays-uniform-length-and-spacing">
-     2.5  Make all objects and bands have identical time arrays (uniform length and spacing)
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#restructure-dataframe-in-format-expected-by-sktime">
-     2.6  Restructure dataframe in format expected by sktime
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#normalize">
-     2.7 Normalize
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#make-datetime-time-column">
-     2.8 Make datetime time column
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#save-this-dataframe">
-     2.9 Save this dataframe
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#make-into-multi-index-which-is-what-sktime-expects-as-input">
-     2.10 make into multi-index which is what SKTime expects as input
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#prep-for-ml-algorithms-in-sktime">
-   3. Prep for ML algorithms in sktime
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#consider-data-augmentation">
-     3.0 Consider data augmentation
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#train-test-split">
-     3.1 Train test split
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#check-that-the-data-types-are-ok-for-sktime">
-     3.2 Check that the data types are ok for sktime
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#run-machine-learning-algorithms-on-the-light-curves">
-   4. Run Machine Learning Algorithms on the light curves
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#the-most-accurate-classifier">
-     4.1 The Most Accurate Classifier
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#loop-over-a-bunch-of-classifiers">
-     4.2 Loop over a bunch of classifiers
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#conclusions">
-   5.0 Conclusions:
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#potential-areas-of-improvement">
-     5.1 Potential Areas of improvement
-    </a>
-   </li>
-  </ul>
- </li>
-</ul>
+              
+              
 
-                        </nav>
-                    </div>
-                </div>
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Light Curve Classifier</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
             </div>
-            <main id="main-content" role="main">
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#learning-goals">Learning Goals</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#read-in-a-dataset-of-archival-light-curves">1. Read in a dataset of archival light curves</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-prep">2. Data Prep</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#remove-bands-with-not-enough-data">2.1 Remove bands with not enough data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#combine-labels-for-a-simpler-classification">2.2 Combine Labels for a Simpler Classification</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#remove-bad-data">2.3 Remove “bad”  data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#incomplete-data">2.4 Incomplete Data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#missing-data">2.5 Missing Data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#make-all-objects-and-bands-have-identical-time-arrays-uniform-length-and-spacing">2.5  Make all objects and bands have identical time arrays (uniform length and spacing)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#restructure-dataframe-in-format-expected-by-sktime">2.6  Restructure dataframe in format expected by sktime</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#normalize">2.7 Normalize</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#make-datetime-time-column">2.8 Make datetime time column</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#save-this-dataframe">2.9 Save this dataframe</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#make-into-multi-index-which-is-what-sktime-expects-as-input">2.10 make into multi-index which is what SKTime expects as input</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prep-for-ml-algorithms-in-sktime">3. Prep for ML algorithms in sktime</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#consider-data-augmentation">3.0 Consider data augmentation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#train-test-split">3.1 Train test split</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#check-that-the-data-types-are-ok-for-sktime">3.2 Check that the data types are ok for sktime</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-machine-learning-algorithms-on-the-light-curves">4. Run Machine Learning Algorithms on the light curves</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-most-accurate-classifier">4.1 The Most Accurate Classifier</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#loop-over-a-bunch-of-classifiers">4.2 Loop over a bunch of classifiers</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conclusions">5.0 Conclusions:</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#potential-areas-of-improvement">5.1 Potential Areas of improvement</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
                 
-              <div>
-                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
   <section id="light-curve-classifier">
-<h1>Light Curve Classifier<a class="headerlink" href="#light-curve-classifier" title="Permalink to this headline">#</a></h1>
+<h1>Light Curve Classifier<a class="headerlink" href="#light-curve-classifier" title="Permalink to this heading">#</a></h1>
 <hr class="docutils" />
 <section id="learning-goals">
-<h2>Learning Goals<a class="headerlink" href="#learning-goals" title="Permalink to this headline">#</a></h2>
+<h2>Learning Goals<a class="headerlink" href="#learning-goals" title="Permalink to this heading">#</a></h2>
 <p>By the end of this tutorial, you will be able to:</p>
 <ul class="simple">
 <li><p>do some basic data cleaning and filtering to prepare the data for the ML algorithms</p></li>
@@ -749,7 +508,7 @@ title="Print to PDF"
 </ul>
 </section>
 <section id="introduction">
-<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">#</a></h2>
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
 <p>This notebook takes output of a previous demo notebook which generates light curves from archival data, does data prep, and runs the light curves through multiple <a class="reference external" href="https://www.sktime.net/en/stable/"><code class="docutils literal notranslate"><span class="pre">sktime</span></code></a> classifiers.  The goal of the classifiers is to be able to differentiate changing look active galactic nucleii (CLAGN) from an SDSS quasar sample based on multiband light curves.  CLAGN are quite interested objects in that they appear to change state, but only a few hundred are currently known, and finding them is quite expensive requiring spectroscopic follow up.  Being able to identify CLAGN in existing large samples would allow us to identify a statisitcal sample from which we could better understand the physics of what is occuring in these systems.</p>
 <p>The challenges of this time-domain dataset are:</p>
 <ol class="arabic simple">
@@ -767,16 +526,16 @@ title="Print to PDF"
 </ol>
 </section>
 <section id="input">
-<h2>Input<a class="headerlink" href="#input" title="Permalink to this headline">#</a></h2>
+<h2>Input<a class="headerlink" href="#input" title="Permalink to this heading">#</a></h2>
 <p>Light curve parquet file of multiband light curves from the mulitband_lc.ipynb demo notebook.  The format of the light curves is a Pandas multiindex data frame</p>
 <p>A useful reference for what sktime expects as input to its ML algorithms: https://github.com/sktime/sktime/blob/main/examples/AA_datatypes_and_datasets.ipynb</p>
 </section>
 <section id="output">
-<h2>Output<a class="headerlink" href="#output" title="Permalink to this headline">#</a></h2>
+<h2>Output<a class="headerlink" href="#output" title="Permalink to this heading">#</a></h2>
 <p>Trained classifiers as well as estimates of their accuracy and plots of confusion matrices</p>
 </section>
 <section id="imports">
-<h2>Imports<a class="headerlink" href="#imports" title="Permalink to this headline">#</a></h2>
+<h2>Imports<a class="headerlink" href="#imports" title="Permalink to this heading">#</a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">pandas</span></code> to work with light curve data structure</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">numpy</span></code> for numerical calculations</p></li>
@@ -789,10 +548,10 @@ title="Print to PDF"
 </ul>
 </section>
 <section id="authors">
-<h2>Authors<a class="headerlink" href="#authors" title="Permalink to this headline">#</a></h2>
+<h2>Authors<a class="headerlink" href="#authors" title="Permalink to this heading">#</a></h2>
 </section>
 <section id="acknowledgements">
-<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">#</a></h2>
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span>#ensure all dependencies are installed
@@ -840,7 +599,7 @@ title="Print to PDF"
 </div>
 </section>
 <section id="read-in-a-dataset-of-archival-light-curves">
-<h2>1. Read in a dataset of archival light curves<a class="headerlink" href="#read-in-a-dataset-of-archival-light-curves" title="Permalink to this headline">#</a></h2>
+<h2>1. Read in a dataset of archival light curves<a class="headerlink" href="#read-in-a-dataset-of-archival-light-curves" title="Permalink to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#access structure of light curves made in the light curve notebook</span>
@@ -861,7 +620,7 @@ title="Print to PDF"
 </div>
 </section>
 <section id="data-prep">
-<h2>2. Data Prep<a class="headerlink" href="#data-prep" title="Permalink to this headline">#</a></h2>
+<h2>2. Data Prep<a class="headerlink" href="#data-prep" title="Permalink to this heading">#</a></h2>
 <p>This dataset needs significant work before it can be fed into a ML algorithm</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -872,7 +631,7 @@ title="Print to PDF"
 </div>
 </div>
 <section id="remove-bands-with-not-enough-data">
-<h3>2.1 Remove bands with not enough data<a class="headerlink" href="#remove-bands-with-not-enough-data" title="Permalink to this headline">#</a></h3>
+<h3>2.1 Remove bands with not enough data<a class="headerlink" href="#remove-bands-with-not-enough-data" title="Permalink to this heading">#</a></h3>
 <p>For this use case of CLAGN classification, we don’t need to include some of the bands
 that are known to be sparse.</p>
 <div class="cell docutils container">
@@ -895,7 +654,7 @@ that are known to be sparse.</p>
 </div>
 </section>
 <section id="combine-labels-for-a-simpler-classification">
-<h3>2.2 Combine Labels for a Simpler Classification<a class="headerlink" href="#combine-labels-for-a-simpler-classification" title="Permalink to this headline">#</a></h3>
+<h3>2.2 Combine Labels for a Simpler Classification<a class="headerlink" href="#combine-labels-for-a-simpler-classification" title="Permalink to this heading">#</a></h3>
 <p>All CLAGN start in the dataset as having labels based on their discovery paper.  Because we want one sample with all known CLAGN, change those discoery names to be simply “CLAGN” for all CLAGN, regardless of origin</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -914,7 +673,7 @@ that are known to be sparse.</p>
 </div>
 </section>
 <section id="remove-bad-data">
-<h3>2.3 Remove “bad”  data<a class="headerlink" href="#remove-bad-data" title="Permalink to this headline">#</a></h3>
+<h3>2.3 Remove “bad”  data<a class="headerlink" href="#remove-bad-data" title="Permalink to this heading">#</a></h3>
 <p>“bad” includes:</p>
 <ul class="simple">
 <li><p>errant values</p></li>
@@ -1054,7 +813,7 @@ that are known to be sparse.</p>
 </div>
 </section>
 <section id="incomplete-data">
-<h3>2.4 Incomplete Data<a class="headerlink" href="#incomplete-data" title="Permalink to this headline">#</a></h3>
+<h3>2.4 Incomplete Data<a class="headerlink" href="#incomplete-data" title="Permalink to this heading">#</a></h3>
 <p>Some objects have only a few datapoints.  Three data points is not large enough for KNN interpolation, so we will consider any array with fewer than 4 photometry points to be incomplete data.</p>
 <p>Another way of saying this is that we choose to remove those light curves with 3 or fewer data points.</p>
 <div class="cell docutils container">
@@ -1078,7 +837,7 @@ that are known to be sparse.</p>
 </div>
 </section>
 <section id="missing-data">
-<h3>2.5 Missing Data<a class="headerlink" href="#missing-data" title="Permalink to this headline">#</a></h3>
+<h3>2.5 Missing Data<a class="headerlink" href="#missing-data" title="Permalink to this heading">#</a></h3>
 <p>Some objects do not have light curves in all bands.  Some ML algorithms can handle mising data, but not all, so it would be useful to handle this missing data up front.</p>
 <p>We will add light curves with zero flux and err values for the missing data.  SKtime does not like NaNs, so we chose zeros.</p>
 <div class="cell docutils container">
@@ -1134,6 +893,7 @@ that are known to be sparse.</p>
 <span class="c1"># df_empty has one row per dict. time,flux, and err columns store arrays.</span>
 <span class="c1"># &quot;explode&quot; the dataframe to get one row per light curve point. time, flux, and err columns will now store floats.</span>
 <span class="n">df_empty</span> <span class="o">=</span> <span class="n">df_empty</span><span class="o">.</span><span class="n">explode</span><span class="p">([</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;flux&quot;</span><span class="p">,</span><span class="s2">&quot;err&quot;</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">df_empty</span> <span class="o">=</span> <span class="n">df_empty</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="n">col</span><span class="p">:</span> <span class="s2">&quot;float&quot;</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;flux&quot;</span><span class="p">,</span> <span class="s2">&quot;err&quot;</span><span class="p">]})</span>
 
 
 <span class="c1">#now put the empty light curves back together with the main light curve dataframe</span>
@@ -1144,7 +904,7 @@ that are known to be sparse.</p>
 </div>
 </section>
 <section id="make-all-objects-and-bands-have-identical-time-arrays-uniform-length-and-spacing">
-<h3>2.5  Make all objects and bands have identical time arrays (uniform length and spacing)<a class="headerlink" href="#make-all-objects-and-bands-have-identical-time-arrays-uniform-length-and-spacing" title="Permalink to this headline">#</a></h3>
+<h3>2.5  Make all objects and bands have identical time arrays (uniform length and spacing)<a class="headerlink" href="#make-all-objects-and-bands-have-identical-time-arrays-uniform-length-and-spacing" title="Permalink to this heading">#</a></h3>
 <p>It is very hard to find time-domain ML algorithms which can handle non uniform length datasets. Therefore we make them uniform using Pandas <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.reindex.html">reindex</a> which fills in the uniform length arrays with values according to the method chosen by the user.  We implement a nearest neighbor to fill the arrays.</p>
 <p>try a sklearn regressor to fit the shape of the light curve and do interpolation</p>
 <p>Potential other options for uniformizing the time series dataset:</p>
@@ -1225,18 +985,14 @@ that are known to be sparse.</p>
 <span class="c1"># df_lc_interpol has one row per dict in lc_interpol. time and flux columns store arrays.</span>
 <span class="c1"># &quot;explode&quot; the dataframe to get one row per light curve point. time and flux columns will now store floats.</span>
 <span class="n">df_lc</span> <span class="o">=</span> <span class="n">df_interpol</span><span class="o">.</span><span class="n">explode</span><span class="p">([</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;flux&quot;</span><span class="p">,</span><span class="s2">&quot;err&quot;</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="c1">#somehow data types for some columns are coming in as &#39;object&#39; which sktime doesn&#39;t like</span>
-<span class="c1">#instead make them numeric data types</span>
-<span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;flux&quot;</span><span class="p">,</span> <span class="s2">&quot;err&quot;</span><span class="p">]</span>
-<span class="n">df_lc</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_lc</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
+<span class="n">df_lc</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="n">col</span><span class="p">:</span> <span class="s2">&quot;float&quot;</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;flux&quot;</span><span class="p">,</span> <span class="s2">&quot;err&quot;</span><span class="p">]})</span>
 </pre></div>
 </div>
 </div>
 </div>
 </section>
 <section id="restructure-dataframe-in-format-expected-by-sktime">
-<h3>2.6  Restructure dataframe in format expected by sktime<a class="headerlink" href="#restructure-dataframe-in-format-expected-by-sktime" title="Permalink to this headline">#</a></h3>
+<h3>2.6  Restructure dataframe in format expected by sktime<a class="headerlink" href="#restructure-dataframe-in-format-expected-by-sktime" title="Permalink to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Make columns have band names in them and then remove band from the index</p></li>
 <li><p>pivot the dataframe so that SKTIME understands its format</p></li>
@@ -1282,7 +1038,7 @@ that are known to be sparse.</p>
 </div>
 </section>
 <section id="normalize">
-<h3>2.7 Normalize<a class="headerlink" href="#normalize" title="Permalink to this headline">#</a></h3>
+<h3>2.7 Normalize<a class="headerlink" href="#normalize" title="Permalink to this heading">#</a></h3>
 <ul class="simple">
 <li><p>this is normalizing across all bands</p></li>
 <li><p>think this is the right place to do this, rather than interpolate over time
@@ -1317,7 +1073,7 @@ which goes into the ML algorithms.</p></li>
 </div>
 </section>
 <section id="make-datetime-time-column">
-<h3>2.8 Make datetime time column<a class="headerlink" href="#make-datetime-time-column" title="Permalink to this headline">#</a></h3>
+<h3>2.8 Make datetime time column<a class="headerlink" href="#make-datetime-time-column" title="Permalink to this heading">#</a></h3>
 <p>https://docs.python.org/3/library/datetime.html#module-datetime</p>
 <p>SKTime wants a datetime column</p>
 <div class="cell docutils container">
@@ -1340,7 +1096,7 @@ which goes into the ML algorithms.</p></li>
 </div>
 </section>
 <section id="save-this-dataframe">
-<h3>2.9 Save this dataframe<a class="headerlink" href="#save-this-dataframe" title="Permalink to this headline">#</a></h3>
+<h3>2.9 Save this dataframe<a class="headerlink" href="#save-this-dataframe" title="Permalink to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#save this dataframe to use for the ML below so we don&#39;t have to make it every time</span>
@@ -1353,7 +1109,7 @@ which goes into the ML algorithms.</p></li>
 </div>
 </section>
 <section id="make-into-multi-index-which-is-what-sktime-expects-as-input">
-<h3>2.10 make into multi-index which is what SKTime expects as input<a class="headerlink" href="#make-into-multi-index-which-is-what-sktime-expects-as-input" title="Permalink to this headline">#</a></h3>
+<h3>2.10 make into multi-index which is what SKTime expects as input<a class="headerlink" href="#make-into-multi-index-which-is-what-sktime-expects-as-input" title="Permalink to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df_lc</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s2">&quot;objectid&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="s2">&quot;datetime&quot;</span><span class="p">])</span>
@@ -1364,7 +1120,7 @@ which goes into the ML algorithms.</p></li>
 </section>
 </section>
 <section id="prep-for-ml-algorithms-in-sktime">
-<h2>3. Prep for ML algorithms in sktime<a class="headerlink" href="#prep-for-ml-algorithms-in-sktime" title="Permalink to this headline">#</a></h2>
+<h2>3. Prep for ML algorithms in sktime<a class="headerlink" href="#prep-for-ml-algorithms-in-sktime" title="Permalink to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># could load a previously saved file in order to plot</span>
@@ -1377,7 +1133,7 @@ which goes into the ML algorithms.</p></li>
 </div>
 </div>
 <section id="consider-data-augmentation">
-<h3>3.0 Consider data augmentation<a class="headerlink" href="#consider-data-augmentation" title="Permalink to this headline">#</a></h3>
+<h3>3.0 Consider data augmentation<a class="headerlink" href="#consider-data-augmentation" title="Permalink to this heading">#</a></h3>
 <ol class="arabic simple">
 <li><p>https://arxiv.org/pdf/1811.08295.pdf which has the following github</p>
 <ul class="simple">
@@ -1391,7 +1147,7 @@ which goes into the ML algorithms.</p></li>
 <p>Worried that augmenting noisy data just makes more noise</p>
 </section>
 <section id="train-test-split">
-<h3>3.1 Train test split<a class="headerlink" href="#train-test-split" title="Permalink to this headline">#</a></h3>
+<h3>3.1 Train test split<a class="headerlink" href="#train-test-split" title="Permalink to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Because thre are uneven numbers of each type (many more SDSS than CLAGN), we want to make sure to stratify evenly by type</p></li>
 <li><p>Random split</p></li>
@@ -1446,7 +1202,7 @@ which goes into the ML algorithms.</p></li>
 </div>
 </section>
 <section id="check-that-the-data-types-are-ok-for-sktime">
-<h3>3.2 Check that the data types are ok for sktime<a class="headerlink" href="#check-that-the-data-types-are-ok-for-sktime" title="Permalink to this headline">#</a></h3>
+<h3>3.2 Check that the data types are ok for sktime<a class="headerlink" href="#check-that-the-data-types-are-ok-for-sktime" title="Permalink to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#ask sktime if it likes the data type of X_train</span>
@@ -1463,7 +1219,7 @@ which goes into the ML algorithms.</p></li>
 </section>
 </section>
 <section id="run-machine-learning-algorithms-on-the-light-curves">
-<h2>4. Run Machine Learning Algorithms on the light curves<a class="headerlink" href="#run-machine-learning-algorithms-on-the-light-curves" title="Permalink to this headline">#</a></h2>
+<h2>4. Run Machine Learning Algorithms on the light curves<a class="headerlink" href="#run-machine-learning-algorithms-on-the-light-curves" title="Permalink to this heading">#</a></h2>
 <p>We choose to use <a class="reference external" href="https://www.sktime.net/en/stable/index.html">sktime</a> algorithms beacuse it is a library of many algorithms specifically tailored to time series datasets.  It is based on the sklearn library so syntax is familiar to many users.</p>
 <p>Types of classifiers are listed <a class="reference external" href="https://www.sktime.net/en/stable/api_reference/classification.html">here</a>.</p>
 <p>This notebook will invert the actual workflow and show you a single example of the algorithm which best fits the data and has the most accurate classifier. Then it will show how to write a for loop over a bunch of classifiers before narrowing it down to the most accurate.</p>
@@ -1478,7 +1234,7 @@ which goes into the ML algorithms.</p></li>
 </div>
 </div>
 <section id="the-most-accurate-classifier">
-<h3>4.1 The Most Accurate Classifier<a class="headerlink" href="#the-most-accurate-classifier" title="Permalink to this headline">#</a></h3>
+<h3>4.1 The Most Accurate Classifier<a class="headerlink" href="#the-most-accurate-classifier" title="Permalink to this heading">#</a></h3>
 <p>See section 4.2 for how we landed with this algorithm</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -1494,7 +1250,7 @@ which goes into the ML algorithms.</p></li>
 <span class="c1">#make predictions on the test dataset using the trained model </span>
 <span class="n">y_pred</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Accuracy of Random Interval Classifier: </span><span class="si">{</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Accuracy of Random Interval Classifier: </span><span class="si">{</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span><span class="w"> </span><span class="n">y_pred</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1">#plot a confusion matrix</span>
 <span class="n">cm</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">clf</span><span class="o">.</span><span class="n">classes_</span><span class="p">)</span>
@@ -1508,7 +1264,7 @@ which goes into the ML algorithms.</p></li>
 </div>
 </section>
 <section id="loop-over-a-bunch-of-classifiers">
-<h3>4.2 Loop over a bunch of classifiers<a class="headerlink" href="#loop-over-a-bunch-of-classifiers" title="Permalink to this headline">#</a></h3>
+<h3>4.2 Loop over a bunch of classifiers<a class="headerlink" href="#loop-over-a-bunch-of-classifiers" title="Permalink to this heading">#</a></h3>
 <p>Our method is to do a cursory check of a bunch of classifiers and then later drill down deeper on anything with good initial results.  We choose to run a loop over ~10 classifiers that seem promising and check the accuracy scores for each one.  Any classifier with a promising accuracy score could then be followed up with detailed hyperparameter tuning, or potentially with considering other classifiers in that same type.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -1586,10 +1342,10 @@ which goes into the ML algorithms.</p></li>
 </section>
 </section>
 <section id="conclusions">
-<h2>5.0 Conclusions:<a class="headerlink" href="#conclusions" title="Permalink to this headline">#</a></h2>
+<h2>5.0 Conclusions:<a class="headerlink" href="#conclusions" title="Permalink to this heading">#</a></h2>
 <p>This classifier can be used to predict CLAGN.  The feature based algorithms do the best jobs of having little to no predicted CLAGN that are truly normal SDSS quasars.  We infer then that if the trained model predicts CLAGN, it is a very good target for follow-up spectroscopy to confirm CLAGN.  However this algorthim will not catch all CLAGN, and will incorrectly labels some CLAGN as being normal SDSS quasars.  THis algorithm can therefore not be used to find a complete sample of CLAGN, but can be used to increase the known sample.</p>
 <section id="potential-areas-of-improvement">
-<h3>5.1 Potential Areas of improvement<a class="headerlink" href="#potential-areas-of-improvement" title="Permalink to this headline">#</a></h3>
+<h3>5.1 Potential Areas of improvement<a class="headerlink" href="#potential-areas-of-improvement" title="Permalink to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Data is messy</p>
 <ul>
@@ -1614,50 +1370,129 @@ which goes into the ML algorithms.</p></li>
 </section>
 
 
-              </div>
+                </article>
               
-            </main>
-            <footer class="footer-article noprint">
-                
-    <!-- Previous / next buttons -->
-<div class='prev-next-area'>
-    <a class='left-prev' id="prev-link" href="multiband_lc.html" title="previous page">
-        <i class="fas fa-angle-left"></i>
-        <div class="prev-next-info">
-            <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">Make multiwavelength light curves using archival data</p>
-        </div>
-    </a>
-    <a class='right-next' id="next-link" href="ML_AGNzoo.html" title="next page">
-    <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">How do AGNs selected with different techniques compare?</p>
-    </div>
-    <i class="fas fa-angle-right"></i>
-    </a>
-</div>
-            </footer>
-        </div>
-    </div>
-    <div class="footer-content row">
-        <footer class="col footer"><p>
-  
-    By Fornax developers<br/>
-  
-      &copy; Copyright 2022-2023, Fornax developers.<br/>
-</p>
-        </footer>
-    </div>
-    
-</div>
 
-
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="light_curve_generator.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Make multiwavelength light curves using archival data</p>
       </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#learning-goals">Learning Goals</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#read-in-a-dataset-of-archival-light-curves">1. Read in a dataset of archival light curves</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-prep">2. Data Prep</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#remove-bands-with-not-enough-data">2.1 Remove bands with not enough data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#combine-labels-for-a-simpler-classification">2.2 Combine Labels for a Simpler Classification</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#remove-bad-data">2.3 Remove “bad”  data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#incomplete-data">2.4 Incomplete Data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#missing-data">2.5 Missing Data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#make-all-objects-and-bands-have-identical-time-arrays-uniform-length-and-spacing">2.5  Make all objects and bands have identical time arrays (uniform length and spacing)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#restructure-dataframe-in-format-expected-by-sktime">2.6  Restructure dataframe in format expected by sktime</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#normalize">2.7 Normalize</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#make-datetime-time-column">2.8 Make datetime time column</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#save-this-dataframe">2.9 Save this dataframe</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#make-into-multi-index-which-is-what-sktime-expects-as-input">2.10 make into multi-index which is what SKTime expects as input</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prep-for-ml-algorithms-in-sktime">3. Prep for ML algorithms in sktime</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#consider-data-augmentation">3.0 Consider data augmentation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#train-test-split">3.1 Train test split</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#check-that-the-data-types-are-ok-for-sktime">3.2 Check that the data types are ok for sktime</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-machine-learning-algorithms-on-the-light-curves">4. Run Machine Learning Algorithms on the light curves</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-most-accurate-classifier">4.1 The Most Accurate Classifier</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#loop-over-a-bunch-of-classifiers">4.2 Loop over a bunch of classifiers</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conclusions">5.0 Conclusions:</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#potential-areas-of-improvement">5.1 Potential Areas of improvement</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Fornax developers
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2022-2023, Fornax developers.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
     </div>
+  </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
 
-
+  <footer class="bd-footer">
+  </footer>
   </body>
 </html>
