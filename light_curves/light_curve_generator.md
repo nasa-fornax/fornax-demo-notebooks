@@ -4,11 +4,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.15.2
+    jupytext_version: 1.16.0
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  display_name: science_demo
   language: python
-  name: python3
+  name: conda-env-science_demo-py
 ---
 
 # Make Multiwavelength Light Curves Using Archival Data
@@ -17,19 +17,19 @@ kernelspec:
 ## Learning Goals    
 By the end of this tutorial, you will be able to:  
   &bull; Automatically load a catalog of sources  
-  &bull; Automatically search NASA and non-NASA resources for light curves  
-  &bull; Store light curves in a Pandas multiindex dataframe  
+  &bull; Automatically & efficiently search NASA and non-NASA resources for light curves at scale  
+  &bull; Store & manipulate light curves in a Pandas multiindex dataframe  
   &bull; Plot all light curves on the same plot
  
  
 ## Introduction:  
  &bull; A user has a sample of interesting targets for which they would like to see a plot of available archival light curves.  We start with a small set of changing look AGN from Yang et al., 2018, which are automatically downloaded. Changing look AGN are cases where the broad emission lines appear or disappear (and not just that the flux is variable). 
  
- &bull; We model light curve plots after van Velzen et al. 2021.  We search through a curated list of time-domain NASA holdings as well as non-NASA sources.  HEASARC catalogs used are Fermi and Beppo-Sax, IRSA catalogs used are ZTF and WISE, and MAST catalogs used are Pan-Starrs, TESS, Kepler, and K2.  Non-NASA sources are Gaia and IceCube. This list is generalized enough to include many types of targets to make this notebook interesting for many types of science.  All of these time-domain archives are searched in an automated fashion using astroquery or APIs.
+ &bull; We model light curve plots after van Velzen et al. 2021.  We search through a curated list of time-domain NASA holdings as well as non-NASA sources.  HEASARC catalogs used are Fermi and Beppo-Sax, IRSA catalogs used are ZTF and WISE, and MAST catalogs used are Pan-Starrs, TESS, Kepler, and K2.  Non-NASA sources are Gaia and IceCube. This list is generalized enough to include many types of targets to make this notebook interesting for many types of science.  All of these time-domain archives are searched in an automated and efficient fashion using astroquery, pyvo, pyarrow or APIs.
  
  &bull; Light curve data storage is a tricky problem.  Currently we are using a multi-index Pandas dataframe, as the best existing choice for right now.  One downside is that we need to manually track the units of flux and time instead of relying on an astropy storage scheme which would be able to do some of the units worrying for us (even astropy can't do all magnitude to flux conversions).  Astropy does not currently have a good option for multi-band light curve storage.
  
- &bull; We intend to explore a ML classifier for these changing look AGN light curves.
+ &bull; ML work using these time-series light curves is in two neighboring notebooks: ML_AGNzoo and lc_classifier.
  
 ## Input:
  &bull; choose from a list of known changing look AGN from the literature  
@@ -454,11 +454,10 @@ _ = create_figures(sample_table ,
 This work made use of:
 
 &bull; Astroquery; Ginsburg et al., 2019, 2019AJ....157...98G  
-&bull; Astropy; Astropy Collaboration 2022, Astropy Collaboration 2018, Astropy Collaboration 2013, 2022ApJ...935..167A, 2018AJ....156..123A, 2013A&A...558A..33A  
+&bull; Astropy; Astropy Collaboration 2022, Astropy Collaboration 2018, Astropy Collaboration 2013,    2022ApJ...935..167A, 2018AJ....156..123A, 2013A&A...558A..33A  
 &bull; Lightkurve; Lightkurve Collaboration 2018, 2018ascl.soft12013L  
 &bull; acstools; https://zenodo.org/record/7406933#.ZBH1HS-B0eY  
 &bull; unWISE light curves; Meisner et al., 2023, 2023AJ....165...36M  
-&bull; Alerce; Forster et al., 2021, 2021AJ....161..242F
 
 ```{code-cell} ipython3
 
