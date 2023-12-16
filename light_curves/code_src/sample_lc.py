@@ -14,7 +14,7 @@ from panstarrs import Panstarrs_get_lightcurves
 from sample_selection import (clean_sample, get_green_sample, get_hon_sample, get_lamassa_sample,
                               get_lopeznavas_sample, get_lyu_sample, get_macleod16_sample, get_macleod19_sample, get_paper_sample,
                               get_ruan_sample, get_SDSS_sample, get_sheng_sample, get_yang_sample, nonunique_sample)
-# from tde_functions import TDE_id2coord
+from tde_functions import TDE_id2coord
 from TESS_Kepler_functions import TESS_Kepler_get_lightcurves
 from WISE_functions import WISE_get_lightcurves
 from ztf_functions import ZTF_get_lightcurve
@@ -55,7 +55,7 @@ def build_sample():
 
     ## ADD TDEs to the sample, manually copied the TDE ZTF names from Hammerstein et al. 2023
     tde_names = ['ZTF18aabtxvd','ZTF18aahqkbt','ZTF18abxftqm','ZTF18acaqdaa','ZTF18acpdvos','ZTF18actaqdw','ZTF19aabbnzo','ZTF18acnbpmd','ZTF19aakiwze','ZTF19aakswrb','ZTF17aaazdba','ZTF19aapreis','ZTF19aarioci','ZTF19abhejal','ZTF19abhhjcc','ZTF19abidbya','ZTF19abzrhgq','ZTF19accmaxo','ZTF20aabqihu','ZTF19acspeuw','ZTF20aamqmfk','ZTF18aakelin','ZTF20abjwvae','ZTF20abfcszi','ZTF20abefeab','ZTF20abowque','ZTF20abrnwfc','ZTF20acitpfz','ZTF20acqoiyt', 'ZTF20abnorit']
-    TDE_id2coord(tde_names,coords,labels)
+    TDE_id2coord(tde_names, coords, labels)
 
     get_paper_sample('2015ApJ...810...14A','FermiBL',coords,labels)
     get_paper_sample('2019A&A...627A..33D','Cicco19',coords,labels)
@@ -65,8 +65,8 @@ def build_sample():
     #To remove duplicates from the list if combining multiple references clean_sample can be used
     # the call below with nonunique_sample just changes the structure to mimic the output of clean sample
     coords_list, labels_list = nonunique_sample(coords, labels)
-    print('final sample: ',len(coords))
-    return coords_list,labels_list
+    print('final sample: ', len(coords))
+    return coords_list, labels_list
 
 
 def parallel_lc(coords_list,labels_list,parquet_savename = '../output/df_lc_.parquet'):
