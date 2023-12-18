@@ -17,7 +17,8 @@ K = 5  # HEALPix order at which the dataset is partitioned
 
 def WISE_get_lightcurves(sample_table, radius=1.0 * u.arcsec, bandlist=["W1", "W2"]):
     """Loads WISE data by searching the unWISE light curve catalog (Meisner et al., 2023AJ....165...36M).
-
+    This is the MAIN function
+    
     Parameters
     ----------
     sample_table : `~astropy.table.Table`

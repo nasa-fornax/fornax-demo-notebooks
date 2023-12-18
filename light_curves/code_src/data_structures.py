@@ -1,4 +1,4 @@
-#setup to save the light curves in a data structure
+#setup to store the light curves in a data structure
 import pandas as pd
 from astropy.table import vstack
 from astropy.timeseries import TimeSeries
