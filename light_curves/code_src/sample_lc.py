@@ -9,8 +9,8 @@ from data_structures import MultiIndexDFObject
 from gaia_functions import Gaia_get_lightcurve
 from HCV_functions import HCV_get_lightcurves
 from heasarc_functions import HEASARC_get_lightcurves
-from icecube_functions import icecube_get_lightcurve
-from panstarrs import panstarrs_get_lightcurves
+from icecube_functions import Icecube_get_lightcurve
+from panstarrs import Panstarrs_get_lightcurves
 from sample_selection import (clean_sample, get_green_sample, get_hon_sample, get_lamassa_sample,
                               get_lopeznavas_sample, get_lyu_sample, get_macleod16_sample, get_macleod19_sample, get_paper_sample,
                               get_ruan_sample, get_SDSS_sample, get_sheng_sample, get_yang_sample, nonunique_sample)
@@ -22,10 +22,10 @@ from ztf_functions import ZTF_get_lightcurve
 
 def build_sample():
     '''Putting together a sample of SDSS quasars, WISE variable AGNs,
-    TDEs, Changing look AGNs, .. coordinates from different 
+    TDEs, Changing look AGNs, .. coordinates from different
     papers.'''
-    
-    coords =[]
+
+    coords = []
     labels = []
 
     get_lamassa_sample(coords, labels)  #2015ApJ...800..144L
@@ -44,11 +44,11 @@ def build_sample():
     vagn_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(VAGN['SDSS_RA'], VAGN['SDSS_Dec'])]
     vagn_labels = ['WISE-Variable' for ra in VAGN['SDSS_RA']]
     coords.extend(vagn_coords)
-    labels.extend(vagn_labels)    
+    labels.extend(vagn_labels)
 
     #now get some "normal" QSOs for use in the classifier
     #there are ~500K of these, so choose the number based on
-    #a balance between speed of running the light curves and whatever 
+    #a balance between speed of running the light curves and whatever
     #the ML algorithms would like to have
     num_normal_QSO = 2000
     get_SDSS_sample(coords, labels, num_normal_QSO)
@@ -56,26 +56,26 @@ def build_sample():
     ## ADD TDEs to the sample, manually copied the TDE ZTF names from Hammerstein et al. 2023
     #tde_names = ['ZTF18aabtxvd','ZTF18aahqkbt','ZTF18abxftqm','ZTF18acaqdaa','ZTF18acpdvos','ZTF18actaqdw','ZTF19aabbnzo','ZTF18acnbpmd','ZTF19aakiwze','ZTF19aakswrb','ZTF17aaazdba','ZTF19aapreis','ZTF19aarioci','ZTF19abhejal','ZTF19abhhjcc','ZTF19abidbya','ZTF19abzrhgq','ZTF19accmaxo','ZTF20aabqihu','ZTF19acspeuw','ZTF20aamqmfk','ZTF18aakelin','ZTF20abjwvae','ZTF20abfcszi','ZTF20abefeab','ZTF20abowque','ZTF20abrnwfc','ZTF20acitpfz','ZTF20acqoiyt', 'ZTF20abnorit']
     #TDE_id2coord(tde_names,coords,labels)
-    
+
 
     get_paper_sample('2015ApJ...810...14A','FermiBL',coords,labels)
     get_paper_sample('2019A&A...627A..33D','Cicco19',coords,labels)
     get_paper_sample('2022ApJ...933...37W','Galex variable 22',coords,labels)
     get_paper_sample('2020ApJ...896...10B','Palomar variable 20',coords,labels)
 
-    #To remove duplicates from the list if combining multiple references clean_sample can be used 
+    #To remove duplicates from the list if combining multiple references clean_sample can be used
     # the call below with nonunique_sample just changes the structure to mimic the output of clean sample
-    coords_list, labels_list = nonunique_sample(coords, labels) 
+    coords_list, labels_list = nonunique_sample(coords, labels)
     print('final sample: ',len(coords))
     return coords_list,labels_list
- 
+
 
 def parallel_lc(coords_list,labels_list,parquet_savename = '../output/df_lc_.parquet'):
-    ''' Check all the archives for the light curve data of the 
-    list of coordinates given in input in parallel and return a 
+    ''' Check all the archives for the light curve data of the
+    list of coordinates given in input in parallel and return a
     muldidimensional lightcurve dataframe.'''
-    
-    max_fermi_error_radius = str(1.0)  
+
+    max_fermi_error_radius = str(1.0)
     max_sax_error_radius = str(3.0)
     heasarc_cat = ["FERMIGTRIG", "SAXGRBMGRB"]
     error_radius = [max_fermi_error_radius , max_sax_error_radius]
@@ -109,10 +109,10 @@ def parallel_lc(coords_list,labels_list,parquet_savename = '../output/df_lc_.par
             HCV_get_lightcurves, (coords_list, labels_list, hcv_radius), callback=callback
         )
         pool.apply_async(
-            icecube_get_lightcurve, (coords_list, labels_list, 3, "../data/", 1), callback=callback
+            Icecube_get_lightcurve, (coords_list, labels_list, 3, "../data/", 1), callback=callback
         )
         pool.apply_async(
-            panstarrs_get_lightcurves, (coords_list, labels_list, panstarrs_radius), callback=callback
+            Panstarrs_get_lightcurves, (coords_list, labels_list, panstarrs_radius), callback=callback
         )
         pool.apply_async(
             TESS_Kepler_get_lightcurves, (coords_list, labels_list, lk_radius), callback=callback
@@ -129,7 +129,7 @@ def parallel_lc(coords_list,labels_list,parquet_savename = '../output/df_lc_.par
 
     parallel_endtime = time.time()
     print('parallel processing took', parallel_endtime - parallel_starttime, 's')
-    
+
     # # Save the data for future use with ML notebook
     parallel_df_lc.data.to_parquet(parquet_savename)
     print("file saved!")
@@ -139,6 +139,6 @@ def main():
     c,l = build_sample()
     dflc = parallel_lc(c,l,parquet_savename = '../output/df_lc_smalltest.parquet')
     # Unify for ML and save
-    
+
 if __name__ == "__main__":
     main()
