@@ -3,15 +3,20 @@
 # the container supporting the science use case in question.
 acstools
 astropy
-astroquery==0.4.7dev8479 # pinned for Gaia bug astropy/astroquery#2844
+astroquery>=0.4.7.dev0
+requests
 hpgeom
 lightkurve
 matplotlib
 numpy
 pandas
+pyarrow
 pyvo
+scikit-learn
+scipy
 s3fs>=23.10.0
 tqdm
 alerce
 umap-learn[plot]
 git+https://github.com/sevamoo/SOMPY
+numba
