@@ -1,13 +1,12 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Automated Multiband Forced Photometry on Large Datasets &#8212; Fornax Demo Notebooks</title>
   
@@ -29,22 +28,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/clipboard.min.js"></script>
-    <script src="../_static/copybutton.js"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'forced_photometry/multiband_photometry';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -156,7 +155,18 @@
             <span class="sr-only">GitHub</span></a>
         </li>
 </ul></div>
-        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         
         <ul class="nav bd-sidenav bd-sidenav__home-link">
@@ -498,10 +508,10 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="automated-multiband-forced-photometry-on-large-datasets">
-<h1>Automated Multiband Forced Photometry on Large Datasets<a class="headerlink" href="#automated-multiband-forced-photometry-on-large-datasets" title="Permalink to this heading">#</a></h1>
+<h1>Automated Multiband Forced Photometry on Large Datasets<a class="headerlink" href="#automated-multiband-forced-photometry-on-large-datasets" title="Link to this heading">#</a></h1>
 <hr class="docutils" />
 <section id="learning-goals">
-<h2>Learning Goals:<a class="headerlink" href="#learning-goals" title="Permalink to this heading">#</a></h2>
+<h2>Learning Goals:<a class="headerlink" href="#learning-goals" title="Link to this heading">#</a></h2>
 <p>By the end of this tutorial, you will be able to:</p>
 <ul class="simple">
 <li><p>get catalogs and images from NASA archives in the cloud where possible</p></li>
@@ -512,12 +522,12 @@ document.write(`
 </ul>
 </section>
 <section id="introduction">
-<h2>Introduction:<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
+<h2>Introduction:<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
 <p>This code performs photometry in an automated fashion at all locations in an input catalog on 4 bands of IRAC data from IRSA and 2 bands of Galex data from MAST.  The resulting catalog is then cross-matched with a Chandra catalog from HEASARC to generate a multiband catalog to facilitate galaxy evolution studies.</p>
 <p>The code will run on 2 different science platforms and makes full use of multiple processors to optimize run time on large datasets.</p>
 </section>
 <section id="input">
-<h2>Input:<a class="headerlink" href="#input" title="Permalink to this heading">#</a></h2>
+<h2>Input:<a class="headerlink" href="#input" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p>RA and DEC within COSMOS catalog</p></li>
 <li><p>desired catalog radius in arcminutes</p></li>
@@ -525,14 +535,14 @@ document.write(`
 </ul>
 </section>
 <section id="output">
-<h2>Output:<a class="headerlink" href="#output" title="Permalink to this heading">#</a></h2>
+<h2>Output:<a class="headerlink" href="#output" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p>merged, multiband, science ready pandas dataframe</p></li>
 <li><p>IRAC color color plot for identifying interesting populations</p></li>
 </ul>
 </section>
 <section id="non-standard-imports">
-<h2>Non-standard Imports<a class="headerlink" href="#non-standard-imports" title="Permalink to this heading">#</a></h2>
+<h2>Non-standard Imports<a class="headerlink" href="#non-standard-imports" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">tractor</span></code> code which does the forced photometry from Lang et al., 2016</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">astroquery</span></code> to interface with archives APIs</p></li>
@@ -541,17 +551,17 @@ document.write(`
 </ul>
 </section>
 <section id="authors">
-<h2>Authors:<a class="headerlink" href="#authors" title="Permalink to this heading">#</a></h2>
+<h2>Authors:<a class="headerlink" href="#authors" title="Link to this heading">#</a></h2>
 <p>Jessica Krick, David Shupe, Marziye JafariYazani, Brigitta Sipőcz, Vandana Desai, Steve Groom, Troy Raen</p>
 </section>
 <section id="acknowledgements">
-<h2>Acknowledgements:<a class="headerlink" href="#acknowledgements" title="Permalink to this heading">#</a></h2>
+<h2>Acknowledgements:<a class="headerlink" href="#acknowledgements" title="Link to this heading">#</a></h2>
 <p>Kristina Nyland for the workflow of the tractor wrapper.<br />
 MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>#ensure all dependencies are installed
-!pip install -r requirements.txt
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#ensure all dependencies are installed</span>
+<span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 </div>
@@ -619,7 +629,7 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 </div>
 </section>
 <section id="retrieve-initial-catalog-from-irsa">
-<h2>1. Retrieve Initial Catalog from IRSA<a class="headerlink" href="#retrieve-initial-catalog-from-irsa" title="Permalink to this heading">#</a></h2>
+<h2>1. Retrieve Initial Catalog from IRSA<a class="headerlink" href="#retrieve-initial-catalog-from-irsa" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p>Automatically set up a catalog with ra, dec, photometric redshifts, fiducial band fluxes, &amp; probability that it is a star</p></li>
 <li><p>Catalog we are using is COSMOS2015 (Laigle et al. 2016)</p></li>
@@ -661,7 +671,7 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 </div>
 </div>
 <section id="a-filter-catalog">
-<h3>1a. Filter Catalog<a class="headerlink" href="#a-filter-catalog" title="Permalink to this heading">#</a></h3>
+<h3>1a. Filter Catalog<a class="headerlink" href="#a-filter-catalog" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>if desired could filter the initial catalog to only include desired sources</p></li>
 </ul>
@@ -678,20 +688,20 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 </section>
 </section>
 <section id="retrieve-image-datasets-from-the-cloud">
-<h2>2. Retrieve Image Datasets from the Cloud<a class="headerlink" href="#retrieve-image-datasets-from-the-cloud" title="Permalink to this heading">#</a></h2>
+<h2>2. Retrieve Image Datasets from the Cloud<a class="headerlink" href="#retrieve-image-datasets-from-the-cloud" title="Link to this heading">#</a></h2>
 <section id="use-the-fornax-cloud-access-api-to-obtain-the-irac-data-from-the-irsa-s3-bucket">
-<h3>Use the fornax cloud access API to obtain the IRAC data from the IRSA S3 bucket.<a class="headerlink" href="#use-the-fornax-cloud-access-api-to-obtain-the-irac-data-from-the-irsa-s3-bucket" title="Permalink to this heading">#</a></h3>
+<h3>Use the fornax cloud access API to obtain the IRAC data from the IRSA S3 bucket.<a class="headerlink" href="#use-the-fornax-cloud-access-api-to-obtain-the-irac-data-from-the-irsa-s3-bucket" title="Link to this heading">#</a></h3>
 <p>Details here may change as the prototype code is being added to the appropriate libraries, as well as the data holding to the appropriate NGAP storage as opposed to IRSA resources.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span># Temporary solution, remove when the fornax API is added to the image
-# This relies on the assumption that https://github.com/fornax-navo/fornax-cloud-access-API is being cloned to this environment. 
-# If it&#39;s not, then run a ``git clone https://github.com/fornax-navo/fornax-cloud-access-API --depth=1`` from a terminal at the highest directory root.
-# You may need to update the fork if you forked it in the past
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Temporary solution, remove when the fornax API is added to the image</span>
+<span class="c1"># This relies on the assumption that https://github.com/fornax-navo/fornax-cloud-access-API is being cloned to this environment. </span>
+<span class="c1"># If it&#39;s not, then run a ``git clone https://github.com/fornax-navo/fornax-cloud-access-API --depth=1`` from a terminal at the highest directory root.</span>
+<span class="c1"># You may need to update the fork if you forked it in the past</span>
 
-import os
-if not os.path.exists(&#39;../../fornax-cloud-access-API&#39;):
-    ! git clone https://github.com/fornax-navo/fornax-cloud-access-API --depth=1 ../../fornax-cloud-access-API
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;../../fornax-cloud-access-API&#39;</span><span class="p">):</span>
+    <span class="err">!</span> <span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">fornax</span><span class="o">-</span><span class="n">navo</span><span class="o">/</span><span class="n">fornax</span><span class="o">-</span><span class="n">cloud</span><span class="o">-</span><span class="n">access</span><span class="o">-</span><span class="n">API</span> <span class="o">--</span><span class="n">depth</span><span class="o">=</span><span class="mi">1</span> <span class="o">../../</span><span class="n">fornax</span><span class="o">-</span><span class="n">cloud</span><span class="o">-</span><span class="n">access</span><span class="o">-</span><span class="n">API</span>
 </pre></div>
 </div>
 </div>
@@ -771,7 +781,7 @@ if not os.path.exists(&#39;../../fornax-cloud-access-API&#39;):
 </div>
 </section>
 <section id="use-ivoa-image-search-and-fornax-download-to-obtain-galex-from-the-mast-archive">
-<h3>Use IVOA image search and Fornax download to obtain Galex from the MAST archive<a class="headerlink" href="#use-ivoa-image-search-and-fornax-download-to-obtain-galex-from-the-mast-archive" title="Permalink to this heading">#</a></h3>
+<h3>Use IVOA image search and Fornax download to obtain Galex from the MAST archive<a class="headerlink" href="#use-ivoa-image-search-and-fornax-download-to-obtain-galex-from-the-mast-archive" title="Link to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#the Galex mosaic of COSMOS is broken into 4 seperate images</span>
@@ -873,12 +883,12 @@ if not os.path.exists(&#39;../../fornax-cloud-access-API&#39;):
 </section>
 </section>
 <section id="run-forced-photometry">
-<h2>3.  Run Forced Photometry<a class="headerlink" href="#run-forced-photometry" title="Permalink to this heading">#</a></h2>
+<h2>3.  Run Forced Photometry<a class="headerlink" href="#run-forced-photometry" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p>Calculate a flux at a given position in 2 IRAC and 2 Galex bands</p></li>
 </ul>
 <section id="a-setup">
-<h3>3a. Setup<a class="headerlink" href="#a-setup" title="Permalink to this heading">#</a></h3>
+<h3>3a. Setup<a class="headerlink" href="#a-setup" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>initialize data frame columns to hold the results</p></li>
 <li><p>collect the parameters for each band/channel</p></li>
@@ -1004,7 +1014,7 @@ if not os.path.exists(&#39;../../fornax-cloud-access-API&#39;):
 </div>
 </section>
 <section id="b-main-function-to-do-the-forced-photometry">
-<h3>3b. Main Function to do the Forced Photometry<a class="headerlink" href="#b-main-function-to-do-the-forced-photometry" title="Permalink to this heading">#</a></h3>
+<h3>3b. Main Function to do the Forced Photometry<a class="headerlink" href="#b-main-function-to-do-the-forced-photometry" title="Link to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calc_instrflux</span><span class="p">(</span><span class="n">band</span><span class="p">,</span> <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">stype</span><span class="p">,</span> <span class="n">ks_flux_aper2</span><span class="p">,</span> <span class="n">img_pair</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
@@ -1088,14 +1098,14 @@ if not os.path.exists(&#39;../../fornax-cloud-access-API&#39;):
 </div>
 </section>
 <section id="c-calculate-forced-photometry-with-straightforward-but-slow-method">
-<h3>3c. Calculate Forced Photometry with Straightforward but Slow Method<a class="headerlink" href="#c-calculate-forced-photometry-with-straightforward-but-slow-method" title="Permalink to this heading">#</a></h3>
+<h3>3c. Calculate Forced Photometry with Straightforward but Slow Method<a class="headerlink" href="#c-calculate-forced-photometry-with-straightforward-but-slow-method" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>no longer in use but keeping to demonstrate this capability<br />
 as well as the increase in speed when going to parallelization</p></li>
 </ul>
 </section>
 <section id="d-calculate-forced-photometry-parallelization">
-<h3>3d. Calculate Forced Photometry - Parallelization<a class="headerlink" href="#d-calculate-forced-photometry-parallelization" title="Permalink to this heading">#</a></h3>
+<h3>3d. Calculate Forced Photometry - Parallelization<a class="headerlink" href="#d-calculate-forced-photometry-parallelization" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Parallelization: we can either interate over the rows of the dataframe and run the four bands in parallel; or we could zip together the row index, band, ra, dec,</p></li>
 </ul>
@@ -1182,7 +1192,7 @@ as well as the increase in speed when going to parallelization</p></li>
 </div>
 </section>
 <section id="e-cleanup">
-<h3>3e. Cleanup<a class="headerlink" href="#e-cleanup" title="Permalink to this heading">#</a></h3>
+<h3>3e. Cleanup<a class="headerlink" href="#e-cleanup" title="Link to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#had to call the galex flux columns ch5 and ch6</span>
@@ -1214,7 +1224,7 @@ as well as the increase in speed when going to parallelization</p></li>
 </div>
 </section>
 <section id="f-plot-to-confirm-our-photometry-results">
-<h3>3f. Plot to Confirm our Photometry Results<a class="headerlink" href="#f-plot-to-confirm-our-photometry-results" title="Permalink to this heading">#</a></h3>
+<h3>3f. Plot to Confirm our Photometry Results<a class="headerlink" href="#f-plot-to-confirm-our-photometry-results" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>compare to published COSMOS 2015 catalog</p></li>
 </ul>
@@ -1321,11 +1331,11 @@ as well as the increase in speed when going to parallelization</p></li>
 </section>
 </section>
 <section id="cross-match-our-new-photometry-catalog-with-an-x-ray-archival-catalog">
-<h2>4. Cross Match our New Photometry Catalog with an X-ray archival Catalog<a class="headerlink" href="#cross-match-our-new-photometry-catalog-with-an-x-ray-archival-catalog" title="Permalink to this heading">#</a></h2>
+<h2>4. Cross Match our New Photometry Catalog with an X-ray archival Catalog<a class="headerlink" href="#cross-match-our-new-photometry-catalog-with-an-x-ray-archival-catalog" title="Link to this heading">#</a></h2>
 <p>We are using <code class="docutils literal notranslate"><span class="pre">nway</span></code> as the tool to do the cross match (Salvato et al. 2017).
 <code class="docutils literal notranslate"><span class="pre">nway</span></code> expects input as two fits table files and outputs a third table file with all the possible matches and their probabilities of being the correct match.  We then sort that catalog and take only the best matches to be the true matches.</p>
 <section id="a-retrieve-the-heasarc-catalog">
-<h3>4a. Retrieve the HEASARC Catalog<a class="headerlink" href="#a-retrieve-the-heasarc-catalog" title="Permalink to this heading">#</a></h3>
+<h3>4a. Retrieve the HEASARC Catalog<a class="headerlink" href="#a-retrieve-the-heasarc-catalog" title="Link to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#first get an X-ray catalog from Heasarc</span>
@@ -1348,7 +1358,7 @@ as well as the increase in speed when going to parallelization</p></li>
 </div>
 </section>
 <section id="b-run-nway-to-do-the-cross-match">
-<h3>4b. Run <code class="docutils literal notranslate"><span class="pre">nway</span></code> to do the Cross-Match<a class="headerlink" href="#b-run-nway-to-do-the-cross-match" title="Permalink to this heading">#</a></h3>
+<h3>4b. Run <code class="docutils literal notranslate"><span class="pre">nway</span></code> to do the Cross-Match<a class="headerlink" href="#b-run-nway-to-do-the-cross-match" title="Link to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#setup:</span>
@@ -1374,10 +1384,10 @@ as well as the increase in speed when going to parallelization</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span># call nway
-!/home/jovyan/.local/bin/nway.py &#39;data/Chandra/COSMOS_chandra.fits&#39; :ERROR_RADIUS &#39;data/multiband_phot.fits&#39; 0.1 --out=data/Chandra/chandra_multiband.fits --radius 15 --prior-completeness 0.9
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># call nway</span>
+<span class="err">!</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">jovyan</span><span class="o">/.</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">nway</span><span class="o">.</span><span class="n">py</span> <span class="s1">&#39;data/Chandra/COSMOS_chandra.fits&#39;</span> <span class="p">:</span><span class="n">ERROR_RADIUS</span> <span class="s1">&#39;data/multiband_phot.fits&#39;</span> <span class="mf">0.1</span> <span class="o">--</span><span class="n">out</span><span class="o">=</span><span class="n">data</span><span class="o">/</span><span class="n">Chandra</span><span class="o">/</span><span class="n">chandra_multiband</span><span class="o">.</span><span class="n">fits</span> <span class="o">--</span><span class="n">radius</span> <span class="mi">15</span> <span class="o">--</span><span class="n">prior</span><span class="o">-</span><span class="n">completeness</span> <span class="mf">0.9</span>
     
-#!/opt/conda/bin/nway.py &#39;data/Chandra/COSMOS_chandra.fits&#39; :ERROR_RADIUS &#39;data/multiband_phot.fits&#39; 0.1 --out=data/Chandra/chandra_multiband.fits --radius 15 --prior-completeness 0.9
+<span class="c1">#!/opt/conda/bin/nway.py &#39;data/Chandra/COSMOS_chandra.fits&#39; :ERROR_RADIUS &#39;data/multiband_phot.fits&#39; 0.1 --out=data/Chandra/chandra_multiband.fits --radius 15 --prior-completeness 0.9</span>
 </pre></div>
 </div>
 </div>
@@ -1438,7 +1448,7 @@ as well as the increase in speed when going to parallelization</p></li>
 </section>
 </section>
 <section id="plot-final-results">
-<h2>5. Plot Final Results<a class="headerlink" href="#plot-final-results" title="Permalink to this heading">#</a></h2>
+<h2>5. Plot Final Results<a class="headerlink" href="#plot-final-results" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p>We want to understand something about populations based on their colors</p></li>
 </ul>
@@ -1540,7 +1550,7 @@ as well as the increase in speed when going to parallelization</p></li>
 <p>We extend the works of Bouquin et al. 2015 and Moutard et al. 2020 by showing a GALEX - Spitzer color color diagram over plotted with Chandra detections.  Blue galaxies in these colors are generated by O and B stars and so must currently be forming stars. We find a tight blue cloud in this color space identifying those star forming galaxies.  Galaxies off of the blue cloud have had their star formation quenched, quite possibly by the existence of an AGN through removal of the gas reservoir required for star formation.  Chandra detected galaxies host AGN, and while those are more limited in number, can be shown here to be a hosted by all kinds of galaxies, including quiescent galaxies which would be in the upper right of this plot.  This likely implies that AGN are indeed involved in quenching star formation.  Additionally, we show the Chandra hardness ratio (HR) color coded according to the vertical color bar on the right side of the plot.  Those AGN with higher hardness ratios have their soft x-ray bands heavily obscured and appear to reside preferentially toward the quiescent galaxies.</p>
 </section>
 <section id="references">
-<h2>References<a class="headerlink" href="#references" title="Permalink to this heading">#</a></h2>
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
 <p>This work made use of:</p>
 <ul class="simple">
 <li><p>Astroquery; Ginsburg et al., 2019, 2019AJ….157…98G</p></li>
