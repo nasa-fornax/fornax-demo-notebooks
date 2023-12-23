@@ -409,6 +409,9 @@ with mp.Pool(processes=n_workers) as pool:
     pool.join()  # wait for all jobs to complete, including the callback
 
 parallel_endtime = time.time()
+
+# LightKurve will return an "Error" when it doesn't find a match for a target
+# These are not real errors and can be safely ignored.
 ```
 
 ```{code-cell} ipython3
