@@ -73,13 +73,10 @@ MAST, HEASARC, & IRSA Fornax teams
 import multiprocessing as mp
 import sys
 import time
-import warnings
 
 import astropy.units as u
 import pandas as pd
 from astropy.table import Table
-
-warnings.filterwarnings('ignore')
 
 # local code imports
 sys.path.append('code_src/')
