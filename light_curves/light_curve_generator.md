@@ -189,15 +189,14 @@ heasarcstarttime = time.time()
 max_fermi_error_radius = str(1.0)  
 max_sax_error_radius = str(3.0)
 
-# List of missions to query and their corresponding error radii
-heasarc_cat = ["FERMIGTRIG", "SAXGRBMGRB"]
-error_radius = [max_fermi_error_radius , max_sax_error_radius]
+# catalogs to query and their corresponding max error radii
+heasarc_catalogs = {"FERMIGTRIG": max_fermi_error_radius, "SAXGRBMGRB": max_sax_error_radius}
 
-# get heasarc light curves in the above curated list of missions 
-df_lc_fermi = HEASARC_get_lightcurves(sample_table, heasarc_cat, error_radius)
+# get heasarc light curves in the above curated list of catalogs
+df_lc_HEASARC = HEASARC_get_lightcurves(sample_table, heasarc_catalogs)
 
 # add the resulting dataframe to all other archives
-df_lc.append(df_lc_fermi)
+df_lc.append(df_lc_HEASARC)
 
 print('heasarc search took:', time.time() - heasarcstarttime, 's')
 ```
@@ -341,8 +340,7 @@ print('total time for serial archive calls is ', end_serial - start_serial, 's')
 # define some variables in case the above serial cells are not run
 max_fermi_error_radius = str(1.0)  
 max_sax_error_radius = str(3.0)
-heasarc_cat = ["FERMIGTRIG", "SAXGRBMGRB"]
-error_radius = [max_fermi_error_radius , max_sax_error_radius]
+heasarc_catalogs = {"FERMIGTRIG": max_fermi_error_radius, "SAXGRBMGRB": max_sax_error_radius}
 bandlist = ["W1", "W2"]
 wise_radius = 1.0 * u.arcsec
 panstarrs_radius = 1.0 / 3600.0  # search radius = 1 arcsec
@@ -384,7 +382,7 @@ with mp.Pool(processes=n_workers) as pool:
         Gaia_get_lightcurve, (sample_table, 1/3600., 0), callback=callback
     )
     pool.apply_async(
-        HEASARC_get_lightcurves, (sample_table, heasarc_cat, error_radius), callback=callback
+        HEASARC_get_lightcurves, (sample_table, heasarc_catalogs), callback=callback
     )
     pool.apply_async(
         HCV_get_lightcurves, (sample_table, hcv_radius), callback=callback
