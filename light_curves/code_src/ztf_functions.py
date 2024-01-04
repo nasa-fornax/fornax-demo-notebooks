@@ -309,13 +309,11 @@ def transform_lightcurves(ztf_df):
     ztf_df = ztf_df.loc[ztf_df["catflags"] < 32768, :]
 
     # calc flux [https://arxiv.org/pdf/1902.01872.pdf zeropoint corrections already applied]
-    magupper = ztf_df["mag"] + ztf_df["magerr"]
-    maglower = ztf_df["mag"] - ztf_df["magerr"]
-    flux = 10 ** ((ztf_df["mag"] - 23.9) / -2.5)  # uJy
-    flux_upper = abs(flux - 10 ** ((magupper - 23.9) / -2.5))
-    flux_lower = abs(flux - 10 ** ((maglower - 23.9) / -2.5))
-    fluxerr = (flux_upper + flux_lower) / 2.0
-    ztf_df.loc[:, "flux"] = flux * 1e-3  # now in mJy
-    ztf_df.loc[:, "err"] = fluxerr * 1e-3
+    mag = ztf_df["mag"].to_numpy()
+    magerr = ztf_df["magerr"].to_numpy()
+    fluxupper = ((mag - magerr) * u.ABmag).to_value('mJy')
+    fluxlower = ((mag + magerr) * u.ABmag).to_value('mJy')
+    ztf_df["flux"] = (mag * u.ABmag).to_value('mJy')
+    ztf_df["err"] = (fluxupper - fluxlower) / 2
 
     return ztf_df
