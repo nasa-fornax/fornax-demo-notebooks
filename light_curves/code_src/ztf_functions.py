@@ -24,7 +24,7 @@ CATALOG_FILES = (
 )
 
 
-def ZTF_get_lightcurve(sample_table, nworkers=6, ztf_radius=0.000278 * u.deg):
+def ZTF_get_lightcurve(sample_table, nworkers=6, match_radius=0.000278 * u.deg):
     """Function to add the ZTF lightcurves in all three bands to a multiframe data structure.  This is the MAIN function.
 
     Parameters
@@ -35,7 +35,7 @@ def ZTF_get_lightcurve(sample_table, nworkers=6, ztf_radius=0.000278 * u.deg):
         number of workers in the multiprocessing pool used in the load_lightcurves function.
         This must be None if this function is being called from within a child process already.
         (This function does not support nested multiprocessing.)
-    ztf_radius : astropy Quantity
+    match_radius : astropy Quantity
         search radius, how far from the source should the archives return results
 
     Returns
@@ -45,7 +45,7 @@ def ZTF_get_lightcurve(sample_table, nworkers=6, ztf_radius=0.000278 * u.deg):
     """
     # the catalog is in parquet format with one file per ZTF filter, field, ccd, and quadrant
     # use a TAP query to locate which files each object is in
-    locations_df = locate_objects(sample_table, ztf_radius)
+    locations_df = locate_objects(sample_table, match_radius)
 
     # the catalog is stored in an AWS S3 bucket. loop over the files and load the light curves
     ztf_df = load_lightcurves(locations_df, nworkers=nworkers)
@@ -104,7 +104,7 @@ def file_name(filtercode, field, ccdid, qid, basedir=None):
     return CATALOG_ROOT + f
 
 
-def locate_objects(sample_table, radius, chunksize=10000):
+def locate_objects(sample_table, match_radius, chunksize=10000):
     """The catalog's parquet files are organized by filter, field, CCD, and quadrant. Use TAP to look them up.
 
     https://irsa.ipac.caltech.edu/docs/program_interface/TAP.html
@@ -113,9 +113,9 @@ def locate_objects(sample_table, radius, chunksize=10000):
     ----------
     sample_table : `~astropy.table.Table`
         Table with the coordinates and journal reference labels of the sources
-    radius : astropy Quantity
+    match_radius : astropy Quantity
         search radius, how far from the source should the archives return results
-     chunksize : int
+    chunksize : int
         This tap query is much faster when submitting less than ~10,000 coords at a time
         so iterate over chunks of coords_tbl and then concat results.
 
@@ -139,7 +139,7 @@ def locate_objects(sample_table, radius, chunksize=10000):
     query = f"""SELECT {select_cols}
         FROM ztf_objects_{DATARELEASE} ztf, TAP_UPLOAD.sample sample
         WHERE CONTAINS(
-            POINT('ICRS', sample.ra, sample.dec), CIRCLE('ICRS', ztf.ra, ztf.dec, {radius.value})
+            POINT('ICRS', sample.ra, sample.dec), CIRCLE('ICRS', ztf.ra, ztf.dec, {match_radius.value})
         )=1"""
 
     # do the tap calls
