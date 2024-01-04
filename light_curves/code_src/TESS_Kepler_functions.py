@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 from data_structures import MultiIndexDFObject
 
-def clean_filternames(search_result, numlc):
+def clean_filternames(lightcurve):
     """Simplify mission name from a combined list
     
     Mission names are returned including quarter numbers, remove those to
@@ -23,7 +23,7 @@ def clean_filternames(search_result, numlc):
     filtername : str
         name of the mission without quarter information
     """            
-    filtername = str(search_result[numlc].mission)
+    filtername = lightcurve.mission
     # clean this up a bit so all Kepler quarters etc., get the same filtername
     # we don't need to track the individual names for the quarters, just need to know which mission it is
     if 'Kepler' in filtername:
@@ -73,12 +73,10 @@ def TESS_Kepler_get_lightcurves(sample_table, radius):
 
         # can't get the whole collection directly into pandas multiindex
         # pull out inidividual light curves, convert to uniform units, and put them in pandas
-        for numlc in range(len(search_result)):
-    
-            lc = lc_collection[numlc]  # for testing 0 is Kepler, #69 is TESS
+        for lightcurve in lc_collection:  # for testing 0 is Kepler, #69 is TESS
 
             # convert to Pandas
-            lcdf = lc.to_pandas().reset_index()
+            lcdf = lightcurve.to_pandas().reset_index()
 
             # these light curves are too highly sampled for our AGN use case, so reduce their size
             # by choosing only to keep every nth sample
@@ -97,7 +95,7 @@ def TESS_Kepler_get_lightcurves(sample_table, radius):
             fluxerr_lc = lcdf_small.flux_err #in electron/s
 
             # record band name
-            filtername = clean_filternames(search_result, numlc)
+            filtername = clean_filternames(lightcurve)
 
             # put this single object light curves into a pandas multiindex dataframe
             # fluxes are in units of electrons/s and will be scaled to fit the other fluxes when plotting
