@@ -256,50 +256,40 @@ def Panstarrs_get_lightcurves(sample_table, radius):
         lab = row["label"]
         objectid = row["objectid"]
 
-        #sometimes there isn't actually a light curve for the target???
-        try:
-            #see if there is an object in panSTARRS at this location
-            results = ps1cone(ra,dec,radius,release='dr2')
-            tab = ascii.read(results)
+        # see if there is an object in panSTARRS at this location. if not, continue to the next object.
+        results = ps1cone(ra,dec,radius,release='dr2')
+        if not results:
+            continue
+        tab = ascii.read(results)
     
-            # improve the format of the table
-            tab = improve_filter_format(tab)
-        
-            #in case there is more than one object within 1 arcsec, sort them by match distance
-            tab.sort('distance')
+        # improve the format of the table
+        tab = improve_filter_format(tab)
     
-            #if there is an object at that location
-            if len(tab) > 0:   
-                #got a live one
-                #print( 'for object', ccount + 1, 'there is ',len(tab), 'match in panSTARRS', tab['objID'])
+        #in case there is more than one object within 1 arcsec, sort them by match distance
+        tab.sort('distance')
 
-                #take the closest match as the best match
-                objid = tab['objID'][0]
-        
-                #get the actual detections and light curve info for this target
-                dresults = search_lightcurve(objid)
-        
-            ascii.read(dresults)
-       
+        #take the closest match as the best match
+        objid = tab['objID'][0]
+
+        #get the actual detections and light curve info for this target
+        dresults = search_lightcurve(objid)
+        if not dresults:
+            continue
     
         #fix the column names to include filter names
-    
-            dtab = addfilter(ascii.read(dresults))
-    
-            dtab.sort('obsTime')
+        dtab = addfilter(ascii.read(dresults))
 
-            #here is the light curve mixed from all 5 bands
-            t_panstarrs = dtab['obsTime']
-            flux_panstarrs = dtab['psfFlux']*1E3  # in mJy
-            err_panstarrs = dtab['psfFluxErr'] *1E3
-            filtername = dtab['filter']
-            
-            #put this single object light curves into a pandas multiindex dataframe
-            dfsingle = pd.DataFrame(dict(flux=flux_panstarrs, err=err_panstarrs, time=t_panstarrs, objectid=objectid, band=filtername, label=lab)).set_index(["objectid","label", "band", "time"])
-            #then concatenate each individual df together
-            df_lc.append(dfsingle)
-        except FileNotFoundError:
-            #print("There is no light curve")
-            pass
+        dtab.sort('obsTime')
+
+        #here is the light curve mixed from all 5 bands
+        t_panstarrs = dtab['obsTime']
+        flux_panstarrs = dtab['psfFlux']*1E3  # in mJy
+        err_panstarrs = dtab['psfFluxErr'] *1E3
+        filtername = dtab['filter']
+        
+        #put this single object light curves into a pandas multiindex dataframe
+        dfsingle = pd.DataFrame(dict(flux=flux_panstarrs, err=err_panstarrs, time=t_panstarrs, objectid=objectid, band=filtername, label=lab)).set_index(["objectid","label", "band", "time"])
+        #then concatenate each individual df together
+        df_lc.append(dfsingle)
             
     return(df_lc)
