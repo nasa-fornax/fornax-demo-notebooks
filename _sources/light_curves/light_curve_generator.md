@@ -73,13 +73,10 @@ MAST, HEASARC, & IRSA Fornax teams
 import multiprocessing as mp
 import sys
 import time
-import warnings
 
 import astropy.units as u
 import pandas as pd
 from astropy.table import Table
-
-warnings.filterwarnings('ignore')
 
 # local code imports
 sys.path.append('code_src/')
@@ -412,6 +409,9 @@ with mp.Pool(processes=n_workers) as pool:
     pool.join()  # wait for all jobs to complete, including the callback
 
 parallel_endtime = time.time()
+
+# LightKurve will return an "Error" when it doesn't find a match for a target
+# These are not real errors and can be safely ignored.
 ```
 
 ```{code-cell} ipython3
