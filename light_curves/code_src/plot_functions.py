@@ -33,15 +33,12 @@ def setup_text_plots():
     mpl.rcParams['ytick.right'] = True
     mpl.rcParams['hatch.linewidth'] = 1
 
-def create_figures(sample_table , df_lc, show_nbr_figures, save_output):
+def create_figures(df_lc, show_nbr_figures, save_output):
     '''
-    Creates figures of the lightcurves for each source in the sample_table.
+    Creates figures of the lightcurves for each object in df_lc.
     
     Parameters
     ----------
-    sample_table : `~astropy.table.Table`
-        Table with the coordinates, objectid's and journal reference labels of the sources
-        
     df_lc : lightcurve object
         Lightcurve objects from which to create the lightcurve figures.
         
@@ -70,15 +67,9 @@ def create_figures(sample_table , df_lc, show_nbr_figures, save_output):
         print("No figures are shown or saved.")
         return(False)
     
-    cc = 0
-    for row in sample_table:
-        objectid = row['objectid']
-        cc += 1 # counter (1-indexed)
-        
-        ## Set up =================
-        # sort so that time increases monotonically within each band
-        singleobj = df_lc.data.loc[objectid].sort_index()
-
+    # Iterate over objects. Sort so that time increases monotonically within each band.
+    object_groups = df_lc.data.sort_index().reset_index().groupby('objectid')
+    for cc, (objectid, singleobj) in enumerate(object_groups):
         # Set up for plotting. We use the "mosaic" method so we can plot
         # the ZTF data in a subplot for better visibility.
         fig, axes = plt.subplot_mosaic(mosaic=[["A"],["A"],["B"]] , figsize=(10,8))
@@ -91,18 +82,14 @@ def create_figures(sample_table , df_lc, show_nbr_figures, save_output):
         has_ztf = False # flag to set to True if ZTF data is available.
         has_icecube = False # flag to set to True if IceCube data is available.
 
-        for band in singleobj.index.unique('band'):
-
-            # get data
-            band_lc = singleobj.loc[:, band, :]
-            band_lc.reset_index(inplace = True)
-
+        band_groups = singleobj.groupby('band')
+        for band, band_lc in band_groups:
             # first clean dataframe to remove erroneous rows
             band_lc_clean = band_lc[band_lc['time'] < 65000]
             
             # Do some sigma-clipping, but only if more than 10 data points.
             if len(band_lc_clean) >= 10:
-                band_lc_clean = band_lc_clean[np.abs(stats.zscore(band_lc_clean.flux.values.astype(float))) < 3.0]
+                band_lc_clean = band_lc_clean[np.abs(stats.zscore(band_lc_clean.flux)) < 3.0]
 
             # before plotting need to scale the Kepler, K2, and TESS fluxes to the other available fluxes
             if band in ['Kepler', 'K2', 'TESS']: # Note: these are not included anymore...
@@ -176,7 +163,6 @@ def create_figures(sample_table , df_lc, show_nbr_figures, save_output):
         # at the end.
         if has_icecube:
             band_lc = singleobj.loc[:, "IceCube", :]
-            band_lc.reset_index(inplace = True)
             band_lc_clean = band_lc[band_lc['time'] < 65000]
 
             y = axes["A"].get_ylim()[0] + np.diff(axes["A"].get_ylim())*0.7
@@ -218,19 +204,13 @@ def create_figures(sample_table , df_lc, show_nbr_figures, save_output):
             savename = os.path.join("output" , "lightcurve_{}.pdf".format(objectid) ) 
             plt.savefig(savename, bbox_inches="tight")
 
-        if cc <= show_nbr_figures:
+        if cc < show_nbr_figures:
             plt.show()
         else:
             plt.close()
-            
-            
-        # If figures are not saved, we only have to loop over the 
-        # number of figures that are shown to the user.
-        if (not save_output) & (cc == show_nbr_figures):
-            print("Done")
-            return(True)
-        else:
-            pass
+            # If figures are not saved, we only have to loop over the number of figures shown.
+            if not save_output:
+                break
             
     print("Done")
     return(True)
