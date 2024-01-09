@@ -1,10 +1,15 @@
 import os
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from astropy.table import Table
 from scipy import stats
+
+
+# List bands that need special treatment
+ELECTRON_BANDS = ["Kepler", "K2", "TESS"]  # flux in electrons/sec
+ICECUBE_BAND = "IceCube"  # "fluxes" are just events (= limits on plot)
+ZTF_BANDS = ["zg", "zr", "zi"]  # will be plotted in "B" zoom-in for better visibility
 
 
 def create_figures(df_lc, show_nbr_figures, save_output):
@@ -41,143 +46,34 @@ def create_figures(df_lc, show_nbr_figures, save_output):
         print("No figures are shown or saved.")
         return(False)
     
-    # Iterate over objects. Sort so that time increases monotonically within each band.
-    object_groups = df_lc.data.sort_index().reset_index().groupby('objectid')
-    for cc, (objectid, singleobj) in enumerate(object_groups):
+    # Iterate over objects and create figures
+    for cc, (objectid, singleobj_df) in enumerate(df_lc.data.groupby('objectid')):
         # Set up for plotting. We use the "mosaic" method so we can plot
         # the ZTF data in a subplot for better visibility.
         fig, axes = plt.subplot_mosaic(mosaic=[["A"],["A"],["B"]] , figsize=(10,8))
+
+        # Iterate over bands and plot light curves.
+        # IceCube needs to be done last so that we know the y-axis limits.
+        band_groups = _clean_lightcurves(singleobj_df).groupby('band')
+        max_fluxes = band_groups.flux.max()  # max flux per band
+        for band, band_df in band_groups:
+            if band == ICECUBE_BAND:
+                continue
+            _plot_lightcurve(band, band_df, axes, max_fluxes)
+        if ICECUBE_BAND in band_groups.groups:
+            _plot_lightcurve(ICECUBE_BAND, band_groups.get_group(ICECUBE_BAND), axes)
+
+        # Format the figure.
+        # Get the ZTF min/max times for the zoom in (will be NaN if there are no ZTF bands).
+        ztf_df = band_groups.filter(lambda band_df: band_df.name in ZTF_BANDS)
+        _format_axes(axes, ztf_time_min_max=(ztf_df.time.min(), ztf_df.time.max()))
         plt.subplots_adjust(hspace=0.3 , wspace=0.3)
+        axes["A"].legend(bbox_to_anchor=(1.2,0.95), title=f"objectid: {objectid}")
 
-        ## Plot all the bands in the *main plot* (A) ====================
-        leg_handles_A = []
-        max_list = [] # store maximum flux for each band
-        ztf_minmax_tab = Table(names=["tmin","tmax","fluxmin","fluxmax"]) # store the min and max of the ZTF band fluxes and time
-        has_ztf = False # flag to set to True if ZTF data is available.
-        has_icecube = False # flag to set to True if IceCube data is available.
-
-        band_groups = singleobj.groupby('band')
-        for band, band_lc in band_groups:
-            # first clean dataframe to remove erroneous rows
-            band_lc_clean = band_lc[band_lc['time'] < 65000]
-            
-            # Do some sigma-clipping, but only if more than 10 data points.
-            if len(band_lc_clean) >= 10:
-                band_lc_clean = band_lc_clean[np.abs(stats.zscore(band_lc_clean.flux)) < 3.0]
-
-            # before plotting need to scale the Kepler, K2, and TESS fluxes to the other available fluxes
-            if band in ['Kepler', 'K2', 'TESS']: # Note: these are not included anymore...
-
-                #remove outliers in the dataset
-                #bandlc_clip = band_lc_clean[(np.abs(stats.zscore(band_lc_clean['flux'])) < 3.0)]
-
-                #find the maximum value of 'other bands'
-                if len(band_lc_clean) > 0:  
-                    max_electrons = max(band_lc_clean.flux)
-                    factor = np.mean(max_list)/ max_electrons
-                    #lh = axes["A"].errorbar(bandlc_clip.time, bandlc_clip.flux * factor, bandlc_clip.err* factor,
-                    #                        capsize = 3.0,label = band)
-                    lh = axes["A"].errorbar(band_lc_clean.time, band_lc_clean.flux * factor, band_lc_clean.err* factor,
-                                            capsize = 3.0,label = band)
-
-            # ZTF is special because we are plotting the data also in "B" zoom-in
-            elif band in ['zg','zr','zi']: # for ZTF
-                has_ztf = True
-                max_list.append(max(band_lc_clean.flux)) 
-                lh = axes["A"].errorbar(band_lc_clean.time, band_lc_clean.flux, band_lc_clean.err,
-                                        capsize = 1.0, elinewidth=0.5,marker='o',markersize=2,linestyle='', label = "ZTF {}".format(band))
-                ztf_minmax_tab.add_row( [np.min(band_lc_clean.time) , np.max(band_lc_clean.time) , np.min(band_lc_clean.flux) , np.max(band_lc_clean.flux) ] )
-
-
-                # plot ZTF in zoomin
-                p1 = axes["B"].errorbar(band_lc_clean.time, band_lc_clean.flux, band_lc_clean.err,
-                                        capsize = 1.0, elinewidth=0.5, marker='o',linestyle='',markersize=0.5, alpha=0.5,
-                                        label = "ZTF {}".format(band) , color=lh.lines[0].get_color())
-
-
-
-                # overplot running mean fo ZTF in zoomin 
-                xx = band_lc_clean.time.values # Note: need to use .values here to remove indexing.
-                yy = band_lc_clean.flux.values # Note: need to use .values here to remove indexing.
-                ee = band_lc_clean.err.values # Note: need to use .values here to remove indexing.
-                x_bin = 30 # in MJD
-                x_grid = np.arange(np.nanmin(xx) , np.nanmax(xx)+x_bin/4 , x_bin/4)
-                tmp = Table(names=["xbin","ybin","yerr"])
-
-                for xxx in x_grid:
-                    s = np.where( np.abs(xx - xxx) < x_bin/2 )[0]
-                    if len(s) > 1:
-                        mn = np.nansum(yy[s]*ee[s]) / np.nansum(ee[s]) # weighted mean
-                        tmp.add_row([xxx , mn , np.nanstd(yy[s])])
-                    else:
-                        tmp.add_row([xxx , np.nan , np.nan])
-
-                axes["B"].plot(tmp["xbin"] , tmp["ybin"] , "-", linewidth=1.5 , color=p1.lines[0].get_color())
-
-
-
-            # IceCube is special because it's only events (= limits on plot.)
-            elif band in ["IceCube"]:
-                has_icecube = True
-                # We deal with this later. Need to wait for all the things to plot
-                # so we know the y limits.
-
-            # Now plot everything else
-            else:
-                max_list.append(max(band_lc_clean.flux)) 
-                lh = axes["A"].errorbar(band_lc_clean.time, band_lc_clean.flux, band_lc_clean.err,
-                                        capsize = 3.0, label = band)
-
-            if band not in ["IceCube"]:
-                leg_handles_A.append(lh) # add legend handles
-
-        ## Now plot IceCube.
-        # we had to wait for all the data to be plotted so we know
-        # the y-limits of the resulting final plot. So, we do IceCube
-        # at the end.
-        if has_icecube:
-            band_lc = singleobj.loc[:, "IceCube", :]
-            band_lc_clean = band_lc[band_lc['time'] < 65000]
-
-            y = axes["A"].get_ylim()[0] + np.diff(axes["A"].get_ylim())*0.7
-            dy = np.diff(axes["A"].get_ylim())/20
-            lh = axes["A"].errorbar(band_lc_clean.time , np.repeat(y , len(band_lc_clean.time)) , yerr=dy, uplims=True ,
-                                    fmt="o"  , label="IceCube" , color="black")
-
-            leg_handles_A.append(lh) # add legend handles (for IceCube)
-
-
-        ## Do Axes ===============
-        axes["A"].set_ylabel('Flux(mJy)')
-
-        # Plot the ZTF bands in a separate plot to show their variability
-        # more clearly. Can still also plot the rest, just change the x and
-        # y axis limits. Only do this if ZTF is available for source.
-        if has_ztf:
-            axes["B"].set_ylabel('Flux(mJy)')
-            axes["B"].set_xlabel('Time(MJD)')
-            axes["B"].set_xlim( np.min(ztf_minmax_tab["tmin"])-100 , np.max(ztf_minmax_tab["tmax"])+100 )
-        else:
-            axes["A"].set_xlabel('Time(MJD)')
-
-        ## Make nice axis
-        axes["A"].grid(linestyle=":",color="lightgray", linewidth=1)
-        axes["A"].minorticks_on()
-        axes["A"].tick_params(axis='x', which='minor', bottom=True)
-        axes["A"].tick_params(axis="both", which="major",direction='in', length=6, width=1)
-        axes["A"].tick_params(axis="both", which="minor",direction='in', length=3, width=1)
-        axes["B"].grid(linestyle=":",color="lightgray", linewidth=1)
-        axes["B"].minorticks_on()
-        axes["B"].tick_params(axis='x', which='minor', bottom=True)
-        axes["B"].tick_params(axis="both", which="major",direction='in', length=6, width=1)
-        axes["B"].tick_params(axis="both", which="minor",direction='in', length=3, width=1)
-
-        plt.legend(handles=leg_handles_A , bbox_to_anchor=(1.2,3.5), title=f"objectid: {objectid}")
-
+        # Save, show, and/or close the figure.
         if save_output:
             savename = os.path.join("output" , "lightcurve_{}.pdf".format(objectid) ) 
             plt.savefig(savename, bbox_inches="tight")
-
         if cc < show_nbr_figures:
             plt.show()
         else:
@@ -188,3 +84,141 @@ def create_figures(df_lc, show_nbr_figures, save_output):
             
     print("Done")
     return(True)
+
+
+def _clean_lightcurves(singleobj_df):
+    """Clean the dataframe in preparation for plotting.
+
+    Parameters
+    ----------
+    singleobj_df : pandas.DataFrame
+        DataFrame for a single object containing light curves in one or more bands.
+
+    Returns
+    -------
+    singleobj_df cleaned of "bad" rows and reformatted for plotting.
+    """
+    # Sort so that time increases monotonically within each band.
+    # Switch the index to columns (reset) so they can be plotted.
+    singleobj = singleobj_df.sort_index().reset_index()
+
+    # Do sigma-clipping per band.
+    band_groups = singleobj.groupby("band").flux
+    zscore = band_groups.transform(lambda fluxes: np.abs(stats.zscore(fluxes)))
+    n_points = band_groups.transform("size")  # number of data points in the band
+    # Keep data points with a zscore < 3 or in a band with less than 10 data points.
+    singleobj = singleobj[(zscore < 3.0) | (n_points < 10)]
+
+    return singleobj
+
+
+def _plot_lightcurve(band, band_df, axes, max_fluxes=None):
+    """Plot the single-band light curve.
+
+    Parameters
+    ----------
+    band : str
+        Name of the band.
+    band_df : pandas.DataFrame
+        Single-band light curve.
+    axes : matplotlib.axes.Axes
+        Axes object to plot the light curve in.
+    max_fluxes : pd.Series
+        Maximum flux per band. Used to scale the bands with fluxes in electrons/sec.
+    """
+    # Plot the light curve. Some bands need special treatment.
+
+    if band in ELECTRON_BANDS:
+        # Fluxes are in electrons/sec. Scale them to the other available fluxes.
+        mean_max_flux = max_fluxes[[b for b in max_fluxes.index if b not in ELECTRON_BANDS + [ICECUBE_BAND]]].mean()
+        max_electrons = band_df.flux.max()
+        factor = mean_max_flux / max_electrons
+        axes["A"].errorbar(band_df.time, band_df.flux * factor, band_df.err * factor, capsize=3.0, label=band)
+
+    elif band == ICECUBE_BAND:
+        # "Fluxes" are actually just events (= limits on plot).
+        y = axes["A"].get_ylim()[0] + np.diff(axes["A"].get_ylim()) * 0.7
+        dy = np.diff(axes["A"].get_ylim()) / 20
+        axes["A"].errorbar(band_df.time, np.repeat(y, len(band_df.time)), yerr=dy, uplims=True,
+                           fmt="o", label="IceCube", color="black")
+
+    elif band in ZTF_BANDS:
+        # ZTF is special because we are plotting the data also in "B" zoom-in.
+        _plot_ztf_lightcurve(band, band_df, axes)
+
+    else:
+        axes["A"].errorbar(band_df.time, band_df.flux, band_df.err, capsize=3.0, label=band)
+
+
+def _plot_ztf_lightcurve(band, band_df, axes):
+    """Plot the ZTF single-band light curve.
+
+    Parameters
+    ----------
+    band : str
+        Name of the band.
+    band_df : pandas.DataFrame
+        Single-band light curve.
+    axes : matplotlib.axes.Axes
+        Axes object to plot the light curve in.
+    """
+    # Plot on "A" axis.
+    lh = axes["A"].errorbar(band_df.time, band_df.flux, band_df.err, capsize=1.0, elinewidth=0.5,
+                            marker="o", markersize=2, linestyle="", label=f"ZTF {band}")
+
+    # Plot "B" zoomin
+    p1 = axes["B"].errorbar(band_df.time, band_df.flux, band_df.err, capsize=1.0, elinewidth=0.5,
+                            marker="o", linestyle="", markersize=0.5, alpha=0.5, label=f"ZTF {band}",
+                            color=lh.lines[0].get_color())
+
+    # Overplot running mean for ZTF in zoomin. Use .values to remove indexing.
+    xx = band_df.time.values
+    yy = band_df.flux.values
+    ee = band_df.err.values
+    x_bin = 30  # in MJD
+    x_grid = np.arange(np.nanmin(xx), np.nanmax(xx) + x_bin / 4, x_bin / 4)
+    tmp = Table(names=["xbin", "ybin", "yerr"])
+
+    for xxx in x_grid:
+        s = np.where(np.abs(xx - xxx) < x_bin / 2)[0]
+        if len(s) > 1:
+            mn = np.nansum(yy[s] * ee[s]) / np.nansum(ee[s])  # weighted mean
+            tmp.add_row([xxx, mn, np.nanstd(yy[s])])
+        else:
+            tmp.add_row([xxx, np.nan, np.nan])
+
+    axes["B"].plot(tmp["xbin"], tmp["ybin"], "-", linewidth=1.5, color=p1.lines[0].get_color())
+
+
+def _format_axes(axes, ztf_time_min_max):
+    """Format the axes to look nice.
+
+    Parameters
+    ----------
+    axes : matplotlib.axes.Axes
+        Axes object to plot the light curve in.
+    ztf_time_min_max : tuple containing two floats
+        Min and max times of ZTF observations. Used to set x-axis limits on "B" zoomin. If there are no ZTF bands
+        in the figure, skip this by sending None or a tuple of NaNs.
+    """
+    # Set axes limits and labels
+    axes["A"].set_ylabel("Flux(mJy)")
+    # If we have ZTF limits, set labels and limits on the "B" zoomin.
+    if ztf_time_min_max and not any(np.isnan(ztf_time_min_max)):
+        axes["B"].set_ylabel("Flux(mJy)")
+        axes["B"].set_xlabel("Time(MJD)")
+        axes["B"].set_xlim(ztf_time_min_max[0] - 100, ztf_time_min_max[1] + 100)
+    else:
+        axes["A"].set_xlabel("Time(MJD)")
+
+    ## Set axes ticks and grids
+    axes["A"].grid(linestyle=":", color="lightgray", linewidth=1)
+    axes["A"].minorticks_on()
+    axes["A"].tick_params(axis="x", which="minor", bottom=True)
+    axes["A"].tick_params(axis="both", which="major", direction="in", length=6, width=1)
+    axes["A"].tick_params(axis="both", which="minor", direction="in", length=3, width=1)
+    axes["B"].grid(linestyle=":", color="lightgray", linewidth=1)
+    axes["B"].minorticks_on()
+    axes["B"].tick_params(axis="x", which="minor", bottom=True)
+    axes["B"].tick_params(axis="both", which="major", direction="in", length=6, width=1)
+    axes["B"].tick_params(axis="both", which="minor", direction="in", length=3, width=1)
