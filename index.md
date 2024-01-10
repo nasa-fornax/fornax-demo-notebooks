@@ -15,3 +15,14 @@ light_curves/README
 ```{include} README.md
 
 ```
+
+## More details about the Fornax Portal
+
+```{toctree}
+---
+maxdepth: 2
+---
+
+documentation/README
+
+```
