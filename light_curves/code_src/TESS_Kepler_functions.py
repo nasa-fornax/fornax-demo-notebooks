@@ -13,10 +13,8 @@ def clean_filternames(lightcurve):
     
     Parameters
     ----------
-    search_result : lightkurve object
+    lightcurve : lightkurve result
         object detailing the light curve object found with lightkurve
-    numlc : int
-        index of the light curve we are working on
         
     Returns
     -------
