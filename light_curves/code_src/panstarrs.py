@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import requests
-from astropy.io import ascii
 from astropy.table import Table
 from tqdm import tqdm
 
@@ -260,7 +259,7 @@ def Panstarrs_get_lightcurves(sample_table, radius):
         results = ps1cone(ra,dec,radius,release='dr2')
         if not results:
             continue
-        tab = ascii.read(results)
+        tab = Table.read(results, format='ascii')
     
         # improve the format of the table
         tab = improve_filter_format(tab)
@@ -277,7 +276,7 @@ def Panstarrs_get_lightcurves(sample_table, radius):
             continue
     
         #fix the column names to include filter names
-        dtab = addfilter(ascii.read(dresults))
+        dtab = addfilter(Table.read(dresults, format='ascii'))
 
         dtab.sort('obsTime')
 
