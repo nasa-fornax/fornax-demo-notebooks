@@ -705,15 +705,14 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 <span class="n">max_fermi_error_radius</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>  
 <span class="n">max_sax_error_radius</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
 
-<span class="c1"># List of missions to query and their corresponding error radii</span>
-<span class="n">heasarc_cat</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;FERMIGTRIG&quot;</span><span class="p">,</span> <span class="s2">&quot;SAXGRBMGRB&quot;</span><span class="p">]</span>
-<span class="n">error_radius</span> <span class="o">=</span> <span class="p">[</span><span class="n">max_fermi_error_radius</span> <span class="p">,</span> <span class="n">max_sax_error_radius</span><span class="p">]</span>
+<span class="c1"># catalogs to query and their corresponding max error radii</span>
+<span class="n">heasarc_catalogs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;FERMIGTRIG&quot;</span><span class="p">:</span> <span class="n">max_fermi_error_radius</span><span class="p">,</span> <span class="s2">&quot;SAXGRBMGRB&quot;</span><span class="p">:</span> <span class="n">max_sax_error_radius</span><span class="p">}</span>
 
-<span class="c1"># get heasarc light curves in the above curated list of missions </span>
-<span class="n">df_lc_fermi</span> <span class="o">=</span> <span class="n">HEASARC_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">heasarc_cat</span><span class="p">,</span> <span class="n">error_radius</span><span class="p">)</span>
+<span class="c1"># get heasarc light curves in the above curated list of catalogs</span>
+<span class="n">df_lc_HEASARC</span> <span class="o">=</span> <span class="n">HEASARC_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">heasarc_catalogs</span><span class="p">)</span>
 
 <span class="c1"># add the resulting dataframe to all other archives</span>
-<span class="n">df_lc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lc_fermi</span><span class="p">)</span>
+<span class="n">df_lc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lc_HEASARC</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;heasarc search took:&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">heasarcstarttime</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
 </pre></div>
@@ -888,8 +887,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># define some variables in case the above serial cells are not run</span>
 <span class="n">max_fermi_error_radius</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>  
 <span class="n">max_sax_error_radius</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
-<span class="n">heasarc_cat</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;FERMIGTRIG&quot;</span><span class="p">,</span> <span class="s2">&quot;SAXGRBMGRB&quot;</span><span class="p">]</span>
-<span class="n">error_radius</span> <span class="o">=</span> <span class="p">[</span><span class="n">max_fermi_error_radius</span> <span class="p">,</span> <span class="n">max_sax_error_radius</span><span class="p">]</span>
+<span class="n">heasarc_catalogs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;FERMIGTRIG&quot;</span><span class="p">:</span> <span class="n">max_fermi_error_radius</span><span class="p">,</span> <span class="s2">&quot;SAXGRBMGRB&quot;</span><span class="p">:</span> <span class="n">max_sax_error_radius</span><span class="p">}</span>
 <span class="n">bandlist</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;W1&quot;</span><span class="p">,</span> <span class="s2">&quot;W2&quot;</span><span class="p">]</span>
 <span class="n">wise_radius</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">arcsec</span>
 <span class="n">panstarrs_radius</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">3600.0</span>  <span class="c1"># search radius = 1 arcsec</span>
@@ -940,7 +938,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
         <span class="n">Gaia_get_lightcurve</span><span class="p">,</span> <span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">3600.</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span>
     <span class="p">)</span>
     <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span>
-        <span class="n">HEASARC_get_lightcurves</span><span class="p">,</span> <span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">heasarc_cat</span><span class="p">,</span> <span class="n">error_radius</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span>
+        <span class="n">HEASARC_get_lightcurves</span><span class="p">,</span> <span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">heasarc_catalogs</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span>
     <span class="p">)</span>
     <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span>
         <span class="n">HCV_get_lightcurves</span><span class="p">,</span> <span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">hcv_radius</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span>
