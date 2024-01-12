@@ -1,4 +1,4 @@
-# Table of Content
+# Tutorial Notebooks
 
 ```{toctree}
 ---
@@ -16,7 +16,7 @@ light_curves/README
 
 ```
 
-## More details about the Fornax Portal
+## Documentation
 
 ```{toctree}
 ---
