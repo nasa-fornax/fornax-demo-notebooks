@@ -279,6 +279,8 @@ def Panstarrs_get_lightcurves(sample_table, radius):
         dtab = addfilter(Table.read(dresults, format='ascii'))
 
         dtab.sort('obsTime')
+        dtab['psfFlux'][dtab['psfFlux'] == -999.0] = np.nan
+        dtab['psfFluxErr'][dtab['psfFluxErr'] == -999.0] = np.nan
 
         #here is the light curve mixed from all 5 bands
         t_panstarrs = dtab['obsTime']
