@@ -440,8 +440,7 @@ These plots are modelled after [van Velzen et al., 2021](https://arxiv.org/pdf/2
 __Note__ that in the following, we can either plot the results from `df_lc` (from the serial call) or `parallel_df_lc` (from the parallel call). By default (see next cell) the output of the parallel call is used.
 
 ```{code-cell} ipython3
-_ = create_figures(sample_table ,
-                   df_lc = parallel_df_lc, # either df_lc (serial call) or parallel_df_lc (parallel call)
+_ = create_figures(df_lc = parallel_df_lc, # either df_lc (serial call) or parallel_df_lc (parallel call)
                    show_nbr_figures = 5,  # how many plots do you actually want to see?
                    save_output = True ,  # should the resulting plots be saved?
                   )
