@@ -114,6 +114,9 @@ def _clean_lightcurves(singleobj_df):
     # Switch the index to columns (reset) so they can be plotted.
     singleobj = singleobj_df.sort_index().reset_index()
 
+    # Remove rows containing NaN in time, flux, or err
+    singleobj = singleobj.dropna(subset=["time", "flux", "err"])
+
     # Do sigma-clipping per band.
     band_groups = singleobj.groupby("band").flux
     zscore = band_groups.transform(lambda fluxes: np.abs(stats.zscore(fluxes)))
