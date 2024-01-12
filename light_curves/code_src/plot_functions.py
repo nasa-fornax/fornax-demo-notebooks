@@ -1,5 +1,6 @@
 import os
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from astropy.table import Table
@@ -7,9 +8,20 @@ from scipy import stats
 
 
 # List bands that need special treatment
-ELECTRON_BANDS = ["Kepler", "K2", "TESS"]  # flux in electrons/sec
+ELECTRON_BANDS = ["K2", "Kepler", "TESS"]  # flux in electrons/sec
 ICECUBE_BAND = "IceCube"  # "fluxes" are just events (= limits on plot)
 ZTF_BANDS = ["zg", "zr", "zi"]  # will be plotted in "B" zoom-in for better visibility
+# List all other bands
+OTHER_BANDS = ["F814W",  # HCV
+               "FERMIGTRIG", "SAXGRBMGRB",  # HEASARC
+               "G", "BP", "RP",  # Gaia
+               "panstarrs g", "panstarrs i", "panstarrs r", "panstarrs y", "panstarrs z",  # Pan-STARRS
+               "W1", "W2"]  # WISE
+
+# Set a color for each band.
+# Create a generator to yield colors (this will be useful if we need to plot bands not listed above).
+COLORS = (color for color in mpl.colormaps["tab20"].colors + mpl.colormaps["tab20b"].colors)
+BAND_COLORS = {band: next(COLORS) for band in [ICECUBE_BAND] + ZTF_BANDS + ELECTRON_BANDS + OTHER_BANDS}
 
 
 def create_figures(df_lc, show_nbr_figures, save_output):
@@ -127,27 +139,30 @@ def _plot_lightcurve(band, band_df, axes, max_fluxes=None):
         Maximum flux per band. Used to scale the bands with fluxes in electrons/sec.
     """
     # Plot the light curve. Some bands need special treatment.
+    # Get the band color, or the next color in the generator if the band isn't listed above.
+    color = BAND_COLORS.get(band) or next(COLORS)
 
     if band in ELECTRON_BANDS:
         # Fluxes are in electrons/sec. Scale them to the other available fluxes.
         mean_max_flux = max_fluxes[[b for b in max_fluxes.index if b not in ELECTRON_BANDS + [ICECUBE_BAND]]].mean()
         max_electrons = band_df.flux.max()
         factor = mean_max_flux / max_electrons
-        axes["A"].errorbar(band_df.time, band_df.flux * factor, band_df.err * factor, capsize=3.0, label=band)
+        axes["A"].errorbar(band_df.time, band_df.flux * factor, band_df.err * factor,
+                           capsize=3.0, label=band, color=color)
 
     elif band == ICECUBE_BAND:
         # "Fluxes" are actually just events (= limits on plot).
         y = axes["A"].get_ylim()[0] + np.diff(axes["A"].get_ylim()) * 0.7
         dy = np.diff(axes["A"].get_ylim()) / 20
         axes["A"].errorbar(band_df.time, np.repeat(y, len(band_df.time)), yerr=dy, uplims=True,
-                           fmt="o", label="IceCube", color="black")
+                           fmt="o", label=band, color=color)
 
     elif band in ZTF_BANDS:
         # ZTF is special because we are plotting the data also in "B" zoom-in.
         _plot_ztf_lightcurve(band, band_df, axes)
 
     else:
-        axes["A"].errorbar(band_df.time, band_df.flux, band_df.err, capsize=3.0, label=band)
+        axes["A"].errorbar(band_df.time, band_df.flux, band_df.err, capsize=3.0, label=band, color=color)
 
 
 def _plot_ztf_lightcurve(band, band_df, axes):
@@ -162,14 +177,15 @@ def _plot_ztf_lightcurve(band, band_df, axes):
     axes : matplotlib.axes.Axes
         Axes object to plot the light curve in.
     """
+    color = BAND_COLORS.get(band) or next(COLORS)
+
     # Plot on "A" axis.
-    lh = axes["A"].errorbar(band_df.time, band_df.flux, band_df.err, capsize=1.0, elinewidth=0.5,
-                            marker="o", markersize=2, linestyle="", label=f"ZTF {band}")
+    axes["A"].errorbar(band_df.time, band_df.flux, band_df.err, capsize=1.0, elinewidth=0.5,
+                            marker="o", markersize=2, linestyle="", label=f"ZTF {band}", color=color)
 
     # Plot "B" zoomin
-    p1 = axes["B"].errorbar(band_df.time, band_df.flux, band_df.err, capsize=1.0, elinewidth=0.5,
-                            marker="o", linestyle="", markersize=0.5, alpha=0.5, label=f"ZTF {band}",
-                            color=lh.lines[0].get_color())
+    axes["B"].errorbar(band_df.time, band_df.flux, band_df.err, capsize=1.0, elinewidth=0.5,
+                       marker="o", linestyle="", markersize=0.5, alpha=0.5, label=f"ZTF {band}", color=color)
 
     # Overplot running mean for ZTF in zoomin. Use .values to remove indexing.
     xx = band_df.time.values
@@ -187,7 +203,7 @@ def _plot_ztf_lightcurve(band, band_df, axes):
         else:
             tmp.add_row([xxx, np.nan, np.nan])
 
-    axes["B"].plot(tmp["xbin"], tmp["ybin"], "-", linewidth=1.5, color=p1.lines[0].get_color())
+    axes["B"].plot(tmp["xbin"], tmp["ybin"], "-", linewidth=1.5, color=color)
 
 
 def _format_axes(axes, ztf_time_min_max):
