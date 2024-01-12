@@ -1008,8 +1008,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 <p><strong>Note</strong> that in the following, we can either plot the results from <code class="docutils literal notranslate"><span class="pre">df_lc</span></code> (from the serial call) or <code class="docutils literal notranslate"><span class="pre">parallel_df_lc</span></code> (from the parallel call). By default (see next cell) the output of the parallel call is used.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">_</span> <span class="o">=</span> <span class="n">create_figures</span><span class="p">(</span><span class="n">sample_table</span> <span class="p">,</span>
-                   <span class="n">df_lc</span> <span class="o">=</span> <span class="n">parallel_df_lc</span><span class="p">,</span> <span class="c1"># either df_lc (serial call) or parallel_df_lc (parallel call)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">_</span> <span class="o">=</span> <span class="n">create_figures</span><span class="p">(</span><span class="n">df_lc</span> <span class="o">=</span> <span class="n">parallel_df_lc</span><span class="p">,</span> <span class="c1"># either df_lc (serial call) or parallel_df_lc (parallel call)</span>
                    <span class="n">show_nbr_figures</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>  <span class="c1"># how many plots do you actually want to see?</span>
                    <span class="n">save_output</span> <span class="o">=</span> <span class="kc">True</span> <span class="p">,</span>  <span class="c1"># should the resulting plots be saved?</span>
                   <span class="p">)</span>
