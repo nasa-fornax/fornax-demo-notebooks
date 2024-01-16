@@ -649,7 +649,11 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <span class="n">coords</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="s1">&#39;150.01d 2.2d&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s1">&#39;icrs&#39;</span><span class="p">)</span>  <span class="c1">#COSMOS center acording to Simbad</span>
 
 <span class="c1">#how large is the search radius, in arcmin</span>
-<span class="n">radius</span> <span class="o">=</span> <span class="mf">48.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">arcmin</span>  
+<span class="c1"># full area of COSMOS is radius = 48&#39;</span>
+<span class="c1"># running this code on the full COSMOS area takes ~24 hours on a 128core server, therefore</span>
+<span class="c1"># start with a manageable radius and increase as needed</span>
+<span class="n">radius</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">arcmin</span>  
+
 
 <span class="c1">#specify only select columns to limit the size of the catalog</span>
 <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span>
