@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.15.2
 kernelspec:
-  display_name: Python [conda env:tractor]
+  display_name: Python 3 (ipykernel)
   language: python
-  name: conda-env-tractor-py
+  name: python3
 ---
 
 # Automated Multiband Forced Photometry on Large Datasets
@@ -50,8 +50,6 @@ Jessica Krick, David Shupe, Marziye JafariYazani, Brigitta Sipőcz, Vandana Desa
 ## Acknowledgements:
 Kristina Nyland for the workflow of the tractor wrapper.\
 MAST, HEASARC, & IRSA Fornax teams
-
-
 
 ```{code-cell} ipython3
 #ensure all dependencies are installed
@@ -128,7 +126,11 @@ except ImportError:
 coords = SkyCoord('150.01d 2.2d', frame='icrs')  #COSMOS center acording to Simbad
 
 #how large is the search radius, in arcmin
-radius = 48.0 * u.arcmin  
+# full area of COSMOS is radius = 48'
+# running this code on the full COSMOS area takes ~24 hours on a 128core server, therefore
+# start with a manageable radius and increase as needed
+radius = 0.5 * u.arcmin  
+
 
 #specify only select columns to limit the size of the catalog
 cols = [
@@ -161,7 +163,6 @@ print("Number of objects: ", len(cosmos_table))
 #select those rows with either chandra fluxes or Galex NUV fluxes
 
 #example_table = cosmos_table[(cosmos_table['flux_chandra_05_10']> 0) | (cosmos_table['flux_galex_fuv'] > 0)]
-
 ```
 
 ## 2. Retrieve Image Datasets from the Cloud
@@ -437,7 +438,6 @@ sci_bkg_pairs = [
     ('data/Galex/COSMOS_04-nd-int.fits.gz', 'data/Galex/COSMOS_04-nd-skybg.fits.gz'),
     ('data/Galex/COSMOS_04-fd-int.fits.gz', 'data/Galex/COSMOS_04-fd-skybg.fits.gz'),
 ]
-
 ```
 
 ### 3b. Main Function to do the Forced Photometry
@@ -550,7 +550,7 @@ t1 = time.time()
 ```
 
 ### 3d. Calculate Forced Photometry - Parallelization
-- Parallelization: we can either interate over the rows of the dataframe and run the four bands in parallel; or we could zip together the row index, band, ra, dec, 
+- Parallelization: we can either interate over the rows of the dataframe and run the four bands in parallel; or we could zip together the row index, band, ra, dec,
 
 ```{code-cell} ipython3
 paramlist = []
@@ -785,7 +785,6 @@ df['ID'] = range(1, len(df) + 1)
 #need this to be a fits table and needs to include area of the survey.
 rad_in_arcmin = radius.value  #units attached to this are confusing nway down the line
 nway_write_header('data/multiband_phot.fits', 'OPT', float((2*rad_in_arcmin/60)**2) )
-
 ```
 
 ```{code-cell} ipython3
