@@ -126,9 +126,11 @@ except ImportError:
 coords = SkyCoord('150.01d 2.2d', frame='icrs')  #COSMOS center acording to Simbad
 
 #how large is the search radius, in arcmin
-radius = 0.5 * u.arcmin  #start with a manageable radius and increase as needed
-#full area of COSMOS is radius = 48'
-#running this code on the full COSMOS area takes ~24 hours on a 128core server
+# full area of COSMOS is radius = 48'
+# running this code on the full COSMOS area takes ~24 hours on a 128core server, therefore
+# start with a manageable radius and increase as needed
+radius = 0.5 * u.arcmin  
+
 
 #specify only select columns to limit the size of the catalog
 cols = [
