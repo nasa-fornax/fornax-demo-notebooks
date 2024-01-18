@@ -76,6 +76,14 @@ def TESS_Kepler_get_lightcurves(sample_table, radius):
             # convert to Pandas
             lcdf = lightcurve.to_pandas().reset_index()
 
+            # record band name
+            filtername = clean_filternames(lightcurve)
+
+            # filter out TESS negative fluxes (non-detections) and NaNs
+            # https://tess.mit.edu/public/tesstransients/pages/readme.html
+            if filtername == "TESS":
+                lcdf = lcdf.loc[lcdf.flux > 0]
+
             # these light curves are too highly sampled for our AGN use case, so reduce their size
             # by choosing only to keep every nth sample
             nsample = 30
@@ -91,9 +99,6 @@ def TESS_Kepler_get_lightcurves(sample_table, radius):
             # save as electron/s here and scale when plotting
             flux_lc = lcdf_small.flux #in electron/s
             fluxerr_lc = lcdf_small.flux_err #in electron/s
-
-            # record band name
-            filtername = clean_filternames(lightcurve)
 
             # put this single object light curves into a pandas multiindex dataframe
             # fluxes are in units of electrons/s and will be scaled to fit the other fluxes when plotting
