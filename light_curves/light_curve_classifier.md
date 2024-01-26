@@ -666,7 +666,7 @@ plt.show()
 
 Our method is to do a cursory check of a bunch of classifiers and then later drill down deeper on anything with good initial results.  We choose to run a loop over ~10 classifiers that seem promising and check the accuracy scores for each one.  Any classifier with a promising accuracy score could then be followed up with detailed hyperparameter tuning, or potentially with considering other classifiers in that same type.
 
-```{code-cell} ipython3
+```{raw-cell}
 %%time
 #which classifiers are we interestd in
 #roughly one from each type of classifier
@@ -781,7 +781,13 @@ y_test_np = test_df.groupby('objectid')['label'].first().to_numpy()
 y_train_np.shape, y_test_np.shape
 ```
 
-### 5.2 Loop over a bunch of classifiers
+### 5.2 The most accurate classifier
+
+```{code-cell} ipython3
+
+```
+
+### 5.3 Loop over a bunch of classifiers
 
 ```{code-cell} ipython3
 #setup to store the accuracy et al. scores
