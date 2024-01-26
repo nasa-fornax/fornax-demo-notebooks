@@ -18,7 +18,7 @@ kernelspec:
 By the end of this tutorial, you will be able to:
 - do some basic data cleaning and filtering to prepare the data for the ML algorithms
 - work with Pandas data frames as a way of storing time domain datasets
-- use sktime algorithms to train a classifier and predict values on a test dataset
+- use sktime & pyTS algorithms to train a classifier and predict values on a test dataset
 
 ## Introduction
 This notebook takes output of a previous demo notebook which generates light curves from archival data, does data prep, and runs the light curves through multiple [`sktime`](https://www.sktime.net/en/stable/) classifiers.  The goal of the classifiers is to be able to differentiate changing look active galactic nucleii (CLAGN) from an SDSS quasar sample based on multiband light curves.  CLAGN are quite interested objects in that they appear to change state, but only a few hundred are currently known, and finding them is quite expensive requiring spectroscopic follow up.  Being able to identify CLAGN in existing large samples would allow us to identify a statisitcal sample from which we could better understand the physics of what is occuring in these systems.
@@ -72,12 +72,16 @@ import pandas as pd
 from astropy.time import Time
 from google_drive_downloader import GoogleDriveDownloader as gdd
 from scipy.stats import sigmaclip
+from tqdm import tqdm
+import json
 
 from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF
 from sklearn.neighbors import KNeighborsRegressor
+from sklearn.metrics import matthews_corrcoef, f1_score
+from sklearn.metrics.cluster import completeness_score, homogeneity_score
 
 from sktime.classification.deep_learning import CNNClassifier
 from sktime.classification.dictionary_based import IndividualTDE
@@ -90,7 +94,12 @@ from sktime.classification.interval_based import CanonicalIntervalForest
 from sktime.classification.kernel_based import Arsenal, RocketClassifier
 from sktime.classification.shapelet_based import ShapeletTransformClassifier
 from sktime.registry import all_estimators, all_tags
-from tqdm import tqdm
+
+from pyts.classification import KNeighborsClassifier
+from pyts.classification import SAXVSM
+from pyts.classification import BOSSVS
+from pyts.classification import LearningShapelets
+from pyts.classification import TimeSeriesForest
 
 # local code imports
 sys.path.append('code_src/')
@@ -142,7 +151,6 @@ df_lc = df_lc[~df_lc["band"].isin(bands_to_drop)]
 All CLAGN start in the dataset as having labels based on their discovery paper.  Because we want one sample with all known CLAGN, change those discoery names to be simply "CLAGN" for all CLAGN, regardless of origin
 
 ```{code-cell} ipython3
-
 df_lc['label'] = df_lc.label.str.replace('MacLeod 16', 'CLAGN')
 df_lc['label'] = df_lc.label.str.replace('LaMassa 15', 'CLAGN')
 df_lc['label'] = df_lc.label.str.replace('Yang 18', 'CLAGN')
@@ -152,7 +160,6 @@ df_lc['label'] = df_lc.label.str.replace('Sheng 20', 'CLAGN')
 df_lc['label'] = df_lc.label.str.replace('MacLeod 19', 'CLAGN')
 df_lc['label'] = df_lc.label.str.replace('Green 22', 'CLAGN')
 df_lc['label'] = df_lc.label.str.replace('Lopez-Navas 22', 'CLAGN')
-
 ```
 
 ### 2.3 Remove "bad"  data
@@ -178,7 +185,6 @@ df_lc.dropna(inplace = True, axis = 0)
 #We are going to define zero flux later to be missing data, but not sure what these are
 querystring = 'flux < 0.000001'
 df_lc = df_lc.drop(df_lc.query(querystring).index)
-
 ```
 
 ```{code-cell} ipython3
@@ -246,7 +252,6 @@ total_objectids = df_lc.groupby( "objectid").ngroups
 for band, df_lc_band in df_lc.groupby( "band"):
     total_band = df_lc_band.groupby("objectid").ngroups
     print(total_band/total_objectids, " have ", band, " fluxes" )
-
 ```
 
 ```{code-cell} ipython3
@@ -296,7 +301,6 @@ df_lc = df_lc.groupby(["band", "objectid"]).filter(lambda x: len(x) > thresh_too
 print(df_lc.groupby(["band", "objectid"]).ngroups, "n groups after")
 
 #currently this seems like a lot of groups because we still have the gaia single photometry points for many objects
-
 ```
 
 ### 2.5 Missing Data
@@ -519,7 +523,6 @@ t = Time(jd, format = 'jd' )
 #t.datetime is now an array of type datetime
 #make it a column in the dataframe
 df_lc['datetime'] = t.datetime
-
 ```
 
 ### 2.9 Save this dataframe
@@ -538,7 +541,6 @@ df_lc = df_lc.set_index(["objectid", "label", "datetime"])
 ```
 
 ## 3. Prep for ML algorithms in sktime
-
 
 ```{code-cell} ipython3
 # could load a previously saved file in order to plot
@@ -601,7 +603,6 @@ X_test = test_df.droplevel('label')
 #y are the labels, should be a series 
 y_train = train_df.droplevel('datetime').index.unique().get_level_values('label').to_series()
 y_test = test_df.droplevel('datetime').index.unique().get_level_values('label').to_series()
-
 ```
 
 ### 3.2 Check that the data types are ok for sktime
@@ -616,14 +617,13 @@ check_is_mtype(X_train, mtype="pd-multiindex", scitype="Panel", return_metadata=
 #This test needs to pass in order for sktime to run
 ```
 
-## 4. Run Machine Learning Algorithms on the light curves
+## 4. Run sktime algorithms on the light curves
 
 We choose to use [sktime](https://www.sktime.net/en/stable/index.html) algorithms beacuse it is a library of many algorithms specifically tailored to time series datasets.  It is based on the sklearn library so syntax is familiar to many users.
 
 Types of classifiers are listed [here](https://www.sktime.net/en/stable/api_reference/classification.html).
 
 This notebook will invert the actual workflow and show you a single example of the algorithm which best fits the data and has the most accurate classifier. Then it will show how to write a for loop over a bunch of classifiers before narrowing it down to the most accurate.
-
 
 ```{code-cell} ipython3
 #what is the list of all possible classifiers that work with multivariate data
@@ -729,7 +729,114 @@ for name, clf in tqdm(zip(names, classifier_call)):
 accscore_dict
 ```
 
-## 5.0 Conclusions:  
+```{code-cell} ipython3
+#save statistics from these runs
+
+# Serialize data into file:
+json.dump( accscore_dict, open( "output/accscore.json", 'w' ) )
+json.dump( completeness_dict, open( "output/completeness.json", 'w' ) )
+json.dump( homogeneity_dict, open( "output/homogeneity.json", 'w' ) )
+
+# Read data from file:
+#accscore_dict = json.load( open( "output/accscore.json") )
+```
+
+## 5.0 Run pyTS algorithms on the light curves
+
++++
+
+### 5.1 Get the data into the correct shape for pyTS
+
+```{code-cell} ipython3
+#input to pyTS must be a  numpy.ndarray 
+# a 2d array with shape (n_samples, n_timestamps), where the first axis represents the 
+# samples and the second axis represents time
+#so I need a (6047, 134) array for X_train
+#and y_train should have shape (6047,)
+
+#start working on X
+X_train.reset_index()
+X_test.reset_index()
+
+# Extract the flux values into NumPy arrays and reshape them
+X_train_np = X_train.pivot_table(index='objectid',  columns='time',values='flux_W1', aggfunc='first').to_numpy() 
+X_test_np = X_test.pivot_table(index='objectid', columns='time', values='flux_W1', aggfunc='first').to_numpy() 
+
+# Reshape the arrays to the desired shape
+X_train_np = X_train_np.reshape(6047, 134)
+X_test_np = X_test_np.reshape(2016, 134)
+X_train_np.shape, X_test_np.shape
+
+#now work on the y
+train_df = train_df.reset_index()
+test_df = test_df.reset_index()
+
+# Extract unique labels for each objectid and convert to a NumPy array
+y_train_np = train_df.groupby('objectid')['label'].first().to_numpy()
+y_test_np = test_df.groupby('objectid')['label'].first().to_numpy()
+y_train_np.shape, y_test_np.shape
+```
+
+### 5.2 Loop over a bunch of classifiers
+
+```{code-cell} ipython3
+#setup to store the accuracy et al. scores
+accscore_dict = {}
+MCC_dict ={}
+homogeneity_dict = {}
+completeness_dict = {}
+f1_dict = {}
+```
+
+```{code-cell} ipython3
+%%time
+
+names = ["KNNDTW","saxvsm","bossvs", "learningshapelets","timeseriesforest"]
+         
+
+#these could certainly be more tailored
+classifier_call = [KNeighborsClassifier(metric='dtw'), 
+                   SAXVSM(window_size=34, sublinear_tf=False, use_idf=False),
+                   BOSSVS(window_size=28),
+                   LearningShapelets(random_state=43, tol=0.01),
+                   TimeSeriesForest(random_state=43)]
+                   
+#setup to store the accuracy scores
+accscore_dict = {}
+
+# iterate over classifiers
+for name, clf in tqdm(zip(names, classifier_call)):
+    #fit the classifier
+    clf.fit(X_train_np, y_train_np)
+    
+    #make predictions on the test dataset
+    y_pred = clf.predict(X_test_np)
+
+    #calculate and track accuracy score
+    accscore = accuracy_score(y_test_np, y_pred)
+    print(f"Accuracy of {name} classifier: {accscore}\n", flush=True)
+    accscore_dict[name] = accscore
+    
+    #plot confusion matrix
+    cm = confusion_matrix(y_test, y_pred, labels=clf.classes_)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm,display_labels=clf.classes_)
+    disp.plot()
+    plt.show()
+```
+
+```{code-cell} ipython3
+#save statistics from these runs
+
+# Serialize data into file:
+json.dump( accscore_dict, open( "output/pyts_accscore.json", 'w' ) )
+json.dump( completeness_dict, open( "output/pyts_completeness.json", 'w' ) )
+json.dump( homogeneity_dict, open( "output/pyts_homogeneity.json", 'w' ) )
+
+# Read data from file:
+#accscore_dict = json.load( open( "output/pyts_accscore.json") )
+```
+
+## 6.0 Conclusions:  
 This classifier can be used to predict CLAGN.  The feature based algorithms do the best jobs of having little to no predicted CLAGN that are truly normal SDSS quasars.  We infer then that if the trained model predicts CLAGN, it is a very good target for follow-up spectroscopy to confirm CLAGN.  However this algorthim will not catch all CLAGN, and will incorrectly labels some CLAGN as being normal SDSS quasars.  THis algorithm can therefore not be used to find a complete sample of CLAGN, but can be used to increase the known sample.
 
 +++
