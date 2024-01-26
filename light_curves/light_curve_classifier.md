@@ -446,9 +446,10 @@ df_lc = df_interpol.explode(["time", "flux","err"], ignore_index=True)
 df_lc = df_lc.astype({col: "float" for col in ["time", "flux", "err"]})
 ```
 
-### 2.6  Restructure dataframe in format expected by sktime
+### 2.6  Restructure dataframe 
 - Make columns have band names in them and then remove band from the index
 - pivot the dataframe so that SKTIME understands its format
+- this will put it in the format expected by sktime
 
 ```{code-cell} ipython3
 df_lc
@@ -534,13 +535,14 @@ df_lc.to_parquet(parquet_savename)
 #print("file saved!")
 ```
 
-### 2.10 make into multi-index which is what SKTime expects as input
+### 2.10 Make into multi-index
+(which is what SKTime expects as input)
 
 ```{code-cell} ipython3
 df_lc = df_lc.set_index(["objectid", "label", "datetime"])
 ```
 
-## 3. Prep for ML algorithms in sktime
+## 3. Prep for ML algorithms
 
 ```{code-cell} ipython3
 # could load a previously saved file in order to plot
@@ -605,7 +607,17 @@ y_train = train_df.droplevel('datetime').index.unique().get_level_values('label'
 y_test = test_df.droplevel('datetime').index.unique().get_level_values('label').to_series()
 ```
 
-### 3.2 Check that the data types are ok for sktime
+## 4. Run sktime algorithms on the light curves
+
+We choose to use [sktime](https://www.sktime.net/en/stable/index.html) algorithms beacuse it is a library of many algorithms specifically tailored to time series datasets.  It is based on the sklearn library so syntax is familiar to many users.
+
+Types of classifiers are listed [here](https://www.sktime.net/en/stable/api_reference/classification.html).
+
+This notebook will invert the actual workflow and show you a single example of the algorithm which best fits the data and has the most accurate classifier. Then it will show how to write a for loop over a bunch of classifiers before narrowing it down to the most accurate.
+
++++
+
+### 4.1 Check that the data types are ok for sktime
 
 ```{code-cell} ipython3
 #ask sktime if it likes the data type of X_train
@@ -617,14 +629,6 @@ check_is_mtype(X_train, mtype="pd-multiindex", scitype="Panel", return_metadata=
 #This test needs to pass in order for sktime to run
 ```
 
-## 4. Run sktime algorithms on the light curves
-
-We choose to use [sktime](https://www.sktime.net/en/stable/index.html) algorithms beacuse it is a library of many algorithms specifically tailored to time series datasets.  It is based on the sklearn library so syntax is familiar to many users.
-
-Types of classifiers are listed [here](https://www.sktime.net/en/stable/api_reference/classification.html).
-
-This notebook will invert the actual workflow and show you a single example of the algorithm which best fits the data and has the most accurate classifier. Then it will show how to write a for loop over a bunch of classifiers before narrowing it down to the most accurate.
-
 ```{code-cell} ipython3
 #what is the list of all possible classifiers that work with multivariate data
 #all_tags(estimator_types = 'classifier')
@@ -632,8 +636,8 @@ classifiers = all_estimators("classifier", filter_tags={'capability:multivariate
 classifiers
 ```
 
-### 4.1 The Most Accurate Classifier
-See section 4.2 for how we landed with this algorithm
+### 4.2 The Most Accurate Classifier
+See section 4.3 for how we landed with this algorithm
 
 ```{code-cell} ipython3
 %%time
@@ -658,7 +662,7 @@ disp.plot()
 plt.show()
 ```
 
-### 4.2 Loop over a bunch of classifiers
+### 4.3 Loop over a bunch of classifiers
 
 Our method is to do a cursory check of a bunch of classifiers and then later drill down deeper on anything with good initial results.  We choose to run a loop over ~10 classifiers that seem promising and check the accuracy scores for each one.  Any classifier with a promising accuracy score could then be followed up with detailed hyperparameter tuning, or potentially with considering other classifiers in that same type.
 
@@ -841,7 +845,7 @@ This classifier can be used to predict CLAGN.  The feature based algorithms do t
 
 +++
 
-### 5.1 Potential Areas of improvement
+### 6.1 Potential Areas of improvement
 - Data is messy
     - ZTF calibration??
 - Label inaccuracy is a concern
