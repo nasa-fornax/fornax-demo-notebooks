@@ -636,10 +636,10 @@ classifiers = all_estimators("classifier", filter_tags={'capability:multivariate
 classifiers
 ```
 
-### 4.2 The Most Accurate Classifier
+### 4.1 A single Classifier
 See section 4.3 for how we landed with this algorithm
 
-```{code-cell} ipython3
+```{raw-cell}
 %%time
 #looks like RandomIntervalClassifier is performing the best for the CLAGN (not for the SDSS)
 
@@ -781,10 +781,39 @@ y_test_np = test_df.groupby('objectid')['label'].first().to_numpy()
 y_train_np.shape, y_test_np.shape
 ```
 
-### 5.2 The most accurate classifier
+### 5.2 A single classifier
 
 ```{code-cell} ipython3
+clf = LearningShapelets(random_state=42, tol=0.01)
+clf.fit(X_train_np, y_train_np)
+clf.score(X_test_np, y_test_np)
+y_pred = clf.predict(X_test_np)
 
+#plot confusion matrix
+cm = confusion_matrix(y_test_np, y_pred, labels=clf.classes_)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm,display_labels=clf.classes_)
+disp.plot()
+#calculate and track accuracy score
+name = "learningshapelets"
+accscore = accuracy_score(y_test, y_pred)
+print(f"Accuracy of {name} classifier: {accscore}\n", flush=True)
+accscore_dict[name] = accscore
+    
+MCC = matthews_corrcoef(y_test, y_pred)
+print(f"MCC of {name} classifier: {MCC}\n", flush=True)
+MCC_dict[name] = MCC
+    
+completeness = completeness_score(y_test, y_pred)
+print(f"Completeness of {name} classifier: {completeness}\n", flush=True)
+completeness_dict[name] = completeness
+    
+homogeneity = homogeneity_score(y_test, y_pred)
+print(f"Homogeneity of {name} classifier: {homogeneity}\n", flush=True)
+homogeneity_dict[name] = homogeneity
+    
+f1 = f1_score(y_test, y_pred, average='macro')
+print(f"F1 score of {name} classifier: {f1}\n", flush=True)
+f1_dict[name] = f1
 ```
 
 ### 5.3 Loop over a bunch of classifiers
@@ -798,7 +827,7 @@ completeness_dict = {}
 f1_dict = {}
 ```
 
-```{code-cell} ipython3
+```{raw-cell}
 %%time
 
 names = ["KNNDTW","saxvsm","bossvs", "learningshapelets","timeseriesforest"]
@@ -834,7 +863,7 @@ for name, clf in tqdm(zip(names, classifier_call)):
     plt.show()
 ```
 
-```{code-cell} ipython3
+```{raw-cell}
 #save statistics from these runs
 
 # Serialize data into file:
