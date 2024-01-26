@@ -352,11 +352,6 @@ hcv_radius = 1.0 / 3600.0  # radius = 1 arcsec
 # number of workers to use in the parallel processing pool
 # this should equal the total number of archives called
 n_workers = 8
-
-# "spawn" new processes because it uses less memory and is thread safe
-# in particular, this is required for pd.read_parquet (used by ZTF_get_lightcurve)
-# https://stackoverflow.com/questions/64095876/multiprocessing-fork-vs-spawn
-mp.set_start_method("spawn", force=True)
 ```
 
 ```{code-cell} ipython3
