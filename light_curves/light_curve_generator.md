@@ -52,7 +52,6 @@ By the end of this tutorial, you will be able to:
  &bull; `pyarrow` to work with Parquet files for WISE and ZTF  
  &bull; `pyvo` for acessing Virtual Observatory(VO) standard data  
  &bull; `requests` to get information from URLs  
- &bull; `s3fs` to connect to AWS S3 buckets  
  &bull; `scipy` to do statistics  
  &bull; `tqdm` to track progress on long running jobs  
  &bull; `urllib` to handle archive searches with website interface
