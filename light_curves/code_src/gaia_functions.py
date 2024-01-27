@@ -152,7 +152,8 @@ def Gaia_retrieve_epoch_photometry(gaia_table):
                                   data_structure = data_structure, 
                                   verbose = False, 
                                   output_file = None , 
-                                  overwrite_output_file=True)
+                                  overwrite_output_file=True,
+                                  format="votable")
 
         # datalink contains a single VOTable, but it's wrapped in a list which is itself wrapped in a dict
         # it's safest to act as if both list and dict may contain an arbitrary number of items
