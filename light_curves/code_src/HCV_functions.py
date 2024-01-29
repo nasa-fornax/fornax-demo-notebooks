@@ -246,14 +246,14 @@ def HCV_get_lightcurves(sample_table, radius):
         tab = hcvcone(ra,dec,radius,table="hcvsummary")
         if tab == '':
             continue
-    
-        tab = ascii.read(tab)
+
+        tab = Table.read(tab, format='ascii')
             
         matchid = tab['MatchID'][0]  #take the first one, assuming it is the nearest match
     
         #just pulling one filter for an example (more filters are available)
         try:
-            src_814 = ascii.read(hcvsearch(table='hcv',MatchID=matchid,Filter='ACS_F814W'))
+            src_814 = Table.read(hcvsearch(table='hcv',MatchID=matchid,Filter='ACS_F814W'), format='ascii')
         except FileNotFoundError:
             #that filter doesn't exist for this target
             continue
