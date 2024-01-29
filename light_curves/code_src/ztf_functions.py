@@ -3,8 +3,9 @@ import re
 
 import astropy.units as u
 import pandas as pd
+import pyarrow.fs
+import pyarrow.parquet
 import pyvo
-import s3fs
 import tqdm
 
 from data_structures import MultiIndexDFObject
@@ -196,10 +197,6 @@ def load_lightcurves(locations_df, nworkers=6, chunksize=100):
     if len(location_grps) < nworkers * chunksize:
         chunksize = len(location_grps) // nworkers + 1
 
-    # "spawn" new processes because it uses less memory and is thread safe (req'd for pd.read_parquet)
-    # https://stackoverflow.com/questions/64095876/multiprocessing-fork-vs-spawn
-    mp.set_start_method("spawn", force=True)
-
     # start a pool of background processes to load data in parallel
     with mp.Pool(nworkers) as pool:
         lightcurves = []
@@ -236,14 +233,15 @@ def load_lightcurves_one_file(location):
     """
     location_keys, location_df = location
 
-    # load light curves from this file, filtering for the ZTF object IDs in location_df
-    ztf_df = pd.read_parquet(
+    # load light curves from this file, filtering for the ZTF object IDs in location_df.
+    # we could use pandas or pyarrow. pyarrow plays nicer with multiprocessing. pandas requires 
+    # "spawning" new processes, which causes leaked semaphores in some cases.
+    ztf_df = pyarrow.parquet.read_table(
         file_name(*location_keys),
-        engine="pyarrow",
-        filesystem=s3fs.S3FileSystem(),
+        filesystem=pyarrow.fs.S3FileSystem(region="us-east-1"),
         columns=["objectid", "hmjd", "mag", "magerr", "catflags"],
         filters=[("objectid", "in", location_df["oid"].to_list())],
-    )
+    ).to_pandas()
 
     # in the parquet files, "objectid" is the ZTF object ID
     # in the MultiIndexDFObject, "objectid" is the ID of a sample_table object
