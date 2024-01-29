@@ -588,6 +588,11 @@ test_df = df_lc.loc[test_ix]
 ```
 
 ```{code-cell} ipython3
+print(train_df.groupby([ "objectid"]).ngroups, "n groups in train sample")
+print(test_df.groupby(["objectid"]).ngroups, "n groups in test sample")
+```
+
+```{code-cell} ipython3
 #plot to show how many of each type of object in the test dataset
 
 plt.figure(figsize=(6,4))
@@ -605,6 +610,11 @@ X_test = test_df.droplevel('label')
 #y are the labels, should be a series 
 y_train = train_df.droplevel('datetime').index.unique().get_level_values('label').to_series()
 y_test = test_df.droplevel('datetime').index.unique().get_level_values('label').to_series()
+```
+
+```{code-cell} ipython3
+print(X_train.groupby([ "objectid"]).ngroups, "n groups in train sample")
+print(X_test.groupby(["objectid"]).ngroups, "n groups in test sample")
 ```
 
 ## 4. Run sktime algorithms on the light curves
@@ -728,12 +738,12 @@ for name, clf in tqdm(zip(names, classifier_call)):
 #this fails to complete, and is a known limitation of this algorithm.  
 ```
 
-```{code-cell} ipython3
+```{raw-cell}
 #show the summary of the algorithms used and their accuracy score
 accscore_dict
 ```
 
-```{code-cell} ipython3
+```{raw-cell}
 #save statistics from these runs
 
 # Serialize data into file:
@@ -745,9 +755,11 @@ json.dump( homogeneity_dict, open( "output/homogeneity.json", 'w' ) )
 #accscore_dict = json.load( open( "output/accscore.json") )
 ```
 
-## 5.0 Run pyTS algorithms on the light curves
+## 5.0 Run pyTS algorithms on a single band of the light curves
 
-+++
+```{code-cell} ipython3
+X_train
+```
 
 ### 5.1 Get the data into the correct shape for pyTS
 
@@ -756,20 +768,38 @@ json.dump( homogeneity_dict, open( "output/homogeneity.json", 'w' ) )
 # a 2d array with shape (n_samples, n_timestamps), where the first axis represents the 
 # samples and the second axis represents time
 #so I need a (6047, 134) array for X_train
-#and y_train should have shape (6047,)
+#and y_train should have shape (6047,) 
 
 #start working on X
-X_train.reset_index()
-X_test.reset_index()
+X_train.reset_index(inplace=True)
+X_test.reset_index(inplace=True)
 
-# Extract the flux values into NumPy arrays and reshape them
-X_train_np = X_train.pivot_table(index='objectid',  columns='time',values='flux_W1', aggfunc='first').to_numpy() 
-X_test_np = X_test.pivot_table(index='objectid', columns='time', values='flux_W1', aggfunc='first').to_numpy() 
+```
 
+```{code-cell} ipython3
+print(X_train.groupby([ "objectid"]).ngroups, "n groups in train sample")
+print(X_test.groupby(["objectid"]).ngroups, "n groups in test sample")
+```
+
+```{code-cell} ipython3
+# Extract univariate flux values into NumPy arrays and reshape them
+X_train_np = X_train.pivot(index='objectid',  columns='time',values='flux_w1').to_numpy() 
+X_test_np = X_test.pivot(index='objectid', columns='time', values='flux_w1').to_numpy()
+
+```
+
+```{code-cell} ipython3
+X_train_np.shape
+```
+
+```{code-cell} ipython3
 # Reshape the arrays to the desired shape
-X_train_np = X_train_np.reshape(6047, 134)
-X_test_np = X_test_np.reshape(2016, 134)
-X_train_np.shape, X_test_np.shape
+#n_timestamps = X_train.groupby(["objectid"]).size()[0] #168
+#n_train_sample = X_train.groupby([ "objectid"]).ngroups  #6047
+#n_test_sample = X_test.groupby([ "objectid"]).ngroups  #2016
+#X_train_np = X_train_np.reshape(n_train_sample, n_timestamps)
+#X_test_np = X_test_np.reshape(n_test_sample, n_timestamps)
+#X_train_np.shape, X_test_np.shape
 
 #now work on the y
 train_df = train_df.reset_index()
@@ -779,6 +809,11 @@ test_df = test_df.reset_index()
 y_train_np = train_df.groupby('objectid')['label'].first().to_numpy()
 y_test_np = test_df.groupby('objectid')['label'].first().to_numpy()
 y_train_np.shape, y_test_np.shape
+```
+
+```{code-cell} ipython3
+n_train_sample = X_train.groupby([ "objectid"]).ngroups 
+n_train_sample
 ```
 
 ### 5.2 A single classifier
