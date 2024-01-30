@@ -46,9 +46,9 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 | IRSA    | Herschel*    | Some spectra, need to check reduction stage | | |
 | IRSA    | Euclid      | Spectra hosted at IRSA in FY25 -> preparation for ingestion | | Will use mock spectra with correct format for testing |
 | IRSA    | SPHEREx     | Spectra/cubes will be hosted at IRSA, first release in FY25 -> preparation for ingestion | | Will use mock spectra with correct format for testing |
-| MAST    | HST*         | Slitless spectra would need reduction and extraction. There are some reduced slit spectra from COS in the Hubble Archive | `astroquery.mast`? | Should be straight forward using `astroquery.mast` |
+| MAST    | HST*         | Slitless spectra would need reduction and extraction. There are some reduced slit spectra from COS in the Hubble Archive | `astroquery.mast`? | Implemented using `astroquery.mast` |
 | MAST    | JWST*        | Reduced slit MSA spectra that can be queried | `astroquery.mast`? | Should be straight forward using `astroquery.mast` |
-| SDSS    | SDSS optical| Optical spectra that are reduced | [Sky Server](https://skyserver.sdss.org/dr18/SearchTools) or `astroquery.sdss` (preferred) | (ALF has code to get spectra via skyserver). Need to look into `astroquery`. |
+| SDSS    | SDSS optical| Optical spectra that are reduced | [Sky Server](https://skyserver.sdss.org/dr18/SearchTools) or `astroquery.sdss` (preferred) | Implemented using `astroquery.sdss`. |
 | DESI    | DESI*        | Optical spectra | [DESI public data release](https://data.desi.lbl.gov/public/) | No obvious API. `pyvo` might work, need to look into this. |
 | HEASARC | None        | Could link to Chandra observations to check AGN occurrence. | `astroquery.heasarc` | More thoughts on how to include scientifically.   |
 
@@ -86,12 +86,370 @@ Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, D
 <!-- #endregion -->
 
 ```python
-## test the HST spectrum retrieval.
-# For this, take a galaxy for which we know HST spectroscopy exists
+## IMPORTS
+import sys, os
+import requests
+import numpy as np
+
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+
+import pandas as pd
+
+from astroquery.mast import Observations
+from astroquery.sdss import SDSS
+from astroquery.ipac.irsa import Irsa
+
+from astropy.coordinates import SkyCoord
+import astropy.units as u
+from astropy.io import fits, ascii
+from astropy.table import Table, Column, vstack, hstack, join, join_skycoord, unique
+from astropy.nddata import StdDevUncertainty
+#from astropy import cosmology
+
+from specutils import Spectrum1D # had to pip install this one
+
+
+sys.path.append('code_src/')
+from data_structures_spec import MultiIndexDFObject
+from sample_selection import clean_sample
+
+
+## Plotting stuff
+mpl.rcParams['font.size'] = 12
+mpl.rcParams['axes.labelpad'] = 10
+mpl.rcParams['xtick.major.pad'] = 7
+mpl.rcParams['ytick.major.pad'] = 7
+mpl.rcParams['xtick.minor.visible'] = True
+mpl.rcParams['ytick.minor.visible'] = True
+mpl.rcParams['xtick.minor.top'] = True
+mpl.rcParams['xtick.minor.bottom'] = True
+mpl.rcParams['ytick.minor.left'] = True
+mpl.rcParams['ytick.minor.right'] = True
+mpl.rcParams['xtick.major.size'] = 5
+mpl.rcParams['ytick.major.size'] = 5
+mpl.rcParams['xtick.minor.size'] = 3
+mpl.rcParams['ytick.minor.size'] = 3
+mpl.rcParams['xtick.direction'] = 'in'
+mpl.rcParams['ytick.direction'] = 'in'
+#mpl.rc('text', usetex=True)
+mpl.rc('font', family='serif')
+mpl.rcParams['xtick.top'] = True
+mpl.rcParams['ytick.right'] = True
+mpl.rcParams['hatch.linewidth'] = 1
+
+def_cols = plt.rcParams['axes.prop_cycle'].by_key()['color']
 ```
 
 ```python
-## Your code here
+def bin_spectra(wave,flux, bin_factor):
+    '''
+    Does a very crude median binning on a spectrum.
+
+    Parameters
+    ----------
+    wave: `astropy.ndarray`
+        Wavelength (can be any units)
+    flux: `astropy.ndarray`
+        Flux (can be any linear units)
+    bin_factor: `float`
+        Binning factor in terms of average wavelength resolution
+
+    Returns
+    -------
+    A tuple (wave_bin , flux_bin , dwave) where
+    wave_bin: `astropy.ndarray`
+        Binned wavelength.
+    flux_bin: `astropy.ndarray`
+        Binned flux
+    dwave: `float`
+        The wavelength resolution used for the binning.
+    
+    '''
+
+    dlam = np.nanmedian(np.diff(wave.value)) * bin_factor
+
+    lam_bin = np.arange(np.nanmin(wave.value)+dlam/2, np.nanmax(wave.value)+dlam/2 + dlam , dlam)
+    flux_bin = np.asarray( [ np.nanmedian(flux[(wave.value >= (ll-dlam/2)) & (wave.value < (ll+dlam/2) )].value) for ll in lam_bin ] )
+
+    return(lam_bin , flux_bin, dlam)
+
+def SDSS_get_spec(sample_table, search_radius_arcsec):
+    '''
+    Retrieves SDSS spectra for a list of sources. Note that no data will
+    be directly downloaded. All will be saved in cache.
+
+    Parameters
+    ----------
+    sample_table : `~astropy.table.Table`
+        Table with the coordinates and journal reference labels of the sources
+    search_radius_arcsec : `float`
+        Search radius in arcseconds.
+
+    Returns
+    -------
+    df_lc : MultiIndexDFObject
+        The main data structure to store all spectra
+        
+    '''
+
+    
+    ## Initialize multi-index object:
+    df_spec = MultiIndexDFObject()
+    
+    for stab in sample_table:
+
+        ## Get Spectra for SDSS
+        search_coords = stab["coord"]
+        
+        xid = SDSS.query_region(search_coords, radius=search_radius_arcsec * u.arcsec, spectro=True)
+
+        if str(type(xid)) != "<class 'NoneType'>":
+            sp = SDSS.get_spectra(matches=xid, show_progress=True)
+    
+            ## Get data
+            wave = 10**sp[0]["COADD"].data.loglam * u.angstrom
+            flux = sp[0]["COADD"].data.flux*1e-17 * u.erg/u.second/u.centimeter**2/u.angstrom # CHECK IT!!!!
+            err = np.repeat(0.0 , len(wave)) * flux.unit
+            
+            ## Add to df_spec.
+            dfsingle = pd.DataFrame(dict(wave=[wave] , flux=[flux], err=[err],
+                                     label=[stab["label"]],
+                                     objectid=[stab["objectid"]],
+                                     mission=["SDSS"],
+                                     instrument=["SDSS"],
+                                     filter=["optical"],
+                                    )).set_index(["objectid", "label", "filter", "mission"])
+            df_spec.append(dfsingle)
+
+        else:
+            print("Source {} could not be found".format(stab["label"]))
+
+
+    return(df_spec)
+
+def HST_get_spec(sample_table, search_radius_arcsec, datadir):
+    '''
+    Retrieves HST spectra for a list of sources.
+
+    Parameters
+    ----------
+    sample_table : `~astropy.table.Table`
+        Table with the coordinates and journal reference labels of the sources
+    search_radius_arcsec : `float`
+        Search radius in arcseconds.
+    datadir : `str`
+        Data directory where to store the data. Each function will create a
+        separate data directory (for example "[datadir]/HST/" for HST data).
+
+    Returns
+    -------
+    df_lc : MultiIndexDFObject
+        The main data structure to store all spectra
+        
+    '''
+
+    ## Create directory
+    this_data_dir = os.path.join(datadir , "HST/")
+    
+    
+    ## Initialize multi-index object:
+    df_spec = MultiIndexDFObject()
+    
+    for stab in sample_table:
+
+        print("Processing source {}".format(stab["label"]))
+
+        ## Query results
+        search_coords = stab["coord"]
+        query_results = Observations.query_criteria(coordinates = search_coords, radius = search_radius_arcsec * u.arcsec,
+                                                dataproduct_type=["spectrum"], obs_collection=["HST"], intentType="science", calib_level=[3,4],
+                                               )
+        print("Number of search results: {}".format(len(query_results)))
+
+        if len(query_results) > 0: # found some spectra
+            
+            
+            ## Retrieve spectra
+            data_products_list = Observations.get_product_list(query_results)
+            
+            ## Filter
+            data_products_list_filter = Observations.filter_products(data_products_list,
+                                                    productType=["SCIENCE"],
+                                                    extension="fits",
+                                                    calib_level=[3,4], # only fully reduced or contributed
+                                                    productSubGroupDescription=["SX1"] # only 1D spectra
+                                                                    )
+            print("Number of files to download: {}".format(len(data_products_list_filter)))
+
+            if len(data_products_list_filter) > 0:
+                
+                ## Download
+                download_results = Observations.download_products(data_products_list_filter, download_dir=this_data_dir)
+            
+                
+                ## Create table
+                keys = ["filters","obs_collection","instrument_name","calib_level","t_obs_release","proposal_id","obsid","objID","distance"]
+                tab = Table(names=keys , dtype=[str,str,str,int,float,int,int,int,float])
+                for jj in range(len(download_results)):
+                    tmp = query_results[query_results["obsid"] == data_products_list_filter["obsID"][jj]][keys]
+                    tab.add_row( list(tmp[0]) )
+                
+                ## Create multi-index object
+                for jj in range(len(tab)):
+                
+                    # open spectrum
+                    filepath = download_results[jj]["Local Path"]
+                    print(filepath)
+                    spec1d = Spectrum1D.read(filepath)  
+                    
+                    dfsingle = pd.DataFrame(dict(wave=[spec1d.spectral_axis] , flux=[spec1d.flux], err=[np.repeat(0,len(spec1d.flux))],
+                                                 label=[stab["label"]],
+                                                 objectid=[stab["objectid"]],
+                                                 #objID=[tab["objID"][jj]],
+                                                 #obsid=[tab["obsid"][jj]],
+                                                 mission=[tab["obs_collection"][jj]],
+                                                 instrument=[tab["instrument_name"][jj]],
+                                                 filter=[tab["filters"][jj]],
+                                                )).set_index(["objectid", "label", "filter", "mission"])
+                    df_spec.append(dfsingle)
+            
+            else:
+                print("Nothing to download for source {}.".format(stab["label"]))
+        else:
+            print("Source {} could not be found".format(stab["label"]))
+        
+
+    return(df_spec)
+
+
+def create_figures(df_spec, bin_factor, show_nbr_figures , save_output):
+    '''
+    Plots the spectra of the sources.
+
+    Parameters
+    ----------
+    df_spec: MultiIndexDFObject
+        The main data structure to store all spectra
+    
+    bin_factor: `float`
+        Binning factor in terms of average wavelength resolution
+    
+    show_nbr_figures : int
+        Number of figures to show inline. For example, `show_nbr_figures = 5' would
+        show the first 5 figures inline.
+        
+    save_output: bool
+        Whether to save the lightcurve figures. If saved, they will be in the "output" directory.
+    
+    '''
+
+    
+    for cc, (objectid, singleobj_df) in enumerate(df_spec.data.groupby('objectid')):
+    
+        fig = plt.figure(figsize=(9,6))
+        ax1 = fig.add_subplot(1,1,1)
+        
+        for ff, (filt,filt_df) in enumerate(singleobj_df.groupby('filter')):
+    
+            #print("{} entries for a object {} and filter {}".format(len(filt_df.flux), objectid , filt))
+            for ii in range(len(filt_df.flux)):
+    
+                wave = filt_df.reset_index().wave[ii]
+                flux = filt_df.reset_index().flux[ii]
+                err = filt_df.reset_index().err[ii]
+                #ax1.plot(wave/1e4 , flux , "-" , label="{} ({})".format(filt, filt_df.reset_index().mission[0]))
+                wave_bin , flux_bin, _ = bin_spectra(wave, flux, bin_factor=bin_factor)
+                ax1.step(wave_bin/1e4 , flux_bin , "-" , label="{} ({})".format(filt, filt_df.reset_index().mission[0]), where="mid")
+    
+        #ax1.set_xscale("log") 
+        ax1.set_yscale("log")
+        ax1.set_xlabel(r"Wavelength [$\rm \mu m$]")
+        ax1.set_ylabel(r"Flux [erg/s/cm$^2$/$\rm \AA$]")
+        ax1.legend(bbox_to_anchor=(1.27,1), fontsize=11)
+
+        if save_output:
+            savename = os.path.join("output" , "spectra_{}.pdf".format(objectid) ) 
+            plt.savefig(savename, bbox_inches="tight")
+        
+        if cc < show_nbr_figures:
+            plt.show()
+        else:
+            plt.close()
+
+    return(True)
+```
+
+```python
+## Get Source list:
+
+coords = []
+labels = []
+
+coords.append(SkyCoord("{} {}".format("09 54 49.40" , "+09 16 15.9"), unit=(u.hourangle, u.deg) ))
+labels.append("NGC3049")
+
+coords.append(SkyCoord("{} {}".format("12 45 17.44 " , "27 07 31.8"), unit=(u.hourangle, u.deg) ))
+labels.append("NGC4670")
+
+coords.append(SkyCoord("{} {}".format("14 01 19.92" , "−33 04 10.7"), unit=(u.hourangle, u.deg) ))
+labels.append("Tol_89")
+
+coords.append(SkyCoord("{} {}".format("150.000" , "+2.00"), unit=(u.deg, u.deg) ))
+labels.append("None")
+
+
+sample_table = clean_sample(coords, labels , verbose=1)
+
+print("Number of sources in sample table: {}".format(len(sample_table)))
+```
+
+```python
+%%time
+## Get IRSA spectra
+
+## Do search
+tab = Irsa.query_region(coordinates="Arp220", catalog="irs_enhv211", spatial="Cone",radius=1 * u.arcsec)
+#tab
+
+## Do this for each entry
+url = "https://irsa.ipac.caltech.edu{}".format(tab["xtable"][0].split("\"")[1])
+print(url)
+
+spec = requests.get(url).content
+
+```
+
+```python
+## Initialize multi-index object
+df_spec = MultiIndexDFObject()
+```
+
+```python
+%%time
+## Get Spectra for HST
+df_spec_HST = HST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/")
+df_spec.append(df_spec_HST)
+```
+
+```python
+%%time
+## Get SDSS Spectra
+df_spec_SDSS = SDSS_get_spec(sample_table , search_radius_arcsec=10)
+df_spec.append(df_spec_SDSS)
+```
+
+```python
+df_spec.data
+```
+
+```python
+### Plotting ####
+create_figures(df_spec = df_spec,
+             bin_factor=10,
+             show_nbr_figures = 10,
+             save_output = False,
+             )
 ```
 
 ```python
