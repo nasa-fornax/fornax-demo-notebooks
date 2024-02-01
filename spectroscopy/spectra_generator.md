@@ -99,21 +99,25 @@ from astroquery.mast import Observations
 from astroquery.sdss import SDSS
 from astroquery.ipac.irsa import Irsa
 
+from sparcl.client import SparclClient
+
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 from astropy.io import fits, ascii
 from astropy.table import Table, Column, vstack, hstack, join, join_skycoord, unique
 from astropy.nddata import StdDevUncertainty
 import astropy.constants as const
+#from astropy.nddata import InverseVariance
+from astropy import nddata
 #from astropy import cosmology
 
 from specutils import Spectrum1D # had to pip install this one
-
 
 sys.path.append('code_src/')
 from data_structures_spec import MultiIndexDFObject
 from sample_selection import clean_sample
 
+!pip install sparclclient
 
 ## Plotting stuff
 mpl.rcParams['font.size'] = 12
@@ -142,38 +146,96 @@ def_cols = plt.rcParams['axes.prop_cycle'].by_key()['color']
 ```
 
 ```python
-def bin_spectra(wave,flux, bin_factor):
+
+
+def DESIBOSS_get_spec(sample_table, search_radius_arcsec):
     '''
-    Does a very crude median binning on a spectrum.
+    Retrieves DESI and BOSS spectra for a list of sources.
+    Note, that we can also retrieve SDSS-DR16 spectra here, which
+    leads to similar results as SDSS_get_spec().
 
     Parameters
     ----------
-    wave: `astropy.ndarray`
-        Wavelength (can be any units)
-    flux: `astropy.ndarray`
-        Flux (can be any linear units)
-    bin_factor: `float`
-        Binning factor in terms of average wavelength resolution
+    sample_table : `~astropy.table.Table`
+        Table with the coordinates and journal reference labels of the sources
+    search_radius_arcsec : `float`
+        Search radius in arcseconds. Here its rather half a box size.
 
     Returns
     -------
-    A tuple (wave_bin , flux_bin , dwave) where
-    wave_bin: `astropy.ndarray`
-        Binned wavelength.
-    flux_bin: `astropy.ndarray`
-        Binned flux
-    dwave: `float`
-        The wavelength resolution used for the binning.
-    
+    df_lc : MultiIndexDFObject
+        The main data structure to store all spectra
+        
     '''
 
-    dlam = np.nanmedian(np.diff(wave.value)) * bin_factor
-
-    lam_bin = np.arange(np.nanmin(wave.value)+dlam/2, np.nanmax(wave.value)+dlam/2 + dlam , dlam)
-    flux_bin = np.asarray( [ np.nanmedian(flux[(wave.value >= (ll-dlam/2)) & (wave.value < (ll+dlam/2) )].value) for ll in lam_bin ] )
-
-    return(lam_bin , flux_bin, dlam)
-
+    
+    ## Set up client
+    client = SparclClient()
+    #print(client.all_datasets) # print data sets
+    
+    ## Initialize multi-index object:
+    df_spec = MultiIndexDFObject()
+    
+    
+    for stab in sample_table:
+    
+        ## Search
+        data_releases = ['DESI-EDR','BOSS-DR16']
+        #data_releases = ['DESI-EDR','BOSS-DR16','SDSS-DR16']
+        
+        search_coords = stab["coord"]
+        dra = (search_radius_arcsec*u.arcsec).to(u.degree)
+        ddec = (search_radius_arcsec*u.arcsec).to(u.degree)
+        out = ['sparcl_id', 'ra', 'dec', 'redshift', 'spectype', 'data_release', 'redshift_err']
+        cons = {'spectype': ['GALAXY','STAR','QSO'],
+                'data_release': data_releases,
+                #'redshift': [0.5, 0.9],
+                'ra' : [search_coords.ra.deg-dra.value  , search_coords.ra.deg+dra.value ],
+                'dec' : [search_coords.dec.deg-ddec.value  , search_coords.dec.deg+ddec.value ]
+               }
+        found_I = client.find(outfields=out, constraints=cons, limit=20) # search
+        #print(found_I)
+        
+        ## Extract nice table and the spectra
+        if len(found_I.records) > 0:
+            result_tab = Table(names=found_I.records[0].keys() , dtype=[ type(found_I.records[0][key]) for key in found_I.records[0].keys()])
+            _ = [ result_tab.add_row([f[key] for key in f.keys()]) for f in found_I.records]
+        
+            sep = [search_coords.separation(SkyCoord(tt["ra"], tt["dec"], unit=u.deg, frame='icrs')).to(u.arcsecond).value for tt in result_tab]
+            result_tab["separation"] = sep
+            
+            ## Retrieve Spectra
+            inc = ['sparcl_id', 'specid', 'data_release', 'redshift', 'flux',
+                   'wavelength', 'model', 'ivar', 'mask', 'spectype', 'ra', 'dec']
+            results_I = client.retrieve(uuid_list=found_I.ids, include=inc)
+            specs = [Spectrum1D(spectral_axis = r.wavelength*u.AA,
+                                flux = np.array(r.flux)* 10**-17 * u.Unit('erg cm-2 s-1 AA-1'),
+                                uncertainty = nddata.InverseVariance(np.array(r.ivar)),
+                                redshift = r.redshift,
+                                mask = r.mask)
+                    for r in results_I.records]
+            
+        
+            ## Choose objects
+            for dr in data_releases:
+                
+                sel = np.where(result_tab["data_release"] == dr)[0]
+                if len(sel) > 0: # found entry
+                    idx_closest = sel[ np.where(result_tab["separation"][sel] == np.nanmin(result_tab["separation"][sel]))[0][0] ]
+            
+                    # create MultiIndex Object
+                    dfsingle = pd.DataFrame(dict(wave=[specs[idx_closest].spectral_axis] ,
+                                                     flux=[specs[idx_closest].flux],
+                                                     err=[np.sqrt(1/specs[idx_closest].uncertainty.quantity)],
+                                                                         label=[stab["label"]],
+                                                                         objectid=[stab["objectid"]],
+                                                                         mission=[dr],
+                                                                         instrument=[dr],
+                                                                         filter=["optical"],
+                                                                        )).set_index(["objectid", "label", "filter", "mission"])
+                    df_spec.append(dfsingle)
+                
+    return(df_spec)
 
 def SpitzerIRS_get_spec(sample_table, search_radius_arcsec , COMBINESPEC):
     '''
@@ -297,9 +359,9 @@ def SDSS_get_spec(sample_table, search_radius_arcsec):
             sp = SDSS.get_spectra(matches=xid, show_progress=True)
     
             ## Get data
-            wave = 10**sp[0]["COADD"].data.loglam * u.angstrom
-            flux = sp[0]["COADD"].data.flux*1e-17 * u.erg/u.second/u.centimeter**2/u.angstrom # CHECK IT!!!!
-            err = np.repeat(0.0 , len(wave)) * flux.unit
+            wave = 10**sp[0]["COADD"].data.loglam * u.angstrom # only one entry because we only search for one xid at a time. Could change that?
+            flux = sp[0]["COADD"].data.flux*1e-17 * u.erg/u.second/u.centimeter**2/u.angstrom 
+            err = np.sqrt(1/sp[0]["COADD"].data.ivar)*1e-17 * flux.unit
             
             ## Add to df_spec.
             dfsingle = pd.DataFrame(dict(wave=[wave] , flux=[flux], err=[err],
@@ -412,6 +474,39 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir):
     return(df_spec)
 
 
+def bin_spectra(wave,flux, bin_factor):
+    '''
+    Does a very crude median binning on a spectrum.
+
+    Parameters
+    ----------
+    wave: `astropy.ndarray`
+        Wavelength (can be any units)
+    flux: `astropy.ndarray`
+        Flux (can be any linear units)
+    bin_factor: `float`
+        Binning factor in terms of average wavelength resolution
+
+    Returns
+    -------
+    A tuple (wave_bin , flux_bin , dwave) where
+    wave_bin: `astropy.ndarray`
+        Binned wavelength.
+    flux_bin: `astropy.ndarray`
+        Binned flux
+    dwave: `float`
+        The wavelength resolution used for the binning.
+    
+    '''
+
+    dlam = np.nanmedian(np.diff(wave.value)) * bin_factor
+
+    lam_bin = np.arange(np.nanmin(wave.value)+dlam/2, np.nanmax(wave.value)+dlam/2 + dlam , dlam)
+    flux_bin = np.asarray( [ np.nanmedian(flux[(wave.value >= (ll-dlam/2)) & (wave.value < (ll+dlam/2) )].value) for ll in lam_bin ] )
+
+    return(lam_bin , flux_bin, dlam)
+
+
 def create_figures(df_spec, bin_factor, show_nbr_figures , save_output):
     '''
     Plots the spectra of the sources.
@@ -441,7 +536,7 @@ def create_figures(df_spec, bin_factor, show_nbr_figures , save_output):
         
         for ff, (filt,filt_df) in enumerate(singleobj_df.groupby('filter')):
     
-            #print("{} entries for a object {} and filter {}".format(len(filt_df.flux), objectid , filt))
+            print("{} entries for a object {} and filter {}".format(len(filt_df.flux), objectid , filt))
             for ii in range(len(filt_df.flux)):
     
                 wave = filt_df.reset_index().wave[ii]
@@ -449,7 +544,7 @@ def create_figures(df_spec, bin_factor, show_nbr_figures , save_output):
                 err = filt_df.reset_index().err[ii]
                 #ax1.plot(wave/1e4 , flux , "-" , label="{} ({})".format(filt, filt_df.reset_index().mission[0]))
                 wave_bin , flux_bin, _ = bin_spectra(wave, flux, bin_factor=bin_factor)
-                ax1.step(wave_bin/1e4 , flux_bin , "-" , label="{} ({})".format(filt, filt_df.reset_index().mission[0]), where="mid")
+                ax1.step(wave_bin/1e4 , flux_bin , "-" , label="{} ({})".format(filt, filt_df.reset_index().mission[ii]), where="mid")
     
         #ax1.set_xscale("log")
         ax1.set_xscale("log")
@@ -488,10 +583,6 @@ labels.append("Tol_89")
 coords.append(SkyCoord(233.73856 , 23.50321, unit=u.deg ))
 labels.append("Arp220")
 
-
-coords.append(SkyCoord(233.73856 , 23.50321, unit=u.deg ))
-labels.append("Arp220_2")
-
 coords.append(SkyCoord("{} {}".format("150.000" , "+2.00"), unit=(u.deg, u.deg) ))
 labels.append("None")
 
@@ -517,7 +608,7 @@ df_spec.append(df_spec_HST)
 ```python
 %%time
 ## Get SDSS Spectra
-df_spec_SDSS = SDSS_get_spec(sample_table , search_radius_arcsec=10)
+df_spec_SDSS = SDSS_get_spec(sample_table , search_radius_arcsec=5)
 df_spec.append(df_spec_SDSS)
 ```
 
@@ -530,11 +621,14 @@ df_spec.append(df_spec_IRS)
 ```
 
 ```python
-df_spec.data
+%%time
+## Get DESI and BOSS spectra with SPARCL
+df_spec_DESIBOSS = DESIBOSS_get_spec(sample_table, search_radius_arcsec=5)
+df_spec.append(df_spec_DESIBOSS)
 ```
 
 ```python
-#Irsa.list_catalogs()
+df_spec.data
 ```
 
 ```python
