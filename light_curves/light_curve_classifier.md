@@ -172,8 +172,144 @@ df_lc['label'] = df_lc.label.str.replace('Lopez-Navas 22', 'CLAGN')
 - objects with no measurements in WISE W1 band
 
 ```{code-cell} ipython3
-#find and drop bad rows
+def sigmaclip_lightcurves(df_lc, sigmaclip_value = 10.0, include_plot = False):
+    """
+    Sigmaclip to remove bad values from the light curves; optionally plots histograms of uncertainties
+        to help determine sigmaclip_value from the data. This is a tricky job because we want to keep 
+        astrophysical outliers of variable objects, butremove instrumental noise and CR (ground based).
+    
+    Parameters
+    ----------
+    df_lc: Pandas dataframe with light curve info
+   
+    sigmaclip_value: what value of sigma should be used to make the cuts
+        
+    Returns
+    --------
+    df_lc: MultiIndexDFObject with all  light curves
+        
+    """
+    #keep track of how many rows this removes
+    start_len = len(df_lc)
 
+    #setup to collect the outlier thresholds per band to later reject
+    nsigmaonmean= {}
+
+    if include_plot:
+        #create the figure and axes
+        fig, axs = plt.subplots(5, 3, figsize = (12, 12))
+
+        # unpack all the axes subplots
+        axe = axs.ravel()
+
+    #for each band
+    for count, (bandname, singleband) in enumerate(df_lc.groupby("band")):
+    
+        #use scipy sigmaclip to iteratively determine sigma on the dataset
+        clippedarr, lower, upper = sigmaclip(singleband.err, low = sigmaclip_value, high = sigmaclip_value)
+    
+        #store this value for later
+        nsigmaonmean[bandname] = upper
+    
+        if include_plot:        
+            #plot distributions and print stddev
+            singleband.err.plot(kind = 'hist', bins = 30, subplots =True, ax = axe[count],label = bandname+' '+str(upper), legend=True)
+
+    #remove data that are outside the sigmaclip_value
+    for bandname, cut in nsigmaonmean.items():
+        querystring = f'band == {bandname!r} & err > {cut}'
+        df_lc = df_lc.drop(df_lc.query(querystring).index)
+
+    #how much data did we remove with this sigma clipping?
+    #This should inform our choice of sigmaclip_value.
+
+    end_len = len(df_lc)
+    fraction = (start_len - end_len) / start_len
+    print(f"This {sigmaclip_value} sigma clipping removed {fraction}% of the rows in df_lc")
+
+    return df_lc
+```
+
+```{code-cell} ipython3
+def remove_objects_without_W1(df_lc, verbose=False):
+    """
+    Get rid of the light curves which do not have W1 data.  We want to normalize
+    all light curves by W1, so we neeed to remove those without W1 fluxes as there 
+    will be nothing to normalize those light curves with and we don't want to 
+    have un-normalized data or data that has been normalized by a different band.  
+    
+    Parameters
+    ----------
+    df_lc: Pandas dataframe with light curve info
+        
+        
+    Returns
+    --------
+    df_lc: MultiIndexDFObject with all  light curves
+        
+    """
+
+
+    #keep track of how many get dropped
+    dropcount = 0
+
+    #for each object
+    for oid , singleoid in df_lc.groupby("objectid"):
+        #what bands does that object have
+        bandname = singleoid.band.unique().tolist()
+    
+        #if it doesn't have W1:
+        if 'w1' not in bandname:
+            #delete this oid from the dataframe of light curves
+            indexoid = df_lc[ (df_lc['objectid'] == oid)].index
+            df_lc.drop(indexoid , inplace=True)
+        
+            #keep track of how many are being deleted
+            dropcount = dropcount + 1
+        
+    if verbose:    
+        print( dropcount, "objects do not have W1 fluxes and were removed")
+
+    return df_lc
+```
+
+```{code-cell} ipython3
+def remove_incomplete_data(df_lc, threshold_too_few = 3):
+    """
+    Remove those light curves that don't have enough data for classification.
+    Some bands in some objects have only a few datapoints. Three data points 
+    is not large enough for KNN interpolation, so we will consider any array 
+    with fewer than 4 photometry points to be incomplete data.  Another way 
+    of saying this is that we choose to remove those light curves with 3 or 
+    fewer data points.
+    
+    Parameters
+    ----------
+    df_lc: Pandas dataframe with light curve info
+
+    threshold_too_few: Int
+        Define what the threshold is for too few datapoints.
+        
+    Returns
+    --------
+    df_lc: MultiIndexDFObject with all  light curves
+        
+    """
+
+    #how many groups do we have before we start
+    print(df_lc.groupby(["band", "objectid"]).ngroups, "n groups before")
+
+    #use pandas .filter to remove small groups
+    df_lc = df_lc.groupby(["band", "objectid"]).filter(lambda x: len(x) > thresh_too_few)
+
+    #how many groups do we have after culling?
+    print(df_lc.groupby(["band", "objectid"]).ngroups, "n groups after")
+
+    return df_lc
+    
+```
+
+```{code-cell} ipython3
 #one panstarrs z has a crazy err value of -999000, definitely don't want to include that one
 querystring = 'err < -100'
 df_lc = df_lc.drop(df_lc.query(querystring).index)
@@ -185,125 +321,21 @@ df_lc.dropna(inplace = True, axis = 0)
 #We are going to define zero flux later to be missing data, but not sure what these are
 querystring = 'flux < 0.000001'
 df_lc = df_lc.drop(df_lc.query(querystring).index)
-```
 
-```{code-cell} ipython3
-#consider Removing all rows with uncertainties well outside of a normal distribution
-#plot histograms to see what these distributions look like
-#This is a tricky job because we want to keep astrophysical outliers of variable objects, but 
-#remove instrumental noise and CR (ground based)
-
-#keep track of how many rows this removes
-start_len = len(df_lc)
-
-#setup to collect the outlier thresholds per band to later reject
-nsigmaonmean= {}
-
-#what value of sigma are we going to consider is an outlier?
+#remove outliers
 sigmaclip_value = 10.0
+df_lc = sigmaclip_lightcurves(df_lc, sigmaclip_value, include_plot = False)
 
-#create the figure and axes
-fig, axs = plt.subplots(5, 3, figsize = (12, 12))
+#remove objects without W1 fluxes
+df_lc = remove_objects_without_W1(df_lc, verbose=True)
 
-# unpack all the axes subplots
-axe = axs.ravel()
-
-#for each band
-for count, (bandname, singleband) in enumerate(df_lc.groupby("band")):
+#remove incomplete data
+threshold_too_few = 3
+df_lc = remove_incomplete_data(df_lc, threshold_too_few)
     
-    #use scipy sigmaclip to iteratively determine sigma on the dataset
-    clippedarr, lower, upper = sigmaclip(singleband.err, low = sigmaclip_value, high = sigmaclip_value)
-    
-    #store this value for later
-    nsigmaonmean[bandname] = upper
-    
-    #plot distributions and print stddev
-    singleband.err.plot(kind = 'hist', bins = 30, subplots =True, ax = axe[count],label = bandname+' '+str(upper), legend=True)
 ```
 
-```{code-cell} ipython3
-#remove data that are outside the sigmaclip_value
-for bandname, cut in nsigmaonmean.items():
-    querystring = f'band == {bandname!r} & err > {cut}'
-    df_lc = df_lc.drop(df_lc.query(querystring).index)
-```
-
-```{code-cell} ipython3
-#how much data did we remove with this sigma clipping?
-#This should inform our choice of sigmaclip_value.
-
-end_len = len(df_lc)
-fraction = (start_len - end_len) / start_len
-print(f"This {sigmaclip_value} sigma clipping removed {fraction}% of the rows in df_lc")
-```
-
-```{code-cell} ipython3
-#Remove objects which do not have fluxes measured in the band with which we want to normalize
-#which band has the most data?
-
-#Later in the code we will need to noramalize fluxes by one of the bands
-#This cell aims to figure out which band has the most data 
-#this needs to be run before we go and fill in missing data
-
-#how many objects are there total?
-total_objectids = df_lc.groupby( "objectid").ngroups
-
-#how many objects have at least 1 flux in each of the band?
-for band, df_lc_band in df_lc.groupby( "band"):
-    total_band = df_lc_band.groupby("objectid").ngroups
-    print(total_band/total_objectids, " have ", band, " fluxes" )
-```
-
-```{code-cell} ipython3
-#this argues for normalizing by w1 fluxes (later)
-#We will therefore need to get rid of the 4% of light curves which do not have W1 data
-#as there will be nothing to normalize those light curves with and we don't want to 
-#have un-normalized data or data that has been normalized by a different band.  
-
-#keep track of how many get dropped
-dropcount = 0
-
-#for each object
-for oid , singleoid in df_lc.groupby("objectid"):
-    #what bands does that object have
-    bandname = singleoid.band.unique().tolist()
-    
-    #if it doesn't have W1:
-    if 'w1' not in bandname:
-        #delete this oid from the dataframe of light curves
-        indexoid = df_lc[ (df_lc['objectid'] == oid)].index
-        df_lc.drop(indexoid , inplace=True)
-        
-        #keep track of how many are being deleted
-        dropcount = dropcount + 1
-        
-        
-print( dropcount, "objects do not have W1 fluxes and were removed")
-```
-
-### 2.4 Incomplete Data
-
-Some bands in some objects have only a few datapoints.  Three data points is not large enough for KNN interpolation, so we will consider any array with fewer than 4 photometry points to be incomplete data.
-
-Another way of saying this is that we choose to remove those light curves with 3 or fewer data points.
-
-```{code-cell} ipython3
-#Define what the threshold is for too few datapoints.
-thresh_too_few = 3
-
-#how many groups do we have before we start
-print(df_lc.groupby(["band", "objectid"]).ngroups, "n groups before")
-
-#use pandas .filter to remove small groups
-df_lc = df_lc.groupby(["band", "objectid"]).filter(lambda x: len(x) > thresh_too_few)
-
-#how many groups do we have after culling?
-print(df_lc.groupby(["band", "objectid"]).ngroups, "n groups after")
-
-#currently this seems like a lot of groups because we still have the gaia single photometry points for many objects
-```
-
-### 2.5 Missing Data
+### 2.4 Missing Data
 Some objects do not have light curves in all bands.  Some ML algorithms can handle mising data, but not all, so it would be useful to handle this missing data up front.
 
 We will add light curves with zero flux and err values for the missing data.  SKtime does not like NaNs, so we chose zeros.
@@ -604,6 +636,11 @@ df_lc = df_lc.set_index(["objectid", "label", "datetime"])
 #print("file loaded!")
 ```
 
+```{code-cell} ipython3
+#try dropping the uncertainty columns as variables for sktime
+df_lc.drop(columns = ['err_panstarrs_g',	'err_panstarrs_i',	'err_panstarrs_r',	'err_panstarrs_y',	'err_panstarrs_z',	'err_w1',	'err_w2',	'err_zg',	'err_zr'], inplace = True)
+```
+
 ### 3.0 Consider data augmentation
 
 1. https://arxiv.org/pdf/1811.08295.pdf which has the following github
@@ -694,7 +731,7 @@ check_is_mtype(X_train, mtype="pd-multiindex", scitype="Panel", return_metadata=
 ```{code-cell} ipython3
 #what is the list of all possible classifiers that work with multivariate data
 #all_tags(estimator_types = 'classifier')
-classifiers = all_estimators("classifier", filter_tags={'capability:multivariate':True})
+#classifiers = all_estimators("classifier", filter_tags={'capability:multivariate':True})
 #classifiers
 ```
 
@@ -981,6 +1018,12 @@ This classifier can be used to predict CLAGN.  The feature based algorithms do t
 - Not enough data on CLAGN
     - limited number of lightcurves
     - consider data augmentation
+
++++
+
+## References:
+Markus Löning, Anthony Bagnall, Sajaysurya Ganesh, Viktor Kazakov, Jason Lines, Franz Király (2019): “sktime: A Unified Interface for Machine Learning with Time Series”
+Markus Löning, Tony Bagnall, Sajaysurya Ganesh, George Oastler, Jason Lines, ViktorKaz, …, Aadesh Deshmukh (2020). sktime/sktime. Zenodo. http://doi.org/10.5281/zenodo.3749000
 
 ```{code-cell} ipython3
 
