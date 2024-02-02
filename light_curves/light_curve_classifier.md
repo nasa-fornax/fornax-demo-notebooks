@@ -499,7 +499,7 @@ df_lc
 
 ```{code-cell} ipython3
 #this cell takes 13seconds to run on the sample of 458 sources
-def uniform_length_spacing(df_lc, include_plot = True):
+def uniform_length_spacing(df_lc, final_freq_interpol, include_plot = True):
     """
     Drop bands with the most missing data and objects without all remaining bands so that there is no missing data going forward.
        
@@ -515,11 +515,9 @@ def uniform_length_spacing(df_lc, include_plot = True):
         
     """
 
-    #change this to change the frequency of the time array
-    final_freq_int = 30  #this is the timescale of interpolation in units of days
 
     #make a time array with the minimum and maximum of all light curves in the sample
-    x_interpol = np.arange(df_lc.time.min(), df_lc.time.max(), final_freq_int)
+    x_interpol = np.arange(df_lc.time.min(), df_lc.time.max(), final_freq_interpol)
     x_interpol = x_interpol.reshape(-1, 1) # needed for sklearn
     lc_interpol = []  # list to store interpolated light curves
 
@@ -585,7 +583,10 @@ def uniform_length_spacing(df_lc, include_plot = True):
 ```
 
 ```{code-cell} ipython3
-df_interpol = uniform_length_spacing(df_lc)
+#change this to change the frequency of the time array
+final_freq_interpol = 30  #this is the timescale of interpolation in units of days
+
+df_interpol = uniform_length_spacing(df_lc, final_freq_interpol )
 # df_lc_interpol has one row per dict in lc_interpol. time and flux columns store arrays.
 # "explode" the dataframe to get one row per light curve point. time and flux columns will now store floats.
 df_lc = df_interpol.explode(["time", "flux","err"], ignore_index=True)
