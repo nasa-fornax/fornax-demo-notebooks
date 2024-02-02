@@ -175,14 +175,17 @@ df_lc['label'] = df_lc.label.str.replace('Lopez-Navas 22', 'CLAGN')
 def sigmaclip_lightcurves(df_lc, sigmaclip_value = 10.0, include_plot = False):
     """
     Sigmaclip to remove bad values from the light curves; optionally plots histograms of uncertainties
-        to help determine sigmaclip_value from the data. This is a tricky job because we want to keep 
-        astrophysical outliers of variable objects, butremove instrumental noise and CR (ground based).
+        to help determine sigmaclip_value from the data. 
     
     Parameters
     ----------
     df_lc: Pandas dataframe with light curve info
    
-    sigmaclip_value: what value of sigma should be used to make the cuts
+    sigmaclip_value: float
+        what value of sigma should be used to make the cuts
+
+    include_plot: bool
+        have the function plot histograms of uncertainties for each band
         
     Returns
     --------
@@ -233,10 +236,7 @@ def sigmaclip_lightcurves(df_lc, sigmaclip_value = 10.0, include_plot = False):
 ```{code-cell} ipython3
 def remove_objects_without_W1(df_lc, verbose=False):
     """
-    Get rid of the light curves which do not have W1 data.  We want to normalize
-    all light curves by W1, so we neeed to remove those without W1 fluxes as there 
-    will be nothing to normalize those light curves with and we don't want to 
-    have un-normalized data or data that has been normalized by a different band.  
+    Get rid of the light curves which do not have W1 data.  
     
     Parameters
     ----------
@@ -277,12 +277,7 @@ def remove_objects_without_W1(df_lc, verbose=False):
 def remove_incomplete_data(df_lc, threshold_too_few = 3):
     """
     Remove those light curves that don't have enough data for classification.
-    Some bands in some objects have only a few datapoints. Three data points 
-    is not large enough for KNN interpolation, so we will consider any array 
-    with fewer than 4 photometry points to be incomplete data.  Another way 
-    of saying this is that we choose to remove those light curves with 3 or 
-    fewer data points.
-    
+       
     Parameters
     ----------
     df_lc: Pandas dataframe with light curve info
@@ -300,7 +295,7 @@ def remove_incomplete_data(df_lc, threshold_too_few = 3):
     print(df_lc.groupby(["band", "objectid"]).ngroups, "n groups before")
 
     #use pandas .filter to remove small groups
-    df_lc = df_lc.groupby(["band", "objectid"]).filter(lambda x: len(x) > thresh_too_few)
+    df_lc = df_lc.groupby(["band", "objectid"]).filter(lambda x: len(x) > threshold_too_few)
 
     #how many groups do we have after culling?
     print(df_lc.groupby(["band", "objectid"]).ngroups, "n groups after")
@@ -317,19 +312,29 @@ df_lc = df_lc.drop(df_lc.query(querystring).index)
 #drop rows which have Nans
 df_lc.dropna(inplace = True, axis = 0)
 
-#drop ~8 rows with zero flux
-#We are going to define zero flux later to be missing data, but not sure what these are
+#drop rows with zero flux
 querystring = 'flux < 0.000001'
 df_lc = df_lc.drop(df_lc.query(querystring).index)
 
 #remove outliers
+#This is a tricky job because we want to keep astrophysical outliers of 
+#variable objects, but remove instrumental noise and CR (ground based).
 sigmaclip_value = 10.0
 df_lc = sigmaclip_lightcurves(df_lc, sigmaclip_value, include_plot = False)
 
 #remove objects without W1 fluxes
+#We want to normalize all light curves by W1, so we neeed to remove those 
+#without W1 fluxes as there will be nothing to normalize those light curves 
+#with and we don't want to have un-normalized data or data that has been 
+#normalized by a different band.  
 df_lc = remove_objects_without_W1(df_lc, verbose=True)
 
 #remove incomplete data
+#Some bands in some objects have only a few datapoints. Three data points 
+#is not large enough for KNN interpolation, so we will consider any array 
+#with fewer than 4 photometry points to be incomplete data.  Another way 
+#of saying this is that we choose to remove those light curves with 3 or 
+#fewer data points.
 threshold_too_few = 3
 df_lc = remove_incomplete_data(df_lc, threshold_too_few)
     
@@ -338,11 +343,31 @@ df_lc = remove_incomplete_data(df_lc, threshold_too_few)
 ### 2.4 Missing Data
 Some objects do not have light curves in all bands.  Some ML algorithms can handle mising data, but not all, so it would be useful to handle this missing data up front.
 
-We will add light curves with zero flux and err values for the missing data.  SKtime does not like NaNs, so we chose zeros.
+There are two options here
+1) We will add light curves with zero flux and err values for the missing data.  SKtime does not like NaNs, so we chose zeros.
+2) Remove bands which have less data from all objects so that there are no objects with missing data
 
-+++
+Functions are inlcuded for both options (for now)
 
-def make_zero_lc(oid, band, label):
+```{code-cell} ipython3
+def make_zero_light_curve(oid, band, label):
+    """
+    Make placeholder light curves with flux and err values = 0.0.
+       
+    Parameters
+    ----------
+    oid: Int
+        objectid
+    band: string
+        photometric band name
+    label: string
+        value for ML algorithms which details what kind of object this is
+        
+    Returns
+    --------
+    zerosingle: dictionary with light curve info
+        
+    """
     #randomly choose some times during the WISE survey
     #these will all get fleshed out in the section on making uniform length time arrays
     #so the specifics are not important now
@@ -353,96 +378,109 @@ def make_zero_lc(oid, band, label):
                   "flux": np.zeros(len(timelist)), "err":np.zeros(len(timelist))}
     
     return zerosingle
+```
 
-```{raw-cell}
-#for the case where there is no photometry in a band:
-#make light curves with flux, err set to zeros
+```{code-cell} ipython3
+def missingdata_to_zeros(df_lc):
+    """
+    Convert mising data into zero fluxes and uncertainties
+       
+    Parameters
+    ----------
+    df_lc: Pandas dataframe with light curve info
 
-#what is the full set of unique band names?
-full_bandname = df_lc.band.unique()
+    Returns
+    --------
+    df_lc: MultiIndexDFObject with all  light curves
+        
+    """
+    #what is the full set of unique band names?
+    full_bandname = df_lc.band.unique()
 
-#setup a list to store empty light curves
-zerosingle_list = [] 
+    #setup a list to store empty light curves
+    zerosingle_list = [] 
 
-#for each object in each band
-for oid , singleoid in df_lc.groupby("objectid"):
+    #for each object in each band
+    for oid , singleoid in df_lc.groupby("objectid"):
                                   
-    #this is the list of bandnames for that object                                
-    oid_bandname = singleoid.band.unique()
+        #this is the list of bandnames for that object                                
+        oid_bandname = singleoid.band.unique()
     
-    #figure out which bands are missing
-    missing = list(set(full_bandname).difference(oid_bandname))
+        #figure out which bands are missing
+        missing = list(set(full_bandname).difference(oid_bandname))
     
-    #if it is not the complete list, ie some bandnames are missing:                            
-    if len(missing) > 0:
+        #if it is not the complete list, ie some bandnames are missing:                            
+        if len(missing) > 0:
     
-        #make new dataframe for this object with zero flux and err values
-        for band in missing:
-            label = str(singleoid.label.unique().squeeze())
-            zerosingle = make_zero_lc(oid, band, label)
-            #keep track of these empty light curces in a list
-            zerosingle_list.append(zerosingle)
+            #make new dataframe for this object with zero flux and err values
+            for band in missing:
+                label = str(singleoid.label.unique().squeeze())
+                zerosingle = make_zero_light_curve(oid, band, label)
+                #keep track of these empty light curces in a list
+                zerosingle_list.append(zerosingle)
+    
+    #turn the empty light curves into a dataframe
+    df_empty = pd.DataFrame(zerosingle_list)
+    # df_empty has one row per dict. time,flux, and err columns store arrays.
+    # "explode" the dataframe to get one row per light curve point. time, flux, and err columns will now store floats.
+    df_empty = df_empty.explode(["time", "flux","err"], ignore_index=True)
+    df_empty = df_empty.astype({col: "float" for col in ["time", "flux", "err"]})
 
-            
-#turn the empty light curves into a dataframe
-df_empty = pd.DataFrame(zerosingle_list)
-# df_empty has one row per dict. time,flux, and err columns store arrays.
-# "explode" the dataframe to get one row per light curve point. time, flux, and err columns will now store floats.
-df_empty = df_empty.explode(["time", "flux","err"], ignore_index=True)
-df_empty = df_empty.astype({col: "float" for col in ["time", "flux", "err"]})
 
+    #now put the empty light curves back together with the main light curve dataframe
+    df_lc = pd.concat([df_lc, df_empty])
 
-#now put the empty light curves back together with the main light curve dataframe
-df_lc = pd.concat([df_lc, df_empty])
+    return(df_lc)
 ```
 
 ```{code-cell} ipython3
-all_bands = df_lc.band.unique()
-all_bands
+def missingdata_drop_bands(df_lc, verbose = False):
+    """
+    Drop bands with the most missing data and objects without all remaining bands so that there is no missing data going forward.
+       
+    Parameters
+    ----------
+    df_lc: Pandas dataframe with light curve info
+    
+    verbose: bool
+    
+    Returns
+    --------
+    df_lc: MultiIndexDFObject with all  light curves
+        
+    """
+
+    #try instead to require that all objects have bands = df_lc.band.unique()
+    #then see what it would be without including gaia??
+
+    #first drop the bands not included from all objects
+    bands_to_drop = ['zi', 'Gaia g', 'Gaia bp', 'Gaia rp']
+    df_lc = df_lc[~df_lc["band"].isin(bands_to_drop)]
+    
+    #now a list of all remaining bands
+    all_bands = df_lc.band.unique()
+    
+    if verbose:
+        #how many objects did we start with?
+        print(df_lc.groupby(["objectid"]).ngroups, "n objects before removing missing band data")
+
+    # Identify objects with all bands
+    complete_objects = df_lc.groupby('objectid')['band'].apply(lambda x: set(x) == set(all_bands))
+
+    # Filter the DataFrame based on complete objects
+    df_lc = df_lc[df_lc['objectid'].isin(complete_objects[complete_objects].index)]
+
+    if verbose:
+        # How many objects are left?
+        print(df_lc.groupby(["objectid"]).ngroups, "n objects after removing missing band data")
+
+    return(df_lc)
 ```
 
 ```{code-cell} ipython3
-#try instead to require that all objects have bands = df_lc.band.unique()
-#then see what it would be without including gaia??
-
-#first drop the bands not included from all objects
-bands_to_drop = ['zi', 'Gaia g', 'Gaia bp', 'Gaia rp']
-df_lc = df_lc[~df_lc["band"].isin(bands_to_drop)]
-
-all_bands = df_lc.band.unique()
-all_bands
-```
-
-```{code-cell} ipython3
-print(df_lc.groupby(["objectid"]).ngroups, "n objects before")
-```
-
-```{code-cell} ipython3
-# Identify objects with all bands
-complete_objects = df_lc.groupby('objectid')['band'].apply(lambda x: set(x) == set(all_bands))
-
-# Filter the DataFrame based on complete objects
-df_lc = df_lc[df_lc['objectid'].isin(complete_objects[complete_objects].index)]
-
-# How many objects are left
-print(df_lc.groupby(["objectid"]).ngroups, "n objects after")
-
-#this drops to 62 with all possible bands
-```
-
-```{code-cell} ipython3
-#checking for Nan
-df_lc.isna().any()
-```
-
-```{code-cell} ipython3
-df_lc
-```
-
-```{code-cell} ipython3
-#checking for zeros in W1
-count = (df_lc['flux'] == 0).sum()
-print('Count of zeros in Column  flux : ', count)
+#choose what to do with missing data...
+#df_lc = missingdata_to_zeros(df_lc)
+df_lc = missingdata_drop_bands(df_lc, verbose = True)
 ```
 
 ### 2.5  Make all objects and bands have identical time arrays (uniform length and spacing)
@@ -455,72 +493,94 @@ Potential other options for uniformizing the time series dataset:
 - pandas.dataframe.interpolate with many methods
 
 ```{code-cell} ipython3
-#what does it look like?
+#what does the dataframe look like at this point in the code?
 df_lc
 ```
 
 ```{code-cell} ipython3
 #this cell takes 13seconds to run on the sample of 458 sources
-
-#change this to change the frequency of the time array
-final_freq_int = 30  #this is the timescale of interpolation in units of days
-
-#make a time array with the minimum and maximum of all light curves in the sample
-x_interpol = np.arange(df_lc.time.min(), df_lc.time.max(), final_freq_int)
-x_interpol = x_interpol.reshape(-1, 1) # needed for sklearn
-lc_interpol = []  # list to store interpolated light curves
-
-#look at each object in each band
-for (band,oid) , singleband_oid in df_lc.groupby(["band", "objectid"]):
-    #singleband_oid is now a dataframe with just one object and one band
-    X = np.array(singleband_oid["time"]).reshape(-1, 1)
-    y = np.array(singleband_oid["flux"])
-    dy = np.array(singleband_oid["err"])
+def uniform_length_spacing(df_lc, include_plot = True):
+    """
+    Drop bands with the most missing data and objects without all remaining bands so that there is no missing data going forward.
+       
+    Parameters
+    ----------
+    df_lc: Pandas dataframe with light curve info
     
-    #kernel = 1.0 * RBF(length_scale=30)
-    #gp = GaussianProcessRegressor(kernel=kernel, alpha=dy**2, normalize_y = False)
-    #gp.fit(X, y)
-    #mean_prediction,std_prediction = gp.predict(x_interpol, return_std=True)
-
-    #try KNN
-    KNN = KNeighborsRegressor(n_neighbors = 3)
-    KNN.fit(X, y)
-    mean_prediction = KNN.predict(x_interpol)
-        
-    #KNN doesnt output an uncertainty array, so make our own:
-    #an array of the same length as mean_prediction
-    #having values equal to the mean of the original uncertainty array
-    err = np.full_like(mean_prediction, singleband_oid.err.mean())  
-        
-    #get these values into the dataframe
-    # append the results as a dict. the list will be converted to a dataframe later.
-    lc_interpol.append(
-        {"objectid": oid, "label": str(singleband_oid.label.unique().squeeze()), "band": band, "time": x_interpol.reshape(-1), 
-         "flux": mean_prediction, "err": err}
-    )
+    verbose: bool
     
+    Returns
+    --------
+    df_interpol: MultiIndexDFObject with interpolated light curves
         
-    #se what this looks like on just a single light curve for now
-    if (band == 'zr') and (oid == 9) :  
-        #see if this looks reasonable
-        plt.errorbar(X,y,dy,linestyle="None",color="tab:blue",marker=".")
-        plt.plot(x_interpol, mean_prediction, label="Mean prediction")
-        #plt.fill_between(
-        #    x_interpol.ravel(),
-        #    mean_prediction - 1.96 * std_prediction,
-        #    mean_prediction + 1.96 * std_prediction,
-        #    color="tab:orange",
-        #    alpha=0.5,
-        #    label=r"95% confidence interval",
-        #)
-        plt.legend()
-        plt.xlabel("time")
-        plt.ylabel("flux")
-        _ = plt.title("KNN regression")
+    """
+
+    #change this to change the frequency of the time array
+    final_freq_int = 30  #this is the timescale of interpolation in units of days
+
+    #make a time array with the minimum and maximum of all light curves in the sample
+    x_interpol = np.arange(df_lc.time.min(), df_lc.time.max(), final_freq_int)
+    x_interpol = x_interpol.reshape(-1, 1) # needed for sklearn
+    lc_interpol = []  # list to store interpolated light curves
+
+    #look at each object in each band
+    for (band,oid) , singleband_oid in df_lc.groupby(["band", "objectid"]):
+        #singleband_oid is now a dataframe with just one object and one band
+        X = np.array(singleband_oid["time"]).reshape(-1, 1)
+        y = np.array(singleband_oid["flux"])
+        dy = np.array(singleband_oid["err"])
+    
+        #kernel = 1.0 * RBF(length_scale=30)
+        #gp = GaussianProcessRegressor(kernel=kernel, alpha=dy**2, normalize_y = False)
+        #gp.fit(X, y)
+        #mean_prediction,std_prediction = gp.predict(x_interpol, return_std=True)
+
+        #try KNN
+        KNN = KNeighborsRegressor(n_neighbors = 3)
+        KNN.fit(X, y)
+        mean_prediction = KNN.predict(x_interpol)
+        
+        #KNN doesnt output an uncertainty array, so make our own:
+        #an array of the same length as mean_prediction
+        #having values equal to the mean of the original uncertainty array
+        err = np.full_like(mean_prediction, singleband_oid.err.mean())  
+        
+        #get these values into the dataframe
+        # append the results as a dict. the list will be converted to a dataframe later.
+        lc_interpol.append(
+            {"objectid": oid, "label": str(singleband_oid.label.unique().squeeze()), "band": band, "time": x_interpol.reshape(-1), 
+             "flux": mean_prediction, "err": err}
+        )
+    
+        if include_plot:
+            #see what this looks like on just a single light curve for now
+            if (band == 'zr') and (oid == 9) :  
+                #see if this looks reasonable
+                plt.errorbar(X,y,dy,linestyle="None",color="tab:blue",marker=".")
+                plt.plot(x_interpol, mean_prediction, label="Mean prediction")
+                #plt.fill_between(
+                #    x_interpol.ravel(),
+                #    mean_prediction - 1.96 * std_prediction,
+                #    mean_prediction + 1.96 * std_prediction,
+                #    color="tab:orange",
+                #    alpha=0.5,
+                #    label=r"95% confidence interval",
+                #)
+                plt.legend()
+                plt.xlabel("time")
+                plt.ylabel("flux")
+                _ = plt.title("KNN regression")
         
         
-# create a dataframe of the interpolated light curves
-df_interpol = pd.DataFrame(lc_interpol)
+    # create a dataframe of the interpolated light curves
+    df_interpol = pd.DataFrame(lc_interpol)
+    return df_interpol
+
+
+```
+
+```{code-cell} ipython3
+df_interpol = uniform_length_spacing(df_lc)
 # df_lc_interpol has one row per dict in lc_interpol. time and flux columns store arrays.
 # "explode" the dataframe to get one row per light curve point. time and flux columns will now store floats.
 df_lc = df_interpol.explode(["time", "flux","err"], ignore_index=True)
@@ -531,10 +591,6 @@ df_lc = df_lc.astype({col: "float" for col in ["time", "flux", "err"]})
 - Make columns have band names in them and then remove band from the index
 - pivot the dataframe so that SKTIME understands its format
 - this will put it in the format expected by sktime
-
-```{code-cell} ipython3
-df_lc
-```
 
 ```{code-cell} ipython3
 #keep some columns out of the mix when doing the pivot by bandname
@@ -577,9 +633,7 @@ Idea here is that we normalize across each object.  So the algorithms will know,
 ```{code-cell} ipython3
 # make a new column with max_r_flux for each objectid
 df_lc['max_W1'] = df_lc.groupby('objectid', sort=False)["flux_w1"].transform('max')
-```
 
-```{code-cell} ipython3
 #figure out which columns in the dataframe are flux columns
 flux_cols = [col for col in df_lc.columns if 'flux' in col]
 
@@ -590,7 +644,7 @@ df_lc[flux_cols] = df_lc[flux_cols].div(df_lc['max_W1'], axis=0)
 df_lc.drop(columns = ['max_W1'], inplace = True)
 ```
 
-### 2.8 Make datetime time column
+### 2.8 Make datetime column
 https://docs.python.org/3/library/datetime.html#module-datetime
 
 SKTime wants a datetime column
@@ -638,7 +692,8 @@ df_lc = df_lc.set_index(["objectid", "label", "datetime"])
 
 ```{code-cell} ipython3
 #try dropping the uncertainty columns as variables for sktime
-df_lc.drop(columns = ['err_panstarrs_g',	'err_panstarrs_i',	'err_panstarrs_r',	'err_panstarrs_y',	'err_panstarrs_z',	'err_w1',	'err_w2',	'err_zg',	'err_zr'], inplace = True)
+df_lc.drop(columns = ['err_panstarrs_g',	'err_panstarrs_i',	'err_panstarrs_r',	'err_panstarrs_y',	
+                      'err_panstarrs_z',	'err_w1',	'err_w2',	'err_zg',	'err_zr'], inplace = True)
 ```
 
 ### 3.0 Consider data augmentation
@@ -661,6 +716,7 @@ Worried that augmenting noisy data just makes more noise
 - Random split
 
 ```{code-cell} ipython3
+#what does the dataframe look like now?
 df_lc
 ```
 
@@ -743,7 +799,7 @@ See section 4.3 for how we landed with this algorithm
 #looks like RandomIntervalClassifier is performing the best for the CLAGN (not for the SDSS)
 
 #setup the classifier
-clf = RandomIntervalClassifier(n_intervals = 20, n_jobs = -1, random_state = 43)
+clf = RandomIntervalClassifier(n_intervals = 12, n_jobs = -1, random_state = 43)
 
 #fit the classifier on the training dataset
 clf.fit(X_train, y_train)
@@ -761,12 +817,14 @@ disp.plot()
 plt.show()
 ```
 
-### 4.3 Loop over a bunch of classifiers
+### 4.2 Loop over a bunch of classifiers
 
 Our method is to do a cursory check of a bunch of classifiers and then later drill down deeper on anything with good initial results.  We choose to run a loop over ~10 classifiers that seem promising and check the accuracy scores for each one.  Any classifier with a promising accuracy score could then be followed up with detailed hyperparameter tuning, or potentially with considering other classifiers in that same type.
 
 ```{raw-cell}
 %%time
+#This cell is currently not being run because it takes a while so is not good for testing/debugging
+
 #which classifiers are we interestd in
 #roughly one from each type of classifier
 
@@ -844,70 +902,42 @@ json.dump( homogeneity_dict, open( "output/homogeneity.json", 'w' ) )
 #accscore_dict = json.load( open( "output/accscore.json") )
 ```
 
-## 5.0 Run pyTS algorithms on a single band of the light curves
+## 5.0 Run pyts algorithms on a single band of the light curves
+[pyts](https://pyts.readthedocs.io/en/stable/) is a python package for time series classification.
 
-```{code-cell} ipython3
-X_train
-```
+We run univariate classification here with just the W1 WISE band.  This is a change from the multivariate sktime classification above.
 
-```{code-cell} ipython3
-#figure out why there are NaNs in X-train
-X_train.isna().any()
-```
++++
 
 ### 5.1 Get the data into the correct shape for pyTS
 
 ```{code-cell} ipython3
-#input to pyTS must be a  numpy.ndarray 
-# a 2d array with shape (n_samples, n_timestamps), where the first axis represents the 
-# samples and the second axis represents time
-#so I need a (6047, 134) array for X_train
-#and y_train should have shape (6047,) 
-
-#start working on X
-X_train.reset_index(inplace=True)
-X_test.reset_index(inplace=True)
-
-```
-
-```{code-cell} ipython3
+#How many objects are we working with?
+#this is repeated here in case sktime is not run above.
 print(X_train.groupby([ "objectid"]).ngroups, "n groups in train sample")
 print(X_test.groupby(["objectid"]).ngroups, "n groups in test sample")
 ```
 
 ```{code-cell} ipython3
+#input to pyTS must be a  numpy.ndarray 
+# a 2d array with shape (n_samples, n_timestamps), where the first axis represents the 
+# samples and the second axis represents time
+
+#start working on X
+X_train_pyts = X_train.reset_index()
+X_test_pyts = X_test.reset_index()
+
 # Extract univariate flux values into NumPy arrays and reshape them
-X_train_np = X_train.pivot(index='objectid',  columns='time',values='flux_w1').to_numpy() 
-X_test_np = X_test.pivot(index='objectid', columns='time', values='flux_w1').to_numpy()
-
-```
-
-```{code-cell} ipython3
-X_train_np.shape
-```
-
-```{code-cell} ipython3
-# Reshape the arrays to the desired shape
-#n_timestamps = X_train.groupby(["objectid"]).size()[0] #168
-#n_train_sample = X_train.groupby([ "objectid"]).ngroups  #6047
-#n_test_sample = X_test.groupby([ "objectid"]).ngroups  #2016
-#X_train_np = X_train_np.reshape(n_train_sample, n_timestamps)
-#X_test_np = X_test_np.reshape(n_test_sample, n_timestamps)
-#X_train_np.shape, X_test_np.shape
+X_train_np = X_train_pyts.pivot(index='objectid',  columns='time',values='flux_w1').to_numpy() 
+X_test_np = X_test_pyts.pivot(index='objectid', columns='time', values='flux_w1').to_numpy()
 
 #now work on the y
-train_df = train_df.reset_index()
-test_df = test_df.reset_index()
+train_df_pyts = train_df.reset_index()
+test_df_pyts = test_df.reset_index()
 
 # Extract unique labels for each objectid and convert to a NumPy array
-y_train_np = train_df.groupby('objectid')['label'].first().to_numpy()
-y_test_np = test_df.groupby('objectid')['label'].first().to_numpy()
-y_train_np.shape, y_test_np.shape
-```
-
-```{code-cell} ipython3
-n_train_sample = X_train.groupby([ "objectid"]).ngroups 
-n_train_sample
+y_train_np = train_df_pyts.groupby('objectid')['label'].first().to_numpy()
+y_test_np = test_df_pyts.groupby('objectid')['label'].first().to_numpy()
 ```
 
 ### 5.2 A single classifier
@@ -958,6 +988,7 @@ f1_dict[name] = f1
 
 ```{raw-cell}
 %%time
+#This cell is currently not being run because it takes a while so is not good for testing/debugging
 
 names = ["KNNDTW","saxvsm","bossvs", "learningshapelets","timeseriesforest"]
          
