@@ -283,7 +283,7 @@ print( dropcount, "objects do not have W1 fluxes and were removed")
 
 ### 2.4 Incomplete Data
 
-Some objects have only a few datapoints.  Three data points is not large enough for KNN interpolation, so we will consider any array with fewer than 4 photometry points to be incomplete data.
+Some bands in some objects have only a few datapoints.  Three data points is not large enough for KNN interpolation, so we will consider any array with fewer than 4 photometry points to be incomplete data.
 
 Another way of saying this is that we choose to remove those light curves with 3 or fewer data points.
 
@@ -308,7 +308,8 @@ Some objects do not have light curves in all bands.  Some ML algorithms can hand
 
 We will add light curves with zero flux and err values for the missing data.  SKtime does not like NaNs, so we chose zeros.
 
-```{code-cell} ipython3
++++
+
 def make_zero_lc(oid, band, label):
     #randomly choose some times during the WISE survey
     #these will all get fleshed out in the section on making uniform length time arrays
@@ -320,9 +321,8 @@ def make_zero_lc(oid, band, label):
                   "flux": np.zeros(len(timelist)), "err":np.zeros(len(timelist))}
     
     return zerosingle
-```
 
-```{code-cell} ipython3
+```{raw-cell}
 #for the case where there is no photometry in a band:
 #make light curves with flux, err set to zeros
 
@@ -362,6 +362,55 @@ df_empty = df_empty.astype({col: "float" for col in ["time", "flux", "err"]})
 
 #now put the empty light curves back together with the main light curve dataframe
 df_lc = pd.concat([df_lc, df_empty])
+```
+
+```{code-cell} ipython3
+all_bands = df_lc.band.unique()
+all_bands
+```
+
+```{code-cell} ipython3
+#try instead to require that all objects have bands = df_lc.band.unique()
+#then see what it would be without including gaia??
+
+#first drop the bands not included from all objects
+bands_to_drop = ['zi', 'Gaia g', 'Gaia bp', 'Gaia rp']
+df_lc = df_lc[~df_lc["band"].isin(bands_to_drop)]
+
+all_bands = df_lc.band.unique()
+all_bands
+```
+
+```{code-cell} ipython3
+print(df_lc.groupby(["objectid"]).ngroups, "n objects before")
+```
+
+```{code-cell} ipython3
+# Identify objects with all bands
+complete_objects = df_lc.groupby('objectid')['band'].apply(lambda x: set(x) == set(all_bands))
+
+# Filter the DataFrame based on complete objects
+df_lc = df_lc[df_lc['objectid'].isin(complete_objects[complete_objects].index)]
+
+# How many objects are left
+print(df_lc.groupby(["objectid"]).ngroups, "n objects after")
+
+#this drops to 62 with all possible bands
+```
+
+```{code-cell} ipython3
+#checking for Nan
+df_lc.isna().any()
+```
+
+```{code-cell} ipython3
+df_lc
+```
+
+```{code-cell} ipython3
+#checking for zeros in W1
+count = (df_lc['flux'] == 0).sum()
+print('Count of zeros in Column  flux : ', count)
 ```
 
 ### 2.5  Make all objects and bands have identical time arrays (uniform length and spacing)
@@ -504,6 +553,9 @@ flux_cols = [col for col in df_lc.columns if 'flux' in col]
 
 # make new normalized flux columns for all fluxes
 df_lc[flux_cols] = df_lc[flux_cols].div(df_lc['max_W1'], axis=0)
+
+#now drop max_W1 as a column so it doesn't get included as a variable in multivariate analysis
+df_lc.drop(columns = ['max_W1'], inplace = True)
 ```
 
 ### 2.8 Make datetime time column
@@ -643,13 +695,13 @@ check_is_mtype(X_train, mtype="pd-multiindex", scitype="Panel", return_metadata=
 #what is the list of all possible classifiers that work with multivariate data
 #all_tags(estimator_types = 'classifier')
 classifiers = all_estimators("classifier", filter_tags={'capability:multivariate':True})
-classifiers
+#classifiers
 ```
 
 ### 4.1 A single Classifier
 See section 4.3 for how we landed with this algorithm
 
-```{raw-cell}
+```{code-cell} ipython3
 %%time
 #looks like RandomIntervalClassifier is performing the best for the CLAGN (not for the SDSS)
 
@@ -761,6 +813,11 @@ json.dump( homogeneity_dict, open( "output/homogeneity.json", 'w' ) )
 X_train
 ```
 
+```{code-cell} ipython3
+#figure out why there are NaNs in X-train
+X_train.isna().any()
+```
+
 ### 5.1 Get the data into the correct shape for pyTS
 
 ```{code-cell} ipython3
@@ -819,6 +876,15 @@ n_train_sample
 ### 5.2 A single classifier
 
 ```{code-cell} ipython3
+#setup to store the accuracy et al. scores
+accscore_dict = {}
+MCC_dict ={}
+homogeneity_dict = {}
+completeness_dict = {}
+f1_dict = {}
+```
+
+```{code-cell} ipython3
 clf = LearningShapelets(random_state=42, tol=0.01)
 clf.fit(X_train_np, y_train_np)
 clf.score(X_test_np, y_test_np)
@@ -852,15 +918,6 @@ f1_dict[name] = f1
 ```
 
 ### 5.3 Loop over a bunch of classifiers
-
-```{code-cell} ipython3
-#setup to store the accuracy et al. scores
-accscore_dict = {}
-MCC_dict ={}
-homogeneity_dict = {}
-completeness_dict = {}
-f1_dict = {}
-```
 
 ```{raw-cell}
 %%time
