@@ -18,7 +18,7 @@ kernelspec:
 By the end of this tutorial, you will be able to:
 - do some basic data cleaning and filtering to prepare the data for the ML algorithms
 - work with Pandas data frames as a way of storing time domain datasets
-- use sktime & pyTS algorithms to train a classifier and predict values on a test dataset
+- use sktime & pyts algorithms to train a classifier and predict values on a test dataset
 
 ## Introduction
 This notebook takes output of a previous demo notebook which generates light curves from archival data, does data prep, and runs the light curves through multiple [`sktime`](https://www.sktime.net/en/stable/) classifiers.  The goal of the classifiers is to be able to differentiate changing look active galactic nucleii (CLAGN) from an SDSS quasar sample based on multiband light curves.  CLAGN are quite interested objects in that they appear to change state, but only a few hundred are currently known, and finding them is quite expensive requiring spectroscopic follow up.  Being able to identify CLAGN in existing large samples would allow us to identify a statisitcal sample from which we could better understand the physics of what is occuring in these systems.
