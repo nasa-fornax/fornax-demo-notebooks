@@ -529,7 +529,12 @@ def uniform_length_spacing(df_lc, include_plot = True):
         X = np.array(singleband_oid["time"]).reshape(-1, 1)
         y = np.array(singleband_oid["flux"])
         dy = np.array(singleband_oid["err"])
-    
+
+        #could imagine using GP to make the arrays equal length and spacing
+        #however this sends the flux values to zero at the beginning and end of 
+        #the arrays if there is time without observations.  This is not ideal
+        #because it significantly changes the shape of the light curves.
+        
         #kernel = 1.0 * RBF(length_scale=30)
         #gp = GaussianProcessRegressor(kernel=kernel, alpha=dy**2, normalize_y = False)
         #gp.fit(X, y)
