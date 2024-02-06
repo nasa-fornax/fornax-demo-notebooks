@@ -13,7 +13,7 @@ kernelspec:
 
 # How do AGNs selected with different techniques compare?
 
-By the IPAC Science Platform Team, last edit: Sep 25th, 2024
+By the IPAC Science Platform Team, last edit: Feb 5th, 2024
 
 ***
 
@@ -46,7 +46,6 @@ Here are the libraries used in this network. They are also mostly mentioned in t
 - *MultiIndexDFObject*, *ML_utils*, *sample_lc* for reading in and prepreocessing of lightcurve data
 - *umap* and *sompy* for manifold learning, dimensionality reduction and visualization
 
-
 ```{code-cell} ipython3
 #!pip install -r requirements.txt
 import sys
@@ -55,6 +54,7 @@ import re
 import time
 
 import astropy.units as u
+from astropy.table import Table
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.cm as cm
@@ -65,17 +65,11 @@ from data_structures import MultiIndexDFObject
 from ML_utils import unify_lc, stat_bands, autopct_format, combine_bands,\
 mean_fractional_variation, normalize_mean_objects, normalize_max_objects, \
 normalize_clipmax_objects, shuffle_datalabel, dtw_distance, stretch_small_values_arctan
-from sample_lc import build_sample
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from collections import Counter,OrderedDict
 
-try:
-    import umap
-    import umap.plot
-except:
-    !pip install umap-learn[plot]
-
+import umap
 from sompy import * #using the SOMPY package from https://github.com/sevamoo/SOMPY
 
 import warnings
@@ -103,25 +97,14 @@ colors = [
 Here we load a parquet file of light curves generated using the multiband_lc notebook. One can build the sample from different sources in the literature and grab the data from archives of interes.
 
 ```{code-cell} ipython3
-# To build a sample and generate the multiindex lc dataframe the code below is used, which takes long:
-#!python sample_lc.py
-#c,l = build_sample() # if coordinates and labels of the sample are needed separately
-
-parquet_loadname = 'output/df_lc_5k.parquet.gzip'
-parallel_df_lc = MultiIndexDFObject()
-parallel_df_lc.data = pd.read_parquet(parquet_loadname)
-
-#parquet2_loadname = 'output/df_lc_changelook.parquet'
-#parallel2_df_lc = MultiIndexDFObject()
-#parallel2_df_lc.data = pd.read_parquet(parquet2_loadname)
-
-# To connect two dflcs
-#parallel_df_lc = parallel1_df_lc.concat(parallel2_df_lc)
-
+sample_table = Table.read('data/object_sample.ecsv', format="ascii.ecsv")
+df_lc = pd.read_parquet('data/lightcurves.parquet')
+# there is an extra column containing the mission. if you want to remove it, do:
+parallel_df_lc = df_lc[['flux', 'err']]
 ```
 
 ```{code-cell} ipython3
-parallel_df_lc.data
+parallel_df_lc
 ```
 
 ### 1.1) What is in this sample
@@ -129,13 +112,13 @@ parallel_df_lc.data
 To effectively undertake machine learning (ML) in addressing a specific question, it's imperative to have a clear understanding of the data we'll be utilizing. This understanding aids in selecting the appropriate ML approach and, critically, allows for informed and necessary data preprocessing. For example whether a normalization is needed, and what band to choose for normalization.
 
 ```{code-cell} ipython3
-objid = parallel_df_lc.data.index.get_level_values('objectid')[:].unique()
+objid = parallel_df_lc.index.get_level_values('objectid')[:].unique()
 seen = Counter()
 
 # Grouping all changing look AGNs from the literature into one class:
 cl_labels = ['LaMassa 15','Green 22','Hon 22','Lyu 21','Sheng 20','MacLeod 19','MacLeod 16','Ruan 16','Yang 18','Lopez-Navas 22']
 for b in objid:
-    singleobj = parallel_df_lc.data.loc[b,:,:,:]
+    singleobj = parallel_df_lc.loc[b,:,:,:]
     label = singleobj.index.unique('label')
     if label in cl_labels:
         label = ['CL AGN']
@@ -146,7 +129,7 @@ for b in objid:
     seen.update(label)
 
 #changing order of labels in dictionary only for text to be readable on the plot
-key_order = ('SDSS','TDE', 'FermiBL','CL-On','CL-Off', 'VLT Cosmos','Palomar variable 20','WISE-Variable', 'Galex variable 22')
+key_order = ('SDSS','TDE', 'FermiBL','CL-On','CL-Off', 'VLT Cosmos','Palomar variable 20', 'Galex variable 22')#'WISE-Variable',
 new_queue = OrderedDict()
 for k in key_order:
     new_queue[k] = seen[k]
@@ -161,7 +144,7 @@ In this particular example, the largest three subsamples are AGNs selected from 
 ```{code-cell} ipython3
 seen = Counter()
 for b in objid:
-    singleobj = parallel_df_lc.data.loc[b,:,:,:]
+    singleobj = parallel_df_lc.loc[b,:,:,:]
     label = singleobj.index.unique('label')
     bands = singleobj.loc[label[0],:,:].index.get_level_values('band')[:].unique()
     seen.update(bands)
@@ -179,7 +162,7 @@ cadence = dict((el,[]) for el in seen.keys())
 timerange = dict((el,[]) for el in seen.keys())
 
 for b in objid:
-    singleobj = parallel_df_lc.data.loc[b,:,:,:]
+    singleobj = parallel_df_lc.loc[b,:,:,:]
     label = singleobj.index.unique('label')
     bband = singleobj.index.unique('band')
     for bb in bband:
@@ -251,7 +234,6 @@ for i,l in enumerate(fzr):
 
 The combination of the tree bands into one longer arrays in order of increasing wavelength, can be seen as providing both the SED shape as well as variability in each from the light curve. Figure below demonstrates this as well as our normalization choice. We normalize the data in ZTF R band as it has a higher average numbe of visits compared to G and I band. We remove outliers before measuring the mean and max of the light curve and normalizing by it. This normalization can be skipped if one is mearly interested in comparing brightnesses of the data in this sample, but as dependence on flux is strong to look for variability and compare shapes of light curves a normalization helps.
 
-
 ```{code-cell} ipython3
 r = np.random.randint(np.shape(dat)[1])
 plt.figure(figsize=(18,4))
@@ -283,7 +265,6 @@ for i,l in enumerate(bands_inlc):
     plt.plot(np.linspace(first,last,s),datm[r,first:last],'o',linestyle='--',label=l)
 plt.xlabel(r'Time_[w1,w2,w3]',size=15)
 plt.ylabel(r'Normalized Flux (mean r band)',size=15)
-
 ```
 
 ## 3) Learn the Manifold
@@ -361,8 +342,6 @@ plt.title('mean fractional variation')
 plt.contourf(x_centers, y_centers, mean_property2, cmap='viridis', alpha=0.7)
 plt.colorbar()
 #plt.axis('off')
-
-
 ```
 
 ### 3.1) Sample comparison on the UMAP
@@ -395,7 +374,6 @@ for i, prob in enumerate(class_probabilities):
 ax0.legend(loc=4,fontsize=7)
 ax0.axis('off')
 plt.tight_layout()
-
 ```
 
 Figure above shows how with ZTF light curves alone we can separate some of these AGN samples, where they have overlaps. We can do a similar exercise with other dimensionality reduction techniques. Below we show two SOMs one with normalized and another with no normalization. The advantage of Umaps to SOMs is that in practice you may change the parameters to separate classes of vastly different data points, as distance is preserved on a umap. On a SOM however only topology of higher dimensions is preserved and not distance hence, the change on the 2d grid does not need to be smooth and from one cell to next there might be larg jumps. On the other hand, an advantage of the SOM is that by definition it has a grid and no need for a posterior interpolation (as we did above) is needed to map more data or to measure probabilities, etc.
@@ -504,7 +482,6 @@ plt.tight_layout()
 ```
 
 The above SOMs are colored by the mean fractional variation of the lightcurves in all bands (a measure of AGN variability). The crosses are different samples mapped to the trained SOM to see if they are distinguishable on a normalized lightcurve som.
-
 
 ```{code-cell} ipython3
 # shuffle data incase the ML routines are sensitive to order
@@ -914,7 +891,6 @@ for l,lab in enumerate(np.unique(fzr)):
     cf = ax0.scatter(mapper.embedding_[u,0],mapper.embedding_[u,1],s=markersize,c=colors[l],alpha=0.6,edgecolor='gray',label=lab)
 plt.legend(fontsize=12)
 plt.axis('off')
-
 ```
 
 ## About this Notebook

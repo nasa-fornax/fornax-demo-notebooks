@@ -37,7 +37,7 @@ def unify_lc(df_lc, bands_inlc=['zr', 'zi', 'zg'], xres=160, numplots=1, low_lim
     x_wise = np.linspace(0, 4000, xres)  # For WISE
 
     # Extract unique object IDs from the DataFrame
-    objids = df_lc.data.index.get_level_values('objectid')[:].unique()
+    objids = df_lc.index.get_level_values('objectid')[:].unique()
 
     # Initialize variables for storing results
     printcounter = 0
@@ -45,7 +45,7 @@ def unify_lc(df_lc, bands_inlc=['zr', 'zi', 'zg'], xres=160, numplots=1, low_lim
 
     # Iterate over each object ID
     for keepindex, obj in tqdm(enumerate(objids)):
-        singleobj = df_lc.data.loc[obj, :, :, :]  # Extract data for the single object
+        singleobj = df_lc.loc[obj, :, :, :]  # Extract data for the single object
         label = singleobj.index.unique('label')  # Get the label of the object
         bands = singleobj.loc[label[0], :, :].index.get_level_values('band')[:].unique()  # Extract bands
 
@@ -132,13 +132,13 @@ def unify_lc_gp(df_lc,bands_inlc=['zr','zi','zg'],xres=160,numplots=1,low_limit_
     '''
     x_ztf = np.linspace(0,1600,xres).reshape(-1, 1) # X array for interpolation
     x_wise = np.linspace(0,4000,xres).reshape(-1, 1) # X array for interpolation
-    objids = df_lc.data.index.get_level_values('objectid')[:].unique()
+    objids = df_lc.index.get_level_values('objectid')[:].unique()
 
     printcounter = 0
     objects,dobjects,flabels,keeps = [],[],[],[]
     for keepindex,obj in tqdm(enumerate(objids)):
 
-        singleobj = df_lc.data.loc[obj,:,:,:]
+        singleobj = df_lc.loc[obj,:,:,:]
         label = singleobj.index.unique('label')
         bands = singleobj.loc[label[0],:,:].index.get_level_values('band')[:].unique()
         keepobj = 0
