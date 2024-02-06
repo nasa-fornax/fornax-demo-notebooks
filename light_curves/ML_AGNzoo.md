@@ -72,6 +72,13 @@ from collections import Counter,OrderedDict
 import umap
 from sompy import * #using the SOMPY package from https://github.com/sevamoo/SOMPY
 
+import logging
+
+# Get the root logger
+logger = logging.getLogger()
+logger.setLevel(logging.ERROR)
+logging.getLogger('matplotlib.font_manager').disabled = True
+
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -185,8 +192,6 @@ plt.ylabel(r'Average number of visits',size=20)
 plt.xlabel(r'Average baseline (days)',size=20)
 plt.xlim([0,4000])
 plt.yscale('log')
-
-plt.show()
 ```
 
 While from the histogram plot we see which bands have the highest number of observed lightcurves, what might matter more in finding/selecting variability or changing look in lightcurves is the cadence and the average baseline of observations. For instance, Panstarrs has a large number of lightcurve detections in our sample, but from the figure above we see that the average number of visits and the baseline for those observations are considerably less than ZTF. WISE also shows the longest baseline of observations which is suitable to finding longer term variability in objects.
@@ -299,7 +304,6 @@ plt.colorbar(cf)
 plt.axis('off')
 
 plt.tight_layout()
-
 #plt.savefig('umap-ztf.png')
 ```
 
