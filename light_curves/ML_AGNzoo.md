@@ -77,7 +77,6 @@ import logging
 # Get the root logger
 logger = logging.getLogger()
 logger.setLevel(logging.ERROR)
-logging.getLogger('matplotlib.font_manager').disabled = True
 
 import warnings
 warnings.filterwarnings('ignore')
