@@ -147,8 +147,6 @@ def_cols = plt.rcParams['axes.prop_cycle'].by_key()['color']
 ```
 
 ```python
-
-
 def DESIBOSS_get_spec(sample_table, search_radius_arcsec):
     '''
     Retrieves DESI and BOSS spectra for a list of sources.
@@ -475,6 +473,84 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir):
     return(df_spec)
 
 
+def KeckDEIMOS_get_spec(sample_table, search_radius_arcsec):
+    '''
+    Retrieves Keck DEIMOS on COSMOS spectra for a list of sources.
+
+    Parameters
+    ----------
+    sample_table : `~astropy.table.Table`
+        Table with the coordinates and journal reference labels of the sources
+    search_radius_arcsec : `float`
+        Search radius in arcseconds.
+
+    Returns
+    -------
+    df_lc : MultiIndexDFObject
+        The main data structure to store all spectra
+        
+    '''
+
+    ## Initialize multi-index object:
+    df_spec = MultiIndexDFObject()
+    
+    for stab in sample_table:
+
+        search_coords = stab["coord"]
+        tab = Irsa.query_region(coordinates=search_coords, catalog="cosmos_deimos", spatial="Cone",radius=search_radius_arcsec * u.arcsec)
+        print("Number of entries found: {}".format(len(tab)))
+        
+        
+        if len(tab) > 0: # found a source
+        
+            ## If multiple entries are found, pick the closest.
+            if len(tab) > 1:
+                print("More than 1 entry found - pick the closest. ")
+                sep = [search_coords.separation(SkyCoord(tt["ra"], tt["dec"], unit=u.deg, frame='icrs')).to(u.arcsecond).value for tt in tab]
+                id_min = np.where(sep == np.nanmin(sep))[0]
+                tab_final = tab[id_min]
+            else:
+                tab_final = tab.copy()
+        
+        
+            if "_acal" in tab_final["fits1d"][0]:
+                ISCALIBRATED = True
+            else:
+                print("no calibration is available")
+                ISCALIBRATED = False
+        
+        
+            if ISCALIBRATED: # only if calibrated spectrum is available
+            
+                ## Now extract spectrum
+                # ASCII 1d spectrum for file spec1d.cos0.034.VD_07891 
+                # wavelength in Angstroms and observed-frame
+                # flux (f_lambda) in 1e-17 erg/s/cm2/A if calibrated, else in counts
+                # ivar (inverse variance) in 1e-17 erg/s/cm2/A if calibrated, else in counts
+                # wavelength flux ivar 
+                url = "https://irsa.ipac.caltech.edu{}".format(tab_final["fits1d"][0].split("\"")[1])
+                spec = Table.read(url)
+                
+                # Prepare arrays
+                wave = spec["LAMBDA"][0] * u.angstrom
+                flux_cgs = spec["FLUX"][0] * 1e-17 * u.erg/u.second/u.centimeter**2/u.angstrom
+                error_cgs = np.sqrt( 1 / spec["IVAR"][0]) * 1e-17 * u.erg/u.second/u.centimeter**2/u.angstrom
+                
+                # Create MultiIndex object
+                dfsingle = pd.DataFrame(dict(wave=[wave] ,
+                                             flux=[flux_cgs],
+                                             err=[error_cgs],
+                                                                 label=[stab["label"]],
+                                                                 objectid=[stab["objectid"]],
+                                                                 mission=["Keck"],
+                                                                 instrument=["DEIMOS"],
+                                                                 filter=["optical"],
+                                                                )).set_index(["objectid", "label", "filter", "mission"])
+                df_spec.append(dfsingle)
+
+    return(df_spec)
+
+
 def bin_spectra(wave,flux, bin_factor):
     '''
     Does a very crude median binning on a spectrum.
@@ -534,6 +610,15 @@ def create_figures(df_spec, bin_factor, show_nbr_figures , save_output):
     
         fig = plt.figure(figsize=(9,6))
         ax1 = fig.add_subplot(1,1,1)
+
+        this_label = list(singleobj_df.groupby('label'))[0][0]
+
+        ## Logarithmic or linear x-axis?
+        all_instruments = [ list(singleobj_df.groupby('instrument'))[ii][0] for ii in range(len(list(singleobj_df.groupby('instrument')))) ]
+        if "IRS" in all_instruments:
+            LOGX = True
+        else:
+            LOGX = False
         
         for ff, (filt,filt_df) in enumerate(singleobj_df.groupby('filter')):
     
@@ -543,12 +628,17 @@ def create_figures(df_spec, bin_factor, show_nbr_figures , save_output):
                 wave = filt_df.reset_index().wave[ii]
                 flux = filt_df.reset_index().flux[ii]
                 err = filt_df.reset_index().err[ii]
+                mask = np.where(np.isfinite(err))[0]
+                wave = wave[mask]
+                flux = flux[mask]
+                err = err[mask]
+                
                 #ax1.plot(wave/1e4 , flux , "-" , label="{} ({})".format(filt, filt_df.reset_index().mission[0]))
                 wave_bin , flux_bin, _ = bin_spectra(wave, flux, bin_factor=bin_factor)
                 ax1.step(wave_bin/1e4 , flux_bin , "-" , label="{} ({})".format(filt, filt_df.reset_index().mission[ii]), where="mid")
     
-        #ax1.set_xscale("log")
-        ax1.set_xscale("log")
+        ax1.set_title(this_label)
+        if LOGX: ax1.set_xscale("log")
         ax1.set_yscale("log")
         ax1.set_xlabel(r"Wavelength [$\rm \mu m$]")
         ax1.set_ylabel(r"Flux [erg/s/cm$^2$/$\rm \AA$]")
@@ -584,6 +674,12 @@ labels.append("Tol_89")
 coords.append(SkyCoord(233.73856 , 23.50321, unit=u.deg ))
 labels.append("Arp220")
 
+coords.append(SkyCoord( 150.091 , 2.2745833, unit=u.deg ))
+labels.append("COSMOS1")
+
+coords.append(SkyCoord( 150.1024475 , 2.2815559, unit=u.deg ))
+labels.append("COSMOS2")
+
 coords.append(SkyCoord("{} {}".format("150.000" , "+2.00"), unit=(u.deg, u.deg) ))
 labels.append("None")
 
@@ -597,6 +693,12 @@ print("Number of sources in sample table: {}".format(len(sample_table)))
 ```python
 ## Initialize multi-index object
 df_spec = MultiIndexDFObject()
+```
+
+```python
+## Get Keck Spectra (COSMOS only)
+df_spec_DEIMOS = KeckDEIMOS_get_spec(sample_table = sample_table, search_radius_arcsec=1)
+df_spec.append(df_spec_DEIMOS)
 ```
 
 ```python
@@ -642,5 +744,51 @@ create_figures(df_spec = df_spec,
 ```
 
 ```python
+END
+```
 
+```python
+### FOR TESTING ONLY ####
+
+bin_factor = 10
+
+for cc, (objectid, singleobj_df) in enumerate(df_spec.data.groupby('objectid')):
+
+    if cc == 0:
+        
+        fig = plt.figure(figsize=(9,6))
+        ax1 = fig.add_subplot(1,1,1)
+    
+        this_label = list(singleobj_df.groupby('label'))[0][0]
+    
+        ## Logarithmic or linear x-axis?
+        all_instruments = [ list(singleobj_df.groupby('instrument'))[ii][0] for ii in range(len(list(singleobj_df.groupby('instrument')))) ]
+        if "IRS" in all_instruments:
+            LOGX = True
+        else:
+            LOGX = False
+        
+        for ff, (filt,filt_df) in enumerate(singleobj_df.groupby('filter')):
+    
+            print("{} entries for a object {} and filter {}".format(len(filt_df.flux), objectid , filt))
+            for ii in range(len(filt_df.flux)):
+    
+                wave = filt_df.reset_index().wave[ii]
+                flux = filt_df.reset_index().flux[ii]
+                err = filt_df.reset_index().err[ii]
+                mask = np.where(np.isfinite(err))[0]
+                wave = wave[mask]
+                flux = flux[mask]
+                err = err[mask]
+                
+                #ax1.plot(wave/1e4 , flux , "-" , label="{} ({})".format(filt, filt_df.reset_index().mission[0]))
+                wave_bin , flux_bin, _ = bin_spectra(wave, flux, bin_factor=bin_factor)
+                ax1.step(wave_bin/1e4 , flux_bin , "-" , label="{} ({})".format(filt, filt_df.reset_index().mission[ii]), where="mid")
+    
+        ax1.set_title(this_label)
+        if LOGX: ax1.set_xscale("log")
+        ax1.set_yscale("log")
+        ax1.set_xlabel(r"Wavelength [$\rm \mu m$]")
+        ax1.set_ylabel(r"Flux [erg/s/cm$^2$/$\rm \AA$]")
+        ax1.legend(bbox_to_anchor=(1.27,1), fontsize=11)
 ```
