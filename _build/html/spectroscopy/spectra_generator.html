@@ -1,0 +1,660 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Extract Multi-Wavelength Spectroscopy from Archival Data &#8212; Fornax Demo Notebooks</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'spectroscopy/spectra_generator';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/fornax_logo.png" class="logo__image only-light" alt="Fornax Demo Notebooks - Home"/>
+    <script>document.write(`<img src="../_static/fornax_logo.png" class="logo__image only-dark" alt="Fornax Demo Notebooks - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/fornax-navo/fornax-demo-notebooks" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../index.html">
+                    Table of Content
+                </a>
+            </li>
+        </ul>
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../forced_photometry/README.html">Multi-band forced photometry</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../forced_photometry/multiband_photometry.html">Automated Multiband Forced Photometry on Large Datasets</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../light_curves/README.html">Time Domain</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../light_curves/light_curve_generator.html">Make Multiwavelength Light Curves Using Archival Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../light_curves/lc_classifier.html">Light Curve Classifier</a></li>
+</ul>
+</li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/fornax-navo/fornax-demo-notebooks" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/fornax-navo/fornax-demo-notebooks/edit/main/spectroscopy/spectra_generator.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/fornax-navo/fornax-demo-notebooks/issues/new?title=Issue%20on%20page%20%2Fspectroscopy/spectra_generator.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/spectroscopy/spectra_generator.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Extract Multi-Wavelength Spectroscopy from Archival Data</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#learning-goals">Learning Goals</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction:</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#motivation">Motivation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#list-of-spectroscopic-archives-and-status">List of Spectroscopic Archives and Status</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-standard-imports">Non-standard Imports:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next Steps:</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <!-- #region -->
+<section id="extract-multi-wavelength-spectroscopy-from-archival-data">
+<h1>Extract Multi-Wavelength Spectroscopy from Archival Data<a class="headerlink" href="#extract-multi-wavelength-spectroscopy-from-archival-data" title="Link to this heading">#</a></h1>
+<hr class="docutils" />
+<section id="learning-goals">
+<h2>Learning Goals<a class="headerlink" href="#learning-goals" title="Link to this heading">#</a></h2>
+<p>By the end of this tutorial, you will be able to:</p>
+<p>• automatically load a catalog of sources</p>
+<p>• search NASA and non-NASA resources for fully reduced spectra and load them using specutils</p>
+<p>• store the spectra in a Pandas multiindex dataframe</p>
+<p>• plot all the spectra of a given source</p>
+</section>
+<section id="introduction">
+<h2>Introduction:<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
+<section id="motivation">
+<h3>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">#</a></h3>
+<p>A user has a source (or a sample of sources) for which they want to obtain spectra covering ranges of wavelengths from the UV to the far-IR. The large amount of spectra available enables multi-wavelength spectroscopic studies, which is crucial to understand the physics of stars, galaxies, and AGN. However, gathering and analysing spectra is a difficult endeavor as the spectra are distributed over different archives and in addition they have different formats which complicates their handling. This notebook showcases a tool for the user to conveniently query the spectral archives and collect the spectra for a set of objects in a format that can be read in using common software such as the Python <code class="docutils literal notranslate"><span class="pre">specutils</span></code> package. For simplicity, we limit the tool to query already reduced and calibrated spectra.
+The notebook may focus on the COSMOS field for now, which has a large overlap of spectroscopic surveys such as with SDSS, DESI, Keck, HST, JWST, Spitzer, and Herschel. In addition, the tool enables the capability to search and ingest spectra from Euclid and SPHEREx in the feature. For this to work, the <code class="docutils literal notranslate"><span class="pre">specutils</span></code> functions may have to be update or a wrapper has to be implemented.</p>
+</section>
+<section id="list-of-spectroscopic-archives-and-status">
+<h3>List of Spectroscopic Archives and Status<a class="headerlink" href="#list-of-spectroscopic-archives-and-status" title="Link to this heading">#</a></h3>
+<table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Archive</p></th>
+<th class="head"><p>Spectra</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Access point</p></th>
+<th class="head"><p>Status</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>IRSA</p></td>
+<td><p>Keck</p></td>
+<td><p>About 10,000 spectra on the COSMOS field from <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2018ApJ...858...77H/abstract">Hasinger et al. (2018)</a></p></td>
+<td><p><a class="reference external" href="https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-scan?projshort=COSMOS">IRSA Archive</a></p></td>
+<td><p>Straight forward to implement via IRSA API</p></td>
+</tr>
+<tr class="row-odd"><td><p>IRSA</p></td>
+<td><p>Spitzer IRS</p></td>
+<td><p>~17,000 merged low-resolution IRS spectra</p></td>
+<td><p><a class="reference external" href="https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-dd?catalog=irs_enhv211">IRS Enhanced Product</a></p></td>
+<td><p>IRS Enhanced products can be searched through IRSA API and downloaded as IPAC table. Does <code class="docutils literal notranslate"><span class="pre">astroquery.ipac.irsa</span></code> work?</p></td>
+</tr>
+<tr class="row-even"><td><p>IRSA</p></td>
+<td><p>IRTF*</p></td>
+<td><p>Large library of stellar spectra</p></td>
+<td><p></p></td>
+<td><p>does <code class="docutils literal notranslate"><span class="pre">astroquery.ipac.irsa</span></code> work??</p></td>
+</tr>
+<tr class="row-odd"><td><p>IRSA</p></td>
+<td><p>Herschel*</p></td>
+<td><p>Some spectra, need to check reduction stage</p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>IRSA</p></td>
+<td><p>Euclid</p></td>
+<td><p>Spectra hosted at IRSA in FY25 -&gt; preparation for ingestion</p></td>
+<td><p></p></td>
+<td><p>Will use mock spectra with correct format for testing</p></td>
+</tr>
+<tr class="row-odd"><td><p>IRSA</p></td>
+<td><p>SPHEREx</p></td>
+<td><p>Spectra/cubes will be hosted at IRSA, first release in FY25 -&gt; preparation for ingestion</p></td>
+<td><p></p></td>
+<td><p>Will use mock spectra with correct format for testing</p></td>
+</tr>
+<tr class="row-even"><td><p>MAST</p></td>
+<td><p>HST*</p></td>
+<td><p>Slitless spectra would need reduction and extraction. There are some reduced slit spectra from COS in the Hubble Archive</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">astroquery.mast</span></code>?</p></td>
+<td><p>Should be straight forward using <code class="docutils literal notranslate"><span class="pre">astroquery.mast</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>MAST</p></td>
+<td><p>JWST*</p></td>
+<td><p>Reduced slit MSA spectra that can be queried</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">astroquery.mast</span></code>?</p></td>
+<td><p>Should be straight forward using <code class="docutils literal notranslate"><span class="pre">astroquery.mast</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>SDSS</p></td>
+<td><p>SDSS optical</p></td>
+<td><p>Optical spectra that are reduced</p></td>
+<td><p><a class="reference external" href="https://skyserver.sdss.org/dr18/SearchTools">Sky Server</a> or <code class="docutils literal notranslate"><span class="pre">astroquery.sdss</span></code> (preferred)</p></td>
+<td><p>(ALF has code to get spectra via skyserver). Need to look into <code class="docutils literal notranslate"><span class="pre">astroquery</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>DESI</p></td>
+<td><p>DESI*</p></td>
+<td><p>Optical spectra</p></td>
+<td><p><a class="reference external" href="https://data.desi.lbl.gov/public/">DESI public data release</a></p></td>
+<td><p>No obvious API. <code class="docutils literal notranslate"><span class="pre">pyvo</span></code> might work, need to look into this.</p></td>
+</tr>
+<tr class="row-even"><td><p>HEASARC</p></td>
+<td><p>None</p></td>
+<td><p>Could link to Chandra observations to check AGN occurrence.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">astroquery.heasarc</span></code></p></td>
+<td><p>More thoughts on how to include scientifically.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The ones with an asterisk (*) are the challenging ones.</p>
+</section>
+</section>
+<section id="input">
+<h2>Input:<a class="headerlink" href="#input" title="Link to this heading">#</a></h2>
+<p>• Coordinates for a single source or a sample on the COSMOS field</p>
+</section>
+<section id="output">
+<h2>Output:<a class="headerlink" href="#output" title="Link to this heading">#</a></h2>
+<p>• A Pandas data frame including the spectra from different facilities</p>
+<p>• A plot comparing the different spectra extracted for each source</p>
+</section>
+<section id="non-standard-imports">
+<h2>Non-standard Imports:<a class="headerlink" href="#non-standard-imports" title="Link to this heading">#</a></h2>
+<p>• …</p>
+</section>
+<section id="authors">
+<h2>Authors:<a class="headerlink" href="#authors" title="Link to this heading">#</a></h2>
+<p>Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, Dave Shupe</p>
+</section>
+<section id="acknowledgements">
+<h2>Acknowledgements:<a class="headerlink" href="#acknowledgements" title="Link to this heading">#</a></h2>
+<p>…</p>
+</section>
+<section id="next-steps">
+<h2>Next Steps:<a class="headerlink" href="#next-steps" title="Link to this heading">#</a></h2>
+<p>• Start with HSt and JWST. Is there an easy way to download the spectra?</p>
+<p>• Contact IRSA folks (Anastasia) to ask whether Herschel and Spitzer IRS can be accessed via the new IRSA API (and <code class="docutils literal notranslate"><span class="pre">astroquery</span></code>?)</p>
+<!-- #endregion -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">## test the HST spectrum retrieval.</span>
+<span class="c1"># For this, take a galaxy for which we know HST spectroscopy exists</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">## Your code here</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#learning-goals">Learning Goals</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction:</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#motivation">Motivation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#list-of-spectroscopic-archives-and-status">List of Spectroscopic Archives and Status</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-standard-imports">Non-standard Imports:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next Steps:</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Fornax developers
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2022-2023, Fornax developers.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -342,6 +342,7 @@ plt.title('mean fractional variation')
 plt.contourf(x_centers, y_centers, mean_property2, cmap='viridis', alpha=0.7)
 plt.colorbar()
 #plt.axis('off')
+
 ```
 
 ### 3.1) Sample comparison on the UMAP
