@@ -13,7 +13,7 @@ kernelspec:
 
 # How do AGNs selected with different techniques compare?
 
-By the IPAC Science Platform Team, last edit: Feb 5th, 2024
+By the IPAC Science Platform Team, last edit: Feb 8th, 2024
 
 ***
 
@@ -104,7 +104,7 @@ Here we load a parquet file of light curves generated using the multiband_lc not
 
 ```{code-cell} ipython3
 sample_table = Table.read('data/object_sample.ecsv', format="ascii.ecsv")
-df_lc = pd.read_parquet('data/lightcurves.parquet')
+df_lc = pd.read_parquet('data/df_lc_020724.parquet.gzip')
 # there is an extra column containing the mission. if you want to remove it, do:
 parallel_df_lc = df_lc[['flux', 'err']]
 ```
@@ -121,28 +121,47 @@ To effectively undertake machine learning (ML) in addressing a specific question
 objid = parallel_df_lc.index.get_level_values('objectid')[:].unique()
 seen = Counter()
 
-# Grouping all changing look AGNs from the literature into one class:
-cl_labels = ['LaMassa 15','Green 22','Hon 22','Lyu 21','Sheng 20','MacLeod 19','MacLeod 16','Ruan 16','Yang 18','Lopez-Navas 22']
+def translate_bitwise_sum_to_labels(bitwise_sum):
+    """
+    Translate a bitwise sum back to the labels which were set to 1.
+
+    Parameters:
+    - bitwise_sum: Integer, the bitwise sum representing the combination of labels.
+    - labels: List of strings, the labels corresponding to each bit position.
+
+    Returns:
+    - List of strings, the labels that are set to 1.
+    """
+    # Initialize agnlabels
+    agnlabels = ['SDSS_QSO', 'WISE_Variable','Optical_Variable','Galex_Variable',
+                 'Turn-on', 'Turn-off',
+                 'SPIDER', 'SPIDER_AGN','SPIDER_BL','SPIDER_QSOBL','SPIDER_AGNBL', 
+                 'TDE','Fermi_blazar']
+    active_labels = []
+    for i, label in enumerate(agnlabels):
+        # Check if the ith bit is set to 1
+        if bitwise_sum & (1 << i):
+            active_labels.append(label)
+    return active_labels
+
 for b in objid:
     singleobj = parallel_df_lc.loc[b,:,:,:]
     label = singleobj.index.unique('label')
-    if label in cl_labels:
-        label = ['CL AGN']
-    if label=='ZTF-Objname':
-        label= ['TDE']
-    if label=='Cicco19':
-        label= ['VLT Cosmos']
-    seen.update(label)
-
+    # Translate the bitwise sum back to active labels
+    bitwise_sum = int(label[0])  # Convert to integer
+    active_labels = translate_bitwise_sum_to_labels(bitwise_sum)
+    #active_labels = translate_bitwise_sum_to_labels(label[0])
+    seen.update(active_labels)
 #changing order of labels in dictionary only for text to be readable on the plot
-key_order = ('SDSS','TDE', 'FermiBL','CL-On','CL-Off', 'VLT Cosmos','Palomar variable 20', 'Galex variable 22')#'WISE-Variable',
+key_order = ('SDSS_QSO', 'SPIDER_AGN','SPIDER_BL','SPIDER_QSOBL', 'SPIDER_AGNBL',
+             'WISE_Variable','Optical_Variable','Galex_Variable','Turn-on', 'Turn-off','TDE')
 new_queue = OrderedDict()
 for k in key_order:
     new_queue[k] = seen[k]
 
 plt.figure(figsize=(8,8))
 plt.title(r'Sample consists of:',size=15)
-h = plt.pie(new_queue.values(),labels=new_queue.keys(),autopct=autopct_format(new_queue.values()), textprops={'fontsize': 15},startangle=60,  labeldistance=1.1, wedgeprops = { 'linewidth' : 3, 'edgecolor' : 'white' }, colors=colors)
+h = plt.pie(new_queue.values(),labels=new_queue.keys(),autopct=autopct_format(new_queue.values()), textprops={'fontsize': 15},startangle=30,  labeldistance=1.1, wedgeprops = { 'linewidth' : 3, 'edgecolor' : 'white' }, colors=colors)
 ```
 
 In this particular example, the largest three subsamples are AGNs selected from [gamma ray observations by the Fermi Large Area Telescope](https://ui.adsabs.harvard.edu/abs/2015yCat..18100014A/similar) (with more than 98% blazars), AGNs from the optical spectra by the [SDSS quasar sample DR16Q](https://www.sdss4.org/dr17/algorithms/qso_catalog/) with a criteria on redshift (z<2), and a subset of AGNs selected in MIR WISE bands based on their variability ([csv in data folder credit RChary](https://ui.adsabs.harvard.edu/abs/2019AAS...23333004P/abstract)). We also include some smaller samples from the literature to see where they sit compared to the rest of the population and if they are localized on the 2D projection. These include the Changing Look AGNs from the literature (e.g., [LaMassa et al. 2015](https://ui.adsabs.harvard.edu/abs/2015ApJ...800..144L/abstract), [Lyu et al. 2022](https://ui.adsabs.harvard.edu/abs/2022ApJ...927..227L/abstract), [Hon et al. 2022](https://ui.adsabs.harvard.edu/abs/2022MNRAS.511...54H/abstract)), a sample which showed variability in Galex UV images ([Wasleske et al. 2022](https://ui.adsabs.harvard.edu/abs/2022ApJ...933...37W/abstract)), a sample of variable sources identified in optical Palomar observarions ([Baldassare et al. 2020](https://ui.adsabs.harvard.edu/abs/2020ApJ...896...10B/abstract)), and the optically variable AGNs in the COSMOS field from a three year program on VLT([De Cicco et al. 2019](https://ui.adsabs.harvard.edu/abs/2019A%26A...627A..33D/abstract)). We also include 30 Tidal Disruption Event coordinates identified from ZTF light curves [Hammerstein et al. 2023](https://iopscience.iop.org/article/10.3847/1538-4357/aca283/meta).
@@ -226,14 +245,6 @@ datm = normalize_clipmax_objects(dat_notnormal,meanarray,band = 1)
 # shuffle data incase the ML routines are sensitive to order
 data,fzr,p = shuffle_datalabel(dat,flabels)
 fvar_arr,maximum_arr,average_arr = fvar[:,p],maxarray[:,p],meanarray[:,p]
-
-# Fix label of all changing looks and TDEs
-cl_labels = ['LaMassa 15','Green 22','Hon 22','Lyu 21','Sheng 20','MacLeod 19','MacLeod 16','Ruan 16','Yang 18','Lopez-Navas 22']
-for i,l in enumerate(fzr):
-    if l in cl_labels:
-        fzr[i] = 'CL AGN'
-    if l=='ZTF-Objname':
-        fzr[i] = 'TDE'
 ```
 
 The combination of the tree bands into one longer arrays in order of increasing wavelength, can be seen as providing both the SED shape as well as variability in each from the light curve. Figure below demonstrates this as well as our normalization choice. We normalize the data in ZTF R band as it has a higher average numbe of visits compared to G and I band. We remove outliers before measuring the mean and max of the light curve and normalizing by it. This normalization can be skipped if one is mearly interested in comparing brightnesses of the data in this sample, but as dependence on flux is strong to look for variability and compare shapes of light curves a normalization helps.
@@ -277,6 +288,17 @@ plt.ylabel(r'Normalized Flux (mean r band)',size=15)
 Now we can train a UMAP with the processed data vectors above. Different choices for the number of neighbors, minimum distance and metric can be made and a parameter space can be explored. We show here our preferred combination given this data. We choose manhattan distance (also called [the L1 distance](https://en.wikipedia.org/wiki/Taxicab_geometry)) as it is optimal for the kind of grid we interpolated on, for instance we want the distance to not change if there are observations missing. Another metric appropriate for our purpose in time domain analysis is Dynamic Time Warping ([DTW](https://en.wikipedia.org/wiki/Dynamic_time_warping)), which is insensitive to a shift in time. This is helpful as we interpolate the observations onto a grid starting from time 0 and when discussing variability we care less about when it happens and more about whether and how strong it happened. As the measurement of the DTW distance takes longer compared to the other metrics we show examples here with manhattan and only show one example exploring the parameter space including a DTW metric in the last cell of this notebook.
 
 ```{code-cell} ipython3
+labc = {}  # Initialize labc to hold indices of each unique label
+
+for index, f in enumerate(fzr):
+    lab = translate_bitwise_sum_to_labels(int(f))
+    for label in lab:
+        if label not in labc:
+            labc[label] = []  # Initialize the list for this label if it's not already in labc
+        labc[label].append(index)  # Append the current index to the list of indices for this label
+```
+
+```{code-cell} ipython3
 plt.figure(figsize=(18,6))
 markersize=200
 mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='manhattan',random_state=20).fit(data)
@@ -287,6 +309,7 @@ cf = ax1.scatter(mapper.embedding_[:,0],mapper.embedding_[:,1],s=markersize,c=np
 plt.colorbar(cf)
 plt.axis('off')
 
+
 ax0 = plt.subplot(1,3,3)
 ax0.set_title(r'mean fractional variation',size=20)
 cf = ax0.scatter(mapper.embedding_[:,0],mapper.embedding_[:,1],s=markersize,c=stretch_small_values_arctan(np.nansum(fvar_arr,axis=0),factor=3),edgecolor='gray')
@@ -295,9 +318,9 @@ plt.axis('off')
 
 ax2 = plt.subplot(1,3,1)
 ax2.set_title('sample origin',size=20)
-for l,lab in enumerate(np.unique(fzr)):
-    u=(fzr[:]==lab)
-    cf = ax2.scatter(mapper.embedding_[u,0],mapper.embedding_[u,1],s=markersize,c=colors[l],alpha=0.5,edgecolor='gray',label=lab)
+
+for label, indices in labc.items():
+    cf = ax2.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=markersize,alpha=0.5,edgecolor='gray',label=label)
 plt.legend(fontsize=12)
 plt.colorbar(cf)
 plt.axis('off')
@@ -310,7 +333,7 @@ The left panel is colorcoded by the origin of the sample. The middle panel shows
 
 ```{code-cell} ipython3
 # Define a grid
-grid_resolution = 25# Number of cells in the grid
+grid_resolution = 40# Number of cells in the grid
 x_min, x_max = mapper.embedding_[:, 0].min(), mapper.embedding_[:, 0].max()
 y_min, y_max = mapper.embedding_[:, 1].min(), mapper.embedding_[:, 1].max()
 x_grid = np.linspace(x_min, x_max, grid_resolution)
@@ -334,15 +357,15 @@ for i in range(grid_resolution - 1):
             mean_property2[j, i] = np.mean(propfvar[mask])
 
 
-plt.figure(figsize=(9,4))
+plt.figure(figsize=(9,3))
 plt.subplot(1,2,1)
 plt.title('mean brightness')
-plt.contourf(x_centers, y_centers, mean_property1, cmap='viridis', alpha=0.7)
+plt.contourf(x_centers, y_centers, mean_property1, cmap='viridis', alpha=0.9)
 plt.colorbar()
 #plt.axis('off')
 plt.subplot(1,2,2)
 plt.title('mean fractional variation')
-plt.contourf(x_centers, y_centers, mean_property2, cmap='viridis', alpha=0.7)
+plt.contourf(x_centers, y_centers, mean_property2, cmap='viridis', alpha=0.9)
 plt.colorbar()
 #plt.axis('off')
 ```
@@ -352,28 +375,19 @@ plt.colorbar()
 ```{code-cell} ipython3
 # Calculate 2D histogram
 hist, x_edges, y_edges = np.histogram2d(mapper.embedding_[:, 0], mapper.embedding_[:, 1], bins=12)
-
-# Calculate class probabilities for each bin
-class_probabilities = []
-
-for l,lab in enumerate(np.unique(fzr)):
-    u=(fzr[:]==lab)
-    hist_per_cluster, _, _ = np.histogram2d(mapper.embedding_[u,0], mapper.embedding_[u,1], bins=(x_edges, y_edges))
-    class_prob = hist_per_cluster / hist
-    class_probabilities.append(class_prob)
-    #print(lab, class_prob)
-
-labs = np.unique(fzr)
-plt.figure(figsize=(15,10))
-ax0 = plt.subplot(3,4,1)
-for i, prob in enumerate(class_probabilities):
-    plt.subplot(3,4,i+2)
-    plt.title(labs[i])
+plt.figure(figsize=(15,12))
+i=1
+ax0 = plt.subplot(4,4,13)
+for label, indices in labc.items():
+    hist_per_cluster, _, _ = np.histogram2d(mapper.embedding_[indices,0], mapper.embedding_[indices,1], bins=(x_edges, y_edges))
+    prob = hist_per_cluster / hist
+    plt.subplot(4,4,i)
+    plt.title(label)
     plt.contourf(x_edges[:-1], y_edges[:-1], prob.T, levels=20, alpha=0.8)
     plt.colorbar()
     plt.axis('off')
-    u=(fzr[:]==labs[i])
-    cf = ax0.scatter(mapper.embedding_[u,0],mapper.embedding_[u,1],s=80,c=colors[i],alpha=0.5,edgecolor='gray',label=labs[i])
+    cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
+    i+=1
 ax0.legend(loc=4,fontsize=7)
 ax0.axis('off')
 plt.tight_layout()
@@ -385,7 +399,7 @@ Figure above shows how with ZTF light curves alone we can separate some of these
 ### 3.2) Reduced dimensions on a SOM grid
 
 ```{code-cell} ipython3
-msz0,msz1 = 12,12
+msz0,msz1 = 15,15
 sm = sompy.SOMFactory.build(data, mapsize=[msz0,msz1], mapshape='planar', lattice='rect', initialization='pca')
 sm.train(n_job=4, shared_memory = 'no')
 ```
@@ -412,11 +426,12 @@ plt.title('SDSS',fontsize=15)
 cf=plt.imshow(med_r,origin='lower',cmap='viridis')
 plt.axis('off')
 
-d = []
-for i,f in enumerate(fzr):
-    if f=='SDSS':
-        d.append(data[i,:])
-dsdss =np.array(d)
+def get_indices_by_label(labc, label):
+    return labc.get(label, [])
+
+# Example usage
+u = labc.get('SDSS_QSO',[])
+dsdss = data[u,:]
 asdss=sm.bmu_ind_to_xy(sm.project_data(dsdss))
 x,y=np.zeros(len(asdss)),np.zeros(len(asdss))
 k=0
@@ -427,14 +442,11 @@ for i in asdss:
 plt.plot(y,x,'rx',alpha=0.5)
 
 plt.subplot(1,4,2)
-plt.title('WISE Variable',fontsize=15)
+plt.title('WISE_Variable',fontsize=15)
 cf=plt.imshow(med_r,origin='lower',cmap='viridis')
 plt.axis('off')
-d = []
-for i,f in enumerate(fzr):
-    if f=='WISE-Variable':
-        d.append(data[i,:])
-dwise =np.array(d)
+u = labc.get('WISE_Variable',[])
+dwise = data[u,:]
 awise=sm.bmu_ind_to_xy(sm.project_data(dwise))
 x,y=np.zeros(len(awise)),np.zeros(len(awise))
 k=0
@@ -445,14 +457,11 @@ for i in awise:
 plt.plot(y,x,'rx',alpha=0.5)
 
 plt.subplot(1,4,3)
-plt.title('CICCO 2019',fontsize=15)
+plt.title('Turn-on',fontsize=15)
 cf=plt.imshow(med_r,origin='lower',cmap='viridis')
 plt.axis('off')
-d = []
-for i,f in enumerate(fzr):
-    if f=='Cicco19':
-        d.append(data[i,:])
-dcic =np.array(d)
+u = labc.get('Turn-on',[])
+dcic = data[u,:]
 acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
 x,y=np.zeros(len(acic)),np.zeros(len(acic))
 k=0
@@ -464,14 +473,11 @@ plt.plot(y,x,'rx',alpha=0.5)
 
 
 plt.subplot(1,4,4)
-plt.title('Changing Look AGNs',fontsize=15)
+plt.title('Turn-off',fontsize=15)
 cf=plt.imshow(med_r,origin='lower',cmap='viridis')
 plt.axis('off')
-d = []
-for i,f in enumerate(fzr):
-    if f=='CL AGN':
-        d.append(data[i,:])
-dcic =np.array(d)
+u = labc.get('Turn-off',[])
+dcic = data[u,:]
 acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
 x,y=np.zeros(len(acic)),np.zeros(len(acic))
 k=0
