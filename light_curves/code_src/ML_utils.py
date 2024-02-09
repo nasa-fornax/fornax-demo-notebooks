@@ -159,7 +159,7 @@ def unify_lc(df_lc, bands_inlc=['zr', 'zi', 'zg'], xres=160, numplots=1, low_lim
                     keepobj = 0
 
             if printcounter<numplots:
-                plt.title('Object '+str(obj)+' from '+label[0]+' et al.')
+                plt.title('Object '+str(obj))#+' from '+label[0]+' et al.')
                 plt.xlabel('Time(MJD)')
                 plt.ylabel('Flux(mJy)')
                 plt.legend()
@@ -243,7 +243,7 @@ def unify_lc_gp(df_lc,bands_inlc=['zr','zi','zg'],xres=160,numplots=1,low_limit_
                 else:
                     keepobj=0
             if (printcounter<numplots):
-                plt.title('Object '+str(obj)+' from '+label[0]+' et al.')
+                plt.title('Object '+str(obj))#+' from '+label[0]+' et al.')
                 plt.xlabel('Time(MJD)')
                 plt.ylabel('Flux(mJy)')
                 plt.legend()
