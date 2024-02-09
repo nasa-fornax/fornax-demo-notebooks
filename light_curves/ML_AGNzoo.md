@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.15.2
+    jupytext_version: 1.16.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -167,7 +167,7 @@ h = plt.bar(seen.keys(), seen.values())
 plt.ylabel(r'#',size=20)
 ```
 
-The histogram shows the number of lightcurves which ended up in the multi-index data frame from each of the archive calls in different wavebands/filters. 
+The histogram shows the number of lightcurves which ended up in the multi-index data frame from each of the archive calls in different wavebands/filters.
 
 ```{code-cell} ipython3
 cadence = dict((el,[]) for el in seen.keys())
@@ -283,42 +283,6 @@ plt.ylabel(r'Normalized Flux (mean r band)',size=15)
 Now we can train a UMAP with the processed data vectors above. Different choices for the number of neighbors, minimum distance and metric can be made and a parameter space can be explored. We show here our preferred combination given this data. We choose manhattan distance (also called [the L1 distance](https://en.wikipedia.org/wiki/Taxicab_geometry)) as it is optimal for the kind of grid we interpolated on, for instance we want the distance to not change if there are observations missing. Another metric appropriate for our purpose in time domain analysis is Dynamic Time Warping ([DTW](https://en.wikipedia.org/wiki/Dynamic_time_warping)), which is insensitive to a shift in time. This is helpful as we interpolate the observations onto a grid starting from time 0 and when discussing variability we care less about when it happens and more about whether and how strong it happened. As the measurement of the DTW distance takes longer compared to the other metrics we show examples here with manhattan and only show one example exploring the parameter space including a DTW metric in the last cell of this notebook.
 
 ```{code-cell} ipython3
-plt.figure(figsize=(16,12))
-markersize=200
-
-mapper = umap.UMAP(n_neighbors=50,min_dist=0.5,metric='euclidean',random_state=20).fit(data)
-ax0 = plt.subplot(2,2,1)
-ax0.set_title(r'Euclidean Distance, min_d=0.5, n_neighbors=50',size=20)
-for label, indices in (labc.items()):
-     cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
-plt.axis('off')
-
-mapper = umap.UMAP(n_neighbors=50,min_dist=0.5,metric='manhattan',random_state=20).fit(data)
-ax0 = plt.subplot(2,2,2)
-ax0.set_title(r'Manhattan Distance, min_d=0.5, n_neighbors=50',size=20)
-for label, indices in (labc.items()):
-     cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
-plt.axis('off')
-
-
-mapperg = umap.UMAP(n_neighbors=50,min_dist=0.5,metric=dtw_distance,random_state=20).fit(data) #this distance takes long
-ax2 = plt.subplot(2,2,3)
-ax2.set_title(r'DTW Distance, min_d=0.5,n_neighbors=50',size=20)
-for label, indices in (labc.items()):
-     cf = ax2.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
-plt.axis('off')
-
-
-mapper = umap.UMAP(n_neighbors=7,min_dist=0.1,metric='manhattan',random_state=20).fit(data)
-ax0 = plt.subplot(2,2,4)
-ax0.set_title(r'Manhattan Distance, min_d=0.1, n_neighbors=7',size=20)
-for label, indices in (labc.items()):
-     cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
-plt.legend(fontsize=12)
-plt.axis('off')
-```
-
-```{code-cell} ipython3
 plt.figure(figsize=(18,6))
 markersize=200
 mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='manhattan',random_state=20).fit(data)
@@ -359,7 +323,7 @@ The left panel is colorcoded by the origin of the sample. The middle panel shows
 
 ```{code-cell} ipython3
 # Define a grid
-grid_resolution = 20# Number of cells in the grid
+grid_resolution = 15# Number of cells in the grid
 x_min, x_max = mapper.embedding_[:, 0].min(), mapper.embedding_[:, 0].max()
 y_min, y_max = mapper.embedding_[:, 1].min(), mapper.embedding_[:, 1].max()
 x_grid = np.linspace(x_min, x_max, grid_resolution)
@@ -383,10 +347,10 @@ for i in range(grid_resolution - 1):
             mean_property2[j, i] = np.mean(propfvar[mask])
 
 
-plt.figure(figsize=(12,5))
+plt.figure(figsize=(12,4))
 plt.subplot(1,2,1)
 plt.title('mean brightness')
-cf = plt.contourf(x_centers, y_centers, mean_property1, cmap=custom_cmap, alpha=0.9)
+cf = plt.contourf(x_centers, y_centers, mean_property1, cmap='viridis', alpha=0.9)
 plt.axis('off')
 divider = make_axes_locatable(plt.gca())
 cax = divider.append_axes("right", size="5%", pad=0.05)
@@ -394,7 +358,7 @@ plt.colorbar(cf,cax=cax)
 
 plt.subplot(1,2,2)
 plt.title('mean fractional variation')
-cf = plt.contourf(x_centers, y_centers, mean_property2, cmap=custom_cmap, alpha=0.9)
+cf = plt.contourf(x_centers, y_centers, mean_property2, cmap='viridis', alpha=0.9)
 plt.axis('off')
 divider = make_axes_locatable(plt.gca())
 cax = divider.append_axes("right", size="5%", pad=0.05)
@@ -451,8 +415,8 @@ for i in range(msz0):
         med_r[i,j]=(np.nanmedian(fvar_new[unja]))
 
 
-plt.figure(figsize=(18,8))
-plt.subplot(1,4,1)
+plt.figure(figsize=(18,12))
+plt.subplot(3,4,1)
 plt.title('SDSS',fontsize=15)
 cf=plt.imshow(med_r,origin='lower',cmap='viridis')
 plt.axis('off')
@@ -470,9 +434,9 @@ for i in asdss:
     x[k]=i[0]
     y[k]=i[1]
     k+=1
-plt.plot(y,x,'rx',alpha=0.5)
+plt.plot(y,x,'rx',alpha=0.8)
 
-plt.subplot(1,4,2)
+plt.subplot(3,4,2)
 plt.title('WISE_Variable',fontsize=15)
 cf=plt.imshow(med_r,origin='lower',cmap='viridis')
 plt.axis('off')
@@ -485,13 +449,13 @@ for i in awise:
     x[k]=i[0]
     y[k]=i[1]
     k+=1
-plt.plot(y,x,'rx',alpha=0.5)
+plt.plot(y,x,'rx',alpha=0.8)
 
-plt.subplot(1,4,3)
-plt.title('Turn-on',fontsize=15)
+plt.subplot(3,4,3)
+plt.title('Optical_Variable',fontsize=15)
 cf=plt.imshow(med_r,origin='lower',cmap='viridis')
 plt.axis('off')
-u = labc.get('Turn-on',[])
+u = labc.get('Optical_Variable',[])
 dcic = data[u,:]
 acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
 x,y=np.zeros(len(acic)),np.zeros(len(acic))
@@ -500,10 +464,85 @@ for i in acic:
     x[k]=i[0]
     y[k]=i[1]
     k+=1
-plt.plot(y,x,'rx',alpha=0.5)
+plt.plot(y,x,'rx',alpha=0.8)
 
 
-plt.subplot(1,4,4)
+plt.subplot(3,4,4)
+plt.title('Galex_Variable',fontsize=15)
+cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.axis('off')
+u = labc.get('Galex_Variable',[])
+dcic = data[u,:]
+acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
+x,y=np.zeros(len(acic)),np.zeros(len(acic))
+k=0
+for i in acic:
+    x[k]=i[0]
+    y[k]=i[1]
+    k+=1
+plt.plot(y,x,'rx',alpha=0.8)
+
+plt.subplot(3,4,5)
+plt.title('SPIDER_AGN',fontsize=15)
+cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.axis('off')
+u = labc.get('SPIDER_AGN',[])
+dcic = data[u,:]
+acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
+x,y=np.zeros(len(acic)),np.zeros(len(acic))
+k=0
+for i in acic:
+    x[k]=i[0]
+    y[k]=i[1]
+    k+=1
+plt.plot(y,x,'rx',alpha=0.8)
+
+plt.subplot(3,4,6)
+plt.title('SPIDER_AGNBL',fontsize=15)
+cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.axis('off')
+u = labc.get('SPIDER_AGNBL',[])
+dcic = data[u,:]
+acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
+x,y=np.zeros(len(acic)),np.zeros(len(acic))
+k=0
+for i in acic:
+    x[k]=i[0]
+    y[k]=i[1]
+    k+=1
+plt.plot(y,x,'rx',alpha=0.8)
+
+plt.subplot(3,4,7)
+plt.title('SPIDER_QSOBL',fontsize=15)
+cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.axis('off')
+u = labc.get('SPIDER_QSOBL',[])
+dcic = data[u,:]
+acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
+x,y=np.zeros(len(acic)),np.zeros(len(acic))
+k=0
+for i in acic:
+    x[k]=i[0]
+    y[k]=i[1]
+    k+=1
+plt.plot(y,x,'rx',alpha=0.8)
+
+plt.subplot(3,4,8)
+plt.title('SPIDER_BL',fontsize=15)
+cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.axis('off')
+u = labc.get('SPIDER_BL',[])
+dcic = data[u,:]
+acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
+x,y=np.zeros(len(acic)),np.zeros(len(acic))
+k=0
+for i in acic:
+    x[k]=i[0]
+    y[k]=i[1]
+    k+=1
+plt.plot(y,x,'rx',alpha=0.8)
+
+plt.subplot(3,4,9)
 plt.title('Turn-off',fontsize=15)
 cf=plt.imshow(med_r,origin='lower',cmap='viridis')
 plt.axis('off')
@@ -516,7 +555,38 @@ for i in acic:
     x[k]=i[0]
     y[k]=i[1]
     k+=1
-plt.plot(y,x,'rx',alpha=0.5)
+plt.plot(y,x,'rx',alpha=0.8)
+
+
+plt.subplot(3,4,10)
+plt.title('Turn-on',fontsize=15)
+cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.axis('off')
+u = labc.get('Turn-on',[])
+dcic = data[u,:]
+acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
+x,y=np.zeros(len(acic)),np.zeros(len(acic))
+k=0
+for i in acic:
+    x[k]=i[0]
+    y[k]=i[1]
+    k+=1
+plt.plot(y,x,'rx',alpha=0.8)
+
+plt.subplot(3,4,11)
+plt.title('TDE',fontsize=15)
+cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.axis('off')
+u = labc.get('TDE',[])
+dcic = data[u,:]
+acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
+x,y=np.zeros(len(acic)),np.zeros(len(acic))
+k=0
+for i in acic:
+    x[k]=i[0]
+    y[k]=i[1]
+    k+=1
+plt.plot(y,x,'rx',alpha=0.8)
 
 plt.tight_layout()
 ```
@@ -652,7 +722,8 @@ for index, f in enumerate(fzr):
 ```{code-cell} ipython3
 plt.figure(figsize=(18,6))
 markersize=200
-mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='manhattan',random_state=20).fit(data)
+#mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='manhattan',random_state=4).fit(data)
+mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric=dtw_distance,random_state=20).fit(data) #this distance takes long
 
 
 ax1 = plt.subplot(1,3,2)
@@ -709,33 +780,33 @@ plt.tight_layout()
 ## 5) Wise bands alone
 
 ```{code-cell} ipython3
-bands_inlc = ['W1','W2']
-objects,dobjects,flabels,keeps = unify_lc(df_lc,bands_inlc,xres=30)
+bands_inlcw = ['W1','W2']
+objectsw,dobjectsw,flabelsw,keepsw = unify_lc(df_lc,bands_inlc,xres=30)
 # calculate some basic statistics
-fvar, maxarray, meanarray = stat_bands(objects,dobjects,bands_inlc)
-dat_notnormal = combine_bands(objects,bands_inlc)
-dat = normalize_clipmax_objects(dat_notnormal,maxarray,band = -1)
-data,fzr,p = shuffle_datalabel(dat,flabels)
-fvar_arr,maximum_arr,average_arr = fvar[:,p],maxarray[:,p],meanarray[:,p]
+fvarw, maxarrayw, meanarrayw = stat_bands(objectsw,dobjectsw,bands_inlcw)
+dat_notnormalw = combine_bands(objects,bands_inlcw)
+datw = normalize_clipmax_objects(dat_notnormalw,maxarrayw,band = -1)
+dataw,fzrw,pw = shuffle_datalabel(datw,flabelsw)
+fvar_arrw,maximum_arrw,average_arrw = fvarw[:,pw],maxarrayw[:,pw],meanarrayw[:,pw]
 
-labc = {}  # Initialize labc to hold indices of each unique label
-for index, f in enumerate(fzr):
+labcw = {}  # Initialize labc to hold indices of each unique label
+for index, f in enumerate(fzrw):
     lab = translate_bitwise_sum_to_labels(int(f))
     for label in lab:
-        if label not in labc:
-            labc[label] = []  # Initialize the list for this label if it's not already in labc
-        labc[label].append(index)  # Append the current index to the list of indices for this label
+        if label not in labcw:
+            labcw[label] = []  # Initialize the list for this label if it's not already in labc
+        labcw[label].append(index)  # Append the current index to the list of indices for this label
 ```
 
 ```{code-cell} ipython3
 plt.figure(figsize=(18,6))
 markersize=200
-mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='manhattan',random_state=20).fit(data)
+mapp = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='manhattan',random_state=20).fit(dataw)
 
 
 ax1 = plt.subplot(1,3,2)
 ax1.set_title(r'mean brightness',size=20)
-cf = ax1.scatter(mapper.embedding_[:,0],mapper.embedding_[:,1],s=markersize,c=np.log10(np.nansum(meanarray,axis=0)),edgecolor='gray')
+cf = ax1.scatter(mapp.embedding_[:,0],mapp.embedding_[:,1],s=markersize,c=np.log10(np.nansum(meanarrayw,axis=0)),edgecolor='gray')
 plt.axis('off')
 divider = make_axes_locatable(ax1)
 cax = divider.append_axes("right", size="5%", pad=0.05)
@@ -744,7 +815,7 @@ plt.colorbar(cf,cax=cax)
 
 ax0 = plt.subplot(1,3,3)
 ax0.set_title(r'mean fractional variation',size=20)
-cf = ax0.scatter(mapper.embedding_[:,0],mapper.embedding_[:,1],s=markersize,c=stretch_small_values_arctan(np.nansum(fvar_arr,axis=0),factor=3),edgecolor='gray')
+cf = ax0.scatter(mapp.embedding_[:,0],mapp.embedding_[:,1],s=markersize,c=stretch_small_values_arctan(np.nansum(fvar_arrw,axis=0),factor=3),edgecolor='gray')
 plt.axis('off')
 divider = make_axes_locatable(ax0)
 cax = divider.append_axes("right", size="5%", pad=0.05)
@@ -753,8 +824,8 @@ plt.colorbar(cf,cax=cax)
 ax2 = plt.subplot(1,3,1)
 ax2.set_title('sample origin',size=20)
 counts = 1
-for label, indices in labc.items():
-    cf = ax2.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=markersize,c = colors[counts],alpha=0.5,edgecolor='gray',label=label)
+for label, indices in labcw.items():
+    cf = ax2.scatter(mapp.embedding_[indices,0],mapp.embedding_[indices,1],s=markersize,c = colors[counts],alpha=0.5,edgecolor='gray',label=label)
     counts+=1
 plt.legend(fontsize=12)
 #plt.colorbar(cf)
@@ -765,55 +836,58 @@ plt.tight_layout()
 
 ```{code-cell} ipython3
 # Calculate 2D histogram
-hist, x_edges, y_edges = np.histogram2d(mapper.embedding_[:, 0], mapper.embedding_[:, 1], bins=12)
+hist, x_edges, y_edges = np.histogram2d(mapp.embedding_[:, 0], mapp.embedding_[:, 1], bins=12)
 plt.figure(figsize=(15,12))
 i=1
 ax0 = plt.subplot(4,4,12)
-for label, indices in sorted(labc.items()):
-    hist_per_cluster, _, _ = np.histogram2d(mapper.embedding_[indices,0], mapper.embedding_[indices,1], bins=(x_edges, y_edges))
+for label, indices in sorted(labcw.items()):
+    hist_per_cluster, _, _ = np.histogram2d(mapp.embedding_[indices,0], mapp.embedding_[indices,1], bins=(x_edges, y_edges))
     prob = hist_per_cluster / hist
     plt.subplot(4,4,i)
     plt.title(label)
     plt.contourf(x_edges[:-1], y_edges[:-1], prob.T, levels=20, alpha=0.8,cmap=custom_cmap)
     plt.colorbar()
     plt.axis('off')
-    cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label,c=colors[i-1])
+    cf = ax0.scatter(mapp.embedding_[indices,0],mapp.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label,c=colors[i-1])
     i+=1
 ax0.legend(loc=4,fontsize=7)
 ax0.axis('off')
 plt.tight_layout()
 ```
 
+## 6) UMAP with different metrics/distances on ZTF+WISE
+DTW takes a bit longer compared to other metrics. 
+
 ```{code-cell} ipython3
-plt.figure(figsize=(16,12))
+plt.figure(figsize=(12,10))
 markersize=200
 
-mapper = umap.UMAP(n_neighbors=50,min_dist=0.5,metric='euclidean',random_state=20).fit(data)
+mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='euclidean',random_state=20).fit(data)
 ax0 = plt.subplot(2,2,1)
-ax0.set_title(r'Euclidean Distance, min_d=0.5, n_neighbors=50',size=20)
+ax0.set_title(r'Euclidean Distance, min_d=0.9, n_neighbors=50',size=12)
 for label, indices in (labc.items()):
      cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
 plt.axis('off')
 
-mapper = umap.UMAP(n_neighbors=50,min_dist=0.5,metric='manhattan',random_state=20).fit(data)
+mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='manhattan',random_state=20).fit(data)
 ax0 = plt.subplot(2,2,2)
-ax0.set_title(r'Manhattan Distance, min_d=0.5, n_neighbors=50',size=20)
+ax0.set_title(r'Manhattan Distance, min_d=0.9, n_neighbors=50',size=12)
 for label, indices in (labc.items()):
      cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
 plt.axis('off')
 
 
-mapperg = umap.UMAP(n_neighbors=50,min_dist=0.5,metric=dtw_distance,random_state=20).fit(data) #this distance takes long
+mapperg = umap.UMAP(n_neighbors=50,min_dist=0.9,metric=dtw_distance,random_state=20).fit(data) #this distance takes long
 ax2 = plt.subplot(2,2,3)
-ax2.set_title(r'DTW Distance, min_d=0.5,n_neighbors=50',size=20)
+ax2.set_title(r'DTW Distance, min_d=0.9,n_neighbors=50',size=12)
 for label, indices in (labc.items()):
      cf = ax2.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
 plt.axis('off')
 
 
-mapper = umap.UMAP(n_neighbors=7,min_dist=0.1,metric='manhattan',random_state=20).fit(data)
+mapper = umap.UMAP(n_neighbors=50,min_dist=0.1,metric='manhattan',random_state=20).fit(data)
 ax0 = plt.subplot(2,2,4)
-ax0.set_title(r'Manhattan Distance, min_d=0.1, n_neighbors=7',size=20)
+ax0.set_title(r'Manhattan Distance, min_d=0.1, n_neighbors=50',size=12)
 for label, indices in (labc.items()):
      cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
 plt.legend(fontsize=12)
@@ -841,7 +915,3 @@ Packages:
 
 
 [Top of Page](#top)
-
-```{code-cell} ipython3
-
-```
