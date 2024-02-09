@@ -13,7 +13,7 @@ kernelspec:
 
 # How do AGNs selected with different techniques compare?
 
-By the IPAC Science Platform Team, last edit: Feb 8th, 2024
+By the IPAC Science Platform Team, last edit: Feb 9th, 2024
 
 ***
 
@@ -33,7 +33,7 @@ By the end of this tutorial, you will:
 
 Active Galactic Nuclei (AGNs), some of the most powerful sources in the universe, emit a broad range of electromagnetic radiation, from radio waves to gamma rays. Consequently, there is a wide variety of AGN labels depending on the identification/selection scheme and the presence or absence of certain emissions (e.g., Radio loud/quiet, Quasars, Blazars, Seiferts, Changing looks). According to the unified model, this zoo of labels we see depend on a limited number of parameters, namely the viewing angle, the accretion rate, presence or lack of jets, and perhaps the properties of the host/environment (e.g., [Padovani et al. 2017](https://arxiv.org/pdf/1707.07134.pdf)). Here, we collect archival temporal data and labels from the literature to compare how some of these different labels/selection schemes compare.
 
-We use manifold learning and dimensionality reduction to learn the distribution of AGN lightcurves observed with different facilities. We mostly focus on UMAP ([Uniform Manifold Approximation and Projection, McInnes 2020](https://arxiv.org/pdf/1802.03426.pdf)) but also show two SOM ([Self organizing Map, Kohonen 1990](https://ieeexplore.ieee.org/document/58325)) examples. The reduced 2D projections from these two unsupervised ML techniques reveal similarities and overlaps of different selection techniques and coloring the projections with various statistical physical properties (e.g., mean brightness, fractional lightcurve variation) is informative of correlations of the selections technique with physics such as AGN variability. Using different parts of the EM in training (or in building the initial higher dimensional manifold) demonstrates how much information if any is in that part of the data for each labeling scheme, for example whether with ZTF optical light curves alone, we can identify sources with variability in WISE near IR bands. These techniques also have a potential for identifying targets of a specific class or characteristic for future follow up observations.
+We use manifold learning and dimensionality reduction to learn the distribution of AGN lightcurves observed with different facilities. We mostly focus on UMAP ([Uniform Manifold Approximation and Projection, McInnes 2020](https://arxiv.org/pdf/1802.03426.pdf)) but also show SOM ([Self organizing Map, Kohonen 1990](https://ieeexplore.ieee.org/document/58325)) examples. The reduced 2D projections from these two unsupervised ML techniques reveal similarities and overlaps of different selection techniques and coloring the projections with various statistical physical properties (e.g., mean brightness, fractional lightcurve variation) is informative of correlations of the selections technique with physics such as AGN variability. Using different parts of the EM in training (or in building the initial higher dimensional manifold) demonstrates how much information if any is in that part of the data for each labeling scheme, for example whether with ZTF optical light curves alone, we can identify sources with variability in WISE near IR bands. These techniques also have a potential for identifying targets of a specific class or characteristic for future follow up observations.
 
 
 ## Imports
@@ -58,6 +58,9 @@ from astropy.table import Table
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.cm as cm
+from matplotlib.colors import LinearSegmentedColormap
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 import numpy as np
 import pandas as pd
 sys.path.append('code_src/')
@@ -83,17 +86,21 @@ warnings.filterwarnings('ignore')
 
 plt.style.use('bmh')
 colors = [
-    "#6C907D",  # Soft Green
-    "#B9C3C2",  # Pale Gray
-    "#8C9EFF",  # Periwinkle Blue
-    "#FF6347",  # Tomato Red
-    "#66CDAA",  # Medium Aquamarine
-    "#E6E6FA",  # Lavender
-    "#FAFAD2",  # Light Goldenrod Yellow
-    "#FFD700",  # Gold
-    "#FFA500",  # Orange
-    "#9370DB",  # Medium Purple
+    "#3F51B5",  # Ultramarine Blue
+    "#003153",  # Prussian Blue
+    "#0047AB",  # Cobalt Blue
+    "#40826D",  # Viridian Green
+    "#50C878",  # Emerald Green
+    "#FFEA00",  # Chrome Yellow
+    "#CC7722",  # Yellow Ochre
+    "#E34234",  # Vermilion
+    "#E30022",  # Cadmium Red
+    "#D68A59",  # Raw Sienna
+    "#8A360F",  # Burnt Sienna
+    "#826644",  # Raw Umber
 ]
+
+custom_cmap = LinearSegmentedColormap.from_list("custom_theme", colors[1:])
 ```
 
 ***
@@ -103,7 +110,7 @@ colors = [
 Here we load a parquet file of light curves generated using the multiband_lc notebook. One can build the sample from different sources in the literature and grab the data from archives of interes.
 
 ```{code-cell} ipython3
-sample_table = Table.read('data/object_sample.ecsv', format="ascii.ecsv")
+#sample_table = Table.read('data/agnsample_feb7.ecsv', format="ascii.ecsv") # if needed, contains coordinates, redshift and all labels
 df = pd.read_parquet('data/df_lc_020724.parquet.gzip')
 
 df2 = df[df.index.get_level_values('label') != '64'] # remove 64 for SPIDER only as its too large
@@ -144,7 +151,7 @@ plt.title(r'Sample consists of:',size=15)
 h = plt.pie(new_queue.values(),labels=new_queue.keys(),autopct=autopct_format(new_queue.values()), textprops={'fontsize': 15},startangle=30,  labeldistance=1.1, wedgeprops = { 'linewidth' : 3, 'edgecolor' : 'white' }, colors=colors)
 ```
 
-In this particular example, the largest three subsamples are AGNs selected from [gamma ray observations by the Fermi Large Area Telescope](https://ui.adsabs.harvard.edu/abs/2015yCat..18100014A/similar) (with more than 98% blazars), AGNs from the optical spectra by the [SDSS quasar sample DR16Q](https://www.sdss4.org/dr17/algorithms/qso_catalog/) with a criteria on redshift (z<2), and a subset of AGNs selected in MIR WISE bands based on their variability ([csv in data folder credit RChary](https://ui.adsabs.harvard.edu/abs/2019AAS...23333004P/abstract)). We also include some smaller samples from the literature to see where they sit compared to the rest of the population and if they are localized on the 2D projection. These include the Changing Look AGNs from the literature (e.g., [LaMassa et al. 2015](https://ui.adsabs.harvard.edu/abs/2015ApJ...800..144L/abstract), [Lyu et al. 2022](https://ui.adsabs.harvard.edu/abs/2022ApJ...927..227L/abstract), [Hon et al. 2022](https://ui.adsabs.harvard.edu/abs/2022MNRAS.511...54H/abstract)), a sample which showed variability in Galex UV images ([Wasleske et al. 2022](https://ui.adsabs.harvard.edu/abs/2022ApJ...933...37W/abstract)), a sample of variable sources identified in optical Palomar observarions ([Baldassare et al. 2020](https://ui.adsabs.harvard.edu/abs/2020ApJ...896...10B/abstract)), and the optically variable AGNs in the COSMOS field from a three year program on VLT([De Cicco et al. 2019](https://ui.adsabs.harvard.edu/abs/2019A%26A...627A..33D/abstract)). We also include 30 Tidal Disruption Event coordinates identified from ZTF light curves [Hammerstein et al. 2023](https://iopscience.iop.org/article/10.3847/1538-4357/aca283/meta).
+In this particular example, the largest subsamples of AGNs, all with a criteria on redshift (z<1), are from the optical spectra by the [SDSS quasar sample DR16Q](https://www.sdss4.org/dr17/algorithms/qso_catalog/), the value added SDSS spectra from [SPIDERS](https://www.sdss.org/dr18/bhm/programs/spiders/), and a subset of AGNs selected in MIR WISE bands based on their variability ([csv in data folder credit RChary](https://ui.adsabs.harvard.edu/abs/2019AAS...23333004P/abstract)). We also include some smaller samples from the literature to see where they sit compared to the rest of the population and if they are localized on the 2D projection. These include the Changing Look AGNs from the literature (e.g., [LaMassa et al. 2015](https://ui.adsabs.harvard.edu/abs/2015ApJ...800..144L/abstract), [Lyu et al. 2022](https://ui.adsabs.harvard.edu/abs/2022ApJ...927..227L/abstract), [Hon et al. 2022](https://ui.adsabs.harvard.edu/abs/2022MNRAS.511...54H/abstract)), a sample which showed variability in Galex UV images ([Wasleske et al. 2022](https://ui.adsabs.harvard.edu/abs/2022ApJ...933...37W/abstract)), a sample of variable sources identified in optical Palomar observarions ([Baldassare et al. 2020](https://ui.adsabs.harvard.edu/abs/2020ApJ...896...10B/abstract)), and the optically variable AGNs in the COSMOS field from a three year program on VLT([De Cicco et al. 2019](https://ui.adsabs.harvard.edu/abs/2019A%26A...627A..33D/abstract)). We also include 30 Tidal Disruption Event coordinates identified from ZTF light curves [Hammerstein et al. 2023](https://iopscience.iop.org/article/10.3847/1538-4357/aca283/meta).
 
 ```{code-cell} ipython3
 seen = Counter()
@@ -160,7 +167,7 @@ h = plt.bar(seen.keys(), seen.values())
 plt.ylabel(r'#',size=20)
 ```
 
-The histogram shows the number of lightcurves which ended up in the multi-index data frame from each of the archive calls in different wavebands/filters. We note that the IceCube peak should be corrected as it also include non detections in the figure above.
+The histogram shows the number of lightcurves which ended up in the multi-index data frame from each of the archive calls in different wavebands/filters. 
 
 ```{code-cell} ipython3
 cadence = dict((el,[]) for el in seen.keys())
@@ -276,30 +283,72 @@ plt.ylabel(r'Normalized Flux (mean r band)',size=15)
 Now we can train a UMAP with the processed data vectors above. Different choices for the number of neighbors, minimum distance and metric can be made and a parameter space can be explored. We show here our preferred combination given this data. We choose manhattan distance (also called [the L1 distance](https://en.wikipedia.org/wiki/Taxicab_geometry)) as it is optimal for the kind of grid we interpolated on, for instance we want the distance to not change if there are observations missing. Another metric appropriate for our purpose in time domain analysis is Dynamic Time Warping ([DTW](https://en.wikipedia.org/wiki/Dynamic_time_warping)), which is insensitive to a shift in time. This is helpful as we interpolate the observations onto a grid starting from time 0 and when discussing variability we care less about when it happens and more about whether and how strong it happened. As the measurement of the DTW distance takes longer compared to the other metrics we show examples here with manhattan and only show one example exploring the parameter space including a DTW metric in the last cell of this notebook.
 
 ```{code-cell} ipython3
+plt.figure(figsize=(16,12))
+markersize=200
+
+mapper = umap.UMAP(n_neighbors=50,min_dist=0.5,metric='euclidean',random_state=20).fit(data)
+ax0 = plt.subplot(2,2,1)
+ax0.set_title(r'Euclidean Distance, min_d=0.5, n_neighbors=50',size=20)
+for label, indices in (labc.items()):
+     cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
+plt.axis('off')
+
+mapper = umap.UMAP(n_neighbors=50,min_dist=0.5,metric='manhattan',random_state=20).fit(data)
+ax0 = plt.subplot(2,2,2)
+ax0.set_title(r'Manhattan Distance, min_d=0.5, n_neighbors=50',size=20)
+for label, indices in (labc.items()):
+     cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
+plt.axis('off')
+
+
+mapperg = umap.UMAP(n_neighbors=50,min_dist=0.5,metric=dtw_distance,random_state=20).fit(data) #this distance takes long
+ax2 = plt.subplot(2,2,3)
+ax2.set_title(r'DTW Distance, min_d=0.5,n_neighbors=50',size=20)
+for label, indices in (labc.items()):
+     cf = ax2.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
+plt.axis('off')
+
+
+mapper = umap.UMAP(n_neighbors=7,min_dist=0.1,metric='manhattan',random_state=20).fit(data)
+ax0 = plt.subplot(2,2,4)
+ax0.set_title(r'Manhattan Distance, min_d=0.1, n_neighbors=7',size=20)
+for label, indices in (labc.items()):
+     cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
+plt.legend(fontsize=12)
+plt.axis('off')
+```
+
+```{code-cell} ipython3
 plt.figure(figsize=(18,6))
 markersize=200
 mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='manhattan',random_state=20).fit(data)
 
+
 ax1 = plt.subplot(1,3,2)
 ax1.set_title(r'mean brightness',size=20)
 cf = ax1.scatter(mapper.embedding_[:,0],mapper.embedding_[:,1],s=markersize,c=np.log10(np.nansum(meanarray,axis=0)),edgecolor='gray')
-plt.colorbar(cf)
 plt.axis('off')
+divider = make_axes_locatable(ax1)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+plt.colorbar(cf,cax=cax)
 
 
 ax0 = plt.subplot(1,3,3)
 ax0.set_title(r'mean fractional variation',size=20)
 cf = ax0.scatter(mapper.embedding_[:,0],mapper.embedding_[:,1],s=markersize,c=stretch_small_values_arctan(np.nansum(fvar_arr,axis=0),factor=3),edgecolor='gray')
-plt.colorbar(cf)
 plt.axis('off')
+divider = make_axes_locatable(ax0)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+plt.colorbar(cf,cax=cax)
 
 ax2 = plt.subplot(1,3,1)
 ax2.set_title('sample origin',size=20)
-
+counts = 1
 for label, indices in labc.items():
-    cf = ax2.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=markersize,alpha=0.5,edgecolor='gray',label=label)
+    cf = ax2.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=markersize,c = colors[counts],alpha=0.5,edgecolor='gray',label=label)
+    counts+=1
 plt.legend(fontsize=12)
-plt.colorbar(cf)
+#plt.colorbar(cf)
 plt.axis('off')
 
 plt.tight_layout()
@@ -310,7 +359,7 @@ The left panel is colorcoded by the origin of the sample. The middle panel shows
 
 ```{code-cell} ipython3
 # Define a grid
-grid_resolution = 15# Number of cells in the grid
+grid_resolution = 20# Number of cells in the grid
 x_min, x_max = mapper.embedding_[:, 0].min(), mapper.embedding_[:, 0].max()
 y_min, y_max = mapper.embedding_[:, 1].min(), mapper.embedding_[:, 1].max()
 x_grid = np.linspace(x_min, x_max, grid_resolution)
@@ -334,17 +383,22 @@ for i in range(grid_resolution - 1):
             mean_property2[j, i] = np.mean(propfvar[mask])
 
 
-plt.figure(figsize=(9,3))
+plt.figure(figsize=(12,5))
 plt.subplot(1,2,1)
 plt.title('mean brightness')
-plt.contourf(x_centers, y_centers, mean_property1, cmap='Blues', alpha=0.9)
-plt.colorbar()
-#plt.axis('off')
+cf = plt.contourf(x_centers, y_centers, mean_property1, cmap=custom_cmap, alpha=0.9)
+plt.axis('off')
+divider = make_axes_locatable(plt.gca())
+cax = divider.append_axes("right", size="5%", pad=0.05)
+plt.colorbar(cf,cax=cax)
+
 plt.subplot(1,2,2)
 plt.title('mean fractional variation')
-plt.contourf(x_centers, y_centers, mean_property2, cmap='Blues', alpha=0.9)
-plt.colorbar()
-#plt.axis('off')
+cf = plt.contourf(x_centers, y_centers, mean_property2, cmap=custom_cmap, alpha=0.9)
+plt.axis('off')
+divider = make_axes_locatable(plt.gca())
+cax = divider.append_axes("right", size="5%", pad=0.05)
+plt.colorbar(cf,cax=cax)
 ```
 
 ### 3.1) Sample comparison on the UMAP
@@ -360,10 +414,10 @@ for label, indices in sorted(labc.items()):
     prob = hist_per_cluster / hist
     plt.subplot(4,4,i)
     plt.title(label)
-    plt.contourf(x_edges[:-1], y_edges[:-1], prob.T, levels=20, alpha=0.8)
+    plt.contourf(x_edges[:-1], y_edges[:-1], prob.T, levels=20, alpha=0.8,cmap=custom_cmap)
     plt.colorbar()
     plt.axis('off')
-    cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
+    cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label,c=colors[i-1])
     i+=1
 ax0.legend(loc=4,fontsize=7)
 ax0.axis('off')
@@ -571,103 +625,10 @@ plt.plot(y,x,'rx',alpha=0.5)
 plt.tight_layout()
 ```
 
-skipping the normalization of lightcurves, can show for example how the Cicco et al. 2019 sample, from the 3year VLT observations of the COSMOS field are all fainter compared to the rest.
+skipping the normalization of lightcurves, further separates turn on/off CLAGNs when looking at ZTF lightcurves only.
 
 
-## 4) Repeating the above, this time with Panstarrs observations
-
-```{code-cell} ipython3
-bands_inlc = ['panstarrs g','panstarrs r','panstarrs i','panstarrs z', 'panstarrs y']
-
-objects,dobjects,flabels,keeps = unify_lc(df_lc,bands_inlc,xres=10,numplots=20,low_limit_size=5) #nearest neightbor linear interpolation
-#objects,dobjects,flabels,keeps = unify_lc_gp(df_lc,bands_inlc,xres=5,numplots=20,low_limit_size=5) #Gaussian process unification
-
-# calculate some basic statistics with a sigmaclipping with width 5sigma
-fvar, maxarray, meanarray = stat_bands(objects,dobjects,bands_inlc,sigmacl=5)
-
-# combine different waveband into one array
-dat_notnormal = combine_bands(objects,bands_inlc)
-
-# Normalize the combinde array by maximum of brightness in a waveband after clipping outliers:
-dat = normalize_clipmax_objects(dat_notnormal,maxarray,band = 1)
-
-# Normalize the combinde array by mean brightness in a waveband after clipping outliers:
-datm = normalize_clipmax_objects(dat_notnormal,meanarray,band = 1)
-
-# shuffle data incase the ML routines are sensitive to order
-data,fzr,p = shuffle_datalabel(dat,flabels)
-fvar_arr,maximum_arr,average_arr = fvar[:,p],maxarray[:,p],meanarray[:,p]
-labc = {}  # Initialize labc to hold indices of each unique label
-for index, f in enumerate(fzr):
-    lab = translate_bitwise_sum_to_labels(int(f))
-    for label in lab:
-        if label not in labc:
-            labc[label] = []  # Initialize the list for this label if it's not already in labc
-        labc[label].append(index)  # Append the current index to the list of indices for this label
-```
-
-```{code-cell} ipython3
-plt.figure(figsize=(18,6))
-markersize=200
-mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='manhattan',random_state=20).fit(data)
-
-ax1 = plt.subplot(1,3,2)
-ax1.set_title(r'mean brightness',size=20)
-cf = ax1.scatter(mapper.embedding_[:,0],mapper.embedding_[:,1],s=markersize,c=np.log10(np.nansum(meanarray,axis=0)),edgecolor='gray')
-plt.colorbar(cf)
-plt.axis('off')
-
-
-ax0 = plt.subplot(1,3,3)
-ax0.set_title(r'mean fractional variation',size=20)
-cf = ax0.scatter(mapper.embedding_[:,0],mapper.embedding_[:,1],s=markersize,c=stretch_small_values_arctan(np.nansum(fvar_arr,axis=0),factor=3),edgecolor='gray')
-plt.colorbar(cf)
-plt.axis('off')
-
-ax2 = plt.subplot(1,3,1)
-ax2.set_title('sample origin',size=20)
-
-for label, indices in labc.items():
-    cf = ax2.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=markersize,alpha=0.5,edgecolor='gray',label=label)
-plt.legend(fontsize=12)
-plt.colorbar(cf)
-plt.axis('off')
-
-plt.tight_layout()
-#plt.savefig('umap-ztf.png')
-```
-
-```{code-cell} ipython3
-# Calculate 2D histogram
-hist, x_edges, y_edges = np.histogram2d(mapper.embedding_[:, 0], mapper.embedding_[:, 1], bins=12)
-
-# Calculate class probabilities for each bin
-class_probabilities = []
-
-for l,lab in enumerate(np.unique(fzr)):
-    u=(fzr[:]==lab)
-    hist_per_cluster, _, _ = np.histogram2d(mapper.embedding_[u,0], mapper.embedding_[u,1], bins=(x_edges, y_edges))
-    class_prob = hist_per_cluster / hist
-    class_probabilities.append(class_prob)
-    #print(lab, class_prob)
-
-labs = np.unique(fzr)
-plt.figure(figsize=(15,12))
-ax0 = plt.subplot(3,4,1)
-for i, prob in enumerate(class_probabilities):
-    plt.subplot(3,4,i+2)
-    plt.title(labs[i])
-    plt.contourf(x_edges[:-1], y_edges[:-1], prob.T, levels=20, alpha=0.8)
-    plt.colorbar()
-    plt.axis('off')
-    u=(fzr[:]==labs[i])
-    cf = ax0.scatter(mapper.embedding_[u,0],mapper.embedding_[u,1],s=80,c=colors[i],alpha=0.5,edgecolor='gray',label=labs[i])
-ax0.legend(loc=4,fontsize=7)
-ax0.axis('off')
-plt.tight_layout()
-```
-
-## 5) ZTF + WISE manifold
+## 4) Repeating the above, this time with ZTF + WISE manifold
 
 ```{code-cell} ipython3
 bands_inlc = ['zg','zr','zi','W1','W2']
@@ -693,26 +654,32 @@ plt.figure(figsize=(18,6))
 markersize=200
 mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='manhattan',random_state=20).fit(data)
 
+
 ax1 = plt.subplot(1,3,2)
 ax1.set_title(r'mean brightness',size=20)
-cf = ax1.scatter(mapper.embedding_[:,0],mapper.embedding_[:,1],s=markersize,c=np.log10(np.nansum(average_arr,axis=0)),edgecolor='gray')
-plt.colorbar(cf)
+cf = ax1.scatter(mapper.embedding_[:,0],mapper.embedding_[:,1],s=markersize,c=np.log10(np.nansum(meanarray,axis=0)),edgecolor='gray')
 plt.axis('off')
+divider = make_axes_locatable(ax1)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+plt.colorbar(cf,cax=cax)
 
 
 ax0 = plt.subplot(1,3,3)
 ax0.set_title(r'mean fractional variation',size=20)
 cf = ax0.scatter(mapper.embedding_[:,0],mapper.embedding_[:,1],s=markersize,c=stretch_small_values_arctan(np.nansum(fvar_arr,axis=0),factor=3),edgecolor='gray')
-plt.colorbar(cf)
 plt.axis('off')
+divider = make_axes_locatable(ax0)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+plt.colorbar(cf,cax=cax)
 
 ax2 = plt.subplot(1,3,1)
 ax2.set_title('sample origin',size=20)
-
+counts = 1
 for label, indices in labc.items():
-    cf = ax2.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=markersize,alpha=0.5,edgecolor='gray',label=label)
+    cf = ax2.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=markersize,c = colors[counts],alpha=0.5,edgecolor='gray',label=label)
+    counts+=1
 plt.legend(fontsize=12)
-plt.colorbar(cf)
+#plt.colorbar(cf)
 plt.axis('off')
 
 plt.tight_layout()
@@ -723,23 +690,23 @@ plt.tight_layout()
 hist, x_edges, y_edges = np.histogram2d(mapper.embedding_[:, 0], mapper.embedding_[:, 1], bins=12)
 plt.figure(figsize=(15,12))
 i=1
-ax0 = plt.subplot(4,4,1)
-for label, indices in (labc.items()):
+ax0 = plt.subplot(4,4,12)
+for label, indices in sorted(labc.items()):
     hist_per_cluster, _, _ = np.histogram2d(mapper.embedding_[indices,0], mapper.embedding_[indices,1], bins=(x_edges, y_edges))
     prob = hist_per_cluster / hist
-    plt.subplot(4,4,i+1)
+    plt.subplot(4,4,i)
     plt.title(label)
-    plt.contourf(x_edges[:-1], y_edges[:-1], prob.T, levels=20, alpha=0.8)
+    plt.contourf(x_edges[:-1], y_edges[:-1], prob.T, levels=20, alpha=0.8,cmap=custom_cmap)
     plt.colorbar()
     plt.axis('off')
-    cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
+    cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label,c=colors[i-1])
     i+=1
 ax0.legend(loc=4,fontsize=7)
 ax0.axis('off')
 plt.tight_layout()
 ```
 
-## 6) Wise bands alone
+## 5) Wise bands alone
 
 ```{code-cell} ipython3
 bands_inlc = ['W1','W2']
@@ -765,26 +732,32 @@ plt.figure(figsize=(18,6))
 markersize=200
 mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='manhattan',random_state=20).fit(data)
 
+
 ax1 = plt.subplot(1,3,2)
 ax1.set_title(r'mean brightness',size=20)
-cf = ax1.scatter(mapper.embedding_[:,0],mapper.embedding_[:,1],s=markersize,c=np.log10(np.nansum(average_arr,axis=0)),edgecolor='gray')
-plt.colorbar(cf)
+cf = ax1.scatter(mapper.embedding_[:,0],mapper.embedding_[:,1],s=markersize,c=np.log10(np.nansum(meanarray,axis=0)),edgecolor='gray')
 plt.axis('off')
+divider = make_axes_locatable(ax1)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+plt.colorbar(cf,cax=cax)
 
 
 ax0 = plt.subplot(1,3,3)
 ax0.set_title(r'mean fractional variation',size=20)
 cf = ax0.scatter(mapper.embedding_[:,0],mapper.embedding_[:,1],s=markersize,c=stretch_small_values_arctan(np.nansum(fvar_arr,axis=0),factor=3),edgecolor='gray')
-plt.colorbar(cf)
 plt.axis('off')
+divider = make_axes_locatable(ax0)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+plt.colorbar(cf,cax=cax)
 
 ax2 = plt.subplot(1,3,1)
 ax2.set_title('sample origin',size=20)
-
+counts = 1
 for label, indices in labc.items():
-    cf = ax2.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=markersize,alpha=0.5,edgecolor='gray',label=label)
+    cf = ax2.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=markersize,c = colors[counts],alpha=0.5,edgecolor='gray',label=label)
+    counts+=1
 plt.legend(fontsize=12)
-plt.colorbar(cf)
+#plt.colorbar(cf)
 plt.axis('off')
 
 plt.tight_layout()
@@ -795,16 +768,16 @@ plt.tight_layout()
 hist, x_edges, y_edges = np.histogram2d(mapper.embedding_[:, 0], mapper.embedding_[:, 1], bins=12)
 plt.figure(figsize=(15,12))
 i=1
-ax0 = plt.subplot(4,4,1)
-for label, indices in (labc.items()):
+ax0 = plt.subplot(4,4,12)
+for label, indices in sorted(labc.items()):
     hist_per_cluster, _, _ = np.histogram2d(mapper.embedding_[indices,0], mapper.embedding_[indices,1], bins=(x_edges, y_edges))
     prob = hist_per_cluster / hist
-    plt.subplot(4,4,i+1)
+    plt.subplot(4,4,i)
     plt.title(label)
-    plt.contourf(x_edges[:-1], y_edges[:-1], prob.T, levels=20, alpha=0.8)
+    plt.contourf(x_edges[:-1], y_edges[:-1], prob.T, levels=20, alpha=0.8,cmap=custom_cmap)
     plt.colorbar()
     plt.axis('off')
-    cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
+    cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label,c=colors[i-1])
     i+=1
 ax0.legend(loc=4,fontsize=7)
 ax0.axis('off')
@@ -851,7 +824,7 @@ plt.axis('off')
 This notebook is created by the IPAC science platform team as a usecase of ML for time domain astrophysics. For questions contact: shemmati@caltech.edu
 
 **Author:** Shoubaneh Hemmati, Research scientist
-**Updated On:** 2023-20-11
+**Updated On:** 2024-09-02
 
 
 ## Citations
