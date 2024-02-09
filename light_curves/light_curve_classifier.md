@@ -700,6 +700,9 @@ df_lc = df_lc.set_index(["objectid", "label", "datetime"])
 #try dropping the uncertainty columns as variables for sktime
 df_lc.drop(columns = ['err_panstarrs_g',	'err_panstarrs_i',	'err_panstarrs_r',	'err_panstarrs_y',	
                       'err_panstarrs_z',	'err_w1',	'err_w2',	'err_zg',	'err_zr'], inplace = True)
+
+#drop also the time column because that shouldn't be a feature
+df_lc.drop(columns = ['time'],inplace = True)
 ```
 
 ### 3.0 Consider data augmentation
