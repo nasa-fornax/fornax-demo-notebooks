@@ -193,7 +193,7 @@ def sigmaclip_lightcurves(df_lc, sigmaclip_value = 10.0, include_plot = False):
         
     """
     #keep track of how many rows this removes
-    start_len = len(df_lc)
+    start_len = len(df_lc.index)
 
     #setup to collect the outlier thresholds per band to later reject
     nsigmaonmean= {}
@@ -226,7 +226,7 @@ def sigmaclip_lightcurves(df_lc, sigmaclip_value = 10.0, include_plot = False):
     #how much data did we remove with this sigma clipping?
     #This should inform our choice of sigmaclip_value.
 
-    end_len = len(df_lc)
+    end_len = len(df_lc.index)
     fraction = (start_len - end_len) / start_len
     print(f"This {sigmaclip_value} sigma clipping removed {fraction}% of the rows in df_lc")
 
@@ -578,7 +578,6 @@ def uniform_length_spacing(df_lc, final_freq_interpol, include_plot = True):
     # create a dataframe of the interpolated light curves
     df_interpol = pd.DataFrame(lc_interpol)
     return df_interpol
-
 
 ```
 
