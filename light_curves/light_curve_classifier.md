@@ -21,7 +21,9 @@ By the end of this tutorial, you will be able to:
 - use sktime & pyts algorithms to train a classifier and predict values on a test dataset
 
 ## Introduction
-This notebook takes output of a previous demo notebook which generates light curves from archival data, does data prep, and runs the light curves through multiple [`sktime`](https://www.sktime.net/en/stable/) classifiers.  The goal of the classifiers is to be able to differentiate changing look active galactic nucleii (CLAGN) from an SDSS quasar sample based on multiband light curves.  CLAGN are quite interested objects in that they appear to change state, but only a few hundred are currently known, and finding them is quite expensive requiring spectroscopic follow up.  Being able to identify CLAGN in existing large samples would allow us to identify a statisitcal sample from which we could better understand the physics of what is occuring in these systems.
+This notebook takes output of a previous demo notebook which generates light curves from archival data, does data prep, and runs the light curves through multiple [`sktime`](https://www.sktime.net/en/stable/) classifiers.  We choose to use [sktime](https://www.sktime.net/en/stable/index.html) algorithms beacuse it is a library of many algorithms specifically tailored to time series datasets.  It is based on the sklearn library so syntax is familiar to many users.
+
+The goal of the classifiers is to be able to differentiate changing look active galactic nucleii (CLAGN) from an SDSS quasar sample based on multiband light curves.  CLAGN are quite interested objects in that they appear to change state, but only a few hundred are currently known, and finding them is quite expensive requiring spectroscopic follow up.  Being able to identify CLAGN in existing large samples would allow us to identify a statisitcal sample from which we could better understand the physics of what is occuring in these systems.
 
 The challenges of this time-domain dataset are:
 1. Multi-variate = There are multiple bands of observations per target (13+)
@@ -234,7 +236,7 @@ def sigmaclip_lightcurves(df_lc, sigmaclip_value = 10.0, include_plot = False):
 ```
 
 ```{code-cell} ipython3
-def remove_objects_without_W1(df_lc, verbose=False):
+def remove_objects_without_band(df_lc, bandname_to_drop, verbose=False):
     """
     Get rid of the light curves which do not have W1 data.  
     
@@ -261,7 +263,7 @@ def remove_objects_without_W1(df_lc, verbose=False):
         bandname = singleoid.band.unique().tolist()
     
         #if it doesn't have W1:
-        if 'w1' not in bandname:
+        if bandname_to_drop not in bandname:
             #delete this oid from the dataframe of light curves
             indexoid = dropW1_df_lc[ (dropW1_df_lc['objectid'] == oid)].index
             dropW1_df_lc.drop(indexoid , inplace=True)
@@ -579,7 +581,6 @@ def uniform_length_spacing(df_lc, final_freq_interpol, include_plot = True):
     # create a dataframe of the interpolated light curves
     df_interpol = pd.DataFrame(lc_interpol)
     return df_interpol
-
 ```
 
 ```{code-cell} ipython3
