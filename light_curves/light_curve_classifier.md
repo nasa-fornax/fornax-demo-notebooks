@@ -219,18 +219,18 @@ def sigmaclip_lightcurves(df_lc, sigmaclip_value = 10.0, include_plot = False):
             singleband.err.plot(kind = 'hist', bins = 30, subplots =True, ax = axe[count],label = bandname+' '+str(upper), legend=True)
 
     #remove data that are outside the sigmaclip_value
-    for bandname, cut in nsigmaonmean.items():
-        querystring = f'band == {bandname!r} & err > {cut}'
-        df_lc = df_lc.drop(df_lc.query(querystring).index)
+    #make one large querystring joined by "or" for all bands in df_lc
+    querystring = " | ".join(f'(band == {bandname!r} & err > {cut})' for bandname, cut in nsigmaonmean.items())
+    clipped_df_lc = df_lc.drop(df_lc.query(querystring).index)
 
     #how much data did we remove with this sigma clipping?
     #This should inform our choice of sigmaclip_value.
 
-    end_len = len(df_lc.index)
+    end_len = len(clipped_df_lc.index)
     fraction = (start_len - end_len) / start_len
     print(f"This {sigmaclip_value} sigma clipping removed {fraction}% of the rows in df_lc")
 
-    return df_lc
+    return clipped_df_lc
 ```
 
 ```{code-cell} ipython3
@@ -249,20 +249,22 @@ def remove_objects_without_W1(df_lc, verbose=False):
         
     """
 
-
+    #maka a copy so we can work with it
+    dropW1_df_lc = df_lc
+    
     #keep track of how many get dropped
     dropcount = 0
 
     #for each object
-    for oid , singleoid in df_lc.groupby("objectid"):
+    for oid , singleoid in dropW1_df_lc.groupby("objectid"):
         #what bands does that object have
         bandname = singleoid.band.unique().tolist()
     
         #if it doesn't have W1:
         if 'w1' not in bandname:
             #delete this oid from the dataframe of light curves
-            indexoid = df_lc[ (df_lc['objectid'] == oid)].index
-            df_lc.drop(indexoid , inplace=True)
+            indexoid = dropW1_df_lc[ (dropW1_df_lc['objectid'] == oid)].index
+            dropW1_df_lc.drop(indexoid , inplace=True)
         
             #keep track of how many are being deleted
             dropcount = dropcount + 1
@@ -270,7 +272,7 @@ def remove_objects_without_W1(df_lc, verbose=False):
     if verbose:    
         print( dropcount, "objects do not have W1 fluxes and were removed")
 
-    return df_lc
+    return dropW1_df_lc
 ```
 
 ```{code-cell} ipython3
@@ -295,12 +297,12 @@ def remove_incomplete_data(df_lc, threshold_too_few = 3):
     print(df_lc.groupby(["band", "objectid"]).ngroups, "n groups before")
 
     #use pandas .filter to remove small groups
-    df_lc = df_lc.groupby(["band", "objectid"]).filter(lambda x: len(x) > threshold_too_few)
+    complete_df_lc = df_lc.groupby(["band", "objectid"]).filter(lambda x: len(x) > threshold_too_few)
 
     #how many groups do we have after culling?
-    print(df_lc.groupby(["band", "objectid"]).ngroups, "n groups after")
+    print(complete_df_lc.groupby(["band", "objectid"]).ngroups, "n groups after")
 
-    return df_lc
+    return complete_df_lc
     
 ```
 
@@ -428,9 +430,9 @@ def missingdata_to_zeros(df_lc):
 
 
     #now put the empty light curves back together with the main light curve dataframe
-    df_lc = pd.concat([df_lc, df_empty])
+    zeros_df_lc = pd.concat([df_lc, df_empty])
 
-    return(df_lc)
+    return(zeros_df_lc)
 ```
 
 ```{code-cell} ipython3
@@ -451,30 +453,29 @@ def missingdata_drop_bands(df_lc, verbose = False):
     """
 
     #try instead to require that all objects have bands = df_lc.band.unique()
-    #then see what it would be without including gaia??
 
     #first drop the bands not included from all objects
     bands_to_drop = ['zi', 'Gaia g', 'Gaia bp', 'Gaia rp']
-    df_lc = df_lc[~df_lc["band"].isin(bands_to_drop)]
+    drop_df_lc = df_lc[~df_lc["band"].isin(bands_to_drop)]
     
     #now a list of all remaining bands
-    all_bands = df_lc.band.unique()
+    all_bands = drop_df_lc.band.unique()
     
     if verbose:
         #how many objects did we start with?
-        print(df_lc.groupby(["objectid"]).ngroups, "n objects before removing missing band data")
+        print(drop_df_lc.groupby(["objectid"]).ngroups, "n objects before removing missing band data")
 
     # Identify objects with all bands
-    complete_objects = df_lc.groupby('objectid')['band'].apply(lambda x: set(x) == set(all_bands))
+    complete_objects = drop_df_lc.groupby('objectid')['band'].apply(lambda x: set(x) == set(all_bands))
 
     # Filter the DataFrame based on complete objects
-    df_lc = df_lc[df_lc['objectid'].isin(complete_objects[complete_objects].index)]
+    filter_df_lc = drop_df_lc[drop_df_lc['objectid'].isin(complete_objects[complete_objects].index)]
 
     if verbose:
         # How many objects are left?
-        print(df_lc.groupby(["objectid"]).ngroups, "n objects after removing missing band data")
+        print(filter_df_lc.groupby(["objectid"]).ngroups, "n objects after removing missing band data")
 
-    return(df_lc)
+    return(filter_df_lc)
 ```
 
 ```{code-cell} ipython3
