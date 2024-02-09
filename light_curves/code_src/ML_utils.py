@@ -3,13 +3,69 @@ from scipy import stats
 from scipy import interpolate
 import matplotlib.pyplot as plt
 import numba
+import pandas as pd
 
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF
 
 from tqdm import tqdm
 
+def translate_bitwise_sum_to_labels(bitwise_sum):
+    """
+    Translate a bitwise sum back to the labels which were set to 1.
 
+    Parameters:
+    - bitwise_sum: Integer, the bitwise sum representing the combination of labels.
+    - labels: List of strings, the labels corresponding to each bit position.
+
+    Returns:
+    - List of strings, the labels that are set to 1.
+    """
+    # Initialize agnlabels
+    agnlabels = ['SDSS_QSO', 'WISE_Variable','Optical_Variable','Galex_Variable',
+                 'Turn-on', 'Turn-off',
+                 'SPIDER', 'SPIDER_AGN','SPIDER_BL','SPIDER_QSOBL','SPIDER_AGNBL', 
+                 'TDE','Fermi_blazar']
+    active_labels = []
+    for i, label in enumerate(agnlabels):
+        # Check if the ith bit is set to 1
+        if bitwise_sum & (1 << i):
+            active_labels.append(label)
+    return active_labels
+
+def update_bitsums(df, label_num=64):
+    '''To update the bitwise summed labels by subtracting the 64s added in'''
+    
+    # Extract index as a list of tuples if MultiIndex, or adjust accordingly
+    index_list = list(df.index)
+    
+    # Prepare a new list for the updated index
+    updated_index = []
+    
+    # Track whether any changes are made to avoid unnecessary DataFrame recreation
+    changes_made = False
+    
+    for idx in index_list:
+        current_label = int(idx[1])  # Assuming 'label' is the second level in the multi-index
+        
+        # Check if 64 is part of the bitwise sum
+        if current_label & label_num != 0:
+            new_label = current_label ^ label_num  # Calculate the new label by removing 64 using XOR
+            new_idx = list(idx)
+            new_idx[1] = new_label  # Update the label in the index tuple
+            updated_index.append(tuple(new_idx))
+            changes_made = True
+        else:
+            updated_index.append(idx)
+    
+    # If changes were made, update the DataFrame index
+    if changes_made:
+        df_updated = df.set_index(pd.MultiIndex.from_tuples(updated_index, names=df.index.names))
+    else:
+        df_updated = df  # No changes, return original DataFrame
+    
+    return df_updated  
+    
 def autopct_format(values):
 
     def my_format(pct):
