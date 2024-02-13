@@ -309,10 +309,6 @@ def remove_incomplete_data(df_lc, threshold_too_few = 3):
 ```
 
 ```{code-cell} ipython3
-#one panstarrs z has a crazy err value of -999000, definitely don't want to include that one
-querystring = 'err < -100'
-df_lc = df_lc.drop(df_lc.query(querystring).index)
-
 #drop rows which have Nans
 df_lc.dropna(inplace = True, axis = 0)
 
@@ -324,14 +320,14 @@ df_lc = df_lc.drop(df_lc.query(querystring).index)
 #This is a tricky job because we want to keep astrophysical outliers of 
 #variable objects, but remove instrumental noise and CR (ground based).
 sigmaclip_value = 10.0
-df_lc = sigmaclip_lightcurves(df_lc, sigmaclip_value, include_plot = False)
+df_lc = sigmaclip_lightcurves(df_lc, sigmaclip_value, include_plot = True)
 
 #remove objects without W1 fluxes
 #We want to normalize all light curves by W1, so we neeed to remove those 
 #without W1 fluxes as there will be nothing to normalize those light curves 
 #with and we don't want to have un-normalized data or data that has been 
 #normalized by a different band.  
-df_lc = remove_objects_without_W1(df_lc, verbose=True)
+df_lc = remove_objects_without_band(df_lc, 'w1', verbose=True)
 
 #remove incomplete data
 #Some bands in some objects have only a few datapoints. Three data points 
