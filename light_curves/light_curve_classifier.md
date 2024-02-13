@@ -739,6 +739,10 @@ test_df = df_lc.loc[test_ix]
 ```
 
 ```{code-cell} ipython3
+y
+```
+
+```{code-cell} ipython3
 print(train_df.groupby([ "objectid"]).ngroups, "n groups in train sample")
 print(test_df.groupby(["objectid"]).ngroups, "n groups in test sample")
 ```
