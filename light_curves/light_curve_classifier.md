@@ -456,15 +456,15 @@ def missingdata_drop_bands(df_lc, verbose = False):
     bands_to_drop = ['zi', 'Gaia g', 'Gaia bp', 'Gaia rp']
     drop_df_lc = df_lc[~df_lc["band"].isin(bands_to_drop)]
     
-    #now a list of all remaining bands
-    all_bands = drop_df_lc.band.unique()
+    #now a list of all remaining bands that we want to keep
+    bands_to_keep = drop_df_lc.band.unique()
     
     if verbose:
         #how many objects did we start with?
         print(drop_df_lc.groupby(["objectid"]).ngroups, "n objects before removing missing band data")
 
-    # Identify objects with all bands
-    complete_objects = drop_df_lc.groupby('objectid')['band'].apply(lambda x: set(x) == set(all_bands))
+    # Identify objects with all bands that we want to keep
+    complete_objects = drop_df_lc.groupby('objectid')['band'].apply(lambda x: set(x) == set(bands_to_keep))
 
     # Filter the DataFrame based on complete objects
     filter_df_lc = drop_df_lc[drop_df_lc['objectid'].isin(complete_objects[complete_objects].index)]
