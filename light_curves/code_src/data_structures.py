@@ -66,7 +66,7 @@ class MultiIndexDFObject:
         # if we get here, both new_data and self.data contain data, so concat
         self.data = pd.concat([self.data, new_data])
 
-    def concat(self, other_df):
+    def combine_Samples(self, other_df):
         """Concatenate the data of two MultiIndexDFObject instances.
 
         Parameters

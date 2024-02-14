@@ -14,7 +14,7 @@ from panstarrs import Panstarrs_get_lightcurves
 from sample_selection import (clean_sample, get_green_sample, get_hon_sample, get_lamassa_sample,
                               get_lopeznavas_sample, get_lyu_sample, get_macleod16_sample, get_macleod19_sample, get_paper_sample,
                               get_ruan_sample, get_SDSS_sample, get_sheng_sample, get_yang_sample, nonunique_sample)
-from tde_functions import TDE_id2coord
+#from tde_functions import TDE_id2coord
 from TESS_Kepler_functions import TESS_Kepler_get_lightcurves
 from WISE_functions import WISE_get_lightcurves
 from ztf_functions import ZTF_get_lightcurve
@@ -50,7 +50,7 @@ def build_sample():
     #there are ~500K of these, so choose the number based on
     #a balance between speed of running the light curves and whatever
     #the ML algorithms would like to have
-    num_normal_QSO = 0#2000
+    num_normal_QSO = 100
     get_SDSS_sample(coords, labels, num_normal_QSO)
 
     ## ADD TDEs to the sample, manually copied the TDE ZTF names from Hammerstein et al. 2023
@@ -136,7 +136,7 @@ def parallel_lc(coords_list,labels_list,parquet_savename = '../output/df_lc_.par
 
 def main():
     c,l = build_sample()
-    dflc = parallel_lc(c,l,parquet_savename = '../output/df_lc_george.parquet')
+    dflc = parallel_lc(c,l,parquet_savename = '../output/df_lc_small.parquet')
     # Unify for ML and save
 
 if __name__ == "__main__":

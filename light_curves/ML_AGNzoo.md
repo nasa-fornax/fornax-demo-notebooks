@@ -4,16 +4,16 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.1
+    jupytext_version: 1.16.0
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  display_name: root *
   language: python
-  name: python3
+  name: conda-root-py
 ---
 
 # How do AGNs selected with different techniques compare?
 
-By the IPAC Science Platform Team, last edit: Feb 9th, 2024
+By the IPAC Science Platform Team, last edit: Feb 13th, 2024
 
 ***
 
@@ -47,7 +47,7 @@ Here are the libraries used in this network. They are also mostly mentioned in t
 - *umap* and *sompy* for manifold learning, dimensionality reduction and visualization
 
 ```{code-cell} ipython3
-#!pip install -r requirements.txt
+!pip install -r requirements.txt
 import sys
 import os
 import re
@@ -856,7 +856,7 @@ plt.tight_layout()
 ```
 
 ## 6) UMAP with different metrics/distances on ZTF+WISE
-DTW takes a bit longer compared to other metrics. 
+DTW takes a bit longer compared to other metrics.
 
 ```{code-cell} ipython3
 plt.figure(figsize=(12,10))
