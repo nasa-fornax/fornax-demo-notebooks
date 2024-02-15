@@ -22,9 +22,16 @@ cache/
 *.pdf
 *.png
 
-# Jupyter Notebook
+# Tests and reports
+htmlcov/
+.tox/
+.pytest_cache/
+.cache
+
+# Jupyter Notebook and sphinx renderings
 .ipynb_checkpoints
 *.ipynb
+_build/
 
 # PyCharm
 .idea
