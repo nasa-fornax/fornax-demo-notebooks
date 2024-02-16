@@ -11,7 +11,7 @@ kernelspec:
   name: conda-root-py
 ---
 
-# AGN Zoo: Comparison of AGN selected with different techniques
+# AGN Zoo: Comparison of AGN selected with different metrics
 
 By the IPAC Science Platform Team, last edit: Feb 16th, 2024
 
@@ -47,7 +47,7 @@ Here are the libraries used in this network. They are also mostly mentioned in t
 - *umap* and *sompy* for manifold learning, dimensionality reduction and visualization
 
 ```{code-cell} ipython3
-!pip install -r requirements.txt
+#!pip install -r requirements.txt
 import sys
 import os
 import re
