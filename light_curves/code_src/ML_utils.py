@@ -71,7 +71,7 @@ def autopct_format(values):
     def my_format(pct):
         total = sum(values)
         val = int(round(pct*total/100.0))
-        return '{:.1f}%\n({v:d})'.format(pct, v=val)
+        return '{:.1f}%)'.format(pct)
 
     return my_format
 
