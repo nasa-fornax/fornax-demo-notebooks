@@ -108,11 +108,9 @@ def unify_lc(df_lc, bands_inlc=['zr', 'zi', 'zg'], xres=160, numplots=1, low_lim
         keepobj = 0  # Flag to determine if the object should be kept
 
         # Check if the object has all required bands
-        if len(np.intersect1d(bands, bands_inlc)) != len(bands_inlc):
-            continue
-        if printcounter < numplots:
-            fig, ax = plt.subplots(figsize=(15, 5))  # Set up plot if within numplots limit
-        # also de-indent the rest of the loop below
+        if len(np.intersect1d(bands, bands_inlc)) == len(bands_inlc):
+            if printcounter < numplots:
+                fig, ax = plt.subplots(figsize=(15, 5))  # Set up plot if within numplots limit
 
             # Initialize arrays for new interpolated Y and dY values
             obj_newy = [[] for _ in range(len(bands_inlc))]
