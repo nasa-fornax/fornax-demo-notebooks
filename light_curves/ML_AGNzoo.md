@@ -129,13 +129,8 @@ To effectively undertake machine learning (ML) in addressing a specific question
 objid = df_lc.index.get_level_values('objectid')[:].unique()
 seen = Counter()
 
-
-
-for b in objid:
-    singleobj = df_lc.loc[b,:,:,:]
-    label = singleobj.index.unique('label')
-    # Translate the bitwise sum back to active labels
-    bitwise_sum = int(label[0])  # Convert to integer
+for (objectid, label), singleobj in df_lc.groupby(level=["objectid", "label"]):
+    bitwise_sum = int(label)
     active_labels = translate_bitwise_sum_to_labels(bitwise_sum)
     #active_labels = translate_bitwise_sum_to_labels(label[0])
     seen.update(active_labels)
@@ -155,11 +150,7 @@ In this particular example, the largest subsamples of AGNs, all with a criteria 
 
 ```{code-cell} ipython3
 seen = Counter()
-for b in objid:
-    singleobj = df_lc.loc[b,:,:,:]
-    label = singleobj.index.unique('label')
-    bands = singleobj.loc[label[0],:,:].index.get_level_values('band')[:].unique()
-    seen.update(bands)
+seen = df_lc.reset_index().groupby('band').objectid.nunique().to_dict()
 
 plt.figure(figsize=(20,4))
 plt.title(r'Number of lightcurves in each waveband in this sample:',size=20)
@@ -173,18 +164,11 @@ The histogram shows the number of lightcurves which ended up in the multi-index 
 cadence = dict((el,[]) for el in seen.keys())
 timerange = dict((el,[]) for el in seen.keys())
 
-for b in objid:
-    singleobj = df_lc.loc[b,:,:,:]
-    label = singleobj.index.unique('label')
-    bband = singleobj.index.unique('band')
-    for bb in bband:
-        bands = singleobj.loc[label[0],bb,:].index.get_level_values('time')[:]
-        #bands.values
-        #print(bb,len(bands[:]),np.round(bands[:].max()-bands[:].min(),1))
-        cadence[bb].append(len(bands[:]))
-        if bands[:].max()-bands[:].min()>0:
-            timerange[bb].append(np.round(bands[:].max()-bands[:].min(),1))
-
+for (_, band), times in df_lc.reset_index().groupby(["objectid", "band"]).time:
+    cadence[band].append(len(times))
+    if times.max() - times.min() > 0:
+        timerange[band].append(np.round(times.max() - times.min(), 1))
+        
 plt.figure(figsize=(20,4))
 plt.title(r'Time range and cadence covered in each in each waveband averaged over this sample:')
 for el in cadence.keys():
