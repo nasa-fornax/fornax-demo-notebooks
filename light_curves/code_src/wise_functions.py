@@ -15,7 +15,7 @@ BANDMAP = {"W1": 1, "W2": 2}  # map the common names to the values actually stor
 K = 5  # HEALPix order at which the dataset is partitioned
 
 
-def WISE_get_lightcurves(sample_table, radius=1.0 * u.arcsec, bandlist=["W1", "W2"]):
+def wise_get_lightcurves(sample_table, *, radius=1.0, bandlist=["W1", "W2"]):
     """Loads WISE data by searching the unWISE light curve catalog (Meisner et al., 2023AJ....165...36M).
     This is the MAIN function
     
@@ -23,8 +23,8 @@ def WISE_get_lightcurves(sample_table, radius=1.0 * u.arcsec, bandlist=["W1", "W
     ----------
     sample_table : `~astropy.table.Table`
         Table with the coordinates and journal reference labels of the sources
-    radius : astropy Quantity
-        radius for the cone search to determine whether a particular detection is associated with an object
+    radius : float
+        radius (arcsec) for the cone search to determine whether a particular detection is associated with an object
     bandlist: list of strings
         which WISE bands to search for, example: ['W1', 'W2']
 
@@ -33,6 +33,8 @@ def WISE_get_lightcurves(sample_table, radius=1.0 * u.arcsec, bandlist=["W1", "W
     df_lc : MultiIndexDFObject
         the main data structure to store all light curves
     """
+    radius = radius * u.arcsec
+
     # the catalog is in parquet format, partitioned by HEALPix pixel index at order k=5
     # locate the pixels/partitions each object is in
     locations_df = locate_objects(sample_table, radius)

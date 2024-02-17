@@ -32,7 +32,7 @@ def clean_filternames(lightcurve):
         filtername = 'K2'
     return(filtername)
 
-def TESS_Kepler_get_lightcurves(sample_table, radius):
+def tess_kepler_get_lightcurves(sample_table, *, radius=1.0):
     """Searches TESS, Kepler, and K2 for light curves from a list of input coordinates.  This is the MAIN function
     
     Parameters

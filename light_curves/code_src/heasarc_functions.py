@@ -56,7 +56,7 @@ def make_hist_error_radii(missioncat):
     return heasarcresulttable
 
 
-def HEASARC_get_lightcurves(sample_table, catalog_error_radii):
+def heasarc_get_lightcurves(sample_table, *, catalog_error_radii={"FERMIGTRIG": 1.0, "SAXGRBMGRB": 3.0}):
     """Searches HEASARC archive for light curves from a specific list of mission catalogs
 
     Parameters

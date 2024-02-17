@@ -25,7 +25,7 @@ CATALOG_FILES = (
 )
 
 
-def ZTF_get_lightcurve(sample_table, nworkers=6, match_radius=0.000278 * u.deg):
+def ztf_get_lightcurves(sample_table, *, nworkers=6, match_radius=1/3600):
     """Function to add the ZTF lightcurves in all three bands to a multiframe data structure.  This is the MAIN function.
 
     Parameters
@@ -36,8 +36,8 @@ def ZTF_get_lightcurve(sample_table, nworkers=6, match_radius=0.000278 * u.deg):
         number of workers in the multiprocessing pool used in the load_lightcurves function.
         This must be None if this function is being called from within a child process already.
         (This function does not support nested multiprocessing.)
-    match_radius : astropy Quantity
-        search radius, how far from the source should the archives return results
+    match_radius : float
+        search radius (degrees), how far from the source should the archives return results
 
     Returns
     -------
@@ -114,8 +114,8 @@ def locate_objects(sample_table, match_radius, chunksize=10000):
     ----------
     sample_table : `~astropy.table.Table`
         Table with the coordinates and journal reference labels of the sources
-    match_radius : astropy Quantity
-        search radius, how far from the source should the archives return results
+    match_radius : float
+        search radius (degrees), how far from the source should the archives return results
     chunksize : int
         This tap query is much faster when submitting less than ~10,000 coords at a time
         so iterate over chunks of coords_tbl and then concat results.
@@ -140,7 +140,7 @@ def locate_objects(sample_table, match_radius, chunksize=10000):
     query = f"""SELECT {select_cols}
         FROM ztf_objects_{DATARELEASE} ztf, TAP_UPLOAD.sample sample
         WHERE CONTAINS(
-            POINT('ICRS', sample.ra, sample.dec), CIRCLE('ICRS', ztf.ra, ztf.dec, {match_radius.value})
+            POINT('ICRS', sample.ra, sample.dec), CIRCLE('ICRS', ztf.ra, ztf.dec, {match_radius})
         )=1"""
 
     # do the tap calls
