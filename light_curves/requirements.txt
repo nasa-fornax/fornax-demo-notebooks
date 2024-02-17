@@ -13,9 +13,10 @@ pandas
 pyarrow
 pyvo
 scikit-learn
+scikit-image
 scipy
 tqdm
 alerce
-umap-learn[plot]
+umap-learn
 git+https://github.com/sevamoo/SOMPY
 numba
