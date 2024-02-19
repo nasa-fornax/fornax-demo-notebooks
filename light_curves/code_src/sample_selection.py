@@ -1,6 +1,7 @@
 from requests.exceptions import ConnectionError
 
 import astropy.units as u
+from alerce.core import Alerce
 from astropy.coordinates import SkyCoord
 from astropy.table import Table, join, join_skycoord, unique
 from astroquery.ipac.ned import Ned
@@ -315,6 +316,30 @@ def get_graham_sample(coords, labels, *, verbose=1):
         labels.append('Graham 19')
     if verbose:
         print('Changing Look AGN- Graham et al: ',len(CSQ))
+
+
+def get_ztf_objectid_sample(coords, labels, *, objectids=["ZTF18aabtxvd", "ZTF18aahqkbt"], verbose=1):
+    """ To find and append coordinates of objects with only ZTF obj name
+
+    Parameters
+    ----------
+    coords : list of astropy skycoords
+        the coordinates of the targets for which a user wants light curves
+    labels: list of strings
+        journal articles associated with the target coordinates
+    objectids: list of strings
+        List of ZTF objectid. eg., [ "ZTF18accqogs", "ZTF19aakyhxi", "ZTF19abyylzv", "ZTF19acyfpno"]
+    verbose: int
+        print out debugging info (1) or not(0)
+    """
+    alerce = Alerce()
+    objects = alerce.query_objects(oid=objectids, format="pandas")
+    tde_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(objects['meanra'], objects['meandec'])]
+    tde_labels = ['ZTF-Objname' for _ in objects['meanra']]
+    coords.extend(tde_coords)
+    labels.extend(tde_labels)
+    if verbose:
+        print('number of ztf coords added by Objectname:', len(objects['meanra']))
 
 
 #SDSS QSO sample of any desired number
