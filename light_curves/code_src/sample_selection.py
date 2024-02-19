@@ -1,3 +1,5 @@
+from requests.exceptions import ConnectionError
+
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 from astropy.table import Table, join, join_skycoord, unique
@@ -372,7 +374,11 @@ def get_paper_sample(coords, labels, *, paper_link="2019A&A...627A..33D", label=
     verbose : int, optional
         Print out the length of the sample derived from this literature source
     """
-    paper = Ned.query_refcode(paper_link)
+    try:
+        paper = Ned.query_refcode(paper_link)
+    except ConnectionError:
+        print(f"WARNING: encountered a ConnectionError error for paper {paper_link}. skipping.")
+        return
 
     paper_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(paper['RA'], paper['DEC'])]
     paper_labels = [label for ra in paper['RA']]
