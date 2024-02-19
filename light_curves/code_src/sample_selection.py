@@ -1,5 +1,4 @@
 import astropy.units as u
-import numpy as np
 from astropy.coordinates import SkyCoord
 from astropy.table import Table, join, join_skycoord, unique
 from astroquery.ipac.ned import Ned
@@ -383,8 +382,8 @@ def get_paper_sample(coords, labels, *, paper_link="2019A&A...627A..33D", label=
         print("number of sources added from "+str(label)+" :"+str(len(paper_coords)))
 
 
-def clean_sample(coords_list, labels_list, verbose=1):
-    """Makes a unique sample of skycoords and labels with no repeats. Attaches an object ID to the coords.
+def clean_sample(coords_list, labels_list, *, consolidate_nearby_objects=True, verbose=1):
+    """Create a Table with objectid, skycoords, and labels.
 
     Parameters
     ----------
@@ -392,6 +391,9 @@ def clean_sample(coords_list, labels_list, verbose=1):
         list of Astropy SkyCoords derived from literature sources
     labels_list : list
         List of the first author name and publication year for tracking the sources
+    consolidate_nearby_objects : bool
+        Whether to return only the objects that are unique within a small, on-sky separation (True) 
+        or all objects in coords_list (False).
     verbose : int, optional
         Print out the length of the sample after applying this function
 
@@ -402,6 +404,13 @@ def clean_sample(coords_list, labels_list, verbose=1):
     """
 
     sample_table = Table([coords_list, labels_list], names=['coord', 'label'])
+
+    if not consolidate_nearby_objects:
+        # create a range 'objectid'. must start with 1 to match what the astropy `join` produces below.
+        nsample = len(sample_table)
+        sample_table['objectid'] = list(range(1, nsample + 1))
+        print(f'Object sample size: {nsample}')
+        return sample_table['objectid', 'coord', 'label']
 
     # now join the table with itself within a defined radius.
     # We keep one set of original column names to avoid later need for renaming
@@ -419,36 +428,6 @@ def clean_sample(coords_list, labels_list, verbose=1):
     uniqued_table.rename_column('coord_id', 'objectid')
 
     if verbose:
-        print(f'after duplicates removal, sample size: {len(uniqued_table)}')
+        print(f'Object sample size, after duplicates removal: {len(uniqued_table)}')
 
     return uniqued_table
-
-
-def nonunique_sample(skycoordslist, labels, verbose=1):
-    """Changes the structure of the coordinates to a list of SkyCoords and a list of labels.
-
-    Parameters
-    ----------
-    skycoordslist : list
-        list of Astropy SkyCoords derived from literature sources
-    lables : list
-        List of the first author name and publication year for tracking the sources
-    verbose : int, optional
-        Print out the length of the sample after applying this function
-
-    Returns
-    -------
-    coords_list : list of tuples
-        coords input cleaned of duplicates, with an object ID attached. Tuples contain (objectid, skycoords).
-    labels_list : list
-        labels associated with coords_list
-    """
-    #first turn the skycoord list into a table to be able to access table functions in astropy
-    t = Table([skycoordslist, labels, np.arange(0, len(skycoordslist), 1)], names=['sc', 'label', 'idx'])
-    uniquerows = t#table.unique(tjoin, keys = 'sc_id')
-    raw_coords_list = list(t['sc'])
-    labels_list = list(t['label'])
-    if verbose:
-        print('without duplicates removal, sample size: '+str(len(raw_coords_list)))
-    coords_list = list(enumerate(raw_coords_list))  # list of tuples (objectid, skycoords)
-    return coords_list, labels_list
