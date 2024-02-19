@@ -87,7 +87,7 @@ from icecube_functions import icecube_get_lightcurves
 from panstarrs_functions import panstarrs_get_lightcurves
 from plot_functions import create_figures
 from sample_selection import (clean_sample, get_green_sample, get_hon_sample, get_lamassa_sample, get_lopeznavas_sample,
-    get_lyu_sample, get_macleod16_sample, get_macleod19_sample, get_ruan_sample, get_SDSS_sample, get_sheng_sample, get_yang_sample)
+    get_lyu_sample, get_macleod16_sample, get_macleod19_sample, get_ruan_sample, get_sdss_sample, get_sheng_sample, get_yang_sample)
 from tess_kepler_functions import tess_kepler_get_lightcurves
 # Note: WISE and ZTF data are temporarily located in a non-public AWS S3 bucket. It is automatically
 # available from the Fornax SMCE, but will require user credentials for access outside the SMCE.
@@ -125,7 +125,7 @@ get_yang_sample(coords, labels)   #2018ApJ...862..109Y
 # the ML algorithms would like to have
 
 #num_normal_QSO = 5000
-#get_SDSS_sample(coords, labels, num_normal_QSO)
+#get_sdss_sample(coords, labels, num=num_normal_QSO)
 
 # Remove duplicates, attach an objectid to the coords,
 # convert to astropy table to keep all relevant info together
