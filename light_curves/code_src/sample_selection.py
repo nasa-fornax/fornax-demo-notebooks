@@ -413,6 +413,24 @@ def get_paper_sample(coords, labels, *, paper_link="2019A&A...627A..33D", label=
         print("number of sources added from "+str(label)+" :"+str(len(paper_coords)))
 
 
+def get_papers_list_sample(coords, labels, *, paper_kwargs=[dict(),]):
+    """Wrapper for get_paper_sample. Calls get_paper_sample for each item in paper_kwargs.
+
+    Parameters
+    ----------
+    coords : list
+        list of Astropy SkyCoords derived from literature sources, shared amongst functions
+    lables : list
+        List of the first author name and publication year for tracking the sources, shared amongst functions
+    paper_kwargs : list[dict]
+        List of dicts containing keyword arguments passed on to get_paper_sample.
+    """
+    # loop over the papers in paper_kwargs and call get_paper_sample for each
+    for kwargs in paper_kwargs:
+        get_paper_sample(coords, labels, **kwargs)
+
+
+
 def clean_sample(coords_list, labels_list, *, consolidate_nearby_objects=True, verbose=1):
     """Create a Table with objectid, skycoords, and labels.
 
