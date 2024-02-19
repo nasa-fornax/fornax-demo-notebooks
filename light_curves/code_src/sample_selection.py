@@ -430,6 +430,32 @@ def get_papers_list_sample(coords, labels, *, paper_kwargs=[dict(),]):
         get_paper_sample(coords, labels, **kwargs)
 
 
+def get_csv_sample(coords, labels, *, csv_path, label, ra_colname="ra", dec_colname="dec", frame="icrs", unit="deg"):
+    """Loads coordinates from file at `csv_path` and adds them to `coords` and `lables`
+
+    Parameters
+    ----------
+    coords : list
+        list of Astropy SkyCoords derived from literature sources, shared amongst functions
+    lables : list
+        List of the first author name and publication year for tracking the sources, shared amongst functions
+    csv_path : str
+        Path to a csv file containing (at least) columns 
+    label : str
+        The label to apply to these coordinates.
+    ra_colname : str
+        Name of the column containing the RA coord.
+    dec_colname : str
+        Name of the column containing the Dec coord.
+    frame : str
+        Coordinate frame to pass to SkyCoord.
+    unit : str
+        Coordinate unit to pass to SkyCoord.
+    """
+    csv_sample = Table.read(csv_path)[ra_colname, dec_colname]
+    coords.extend([SkyCoord(ra, dec, frame=frame, unit=unit) for (ra, dec) in csv_sample.iterrows()])
+    labels.extend([label] * len(csv_sample))
+
 
 def clean_sample(coords_list, labels_list, *, consolidate_nearby_objects=True, verbose=1):
     """Create a Table with objectid, skycoords, and labels.
