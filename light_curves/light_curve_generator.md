@@ -124,8 +124,10 @@ get_yang_sample(coords, labels)   #2018ApJ...862..109Y
 # a balance between speed of running the light curves and whatever 
 # the ML algorithms would like to have
 
-#num_normal_QSO = 5000
-#get_sdss_sample(coords, labels, num=num_normal_QSO)
+# num_normal_QSO = 5000
+# zmin, zmax = 0, 10
+# randomize_z = False
+#get_sdss_sample(coords, labels, num=num_normal_QSO, zmin=zmin, zmax=zmax, randomize_z=randomize_z)
 
 # Remove duplicates, attach an objectid to the coords,
 # convert to astropy table to keep all relevant info together

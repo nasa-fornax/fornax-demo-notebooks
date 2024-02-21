@@ -318,7 +318,7 @@ def get_graham_sample(coords, labels, *, verbose=1):
 
 #SDSS QSO sample of any desired number
 #These are "normal" QSOs to use in the classifier
-def get_sdss_sample(coords, labels, *, num=10, zmin=0, zmax=10, verbose=1):
+def get_sdss_sample(coords, labels, *, num=10, zmin=0, zmax=10, randomize_z=False, verbose=1):
     """Automatically grabs SDSS quasar sample.
 
     Parameters
@@ -329,14 +329,23 @@ def get_sdss_sample(coords, labels, *, num=10, zmin=0, zmax=10, verbose=1):
         List of the first author name and publication year for tracking the sources, shared amongst functions
     num : int < 500K
         How many quasars for which to return the coords and labels
+    zmin : float
+        Lower limit (non-inclusive) redshift of sources to return.
+    zmax : float
+        Upper limit (non-inclusive) redshift of sources to return.
+    randomize_z : bool
+        Whether to sample randomly within the range zmin to zmax. By default (`False`), this will return
+        the `num` SDSS sources with the smallest redshift (within the range). To get a sample with
+        randomized redshifts, set this to `True`, but beware that the returned sample will be random
+        and thus not reproducible.
     verbose : int, optional
         Print out the length of the sample derived from this literature source
     """
     # Define the query
     query = "SELECT TOP " + str(num) + " specObjID, ra, dec, z FROM SpecObj \
     WHERE ( z > " + str(zmin) + "AND z < " + str(zmax) + " AND class='QSO' AND zWARNING=0 )"
-
-    #making up redshift range here, but should look at redshift distribution of the CLQ
+    if randomize_z:
+        query = query + " ORDER BY NEWID()"
 
     #use astroquery to return an astropy table of results
     if num>0:
