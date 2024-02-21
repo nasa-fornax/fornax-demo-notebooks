@@ -34,16 +34,18 @@ The challenges of this time-domain dataset for ML work are:
 2. Unequal length = Each band has a light curve with different sampling than other bands
 3. Missing data = Not each object has all observations in all bands
 
+
+
+
+## Input
+Light curve parquet file of multiwavelength light curves from the light_curve_generator.md demo notebook in this same repo.  The format of the light curves is a Pandas multiindex data frame.
+
 We choose to use a Pandas multiindex dataframe to store and work with the data because it fulfills these requirements:
 1. It can handle the above challenges of a dataset = multi-variate, unqueal length with missing data.
 2. Multiple targets (multiple rows)
 3. Pandas has some built in understanding of time units
 4. Can be scaled up to big data numbers of rows (altough we don't push to out of memory structures in this use case)
 5. Pandas is user friendly with a lot of existing functionality
-
-
-## Input
-Light curve parquet file of multiband light curves from the light_curve_generator.md demo notebook in this same repo.  The format of the light curves is a Pandas multiindex data frame.
 
 A useful reference for what sktime expects as input to its ML algorithms: https://github.com/sktime/sktime/blob/main/examples/AA_datatypes_and_datasets.ipynb
 
@@ -65,11 +67,12 @@ Trained classifiers as well as estimates of their accuracy and plots of confusio
 - `pyts` time series ML algorithms
   
 ## Authors
+Jessica Krick, Shooby Hemmati, Troy Raen, Brigitta Sipocz, Andreas Faisst, Vandana Desai, Dave Shoop
 
 ## Acknowledgements
 
 ```{code-cell} ipython3
-#ensure all dependencies are installed
+#insure all dependencies are installed
 !pip install -r requirements-lc_classifier.txt
 ```
 
@@ -77,6 +80,7 @@ Trained classifiers as well as estimates of their accuracy and plots of confusio
 import sys
 
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import numpy as np
 import pandas as pd
 from astropy.time import Time
@@ -119,7 +123,7 @@ from fluxconversions import mjd_to_jd
 ## 1. Read in a dataset of archival light curves
 
 ```{code-cell} ipython3
-#access structure of light curves made in the light curve notebook
+#access structure of light curves made in the light curve generator notebook
 # has known CLAGN & random SDSS small sample of 458 targets, all bands
 #https://drive.google.com/file/d/13RiPODiz2kI8j1OKpP1vfh6ByIUNsKEz/view?usp=share_link
 
@@ -139,20 +143,19 @@ df_lc
 ```
 
 ## 2. Data Prep
-The majority of work in all ML projects is preparing and cleaning the data.  This dataset is no different, and needs significant work before it can be fed into a ML algorithm.  This includes everything from removing statistical outliers to putting it in the correct data format for the algorithms.
+The majority of work in all ML projects is preparing and cleaning the data.  As most do, this dataset needs significant work before it can be fed into a ML algorithm.  Data preparation includes everything from removing statistical outliers to putting it in the correct data format for the algorithms.
 
 +++
 
 ### 2.1 Remove bands with not enough data
 For this use case of CLAGN classification, we don't need to include some of the bands
-that are known to be sparse.
+that are known to be sparse.  Most ML algorithms cannot handle sparse data so one way to accomodate that 
+is to remove the sparsest datasets.
 
 ```{code-cell} ipython3
 ##what are the unique set of bands included in our light curves
 df_lc.band.unique()
-```
 
-```{code-cell} ipython3
 # get rid of some of the bands that don't have enough data for all the sources
 #CLAGN are generall fainter targets, and therefore mostly not found in datasets like TESS & K2
 
@@ -161,7 +164,7 @@ df_lc = df_lc[~df_lc["band"].isin(bands_to_drop)]
 ```
 
 ### 2.2 Combine Labels for a Simpler Classification
-All CLAGN start in the dataset as having labels based on their discovery paper.  Because we want one sample with all known CLAGN, change those discovery names to be simply "CLAGN" for all CLAGN, regardless of origin.  
+All CLAGN start in the dataset as having labels based on their discovery paper.  Because we want one sample with all known CLAGN, we change those discovery names to be simply "CLAGN" for all CLAGN, regardless of origin.
 
 ```{code-cell} ipython3
 df_lc['label'] = df_lc.label.str.replace('MacLeod 16', 'CLAGN')
@@ -175,13 +178,56 @@ df_lc['label'] = df_lc.label.str.replace('Green 22', 'CLAGN')
 df_lc['label'] = df_lc.label.str.replace('Lopez-Navas 22', 'CLAGN')
 ```
 
-### 2.3 Clean the dataset of unwanted data
+### 2.3 Data Visualization
+- can we see any trends by examining plots of a subset of the data?
+
+```{code-cell} ipython3
+
+#plot a single band for all objects
+band_of_interest = 'w1'
+W1_band = df_lc[df_lc['band'] == band_of_interest]
+W1_band.set_index('time', inplace = True)
+
+#drop some objects to try to clear up plot
+querystring1 = 'objectid < 100'
+querystring2 = 'objectid > 300'
+W1_band = W1_band.drop(W1_band.query(querystring1 ).index)
+W1_band = W1_band.drop(W1_band.query(querystring2 ).index)
+
+#quick normalization for plotting
+#we normalize for real after cleaning the data
+# make a new column with max_r_flux for each objectid
+W1_band['mean_W1'] = W1_band.groupby('objectid', sort=False)["flux"].transform('mean')
+W1_band['sigma_W1'] = W1_band.groupby('objectid', sort=False)["flux"].transform('std')
+
+W1_band['flux'] = (W1_band['flux'] - W1_band['mean_W1']).div(W1_band['sigma_W1'], axis=0)
+
+#want to have two different sets so I can color code
+clagn_df = W1_band[W1_band['label'] == 'CLAGN']
+sdss_df = W1_band[W1_band['label'] == 'SDSS']
+print(clagn_df.groupby(["objectid"]).ngroups, "n objects CLAGN ")
+print(sdss_df.groupby(["objectid"]).ngroups, "n objects SDSS ")
+
+#groupy objectid, plot
+fig, ax = plt.subplots(figsize=(8,6))
+lc_sdss = sdss_df.groupby(['objectid'])['flux'].plot(kind='line', ax=ax, color = 'gray', label = 'SDSS')
+lc_clagn = clagn_df.groupby(['objectid'])['flux'].plot(kind='line', ax=ax, color = 'orange', label = 'CLAGN')
+
+legend_elements = [Line2D([0], [0], color='orange', lw=4, label='CLAGN'),
+                   Line2D([0], [0], color='gray', lw=4, label='SDSS')]
+ax.legend(handles=legend_elements, loc='best')
+
+ax.set_ylabel('Normalized Flux')
+plt.title("W1 light curves")
+```
+
+### 2.4 Clean the dataset of unwanted data
 "unwanted" includes:
 - NaNs
 - zero flux
 - outliers in uncertainty
-- objects with not enough flux measurements to make a good light curve
 - objects with no measurements in WISE W1 band
+- objects with not enough flux measurements to make a good light curve
 
 ```{code-cell} ipython3
 def sigmaclip_lightcurves(df_lc, sigmaclip_value = 10.0, include_plot = False):
@@ -354,14 +400,14 @@ df_lc = remove_incomplete_data(df_lc, threshold_too_few)
     
 ```
 
-### 2.4 Missing Data
-Some objects do not have light curves in all bands.  Some ML algorithms can handle mising data, but not all, so intentional and sensible to handle this missing data up front.
+### 2.5 Missing Data
+Some objects do not have light curves in all bands.  Some ML algorithms can handle mising data, but not all, so we try to do something intentional and sensible to handle this missing data up front.
 
-There are two options here
-1) We will add light curves with zero flux and err values for the missing data.  SKtime does not like NaNs, so we chose zeros.
-2) Remove bands which have less data from all objects so that there are no objects with missing data
+There are two options here:
+1) We will add light curves with zero flux and err values for the missing data.  SKtime does not like NaNs, so we choose zeros.  This option has the benefit of including more bands and therefore more information, but the drawback of having some objects have bands with entire arrays of zeros.
+2) Remove bands which have less data from all objects so that there are no objects with missing data.  This has the benefit of less zeros, but the disadvantage of throwing away some information for the few objects which do have light curves in the bands which will be removed.  
 
-Functions are inlcuded for both options (for now)
+Functions are inlcuded for both options.
 
 ```{code-cell} ipython3
 def make_zero_light_curve(oid, band, label):
@@ -498,9 +544,9 @@ def missingdata_drop_bands(df_lc, verbose = False):
 df_lc = missingdata_drop_bands(df_lc, verbose = True)
 ```
 
-### 2.5  Make all objects and bands have identical time arrays (uniform length and spacing)
+### 2.6  Make all objects and bands have identical time arrays (uniform length and spacing)
 
-It is very hard to find time-domain ML algorithms which can handle non uniform length datasets. Therefore we make them uniform by interpolating using KNN from scikit-learn which fills in the uniform length arrays with a final frequency chosen by the user.  We choose KNN as very straightforward. This functional also shows the framework in case the user wants to choose a different scikit-learn function to do the interpolation.
+It is very hard to find time-domain ML algorithms which can handle non uniform length datasets. Therefore we make them uniform by interpolating using KNN from scikit-learn which fills in the uniform length arrays with a final frequency chosen by the user.  We choose KNN as very straightforward. This functional also shows the framework in case the user wants to choose a different scikit-learn function to do the interpolation.  Another natural choice would be to use gaussian processes to do the interpolation, but this is not a good solution for our task because the flux values go to zero at times before and after the observations.  Because we include the entire time array from beginning of the first band to end of the second band, most individual bands require interpolation before and after their particular observations.  In other words, our light curves span
 
 ```{code-cell} ipython3
 #what does the dataframe look like at this point in the code?
@@ -607,7 +653,7 @@ df_lc = df_interpol.explode(["time", "flux","err"], ignore_index=True)
 df_lc = df_lc.astype({col: "float" for col in ["time", "flux", "err"]})
 ```
 
-### 2.6  Restructure dataframe 
+### 2.7  Restructure dataframe 
 - Make columns have band names in them and then remove band from the index
 - pivot the dataframe so that SKTIME understands its format
 - this will put it in the format expected by sktime
@@ -638,7 +684,7 @@ singleob = df_lc[df_lc['objectid'] == ob_of_interest]
 singleob
 ```
 
-### 2.7 Normalize 
+### 2.8 Normalize 
 - this is normalizing across all bands
 - think this is the right place to do this, rather than interpolate over time 
     so that the final light curves are normalized since that is the chunk of information 
@@ -664,10 +710,13 @@ df_lc[flux_cols] = df_lc[flux_cols].div(df_lc['max_W1'], axis=0)
 df_lc.drop(columns = ['max_W1'], inplace = True)
 ```
 
-### 2.8 Make datetime column
+### 2.9 Cleanup
+- Make datetime column
 https://docs.python.org/3/library/datetime.html#module-datetime
-
-SKTime wants a datetime column
+    - SKTime wants a datetime column
+- Save dataframe
+- Make into multi-index
+      - SKtime wants multi-index
 
 ```{code-cell} ipython3
 #need to convert df_lc time into datetime
@@ -684,8 +733,6 @@ t = Time(jd, format = 'jd' )
 df_lc['datetime'] = t.datetime
 ```
 
-### 2.9 Save this dataframe
-
 ```{code-cell} ipython3
 #save this dataframe to use for the ML below so we don't have to make it every time
 parquet_savename = 'output/df_lc_ML.parquet'
@@ -693,10 +740,8 @@ df_lc.to_parquet(parquet_savename)
 #print("file saved!")
 ```
 
-### 2.10 Make into multi-index
-(which is what SKTime expects as input)
-
 ```{code-cell} ipython3
+#give this dataframe a multiindex
 df_lc = df_lc.set_index(["objectid", "label", "datetime"])
 ```
 
