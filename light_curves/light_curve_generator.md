@@ -4,11 +4,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.0
+    jupytext_version: 1.15.2
 kernelspec:
-  display_name: science_demo
+  display_name: Python 3 (ipykernel)
   language: python
-  name: conda-env-science_demo-py
+  name: python3
 ---
 
 # Make Multiwavelength Light Curves Using Archival Data
@@ -130,6 +130,9 @@ get_yang_sample(coords, labels)   #2018ApJ...862..109Y
 # Remove duplicates, attach an objectid to the coords,
 # convert to astropy table to keep all relevant info together
 sample_table = clean_sample(coords, labels)
+
+#give this sample a name for use in saving files
+sample_name = "yang_CLAGN"
 ```
 
 ### 1.1 Build your own sample
@@ -150,7 +153,8 @@ At this point you may wish to write out your sample to disk and reuse that in fu
 For the format of the save file, we would suggest to choose from various formats that fully support astropy objects(eg., SkyCoord).  One example that works is Enhanced Character-Separated Values or ['ecsv'](https://docs.astropy.org/en/stable/io/ascii/ecsv.html)
 
 ```{code-cell} ipython3
-sample_table.write('data/input_sample.ecsv', format='ascii.ecsv', overwrite = True)
+savename_sample = f"output/{sample_name}_sample.ecsv"
+sample_table.write(savename_sample, format='ascii.ecsv', overwrite = True)
 ```
 
 ### 1.3 Load the sample table from disk
@@ -158,7 +162,7 @@ sample_table.write('data/input_sample.ecsv', format='ascii.ecsv', overwrite = Tr
 Do only this step from this section when you have a previously generated sample table
 
 ```{code-cell} ipython3
-sample_table = Table.read('data/input_sample.ecsv', format='ascii.ecsv')
+sample_table = Table.read(savename_sample, format='ascii.ecsv')
 ```
 
 ### 1.4 Initialize data structure to hold the light curves
@@ -415,9 +419,9 @@ parallel_df_lc.data
 
 ```{code-cell} ipython3
 # Save the data for future use with ML notebook
-#parquet_savename = 'output/df_lc_090723_yang.parquet'
-#parallel_df_lc.data.to_parquet(parquet_savename)
-#print("file saved!")
+parquet_savename = f"output/{sample_name}_df_lc.parquet"
+parallel_df_lc.data.to_parquet(parquet_savename)
+print("file saved!")
 ```
 
 ```{code-cell} ipython3
@@ -448,7 +452,7 @@ This work made use of:
 &bull; Astropy; Astropy Collaboration 2022, Astropy Collaboration 2018, Astropy Collaboration 2013,    2022ApJ...935..167A, 2018AJ....156..123A, 2013A&A...558A..33A  
 &bull; Lightkurve; Lightkurve Collaboration 2018, 2018ascl.soft12013L  
 &bull; acstools; https://zenodo.org/record/7406933#.ZBH1HS-B0eY  
-&bull; unWISE light curves; Meisner et al., 2023, 2023AJ....165...36M  
+&bull; unWISE light curves; Meisner et al., 2023, 2023AJ....165...36M
 
 ```{code-cell} ipython3
 
