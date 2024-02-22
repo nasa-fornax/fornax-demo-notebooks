@@ -842,11 +842,9 @@ check_is_mtype(X_train, mtype="pd-multiindex", scitype="Panel", return_metadata=
 
 ```{code-cell} ipython3
 %%time
-#lets check out a RandomIntervalClassifier 
-#at some point in developing this notebook it was performing the best for this classification task
 
 #setup the classifier
-clf = RandomIntervalClassifier(n_intervals = 20, n_jobs = -1, random_state = 43)
+clf = Arsenal(time_limit_in_minutes=1, n_jobs = -1)
 
 #fit the classifier on the training dataset
 clf.fit(X_train, y_train)
@@ -868,7 +866,7 @@ plt.show()
 
 Our method is to do a cursory check of a bunch of classifiers and then later drill down deeper on anything with good initial results.  We choose to run a loop over ~10 classifiers that seem promising and check the accuracy scores for each one.  Any classifier with a promising accuracy score could then be followed up with detailed hyperparameter tuning, or potentially with considering other classifiers in that same type.
 
-```{raw-cell}
+```{code-cell} ipython3
 %%time
 #This cell is currently not being run because it takes a while so is not good for testing/debugging
 
@@ -889,7 +887,7 @@ names = ["Arsenal",                     #kernel based
         "DummyClassifier"]             #Dummy - ignores input
 
 #for those with an impossible time limit, how long to let them run for before cutting off
-nmins = 10
+nmins = 3
 
 #these could certainly be more tailored
 classifier_call = [Arsenal(time_limit_in_minutes=nmins, n_jobs = -1), 
@@ -927,27 +925,34 @@ for name, clf in tqdm(zip(names, classifier_call)):
     disp.plot()
     plt.show()
 
-#just for keeping track, I also tried 
-#clf = SignatureClassifier(depth = 2, window_depth = 3, random_state = 43)
-#this fails to complete, and is a known limitation of this algorithm.  
 ```
 
-```{raw-cell}
+```{code-cell} ipython3
 #show the summary of the algorithms used and their accuracy score
 accscore_dict
 ```
 
-```{raw-cell}
+```{code-cell} ipython3
 #save statistics from these runs
 
 # Serialize data into file:
-json.dump( accscore_dict, open( "output/accscore.json", 'w' ) )
-json.dump( completeness_dict, open( "output/completeness.json", 'w' ) )
-json.dump( homogeneity_dict, open( "output/homogeneity.json", 'w' ) )
+#json.dump( accscore_dict, open( "output/accscore.json", 'w' ) )
+#json.dump( completeness_dict, open( "output/completeness.json", 'w' ) )
+#json.dump( homogeneity_dict, open( "output/homogeneity.json", 'w' ) )
 
 # Read data from file:
 #accscore_dict = json.load( open( "output/accscore.json") )
 ```
+
+## 5.0 Create a candidate list 
+Lets assume we now have a classifier which can accurately differentiate CLAGN from SDSS QSOs.  Now we would like to use that classifier on the full sample of ~500k SDSS QSOs to identify CLAGN candidates.  To do this, we need to:
+- read in the full dataframe of 500k SDSS light curves
+- get that dataset in the same format as what was fed into the classifiers
+- run clf.predict() on that re-formatted dataset
+- retrace those objectids to an ra & dec
+- write an observing proposal (ok, you have to do that one yourself)
+
++++
 
 ## References:
 Markus Löning, Anthony Bagnall, Sajaysurya Ganesh, Viktor Kazakov, Jason Lines, Franz Király (2019): “sktime: A Unified Interface for Machine Learning with Time Series”
