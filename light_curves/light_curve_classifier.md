@@ -108,6 +108,7 @@ from sktime.classification.interval_based import CanonicalIntervalForest
 from sktime.classification.kernel_based import Arsenal, RocketClassifier
 from sktime.classification.shapelet_based import ShapeletTransformClassifier
 from sktime.registry import all_estimators, all_tags
+from sktime.datatypes import check_is_mtype
 
 from pyts.classification import KNeighborsClassifier
 from pyts.classification import SAXVSM
@@ -182,52 +183,69 @@ df_lc['label'] = df_lc.label.str.replace('Lopez-Navas 22', 'CLAGN')
 - can we see any trends by examining plots of a subset of the data?
 
 ```{code-cell} ipython3
+#chhose your own adventure, the bands from which you can choose are:
+df_lc.band.unique()
+```
 
+```{code-cell} ipython3
 #plot a single band for all objects
-band_of_interest = 'w1'
-W1_band = df_lc[df_lc['band'] == band_of_interest]
-W1_band.set_index('time', inplace = True)
+band_of_interest = 'zr'
+band_lc = df_lc[df_lc['band'] == band_of_interest]
+#reset zero time to be start of that mission
+band_lc["time"] = band_lc["time"] - band_lc["time"].min()
+band_lc.time.min()
+
+band_lc.set_index('time', inplace = True)  #helps with the plotting
 
 #drop some objects to try to clear up plot
-querystring1 = 'objectid < 100'
-querystring2 = 'objectid > 300'
-W1_band = W1_band.drop(W1_band.query(querystring1 ).index)
-W1_band = W1_band.drop(W1_band.query(querystring2 ).index)
+querystring1 = 'objectid < 150'
+querystring2 = 'objectid > 250'
+band_lc = band_lc.drop(band_lc.query(querystring1 ).index)
+band_lc = band_lc.drop(band_lc.query(querystring2 ).index)
 
 #quick normalization for plotting
 #we normalize for real after cleaning the data
 # make a new column with max_r_flux for each objectid
-W1_band['mean_W1'] = W1_band.groupby('objectid', sort=False)["flux"].transform('mean')
-W1_band['sigma_W1'] = W1_band.groupby('objectid', sort=False)["flux"].transform('std')
+band_lc['mean_band'] = band_lc.groupby('objectid', sort=False)["flux"].transform('mean')
+band_lc['sigma_band'] = band_lc.groupby('objectid', sort=False)["flux"].transform('std')
 
-W1_band['flux'] = (W1_band['flux'] - W1_band['mean_W1']).div(W1_band['sigma_W1'], axis=0)
+#choose to normalize (flux - mean) / sigma
+band_lc['flux'] = (band_lc['flux'] - band_lc['mean_band']).div(band_lc['sigma_band'], axis=0)
 
 #want to have two different sets so I can color code
-clagn_df = W1_band[W1_band['label'] == 'CLAGN']
-sdss_df = W1_band[W1_band['label'] == 'SDSS']
+clagn_df = band_lc[band_lc['label'] == 'CLAGN']
+sdss_df = band_lc[band_lc['label'] == 'SDSS']
 print(clagn_df.groupby(["objectid"]).ngroups, "n objects CLAGN ")
 print(sdss_df.groupby(["objectid"]).ngroups, "n objects SDSS ")
 
-#groupy objectid, plot
+#groupy objectid & plot flux vs. time
 fig, ax = plt.subplots(figsize=(8,6))
 lc_sdss = sdss_df.groupby(['objectid'])['flux'].plot(kind='line', ax=ax, color = 'gray', label = 'SDSS')
 lc_clagn = clagn_df.groupby(['objectid'])['flux'].plot(kind='line', ax=ax, color = 'orange', label = 'CLAGN')
 
+#add legend and labels/titles
 legend_elements = [Line2D([0], [0], color='orange', lw=4, label='CLAGN'),
                    Line2D([0], [0], color='gray', lw=4, label='SDSS')]
 ax.legend(handles=legend_elements, loc='best')
 
 ax.set_ylabel('Normalized Flux')
-plt.title("W1 light curves")
+ax.set_xlabel('Time in days since start of mission')
+plt.title(f"{band_of_interest} light curves")
 ```
 
 ### 2.4 Clean the dataset of unwanted data
 "unwanted" includes:
 - NaNs
+  - SKtime does not work with NaNs
 - zero flux
+  - there are a few flux measurements that come into our dataframe with zeros.  It is not clear what these are, and zero will be used to mean lack of observation in the rest of this notebook, so want to drop these rows at the outset.
 - outliers in uncertainty
+  - This is a tricky job because we want to keep astrophysical sources that are variable objects, but remove instrumental noise and CR (ground based).  The user will need to choose a sigma clipping threshold, and there is some plotting functionality available to help users make that decision
 - objects with no measurements in WISE W1 band
-- objects with not enough flux measurements to make a good light curve
+  - Below we want to normalize all light curves by W1, so we neeed to remove those objects without W1 fluxes because there will be nothing to normalize those light curves with.  We don't want to have un-normalized data.
+- objects with incomplete data
+  - Incomplete is defined here as not enough flux measurements to make a good light curve.  Some bands in some objects have only a few datapoints. Three data points is not large enough for KNN interpolation, so we will consider any array with fewer than 4 photometry points to be incomplete data.  Another way of saying this is that we choose to remove those light curves with 3 or 
+fewer data points.
 
 ```{code-cell} ipython3
 def sigmaclip_lightcurves(df_lc, sigmaclip_value = 10.0, include_plot = False):
@@ -285,7 +303,7 @@ def sigmaclip_lightcurves(df_lc, sigmaclip_value = 10.0, include_plot = False):
     #This should inform our choice of sigmaclip_value.
 
     end_len = len(clipped_df_lc.index)
-    fraction = (start_len - end_len) / start_len
+    fraction = ((start_len - end_len) / start_len) *100.
     print(f"This {sigmaclip_value} sigma clipping removed {fraction}% of the rows in df_lc")
 
     return clipped_df_lc
@@ -377,24 +395,13 @@ querystring = 'flux < 0.000001'
 df_lc = df_lc.drop(df_lc.query(querystring).index)
 
 #remove outliers
-#This is a tricky job because we want to keep astrophysical sources that are 
-#variable objects, but remove instrumental noise and CR (ground based).
 sigmaclip_value = 10.0
-df_lc = sigmaclip_lightcurves(df_lc, sigmaclip_value, include_plot = True)
+df_lc = sigmaclip_lightcurves(df_lc, sigmaclip_value, include_plot = False)
 
 #remove objects without W1 fluxes
-#We want to normalize all light curves by W1, so we neeed to remove those 
-#without W1 fluxes as there will be nothing to normalize those light curves 
-#with and we don't want to have un-normalized data or data that has been 
-#normalized by a different band.  
 df_lc = remove_objects_without_band(df_lc, 'w1', verbose=True)
 
 #remove incomplete data
-#Some bands in some objects have only a few datapoints. Three data points 
-#is not large enough for KNN interpolation, so we will consider any array 
-#with fewer than 4 photometry points to be incomplete data.  Another way 
-#of saying this is that we choose to remove those light curves with 3 or 
-#fewer data points.
 threshold_too_few = 3
 df_lc = remove_incomplete_data(df_lc, threshold_too_few)
     
@@ -546,7 +553,9 @@ df_lc = missingdata_drop_bands(df_lc, verbose = True)
 
 ### 2.6  Make all objects and bands have identical time arrays (uniform length and spacing)
 
-It is very hard to find time-domain ML algorithms which can handle non uniform length datasets. Therefore we make them uniform by interpolating using KNN from scikit-learn which fills in the uniform length arrays with a final frequency chosen by the user.  We choose KNN as very straightforward. This functional also shows the framework in case the user wants to choose a different scikit-learn function to do the interpolation.  Another natural choice would be to use gaussian processes to do the interpolation, but this is not a good solution for our task because the flux values go to zero at times before and after the observations.  Because we include the entire time array from beginning of the first band to end of the second band, most individual bands require interpolation before and after their particular observations.  In other words, our light curves span
+It is very hard to find time-domain ML algorithms which can work with non uniform length datasets. Therefore we make the light curves uniform by interpolating using KNN from scikit-learn which fills in the uniform length arrays with a final frequency chosen by the user.  We choose KNN as very straightforward method. This function also shows the framework in case the user wants to choose a different scikit-learn function to do the interpolation.  Another natural choice would be to use gaussian processes (GP) to do the interpolation, but this is not a good solution for our task because the flux values go to zero at times before and after the observations.  Because we include the entire time array from beginning of the first mission to end of the last mission, most individual bands require interpolation before and after their particular observations.  In other words, our light curves span the entire range from 2010 with the start of panstarrs and WISE to the most recent ZTF data release (at least 2023), even though most individual missions do not cover that full range of time.
+
+It is important to choose the frequency over which the data is interpolated wisely.  Experimentation with treating this variable like a hyperparam and testing sktime algorithms shows slightly higher accuracy values for a suite of algorithms for a frequency of one interpolated observation per 60 days.  
 
 ```{code-cell} ipython3
 #what does the dataframe look like at this point in the code?
@@ -619,14 +628,6 @@ def uniform_length_spacing(df_lc, final_freq_interpol, include_plot = True):
                 #see if this looks reasonable
                 plt.errorbar(X,y,dy,linestyle="None",color="tab:blue",marker=".")
                 plt.plot(x_interpol, mean_prediction, label="Mean prediction")
-                #plt.fill_between(
-                #    x_interpol.ravel(),
-                #    mean_prediction - 1.96 * std_prediction,
-                #    mean_prediction + 1.96 * std_prediction,
-                #    color="tab:orange",
-                #    alpha=0.5,
-                #    label=r"95% confidence interval",
-                #)
                 plt.legend()
                 plt.xlabel("time")
                 plt.ylabel("flux")
@@ -640,9 +641,6 @@ def uniform_length_spacing(df_lc, final_freq_interpol, include_plot = True):
 
 ```{code-cell} ipython3
 #change this to change the frequency of the time array
-#experimentation with treating this variable like a hyperparam and testing
-#sktime algorithms shows slightly higher accuracy values for a suite of algorithms
-#for a frequency of 60 days.  
 final_freq_interpol = 60  #this is the timescale of interpolation in units of days
 
 df_interpol = uniform_length_spacing(df_lc, final_freq_interpol )
@@ -691,7 +689,7 @@ singleob
     which goes into the ML algorithms.
 - chose max and not median or mean because there are some objects where the median flux = 0.0
     - if we did this before the interpolating, the median might be a non-zero value
-- normalizing is required so that the CLAGN and it's comparison SDSS sample don't have different flux levels.
+- normalizing is required so that the CLAGN and it's comparison SDSS sample don't have different flux levels.  ML algorithms will easily choose to classify based on overall flux levels, so we want to discourage that by normalizing the fluxes.
 
 
 Idea here is that we normalize across each object.  So the algorithms will know, for example, that within one object W1 will be brighter than ZTF bands but from one object to the next, it will not know that one is brighter than the other.
@@ -711,8 +709,7 @@ df_lc.drop(columns = ['max_W1'], inplace = True)
 ```
 
 ### 2.9 Cleanup
-- Make datetime column
-https://docs.python.org/3/library/datetime.html#module-datetime
+- Make [datetime](https://docs.python.org/3/library/datetime.html#module-datetime) column
     - SKTime wants a datetime column
 - Save dataframe
 - Make into multi-index
@@ -736,7 +733,7 @@ df_lc['datetime'] = t.datetime
 ```{code-cell} ipython3
 #save this dataframe to use for the ML below so we don't have to make it every time
 parquet_savename = 'output/df_lc_ML.parquet'
-df_lc.to_parquet(parquet_savename)
+#df_lc.to_parquet(parquet_savename)
 #print("file saved!")
 ```
 
@@ -760,33 +757,18 @@ df_lc = df_lc.set_index(["objectid", "label", "datetime"])
 df_lc.drop(columns = ['err_panstarrs_g',	'err_panstarrs_i',	'err_panstarrs_r',	'err_panstarrs_y',	
                       'err_panstarrs_z',	'err_w1',	'err_w2',	'err_zg',	'err_zr'], inplace = True)
 
-#drop also the time column because that shouldn't be a feature
+#drop also the time column because time shouldn't be a feature
 df_lc.drop(columns = ['time'],inplace = True)
 ```
-
-### 3.0 Consider data augmentation
-
-1. https://arxiv.org/pdf/1811.08295.pdf which has the following github
-
-    - https://github.com/gioramponi/GAN_Time_Series/tree/master
-    - not easily usable
-2. https://arxiv.org/pdf/2205.06758.pdf
-
-3. ChatGPT - give multiindex df function and it will give a starting point for augmenting
-
-
-Worried that augmenting noisy data just makes more noise
-
-+++
-
-### 3.1 Train test split 
-- Because thre are uneven numbers of each type (many more SDSS than CLAGN), we want to make sure to stratify evenly by type
-- Random split
 
 ```{code-cell} ipython3
 #what does the dataframe look like now?
 df_lc
 ```
+
+### 3.1 Train test split 
+- Because thre are uneven numbers of each type (many more SDSS than CLAGN), we want to make sure to stratify evenly by type
+- Random split
 
 ```{code-cell} ipython3
 #y is defined to be the labels
@@ -801,17 +783,12 @@ test_df = df_lc.loc[test_ix]
 ```
 
 ```{code-cell} ipython3
-y
-```
-
-```{code-cell} ipython3
 print(train_df.groupby([ "objectid"]).ngroups, "n groups in train sample")
 print(test_df.groupby(["objectid"]).ngroups, "n groups in test sample")
 ```
 
 ```{code-cell} ipython3
 #plot to show how many of each type of object in the test dataset
-
 plt.figure(figsize=(6,4))
 plt.title("Objects in the Test dataset")
 h = plt.hist(test_df.droplevel('datetime').index.unique().get_level_values('label').to_series(),histtype='stepfilled',orientation='horizontal')
@@ -840,38 +817,36 @@ We choose to use [sktime](https://www.sktime.net/en/stable/index.html) algorithm
 
 Types of classifiers are listed [here](https://www.sktime.net/en/stable/api_reference/classification.html).
 
-This notebook will invert the actual workflow and show you a single example of the algorithm which best fits the data and has the most accurate classifier. Then it will show how to write a for loop over a bunch of classifiers before narrowing it down to the most accurate.
+This notebook will first show you an example of a single algorithm classifier. Then it will show how to write a for loop over a bunch of classifiers while outputting some metrics of accuracy.
 
 +++
 
 ### 4.1 Check that the data types are ok for sktime
+This test needs to pass in order for sktime to run
 
 ```{code-cell} ipython3
 #ask sktime if it likes the data type of X_train
-from sktime.datatypes import check_is_mtype
 
 check_is_mtype(X_train, mtype="pd-multiindex", scitype="Panel", return_metadata=True)
-#check_is_mtype(X_test, mtype="pd-multiindex", scitype="Panel", return_metadata=True)
 
-#This test needs to pass in order for sktime to run
 ```
 
 ```{code-cell} ipython3
-#what is the list of all possible classifiers that work with multivariate data
+#show the list of all possible classifiers that work with multivariate data
 #all_tags(estimator_types = 'classifier')
 #classifiers = all_estimators("classifier", filter_tags={'capability:multivariate':True})
 #classifiers
 ```
 
 ### 4.1 A single Classifier
-See section 4.3 for how we landed with this algorithm
 
 ```{code-cell} ipython3
 %%time
-#looks like RandomIntervalClassifier is performing the best for the CLAGN (not for the SDSS)
+#lets check out a RandomIntervalClassifier 
+#at some point in developing this notebook it was performing the best for this classification task
 
 #setup the classifier
-clf = RandomIntervalClassifier(n_intervals = 12, n_jobs = -1, random_state = 43)
+clf = RandomIntervalClassifier(n_intervals = 20, n_jobs = -1, random_state = 43)
 
 #fit the classifier on the training dataset
 clf.fit(X_train, y_train)
@@ -973,156 +948,6 @@ json.dump( homogeneity_dict, open( "output/homogeneity.json", 'w' ) )
 # Read data from file:
 #accscore_dict = json.load( open( "output/accscore.json") )
 ```
-
-## 5.0 Run pyts algorithms on a single band of the light curves
-[pyts](https://pyts.readthedocs.io/en/stable/) is a python package for time series classification.
-
-We run univariate classification here with just the W1 WISE band.  This is a change from the multivariate sktime classification above.
-
-+++
-
-### 5.1 Get the data into the correct shape for pyTS
-
-```{code-cell} ipython3
-#How many objects are we working with?
-#this is repeated here in case sktime is not run above.
-print(X_train.groupby([ "objectid"]).ngroups, "n groups in train sample")
-print(X_test.groupby(["objectid"]).ngroups, "n groups in test sample")
-```
-
-```{code-cell} ipython3
-#input to pyTS must be a  numpy.ndarray 
-# a 2d array with shape (n_samples, n_timestamps), where the first axis represents the 
-# samples and the second axis represents time
-
-#start working on X
-X_train_pyts = X_train.reset_index()
-X_test_pyts = X_test.reset_index()
-
-# Extract univariate flux values into NumPy arrays and reshape them
-X_train_np = X_train_pyts.pivot(index='objectid',  columns='time',values='flux_w1').to_numpy() 
-X_test_np = X_test_pyts.pivot(index='objectid', columns='time', values='flux_w1').to_numpy()
-
-#now work on the y
-train_df_pyts = train_df.reset_index()
-test_df_pyts = test_df.reset_index()
-
-# Extract unique labels for each objectid and convert to a NumPy array
-y_train_np = train_df_pyts.groupby('objectid')['label'].first().to_numpy()
-y_test_np = test_df_pyts.groupby('objectid')['label'].first().to_numpy()
-```
-
-### 5.2 A single classifier
-
-```{code-cell} ipython3
-#setup to store the accuracy et al. scores
-accscore_dict = {}
-MCC_dict ={}
-homogeneity_dict = {}
-completeness_dict = {}
-f1_dict = {}
-```
-
-```{code-cell} ipython3
-clf = LearningShapelets(random_state=42, tol=0.01)
-clf.fit(X_train_np, y_train_np)
-clf.score(X_test_np, y_test_np)
-y_pred = clf.predict(X_test_np)
-
-#plot confusion matrix
-cm = confusion_matrix(y_test_np, y_pred, labels=clf.classes_)
-disp = ConfusionMatrixDisplay(confusion_matrix=cm,display_labels=clf.classes_)
-disp.plot()
-#calculate and track accuracy score
-name = "learningshapelets"
-accscore = accuracy_score(y_test, y_pred)
-print(f"Accuracy of {name} classifier: {accscore}\n", flush=True)
-accscore_dict[name] = accscore
-    
-MCC = matthews_corrcoef(y_test, y_pred)
-print(f"MCC of {name} classifier: {MCC}\n", flush=True)
-MCC_dict[name] = MCC
-    
-completeness = completeness_score(y_test, y_pred)
-print(f"Completeness of {name} classifier: {completeness}\n", flush=True)
-completeness_dict[name] = completeness
-    
-homogeneity = homogeneity_score(y_test, y_pred)
-print(f"Homogeneity of {name} classifier: {homogeneity}\n", flush=True)
-homogeneity_dict[name] = homogeneity
-    
-f1 = f1_score(y_test, y_pred, average='macro')
-print(f"F1 score of {name} classifier: {f1}\n", flush=True)
-f1_dict[name] = f1
-```
-
-### 5.3 Loop over a bunch of classifiers
-
-```{raw-cell}
-%%time
-#This cell is currently not being run because it takes a while so is not good for testing/debugging
-
-names = ["KNNDTW","saxvsm","bossvs", "learningshapelets","timeseriesforest"]
-         
-
-#these could certainly be more tailored
-classifier_call = [KNeighborsClassifier(metric='dtw'), 
-                   SAXVSM(window_size=34, sublinear_tf=False, use_idf=False),
-                   BOSSVS(window_size=28),
-                   LearningShapelets(random_state=43, tol=0.01),
-                   TimeSeriesForest(random_state=43)]
-                   
-#setup to store the accuracy scores
-accscore_dict = {}
-
-# iterate over classifiers
-for name, clf in tqdm(zip(names, classifier_call)):
-    #fit the classifier
-    clf.fit(X_train_np, y_train_np)
-    
-    #make predictions on the test dataset
-    y_pred = clf.predict(X_test_np)
-
-    #calculate and track accuracy score
-    accscore = accuracy_score(y_test_np, y_pred)
-    print(f"Accuracy of {name} classifier: {accscore}\n", flush=True)
-    accscore_dict[name] = accscore
-    
-    #plot confusion matrix
-    cm = confusion_matrix(y_test, y_pred, labels=clf.classes_)
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm,display_labels=clf.classes_)
-    disp.plot()
-    plt.show()
-```
-
-```{raw-cell}
-#save statistics from these runs
-
-# Serialize data into file:
-json.dump( accscore_dict, open( "output/pyts_accscore.json", 'w' ) )
-json.dump( completeness_dict, open( "output/pyts_completeness.json", 'w' ) )
-json.dump( homogeneity_dict, open( "output/pyts_homogeneity.json", 'w' ) )
-
-# Read data from file:
-#accscore_dict = json.load( open( "output/pyts_accscore.json") )
-```
-
-## 6.0 Conclusions:  
-This classifier can be used to predict CLAGN.  The feature based algorithms do the best jobs of having little to no predicted CLAGN that are truly normal SDSS quasars.  We infer then that if the trained model predicts CLAGN, it is a very good target for follow-up spectroscopy to confirm CLAGN.  However this algorthim will not catch all CLAGN, and will incorrectly labels some CLAGN as being normal SDSS quasars.  THis algorithm can therefore not be used to find a complete sample of CLAGN, but can be used to increase the known sample.
-
-+++
-
-### 6.1 Potential Areas of improvement
-- Data is messy
-    - ZTF calibration??
-- Label inaccuracy is a concern
-    - mostly SDSS, 
-    - but CLAGN papers all have different selection criteria
-- Not enough data on CLAGN
-    - limited number of lightcurves
-    - consider data augmentation
-
-+++
 
 ## References:
 Markus Löning, Anthony Bagnall, Sajaysurya Ganesh, Viktor Kazakov, Jason Lines, Franz Király (2019): “sktime: A Unified Interface for Machine Learning with Time Series”
