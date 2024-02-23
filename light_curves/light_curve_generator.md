@@ -4,11 +4,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.15.2
+    jupytext_version: 1.16.0
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  display_name: science_demo
   language: python
-  name: python3
+  name: conda-env-science_demo-py
 ---
 
 # Make Multiwavelength Light Curves Using Archival Data
@@ -117,14 +117,14 @@ labels = []
 #get_lyu_sample(coords, labels)  #z32022ApJ...927..227L
 #get_lopeznavas_sample(coords, labels)  #2022MNRAS.513L..57L
 #get_hon_sample(coords, labels)  #2022MNRAS.511...54H
-get_yang_sample(coords, labels)   #2018ApJ...862..109Y
+#get_yang_sample(coords, labels)   #2018ApJ...862..109Y
 
 # Get some "normal" QSOs 
 # there are ~500K of these, so choose the number based on
 # a balance between speed of running the light curves and whatever 
 # the ML algorithms would like to have
 
-#num_normal_QSO = 5000
+#num_normal_QSO = 300
 #get_SDSS_sample(coords, labels, num_normal_QSO)
 
 # Remove duplicates, attach an objectid to the coords,
@@ -162,7 +162,7 @@ sample_table.write(savename_sample, format='ascii.ecsv', overwrite = True)
 Do only this step from this section when you have a previously generated sample table
 
 ```{code-cell} ipython3
-sample_table = Table.read(savename_sample, format='ascii.ecsv')
+#sample_table = Table.read(savename_sample, format='ascii.ecsv')
 ```
 
 ### 1.4 Initialize data structure to hold the light curves
