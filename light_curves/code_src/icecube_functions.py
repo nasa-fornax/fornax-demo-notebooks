@@ -14,7 +14,10 @@ from astropy.table import Table, vstack
 from data_structures import MultiIndexDFObject
 
 
-def Icecube_get_lightcurve(sample_table, icecube_select_topN=3, max_search_radius=2*u.deg):
+DATA_PATH = os.path.dirname(os.path.dirname(__file__)) + "/data/"  # absolute path to light_curves/data/
+
+
+def icecube_get_lightcurves(sample_table, *, icecube_select_topN=3, max_search_radius=2.0):
     '''
     Extracts IceCube Neutrino events for a given source position.
     This is the MAIN function.
@@ -28,8 +31,8 @@ def Icecube_get_lightcurve(sample_table, icecube_select_topN=3, max_search_radiu
         Maximum number of events to return for a single object in sample_table. The brightest events
         within the match radius will be returned.
 
-    max_search_radius : int
-        Maximum radius to look for matches in IceCube. Actual match radius will not exceed the 
+    max_search_radius : float
+        Maximum radius (degrees) to look for matches in IceCube. Actual match radius will not exceed the 
         IceCube error of an individual event. Beware that setting this to a high number can cause
         the code to look through a large number of potential matches for each object, which may
         impact performance.
@@ -39,6 +42,7 @@ def Icecube_get_lightcurve(sample_table, icecube_select_topN=3, max_search_radiu
     MultiIndexDFObject: IceCube Neutrino events for all the input sources.
 
     '''
+    max_search_radius = max_search_radius * u.deg
 
     # Downloads the IceCube data and unzipps it. Only does it if the files have not yet been downloaded. The
     # total file size is about 30MB (zipped) and 110MB unzipped.
@@ -90,7 +94,7 @@ def Icecube_get_lightcurve(sample_table, icecube_select_topN=3, max_search_radiu
     return (MultiIndexDFObject(data=filter_icecube_df))
 
 
-def icecube_get_catalog(path="data", verbose=False):
+def icecube_get_catalog(path=DATA_PATH, verbose=False):
     '''
     Creates the combined IceCube catalog based on the yearly catalogs.
 
@@ -136,7 +140,7 @@ def icecube_get_catalog(path="data", verbose=False):
 
 
 def icecube_download_data(url="http://icecube.wisc.edu/data-releases/20210126_PS-IC40-IC86_VII.zip",
-                          path="data", verbose=False):
+                          path=DATA_PATH, verbose=False):
     '''
     Download and unzipps the IceCube data (approx. 40MB zipped, 120MB unzipped). Directly
     downloaded from the IceCube webpage:

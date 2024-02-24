@@ -80,19 +80,19 @@ from astropy.table import Table
 # local code imports
 sys.path.append('code_src/')
 from data_structures import MultiIndexDFObject
-from gaia_functions import Gaia_get_lightcurve
-from HCV_functions import HCV_get_lightcurves
-from heasarc_functions import HEASARC_get_lightcurves
-from icecube_functions import Icecube_get_lightcurve
-from panstarrs import Panstarrs_get_lightcurves
+from gaia_functions import gaia_get_lightcurves
+from hcv_functions import hcv_get_lightcurves
+from heasarc_functions import heasarc_get_lightcurves
+from icecube_functions import icecube_get_lightcurves
+from panstarrs_functions import panstarrs_get_lightcurves
 from plot_functions import create_figures
 from sample_selection import (clean_sample, get_green_sample, get_hon_sample, get_lamassa_sample, get_lopeznavas_sample,
-    get_lyu_sample, get_macleod16_sample, get_macleod19_sample, get_ruan_sample, get_SDSS_sample, get_sheng_sample, get_yang_sample)
-from TESS_Kepler_functions import TESS_Kepler_get_lightcurves
+    get_lyu_sample, get_macleod16_sample, get_macleod19_sample, get_ruan_sample, get_sdss_sample, get_sheng_sample, get_yang_sample)
+from tess_kepler_functions import tess_kepler_get_lightcurves
 # Note: WISE and ZTF data are temporarily located in a non-public AWS S3 bucket. It is automatically
 # available from the Fornax SMCE, but will require user credentials for access outside the SMCE.
-from WISE_functions import WISE_get_lightcurves
-from ztf_functions import ZTF_get_lightcurve
+from wise_functions import wise_get_lightcurves
+from ztf_functions import ztf_get_lightcurves
 ```
 
 ## 1. Define the sample
@@ -124,8 +124,10 @@ get_yang_sample(coords, labels)   #2018ApJ...862..109Y
 # a balance between speed of running the light curves and whatever 
 # the ML algorithms would like to have
 
-#num_normal_QSO = 5000
-#get_SDSS_sample(coords, labels, num_normal_QSO)
+# num_normal_QSO = 5000
+# zmin, zmax = 0, 10
+# randomize_z = False
+#get_sdss_sample(coords, labels, num=num_normal_QSO, zmin=zmin, zmax=zmax, randomize_z=randomize_z)
 
 # Remove duplicates, attach an objectid to the coords,
 # convert to astropy table to keep all relevant info together
@@ -192,7 +194,7 @@ max_sax_error_radius = str(3.0)
 heasarc_catalogs = {"FERMIGTRIG": max_fermi_error_radius, "SAXGRBMGRB": max_sax_error_radius}
 
 # get heasarc light curves in the above curated list of catalogs
-df_lc_HEASARC = HEASARC_get_lightcurves(sample_table, heasarc_catalogs)
+df_lc_HEASARC = heasarc_get_lightcurves(sample_table, catalog_error_radii=heasarc_catalogs)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_HEASARC)
@@ -208,7 +210,7 @@ ZTFstarttime = time.time()
 
 # get ZTF lightcurves
 # use the nworkers arg to control the amount of parallelization in the data loading step
-df_lc_ZTF = ZTF_get_lightcurve(sample_table, nworkers=6)
+df_lc_ZTF = ztf_get_lightcurves(sample_table, nworkers=6)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_ZTF)
@@ -226,9 +228,9 @@ The function to retrieve WISE light curves accesses an IRSA generated version of
 WISEstarttime = time.time()
 
 bandlist = ['W1', 'W2']  #list of the WISE band names
-WISE_radius = 1.0 * u.arcsec
+WISE_radius = 1.0  # arcsec
 # get WISE light curves
-df_lc_WISE = WISE_get_lightcurves(sample_table, WISE_radius, bandlist)
+df_lc_WISE = wise_get_lightcurves(sample_table, radius=WISE_radius, bandlist=bandlist)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_WISE)
@@ -244,7 +246,7 @@ panstarrsstarttime = time.time()
 
 panstarrs_search_radius = 1.0/3600.0    # search radius = 1 arcsec
 # get panstarrs light curves
-df_lc_panstarrs = Panstarrs_get_lightcurves(sample_table, panstarrs_search_radius)
+df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius=panstarrs_search_radius)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_panstarrs)
@@ -260,7 +262,7 @@ lightkurvestarttime = time.time()
 
 TESS_search_radius = 1.0  #arcseconds
 # get TESS/Kepler/K2 light curves
-df_lc_TESS = TESS_Kepler_get_lightcurves(sample_table, TESS_search_radius)
+df_lc_TESS = tess_kepler_get_lightcurves(sample_table, radius=TESS_search_radius)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_TESS)
@@ -279,7 +281,7 @@ HCVstarttime = time.time()
 
 HCV_radius = 1.0/3600.0 # radius = 1 arcsec
 # get HCV light curves
-df_lc_HCV = HCV_get_lightcurves(sample_table, HCV_radius)
+df_lc_HCV = hcv_get_lightcurves(sample_table, radius=HCV_radius)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_HCV)
@@ -298,7 +300,7 @@ The function to retrieve Gaia light curves accesses the Gaia DR3 "source lite" c
 gaiastarttime = time.time()
 
 # get Gaia light curves
-df_lc_gaia = Gaia_get_lightcurve(sample_table, 1/3600., 0)
+df_lc_gaia = gaia_get_lightcurves(sample_table, search_radius=1/3600, verbose=0)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_gaia)
@@ -318,8 +320,7 @@ This time series (time vs. neutrino energy) information is similar to photometry
 icecubestarttime = time.time()
 
 # get icecube datapoints
-df_lc_icecube = Icecube_get_lightcurve(sample_table ,
-                                   icecube_select_topN = 3)
+df_lc_icecube = icecube_get_lightcurves(sample_table, icecube_select_topN=3)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_icecube)
@@ -336,27 +337,15 @@ print('total time for serial archive calls is ', end_serial - start_serial, 's')
 ## 4. Parallel processing the archive calls
 
 ```{code-cell} ipython3
-# define some variables in case the above serial cells are not run
-max_fermi_error_radius = str(1.0)  
-max_sax_error_radius = str(3.0)
-heasarc_catalogs = {"FERMIGTRIG": max_fermi_error_radius, "SAXGRBMGRB": max_sax_error_radius}
-bandlist = ["W1", "W2"]
-wise_radius = 1.0 * u.arcsec
-panstarrs_radius = 1.0 / 3600.0  # search radius = 1 arcsec
-lk_radius = 1.0  # arcseconds
-hcv_radius = 1.0 / 3600.0  # radius = 1 arcsec
-```
-
-```{code-cell} ipython3
 # number of workers to use in the parallel processing pool
 # this should equal the total number of archives called
 n_workers = 8
 ```
 
 ```{code-cell} ipython3
-# the ZTF call can be parallelized internally, separate from the pool launched below.
-# these parallelizations are mutually exclusive, so we must turn off the internal parallelization.
-ztf_nworkers = None
+# we'll use the default keyword arguments for all archives except ZTF
+# we must turn off the ZTF internal parallelization because it is incompatible with the pool launched below
+ztf_kwargs = {"nworkers": None}
 
 # note that the ZTF call is relatively slow compared to other archives.
 # if you want to query for a large number of objects, it will be faster to call ZTF individually
@@ -372,30 +361,14 @@ callback = parallel_df_lc.append  # will be called once on the result returned b
 with mp.Pool(processes=n_workers) as pool:
 
     # start the processes that call the archives
-    pool.apply_async(
-        Gaia_get_lightcurve, (sample_table, 1/3600., 0), callback=callback
-    )
-    pool.apply_async(
-        HEASARC_get_lightcurves, (sample_table, heasarc_catalogs), callback=callback
-    )
-    pool.apply_async(
-        HCV_get_lightcurves, (sample_table, hcv_radius), callback=callback
-    )
-    pool.apply_async(
-        Icecube_get_lightcurve, (sample_table , 3), callback=callback
-    )
-    pool.apply_async(
-        Panstarrs_get_lightcurves, (sample_table, panstarrs_radius), callback=callback
-    )
-    pool.apply_async(
-        TESS_Kepler_get_lightcurves, (sample_table, lk_radius), callback=callback
-    )
-    pool.apply_async(
-        WISE_get_lightcurves, (sample_table,  wise_radius, bandlist), callback=callback
-    )
-    pool.apply_async(
-        ZTF_get_lightcurve, (sample_table, ztf_nworkers), callback=callback
-    )
+    pool.apply_async(gaia_get_lightcurves, args=(sample_table,), callback=callback)
+    pool.apply_async(heasarc_get_lightcurves, args=(sample_table,), callback=callback)
+    pool.apply_async(hcv_get_lightcurves, args=(sample_table,), callback=callback)
+    pool.apply_async(icecube_get_lightcurves, args=(sample_table,), callback=callback)
+    pool.apply_async(panstarrs_get_lightcurves, args=(sample_table,), callback=callback)
+    pool.apply_async(tess_kepler_get_lightcurves, args=(sample_table,), callback=callback)
+    pool.apply_async(wise_get_lightcurves, args=(sample_table,), callback=callback)
+    pool.apply_async(ztf_get_lightcurves, args=(sample_table,), kwds=ztf_kwargs, callback=callback)
 
     pool.close()  # signal that no more jobs will be submitted to the pool
     pool.join()  # wait for all jobs to complete, including the callback

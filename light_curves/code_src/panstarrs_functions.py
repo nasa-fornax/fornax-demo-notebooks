@@ -229,7 +229,7 @@ def search_lightcurve(objid):
 
 
 #Do a panstarrs search
-def Panstarrs_get_lightcurves(sample_table, radius):
+def panstarrs_get_lightcurves(sample_table, *, radius=1/3600):
     """Searches panstarrs for light curves from a list of input coordinates.  This is the MAIN function.
     
     Parameters

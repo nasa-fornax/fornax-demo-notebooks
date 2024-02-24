@@ -213,7 +213,7 @@ def checklegal_hcv(table,release,magtype):
             raise ValueError("Bad value for magtype (must be one of {})".format(
                 ", ".join(magtypelist)))
             
-def HCV_get_lightcurves(sample_table, radius):
+def hcv_get_lightcurves(sample_table, *, radius=1/3600):
     """Searches Hubble Catalog of variables for light curves from a list of input coordinates
     
     Parameters
