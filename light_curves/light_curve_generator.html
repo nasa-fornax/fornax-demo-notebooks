@@ -581,19 +581,19 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <span class="c1"># local code imports</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;code_src/&#39;</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">data_structures</span> <span class="kn">import</span> <span class="n">MultiIndexDFObject</span>
-<span class="kn">from</span> <span class="nn">gaia_functions</span> <span class="kn">import</span> <span class="n">Gaia_get_lightcurve</span>
-<span class="kn">from</span> <span class="nn">HCV_functions</span> <span class="kn">import</span> <span class="n">HCV_get_lightcurves</span>
-<span class="kn">from</span> <span class="nn">heasarc_functions</span> <span class="kn">import</span> <span class="n">HEASARC_get_lightcurves</span>
-<span class="kn">from</span> <span class="nn">icecube_functions</span> <span class="kn">import</span> <span class="n">Icecube_get_lightcurve</span>
-<span class="kn">from</span> <span class="nn">panstarrs</span> <span class="kn">import</span> <span class="n">Panstarrs_get_lightcurves</span>
+<span class="kn">from</span> <span class="nn">gaia_functions</span> <span class="kn">import</span> <span class="n">gaia_get_lightcurves</span>
+<span class="kn">from</span> <span class="nn">hcv_functions</span> <span class="kn">import</span> <span class="n">hcv_get_lightcurves</span>
+<span class="kn">from</span> <span class="nn">heasarc_functions</span> <span class="kn">import</span> <span class="n">heasarc_get_lightcurves</span>
+<span class="kn">from</span> <span class="nn">icecube_functions</span> <span class="kn">import</span> <span class="n">icecube_get_lightcurves</span>
+<span class="kn">from</span> <span class="nn">panstarrs_functions</span> <span class="kn">import</span> <span class="n">panstarrs_get_lightcurves</span>
 <span class="kn">from</span> <span class="nn">plot_functions</span> <span class="kn">import</span> <span class="n">create_figures</span>
 <span class="kn">from</span> <span class="nn">sample_selection</span> <span class="kn">import</span> <span class="p">(</span><span class="n">clean_sample</span><span class="p">,</span> <span class="n">get_green_sample</span><span class="p">,</span> <span class="n">get_hon_sample</span><span class="p">,</span> <span class="n">get_lamassa_sample</span><span class="p">,</span> <span class="n">get_lopeznavas_sample</span><span class="p">,</span>
-    <span class="n">get_lyu_sample</span><span class="p">,</span> <span class="n">get_macleod16_sample</span><span class="p">,</span> <span class="n">get_macleod19_sample</span><span class="p">,</span> <span class="n">get_ruan_sample</span><span class="p">,</span> <span class="n">get_SDSS_sample</span><span class="p">,</span> <span class="n">get_sheng_sample</span><span class="p">,</span> <span class="n">get_yang_sample</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">TESS_Kepler_functions</span> <span class="kn">import</span> <span class="n">TESS_Kepler_get_lightcurves</span>
+    <span class="n">get_lyu_sample</span><span class="p">,</span> <span class="n">get_macleod16_sample</span><span class="p">,</span> <span class="n">get_macleod19_sample</span><span class="p">,</span> <span class="n">get_ruan_sample</span><span class="p">,</span> <span class="n">get_sdss_sample</span><span class="p">,</span> <span class="n">get_sheng_sample</span><span class="p">,</span> <span class="n">get_yang_sample</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">tess_kepler_functions</span> <span class="kn">import</span> <span class="n">tess_kepler_get_lightcurves</span>
 <span class="c1"># Note: WISE and ZTF data are temporarily located in a non-public AWS S3 bucket. It is automatically</span>
 <span class="c1"># available from the Fornax SMCE, but will require user credentials for access outside the SMCE.</span>
-<span class="kn">from</span> <span class="nn">WISE_functions</span> <span class="kn">import</span> <span class="n">WISE_get_lightcurves</span>
-<span class="kn">from</span> <span class="nn">ztf_functions</span> <span class="kn">import</span> <span class="n">ZTF_get_lightcurve</span>
+<span class="kn">from</span> <span class="nn">wise_functions</span> <span class="kn">import</span> <span class="n">wise_get_lightcurves</span>
+<span class="kn">from</span> <span class="nn">ztf_functions</span> <span class="kn">import</span> <span class="n">ztf_get_lightcurves</span>
 </pre></div>
 </div>
 </div>
@@ -628,8 +628,10 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <span class="c1"># a balance between speed of running the light curves and whatever </span>
 <span class="c1"># the ML algorithms would like to have</span>
 
-<span class="c1">#num_normal_QSO = 5000</span>
-<span class="c1">#get_SDSS_sample(coords, labels, num_normal_QSO)</span>
+<span class="c1"># num_normal_QSO = 5000</span>
+<span class="c1"># zmin, zmax = 0, 10</span>
+<span class="c1"># randomize_z = False</span>
+<span class="c1">#get_sdss_sample(coords, labels, num=num_normal_QSO, zmin=zmin, zmax=zmax, randomize_z=randomize_z)</span>
 
 <span class="c1"># Remove duplicates, attach an objectid to the coords,</span>
 <span class="c1"># convert to astropy table to keep all relevant info together</span>
@@ -702,7 +704,7 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 <span class="n">heasarc_catalogs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;FERMIGTRIG&quot;</span><span class="p">:</span> <span class="n">max_fermi_error_radius</span><span class="p">,</span> <span class="s2">&quot;SAXGRBMGRB&quot;</span><span class="p">:</span> <span class="n">max_sax_error_radius</span><span class="p">}</span>
 
 <span class="c1"># get heasarc light curves in the above curated list of catalogs</span>
-<span class="n">df_lc_HEASARC</span> <span class="o">=</span> <span class="n">HEASARC_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">heasarc_catalogs</span><span class="p">)</span>
+<span class="n">df_lc_HEASARC</span> <span class="o">=</span> <span class="n">heasarc_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">catalog_error_radii</span><span class="o">=</span><span class="n">heasarc_catalogs</span><span class="p">)</span>
 
 <span class="c1"># add the resulting dataframe to all other archives</span>
 <span class="n">df_lc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lc_HEASARC</span><span class="p">)</span>
@@ -722,7 +724,7 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 
 <span class="c1"># get ZTF lightcurves</span>
 <span class="c1"># use the nworkers arg to control the amount of parallelization in the data loading step</span>
-<span class="n">df_lc_ZTF</span> <span class="o">=</span> <span class="n">ZTF_get_lightcurve</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">nworkers</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">df_lc_ZTF</span> <span class="o">=</span> <span class="n">ztf_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">nworkers</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
 
 <span class="c1"># add the resulting dataframe to all other archives</span>
 <span class="n">df_lc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lc_ZTF</span><span class="p">)</span>
@@ -742,9 +744,9 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">WISEstarttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
 <span class="n">bandlist</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;W1&#39;</span><span class="p">,</span> <span class="s1">&#39;W2&#39;</span><span class="p">]</span>  <span class="c1">#list of the WISE band names</span>
-<span class="n">WISE_radius</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">arcsec</span>
+<span class="n">WISE_radius</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># arcsec</span>
 <span class="c1"># get WISE light curves</span>
-<span class="n">df_lc_WISE</span> <span class="o">=</span> <span class="n">WISE_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">WISE_radius</span><span class="p">,</span> <span class="n">bandlist</span><span class="p">)</span>
+<span class="n">df_lc_WISE</span> <span class="o">=</span> <span class="n">wise_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">WISE_radius</span><span class="p">,</span> <span class="n">bandlist</span><span class="o">=</span><span class="n">bandlist</span><span class="p">)</span>
 
 <span class="c1"># add the resulting dataframe to all other archives</span>
 <span class="n">df_lc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lc_WISE</span><span class="p">)</span>
@@ -764,7 +766,7 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 
 <span class="n">panstarrs_search_radius</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="mf">3600.0</span>    <span class="c1"># search radius = 1 arcsec</span>
 <span class="c1"># get panstarrs light curves</span>
-<span class="n">df_lc_panstarrs</span> <span class="o">=</span> <span class="n">Panstarrs_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">panstarrs_search_radius</span><span class="p">)</span>
+<span class="n">df_lc_panstarrs</span> <span class="o">=</span> <span class="n">panstarrs_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">panstarrs_search_radius</span><span class="p">)</span>
 
 <span class="c1"># add the resulting dataframe to all other archives</span>
 <span class="n">df_lc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lc_panstarrs</span><span class="p">)</span>
@@ -784,7 +786,7 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 
 <span class="n">TESS_search_radius</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1">#arcseconds</span>
 <span class="c1"># get TESS/Kepler/K2 light curves</span>
-<span class="n">df_lc_TESS</span> <span class="o">=</span> <span class="n">TESS_Kepler_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">TESS_search_radius</span><span class="p">)</span>
+<span class="n">df_lc_TESS</span> <span class="o">=</span> <span class="n">tess_kepler_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">TESS_search_radius</span><span class="p">)</span>
 
 <span class="c1"># add the resulting dataframe to all other archives</span>
 <span class="n">df_lc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lc_TESS</span><span class="p">)</span>
@@ -807,7 +809,7 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 
 <span class="n">HCV_radius</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="mf">3600.0</span> <span class="c1"># radius = 1 arcsec</span>
 <span class="c1"># get HCV light curves</span>
-<span class="n">df_lc_HCV</span> <span class="o">=</span> <span class="n">HCV_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">HCV_radius</span><span class="p">)</span>
+<span class="n">df_lc_HCV</span> <span class="o">=</span> <span class="n">hcv_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">HCV_radius</span><span class="p">)</span>
 
 <span class="c1"># add the resulting dataframe to all other archives</span>
 <span class="n">df_lc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lc_HCV</span><span class="p">)</span>
@@ -829,7 +831,7 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">gaiastarttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
 <span class="c1"># get Gaia light curves</span>
-<span class="n">df_lc_gaia</span> <span class="o">=</span> <span class="n">Gaia_get_lightcurve</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">3600.</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">df_lc_gaia</span> <span class="o">=</span> <span class="n">gaia_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">search_radius</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="mi">3600</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="c1"># add the resulting dataframe to all other archives</span>
 <span class="n">df_lc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lc_gaia</span><span class="p">)</span>
@@ -851,8 +853,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">icecubestarttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
 <span class="c1"># get icecube datapoints</span>
-<span class="n">df_lc_icecube</span> <span class="o">=</span> <span class="n">Icecube_get_lightcurve</span><span class="p">(</span><span class="n">sample_table</span> <span class="p">,</span>
-                                   <span class="n">icecube_select_topN</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">df_lc_icecube</span> <span class="o">=</span> <span class="n">icecube_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">icecube_select_topN</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 
 <span class="c1"># add the resulting dataframe to all other archives</span>
 <span class="n">df_lc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lc_icecube</span><span class="p">)</span>
@@ -877,21 +878,6 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 <h2>4. Parallel processing the archive calls<a class="headerlink" href="#parallel-processing-the-archive-calls" title="Link to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># define some variables in case the above serial cells are not run</span>
-<span class="n">max_fermi_error_radius</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>  
-<span class="n">max_sax_error_radius</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
-<span class="n">heasarc_catalogs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;FERMIGTRIG&quot;</span><span class="p">:</span> <span class="n">max_fermi_error_radius</span><span class="p">,</span> <span class="s2">&quot;SAXGRBMGRB&quot;</span><span class="p">:</span> <span class="n">max_sax_error_radius</span><span class="p">}</span>
-<span class="n">bandlist</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;W1&quot;</span><span class="p">,</span> <span class="s2">&quot;W2&quot;</span><span class="p">]</span>
-<span class="n">wise_radius</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">arcsec</span>
-<span class="n">panstarrs_radius</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">3600.0</span>  <span class="c1"># search radius = 1 arcsec</span>
-<span class="n">lk_radius</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># arcseconds</span>
-<span class="n">hcv_radius</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">3600.0</span>  <span class="c1"># radius = 1 arcsec</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># number of workers to use in the parallel processing pool</span>
 <span class="c1"># this should equal the total number of archives called</span>
 <span class="n">n_workers</span> <span class="o">=</span> <span class="mi">8</span>
@@ -901,9 +887,9 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># the ZTF call can be parallelized internally, separate from the pool launched below.</span>
-<span class="c1"># these parallelizations are mutually exclusive, so we must turn off the internal parallelization.</span>
-<span class="n">ztf_nworkers</span> <span class="o">=</span> <span class="kc">None</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># we&#39;ll use the default keyword arguments for all archives except ZTF</span>
+<span class="c1"># we must turn off the ZTF internal parallelization because it is incompatible with the pool launched below</span>
+<span class="n">ztf_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;nworkers&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
 
 <span class="c1"># note that the ZTF call is relatively slow compared to other archives.</span>
 <span class="c1"># if you want to query for a large number of objects, it will be faster to call ZTF individually</span>
@@ -922,30 +908,14 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">n_workers</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
 
     <span class="c1"># start the processes that call the archives</span>
-    <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span>
-        <span class="n">Gaia_get_lightcurve</span><span class="p">,</span> <span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">3600.</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span>
-    <span class="p">)</span>
-    <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span>
-        <span class="n">HEASARC_get_lightcurves</span><span class="p">,</span> <span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">heasarc_catalogs</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span>
-    <span class="p">)</span>
-    <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span>
-        <span class="n">HCV_get_lightcurves</span><span class="p">,</span> <span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">hcv_radius</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span>
-    <span class="p">)</span>
-    <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span>
-        <span class="n">Icecube_get_lightcurve</span><span class="p">,</span> <span class="p">(</span><span class="n">sample_table</span> <span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span>
-    <span class="p">)</span>
-    <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span>
-        <span class="n">Panstarrs_get_lightcurves</span><span class="p">,</span> <span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">panstarrs_radius</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span>
-    <span class="p">)</span>
-    <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span>
-        <span class="n">TESS_Kepler_get_lightcurves</span><span class="p">,</span> <span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">lk_radius</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span>
-    <span class="p">)</span>
-    <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span>
-        <span class="n">WISE_get_lightcurves</span><span class="p">,</span> <span class="p">(</span><span class="n">sample_table</span><span class="p">,</span>  <span class="n">wise_radius</span><span class="p">,</span> <span class="n">bandlist</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span>
-    <span class="p">)</span>
-    <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span>
-        <span class="n">ZTF_get_lightcurve</span><span class="p">,</span> <span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">ztf_nworkers</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span>
-    <span class="p">)</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">gaia_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">heasarc_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">hcv_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">icecube_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">panstarrs_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">tess_kepler_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">wise_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">ztf_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">kwds</span><span class="o">=</span><span class="n">ztf_kwargs</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
 
     <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># signal that no more jobs will be submitted to the pool</span>
     <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>  <span class="c1"># wait for all jobs to complete, including the callback</span>
