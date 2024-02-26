@@ -74,6 +74,8 @@ Jessica Krick, Shooby Hemmati, Troy Raen, Brigitta Sipocz, Andreas Faisst, Vanda
 ```{code-cell} ipython3
 #insure all dependencies are installed
 !pip install -r requirements-lc_classifier.txt
+#need updated version of astropy, so this is here temporarily to make sure we grab that.
+!pip install -U astropy
 ```
 
 ```{code-cell} ipython3
@@ -84,6 +86,7 @@ from matplotlib.lines import Line2D
 import numpy as np
 import pandas as pd
 from astropy.time import Time
+from astropy.table import Table
 from google_drive_downloader import GoogleDriveDownloader as gdd
 from scipy.stats import sigmaclip
 from tqdm import tqdm
@@ -125,20 +128,28 @@ from fluxconversions import mjd_to_jd
 
 ```{code-cell} ipython3
 #access structure of light curves made in the light curve generator notebook
-# has known CLAGN & random SDSS small sample of 458 targets, all bands
-#https://drive.google.com/file/d/13RiPODiz2kI8j1OKpP1vfh6ByIUNsKEz/view?usp=share_link
-
-gdd.download_file_from_google_drive(file_id='13RiPODiz2kI8j1OKpP1vfh6ByIUNsKEz',
-                                    dest_path='./data/df_lc_458sample.parquet',
+# has known CLAGN & random SDSS small sample of targets, all bands
+savename_df_lc = './data/small_CLAGN_SDSS_df_lc.parquet'
+gdd.download_file_from_google_drive(file_id='1DrB-CWdBBBYuO0WzNnMl5uQnnckL7MWH',
+                                    dest_path=savename_df_lc,
                                     unzip=True)
 
-df_lc = pd.read_parquet("./data/df_lc_458sample.parquet")
+df_lc = pd.read_parquet(savename_df_lc)
 
-#get rid of indices set in the light curve code and reset them as needed before sktime algorithms
-df_lc = df_lc.reset_index()  
+
+#access the sample_table made in the light curve generator notebook
+#has information about the sample including ra & dec 
+savename_sample = './data/small_CLAGN_SDSS_sample.ecsv'
+gdd.download_file_from_google_drive(file_id='1pSEKVP4LbrdWQK9ws3CaI90m3Z_2fazL',
+                                    dest_path=savename_sample,
+                                    unzip=True)
+sample_table = Table.read(savename_sample, format='ascii.ecsv')
 ```
 
 ```{code-cell} ipython3
+#get rid of indices set in the light curve code and reset them as needed before sktime algorithms
+df_lc = df_lc.reset_index()  
+
 #what does the dataset look like at the start?
 df_lc
 ```
@@ -171,12 +182,16 @@ All CLAGN start in the dataset as having labels based on their discovery paper. 
 df_lc['label'] = df_lc.label.str.replace('MacLeod 16', 'CLAGN')
 df_lc['label'] = df_lc.label.str.replace('LaMassa 15', 'CLAGN')
 df_lc['label'] = df_lc.label.str.replace('Yang 18', 'CLAGN')
-df_lc['label'] = df_lc.label.str.replace('Lyu 21', 'CLAGN')
+df_lc['label'] = df_lc.label.str.replace('Lyu 22', 'CLAGN')
 df_lc['label'] = df_lc.label.str.replace('Hon 22', 'CLAGN')
 df_lc['label'] = df_lc.label.str.replace('Sheng 20', 'CLAGN')
 df_lc['label'] = df_lc.label.str.replace('MacLeod 19', 'CLAGN')
 df_lc['label'] = df_lc.label.str.replace('Green 22', 'CLAGN')
 df_lc['label'] = df_lc.label.str.replace('Lopez-Navas 22', 'CLAGN')
+```
+
+```{code-cell} ipython3
+print(df_lc.groupby(["objectid"]).ngroups, "n objects before removing missing band data")
 ```
 
 ### 2.3 Data Visualization
@@ -198,8 +213,8 @@ band_lc.time.min()
 band_lc.set_index('time', inplace = True)  #helps with the plotting
 
 #drop some objects to try to clear up plot
-querystring1 = 'objectid < 150'
-querystring2 = 'objectid > 250'
+querystring1 = 'objectid < 162'
+querystring2 = 'objectid > 200'
 band_lc = band_lc.drop(band_lc.query(querystring1 ).index)
 band_lc = band_lc.drop(band_lc.query(querystring2 ).index)
 
@@ -219,9 +234,9 @@ print(clagn_df.groupby(["objectid"]).ngroups, "n objects CLAGN ")
 print(sdss_df.groupby(["objectid"]).ngroups, "n objects SDSS ")
 
 #groupy objectid & plot flux vs. time
-fig, ax = plt.subplots(figsize=(8,6))
-lc_sdss = sdss_df.groupby(['objectid'])['flux'].plot(kind='line', ax=ax, color = 'gray', label = 'SDSS')
-lc_clagn = clagn_df.groupby(['objectid'])['flux'].plot(kind='line', ax=ax, color = 'orange', label = 'CLAGN')
+fig, ax = plt.subplots(figsize=(10,6))
+lc_sdss = sdss_df.groupby(['objectid'])['flux'].plot(kind='line', ax=ax, color = 'gray', label = 'SDSS', linewidth = 0.3)
+lc_clagn = clagn_df.groupby(['objectid'])['flux'].plot(kind='line', ax=ax, color = 'orange', label = 'CLAGN', linewidth = 1)
 
 #add legend and labels/titles
 legend_elements = [Line2D([0], [0], color='orange', lw=4, label='CLAGN'),
@@ -231,6 +246,10 @@ ax.legend(handles=legend_elements, loc='best')
 ax.set_ylabel('Normalized Flux')
 ax.set_xlabel('Time in days since start of mission')
 plt.title(f"{band_of_interest} light curves")
+
+#tailored to ZTF r band with lots of data
+ax.set_ylim([-2, 4])
+ax.set_xlim([1000, 1250])
 ```
 
 ### 2.4 Clean the dataset of unwanted data
@@ -400,14 +419,18 @@ df_lc = df_lc.drop(df_lc.query(querystring).index)
 #remove outliers
 sigmaclip_value = 10.0
 df_lc = sigmaclip_lightcurves(df_lc, sigmaclip_value, include_plot = False)
+print(df_lc.groupby(["objectid"]).ngroups, "n objects after sigma clipping")
+
 
 #remove objects without W1 fluxes
-df_lc = remove_objects_without_band(df_lc, 'w1', verbose=True)
+df_lc = remove_objects_without_band(df_lc, 'W1', verbose=True)
+print(df_lc.groupby(["objectid"]).ngroups, "n objects after removing objects without W1")
 
 #remove incomplete data
 threshold_too_few = 3
 df_lc = remove_incomplete_data(df_lc, threshold_too_few)
-    
+
+print(df_lc.groupby(["objectid"]).ngroups, "n objects after removing incomplete data")
 ```
 
 ### 2.5 Missing Data
@@ -504,61 +527,68 @@ def missingdata_to_zeros(df_lc):
 ```
 
 ```{code-cell} ipython3
-def missingdata_drop_bands(df_lc, verbose = False):
-    """
-    Drop bands with the most missing data and objects without all remaining bands so that there is no missing data going forward.
-       
-    Parameters
-    ----------
-    df_lc: Pandas dataframe with light curve info
-    
-    verbose: bool
-    
-    Returns
-    --------
-    df_lc: MultiIndexDFObject with all  light curves
-        
-    """
+#this function is not currently needed for the notebook, but I would like to keep it around for potential later testing
 
-    #require that all objects have a curated list of bands
+import itertools
 
-    #first drop the bands not included from all objects
-    #these are bands with significantly fewer data points in them than the other bands
-    #ie., fewer objects have these bands
-    bands_to_drop = ['zi', 'Gaia g', 'Gaia bp', 'Gaia rp']
-    drop_df_lc = df_lc[~df_lc["band"].isin(bands_to_drop)]
-    
-    #now a list of all remaining bands that we want to keep
-    bands_to_keep = drop_df_lc.band.unique()
-    
+def calc_nobjects_per_band_combo(df_lc):
+    all_bands = df_lc.band.unique()
+    object_bands = df_lc.groupby("objectid").band.aggregate(lambda x: set(x))
+
+    band_combos = []
+    for l in range(1, len(all_bands) + 1):
+        band_combos.extend(set(bands) for bands in itertools.combinations(all_bands, l))
+
+    print(band_combos)
+    band_combos_nobjects = [len(object_bands.loc[(band_combo - object_bands) == set()].index) for band_combo in band_combos]
+
+    band_combos_df = pd.DataFrame({"bands": band_combos, "nobjects": band_combos_nobjects})
+    band_combos_df = band_combos_df.sort_values("nobjects", ascending=False)
+
+    return band_combos_df
+
+band_combos_df = calc_nobjects_per_band_combo(drop_df_lc)
+```
+
+```{code-cell} ipython3
+def missingdata_drop_bands(df_lc, bands_to_keep, verbose=False):
+    # drop all rows where 'band' is not in 'bands_to_keep'
+    bands_to_drop = set(df_lc.band.unique()) - set(bands_to_keep)
+    clean_df = df_lc.loc[~df_lc.band.isin(bands_to_drop)]
+
     if verbose:
         #how many objects did we start with?
-        print(drop_df_lc.groupby(["objectid"]).ngroups, "n objects before removing missing band data")
+        print(len(clean_df.objectid.unique()), "n objects before removing missing band data")
 
-    # Identify objects with all bands that we want to keep
-    complete_objects = drop_df_lc.groupby('objectid')['band'].apply(lambda x: set(x) == set(bands_to_keep))
-
-    # Filter the DataFrame based on complete objects
-    filter_df_lc = drop_df_lc[drop_df_lc['objectid'].isin(complete_objects[complete_objects].index)]
+    # keep only objects with observations in all remaining bands
+    # first, get a boolean series indexed by objectid
+    has_all_bands = clean_df.groupby('objectid').band.aggregate(lambda x: set(x) == set(bands_to_keep))
+    # extract the objectids that are 'True'
+    objectids_to_keep = has_all_bands[has_all_bands].index
+    # keep only these objects
+    clean_df = clean_df.loc[clean_df.objectid.isin(objectids_to_keep)]
 
     if verbose:
         # How many objects are left?
-        print(filter_df_lc.groupby(["objectid"]).ngroups, "n objects after removing missing band data")
+        print(len(clean_df.objectid.unique()), "n objects after removing missing band data")
 
-    return(filter_df_lc)
+    return clean_df
+
+
 ```
 
 ```{code-cell} ipython3
 #choose what to do with missing data...
 #df_lc = missingdata_to_zeros(df_lc)
-df_lc = missingdata_drop_bands(df_lc, verbose = True)
+bands_to_keep = ['W1','W2','panstarrs g','panstarrs i', 'panstarrs r','panstarrs y','panstarrs z','zg','zr']
+test = missingdata_drop_bands(df_lc, bands_to_keep, verbose = True)
 ```
 
 ### 2.6  Make all objects and bands have identical time arrays (uniform length and spacing)
 
 It is very hard to find time-domain ML algorithms which can work with non uniform length datasets. Therefore we make the light curves uniform by interpolating using KNN from scikit-learn which fills in the uniform length arrays with a final frequency chosen by the user.  We choose KNN as very straightforward method. This function also shows the framework in case the user wants to choose a different scikit-learn function to do the interpolation.  Another natural choice would be to use gaussian processes (GP) to do the interpolation, but this is not a good solution for our task because the flux values go to zero at times before and after the observations.  Because we include the entire time array from beginning of the first mission to end of the last mission, most individual bands require interpolation before and after their particular observations.  In other words, our light curves span the entire range from 2010 with the start of panstarrs and WISE to the most recent ZTF data release (at least 2023), even though most individual missions do not cover that full range of time.
 
-It is important to choose the frequency over which the data is interpolated wisely.  Experimentation with treating this variable like a hyperparam and testing sktime algorithms shows slightly higher accuracy values for a suite of algorithms for a frequency of one interpolated observation per 60 days.  
+It is important to choose the frequency over which the data is interpolated wisely.  Experimentation with treating this variable like a hyperparam and testing sktime algorithms shows slightly higher accuracy values for a suite of algorithms for a frequency of one interpolated observation per 60 days.
 
 ```{code-cell} ipython3
 #what does the dataframe look like at this point in the code?
@@ -654,6 +684,10 @@ df_lc = df_interpol.explode(["time", "flux","err"], ignore_index=True)
 df_lc = df_lc.astype({col: "float" for col in ["time", "flux", "err"]})
 ```
 
+```{code-cell} ipython3
+df_lc
+```
+
 ### 2.7  Restructure dataframe 
 - Make columns have band names in them and then remove band from the index
 - pivot the dataframe so that SKTIME understands its format
@@ -698,7 +732,7 @@ singleob
 Idea here is that we normalize across each object.  So the algorithms will know, for example, that within one object W1 will be brighter than ZTF bands but from one object to the next, it will not know that one is brighter than the other.
 
 ```{code-cell} ipython3
-def local_normalization(df_lc, norm_column = "flux_w1"):
+def local_normalization(df_lc, norm_column = "flux_W1"):
     """
     normalize each individual light curve
        
@@ -735,7 +769,7 @@ def local_normalization(df_lc, norm_column = "flux_w1"):
 
 ```{code-cell} ipython3
 #normalize by W1 band
-df_lc = local_normalization(df_lc, norm_column = "flux_w1")
+df_lc = local_normalization(df_lc, norm_column = "flux_W1")
 ```
 
 ### 2.9 Cleanup
@@ -785,7 +819,7 @@ df_lc = df_lc.set_index(["objectid", "label", "datetime"])
 ```{code-cell} ipython3
 #try dropping the uncertainty columns as variables for sktime
 df_lc.drop(columns = ['err_panstarrs_g',	'err_panstarrs_i',	'err_panstarrs_r',	'err_panstarrs_y',	
-                      'err_panstarrs_z',	'err_w1',	'err_w2',	'err_zg',	'err_zr'], inplace = True)
+                      'err_panstarrs_z',	'err_W1',	'err_W2',	'err_zg',	'err_zr'], inplace = True)
 
 #drop also the time column because time shouldn't be a feature
 df_lc.drop(columns = ['time'],inplace = True)
@@ -862,7 +896,6 @@ This test needs to pass in order for sktime to run
 #ask sktime if it likes the data type of X_train
 
 check_is_mtype(X_train, mtype="pd-multiindex", scitype="Panel", return_metadata=True)
-
 ```
 
 ```{code-cell} ipython3
@@ -900,7 +933,7 @@ plt.show()
 
 Our method is to do a cursory check of a bunch of classifiers and then later drill down deeper on anything with good initial results.  We choose to run a loop over ~10 classifiers that seem promising and check the accuracy scores for each one.  Any classifier with a promising accuracy score could then be followed up with detailed hyperparameter tuning, or potentially with considering other classifiers in that same type.
 
-```{code-cell} ipython3
+```{raw-cell}
 %%time
 #This cell is currently not being run because it takes a while so is not good for testing/debugging
 
@@ -958,10 +991,9 @@ for name, clf in tqdm(zip(names, classifier_call)):
     disp = ConfusionMatrixDisplay(confusion_matrix=cm,display_labels=clf.classes_)
     disp.plot()
     plt.show()
-
 ```
 
-```{code-cell} ipython3
+```{raw-cell}
 #show the summary of the algorithms used and their accuracy score
 accscore_dict
 ```
@@ -1030,7 +1062,7 @@ def prepare_mysample_sktime(path_to_sample):
     my_sample = sigmaclip_lightcurves(my_sample, sigmaclip_value, include_plot = False, verbose= False)
 
     #remove objects without W1 fluxes
-    my_sample = remove_objects_without_band(my_sample, 'w1', verbose=False)
+    my_sample = remove_objects_without_band(my_sample, 'W1', verbose=False)
 
     #remove incomplete data
     threshold_too_few = 3
@@ -1053,7 +1085,7 @@ def prepare_mysample_sktime(path_to_sample):
     my_sample = my_sample.reset_index()  
 
     #normalize
-    my_sample = local_normalization(my_sample, norm_column = "flux_w1")
+    my_sample = local_normalization(my_sample, norm_column = "flux_W1")
 
     #make datetime column
     mjd = my_sample.time
@@ -1066,7 +1098,7 @@ def prepare_mysample_sktime(path_to_sample):
 
     #drop the uncertainty columns 
     my_sample.drop(columns = ['err_panstarrs_g',	'err_panstarrs_i',	'err_panstarrs_r',	'err_panstarrs_y',	
-                          'err_panstarrs_z',	'err_w1',	'err_w2',	'err_zg',	'err_zr'], inplace = True)
+                          'err_panstarrs_z',	'err_W1',	'err_W2',	'err_zg',	'err_zr'], inplace = True)
 
     #drop also the time column 
     my_sample.drop(columns = ['time'],inplace = True)
@@ -1106,9 +1138,13 @@ X_mysample["predicted_labels"] = pd.Series(y_mysample)
 
 #now theoretically X_mysample has both objectid and predicted_labels
 #maybe drop the flux & time columns for ease of use and makes it nice and small
+flux_cols = [col for col in norm_df_lc.columns if 'flux' in col]
+candidate_CLAGN = X_mysample.drop(columns = flux_cols)
+candidate_CLAGN.drop(columns = ['time'], inplace = True)
 
 #if I am only interested in the CLAGN, could drop anything with label = SDSS
-#call this new df candidate_CLAGN
+querystring = 'label == "SDSS"'
+candidate_CLAGN = band_lc.drop(candidate_CLAGN.query(querystring ).index)
 
 # need to read in the ecsv file that is sample_table
 #what format is this table again?
@@ -1117,7 +1153,7 @@ X_mysample["predicted_labels"] = pd.Series(y_mysample)
 ```
 
 ```{code-cell} ipython3
-X_mysample
+type(sample_table)
 ```
 
 ## References:
