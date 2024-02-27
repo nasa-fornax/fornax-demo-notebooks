@@ -14,7 +14,7 @@ kernelspec:
 # Make Multi-Wavelength Light Curves Using Archival Data
 ***
 
-## Learning Goals    
+## Learning Goals
 By the end of this tutorial, you will be able to:  
   &bull; Automatically load a catalog of sources  
   &bull; Automatically & efficiently search NASA and non-NASA resources for light curves at scale  
@@ -22,7 +22,7 @@ By the end of this tutorial, you will be able to:
   &bull; Plot all light curves on the same plot
  
  
-## Introduction:  
+## Introduction
  &bull; A user has a sample of interesting targets for which they would like to see a plot of available archival light curves.  We start with a small set of changing look AGN from Yang et al., 2018, which are automatically downloaded. Changing look AGN are cases where the broad emission lines appear or disappear (and not just that the flux is variable). 
  
  &bull; We model light curve plots after van Velzen et al. 2021.  We search through a curated list of time-domain NASA holdings as well as non-NASA sources.  HEASARC catalogs used are Fermi and Beppo-Sax, IRSA catalogs used are ZTF and WISE, and MAST catalogs used are Pan-STARRS, TESS, Kepler, and K2.  Non-NASA sources are Gaia and IceCube. This list is generalized enough to include many types of targets to make this notebook interesting for many types of science.  All of these time-domain archives are searched in an automated and efficient fashion using astroquery, pyvo, pyarrow or APIs.
@@ -31,15 +31,15 @@ By the end of this tutorial, you will be able to:
  
  &bull; ML work using these time-series light curves is in two neighboring notebooks: ML_AGNzoo and lc_classifier.
  
-## Input:
+### Input
  &bull; choose from a list of known changing look AGN from the literature  
   OR -    
  &bull; input your own sample
 
-## Output:
+### Output
  &bull; an archival optical + IR + neutrino light curve  
  
-## Imports:
+### Imports
  &bull; `acstools` to work with HST magnitude to flux conversion  
  &bull; `astropy` to work with coordinates/units and data structures  
  &bull; `astroquery` to interface with archives APIs  
@@ -55,13 +55,6 @@ By the end of this tutorial, you will be able to:
  &bull; `scipy` to do statistics  
  &bull; `tqdm` to track progress on long running jobs  
  &bull; `urllib` to handle archive searches with website interface
-
-## Authors:
-Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, Dave Shupe
-
-## Acknowledgements:
-Suvi Gezari, Antara Basu-zych, Stephanie LaMassa  
-MAST, HEASARC, & IRSA Fornax teams
 
 ```{code-cell} ipython3
 # Ensure all dependencies are installed
@@ -95,7 +88,9 @@ from wise_functions import wise_get_lightcurves
 from ztf_functions import ztf_get_lightcurves
 ```
 
-## 1. Define the sample
+## Collect Light Curves
+
+### 1. Define the sample
 We define here a "gold" sample of spectroscopically confirmed changing look AGN and quasars. This sample includes both objects which change from type 1 to type 2 and also the opposite.  Future studies may want to treat these as separate objects or separate QSOs from AGN.  Bibcodes for the samples used are listed next to their functions for reference.  
  
 Significant work went into the functions which grab the samples from the papers.  They use Astroquery, NED, SIMBAD, Vizier, and in a few cases grab the tables from the html versions of the paper.  There are trickeries involved in accessing coordinates from tables in the literature. Not every literature table is stored in its entirety in all of these resources, so be sure to check that your chosen method is actually getting the information that you see in the paper table.  Warning: You will get false results if using NED or SIMBAD on a table that has more rows than are printed in the journal.
@@ -134,7 +129,7 @@ get_yang_sample(coords, labels)   #2018ApJ...862..109Y
 sample_table = clean_sample(coords, labels)
 ```
 
-### 1.1 Build your own sample
+#### 1.1 Build your own sample
 
 To build your own sample, you can follow the examples of functions above to grab coordinates from your favorite literature resource, 
 
@@ -143,9 +138,7 @@ or
 You can use [astropy's read](https://docs.astropy.org/en/stable/io/ascii/read.html) function to read in an input table
 to an [astropy table](https://docs.astropy.org/en/stable/table/)
 
-+++
-
-### 1.2 Write out your sample to disk
+#### 1.2 Write out your sample to disk
 
 At this point you may wish to write out your sample to disk and reuse that in future work sessions, instead of creating it from scratch again.
 
@@ -155,7 +148,7 @@ For the format of the save file, we would suggest to choose from various formats
 sample_table.write('data/input_sample.ecsv', format='ascii.ecsv', overwrite = True)
 ```
 
-### 1.3 Load the sample table from disk
+#### 1.3 Load the sample table from disk
 
 Do only this step from this section when you have a previously generated sample table
 
@@ -163,7 +156,9 @@ Do only this step from this section when you have a previously generated sample 
 sample_table = Table.read('data/input_sample.ecsv', format='ascii.ecsv')
 ```
 
-### 1.4 Initialize data structure to hold the light curves
+### 2. Call the archives
+
+We search a curated list of time-domain catalogs from NASA and non-NASA astrophysics archives.  Because each archive is different, and in many cases each catalog is different, each function to access a catalog is necessarily specialized to the location and format of that particular catalog.
 
 ```{code-cell} ipython3
 # We wrote our own class for a Pandas MultiIndex [DataFrame](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html) for storing the light curves
@@ -171,12 +166,7 @@ sample_table = Table.read('data/input_sample.ecsv', format='ascii.ecsv')
 df_lc = MultiIndexDFObject()
 ```
 
-## 2. Find light curves for these targets in NASA catalogs
-We search a curated list of time-domain catalogs from NASA astrophysics archives.  Because each archive is different, and in many cases each catalog is different, each function to access a catalog is necessarily specialized to the location and format of that particular catalog.
-
-+++
-
-### 2.1 HEASARC: FERMI & Beppo SAX
+#### 2.1 NASA-HEASARC: FERMI & Beppo SAX
 The function to retrieve HEASARC data accesses the HEASARC archive using a pyvo search with a table upload.  This is the fastest way to access data from HEASARC catalogs at scale.  
 
 While these aren't strictly light curves, we would like to track if there are gamma rays detected in advance of any change in the CLAGN light curves. We store these gamma ray detections as single data points.  Because gamma ray detections typically have very large error radii, our current technique is to keep matches in the catalogs within some manually selected error radius, currently defaulting to 1 degree for Fermi and 3 degrees for Beppo SAX.  These values are chosen based on a histogram of all values for those catalogs.
@@ -202,7 +192,7 @@ df_lc.append(df_lc_HEASARC)
 print('heasarc search took:', time.time() - heasarcstarttime, 's')
 ```
 
-### 2.2 IRSA: ZTF
+#### 2.2 IRSA: ZTF
 The function to retrieve ZTF light curves accesses a parquet version of the ZTF catalog stored in the cloud using pyarrow.  This is the fastest way to access the ZTF catalog at scale.  The ZTF [API](https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html) is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself.
 
 ```{code-cell} ipython3
@@ -218,7 +208,7 @@ df_lc.append(df_lc_ZTF)
 print('ZTF search took:', time.time() - ZTFstarttime, 's')
 ```
 
-### 2.3 IRSA: WISE
+#### 2.3 NASA-IRSA: WISE
 
 We use the unWISE light curves catalog ([Meisner et al., 2023](https://ui.adsabs.harvard.edu/abs/2023AJ....165...36M/abstract)) which ties together all WISE & NEOWISE 2010 - 2020 epochs.  Specifically it combines all observations at a single epoch to achieve deeper mag limits than individual observations alone.
 
@@ -238,7 +228,7 @@ df_lc.append(df_lc_WISE)
 print('WISE search took:', time.time() - WISEstarttime, 's')
 ```
 
-### 2.4 MAST: Pan-STARRS
+#### 2.4 NASA-MAST: Pan-STARRS
 The function to retrieve lightcurves from Pan-STARRS currently uses their API; based on this [example](https://ps1images.stsci.edu/ps1_dr2_api.html).  This search is not efficient at scale and we expect it to be replaced in the future.
 
 ```{code-cell} ipython3
@@ -254,7 +244,7 @@ df_lc.append(df_lc_panstarrs)
 print('Panstarrs search took:', time.time() - panstarrsstarttime, 's')
 ```
 
-### 2.5 MAST: TESS, Kepler and K2
+#### 2.5 NASA-MAST: TESS, Kepler and K2
 The function to retrieve lightcurves from these three missions currently uses the open source package [`lightKurve`](https://docs.lightkurve.org/index.html).  This search is not efficient at scale and we expect it to be replaced in the future.
 
 ```{code-cell} ipython3
@@ -273,7 +263,7 @@ print('TESS/Kepler/K2 search took:', time.time() - lightkurvestarttime, 's')
 # These are not real errors and can be safely ignored.
 ```
 
-### 2.6 MAST: Hubble Catalog of Variables ([HCV](https://archive.stsci.edu/hlsp/hcv))
+#### 2.6 NASA-MAST: Hubble Catalog of Variables ([HCV](https://archive.stsci.edu/hlsp/hcv))
 The function to retrieve lightcurves from HCV currently uses their API; based on this [example](https://archive.stsci.edu/hst/hsc/help/HCV/HCV_API_demo.html). This search is not efficient at scale and we expect it to be replaced in the future.
 
 ```{code-cell} ipython3
@@ -289,11 +279,7 @@ df_lc.append(df_lc_HCV)
 print('HCV search took:', time.time() - HCVstarttime, 's')
 ```
 
-## 3. Find light curves for these targets in relevant, non-NASA catalogs
-
-+++
-
-### 3.1 Gaia
+#### 2.7 Gaia
 The function to retrieve Gaia light curves accesses the Gaia DR3 "source lite" catalog using an astroquery search with a table upload to do the join with the Gaia photometry. This is currently the fastest way to access light curves from Gaia at scale.
 
 ```{code-cell} ipython3
@@ -334,7 +320,19 @@ end_serial = time.time()
 print('total time for serial archive calls is ', end_serial - start_serial, 's')
 ```
 
-## 4. Parallel processing the archive calls
+## Make plots of luminosity as a function of time
+These plots are modelled after [van Velzen et al., 2021](https://arxiv.org/pdf/2111.09391.pdf). We show flux in mJy as a function of time for all available bands for each object. `show_nbr_figures` controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with `save_output`, they will be put in the output directory and labelled by sample number.
+
+__Note__ that in the following, we can either plot the results from `df_lc` (from the serial call) or `parallel_df_lc` (from the parallel call). By default (see next cell) the output of the parallel call is used.
+
+```{code-cell} ipython3
+_ = create_figures(df_lc = parallel_df_lc, # either df_lc (serial call) or parallel_df_lc (parallel call)
+                   show_nbr_figures = 5,  # how many plots do you actually want to see?
+                   save_output = True ,  # should the resulting plots be saved?
+                  )
+```
+
+## Bulk Runs: Collect light curves using parallel processing
 
 ```{code-cell} ipython3
 # number of workers to use in the parallel processing pool
@@ -401,19 +399,16 @@ parallel_df_lc.data
 #print("file loaded!")
 ```
 
-## 5. Make plots of luminosity as a function of time
-These plots are modelled after [van Velzen et al., 2021](https://arxiv.org/pdf/2111.09391.pdf). We show flux in mJy as a function of time for all available bands for each object. `show_nbr_figures` controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with `save_output`, they will be put in the output directory and labelled by sample number.
+## About This Notebook
 
-__Note__ that in the following, we can either plot the results from `df_lc` (from the serial call) or `parallel_df_lc` (from the parallel call). By default (see next cell) the output of the parallel call is used.
+### Authors
+Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, Dave Shupe
 
-```{code-cell} ipython3
-_ = create_figures(df_lc = parallel_df_lc, # either df_lc (serial call) or parallel_df_lc (parallel call)
-                   show_nbr_figures = 5,  # how many plots do you actually want to see?
-                   save_output = True ,  # should the resulting plots be saved?
-                  )
-```
+### Acknowledgements
+Suvi Gezari, Antara Basu-zych, Stephanie LaMassa  
+MAST, HEASARC, & IRSA Fornax teams
 
-## References
+### References
 
 This work made use of:
 
