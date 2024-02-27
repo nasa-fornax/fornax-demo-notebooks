@@ -11,23 +11,23 @@ kernelspec:
   name: conda-env-science_demo-py
 ---
 
-# Make Multiwavelength Light Curves Using Archival Data
+# Make Multi-Wavelength Light Curves Using Archival Data
 ***
 
 ## Learning Goals    
 By the end of this tutorial, you will be able to:  
   &bull; Automatically load a catalog of sources  
   &bull; Automatically & efficiently search NASA and non-NASA resources for light curves at scale  
-  &bull; Store & manipulate light curves in a Pandas multiindex dataframe  
+  &bull; Store & manipulate light curves in a Pandas MultiIndex dataframe  
   &bull; Plot all light curves on the same plot
  
  
 ## Introduction:  
  &bull; A user has a sample of interesting targets for which they would like to see a plot of available archival light curves.  We start with a small set of changing look AGN from Yang et al., 2018, which are automatically downloaded. Changing look AGN are cases where the broad emission lines appear or disappear (and not just that the flux is variable). 
  
- &bull; We model light curve plots after van Velzen et al. 2021.  We search through a curated list of time-domain NASA holdings as well as non-NASA sources.  HEASARC catalogs used are Fermi and Beppo-Sax, IRSA catalogs used are ZTF and WISE, and MAST catalogs used are Pan-Starrs, TESS, Kepler, and K2.  Non-NASA sources are Gaia and IceCube. This list is generalized enough to include many types of targets to make this notebook interesting for many types of science.  All of these time-domain archives are searched in an automated and efficient fashion using astroquery, pyvo, pyarrow or APIs.
+ &bull; We model light curve plots after van Velzen et al. 2021.  We search through a curated list of time-domain NASA holdings as well as non-NASA sources.  HEASARC catalogs used are Fermi and Beppo-Sax, IRSA catalogs used are ZTF and WISE, and MAST catalogs used are Pan-STARRS, TESS, Kepler, and K2.  Non-NASA sources are Gaia and IceCube. This list is generalized enough to include many types of targets to make this notebook interesting for many types of science.  All of these time-domain archives are searched in an automated and efficient fashion using astroquery, pyvo, pyarrow or APIs.
  
- &bull; Light curve data storage is a tricky problem.  Currently we are using a multi-index Pandas dataframe, as the best existing choice for right now.  One downside is that we need to manually track the units of flux and time instead of relying on an astropy storage scheme which would be able to do some of the units worrying for us (even astropy can't do all magnitude to flux conversions).  Astropy does not currently have a good option for multi-band light curve storage.
+ &bull; Light curve data storage is a tricky problem.  Currently we are using a MultiIndex Pandas dataframe, as the best existing choice for right now.  One downside is that we need to manually track the units of flux and time instead of relying on an astropy storage scheme which would be able to do some of the units worrying for us (even astropy can't do all magnitude to flux conversions).  Astropy does not currently have a good option for multi-band light curve storage.
  
  &bull; ML work using these time-series light curves is in two neighboring notebooks: ML_AGNzoo and lc_classifier.
  
@@ -44,13 +44,13 @@ By the end of this tutorial, you will be able to:
  &bull; `astropy` to work with coordinates/units and data structures  
  &bull; `astroquery` to interface with archives APIs  
  &bull; `hpgeom` to locate coordinates in HEALPix space  
- &bull; `lightkurve` to search TESSS, Kepler, and K2 archives  
+ &bull; `lightkurve` to search TESS, Kepler, and K2 archives  
  &bull; `matplotlib` for plotting  
  &bull; `multiprocessing` to use the power of multiple CPUs to get work done faster  
  &bull; `numpy` for numerical processing  
  &bull; `pandas` for their data structure DataFrame and all the accompanying functions  
  &bull; `pyarrow` to work with Parquet files for WISE and ZTF  
- &bull; `pyvo` for acessing Virtual Observatory(VO) standard data  
+ &bull; `pyvo` for accessing Virtual Observatory(VO) standard data  
  &bull; `requests` to get information from URLs  
  &bull; `scipy` to do statistics  
  &bull; `tqdm` to track progress on long running jobs  
@@ -96,9 +96,9 @@ from ztf_functions import ztf_get_lightcurves
 ```
 
 ## 1. Define the sample
-We define here a "gold" sample of spectroscopically confirmed changing look AGN and quasars. This sample includes both objects which change from type 1 to type 2 and also the opposite.  Future studies may want to treat these as seperate objects or seperate QSOs from AGN.  Bibcodes for the samples used are listed next to their functions for reference.  
+We define here a "gold" sample of spectroscopically confirmed changing look AGN and quasars. This sample includes both objects which change from type 1 to type 2 and also the opposite.  Future studies may want to treat these as separate objects or separate QSOs from AGN.  Bibcodes for the samples used are listed next to their functions for reference.  
  
-Significant work went into the functions which grab the samples from the papers.  They use Astroquery, NED, SIMBAD, Vizier, and in a few cases grab the tables from the html versions of the paper.  There are trickeries involved in accessing coordinates from tables in the literature. Not every literature table is stored in its entirety in all of these resrources, so be sure to check that your chosen method is actually getting the information that you see in the paper table.  Warning: You will get false results if using NED or SIMBAD on a table that has more rows than are printed in the journal.
+Significant work went into the functions which grab the samples from the papers.  They use Astroquery, NED, SIMBAD, Vizier, and in a few cases grab the tables from the html versions of the paper.  There are trickeries involved in accessing coordinates from tables in the literature. Not every literature table is stored in its entirety in all of these resources, so be sure to check that your chosen method is actually getting the information that you see in the paper table.  Warning: You will get false results if using NED or SIMBAD on a table that has more rows than are printed in the journal.
 
 ```{code-cell} ipython3
 # Build up the sample
@@ -172,14 +172,14 @@ df_lc = MultiIndexDFObject()
 ```
 
 ## 2. Find light curves for these targets in NASA catalogs
-We search a curated list of time-domain catalogs from NASA astrophysics archives.  Because each archive is different, and in many cases each catalog is different, each function to access a catalog is necesarily specialized to the location and format of that particular catalog.
+We search a curated list of time-domain catalogs from NASA astrophysics archives.  Because each archive is different, and in many cases each catalog is different, each function to access a catalog is necessarily specialized to the location and format of that particular catalog.
 
 +++
 
 ### 2.1 HEASARC: FERMI & Beppo SAX
 The function to retrieve HEASARC data accesses the HEASARC archive using a pyvo search with a table upload.  This is the fastest way to access data from HEASARC catalogs at scale.  
 
-While these aren't strictly light curves, we would like to track if there are gamma rays detected in advance of any change in the CLAGN light curves. We store these gamma ray detections as single datapoints.  Because gamma ray detections typically have very large error radii, our current technique is to keep matches in the catalogs within some manually selected error radius, currently defaulting to 1 degree for Fermi and 3 degrees for Beppo SAX.  These values are chosen based on a histogram of all values for those catalogs.
+While these aren't strictly light curves, we would like to track if there are gamma rays detected in advance of any change in the CLAGN light curves. We store these gamma ray detections as single data points.  Because gamma ray detections typically have very large error radii, our current technique is to keep matches in the catalogs within some manually selected error radius, currently defaulting to 1 degree for Fermi and 3 degrees for Beppo SAX.  These values are chosen based on a histogram of all values for those catalogs.
 
 ```{code-cell} ipython3
 start_serial = time.time()  #keep track of all serial archive calls to compare later with parallel archive call time
@@ -294,7 +294,7 @@ print('HCV search took:', time.time() - HCVstarttime, 's')
 +++
 
 ### 3.1 Gaia
-The function to retrieve Gaia light curves accesses the Gaia DR3 "source lite" catalog using an astroquery search with a table upload to do the join with the Gaia phtometry. This is currently the fastest way to access light curves from Gaia at scale.
+The function to retrieve Gaia light curves accesses the Gaia DR3 "source lite" catalog using an astroquery search with a table upload to do the join with the Gaia photometry. This is currently the fastest way to access light curves from Gaia at scale.
 
 ```{code-cell} ipython3
 gaiastarttime = time.time()
@@ -308,7 +308,7 @@ df_lc.append(df_lc_gaia)
 print('gaia search took:', time.time() - gaiastarttime, 's')
 ```
 
-### 3.3 Icecube neutrinos
+### 3.3 IceCube neutrinos
 
 There are several [catalogs](https://icecube.wisc.edu/data-releases/2021/01/all-sky-point-source-icecube-data-years-2008-2018) (basically one for each year of IceCube data from 2008 - 2018). The following code creates a large catalog by combining
 all the yearly catalogs.
@@ -319,7 +319,7 @@ This time series (time vs. neutrino energy) information is similar to photometry
 ```{code-cell} ipython3
 icecubestarttime = time.time()
 
-# get icecube datapoints
+# get icecube data points
 df_lc_icecube = icecube_get_lightcurves(sample_table, icecube_select_topN=3)
 
 # add the resulting dataframe to all other archives
@@ -402,7 +402,7 @@ parallel_df_lc.data
 ```
 
 ## 5. Make plots of luminosity as a function of time
-These plots are modelled after [van Velzen et al., 2021](https://arxiv.org/pdf/2111.09391.pdf). We show flux in mJy as a function of time for all available bands for each object. `show_nbr_figures` controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with `save_ouptut`, they will be put in the output directory and labelled by sample number.
+These plots are modelled after [van Velzen et al., 2021](https://arxiv.org/pdf/2111.09391.pdf). We show flux in mJy as a function of time for all available bands for each object. `show_nbr_figures` controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with `save_output`, they will be put in the output directory and labelled by sample number.
 
 __Note__ that in the following, we can either plot the results from `df_lc` (from the serial call) or `parallel_df_lc` (from the parallel call). By default (see next cell) the output of the parallel call is used.
 
