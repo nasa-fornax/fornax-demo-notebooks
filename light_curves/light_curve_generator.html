@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Make Multiwavelength Light Curves Using Archival Data &#8212; Fornax Demo Notebooks</title>
+    <title>Make Multi-Wavelength Light Curves Using Archival Data &#8212; Fornax Demo Notebooks</title>
   
   
   
@@ -183,7 +183,7 @@
 </ul>
 </li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="README.html">Time Domain</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">Make Multiwavelength Light Curves Using Archival Data</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Make Multi-Wavelength Light Curves Using Archival Data</a></li>
 </ul>
 </li>
 </ul>
@@ -454,7 +454,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Make Multiwavelength Light Curves Using Archival Data</h1>
+    <h1>Make Multi-Wavelength Light Curves Using Archival Data</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -489,7 +489,7 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#find-light-curves-for-these-targets-in-relevant-non-nasa-catalogs">3. Find light curves for these targets in relevant, non-NASA catalogs</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gaia">3.1 Gaia</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#icecube-neutrinos">3.3 Icecube neutrinos</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#icecube-neutrinos">3.3 IceCube neutrinos</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-processing-the-archive-calls">4. Parallel processing the archive calls</a></li>
@@ -506,22 +506,22 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="make-multiwavelength-light-curves-using-archival-data">
-<h1>Make Multiwavelength Light Curves Using Archival Data<a class="headerlink" href="#make-multiwavelength-light-curves-using-archival-data" title="Link to this heading">#</a></h1>
+  <section id="make-multi-wavelength-light-curves-using-archival-data">
+<h1>Make Multi-Wavelength Light Curves Using Archival Data<a class="headerlink" href="#make-multi-wavelength-light-curves-using-archival-data" title="Link to this heading">#</a></h1>
 <hr class="docutils" />
 <section id="learning-goals">
 <h2>Learning Goals<a class="headerlink" href="#learning-goals" title="Link to this heading">#</a></h2>
 <p>By the end of this tutorial, you will be able to:<br />
 • Automatically load a catalog of sources<br />
 • Automatically &amp; efficiently search NASA and non-NASA resources for light curves at scale<br />
-• Store &amp; manipulate light curves in a Pandas multiindex dataframe<br />
+• Store &amp; manipulate light curves in a Pandas MultiIndex dataframe<br />
 • Plot all light curves on the same plot</p>
 </section>
 <section id="introduction">
 <h2>Introduction:<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
 <p>• A user has a sample of interesting targets for which they would like to see a plot of available archival light curves.  We start with a small set of changing look AGN from Yang et al., 2018, which are automatically downloaded. Changing look AGN are cases where the broad emission lines appear or disappear (and not just that the flux is variable).</p>
-<p>• We model light curve plots after van Velzen et al. 2021.  We search through a curated list of time-domain NASA holdings as well as non-NASA sources.  HEASARC catalogs used are Fermi and Beppo-Sax, IRSA catalogs used are ZTF and WISE, and MAST catalogs used are Pan-Starrs, TESS, Kepler, and K2.  Non-NASA sources are Gaia and IceCube. This list is generalized enough to include many types of targets to make this notebook interesting for many types of science.  All of these time-domain archives are searched in an automated and efficient fashion using astroquery, pyvo, pyarrow or APIs.</p>
-<p>• Light curve data storage is a tricky problem.  Currently we are using a multi-index Pandas dataframe, as the best existing choice for right now.  One downside is that we need to manually track the units of flux and time instead of relying on an astropy storage scheme which would be able to do some of the units worrying for us (even astropy can’t do all magnitude to flux conversions).  Astropy does not currently have a good option for multi-band light curve storage.</p>
+<p>• We model light curve plots after van Velzen et al. 2021.  We search through a curated list of time-domain NASA holdings as well as non-NASA sources.  HEASARC catalogs used are Fermi and Beppo-Sax, IRSA catalogs used are ZTF and WISE, and MAST catalogs used are Pan-STARRS, TESS, Kepler, and K2.  Non-NASA sources are Gaia and IceCube. This list is generalized enough to include many types of targets to make this notebook interesting for many types of science.  All of these time-domain archives are searched in an automated and efficient fashion using astroquery, pyvo, pyarrow or APIs.</p>
+<p>• Light curve data storage is a tricky problem.  Currently we are using a MultiIndex Pandas dataframe, as the best existing choice for right now.  One downside is that we need to manually track the units of flux and time instead of relying on an astropy storage scheme which would be able to do some of the units worrying for us (even astropy can’t do all magnitude to flux conversions).  Astropy does not currently have a good option for multi-band light curve storage.</p>
 <p>• ML work using these time-series light curves is in two neighboring notebooks: ML_AGNzoo and lc_classifier.</p>
 </section>
 <section id="input">
@@ -540,13 +540,13 @@ OR -<br />
 • <code class="docutils literal notranslate"><span class="pre">astropy</span></code> to work with coordinates/units and data structures<br />
 • <code class="docutils literal notranslate"><span class="pre">astroquery</span></code> to interface with archives APIs<br />
 • <code class="docutils literal notranslate"><span class="pre">hpgeom</span></code> to locate coordinates in HEALPix space<br />
-• <code class="docutils literal notranslate"><span class="pre">lightkurve</span></code> to search TESSS, Kepler, and K2 archives<br />
+• <code class="docutils literal notranslate"><span class="pre">lightkurve</span></code> to search TESS, Kepler, and K2 archives<br />
 • <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> for plotting<br />
 • <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> to use the power of multiple CPUs to get work done faster<br />
 • <code class="docutils literal notranslate"><span class="pre">numpy</span></code> for numerical processing<br />
 • <code class="docutils literal notranslate"><span class="pre">pandas</span></code> for their data structure DataFrame and all the accompanying functions<br />
 • <code class="docutils literal notranslate"><span class="pre">pyarrow</span></code> to work with Parquet files for WISE and ZTF<br />
-• <code class="docutils literal notranslate"><span class="pre">pyvo</span></code> for acessing Virtual Observatory(VO) standard data<br />
+• <code class="docutils literal notranslate"><span class="pre">pyvo</span></code> for accessing Virtual Observatory(VO) standard data<br />
 • <code class="docutils literal notranslate"><span class="pre">requests</span></code> to get information from URLs<br />
 • <code class="docutils literal notranslate"><span class="pre">scipy</span></code> to do statistics<br />
 • <code class="docutils literal notranslate"><span class="pre">tqdm</span></code> to track progress on long running jobs<br />
@@ -601,8 +601,8 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 </section>
 <section id="define-the-sample">
 <h2>1. Define the sample<a class="headerlink" href="#define-the-sample" title="Link to this heading">#</a></h2>
-<p>We define here a “gold” sample of spectroscopically confirmed changing look AGN and quasars. This sample includes both objects which change from type 1 to type 2 and also the opposite.  Future studies may want to treat these as seperate objects or seperate QSOs from AGN.  Bibcodes for the samples used are listed next to their functions for reference.</p>
-<p>Significant work went into the functions which grab the samples from the papers.  They use Astroquery, NED, SIMBAD, Vizier, and in a few cases grab the tables from the html versions of the paper.  There are trickeries involved in accessing coordinates from tables in the literature. Not every literature table is stored in its entirety in all of these resrources, so be sure to check that your chosen method is actually getting the information that you see in the paper table.  Warning: You will get false results if using NED or SIMBAD on a table that has more rows than are printed in the journal.</p>
+<p>We define here a “gold” sample of spectroscopically confirmed changing look AGN and quasars. This sample includes both objects which change from type 1 to type 2 and also the opposite.  Future studies may want to treat these as separate objects or separate QSOs from AGN.  Bibcodes for the samples used are listed next to their functions for reference.</p>
+<p>Significant work went into the functions which grab the samples from the papers.  They use Astroquery, NED, SIMBAD, Vizier, and in a few cases grab the tables from the html versions of the paper.  There are trickeries involved in accessing coordinates from tables in the literature. Not every literature table is stored in its entirety in all of these resources, so be sure to check that your chosen method is actually getting the information that you see in the paper table.  Warning: You will get false results if using NED or SIMBAD on a table that has more rows than are printed in the journal.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build up the sample</span>
@@ -685,11 +685,11 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 </section>
 <section id="find-light-curves-for-these-targets-in-nasa-catalogs">
 <h2>2. Find light curves for these targets in NASA catalogs<a class="headerlink" href="#find-light-curves-for-these-targets-in-nasa-catalogs" title="Link to this heading">#</a></h2>
-<p>We search a curated list of time-domain catalogs from NASA astrophysics archives.  Because each archive is different, and in many cases each catalog is different, each function to access a catalog is necesarily specialized to the location and format of that particular catalog.</p>
+<p>We search a curated list of time-domain catalogs from NASA astrophysics archives.  Because each archive is different, and in many cases each catalog is different, each function to access a catalog is necessarily specialized to the location and format of that particular catalog.</p>
 <section id="heasarc-fermi-beppo-sax">
 <h3>2.1 HEASARC: FERMI &amp; Beppo SAX<a class="headerlink" href="#heasarc-fermi-beppo-sax" title="Link to this heading">#</a></h3>
 <p>The function to retrieve HEASARC data accesses the HEASARC archive using a pyvo search with a table upload.  This is the fastest way to access data from HEASARC catalogs at scale.</p>
-<p>While these aren’t strictly light curves, we would like to track if there are gamma rays detected in advance of any change in the CLAGN light curves. We store these gamma ray detections as single datapoints.  Because gamma ray detections typically have very large error radii, our current technique is to keep matches in the catalogs within some manually selected error radius, currently defaulting to 1 degree for Fermi and 3 degrees for Beppo SAX.  These values are chosen based on a histogram of all values for those catalogs.</p>
+<p>While these aren’t strictly light curves, we would like to track if there are gamma rays detected in advance of any change in the CLAGN light curves. We store these gamma ray detections as single data points.  Because gamma ray detections typically have very large error radii, our current technique is to keep matches in the catalogs within some manually selected error radius, currently defaulting to 1 degree for Fermi and 3 degrees for Beppo SAX.  These values are chosen based on a histogram of all values for those catalogs.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">start_serial</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>  <span class="c1">#keep track of all serial archive calls to compare later with parallel archive call time</span>
@@ -825,7 +825,7 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 <h2>3. Find light curves for these targets in relevant, non-NASA catalogs<a class="headerlink" href="#find-light-curves-for-these-targets-in-relevant-non-nasa-catalogs" title="Link to this heading">#</a></h2>
 <section id="gaia">
 <h3>3.1 Gaia<a class="headerlink" href="#gaia" title="Link to this heading">#</a></h3>
-<p>The function to retrieve Gaia light curves accesses the Gaia DR3 “source lite” catalog using an astroquery search with a table upload to do the join with the Gaia phtometry. This is currently the fastest way to access light curves from Gaia at scale.</p>
+<p>The function to retrieve Gaia light curves accesses the Gaia DR3 “source lite” catalog using an astroquery search with a table upload to do the join with the Gaia photometry. This is currently the fastest way to access light curves from Gaia at scale.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">gaiastarttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -843,7 +843,7 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 </div>
 </section>
 <section id="icecube-neutrinos">
-<h3>3.3 Icecube neutrinos<a class="headerlink" href="#icecube-neutrinos" title="Link to this heading">#</a></h3>
+<h3>3.3 IceCube neutrinos<a class="headerlink" href="#icecube-neutrinos" title="Link to this heading">#</a></h3>
 <p>There are several <a class="reference external" href="https://icecube.wisc.edu/data-releases/2021/01/all-sky-point-source-icecube-data-years-2008-2018">catalogs</a> (basically one for each year of IceCube data from 2008 - 2018). The following code creates a large catalog by combining
 all the yearly catalogs.
 The IceCube catalog contains Neutrino detections with associated energy and time and approximate direction (which is uncertain by half-degree scales….). Usually, for active events only one or two Neutrinos are detected, which makes matching quite different compared to “photons”. For our purpose, we will list the top 3 events in energy that are within a given distance to the target.</p>
@@ -852,7 +852,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">icecubestarttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
-<span class="c1"># get icecube datapoints</span>
+<span class="c1"># get icecube data points</span>
 <span class="n">df_lc_icecube</span> <span class="o">=</span> <span class="n">icecube_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">icecube_select_topN</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 
 <span class="c1"># add the resulting dataframe to all other archives</span>
@@ -962,7 +962,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 </section>
 <section id="make-plots-of-luminosity-as-a-function-of-time">
 <h2>5. Make plots of luminosity as a function of time<a class="headerlink" href="#make-plots-of-luminosity-as-a-function-of-time" title="Link to this heading">#</a></h2>
-<p>These plots are modelled after <a class="reference external" href="https://arxiv.org/pdf/2111.09391.pdf">van Velzen et al., 2021</a>. We show flux in mJy as a function of time for all available bands for each object. <code class="docutils literal notranslate"><span class="pre">show_nbr_figures</span></code> controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with <code class="docutils literal notranslate"><span class="pre">save_ouptut</span></code>, they will be put in the output directory and labelled by sample number.</p>
+<p>These plots are modelled after <a class="reference external" href="https://arxiv.org/pdf/2111.09391.pdf">van Velzen et al., 2021</a>. We show flux in mJy as a function of time for all available bands for each object. <code class="docutils literal notranslate"><span class="pre">show_nbr_figures</span></code> controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with <code class="docutils literal notranslate"><span class="pre">save_output</span></code>, they will be put in the output directory and labelled by sample number.</p>
 <p><strong>Note</strong> that in the following, we can either plot the results from <code class="docutils literal notranslate"><span class="pre">df_lc</span></code> (from the serial call) or <code class="docutils literal notranslate"><span class="pre">parallel_df_lc</span></code> (from the parallel call). By default (see next cell) the output of the parallel call is used.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -1047,7 +1047,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#find-light-curves-for-these-targets-in-relevant-non-nasa-catalogs">3. Find light curves for these targets in relevant, non-NASA catalogs</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gaia">3.1 Gaia</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#icecube-neutrinos">3.3 Icecube neutrinos</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#icecube-neutrinos">3.3 IceCube neutrinos</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-processing-the-archive-calls">4. Parallel processing the archive calls</a></li>
