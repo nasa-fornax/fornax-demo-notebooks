@@ -156,7 +156,7 @@ Do only this step from this section when you have a previously generated sample 
 sample_table = Table.read('data/input_sample.ecsv', format='ascii.ecsv')
 ```
 
-### 2. Call the archives
+### 2. Query the archives
 
 We search a curated list of time-domain catalogs from NASA and non-NASA astrophysics archives.  Because each archive is different, and in many cases each catalog is different, each function to access a catalog is necessarily specialized to the location and format of that particular catalog.
 
@@ -356,7 +356,7 @@ parallel_df_lc = MultiIndexDFObject()  # to collect the results
 callback = parallel_df_lc.append  # will be called once on the result returned by each archive
 with mp.Pool(processes=n_workers) as pool:
 
-    # start the processes that call the archives
+    # start the processes that query the archives
     pool.apply_async(gaia_get_lightcurves, args=(sample_table,), callback=callback)
     pool.apply_async(heasarc_get_lightcurves, args=(sample_table,), callback=callback)
     pool.apply_async(hcv_get_lightcurves, args=(sample_table,), callback=callback)
