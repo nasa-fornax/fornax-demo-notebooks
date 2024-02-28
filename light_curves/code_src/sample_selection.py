@@ -380,7 +380,7 @@ def get_sdss_sample(coords, labels, *, num=10, zmin=0, zmax=10, randomize_z=Fals
         SDSS_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg') for ra, dec in zip(res['ra'], res['dec'])]
         SDSS_labels = ['SDSS' for ra in res['ra']]
 
-        coords.extend(SDSS_coords)
+        coords.extend(zip(SDSS_coords, res['z']))  # add tuple (skycoord, redshift) for each object
         labels.extend(SDSS_labels)
 
     if verbose:
@@ -430,7 +430,8 @@ def get_papers_list_sample(coords, labels, *, paper_kwargs=[dict(),]):
         get_paper_sample(coords, labels, **kwargs)
 
 
-def get_csv_sample(coords, labels, *, csv_path, label, ra_colname="ra", dec_colname="dec", frame="icrs", unit="deg"):
+def get_csv_sample(coords, labels, *, csv_path, label,
+                   ra_colname="ra", dec_colname="dec", z_colname=None, frame="icrs", unit="deg"):
     """Loads coordinates from file at `csv_path` and adds them to `coords` and `lables`
 
     Parameters
@@ -447,13 +448,20 @@ def get_csv_sample(coords, labels, *, csv_path, label, ra_colname="ra", dec_coln
         Name of the column containing the RA coord.
     dec_colname : str
         Name of the column containing the Dec coord.
+    z_colname : str or None
+        Name of the column containing the redshift.
     frame : str
         Coordinate frame to pass to SkyCoord.
     unit : str
         Coordinate unit to pass to SkyCoord.
     """
-    csv_sample = Table.read(csv_path)[ra_colname, dec_colname]
-    coords.extend([SkyCoord(ra, dec, frame=frame, unit=unit) for (ra, dec) in csv_sample.iterrows()])
+    csv_sample = Table.read(csv_path)
+    mycoords = [SkyCoord(ra, dec, frame=frame, unit=unit) for (ra, dec) in csv_sample[ra_colname, dec_colname].iterrows()]
+    if z_colname:
+
+        coords.extend(zip(mycoords, csv_sample[z_colname]))  # add tuple (skycoord, redshift) for each object
+    else:
+        coords.extend(mycoords)
     labels.extend([label] * len(csv_sample))
 
 
@@ -478,14 +486,21 @@ def clean_sample(coords_list, labels_list, *, consolidate_nearby_objects=True, v
         sample cleaned of duplicates, with an object ID attached.
     """
 
-    sample_table = Table([coords_list, labels_list], names=['coord', 'label'])
+    # combine coords_list, labels_list into sample_table
+    # if any redshifts were included in coords_list, create a column for them
+    skycoords_list = [coord[0] if isinstance(coord, tuple) else coord for coord in coords_list]
+    redshift_list = [coord[1] if isinstance(coord, tuple) else None for coord in coords_list]
+    if any(redshift_list):
+        sample_table = Table([skycoords_list, redshift_list, labels_list], names=['coord', 'redshift', 'label'])
+    else:
+        sample_table = Table([skycoords_list, labels_list], names=['coord', 'label'])
 
     if not consolidate_nearby_objects:
         # create a range 'objectid'. must start with 1 to match what the astropy `join` produces below.
         nsample = len(sample_table)
-        sample_table['objectid'] = list(range(1, nsample + 1))
+        sample_table.add_column(list(range(1, nsample + 1)), name='objectid', index=0)
         print(f'Object sample size: {nsample}')
-        return sample_table['objectid', 'coord', 'label']
+        return sample_table
 
     # now join the table with itself within a defined radius.
     # We keep one set of original column names to avoid later need for renaming
@@ -499,7 +514,7 @@ def clean_sample(coords_list, labels_list, *, consolidate_nearby_objects=True, v
     # these 4 will have the same id in the new 'coords_id' column
 
     # keep only those entries in the resulting table which are unique
-    uniqued_table = unique(tjoin, keys='coord_id')['coord_id', 'coord', 'label']
+    uniqued_table = unique(tjoin, keys='coord_id')['coord_id', *sample_table.colnames]
     uniqued_table.rename_column('coord_id', 'objectid')
 
     if verbose:
