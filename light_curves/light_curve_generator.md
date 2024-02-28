@@ -294,7 +294,7 @@ df_lc.append(df_lc_gaia)
 print('gaia search took:', time.time() - gaiastarttime, 's')
 ```
 
-### 3.3 IceCube neutrinos
+#### 2.8 IceCube neutrinos
 
 There are several [catalogs](https://icecube.wisc.edu/data-releases/2021/01/all-sky-point-source-icecube-data-years-2008-2018) (basically one for each year of IceCube data from 2008 - 2018). The following code creates a large catalog by combining
 all the yearly catalogs.
