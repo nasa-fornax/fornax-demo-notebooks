@@ -16,25 +16,24 @@ kernelspec:
 
 ## Learning Goals
 By the end of this tutorial, you will be able to:
-- do some basic data cleaning and filtering to prepare data for ML algorithms
-- work with Pandas data frames as a way of storing time domain datasets
-- use sktime & pyts algorithms to train a classifier and predict values on a test dataset
+- prepare data for ML algorithms by cleaning and filtering the dataset
+- work with Pandas dataframes as a way of storing and manipulating time domain datasets
+- use [sktime](https://www.sktime.net/en/stable/index.html) algorithms to train a classifier and calculate metrics of accuracy
+- use the trained classifier to predict labels on an unlabelled dataset
 
 ## Introduction
 The science goal of this notebook is to find a classifier that can accurately discern changing look active galactic nuclei (CLAGN) from a broad sample of all Sloan Digital Sky Survey (SDSS) identified Quasars (QSOs) based solely on archival photometry in the form of multiwavelength light curves.  
 
-CLAGN are astrophysically interesting objects because they appear to change state.  CLAGN are characterized by the appearance or disappearance of broad emission lines on timescales of order months.  Astronomers would like to understand the physical mechanism behind this apparent change of state.  However, only a few hundered CLAGN are known, and finding CLAGN is observationally expensive, traditionally requiring multiple epochs of spectroscopy.  Being able to identify CLAGN in existing large samples would allow us to identify a statisitcally significant sample from which we could better understand the underlying physics.
+CLAGN are astrophysically interesting objects because they appear to change state.  CLAGN are characterized by the appearance or disappearance of broad emission lines on timescales of order months.  Astronomers would like to understand the physical mechanism behind this apparent change of state.  However, only a few hundered CLAGN are known, and finding CLAGN is observationally expensive, traditionally requiring multiple epochs of spectroscopy.  Being able to identify CLAGN in existing, archival, large, photometric samples would allow us to identify a statisitcally significant sample from which we could better understand the underlying physics.
 
-This notebook walks through an exercise in using multiwavelength photometry alone (no spectroscopy) to learn if we can identify CLAGN based on their light curves alone.  If we are able to find a classifier that can differentiate CLAGN from SDSS QSOs, we would then be able to run the entire sample of SDSS QSOs (~500,000) to find additional CLAGN candidates.
+This notebook walks through an exercise in using multiwavelength photometry(no spectroscopy) to learn if we can identify CLAGN based on their light curves alone.  If we are able to find a classifier that can differentiate CLAGN from SDSS QSOs, we would then be able to run the entire sample of SDSS QSOs (~500,000) to find additional CLAGN candidates for follow-up verification.
 
-Input to this notebook is output of a previous demo notebook which generates multiwavelength light curves from archival data.  THis notebook starts with light curves, does data prep, and runs the light curves through multiple ML classification algorithms.  There are many ML algorthms to choose from; We choose to use [sktime](https://www.sktime.net/en/stable/index.html) algorithms for time domain classification beacuse it is a library of many algorithms specifically tailored to time series datasets.  It is based on the sklearn library so syntax is familiar to many users.
+Input to this notebook is output of a previous demo notebook which generates multiwavelength light curves from archival data.  THis notebook starts with light curves, does data prep, and runs the light curves through multiple ML classification algorithms.  There are many ML algorthms to choose from; We choose to use sktime algorithms for time domain classification beacuse it is a library of many algorithms specifically tailored to time series datasets.  It is based on the [scikit-learn](https://scikit-learn.org/stable/index.html) library so syntax is familiar to many users.
 
 The challenges of this time-domain dataset for ML work are:
 1. Multi-variate = There are multiple bands of observations per target (13+)
 2. Unequal length = Each band has a light curve with different sampling than other bands
 3. Missing data = Not each object has all observations in all bands
-
-
 
 
 ## Input
@@ -64,12 +63,12 @@ Trained classifiers as well as estimates of their accuracy and plots of confusio
 - `scipy` for statistical analysis
 - `json` for storing intermediate files
 - `google_drive_downloader` to access files stored in google drive
-- `pyts` time series ML algorithms
   
 ## Authors
 Jessica Krick, Shooby Hemmati, Troy Raen, Brigitta Sipocz, Andreas Faisst, Vandana Desai, Dave Shoop
 
 ## Acknowledgements
+Stephanie La Massa
 
 ```{code-cell} ipython3
 #insure all dependencies are installed
@@ -112,12 +111,6 @@ from sktime.classification.kernel_based import Arsenal, RocketClassifier
 from sktime.classification.shapelet_based import ShapeletTransformClassifier
 from sktime.registry import all_estimators, all_tags
 from sktime.datatypes import check_is_mtype
-
-from pyts.classification import KNeighborsClassifier
-from pyts.classification import SAXVSM
-from pyts.classification import BOSSVS
-from pyts.classification import LearningShapelets
-from pyts.classification import TimeSeriesForest
 
 # local code imports
 sys.path.append('code_src/')
@@ -518,7 +511,7 @@ def missingdata_to_zeros(df_lc):
 ```
 
 ```{raw-cell}
-#this function is not currently needed for the notebook, but I would like to keep it around for potential later testing
+#this function is not currently needed for the notebook, but I would like to keep it around for potential later testing.  It helps to determine which combination of existing bands has the most objects to use in classification
 
 import itertools
 
@@ -543,6 +536,20 @@ band_combos_df = calc_nobjects_per_band_combo(df_lc)
 
 ```{code-cell} ipython3
 def missingdata_drop_bands(df_lc, bands_to_keep, verbose=False):
+    """
+    Drop bands for which too many objects have no observations.
+       
+    Parameters
+    ----------
+    df_lc: Pandas dataframe with light curve info
+    bands_to_keep = list of strings with band names
+        example: ['W1','W2','panstarrs g','panstarrs i', 'panstarrs r','panstarrs y','panstarrs z','zg','zr']
+
+    Returns
+    --------
+    clean_df: MultiIndexDFObject with light curves
+        
+    """
     # drop all rows where 'band' is not in 'bands_to_keep'
     bands_to_drop = set(df_lc.band.unique()) - set(bands_to_keep)
     clean_df = df_lc.loc[~df_lc.band.isin(bands_to_drop)]
@@ -569,6 +576,7 @@ def missingdata_drop_bands(df_lc, bands_to_keep, verbose=False):
 ```{code-cell} ipython3
 #choose what to do with missing data...
 #df_lc = missingdata_to_zeros(df_lc)
+#or
 bands_to_keep = ['W1','W2','panstarrs g','panstarrs i', 'panstarrs r','panstarrs y','panstarrs z','zg','zr']
 df_lc = missingdata_drop_bands(df_lc, bands_to_keep, verbose = True)
 ```
@@ -665,6 +673,7 @@ def uniform_length_spacing(df_lc, final_freq_interpol, include_plot = True):
 #change this to change the frequency of the time array
 final_freq_interpol = 60  #this is the timescale of interpolation in units of days
 
+#make all light curves have the same time array
 df_interpol = uniform_length_spacing(df_lc, final_freq_interpol, include_plot = True )
 
 # df_lc_interpol has one row per dict in lc_interpol. time and flux columns store arrays.
@@ -709,21 +718,16 @@ singleob
 ```
 
 ### 2.8 Normalize 
-- this is normalizing across all bands
-- think this is the right place to do this, rather than interpolate over time 
-    so that the final light curves are normalized since that is the chunk of information 
-    which goes into the ML algorithms.
-- chose max and not median or mean because there are some objects where the median flux = 0.0
-    - if we did this before the interpolating, the median might be a non-zero value
-- normalizing is required so that the CLAGN and it's comparison SDSS sample don't have different flux levels.  ML algorithms will easily choose to classify based on overall flux levels, so we want to discourage that by normalizing the fluxes.
+Normalizing is required so that the CLAGN and it's comparison SDSS sample don't have different flux levels.  ML algorithms will easily choose to classify based on overall flux levels, so we want to prevent that by normalizing the fluxes. Normalization with a multiband dataset requires extra thought.  The idea here is that we normalize across each object.  We want the algorithms to know, for example, that within one object W1 will be brighter than ZTF bands but from one object to the next, it will not know that one is brighter than the other.
 
+We do the normalization at this point in the code, rather than before interpolating over time, so that the final light curves are normalized since that is the chunk of information which goes into the ML algorithms.
 
-Idea here is that we normalize across each object.  So the algorithms will know, for example, that within one object W1 will be brighter than ZTF bands but from one object to the next, it will not know that one is brighter than the other.
+We chose to normalize by the maximum flux in one band, and not median or mean because there are some objects where the median flux = 0.0 if we did a replacement by zeros for missing data.
 
 ```{code-cell} ipython3
-def local_normalization(df_lc, norm_column = "flux_W1"):
+def local_normalization_max(df_lc, norm_column = "flux_W1"):
     """
-    normalize each individual light curve
+    normalize each individual light curve by the max value in one band
        
     Parameters
     ----------
@@ -758,7 +762,7 @@ def local_normalization(df_lc, norm_column = "flux_W1"):
 
 ```{code-cell} ipython3
 #normalize by W1 band
-df_lc = local_normalization(df_lc, norm_column = "flux_W1")
+df_lc = local_normalization_max(df_lc, norm_column = "flux_W1")
 ```
 
 ### 2.9 Cleanup
@@ -820,8 +824,7 @@ df_lc
 ```
 
 ### 3.1 Train test split 
-- Because thre are uneven numbers of each type (many more SDSS than CLAGN), we want to make sure to stratify evenly by type
-- Random split
+We use sklearn's train test split to randomly split the data into training and testing datasets.  Because thre are uneven numbers of each type (many more SDSS than CLAGN), we want to make sure to stratify evenly by type.
 
 ```{code-cell} ipython3
 #y is defined to be the labels
@@ -836,11 +839,6 @@ test_df = df_lc.loc[test_ix]
 ```
 
 ```{code-cell} ipython3
-print(train_df.groupby([ "objectid"]).ngroups, "n groups in train sample")
-print(test_df.groupby(["objectid"]).ngroups, "n groups in test sample")
-```
-
-```{code-cell} ipython3
 #plot to show how many of each type of object in the test dataset
 plt.figure(figsize=(6,4))
 plt.title("Objects in the Test dataset")
@@ -848,7 +846,9 @@ h = plt.hist(test_df.droplevel('datetime').index.unique().get_level_values('labe
 ```
 
 ```{code-cell} ipython3
-#divide the dataframe into X and y for ML algorithms 
+#divide the dataframe into features and labels for ML algorithms 
+#X is defined to be the features
+# y is defined to be the labels
 
 #X is the multiindex light curve without the labels
 X_train  = train_df.droplevel('label')
@@ -857,15 +857,6 @@ X_test = test_df.droplevel('label')
 #y are the labels, should be a series 
 y_train = train_df.droplevel('datetime').index.unique().get_level_values('label').to_series()
 y_test = test_df.droplevel('datetime').index.unique().get_level_values('label').to_series()
-```
-
-```{code-cell} ipython3
-print(X_train.groupby([ "objectid"]).ngroups, "n groups in train sample")
-print(X_test.groupby(["objectid"]).ngroups, "n groups in test sample")
-```
-
-```{code-cell} ipython3
-X_train
 ```
 
 ## 4. Run sktime algorithms on the light curves
@@ -1000,7 +991,7 @@ accscore_dict
 ```
 
 ## 5.0 Create a candidate list 
-Lets assume we now have a classifier which can accurately differentiate CLAGN from SDSS QSOs.  Next, we would like to use that classifier on our favorite unlabeled sample to identify CLAGN candidates.  To do this, we need to:
+Lets assume we now have a classifier which can accurately differentiate CLAGN from SDSS QSOs based on their archival light curves.  Next, we would like to use that classifier on our favorite unlabeled sample to identify CLAGN candidates.  To do this, we need to:
 - read in a dataframe of our new sample
 - get that dataset in the same format as what was fed into the classifiers
 - use your trained classifier to predict labels for the new sample
@@ -1074,7 +1065,7 @@ def prepare_mysample_sktime(path_to_sample):
     my_sample = my_sample.reset_index()  
 
     #normalize
-    my_sample = local_normalization(my_sample, norm_column = "flux_W1")
+    my_sample = local_normalization_max(my_sample, norm_column = "flux_W1")
 
     #make datetime column
     mjd = my_sample.time
@@ -1153,8 +1144,11 @@ Depending on your comfort level with the accuracy of the classifier you have tra
 +++
 
 ## References:
-Markus Löning, Anthony Bagnall, Sajaysurya Ganesh, Viktor Kazakov, Jason Lines, Franz Király (2019): “sktime: A Unified Interface for Machine Learning with Time Series”
+- “sktime: A Unified Interface for Machine Learning with Time Series”
 Markus Löning, Tony Bagnall, Sajaysurya Ganesh, George Oastler, Jason Lines, ViktorKaz, …, Aadesh Deshmukh (2020). sktime/sktime. Zenodo. http://doi.org/10.5281/zenodo.3749000
+- "Scikit-learn: Machine Learning in Python", Pedregosa et al., JMLR 12, pp. 2825-2830, 2011.
+- "pandas-dev/pandas: Pandas" The pandas development team, 2020. Zenodo. https://doi.org/10.5281/zenodo.3509134
+- This work made use of [Astropy](http://www.astropy.org) a community-developed core Python package and an ecosystem of tools and resources for astronomy (astropy:2013, astropy:2018, astropy:2022).
 
 ```{code-cell} ipython3
 
