@@ -12,6 +12,7 @@ numpy
 pandas
 pyarrow
 pyvo
+s3fs
 scikit-learn
 scikit-image
 scipy
