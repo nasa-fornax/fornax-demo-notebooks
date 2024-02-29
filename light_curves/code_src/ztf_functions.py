@@ -275,10 +275,10 @@ def transform_lightcurves(ztf_df):
     """
     # ztf_df might have more than one light curve per (band + objectid) if the ra/dec is close
     # to a CCD-quadrant boundary (Sanchez-Saez et al., 2021). keep the one with the most datapoints
-    ztf_df_list = []
+    indexes_to_keep = []
     for _, singleband_object in ztf_df.groupby(["objectid", "band"]):
         if len(singleband_object.index) == 1:
-            ztf_df_list.append(singleband_object)
+            indexes_to_keep.extend(singleband_object.index)
         else:
             npoints = singleband_object["mag"].str.len()
             npointsmax_object = singleband_object.loc[npoints == npoints.max()]
@@ -287,19 +287,19 @@ def transform_lightcurves(ztf_df):
             # arbitrarily pick the one with the min oid.
             # depending on your science, you may want (e.g.,) the largest timespan instead
             if len(npointsmax_object.index) == 1:
-                ztf_df_list.append(npointsmax_object)
+                indexes_to_keep.extend(npointsmax_object.index)
             else:
                 minoid = npointsmax_object.oid.min()
-                ztf_df_list.append(npointsmax_object.loc[npointsmax_object.oid == minoid])
-
-    ztf_df = pd.concat(ztf_df_list, ignore_index=True)
-
+                indexes_to_keep.extend(npointsmax_object.loc[npointsmax_object.oid == minoid].index)
+    ztf_df = ztf_df.loc[sorted(indexes_to_keep)]
+    
     # store "hmjd" as "time".
     # note that other light curves in this notebook will have "time" as MJD instead of HMJD.
     # if your science depends on precise times, this will need to be corrected.
     ztf_df = ztf_df.rename(columns={"hmjd": "time"})
 
     # "explode" the data structure into one row per light curve point and set the correct dtypes
+    # note that this operation may require 6+ times the RAM used for ztf_df up to now
     ztf_df = ztf_df.explode(["time", "mag", "magerr", "catflags"], ignore_index=True)
     ztf_df = ztf_df.astype({"time": "float", "mag": "float", "magerr": "float", "catflags": "int"})
 
