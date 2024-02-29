@@ -4,11 +4,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.0
+    jupytext_version: 1.15.2
 kernelspec:
-  display_name: science_demo
+  display_name: Python 3 (ipykernel)
   language: python
-  name: conda-env-science_demo-py
+  name: python3
 ---
 
 # Make Multiwavelength Light Curves Using Archival Data
