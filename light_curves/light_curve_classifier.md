@@ -135,15 +135,6 @@ gdd.download_file_from_google_drive(file_id='1DrB-CWdBBBYuO0WzNnMl5uQnnckL7MWH',
                                     unzip=True)
 
 df_lc = pd.read_parquet(savename_df_lc)
-
-
-#access the sample_table made in the light curve generator notebook
-#has information about the sample including ra & dec 
-savename_sample = './data/small_CLAGN_SDSS_sample.ecsv'
-gdd.download_file_from_google_drive(file_id='1pSEKVP4LbrdWQK9ws3CaI90m3Z_2fazL',
-                                    dest_path=savename_sample,
-                                    unzip=True)
-sample_table = Table.read(savename_sample, format='ascii.ecsv')
 ```
 
 ```{code-cell} ipython3
@@ -526,7 +517,7 @@ def missingdata_to_zeros(df_lc):
     return(zeros_df_lc)
 ```
 
-```{code-cell} ipython3
+```{raw-cell}
 #this function is not currently needed for the notebook, but I would like to keep it around for potential later testing
 
 import itertools
@@ -547,7 +538,7 @@ def calc_nobjects_per_band_combo(df_lc):
 
     return band_combos_df
 
-band_combos_df = calc_nobjects_per_band_combo(drop_df_lc)
+band_combos_df = calc_nobjects_per_band_combo(df_lc)
 ```
 
 ```{code-cell} ipython3
@@ -573,15 +564,13 @@ def missingdata_drop_bands(df_lc, bands_to_keep, verbose=False):
         print(len(clean_df.objectid.unique()), "n objects after removing missing band data")
 
     return clean_df
-
-
 ```
 
 ```{code-cell} ipython3
 #choose what to do with missing data...
 #df_lc = missingdata_to_zeros(df_lc)
 bands_to_keep = ['W1','W2','panstarrs g','panstarrs i', 'panstarrs r','panstarrs y','panstarrs z','zg','zr']
-test = missingdata_drop_bands(df_lc, bands_to_keep, verbose = True)
+df_lc = missingdata_drop_bands(df_lc, bands_to_keep, verbose = True)
 ```
 
 ### 2.6  Make all objects and bands have identical time arrays (uniform length and spacing)
@@ -1014,7 +1003,7 @@ accscore_dict
 Lets assume we now have a classifier which can accurately differentiate CLAGN from SDSS QSOs.  Next, we would like to use that classifier on our favorite unlabeled sample to identify CLAGN candidates.  To do this, we need to:
 - read in a dataframe of our new sample
 - get that dataset in the same format as what was fed into the classifiers
-- run clf.predict() on that re-formatted dataset
+- use your trained classifier to predict labels for the new sample
 - retrace those objectids to an ra & dec
 - write an observing proposal (ok, you have to do that one yourself)
 
@@ -1069,7 +1058,7 @@ def prepare_mysample_sktime(path_to_sample):
     my_sample = remove_incomplete_data(my_sample, threshold_too_few, verbose = False)
 
     #drop missing bands
-    my_sample = missingdata_drop_bands(my_sample, verbose = False)
+    my_sample = missingdata_drop_bands(my_sample, bands_to_keep, verbose = False)
 
     #make arrays have uniform length and spacing
     final_freq_interpol = 60  #this is the timescale of interpolation in units of days
@@ -1110,9 +1099,8 @@ def prepare_mysample_sktime(path_to_sample):
 ```
 
 ```{code-cell} ipython3
-%%time
 #read in data and prepare it for use
-path_to_sample = "./data/df_lc_458sample.parquet"
+path_to_sample = './data/small_CLAGN_SDSS_df_lc.parquet'
 X_mysample = prepare_mysample_sktime(path_to_sample)
 
 #what does this look like to make sure we are on track
@@ -1120,41 +1108,49 @@ X_mysample
 ```
 
 ```{code-cell} ipython3
-%%time
 #use the trained sktime algorithm to make predictions on the test dataset
 y_mysample = clf.predict(X_mysample)
 ```
 
 ```{code-cell} ipython3
-len(y_mysample)
+#access the sample_table made in the light curve generator notebook
+#has information about the sample including ra & dec 
+savename_sample = './data/small_CLAGN_SDSS_sample.ecsv'
+gdd.download_file_from_google_drive(file_id='1pSEKVP4LbrdWQK9ws3CaI90m3Z_2fazL',
+                                    dest_path=savename_sample,
+                                    unzip=True)
+sample_table = Table.read(savename_sample, format='ascii.ecsv')
+
 ```
 
 ```{code-cell} ipython3
 #associate these predicted CLAGN with RA & Dec
 
-#I might have removed some objects in my cleaning, so need to first associate objectid with each of y_mysample
-#this doesn't work, but is what I wanted to work
-X_mysample["predicted_labels"] = pd.Series(y_mysample)
-
-#now theoretically X_mysample has both objectid and predicted_labels
-#maybe drop the flux & time columns for ease of use and makes it nice and small
-flux_cols = [col for col in norm_df_lc.columns if 'flux' in col]
-candidate_CLAGN = X_mysample.drop(columns = flux_cols)
-candidate_CLAGN.drop(columns = ['time'], inplace = True)
+#need to first associate objectid with each of y_mysample
+#make a new df with a column = objectid which 
+#includes all the unique objectids.
+test = X_mysample.reset_index()
+mysample_CLAGN = pd.DataFrame(test.objectid.unique(), columns = ['objectid'])
+mysample_CLAGN["predicted_label"] = pd.Series(y_mysample)
 
 #if I am only interested in the CLAGN, could drop anything with label = SDSS
-querystring = 'label == "SDSS"'
-candidate_CLAGN = band_lc.drop(candidate_CLAGN.query(querystring ).index)
+querystring = 'predicted_label == "SDSS"'
+mysample_CLAGN = mysample_CLAGN.drop(mysample_CLAGN.query(querystring ).index)
 
-# need to read in the ecsv file that is sample_table
-#what format is this table again?
-
-#then will need to join candidate_CLAGN with sample_table along objectid
+#then will need to merge candidate_CLAGN with sample_table along objectid
+sample_table_df = sample_table.to_pandas()
+candidate_CLAGN = pd.merge(mysample_CLAGN, sample_table_df, on = "objectid", how = "inner")
 ```
 
 ```{code-cell} ipython3
-type(sample_table)
+#show the CLAGN candidates ra & dec
+candidate_CLAGN
 ```
+
+## Conclusions
+Depending on your comfort level with the accuracy of the classifier you have trained, you could now write an observing proposal to confirm those targets prediced to be CLAGN based on their multiwavelength light curves.
+
++++
 
 ## References:
 Markus Löning, Anthony Bagnall, Sajaysurya Ganesh, Viktor Kazakov, Jason Lines, Franz Király (2019): “sktime: A Unified Interface for Machine Learning with Time Series”
