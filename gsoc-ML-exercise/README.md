@@ -8,15 +8,16 @@ Please complete all required tasks and whichever optional task(s) allows you to 
 
 ### Overview
 
-Here we will have a simplified case with no time information. We have measurements of galaxies in different wavelengthts (i.e., broadband filters) in five different fields and the task is to bring them all onto a same wavelength footing. A simple notebook to read the galaxy data in the initial filters is in this repository.
+Here we will have a more simplified case of the actual project with no time information. We have measurements of galaxies in different wavelengthts (i.e., broadband filters) in five different fields and the task is to bring them all onto a same wavelength footing. A simple notebook to read the galaxy data in the initial filters is in this repository.
 
 
 ### Instructions
 
-1. Clone this repo and create your own branch.
+1. Clone this repo and checkout the branch gsco-ML-exercise.
 2. Write code.
-    - _Required_: A way to combine all five fields in optical and NIR filters.
+    - _Required_: A simple way to combine all five fields in optical and NIR filters and output one file in the requested wavelengths.
     - _Optional_: Use ML or DL to do this combination.
+    - _Optional_: Use prior information in ML by grouping galaxies at similar redshifts/stellarmasses/ etc. which are columns in the initial catalogs.
 3. _Required_: Write text. 300 words max, included as a '.md' file.
     - Explain what you did and how you approached the problem.
     - For any code that you did not write but would if you had more time, write down what you would do.
