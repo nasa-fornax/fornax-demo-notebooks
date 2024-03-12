@@ -21,6 +21,4 @@ Here we will have a more simplified case of the actual project with no time info
 3. _Required_: Write text. 300 words max, included as a '.md' file.
     - Explain what you did and how you approached the problem.
     - For any code that you did not write but would if you had more time, write down what you would do.
-4. _Required_: Open a PR with your code and (optional) writeup to merge to the main branch. Have GSoC2024 in the title of your PR.
-
-If you have a question, please ask in a comment on this issue.
+4. _Required_: Open a PR with your code and writeup to merge to the main branch. Have GSoC2024 in the title of your PR.
