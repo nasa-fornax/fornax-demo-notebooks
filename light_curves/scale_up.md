@@ -1,3 +1,16 @@
+---
+jupytext:
+  cell_metadata_filter: -all
+  text_representation:
+    extension: .md
+    format_name: myst
+    format_version: 0.13
+    jupytext_version: 1.14.1
+kernelspec:
+  display_name: Python 3 (ipykernel)
+  language: python
+  name: python3
+---
 
 # Make Multi-Wavelength Light Curves for Large Samples
 
@@ -6,6 +19,7 @@
 ## Learning Goals
 
 By the end of this tutorial, you will be able to:
+
 - Parallelize the code demonstrated in the [light_curve_generator](light_curve_generator.md) notebook to get multi-wavelength light curves.
 - Launch a run using a large sample of objects, monitor the run's progress automatically, and understand its resource usage (CPU and RAM).
 - Understand some of general challenges and requirements when scaling up code.
@@ -24,6 +38,7 @@ We have written a bash script and a python "helper" to facilitate large-scale li
 They are demonstrated below.
 
 Notebook sections are:
+
 - "Overview" describes what the script and helper do. Compares some parallel processing options.
 - "Example 1" shows how to launch a large-scale run using the bash script, monitor its progress automatically, and diagnose a problem (out of RAM).
 - "Example 2" shows how to parallelize the example from the light_curve_generator notebook using the helper and python's `multiprocessing` library.
@@ -44,12 +59,14 @@ Also be aware that the script path shown in the commands below assumes you are i
 +++
 
 The python "helper" is a set of wrapper functions around the same 'code_src/' functions used in the light_curve_generator notebook.
+
 - The wrappers facilitate parallelization and large-scale runs by automating tasks like saving the function outputs to files.
 - The helper does not actually implement parallelization and can only run one function per call.
 - The helper can be used in combination with any parallel processing method.
 - The helper can load `top` output from a file to pandas DataFrames and make some figures.
 
 The bash script allows the user to launch the full run with a single command and provides some automated logging and `top` monitoring.
+
 - When a run is launched, the script calls the helper to gather the requested sample and then launches jobs for each archive query in separate, parallel processes.
   The script then exits leaving the archive jobs running in the background.
 - The script redirects stdout and stderr to log files, one per job.
@@ -185,6 +202,7 @@ $ bash code_src/helpers/scale_up.sh \
 +++
 
 There are at least three places to look for information about a run's status.
+
 - Check the logs for job status or errors. The bash script will redirect stdout and stderr to log files and print out the paths for you.
 - Check for light curve (parquet) data. The script will print out the "parquet_dir". `ls` this directory. You will see a subdirectory for each archive call that has completed successfully, assuming it retrieved data for the sample.
 -  Watch `top`. The script will print the job PIDs. The script can also monitor `top` for you and save the output to a log file.
@@ -381,6 +399,7 @@ This example shows the python `kwargs_dict` and bash script flag options in more
 ### Python `kwargs_dict`
 
 `kwargs_dict` is a dictionary containing all keyword arguments for the run. It can contain:
+
 - names and keyword arguments for any of the `get_*_sample` functions.
 - keyword arguments for any of the `*_get_lightcurves` functions.
 - other keyword arguments used directly by the helper.
