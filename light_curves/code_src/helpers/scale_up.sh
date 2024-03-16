@@ -104,8 +104,8 @@ print_help(){
     echo "Flags used to launch a run (optional):"
     echo
     echo "    -a 'archive names'"
-    echo "        Space-separated list of archive names like 'Gaia IceCube WISE' (case insensitive),"
-    echo "        or a shortcut ('core' or 'all')."
+    echo "        Space-separated list of archive names like 'HEASARC PanSTARRS WISE' (case insensitive),"
+    echo "        or a shortcut, e.g., 'all'."
     echo "        The get_<name>_lightcurves function will be called once for each name."
     echo "        If this flag is not supplied, no light-curve data will be retrieved."
     echo
@@ -155,7 +155,7 @@ print_logs(){
 }
 
 # ---- Set variable defaults.
-archive_names=()  # "core", "all", or space-separated list of names like "gaia wise"
+archive_names=()
 kwargs_dict=()
 kwargs_json='{}'
 kill_all_processes=false
@@ -198,7 +198,7 @@ parquet_dir=$(RUN_HELPER_PY parquet_dir+)
 logs_dir=$(RUN_HELPER_PY logs_dir+)
 # expand an archive_names shortcut value.
 if [ "${archive_names[0]}" == "all" ]; then archive_names=($(RUN_HELPER_PY archive_names_all+l)); fi
-if [ "${archive_names[0]}" == "core" ]; then archive_names=($(RUN_HELPER_PY archive_names_core+l)); fi
+if [ "${archive_names[0]}" == "scaled" ]; then archive_names=($(RUN_HELPER_PY archive_names_scaled+l)); fi
 
 # ---- Construct logs paths.
 mkdir -p $logs_dir

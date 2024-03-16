@@ -5,7 +5,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.1
+    jupytext_version: 1.16.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -22,7 +22,7 @@ By the end of this tutorial, you will be able to:
 
 - Parallelize the code demonstrated in the [light_curve_generator](light_curve_generator.md) notebook to get multi-wavelength light curves.
 - Launch a run using a large sample of objects, monitor the run's progress automatically, and understand its resource usage (CPU and RAM).
-- Understand some of general challenges and requirements when scaling up code.
+- Understand some general challenges and requirements when scaling up code.
 
 +++
 
@@ -32,18 +32,16 @@ By the end of this tutorial, you will be able to:
 
 This notebook shows how to collect multi-wavelength light curves for a large sample of target objects.
 This is a scaling-up of the [light_curve_generator](light_curve_generator.md) and assumes you are familiar with the content of that notebook.
-Many of the challenges, needs, and wants discussed in the appendix and addressed throughout the notebook are common when scaling up code and the ideas can be applied to other use cases.
-
-We have written a bash script and a python "helper" to facilitate large-scale light curve collection.
-They are demonstrated below.
 
 Notebook sections are:
 
-- "Overview" describes what the script and helper do. Compares some parallel processing options.
-- "Example 1" shows how to launch a large-scale run using the bash script, monitor its progress automatically, and diagnose a problem (out of RAM).
-- "Example 2" shows how to parallelize the example from the light_curve_generator notebook using the helper and python's `multiprocessing` library.
-- "Example 3" details the helper parameter options and how to use them in python and bash.
-- "Appendix" contains background information including a discussion of the challenges, needs, and wants encountered when scaling up this code, and general advice for the user.
+- Overview: Describes functionality of the included bash script and python helper functions. Compares some parallel processing options. Introduces `top` and what be aware of.
+- Example 1: Shows how to launch a large-scale run using the bash script, monitor its progress automatically, and diagnose a problem (out of RAM). This method is recommended for sample sizes greater than a few hundred.
+- Example 2: Shows how to parallelize the example from the light_curve_generator notebook using the helper and python's `multiprocessing` library.
+- Example 3: Details the helper parameter options and how to use them in python and bash.
+- Appendix: Contains background information including a discussion of the challenges, needs, and wants encountered when scaling up this code, and general advice for the user which can be applied to other use cases.
+
+As written, this notebook is expected to require at least 1 CPU and 6G RAM.
 
 **Many of the bash commands below are shown in non-executable cells because they are not intended to be run in this notebook.**
 Bash commands that are not executed below begin with the symbol `$ `, and those that are executed begin with `!`.
@@ -54,7 +52,16 @@ Also be aware that the script path shown in the commands below assumes you are i
 
 ## Overview
 
-### What the script and helper do
++++
+
+### Parallel processing methods: bash script vs. python's `multiprocessing`
+
++++
+
+- Bash script. Recommended for most runs with medium to large samples. Allows ZTF to use additional parallelization internally, and so is often faster (ZTF often takes the longest and returns the most data for AGN-like samples). Writes stdout and stderr to log files, useful for monitoring jobs and resource usage. Can save `top` output to a file to help identify CPU and RAM usage/needs.
+- Python's `multiprocessing` library. May be convenient for runs with small to medium sample sizes (< few thousand). Has drawbacks that may be significant including the inability to use ZTF's internal parallelization and that it does not save the log output (stdout and stderr) to file. An advantage of the `multiprocessing` example in this notebook over the light_curve_generator is that it automatically saves the sample and light curve data to disk after loading them and can automatically skip those functions in subsequent calls and use the files instead.
+
+### The python helper
 
 +++
 
@@ -65,23 +72,31 @@ The python "helper" is a set of wrapper functions around the same 'code_src/' fu
 - The helper can be used in combination with any parallel processing method.
 - The helper can load `top` output from a file to pandas DataFrames and make some figures.
 
-The bash script allows the user to launch the full run with a single command and provides some automated logging and `top` monitoring.
+### The bash script
 
-- When a run is launched, the script calls the helper to gather the requested sample and then launches jobs for each archive query in separate, parallel processes.
-  The script then exits leaving the archive jobs running in the background.
-- The script redirects stdout and stderr to log files, one per job.
-- The script tells the user what the process PIDs are and where the log and data files are.
-- In case the run needs to be canceled, the script can find and kill all the processes it launched.
-- The script can monitor `top` during the run, saving `top` output to a log file at a user-defined interval(s). The helper can be used to load this file in python.
+The bash script allows the user to collect light curves from a large scale sample with a single command and provides options to help manage and monitor the run.
+In a nutshell, the script does the following when called using flags that "launch a run":
+
+- calls the helper to gather the requested sample and then launches jobs for each archive query in separate, parallel processes.
+- redirects stdout and stderr to log files.
+- tells the user what the process PIDs are and where the log and data files are.
+- exits, leaving the archive jobs running in the background.
+
+In case all the archive calls need to be canceled after the script exits, the user can call the script again with a different flag to have it find and kill all the processes it launched.
+
+While the jobs are running, the user can call the script again with a different flag to have it save `top` output to a log file at a user-defined interval.
+The helper can be used to load this file to pandas DataFrames and make some figures.
 
 +++
 
-### Parallel processing methods: bash script vs. python's `multiprocessing`
+### Interpreting `top`
 
-+++
+If you are unfamiliar with `top`, the answer to this [StackExchange question](https://superuser.com/questions/575202/understanding-top-command-in-unix) contains a basic description of the fields in the output.
+Also, beware that `top` can be configured to display values in different ways (e.g., as a percentage of either a single CPU or of all available CPUs).
+To understand the local configuration, read the man page (run `man top` in a terminal), particularly the sections "SUMMARY Display" and "FIELDS / Columns Display".
 
-- Bash script. Recommended for most runs with medium to large samples. Allows ZTF to use additional parallelization internally, and so is often faster (ZTF often takes the longest and returns the most data for AGN-like samples). Writes stdout and stderr to log files, useful for monitoring jobs and resource usage. Can monitor and record `top` to help identify CPU and RAM usage/needs.
-- Python's `multiprocessing` library. Useful as a demonstration. May be convenient for runs with small to medium sample sizes. Has drawbacks that may be significant including the inability to use ZTF's internal parallelization and that it does not save the log output (stdout and stderr) to file.
+When running on the Science Console, take note of the amount of CPU and RAM available to the server type you choose when starting the session.
+In particular, beware that `top` can show a larger amount of total RAM than is actually accessible to your server due to resource sharing between users.
 
 +++
 
@@ -93,7 +108,6 @@ The bash script allows the user to launch the full run with a single command and
 ```
 
 ```{code-cell}
-import json  # create json strings for bash script arguments
 import multiprocessing  # python parallelization method
 import pandas as pd  # use a DataFrame to work with light-curve and other data
 import sys  # add code directories to the path
@@ -109,9 +123,10 @@ from plot_functions import create_figures  # make light curve figures
 
 +++
 
-This example shows how to launch a large-scale run using the bash script, monitor its performance, and diagnose a problem (out of RAM).
+This example shows how to launch a large-scale collection of light curves using the bash script, monitor its performance, and diagnose a problem (out of RAM).
 This run collects light curves for 500,000 SDSS objects and takes several hours to complete, but is not actually executed here.
 Instead, we show the bash commands and then look at logs that were generated by running the commands on 2024/03/01.
+If executed, the run is expected to require at least 2 CPUs and 100G RAM.
 
 +++
 
@@ -125,13 +140,16 @@ Instead, we show the bash commands and then look at logs that were generated by 
 # If you are running this for the first time, reduce the sample size 500000 -> 50.
 
 # run_id will be used in future calls to manage this run, and also determines the name of the output directory.
+# If you are executing this, change run_id to your own value to avoid overwriting the demo logs.
 $ run_id="demo-SDSS-500k"
 
-# Execute the run:
+# Execute the run.
+# This will get the sample and then call all archives specified by the '-a' flag.
+# Defaults will be used for all keyword arguments that are not specified.
 $ bash code_src/helpers/scale_up.sh \
     -r "$run_id" \
     -j '{"get_samples": {"SDSS": {"num": 500000}}, "archives": {"ZTF": {"nworkers": 8}}}' \
-    -a "core"  # shortcut for "Gaia HEASARC IceCube WISE ZTF"
+    -a "Gaia HEASARC IceCube WISE ZTF"
 ```
 
 +++
@@ -144,6 +162,8 @@ Command output from 2024/03/01 logs:
 
 ```{code-cell}
 !cat output/lightcurves-demo-SDSS-500k/logs/scale_up.sh.log
+# There is a warning that the SDSS 'specObjID' column was converted from an int to a string.
+# The column is immediately dropped. It is not used in the code.
 ```
 
 ### Cancel
@@ -190,7 +210,7 @@ If you want to restart and skip step(s) that previously completed, run the first
 $ bash code_src/helpers/scale_up.sh \
     -r "$run_id" \
     -j '{"get_samples": {"SDSS": {"num": 500000}}, "archives": {"ZTF": {"nworkers": 8}}}' \
-    -a "core" \
+    -a "Gaia HEASARC IceCube WISE ZTF" \
     -d "overwrite_existing_sample=false" \
     -d "overwrite_existing_lightcurves=false"
 ```
@@ -211,29 +231,28 @@ There are at least three places to look for information about a run's status.
 
 #### Logs
 
-Gaia log from 2024/03/01 (success):
-
 ```{code-cell}
+# Gaia log from 2024/03/01 (success)
 !cat output/lightcurves-demo-SDSS-500k/logs/gaia.log
 ```
 
-ZTF log from 2024/03/01 (failure):
-
 ```{code-cell}
+# ZTF log from 2024/03/01 (failure)
 !cat output/lightcurves-demo-SDSS-500k/logs/ztf.log
 ```
 
 The logs above show that the ZTF job loaded the light curve data successfully ("100%") but exited without writing the parquet file (no "Light curves saved" message like Gaia).
 The data was lost.
 There is also no indication of an error; the job just ends.
-We can spot what happened by looking at the `top` output.
+We can diagnose what happened by looking at the `top` output.
 
 +++
 
 #### `top`
 
-During a run, you can use the `-t` (top) flag to have the script monitor `top` for you and save the output to a log file.
-To capture the complete run, open a second terminal and call the script with `-t` right after launching the run.
+While the jobs are running, you can monitor `top` and save the output to a log file by calling the script again with the `-t` flag.
+This call must be separate from the call that launches the run.
+If you want to capture the sample step as well as the archive queries, open a second terminal and call the script with `-t` right after launching the run in the first terminal.
 
 +++
 
@@ -259,10 +278,12 @@ toplog = helpers.top.load_top_output(toptxt_dir=logs_dir, run_id=run_id)
 ```
 
 ```{code-cell}
+# System summary information from lines 1-5 of `top` output. One row per time step.
 toplog.summary_df.sample(5)
 ```
 
 ```{code-cell}
+# Information about running processes from lines 6+ of `top` output. One row per process, per time step.
 toplog.pids_df.sample(5)
 ```
 
@@ -270,9 +291,19 @@ toplog.pids_df.sample(5)
 fig = toplog.plot_overview()
 ```
 
-In the figure above, "Total" is the machine total, the "%CPU" panel is grouped by PID (process ID), and the "%MEM" panel is grouped by job.
+In the figure, panels 1 and 2 show CPU usage while 3 and 4 show memory usage.
+Panels 1 and 3 show system totals while panels 2 and 4 show usage by individual processes.
+Specifically:
+
+- Panel 1: System CPU load, averaged over the previous one minute. A value of "1" means that all compute tasks could have been completed by one CPU working 100% of the time (in reality, the tasks would have been split between the available CPUs). If this value exceeds the number of CPUs available, some tasks will wait in a queue before being executed.
+- Panel 2: Percentage of time the given process used a CPU. This can be greater than 100% if a process uses multiple threads.
+- Panel 3: Amount of unused memory available to the system. If this nears zero, the system will start killing processes so that the entire machine doesn't go down.
+- Panel 4: Percentage of total RAM used by the given process.
+
 There are many interesting features in the figure that the reader may want to look at in more detail.
 For example, other than ZTF's memory spike at the end, we see that the full run collecting multi-wavelength light curves for the SDSS 500k sample could be completed with about 2 CPU and 60G RAM.
+We also see that the IceCube call completes very quickly but requires a significant amount of memory.
+Another observation is that the WISE call's CPU activity seems to slow down when the ZTF workers are running, indicating that a different number of ZTF workers may be more efficient overall.
 
 We want to learn why the ZTF job failed.
 Let's zoom in on that time period:
@@ -286,12 +317,15 @@ Around 23:06 in the fourth panel, we see the ZTF job's memory usage rise sharply
 This coincides with the total available memory dropping to near zero in the third panel.
 This shows that the machine did not have enough memory for the ZTF call to successfully transform the light curve data collected by the workers into a `MultiIndexDFObject` and write it as a parquet file, so the machine killed the job.
 
-The solution is to rerun ZTF on a machine with more RAM.
+The solution is to rerun the ZTF archive call on a machine with more RAM.
 
 To learn exactly which step in `ztf_get_lightcurves` was causing this and how much memory it actually needed, additional print statements were inserted into the code similar to the following:
 
 ```{code-cell}
-print(f"{helpers.scale_up._now()} | starting explode", flush=True)  # _now() prints the current timestamp
+# this was inserted just before "exploding" the dataframe in ztf_functions.py
+# helpers.scale_up._now() prints the current timestamp
+print(f"{helpers.scale_up._now()} | starting explode", flush=True)
+# ztf_df = ztf_df.explode(...  # this is the next line in ztf_functions.py
 ```
 
 ZTF was then rerun on a large machine and `top` output was saved.
@@ -321,6 +355,9 @@ From here, the user can choose an appropriately sized machine and/or consider wh
 +++
 
 This example shows how to parallelize the example from the light_curve_generator notebook using the helper and python's `multiprocessing`.
+An advantage of the method shown here is that it automatically saves the sample and light curve data to disk after loading them and can automatically skip those steps in subsequent calls and use the files instead.
+This is a small sample (Yang, 30 objects).
+If you want a sample larger than a few hundred, consider using the bash script instead.
 
 Define the keyword arguments for the run:
 
@@ -347,13 +384,15 @@ This is a separate list because the helper can only run one archive call at a ti
 We will iterate over this list and launch each job separately.
 
 ```{code-cell}
-# archive_names = ["Gaia", "WISE"]  # choose your own list
-archive_names = helpers.scale_up.ARCHIVE_NAMES["all"]  # predefined list ("core" or "all")
+# archive_names = ["PanSTARRS", "WISE"]  # choose your own list
+archive_names = helpers.scale_up.ARCHIVE_NAMES["all"]  # predefined list
 archive_names
 ```
 
-Collect the sample and write it as a .ecsv file.
-Then query the archives in parallel using a `multiprocessing.Pool` and write the light curve data as .parquet files.
+In the next cell, we:
+
+- collect the sample and write it as a .ecsv file; then
+- query the archives in parallel using a `multiprocessing.Pool` and write the light curve data as .parquet files.
 
 ```{code-cell}
 %%time
@@ -373,8 +412,9 @@ with multiprocessing.Pool(processes=len(archive_names)) as pool:
 # or using the bash script instead.
 ```
 
-The light curve data is saved as a parquet dataset in the "parquet_dir" directory.
-Load it:
+The light curves are saved in the "parquet_dir" directory.
+Each archive call writes data to a parquet file in its own subdirectory.
+These can be loaded together as a single dataset:
 
 ```{code-cell}
 # copy/paste the directory path from the output above, or ask the helper for it like this:
@@ -479,30 +519,7 @@ Bash example:
 
 ```bash
 $ yaml_run_id=demo-kwargs-yaml
-$ bash code_src/helpers/scale_up.sh -r "$yaml_run_id" -d "use_yaml=true" -a "core"
-```
-
-+++
-
-### Using a json string
-
-The bash script will accept a json string which can be convenient in cases where the parameter definitions are relatively simple and/or when you want to quickly override parameters in the yaml file.
-You can create the json string from a python dictionary:
-
-```{code-cell}
-json_kwargs_dict = {"get_samples": {"SDSS": {"num": 50}}, "archives": {"ZTF": {"nworkers": 8}}}
-json.dumps(json_kwargs_dict)
-```
-
-Copy the json string output above, including the surrounding single quotes ('), and use it like this:
-
-+++
-
-```bash
-$ bash code_src/helpers/scale_up.sh \
-    -r "demo-kwargs-json" \
-    -a "core" \
-    -j '{"get_samples": {"SDSS": {"num": 50}}, "archives": {"ZTF": {"nworkers": 8}}}'
+$ bash code_src/helpers/scale_up.sh -r "$yaml_run_id" -d "use_yaml=true" -a "Gaia HEASARC IceCube WISE ZTF"
 ```
 
 +++
@@ -517,13 +534,13 @@ $ bash code_src/helpers/scale_up.sh \
 
 Scaling up to large sample sizes brings new challenges.
 Even if things go smoothly, each function call may need to use a lot more resources like CPU, RAM, and bandwidth, and may take much longer to complete.
-We'll want to run some functions in parallel to save time, but that will mean the calls must also compete with each other for resources.
+Also, we'll want to run some functions in parallel to save time overall, but that will mean they must compete with each other for resources.
 
 These issues are complicated by the fact that different combinations of samples and archive calls can trigger different problems.
 Inefficiencies in any part of the process -- our code, archive backends, etc. -- which may have been negligible at small scale can balloon into significant hurdles.
 
 Problems can manifest in different ways.
-For example, progress may to slow to a crawl, or it may run smoothly for several hours and then crash suddenly.
+For example, progress may slow to a crawl, or it may run smoothly for several hours and then crash suddenly.
 If the job is running in the background, print statements and error messages may get lost and never be displayed for the user if they are not redirected to a file.
 
 +++
@@ -532,23 +549,24 @@ If the job is running in the background, print statements and error messages may
 
 +++
 
-The main goal is to speed up the run, so we want to look for opportunities to parallelize.
+The main goal is to reduce the total time it takes to run the full code, so we want to look for opportunities to parallelize.
 We can group the light_curve_generator code into two main steps: (1) gather the target object sample; then (2) generate light curves by querying the archives and standardizing the returned data.
 All of the archive calls have to wait for the sample to be available before starting, but then they can run independently in parallel.
+This is fortunate, since gathering the sample does not take long compared to the archive calls.
 
-We need to be able to monitor the run's resource usage and capture print statements, error messages, etc. to log files in order to understand if/when something goes wrong.
+It is useful to be able to monitor the run's resource usage and capture print statements, error messages, etc. to log files in order to understand if/when something goes wrong.
 Even with parallelization, gathering light curves for a large sample of objects is likely to take a few hours at least.
 So we want to automate the monitoring tasks as much as possible.
 
-If the run fails, we'd like to be able to restart it without having to re-do any function calls that were previously successful.
-To accomplish this, the functions' inputs and outputs need to be less tightly coupled than they are in the light_curve_generator notebook.
-For example, we want each function to save its results to a file, and we want the archive calls to read their `sample_table` input from a file.
+If the run fails, we'd like to be able to restart it without having to redo steps that were previously successful.
+To accomplish this, the inputs and outputs need to be less tightly coupled than they are in the light_curve_generator notebook.
+Specifically, we want to save the sample and light curve data to file as soon as each piece is collected, and we want the archive functions to be able to get the `sample_table` input from file.
 
 The python helper and bash script were specifically designed to fulfill many of these wants and needs.
 
 +++
 
-### What the user should do
+### Advice for the user
 
 +++
 
@@ -574,4 +592,4 @@ To execute a run:
 
 **Authors**: Troy Raen, Jessica Krick, Brigitta Sipőcz, Shoubaneh Hemmati, Andreas Faisst, David Shupe
 
-**Updated On**: 2024-03-12
+**Updated On**: 2024-03-31

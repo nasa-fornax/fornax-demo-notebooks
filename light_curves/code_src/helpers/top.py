@@ -209,7 +209,7 @@ class _TopLog:
         mem_avail = float(re.search(r"([0-9]+\.[0-9]+)( avail Mem)$", line_batch[6]).group(1))
 
         # summary df
-        load_names = [f"load_avg_{t}" for t in ["1m", "5m", "15m"]]
+        load_names = [f"load_avg_per_{t}min" for t in ["1", "5", "15"]]
         mem_names = [f"{s}_{ram_units}" for s in ["total", "free", "used", "avail"]]
         columns = [*load_names, *mem_names, "time"]
         data = [*load_avg, mem_total, mem_free, mem_used, mem_avail, batch_time]
@@ -231,19 +231,23 @@ class _TopLog:
         """Create a summary figure visualizing top output."""
         assert self.summary_df.index.name == "time"  # relying on this index
 
+        # it would be better if ram_units were a class attribute. for now, here's a hack
+        ram_units = [c for c in self.summary_df.columns if c.startswith("avail")][0].split("_")[-1]
+
         gridspec_kw = dict(top=0.92, right=0.8, hspace=0.08, height_ratios=[1, 2, 1, 2])
         fig, axs = plt.subplots(4, sharex=True, gridspec_kw=gridspec_kw, figsize=(12, 8))
-        ycols_axs = dict(zip(["load_avg_1m", "%CPU", "avail_GiB", "%MEM"], axs))
+        ycols_axs = dict(zip(["load_avg_per_1min", "%CPU", f"avail_{ram_units}", "%MEM"], axs))
 
         # plot
         my_summary = self.summary_df.between_time(*between_time) if between_time else self.summary_df
         for y, ax in ycols_axs.items():
-            if y in ["avail_GiB", "load_avg_1m"]:
+            if y in [f"avail_{ram_units}", "load_avg_per_1min"]:
                 self._plot_summary(my_summary, y=y, ax=ax)
             elif y == "%CPU":
                 self._plot_pids(groupby="PID", y=y, ax=ax, between_time=between_time)
             elif y == "%MEM":
-                self._plot_pids(groupby="job_name", y=y, ax=ax, between_time=between_time)
+                # self._plot_pids(groupby="job_name", y=y, ax=ax, between_time=between_time)
+                self._plot_pids(groupby="PID", y=y, ax=ax, between_time=between_time)
 
         time0 = my_summary.index[0]  # take date and timezone from first row
         self._format_axes(ycols_axs, xlabel=f"{self.summary_df.index.name} ({time0.tzname()})")
@@ -317,13 +321,16 @@ class _TopLog:
         for y, ax in ycols_axs.items():
             handles, labels = ax.get_legend_handles_labels()
             legend_items = dict(zip(labels, handles))  # remove duplicate labels
-            ax.legend(legend_items.values(), legend_items.keys(), loc="upper left", bbox_to_anchor=bbox_to_anchor)
+            title = "System" if "Total" in labels else "Processes"
+            ax.legend(
+                legend_items.values(), legend_items.keys(), loc="upper left", bbox_to_anchor=bbox_to_anchor, title=title
+            )
             ax.set_ylabel(y)
             ax.tick_params(direction="inout")
         ax.xaxis.set_major_formatter(DateFormatter("%H:%M"))
         ax.set_xlabel(xlabel)
 
-    def plot_time_tags(self, summary_y: str = "used_GiB") -> matplotlib.figure.Figure:
+    def plot_time_tags(self, summary_y: str) -> matplotlib.figure.Figure:
         y_series = self.summary_df[summary_y]
         fig, ax = plt.subplots(figsize=(8, 6))
 
