@@ -13,9 +13,8 @@ The user cases and documentation of the Fornax Initiative are currently availabl
 
 ## Content contributing
 
-In this repository, we use Jupytext and MyST Markdown Notebooks. You will need ``jupytext`` installed
-for your browser to recognise the markdown files as notebooks (see more about the motivation and
-technicalities e.g. here: https://numpy.org/numpy-tutorials/content/pairing.html).
+In this repository, we follow the standard practice of the Scientific Python ecosystem and use Jupytext and MyST Markdown Notebooks.
+You will need ``jupytext`` installed for your browser to recognise the markdown files as notebooks (see more about the motivation and technicalities e.g. here: https://numpy.org/numpy-tutorials/content/pairing.html).
 
 If you already have an ``ipynb`` file, convert it to Markdown using the following command, and commit
 only the markdown file to the repo:
