@@ -1,0 +1,1234 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Fornax Science Console &#8212; Fornax Demo Notebooks</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'documentation/README';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Make Multi-Wavelength Light Curves Using Archival Data" href="../light_curves/light_curve_generator.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/fornax_logo.png" class="logo__image only-light" alt="Fornax Demo Notebooks - Home"/>
+    <script>document.write(`<img src="../_static/fornax_logo.png" class="logo__image only-dark" alt="Fornax Demo Notebooks - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/fornax-navo/fornax-demo-notebooks" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../index.html">
+                    Tutorial Notebooks
+                </a>
+            </li>
+        </ul>
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../forced_photometry/README.html">Multi-band forced photometry</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../forced_photometry/multiband_photometry.html">Automated Multiband Forced Photometry on Large Datasets</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../light_curves/README.html">Time Domain</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../light_curves/light_curve_generator.html">Make Multi-Wavelength Light Curves Using Archival Data</a></li>
+</ul>
+</li>
+</ul>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Fornax Science Console</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/fornax-navo/fornax-demo-notebooks" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/fornax-navo/fornax-demo-notebooks/edit/main/documentation/README.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/fornax-navo/fornax-demo-notebooks/issues/new?title=Issue%20on%20page%20%2Fdocumentation/README.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/documentation/README.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Fornax Science Console</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-the-fornax-science-console">What is the Fornax Science Console?</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-does-it-do-basic-capabilities">What does it do? (Basic Capabilities)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#who-is-it-for">Who is it for?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#limits-what-does-it-not-do">Limits: What does it not do?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fornax-will-be-most-beneficial-to-use-cases-which">Fornax will be most beneficial to use cases which:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-fornax-will-be-least-beneficial-to-use-cases-which">The Fornax will be least beneficial to use cases which:</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-started">Getting started</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-get-an-account">How to get an account?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-log-in">How to Log in?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-end-a-session">How to end a session?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-choose-which-size-server-to-open-upon-login">How to choose which size server to open upon login?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-a-kernel-and-how-to-choose-one">What is a kernel and how to choose one?</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#navigating-jupyter-lab">Navigating jupyter lab</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-start-a-new-notebook">How to start a new notebook?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-get-a-terminal-window">How to get a terminal window?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-upload-data-into-fornax">How to upload data into Fornax?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-are-our-storage-limits-for-uploaded-data">What are our storage limits for uploaded data?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-download-data-from-the-plaltform-to-my-local-machine">How to download data from the plaltform to my local machine?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#home-directory">Home directory</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#does-work-persist-between-sessions">Does work persist between sessions?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-the-info-at-the-bottom-of-the-jupyterlab-window">What is the info at the bottom of the jupyterlab window</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-share-data-from-inside-fornax-with-international-collaborators">How to share data from inside Fornax with (international) collaborators?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-there-a-way-to-go-directly-from-fornax-to-a-university-s-box-account">Is there a way to go directly from Fornax to a University’s Box account?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-there-a-way-to-go-directly-from-fornax-into-a-different-aws-bucket-that-a-project-may-pay-for">Is there a way to go directly from Fornax into a different AWS bucket that a project may pay for?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-know-what-computing-resources-are-available-on-fornax">How to know what computing resources are available on Fornax?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-save-my-notebook-as-a-python-script">How to save my notebook as a python script?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#save-your-work">Save your work!</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-long-will-the-server-stay-active-if-not-in-use">How long will the server stay active if not in use?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-run-a-notebook-non-interactively">How to run a notebook non-interactively?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-open-a-plot-png-pdf-etc-either-generated-by-a-notebook-or-uploaded">How to open a plot (png, pdf, etc.) either generated by a notebook or uploaded ?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#will-notebooks-that-run-on-fornax-also-work-on-my-laptop">Will notebooks that run on Fornax also work on my laptop?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#who-covers-costs-when-working-in-fornax">Who covers costs when working in Fornax?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-know-what-costs-are-being-incurred">How to know what costs are being incurred?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-it-possible-to-do-code-development-in-emacs-or-vi-or-some-other-ide">Is it possible to do code development in emacs or vi or some other IDE?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-there-a-limit-to-the-number-of-packages-a-user-can-install">Is there a limit to the number of packages a user can install?</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-access">Data Access</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-add-my-own-data">How to add my own data?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#where-should-data-be-stored-on-fornax">Where should data be stored on Fornax?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-access-images-in-the-cloud">How to access images in the cloud?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-access-catalogs-in-the-cloud">How to access catalogs in the cloud?</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#managing-software">Managing Software</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#making-a-conda-environment-that-persists-across-sessions">Making a conda environment that persists across sessions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-get-a-list-of-what-software-is-already-pre-installed-on-the-fornax-science-console">How to get a list of what software is already pre-installed on the Fornax Science Console?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-install-my-own-software">How to install my own software?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-the-terminal-command-to-list-package-version-info-using-pip">What is the terminal command to list package version info using pip?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-it-possible-to-launch-apps-from-icons-like-mopex-or-spice">Is it possible to launch apps from icons? Like MOPEX or SPICE</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-it-possible-to-run-licensed-software-idl-in-fornax">Is it possible to run licensed software (IDL) in Fornax?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-it-possible-to-bring-my-own-docker-image">Is it possible to bring my own docker image?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-it-possible-to-run-the-container-from-fornax-on-my-own-personal-computer-laptop">Is it possible to run the container from Fornax on my own personal computer/laptop?</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples-and-tutorials">Examples and Tutorials</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fully-worked-science-use-cases">Fully worked science use cases</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cloud">Cloud</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#optimizing-code-for-cpu-usage-cpu-profiling">Optimizing code for CPU usage (CPU profiling)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#optimizing-code-for-memory-usage-memory-profiling">Optimizing code for memory usage (memory profiling)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#optimizing-code-for-multiple-cpus-with-parallelization">Optimizing code for multiple CPUs with parallelization</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-science-examples">MAST science examples</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#heasarc-sciserver-cookbooks">HEASARC sciserver_cookbooks</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cross-matching-two-large-catalogs">Cross matching two large catalogs</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#work-with-theoretical-catalogs">Work with theoretical catalogs</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-should-users-contribute-to-tutorials">How should users contribute to tutorials?</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#troubleshooting">Troubleshooting</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-help">Getting Help</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-and-distributed-processing">Parallel and Distributed Processing</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#terminology">Terminology</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#when-to-use-distributed-or-parallel-processing">When to use distributed or parallel processing?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#distributed-processing-with-dask-dataframes-basic-concepts">Distributed processing with Dask DataFrames – basic concepts</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#additional-resources">Additional Resources</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="fornax-science-console">
+<h1>Fornax Science Console<a class="headerlink" href="#fornax-science-console" title="Link to this heading">#</a></h1>
+<section id="what-is-the-fornax-science-console">
+<h2>What is the Fornax Science Console?<a class="headerlink" href="#what-is-the-fornax-science-console" title="Link to this heading">#</a></h2>
+<p>The Fornax Science Console is a compute system in the cloud near to NASA data in the cloud which provides a place where astronomers can do data intensive research with reduced barriers.
+The first barrier we remove is the need to install software and deal with packages on your personal computer.
+This greatly simplifies the setup and startup for any astronomer who now no longer needs to worry about setting up and maintaining a python working environment.
+Environments with pre-installed python software tailored to astronomers are provided upon login to Jupyterlab for all users of Fornax.
+The second barrier we remove is the need for every astronomer to buy compute/memory commensurate to data science level projects.
+You will no longer need to buy the fastest/ most memory intensive personal computer.
+When you need those capabilities, we will have it ready for you.
+When you need to just write or debug code, we have smaller compute ready for that too.
+These two things (increased compute/memory and ease of use) should lower the barrier of entry to data science projects for all NASA astronomers.
+You no longer need to have an expensive computer, you no longer need to be an expert at installing software, you just need to have an idea!
+Lastly, by lowering the barrier to entry, we also increase the potential for reproducibility of big data results in astronomy.
+Before, if you were wanting to reproduce some data intensive work done in the literature, it would have been challenging to to have the right compute and setup, now you just need a login….</p>
+<section id="what-does-it-do-basic-capabilities">
+<h3>What does it do? (Basic Capabilities)<a class="headerlink" href="#what-does-it-do-basic-capabilities" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Increased ease of use,</p></li>
+<li><p>Increased number of CPUs,</p></li>
+<li><p>Increased memory,</p></li>
+<li><p>Increased inclusion,</p></li>
+<li><p>Increased reproducibility</p></li>
+</ul>
+</section>
+<section id="who-is-it-for">
+<h3>Who is it for?<a class="headerlink" href="#who-is-it-for" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>All astronomers, particularly those interested in analysis of NASA astrophysics data.</p></li>
+</ul>
+</section>
+<section id="limits-what-does-it-not-do">
+<h3>Limits: What does it not do?<a class="headerlink" href="#limits-what-does-it-not-do" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Limits on cores/RAM:</p>
+<ul>
+<li><p>There are several options for the size of the compute.  Please select the smallest that you can use for testing and exploration.  Do not use the larger images unless you have already tested a smaller subset of the analysis on a smaller compute instance.</p></li>
+<li><p>There are currently no GPUs available.</p></li>
+<li><p>In JK’s understanding (which needs to be updated) you get what the numbers say when you choose a server upon login, but for a limited time if you need slightly more, the code will not crash but will have access to slightly more.</p></li>
+<li><p>Raen has seen some evidence of this “bursting” behavior, but doesn’t have direct knowledge of the actual configuration. It would be good to know.</p></li>
+</ul>
+</li>
+<li><p>Limits on disk ace:</p>
+<ul>
+<li><p>Current default is 10GB (Feb 2024).</p></li>
+<li><p>This can be increased on request.</p></li>
+</ul>
+</li>
+<li><p>Limits on incurred costs:</p>
+<ul>
+<li><p>Users ought to be able to access any data they both want and have permissions/credentials for, regardless of where it is (AWS S3, Google’s GCS, NASA archive, personal computer, etc.).</p></li>
+<li><p>Any data downloaded (or pushed out) from the Fornax compute will incur egress costs to Fornax.  This should be limited to small analysis results only.</p></li>
+<li><p>Aside:  Historically, the data holder (e.g., IRSA) typically covers the cost (e.g., egress) of delivering the data to the user, but cloud storage buckets are starting to change both the workflows and the cost models. Buckets support large-scale data access in ways that an archive like IRSA cannot support from on-premise. This is great, but also means more data requests and larger (and less predictable) costs. Data holders can often get the costs covered through grants, arrangements with the cloud provider (e.g., AWS), etc. But, in some cases they will decide that the best option is to make the data available in a bucket under what I would call the “cloud-pricing model” and sum up as “everyone pays for what <em>they</em> use”. In particular, this means the data holder will pay the <em>storage</em> costs (which they can predict and easily control), and the requestor/end user will pay the <em>access</em> costs including egress (which the data holder cannot easily predict or control, but the requestor can). Individual charges are generally small and reasonable when read around in this way, and the the cloud provider often offers free access up to some small but reasonable limit. However, egress is a particular fee that often does not apply at all, but in other cases can balloon to $$$ very quickly. So it is absolutely something to be considered, planned for, and controlled. Lastly, who pays the access/egress costs is determined by a setting on the bucket. If the bucket is “requestor pays”, the user/requestor will need (e.g.,) AWS credentials to access it – charges are then billed to the AWS account that owns the credentials.</p></li>
+<li><p>As far as I can tell, the best (AWS) option for actual controls – beyond just “monitoring” support – is <a class="reference external" href="https://aws.amazon.com/blogs/aws-cloud-financial-management/get-started-with-aws-budgets-actions/">AWS Budgets Actions</a>.</p></li>
+<li><p>AWS may charge <em>ingress</em> fees to bring data into an SMCE pod or user instance. This would be completely separate from any egress fees. There Someone working more directly on Fornax Daskhub would need to answer whether/how ingress applies.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="fornax-will-be-most-beneficial-to-use-cases-which">
+<h3>Fornax will be most beneficial to use cases which:<a class="headerlink" href="#fornax-will-be-most-beneficial-to-use-cases-which" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>can be significantly parallelized to make use of large numbers of CPUs</p></li>
+<li><p>require access to large amounts of data</p></li>
+<li><p>require access to cloud based data (AWS only?)</p></li>
+</ul>
+</section>
+<section id="the-fornax-will-be-least-beneficial-to-use-cases-which">
+<h3>The Fornax will be least beneficial to use cases which:<a class="headerlink" href="#the-fornax-will-be-least-beneficial-to-use-cases-which" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>run codes which are not parallelized</p></li>
+<li><p>Some CPUs are more efficient than others. ie., the M1 is a very powerful CPU compared to what is on Fornax. (Is this true?) A user might expect a few tens of percent speed decrease when going from M1 to Fornax if there are no gains to be made from multiprocessing or cloud access</p></li>
+</ul>
+</section>
+</section>
+<section id="getting-started">
+<h2>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading">#</a></h2>
+<section id="how-to-get-an-account">
+<h3>How to get an account?<a class="headerlink" href="#how-to-get-an-account" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>The platform is currently available by invitation only.</p></li>
+</ul>
+</section>
+<section id="how-to-log-in">
+<h3>How to Log in?<a class="headerlink" href="#how-to-log-in" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Log in at  https://daskhub.fornaxdev.mysmce.com/</p></li>
+</ul>
+</section>
+<section id="how-to-end-a-session">
+<h3>How to end a session?<a class="headerlink" href="#how-to-end-a-session" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Before loggin out, please shut down your server.  This is an important step which insures the server you are using doesn’t keep running in the background, thereby wasting resources.</p></li>
+<li><p>Go to <code class="docutils literal notranslate"><span class="pre">File</span></code> Menu and click on <code class="docutils literal notranslate"><span class="pre">hub</span> <span class="pre">control</span> <span class="pre">panel</span></code> as in the below image, which will bring up the option to <code class="docutils literal notranslate"><span class="pre">stop</span> <span class="pre">my</span> <span class="pre">server</span></code>(in red).  After stopping the server, please <code class="docutils literal notranslate"><span class="pre">logout</span></code> in the upper right of the jupyterhub window.
+<img alt=" " src="../_images/hub_control_panel.png" /></p></li>
+</ul>
+</section>
+<section id="how-to-choose-which-size-server-to-open-upon-login">
+<h3>How to choose which size server to open upon login?<a class="headerlink" href="#how-to-choose-which-size-server-to-open-upon-login" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Make sure to use <code class="docutils literal notranslate"><span class="pre">mini</span></code> or <code class="docutils literal notranslate"><span class="pre">standard</span></code> size for writing/debugging/testing before switching to larger sizes for full runs of code at scale</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">On</span> <span class="pre">demand</span></code> means an AWS server that starts when the user asks for it, and runs as long as you continue to use and pay for it.  This is in contrast to the <code class="docutils literal notranslate"><span class="pre">spot</span></code> servers at AWS which are used for short runs and are cheaper, but can be revoked at any time (per AWS needs)</p></li>
+<li><p>128 core: do not use unless given permission</p></li>
+</ul>
+</section>
+<section id="what-is-a-kernel-and-how-to-choose-one">
+<h3>What is a kernel and how to choose one?<a class="headerlink" href="#what-is-a-kernel-and-how-to-choose-one" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>In Jupyter, kernels are the background processes that execute cells and return results for display.</p></li>
+<li><p>To select the kernel on which you want to run your Notebook, go to the Kernel menu and choose Change Kernel. You can also click directly on the name of the active kernel to switch to another.</p></li>
+</ul>
+</section>
+</section>
+<section id="navigating-jupyter-lab">
+<h2>Navigating jupyter lab<a class="headerlink" href="#navigating-jupyter-lab" title="Link to this heading">#</a></h2>
+<section id="how-to-start-a-new-notebook">
+<h3>How to start a new notebook?<a class="headerlink" href="#how-to-start-a-new-notebook" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>The blue <code class="docutils literal notranslate"><span class="pre">+</span></code> in the upper left brings you to the launcher where you can start a new, empty notebook or open a terminal window
+<img alt="new launcher" src="../_images/new_launcher.png" /></p></li>
+</ul>
+</section>
+<section id="how-to-get-a-terminal-window">
+<h3>How to get a terminal window?<a class="headerlink" href="#how-to-get-a-terminal-window" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>The blue <code class="docutils literal notranslate"><span class="pre">+</span></code> in the upper left brings you to the launcher where you can start a new notebook or open a terminal window
+<img alt="terminal" src="../_images/terminal.png" /></p></li>
+</ul>
+</section>
+<section id="how-to-upload-data-into-fornax">
+<h3>How to upload data into Fornax?<a class="headerlink" href="#how-to-upload-data-into-fornax" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">uparrow</span></code> in the upper left allows you to upload data.  If it is a large amount of data, consider creating a zip or tar archive first.
+<img alt="upload_button" src="../_images/upload_button.png" /></p></li>
+<li><p>From within Jupyter Lab, you can also use a terminal to transfer data with the usual methods (<code class="docutils literal notranslate"><span class="pre">scp</span></code>, <code class="docutils literal notranslate"><span class="pre">wget</span></code>, <code class="docutils literal notranslate"><span class="pre">curl</span></code> should all work).</p></li>
+</ul>
+</section>
+<section id="what-are-our-storage-limits-for-uploaded-data">
+<h3>What are our storage limits for uploaded data?<a class="headerlink" href="#what-are-our-storage-limits-for-uploaded-data" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Current default is 10GB (Feb 2024)</p></li>
+</ul>
+</section>
+<section id="how-to-download-data-from-the-plaltform-to-my-local-machine">
+<h3>How to download data from the plaltform to my local machine?<a class="headerlink" href="#how-to-download-data-from-the-plaltform-to-my-local-machine" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>If it is a large amount of data, consider creating a zip or tar archive first.  If it is a small file, you can right click on the file name in the file browser and scroll to <code class="docutils literal notranslate"><span class="pre">Download</span></code><br />
+<img alt="right_click_download" src="../_images/right_click_download.png" /></p></li>
+</ul>
+</section>
+<section id="home-directory">
+<h3>Home directory<a class="headerlink" href="#home-directory" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>When you log into the science console, the active directory is your $HOME directory.  This directory is unique to you: edits and uploads are not visible to other users.</p></li>
+<li><p>Raen thinks there are directories in $HOME that are shared (e.g., <code class="docutils literal notranslate"><span class="pre">efs</span></code> and <code class="docutils literal notranslate"><span class="pre">s3</span></code>), and perhaps just mirrored or symlinked into $HOME. It would be nice to get clarification. Specifically:</p>
+<ul>
+<li><p>Which directories are/aren’t shared?</p></li>
+<li><p>Which directories does the user have write access to, and are there any restrictions/considerations for putting stuff there (other than disk size)?</p></li>
+<li><p>Which directories can/should the user look in to discover data they have access to? (e.g., <code class="docutils literal notranslate"><span class="pre">s3</span></code> has various archive data, <code class="docutils literal notranslate"><span class="pre">efs</span></code> has some data shared by users, anything else?)</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="does-work-persist-between-sessions">
+<h3>Does work persist between sessions?<a class="headerlink" href="#does-work-persist-between-sessions" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Files in your home directory will persist between sessions.</p></li>
+<li><p>pip installs will persist across kernel restarts, but not across logging out and back in.</p></li>
+<li><p>If you want software installs to be persistent, consider setting up an environment: See below under “Making a conda environment that persists across sessions”</p></li>
+</ul>
+</section>
+<section id="what-is-the-info-at-the-bottom-of-the-jupyterlab-window">
+<h3>What is the info at the bottom of the jupyterlab window<a class="headerlink" href="#what-is-the-info-at-the-bottom-of-the-jupyterlab-window" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>The github branch is listed as well as the name of the kernel in use</p></li>
+<li><p>the kernel is listed as either ‘idle’ or ‘busy’ which is useful to know if your kernel is working or has crashed.</p></li>
+</ul>
+</section>
+<section id="how-to-share-data-from-inside-fornax-with-international-collaborators">
+<h3>How to share data from inside Fornax with (international) collaborators?<a class="headerlink" href="#how-to-share-data-from-inside-fornax-with-international-collaborators" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Download them to favorite storage place (university Box account) or put in AWS cloud (put $$ in your proposals to cover this)</p></li>
+</ul>
+</section>
+<section id="is-there-a-way-to-go-directly-from-fornax-to-a-university-s-box-account">
+<h3>Is there a way to go directly from Fornax to a University’s Box account?<a class="headerlink" href="#is-there-a-way-to-go-directly-from-fornax-to-a-university-s-box-account" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Any publicly accessible web service can be reached from Fornax through the HTTPS protocol, e.g., APIs, wget, etc.</p></li>
+</ul>
+</section>
+<section id="is-there-a-way-to-go-directly-from-fornax-into-a-different-aws-bucket-that-a-project-may-pay-for">
+<h3>Is there a way to go directly from Fornax into a different AWS bucket that a project may pay for?<a class="headerlink" href="#is-there-a-way-to-go-directly-from-fornax-into-a-different-aws-bucket-that-a-project-may-pay-for" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Any publicly available bucket is visible from Fornax as it would be on your laptop.  If you require an access key to see into the bucket from your laptop, you will also need that on Fornax.</p></li>
+</ul>
+</section>
+<section id="how-to-know-what-computing-resources-are-available-on-fornax">
+<h3>How to know what computing resources are available on Fornax?<a class="headerlink" href="#how-to-know-what-computing-resources-are-available-on-fornax" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>in jupyter hub - open a terminal window by going to the file folder in the upper left, clicking on the plus sign</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">nproc</span></code> will give you the number of processors</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cat</span> <span class="pre">/proc/cpuinfo</span></code> will give you more detailed info on the processors</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">free</span> <span class="pre">-h</span></code> will give the amount of RAM available/used</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cat</span> <span class="pre">/proc/meminfo</span></code> will give  more detailed info on the amount of RAM available/used</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="how-to-save-my-notebook-as-a-python-script">
+<h3>How to save my notebook as a python script?<a class="headerlink" href="#how-to-save-my-notebook-as-a-python-script" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>from the command line: <code class="docutils literal notranslate"><span class="pre">jupyter</span> <span class="pre">nbconvert</span> <span class="pre">--to</span> <span class="pre">script</span> <span class="pre">notebookname.ipynb</span></code></p></li>
+</ul>
+</section>
+<section id="save-your-work">
+<h3>Save your work!<a class="headerlink" href="#save-your-work" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>the Fornax Science Console will cull servers after a user is inactive for a certain amount of time -</p></li>
+</ul>
+</section>
+<section id="how-long-will-the-server-stay-active-if-not-in-use">
+<h3>How long will the server stay active if not in use?<a class="headerlink" href="#how-long-will-the-server-stay-active-if-not-in-use" title="Link to this heading">#</a></h3>
+</section>
+<section id="how-to-run-a-notebook-non-interactively">
+<h3>How to run a notebook non-interactively?<a class="headerlink" href="#how-to-run-a-notebook-non-interactively" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>We are working on providing a job queue.</p></li>
+</ul>
+</section>
+<section id="how-to-open-a-plot-png-pdf-etc-either-generated-by-a-notebook-or-uploaded">
+<h3>How to open a plot (png, pdf, etc.) either generated by a notebook or uploaded ?<a class="headerlink" href="#how-to-open-a-plot-png-pdf-etc-either-generated-by-a-notebook-or-uploaded" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>double clicking on them in the file browser will open them in a new tab</p></li>
+</ul>
+</section>
+<section id="will-notebooks-that-run-on-fornax-also-work-on-my-laptop">
+<h3>Will notebooks that run on Fornax also work on my laptop?<a class="headerlink" href="#will-notebooks-that-run-on-fornax-also-work-on-my-laptop" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>In general, yes, but you need to have a python environment setup in the same way as on it is on Fornax.</p></li>
+<li><p>see below under “Can I run the container from Fornax on my own personal computer/laptop?”</p></li>
+</ul>
+</section>
+<section id="who-covers-costs-when-working-in-fornax">
+<h3>Who covers costs when working in Fornax?<a class="headerlink" href="#who-covers-costs-when-working-in-fornax" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>NASA will pay for the work that you do, but please be mindful of those costs.</p></li>
+</ul>
+</section>
+<section id="how-to-know-what-costs-are-being-incurred">
+<h3>How to know what costs are being incurred?<a class="headerlink" href="#how-to-know-what-costs-are-being-incurred" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>We are working on a cost dashboard.</p></li>
+</ul>
+</section>
+<section id="is-it-possible-to-do-code-development-in-emacs-or-vi-or-some-other-ide">
+<h3>Is it possible to do code development in emacs or vi or some other IDE?<a class="headerlink" href="#is-it-possible-to-do-code-development-in-emacs-or-vi-or-some-other-ide" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Emacs or vi is possible from the terminal</p></li>
+<li><p>The JupyterLab interface also has its own editor.</p></li>
+<li><p>If you prefer to develop elsewhere, you can push your changes to a publicly available repo (e.g., GitHub) and synchronize that to a location on your home directory on Fornax.</p></li>
+</ul>
+</section>
+<section id="is-there-a-limit-to-the-number-of-packages-a-user-can-install">
+<h3>Is there a limit to the number of packages a user can install?<a class="headerlink" href="#is-there-a-limit-to-the-number-of-packages-a-user-can-install" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>There is a limit on the space a user has access to, but not the number of packages, and packages are usually small.</p></li>
+</ul>
+</section>
+</section>
+<section id="data-access">
+<h2>Data Access<a class="headerlink" href="#data-access" title="Link to this heading">#</a></h2>
+<section id="how-to-add-my-own-data">
+<h3>How to add my own data?<a class="headerlink" href="#how-to-add-my-own-data" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>see <a class="reference internal" href="#How-to-upload-data-into-fornax?"><span class="xref myst">above</span></a></p></li>
+</ul>
+</section>
+<section id="where-should-data-be-stored-on-fornax">
+<h3>Where should data be stored on Fornax?<a class="headerlink" href="#where-should-data-be-stored-on-fornax" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>See “Home Directory” <a class="reference internal" href="#Home-directory"><span class="xref myst">above</span></a></p></li>
+</ul>
+</section>
+<section id="how-to-access-images-in-the-cloud">
+<h3>How to access images in the cloud?<a class="headerlink" href="#how-to-access-images-in-the-cloud" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/spacetelescope/tike_content/blob/main/content/notebooks/data-access/data-access.ipynb">Tutorial</a> notebook on STScI data</p></li>
+<li><p>Where is Abdu’s similar notebook with pyvo tools that was used for the July2023 HQ demo?</p></li>
+<li><p>placeholder for Brigitta’s SIA access notebook</p></li>
+</ul>
+</section>
+<section id="how-to-access-catalogs-in-the-cloud">
+<h3>How to access catalogs in the cloud?<a class="headerlink" href="#how-to-access-catalogs-in-the-cloud" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><a class="reference external" href="https://irsa.ipac.caltech.edu/docs/notebooks/">Tutorials on IRSA</a></p></li>
+</ul>
+</section>
+</section>
+<section id="managing-software">
+<h2>Managing Software<a class="headerlink" href="#managing-software" title="Link to this heading">#</a></h2>
+<section id="making-a-conda-environment-that-persists-across-sessions">
+<h3>Making a conda environment that persists across sessions<a class="headerlink" href="#making-a-conda-environment-that-persists-across-sessions" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>If the pre-installed environments don’t have the software you need, you can create your own persistent environment available across multiple sessions.</p></li>
+<li><p>follow <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html">conda documentation</a></p></li>
+<li><p>specifically <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html#managing-envs">managing environments</a></p></li>
+</ul>
+</section>
+<section id="how-to-get-a-list-of-what-software-is-already-pre-installed-on-the-fornax-science-console">
+<h3>How to get a list of what software is already pre-installed on the Fornax Science Console?<a class="headerlink" href="#how-to-get-a-list-of-what-software-is-already-pre-installed-on-the-fornax-science-console" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Software is installed in miniconda environments.  You can use “<a class="reference external" href="https://conda.io/projects/conda/en/latest/commands/list.html">conda list</a>”  to list the contents of each.</p></li>
+</ul>
+</section>
+<section id="how-to-install-my-own-software">
+<h3>How to install my own software?<a class="headerlink" href="#how-to-install-my-own-software" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Persistent User-Installed Software</p>
+<ul>
+<li><p>See above(“Making a conda environment that persists across sessions”)</p></li>
+</ul>
+</li>
+<li><p>Non-persistent User-Installed Software</p>
+<ul>
+<li><p>you can !pip install your favorite software from inside a notebook.  This installed software will stay through kernel restarts, but will not be persistent if you stop your server and restart it (logging out and back in) unless you specify the - - user option, which will put the software in your home directory.  Note that an install done in one compute environment may or may not work in a container opened using another environment, even if the directory is still there.  Conda environments are useful to manage these.</p></li>
+<li><p>For the tutorial notebooks we tend to have a requirements.txt file in the repo which lists all the software dependencies.  Then the first line in the notebook is <code class="docutils literal notranslate"><span class="pre">!pip</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">requirements.txt</span></code>  That way other people can run the notebook and will know which software is involved.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="what-is-the-terminal-command-to-list-package-version-info-using-pip">
+<h3>What is the terminal command to list package version info using pip?<a class="headerlink" href="#what-is-the-terminal-command-to-list-package-version-info-using-pip" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">show</span> <span class="pre">packagname</span></code></p></li>
+</ul>
+</section>
+<section id="is-it-possible-to-launch-apps-from-icons-like-mopex-or-spice">
+<h3>Is it possible to launch apps from icons? Like MOPEX or SPICE<a class="headerlink" href="#is-it-possible-to-launch-apps-from-icons-like-mopex-or-spice" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>These apps are unavailable in Fornax</p></li>
+</ul>
+</section>
+<section id="is-it-possible-to-run-licensed-software-idl-in-fornax">
+<h3>Is it possible to run licensed software (IDL) in Fornax?<a class="headerlink" href="#is-it-possible-to-run-licensed-software-idl-in-fornax" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>licensed software is not possible in Fornax</p></li>
+</ul>
+</section>
+<section id="is-it-possible-to-bring-my-own-docker-image">
+<h3>Is it possible to bring my own docker image?<a class="headerlink" href="#is-it-possible-to-bring-my-own-docker-image" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>This is not currently possible.</p></li>
+</ul>
+</section>
+<section id="is-it-possible-to-run-the-container-from-fornax-on-my-own-personal-computer-laptop">
+<h3>Is it possible to run the container from Fornax on my own personal computer/laptop?<a class="headerlink" href="#is-it-possible-to-run-the-container-from-fornax-on-my-own-personal-computer-laptop" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Yes.  The images are all on the AWS Elastic Container Registry.  <strong>Need a link and more instructions</strong></p></li>
+</ul>
+</section>
+</section>
+<section id="examples-and-tutorials">
+<h2><a class="reference external" href="https://fornax-navo.github.io/fornax-demo-notebooks/">Examples and Tutorials</a><a class="headerlink" href="#examples-and-tutorials" title="Link to this heading">#</a></h2>
+<section id="fully-worked-science-use-cases">
+<h3>Fully worked science use cases<a class="headerlink" href="#fully-worked-science-use-cases" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/fornax-navo/fornax-demo-notebooks/tree/main/forced_photometry/">Forced photometry</a></p></li>
+<li><p><a class="reference external" href="https://github.com/fornax-navo/fornax-demo-notebooks/tree/main/light_curves/">Light curves</a></p></li>
+<li><p><a class="reference external" href="https://github.com/fornax-navo/fornax-demo-notebooks/blob/main/light_curves/ML_AGNzoo.md">ML dimensionality reduction</a></p></li>
+</ul>
+</section>
+<section id="cloud">
+<h3>Cloud<a class="headerlink" href="#cloud" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/spacetelescope/tike_content/blob/main/content/notebooks/data-access/data-access.ipynb">STScI</a></p></li>
+<li><p><a class="reference external" href="https://irsa.ipac.caltech.edu/docs/notebooks/cloud-access-intro.html">IRSA Cloud Access Introduction</a></p></li>
+<li><p><a class="reference external" href="https://irsa.ipac.caltech.edu/docs/notebooks/wise-allwise-catalog-demo.html">Parquet info from IRSA</a></p></li>
+<li><p><a class="reference external" href="https://docs.astropy.org/en/stable/io/fits/usage/cloud.html#using-cutout2d-with-cloud-hosted-fits-files">Image cutouts</a></p></li>
+</ul>
+</section>
+<section id="optimizing-code-for-cpu-usage-cpu-profiling">
+<h3>Optimizing code for CPU usage (CPU profiling)<a class="headerlink" href="#optimizing-code-for-cpu-usage-cpu-profiling" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>profiliing within Fornax is possible, however vizualizing the profile is not yet possible</p></li>
+<li><p>profiling needs to be done on a .py script, and not a jupyter notebook</p></li>
+<li><p>sample command on the Fornax command line: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">cProfile</span> <span class="pre">-o</span> <span class="pre">output_profile_name.prof</span>&#160; <span class="pre">code_name.py</span></code></p></li>
+<li><p>Then download the .prof file</p></li>
+<li><p>On your local computer command line: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">snakeviz</span> <span class="pre">output_profile_name.prof</span></code></p></li>
+<li><p>documentation for snakeviz: https://jiffyclub.github.io/snakeviz/</p></li>
+<li><p>This really only looks at CPU usage</p></li>
+</ul>
+</section>
+<section id="optimizing-code-for-memory-usage-memory-profiling">
+<h3>Optimizing code for memory usage <a class="reference external" href="https://towardsdatascience.com/profile-memory-consumption-of-python-functions-in-a-single-line-of-code-6403101db419">(memory profiling)</a><a class="headerlink" href="#optimizing-code-for-memory-usage-memory-profiling" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>inside the notebook:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-U</span> <span class="pre">memory_profiler</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">memory_profiler</span> <span class="pre">import</span> <span class="pre">profile</span></code></p></li>
+<li><p>above the function you want to check add this line: &#64;profile</p></li>
+<li><p>run the script: python -m memory_profiler <filename>.py &gt; mem_prof.txt</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="optimizing-code-for-multiple-cpus-with-parallelization">
+<h3>Optimizing code for multiple CPUs with parallelization<a class="headerlink" href="#optimizing-code-for-multiple-cpus-with-parallelization" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Python built in <a class="reference external" href="https://irsa.ipac.caltech.edu/docs/notebooks/Parallelize_Convolution.html">multiprocessing</a></p></li>
+<li><p><a class="reference external" href="https://gateway.dask.org">Dask gateway</a></p></li>
+<li><p>How to [scale up](Troy’s new notebook) a notebook to big data</p></li>
+</ul>
+</section>
+<section id="mast-science-examples">
+<h3><a class="reference external" href="https://github.com/spacetelescope/tike_content/blob/main/markdown/science-examples.md">MAST science examples</a><a class="headerlink" href="#mast-science-examples" title="Link to this heading">#</a></h3>
+</section>
+<section id="heasarc-sciserver-cookbooks">
+<h3>HEASARC <a class="reference external" href="https://github.com/HEASARC/sciserver_cookbooks/blob/main/Introduction.md">sciserver_cookbooks</a><a class="headerlink" href="#heasarc-sciserver-cookbooks" title="Link to this heading">#</a></h3>
+</section>
+<section id="cross-matching-two-large-catalogs">
+<h3><a class="reference external" href="https://github.com/IPAC-SW/ipac-sp-notebooks/blob/main/gaia_cross_SEIP/gaia_cross_SEIP.ipynb">Cross matching two large catalogs</a><a class="headerlink" href="#cross-matching-two-large-catalogs" title="Link to this heading">#</a></h3>
+</section>
+<section id="work-with-theoretical-catalogs">
+<h3><a class="reference external" href="https://irsa.ipac.caltech.edu/data/theory/Cosmosims/gator_docs/CosmoDC2_Mock_V1_Catalog.html">Work with theoretical catalogs</a><a class="headerlink" href="#work-with-theoretical-catalogs" title="Link to this heading">#</a></h3>
+</section>
+<section id="how-should-users-contribute-to-tutorials">
+<h3>How should users contribute to tutorials?<a class="headerlink" href="#how-should-users-contribute-to-tutorials" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>open issue or PR on Fornax Github <a class="reference external" href="https://github.com/fornax-navo/fornax-demo-notebooks">repo</a></p></li>
+</ul>
+</section>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>If my internet connection goes away or is intermittent - what happens to the running notebook?</p></li>
+<li><p>Restart kernel will solve some problems, especially if the cells were run out of order</p>
+<ul>
+<li><p>Under the <code class="docutils literal notranslate"><span class="pre">kernel</span></code> menu: <code class="docutils literal notranslate"><span class="pre">restart</span> <span class="pre">kernel...</span></code></p></li>
+</ul>
+</li>
+<li><p>Restart Fornax - will solve version issues if packages with different versions were loaded since these won’t persist across Fornax restarts</p></li>
+</ul>
+</section>
+<section id="getting-help">
+<h2>Getting Help<a class="headerlink" href="#getting-help" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>ask your peers: User forum</p></li>
+<li><p>ask Fornax: Helpdesk</p></li>
+</ul>
+</section>
+<section id="parallel-and-distributed-processing">
+<h2>Parallel and Distributed Processing<a class="headerlink" href="#parallel-and-distributed-processing" title="Link to this heading">#</a></h2>
+<p>Since one of the main drivers for using Fornax is the advantage of multiple CPUs, we provide here additional information on how to efficiently use those CPUs.</p>
+<section id="terminology">
+<h3>Terminology<a class="headerlink" href="#terminology" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>CPU</p>
+<ul>
+<li><p>Processing chip. Quality and number of CPU determines compute power – the rate at which computations can be performed.</p></li>
+</ul>
+</li>
+<li><p>Node</p>
+<ul>
+<li><p>A single machine within a network of machines used for distributed processing.</p></li>
+</ul>
+</li>
+<li><p>Parallel or Distributed Processing</p>
+<ul>
+<li><p>Parallel: Running &gt;1 process/job concurrently. Distributed: Running a set of processes/jobs by farming them out to a network of compute nodes; Many of these jobs may run in parallel. (Distinction between parallel and distributed and is not deeply important here.)</p></li>
+</ul>
+</li>
+<li><p>RAM</p>
+<ul>
+<li><p>Working memory in a machine, node, or network. Amount of RAM determines how much data can be loaded in-memory simultaneously.</p></li>
+</ul>
+</li>
+<li><p>Worker</p>
+<ul>
+<li><p>An entity that completes a chunk of work (data + instructions). It runs in the background and must be managed using (e.g.,) python <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> or Dask.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="when-to-use-distributed-or-parallel-processing">
+<h3>When to use distributed or parallel processing?<a class="headerlink" href="#when-to-use-distributed-or-parallel-processing" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p>Your dataset is very large, but could be split into subsets that can be processed individually.</p></li>
+</ol>
+<ul class="simple">
+<li><p>The <a class="reference external" href="https://github.com/fornax-navo/fornax-demo-notebooks/blob/main/forced_photometry/multiband_photometry.md">forced photometry notebook</a> is an example of this. It gathers a large number of images and then processes them all using the same piece of code (photometry extraction). The pipeline is parallelized by running workers that execute the same code on different images.</p></li>
+</ul>
+<ol class="arabic simple" start="2">
+<li><p>Your computations/operations take a long time, but can be split into subsets that are independent from each other (the input to one does not depend on the output of another).</p></li>
+</ol>
+<ul class="simple">
+<li><p>The <a class="reference external" href="https://github.com/fornax-navo/fornax-demo-notebooks/blob/main/light_curves/light_curve_generator.md">light curve generator notebook</a> is an example of this. It gathers a sample of objects and then runs several, independent pieces of code (calls to different archives to retrieve light curves) on the full sample. The pipeline is parallelized by running workers that execute different pieces of code on the same object sample.</p></li>
+</ul>
+</section>
+<section id="distributed-processing-with-dask-dataframes-basic-concepts">
+<h3>Distributed processing with Dask DataFrames – basic concepts<a class="headerlink" href="#distributed-processing-with-dask-dataframes-basic-concepts" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Dask:</p>
+<ul>
+<li><p>Dask is a python library to manage parallel and distributed computing. Its responsibilities include:</p>
+<ul>
+<li><p>Farm out chunks of work (data + instructions) to be completed in the background.</p></li>
+<li><p>Manage the workers, the memory usage, etc.</p></li>
+<li><p>Collect and consolidate worker results and return them to the user.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Pandas DataFrames:</p>
+<ul>
+<li><p>There is no inherent size limit for a Pandas DataFrame other than the amount of RAM available.</p></li>
+<li><p>Some operations that are trivial on a small-ish DataFrame (e.g., sorting) become costly when the DataFrame is large. In addition to DataFrame size, an essential factor will be the quality and number of CPU.</p></li>
+</ul>
+</li>
+<li><p>Dask DataFrame:</p>
+<ul>
+<li><p>You can think of this as a wrapper for Pandas DataFrames:</p>
+<ul>
+<li><p>Pandas handles the actual data (in memory) and most of the computations. Each worker uses it’s own Pandas DataFrame.</p></li>
+<li><p>Dask orchestrates the process. It tells each worker which chunk of the full dataset (which is not in memory) to use, and which Pandas operations to execute.</p></li>
+<li><p>The user gives instructions to Dask (by calling Dask methods), not to Pandas.</p></li>
+</ul>
+</li>
+<li><p>There are Dask-equivalents of many Pandas methods, though they sometimes behave differently due to the need to handle very large datasets or datasets that are not in-memory.</p></li>
+<li><p>Performance implications to be aware of:</p>
+<ul>
+<li><p>The Dask DataFrame index can make a big difference in efficiency. For large datasets, it can be highly advantageous to determine the “right” index (based on the desired chunking and/or computations). Set and sort the index before performing the computations, and don’t change it later on unless really necessary.</p></li>
+<li><p>(others?)</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+<section id="additional-resources">
+<h2>Additional Resources<a class="headerlink" href="#additional-resources" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>New to Python? -</p>
+<ul>
+<li><p><a class="reference internal" href="#?"><span class="xref myst">numpy tutorials</span></a></p></li>
+<li><p><a class="reference external" href="https://scipy-lectures.org/">Scipy lecture notes</a></p></li>
+<li><p><a class="reference external" href="https://jakevdp.github.io/PythonDataScienceHandbook/">Data science handbook</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference external" href="https://developer.lsst.io/python/numpydoc.html#numpydoc-sections-in-docstrings">Guide to documenting python functions</a></p></li>
+<li><p><a class="reference external" href="https://docs.github.com/en/get-started/quickstart">Github</a></p></li>
+<li><p><a class="reference external" href="https://jakevdp.github.io/PythonDataScienceHandbook/01.06-errors-and-debugging.html#Debugging:-When-Reading-Tracebacks-Is-Not-Enough">Debugging</a></p></li>
+<li><p>Fornax is the collaboration of three NASA archives</p>
+<ul>
+<li><p><a class="reference external" href="https://irsa.ipac.caltech.edu/frontpage/">IRSA</a></p></li>
+<li><p><a class="reference external" href="https://heasarc.gsfc.nasa.gov">HEASARC</a></p></li>
+<li><p><a class="reference external" href="https://archive.stsci.edu">MAST</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference external" href="https://jupyter.org">Jupyterlab</a></p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../light_curves/light_curve_generator.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Make Multi-Wavelength Light Curves Using Archival Data</p>
+      </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-the-fornax-science-console">What is the Fornax Science Console?</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-does-it-do-basic-capabilities">What does it do? (Basic Capabilities)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#who-is-it-for">Who is it for?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#limits-what-does-it-not-do">Limits: What does it not do?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fornax-will-be-most-beneficial-to-use-cases-which">Fornax will be most beneficial to use cases which:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-fornax-will-be-least-beneficial-to-use-cases-which">The Fornax will be least beneficial to use cases which:</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-started">Getting started</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-get-an-account">How to get an account?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-log-in">How to Log in?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-end-a-session">How to end a session?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-choose-which-size-server-to-open-upon-login">How to choose which size server to open upon login?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-a-kernel-and-how-to-choose-one">What is a kernel and how to choose one?</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#navigating-jupyter-lab">Navigating jupyter lab</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-start-a-new-notebook">How to start a new notebook?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-get-a-terminal-window">How to get a terminal window?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-upload-data-into-fornax">How to upload data into Fornax?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-are-our-storage-limits-for-uploaded-data">What are our storage limits for uploaded data?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-download-data-from-the-plaltform-to-my-local-machine">How to download data from the plaltform to my local machine?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#home-directory">Home directory</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#does-work-persist-between-sessions">Does work persist between sessions?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-the-info-at-the-bottom-of-the-jupyterlab-window">What is the info at the bottom of the jupyterlab window</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-share-data-from-inside-fornax-with-international-collaborators">How to share data from inside Fornax with (international) collaborators?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-there-a-way-to-go-directly-from-fornax-to-a-university-s-box-account">Is there a way to go directly from Fornax to a University’s Box account?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-there-a-way-to-go-directly-from-fornax-into-a-different-aws-bucket-that-a-project-may-pay-for">Is there a way to go directly from Fornax into a different AWS bucket that a project may pay for?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-know-what-computing-resources-are-available-on-fornax">How to know what computing resources are available on Fornax?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-save-my-notebook-as-a-python-script">How to save my notebook as a python script?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#save-your-work">Save your work!</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-long-will-the-server-stay-active-if-not-in-use">How long will the server stay active if not in use?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-run-a-notebook-non-interactively">How to run a notebook non-interactively?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-open-a-plot-png-pdf-etc-either-generated-by-a-notebook-or-uploaded">How to open a plot (png, pdf, etc.) either generated by a notebook or uploaded ?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#will-notebooks-that-run-on-fornax-also-work-on-my-laptop">Will notebooks that run on Fornax also work on my laptop?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#who-covers-costs-when-working-in-fornax">Who covers costs when working in Fornax?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-know-what-costs-are-being-incurred">How to know what costs are being incurred?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-it-possible-to-do-code-development-in-emacs-or-vi-or-some-other-ide">Is it possible to do code development in emacs or vi or some other IDE?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-there-a-limit-to-the-number-of-packages-a-user-can-install">Is there a limit to the number of packages a user can install?</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-access">Data Access</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-add-my-own-data">How to add my own data?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#where-should-data-be-stored-on-fornax">Where should data be stored on Fornax?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-access-images-in-the-cloud">How to access images in the cloud?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-access-catalogs-in-the-cloud">How to access catalogs in the cloud?</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#managing-software">Managing Software</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#making-a-conda-environment-that-persists-across-sessions">Making a conda environment that persists across sessions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-get-a-list-of-what-software-is-already-pre-installed-on-the-fornax-science-console">How to get a list of what software is already pre-installed on the Fornax Science Console?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-install-my-own-software">How to install my own software?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-the-terminal-command-to-list-package-version-info-using-pip">What is the terminal command to list package version info using pip?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-it-possible-to-launch-apps-from-icons-like-mopex-or-spice">Is it possible to launch apps from icons? Like MOPEX or SPICE</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-it-possible-to-run-licensed-software-idl-in-fornax">Is it possible to run licensed software (IDL) in Fornax?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-it-possible-to-bring-my-own-docker-image">Is it possible to bring my own docker image?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-it-possible-to-run-the-container-from-fornax-on-my-own-personal-computer-laptop">Is it possible to run the container from Fornax on my own personal computer/laptop?</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples-and-tutorials">Examples and Tutorials</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fully-worked-science-use-cases">Fully worked science use cases</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cloud">Cloud</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#optimizing-code-for-cpu-usage-cpu-profiling">Optimizing code for CPU usage (CPU profiling)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#optimizing-code-for-memory-usage-memory-profiling">Optimizing code for memory usage (memory profiling)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#optimizing-code-for-multiple-cpus-with-parallelization">Optimizing code for multiple CPUs with parallelization</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-science-examples">MAST science examples</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#heasarc-sciserver-cookbooks">HEASARC sciserver_cookbooks</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cross-matching-two-large-catalogs">Cross matching two large catalogs</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#work-with-theoretical-catalogs">Work with theoretical catalogs</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-should-users-contribute-to-tutorials">How should users contribute to tutorials?</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#troubleshooting">Troubleshooting</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-help">Getting Help</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-and-distributed-processing">Parallel and Distributed Processing</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#terminology">Terminology</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#when-to-use-distributed-or-parallel-processing">When to use distributed or parallel processing?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#distributed-processing-with-dask-dataframes-basic-concepts">Distributed processing with Dask DataFrames – basic concepts</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#additional-resources">Additional Resources</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Fornax developers
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2022-2023, Fornax developers.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
