@@ -115,6 +115,9 @@ from sktime.datatypes import check_is_mtype
 # local code imports
 sys.path.append('code_src/')
 from fluxconversions import mjd_to_jd
+
+#improves memory usage
+pd.options.mode.copy_on_write = True
 ```
 
 ## 1. Read in a dataset of archival light curves
@@ -314,15 +317,16 @@ def sigmaclip_lightcurves(df_lc, sigmaclip_value = 10.0, include_plot = False, v
 ```
 
 ```{code-cell} ipython3
-def remove_objects_without_band(df_lc, bandname_to_drop = "W1", verbose=False):
+def remove_objects_without_band(df_lc, bandname_to_keep = "W1", verbose=False):
+    # drop objects that do not have data in the band bandname_to_keep
     """
-    Get rid of the light curves which do not have data in the band we want to use for normalization.  
+    Drop objects that do not have data in the band bandname_to_keep.  This is needed for normalization.  
     
     Parameters
     ----------
     df_lc: Pandas dataframe with light curve info
 
-    bandname_to_drop: str "w1"
+    bandname_to_keep: str "w1"
 
     verbose: should the function provide feedback
         
@@ -331,29 +335,13 @@ def remove_objects_without_band(df_lc, bandname_to_drop = "W1", verbose=False):
     drop_df_lc: MultiIndexDFObject with all  light curves
         
     """
+    #remove objects without bandname_to_keep by filtering the dataframe grouped by objectid
+    drop_df_lc = df_lc.groupby('objectid').filter(lambda x: bandname_to_keep in x['band'].values)
 
-    #maka a copy so we can work with it
-    drop_df_lc = df_lc
-    
-    #keep track of how many get dropped
-    dropcount = 0
-
-    #for each object
-    for oid , singleoid in drop_df_lc.groupby("objectid"):
-        #what bands does that object have
-        bandname = singleoid.band.unique().tolist()
-    
-        #if it doesn't have bandname_to_drop:
-        if bandname_to_drop not in bandname:
-            #delete this oid from the dataframe of light curves
-            indexoid = drop_df_lc[ (drop_df_lc['objectid'] == oid)].index
-            drop_df_lc.drop(indexoid , inplace=True)
-        
-            #keep track of how many are being deleted
-            dropcount = dropcount + 1
-        
-    if verbose:    
-        print( dropcount, "objects without", bandname_to_drop, " were removed")
+    if verbose:
+        #if you want to track how many objects were removed by this function...
+        dropcount = df_lc.groupby("objectid").ngroups - drop_df_lc.groupby("objectid").ngroups
+        print( dropcount, "objects without", bandname_to_keep, " were removed")
 
     return drop_df_lc
 ```
@@ -405,16 +393,14 @@ sigmaclip_value = 10.0
 df_lc = sigmaclip_lightcurves(df_lc, sigmaclip_value, include_plot = False)
 print(df_lc.groupby(["objectid"]).ngroups, "n objects after sigma clipping")
 
+#remove incomplete data
+threshold_too_few = 3
+df_lc = remove_incomplete_data(df_lc, threshold_too_few, verbose = False)
 
 #remove objects without W1 fluxes
 df_lc = remove_objects_without_band(df_lc, 'W1', verbose=True)
-print(df_lc.groupby(["objectid"]).ngroups, "n objects after removing objects without W1")
 
-#remove incomplete data
-threshold_too_few = 3
-df_lc = remove_incomplete_data(df_lc, threshold_too_few)
-
-print(df_lc.groupby(["objectid"]).ngroups, "n objects after removing incomplete data")
+print(df_lc.groupby(["objectid"]).ngroups, "n objects after cleaning the data")
 ```
 
 ### 2.5 Missing Data
@@ -556,7 +542,7 @@ def missingdata_drop_bands(df_lc, bands_to_keep, verbose=False):
 
     if verbose:
         #how many objects did we start with?
-        print(len(clean_df.objectid.unique()), "n objects before removing missing band data")
+        print(len(df_lc.objectid.unique()), "n objects before removing missing band data")
 
     # keep only objects with observations in all remaining bands
     # first, get a boolean series indexed by objectid
@@ -712,7 +698,7 @@ df_lc = df_lc.reset_index()
 
 ```{code-cell} ipython3
 #look at a single object to see what this array looks like
-ob_of_interest = 4
+ob_of_interest = 12
 singleob = df_lc[df_lc['objectid'] == ob_of_interest]
 singleob
 ```
@@ -743,20 +729,16 @@ def local_normalization_max(df_lc, norm_column = "flux_W1"):
         
     """
     #make a copy to not alter the original df_lc inside of this function
-    norm_df_lc = df_lc
+    norm_df_lc = df_lc.copy()
     
     # make a new column with max_r_flux for each objectid
-    norm_df_lc['max_W1'] = norm_df_lc.groupby('objectid', sort=False)[norm_column].transform('max')
+    max_W1 = norm_df_lc.groupby('objectid', sort=False)[norm_column].transform('max')
 
     #figure out which columns in the dataframe are flux columns
     flux_cols = [col for col in norm_df_lc.columns if 'flux' in col]
 
     # make new normalized flux columns for all fluxes
-    norm_df_lc[flux_cols] = norm_df_lc[flux_cols].div(norm_df_lc['max_W1'], axis=0)
-
-    #now drop max_W1 as a column so it doesn't get included as a variable in multivariate analysis
-    norm_df_lc.drop(columns = ['max_W1'], inplace = True)
-
+    norm_df_lc[flux_cols] = norm_df_lc[flux_cols].div(max_W1, axis=0)
     return norm_df_lc
 ```
 
@@ -794,11 +776,6 @@ parquet_savename = 'output/df_lc_ML.parquet'
 #print("file saved!")
 ```
 
-```{code-cell} ipython3
-#give this dataframe a multiindex
-df_lc = df_lc.set_index(["objectid", "label", "datetime"])
-```
-
 ## 3. Prep for ML algorithms
 
 ```{code-cell} ipython3
@@ -818,45 +795,33 @@ df_lc.drop(columns = ['err_panstarrs_g',	'err_panstarrs_i',	'err_panstarrs_r',	'
 df_lc.drop(columns = ['time'],inplace = True)
 ```
 
-```{code-cell} ipython3
-#what does the dataframe look like now?
-df_lc
-```
-
 ### 3.1 Train test split 
 We use sklearn's train test split to randomly split the data into training and testing datasets.  Because thre are uneven numbers of each type (many more SDSS than CLAGN), we want to make sure to stratify evenly by type.
 
 ```{code-cell} ipython3
-#y is defined to be the labels
-y = df_lc.droplevel('datetime').index.unique().get_level_values('label').to_series()
-
-#want a stratified split based on label
-test_size = 0.25
-train_ix, test_ix = train_test_split(df_lc.index.levels[0], stratify = y, shuffle = True, random_state = 43, test_size = test_size)
-
-train_df = df_lc.loc[train_ix]  
-test_df = df_lc.loc[test_ix]   
+#divide the dataframe into features and labels for ML algorithms 
+labels = df_lc[["objectid", "label"]].drop_duplicates().set_index("objectid").label
+df_lc = df_lc.drop(columns=["label"]).set_index(["objectid", "datetime"])
 ```
 
 ```{code-cell} ipython3
+
+test_size = 0.25
+
+#want a stratified split based on label
+train_ix, test_ix = train_test_split(df_lc.index.levels[0], stratify = labels, shuffle = True, random_state = 43, test_size = test_size)
+
+#X is defined to be the features
+#y is defined to be the labels
+X_train = df_lc.loc[train_ix]
+y_train = labels.loc[train_ix]
+X_test = df_lc.loc[test_ix]
+y_test = labels.loc[test_ix]
+
 #plot to show how many of each type of object in the test dataset
 plt.figure(figsize=(6,4))
 plt.title("Objects in the Test dataset")
-h = plt.hist(test_df.droplevel('datetime').index.unique().get_level_values('label').to_series(),histtype='stepfilled',orientation='horizontal')
-```
-
-```{code-cell} ipython3
-#divide the dataframe into features and labels for ML algorithms 
-#X is defined to be the features
-# y is defined to be the labels
-
-#X is the multiindex light curve without the labels
-X_train  = train_df.droplevel('label')
-X_test = test_df.droplevel('label')
-
-#y are the labels, should be a series 
-y_train = train_df.droplevel('datetime').index.unique().get_level_values('label').to_series()
-y_test = test_df.droplevel('datetime').index.unique().get_level_values('label').to_series()
+h = plt.hist(y_test, histtype='stepfilled', orientation='horizontal')
 ```
 
 ## 4. Run sktime algorithms on the light curves
@@ -999,101 +964,84 @@ Lets assume we now have a classifier which can accurately differentiate CLAGN fr
 - write an observing proposal (ok, you have to do that one yourself)
 
 ```{code-cell} ipython3
+#read in a dataframe of our new sample:
+# we are going to cheat here and use the same file as we used for input to the above, but you should
+# replace this with your favorite sample run through the light_curve_generator in this same repo.
+path_to_sample = './data/small_CLAGN_SDSS_df_lc.parquet'
+my_sample = pd.read_parquet(path_to_sample)
+```
+
+```{code-cell} ipython3
 #get dataset in same format as what was run through sktime
 #This is not exactly the same as re-running the whole notebook on a different sample,
 #but it is pretty close.  We don't need to do all of the same cleaning because some of that 
 #was to appease sktime in training the algorithms.
 
-def prepare_mysample_sktime(path_to_sample):
-    """
-    run your own favorite sample through all the necessary data prep to be able to use the sktime trained classifer on it
     
-    Parameters
-    ----------
-    path_to_sample: str
-        the location of your favorite sample
 
-     Returns
-    --------
-    X_mysample: MultiIndexDFObject with interpolated light curves
-        ready to be used by sktime classifier
-        
-    """
+#get rid of indices set in the light curve code and reset them as needed before sktime algorithms
+my_sample = my_sample.reset_index()  
 
-    #read in a dataframe of our new sample:
-    # we are going to cheat here and use the same file as we used for input to the above, but you should
-    # replace this with your favorite sample run through the light_curve_generator in this same repo.
+# get rid of some of the bands that don't have enough data for all the sources
+#CLAGN are generall fainter targets, and therefore mostly not found in datasets like TESS & K2
+bands_to_drop = ["IceCube", "TESS", "FERMIGTRIG", "K2"]
+my_sample = my_sample[~my_sample["band"].isin(bands_to_drop)]
 
-    my_sample = pd.read_parquet(path_to_sample)
+#drop rows which have Nans
+my_sample.dropna(inplace = True, axis = 0)
 
-    #get rid of indices set in the light curve code and reset them as needed before sktime algorithms
-    my_sample = my_sample.reset_index()  
+#remove outliers
+sigmaclip_value = 10.0
+my_sample = sigmaclip_lightcurves(my_sample, sigmaclip_value, include_plot = False, verbose= False)
 
-    # get rid of some of the bands that don't have enough data for all the sources
-    #CLAGN are generall fainter targets, and therefore mostly not found in datasets like TESS & K2
-    bands_to_drop = ["IceCube", "TESS", "FERMIGTRIG", "K2"]
-    my_sample = my_sample[~my_sample["band"].isin(bands_to_drop)]
+#remove objects without W1 fluxes
+my_sample = remove_objects_without_band(my_sample, 'W1', verbose=False)
 
-    #drop rows which have Nans
-    my_sample.dropna(inplace = True, axis = 0)
+#remove incomplete data
+threshold_too_few = 3
+my_sample = remove_incomplete_data(my_sample, threshold_too_few, verbose = False)
 
-    #remove outliers
-    sigmaclip_value = 10.0
-    my_sample = sigmaclip_lightcurves(my_sample, sigmaclip_value, include_plot = False, verbose= False)
+#drop missing bands
+my_sample = missingdata_drop_bands(my_sample, bands_to_keep, verbose = False)
 
-    #remove objects without W1 fluxes
-    my_sample = remove_objects_without_band(my_sample, 'W1', verbose=False)
+#make arrays have uniform length and spacing
+final_freq_interpol = 60  #this is the timescale of interpolation in units of days
+df_interpol = uniform_length_spacing(my_sample, final_freq_interpol, include_plot = False )
+my_sample = df_interpol.explode(["time", "flux","err"], ignore_index=True)
+my_sample = my_sample.astype({col: "float" for col in ["time", "flux", "err"]})
 
-    #remove incomplete data
-    threshold_too_few = 3
-    my_sample = remove_incomplete_data(my_sample, threshold_too_few, verbose = False)
+#reformat
+my_sample = my_sample.set_index(["objectid", "label", "time"])
+my_sample = my_sample.pivot(columns = "band")
+my_sample.columns = ["_".join(col) for col in my_sample.columns.values]
+my_sample.columns = my_sample.columns.str.replace(' ', '_') 
+my_sample = my_sample.reset_index()  
 
-    #drop missing bands
-    my_sample = missingdata_drop_bands(my_sample, bands_to_keep, verbose = False)
+#normalize
+my_sample = local_normalization_max(my_sample, norm_column = "flux_W1")
 
-    #make arrays have uniform length and spacing
-    final_freq_interpol = 60  #this is the timescale of interpolation in units of days
-    df_interpol = uniform_length_spacing(my_sample, final_freq_interpol, include_plot = False )
-    my_sample = df_interpol.explode(["time", "flux","err"], ignore_index=True)
-    my_sample = my_sample.astype({col: "float" for col in ["time", "flux", "err"]})
+#make datetime column
+mjd = my_sample.time
+jd = mjd_to_jd(mjd)
+t = Time(jd, format = 'jd' )
+my_sample['datetime'] = t.datetime
 
-    #reformat
-    my_sample = my_sample.set_index(["objectid", "label", "time"])
-    my_sample = my_sample.pivot(columns = "band")
-    my_sample.columns = ["_".join(col) for col in my_sample.columns.values]
-    my_sample.columns = my_sample.columns.str.replace(' ', '_') 
-    my_sample = my_sample.reset_index()  
+#set index expected by sktime
+my_sample = my_sample.set_index(["objectid", "label", "datetime"])
 
-    #normalize
-    my_sample = local_normalization_max(my_sample, norm_column = "flux_W1")
-
-    #make datetime column
-    mjd = my_sample.time
-    jd = mjd_to_jd(mjd)
-    t = Time(jd, format = 'jd' )
-    my_sample['datetime'] = t.datetime
-
-    #set index expected by sktime
-    my_sample = my_sample.set_index(["objectid", "label", "datetime"])
-
-    #drop the uncertainty columns 
-    my_sample.drop(columns = ['err_panstarrs_g',	'err_panstarrs_i',	'err_panstarrs_r',	'err_panstarrs_y',	
+#drop the uncertainty columns 
+my_sample.drop(columns = ['err_panstarrs_g',	'err_panstarrs_i',	'err_panstarrs_r',	'err_panstarrs_y',	
                           'err_panstarrs_z',	'err_W1',	'err_W2',	'err_zg',	'err_zr'], inplace = True)
 
-    #drop also the time column 
-    my_sample.drop(columns = ['time'],inplace = True)
+#drop also the time column 
+my_sample.drop(columns = ['time'],inplace = True)
 
-    #make X 
-    X_mysample  = my_sample.droplevel('label')
+ #make X 
+X_mysample  = my_sample.droplevel('label')
 
-    return X_mysample
 ```
 
 ```{code-cell} ipython3
-#read in data and prepare it for use
-path_to_sample = './data/small_CLAGN_SDSS_df_lc.parquet'
-X_mysample = prepare_mysample_sktime(path_to_sample)
-
 #what does this look like to make sure we are on track
 X_mysample
 ```
@@ -1111,7 +1059,6 @@ gdd.download_file_from_google_drive(file_id='1pSEKVP4LbrdWQK9ws3CaI90m3Z_2fazL',
                                     dest_path=savename_sample,
                                     unzip=True)
 sample_table = Table.read(savename_sample, format='ascii.ecsv')
-
 ```
 
 ```{code-cell} ipython3
