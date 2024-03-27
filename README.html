@@ -403,6 +403,7 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Executive Summary</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#documentation">Documentation</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#content-contributing">Content contributing</a></li>
 </ul>
 
@@ -419,14 +420,17 @@ document.write(`
   <section id="executive-summary">
 <h1>Executive Summary<a class="headerlink" href="#executive-summary" title="Link to this heading">#</a></h1>
 <p>The Fornax Initiative is a NASA Astrophysics Archives project to collaboratively among the three archives HEASARC, IRSA, and MAST, create cloud systems, cloud software, and cloud standards for the astronomical community.</p>
-<p>The Fornax Science Console is a cloud compute system near to NASA data in the AWS cloud which provides a place where astronomers can do data intensive research with reduced barriers. The Fornax Initiative provides increased compute, increased memory, increased ease of use by pre-installing astronomical software, increased reprododicibility of big data results, increased inclusion by removing some of these barriers to entry, tutorial notebooks, and documentation.</p>
-<p>This repo houses tutorial notebooks of fully worked science use cases for all users.  Common goals of the notebooks are the use of archival data from all NASA archives, cross-archive work, big data, and computationally intensive science. Currently there are two major topics for which we have notebooks.  The “Photometry” notebook starts with a catalog and a set of archival images.  The notebook grabs all necesary images and measures photometry at all positions listed in the catalog on all images.  The “Time Domain” notebooks are twofold.  The first generates light curves from all available archival data for any user supplied sample of targets.  The second notebook runs ML algorithms to classify those generated light curves.</p>
+<p>The Fornax Science Console is a cloud compute system near to NASA data in the AWS cloud which provides a place where astronomers can do data-intensive research with reduced barriers. The Fornax Initiative provides increased compute, increased memory, increased ease of use by pre-installing astronomical software, increased reproducibility of big data results, and increased inclusion by removing some of these barriers to entry, tutorial notebooks, and documentation.</p>
+<p>This repo houses tutorial notebooks of fully worked science use cases for all users.  Common goals of the notebooks are the usage of archival data from all NASA archives, cross-archive work, big data, and computationally intensive science. Currently, there are two major topics for which we have notebooks.  The “Photometry” notebook starts with a catalog and a set of archival images.  The notebook grabs all necessary images and measures photometry at all positions listed in the catalog on all images.  The “Time Domain” notebooks are twofold.  The first generates light curves from all available archival data for any user-supplied sample of targets.  The second notebook runs ML algorithms to classify those generated light curves.</p>
+</section>
+<section id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Link to this heading">#</a></h1>
+<p>The user cases and documentation of the Fornax Initiative are currently available at the https://fornax-navo.github.io/fornax-demo-notebooks/ URL.</p>
 </section>
 <section id="content-contributing">
 <h1>Content contributing<a class="headerlink" href="#content-contributing" title="Link to this heading">#</a></h1>
-<p>In this repository we use Jupytext and MyST Markdown Notebooks. You will need <code class="docutils literal notranslate"><span class="pre">jupytext</span></code> installed
-for your browser to recognise the markdown files as notebooks (see more about the motivation and
-technicalities e.g. here: https://numpy.org/numpy-tutorials/content/pairing.html).</p>
+<p>In this repository, we follow the standard practice of the Scientific Python ecosystem and use Jupytext and MyST Markdown Notebooks.
+You will need <code class="docutils literal notranslate"><span class="pre">jupytext</span></code> installed for your browser to recognise the markdown files as notebooks (see more about the motivation and technicalities e.g. here: https://numpy.org/numpy-tutorials/content/pairing.html).</p>
 <p>If you already have an <code class="docutils literal notranslate"><span class="pre">ipynb</span></code> file, convert it to Markdown using the following command, and commit
 only the markdown file to the repo:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">jupytext</span> <span class="o">--</span><span class="kn">from</span> <span class="nn">notebook</span> <span class="o">--</span><span class="n">to</span> <span class="n">myst</span> <span class="n">yournotebook</span><span class="o">.</span><span class="n">ipynb</span>
@@ -462,6 +466,7 @@ only the markdown file to the repo:</p>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Executive Summary</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#documentation">Documentation</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#content-contributing">Content contributing</a></li>
 </ul>
 
