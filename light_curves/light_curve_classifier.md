@@ -537,8 +537,8 @@ def missingdata_drop_bands(df_lc, bands_to_keep, verbose=False):
         
     """
     # drop all rows where 'band' is not in 'bands_to_keep'
-    bands_to_drop = set(df_lc.band.unique()) - set(bands_to_keep)
-    clean_df = df_lc.loc[~df_lc.band.isin(bands_to_drop)]
+    bands_to_remove = set(df_lc.band.unique()) - set(bands_to_keep)
+    clean_df = df_lc.loc[~df_lc.band.isin(bands_to_remove)]
 
     if verbose:
         #how many objects did we start with?
@@ -1001,21 +1001,21 @@ my_sample = my_sample.reset_index()
 
 # get rid of some of the bands that don't have enough data for all the sources
 #CLAGN are generall fainter targets, and therefore mostly not found in datasets like TESS & K2
-bands_to_drop = ["IceCube", "TESS", "FERMIGTRIG", "K2"]
+#make sure your sample has the same bands as were run to train the classifier
 my_sample = my_sample[~my_sample["band"].isin(bands_to_drop)]
 
 #drop rows which have Nans
 my_sample.dropna(inplace = True, axis = 0)
 
 #remove outliers
-sigmaclip_value = 10.0
+#make sure your sample has the same sigmaclip_value as were run to train the classifier
 my_sample = sigmaclip_lightcurves(my_sample, sigmaclip_value, include_plot = False, verbose= False)
 
 #remove objects without W1 fluxes
 my_sample = remove_objects_without_band(my_sample, 'W1', verbose=False)
 
 #remove incomplete data
-threshold_too_few = 3
+#make sure your sample has the same threshole_too_few as were run to train the classifier
 my_sample = remove_incomplete_data(my_sample, threshold_too_few, verbose = False)
 
 #drop missing bands
