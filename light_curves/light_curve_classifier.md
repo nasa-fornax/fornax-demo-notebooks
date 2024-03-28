@@ -1030,21 +1030,21 @@ my_sample = my_sample[~my_sample["band"].isin(bands_to_drop)]
 my_sample.dropna(inplace = True, axis = 0)
 
 #remove outliers
-#make sure your sample has the same sigmaclip_value as were run to train the classifier
+#make sure your sample has the same sigmaclip_value as was run to train the classifier
 my_sample = sigmaclip_lightcurves(my_sample, sigmaclip_value, include_plot = False, verbose= False)
 
 #remove objects without W1 fluxes
 my_sample = remove_objects_without_band(my_sample, 'W1', verbose=False)
 
 #remove incomplete data
-#make sure your sample has the same threshole_too_few as were run to train the classifier
+#make sure your sample has the same threshold_too_few as were run to train the classifier
 my_sample = remove_incomplete_data(my_sample, threshold_too_few, verbose = False)
 
 #drop missing bands
 my_sample = missingdata_drop_bands(my_sample, bands_to_keep, verbose = False)
 
 #make arrays have uniform length and spacing
-final_freq_interpol = 60  #this is the timescale of interpolation in units of days
+#make sure your sample has the same final_feq_interpol as was run to train the classifier
 df_interpol = uniform_length_spacing(my_sample, final_freq_interpol, include_plot = False )
 my_sample = df_interpol.explode(["time", "flux","err"], ignore_index=True)
 my_sample = my_sample.astype({col: "float" for col in ["time", "flux", "err"]})
@@ -1061,12 +1061,9 @@ my_sample['datetime'] = mjd_to_datetime(my_sample)
 #set index expected by sktime
 my_sample = my_sample.set_index(["objectid", "label", "datetime"])
 
-#drop the uncertainty columns 
+#drop the uncertainty and time columns 
 my_sample.drop(columns = ['err_panstarrs_g',	'err_panstarrs_i',	'err_panstarrs_r',	'err_panstarrs_y',	
-                          'err_panstarrs_z',	'err_W1',	'err_W2',	'err_zg',	'err_zr'], inplace = True)
-
-#drop also the time column 
-my_sample.drop(columns = ['time'],inplace = True)
+                          'err_panstarrs_z',	'err_W1',	'err_W2',	'err_zg',	'err_zr','time'], inplace = True)
 
  #make X 
 X_mysample  = my_sample.droplevel('label')
