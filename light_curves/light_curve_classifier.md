@@ -28,7 +28,7 @@ CLAGN are astrophysically interesting objects because they appear to change stat
 
 This notebook walks through an exercise in using multiwavelength photometry(no spectroscopy) to learn if we can identify CLAGN based on their light curves alone.  If we are able to find a classifier that can differentiate CLAGN from SDSS QSOs, we would then be able to run the entire sample of SDSS QSOs (~500,000) to find additional CLAGN candidates for follow-up verification.
 
-Input to this notebook is output of a previous demo notebook which generates multiwavelength light curves from archival data.  THis notebook starts with light curves, does data prep, and runs the light curves through multiple ML classification algorithms.  There are many ML algorthms to choose from; We choose to use sktime algorithms for time domain classification beacuse it is a library of many algorithms specifically tailored to time series datasets.  It is based on the [scikit-learn](https://scikit-learn.org/stable/index.html) library so syntax is familiar to many users.
+Input to this notebook is output of a previous demo notebook which generates multiwavelength light curves from archival data.  This notebook starts with light curves, does data prep, and runs the light curves through multiple ML classification algorithms.  There are many ML algorthms to choose from; We choose to use sktime algorithms for time domain classification beacuse it is a library of many algorithms specifically tailored to time series datasets.  It is based on the [scikit-learn](https://scikit-learn.org/stable/index.html) library so syntax is familiar to many users.
 
 The challenges of this time-domain dataset for ML work are:
 1. Multi-variate = There are multiple bands of observations per target (13+)
@@ -319,10 +319,6 @@ df_lc = df_interpol.explode(["time", "flux","err"], ignore_index=True)
 df_lc = df_lc.astype({col: "float" for col in ["time", "flux", "err"]})
 ```
 
-```{code-cell} ipython3
-df_lc
-```
-
 ### 2.7  Restructure dataframe 
 - Make columns have band names in them and then remove band from the index
 - pivot the dataframe so that SKTIME understands its format
@@ -356,8 +352,6 @@ df_lc = local_normalization_max(df_lc, norm_column = "flux_W1")
 - Make [datetime](https://docs.python.org/3/library/datetime.html#module-datetime) column
     - SKTime wants a datetime column
 - Save dataframe
-- Make into multi-index
-      - SKtime wants multi-index
 
 ```{code-cell} ipython3
 # need to make a datetime column
@@ -449,6 +443,7 @@ check_is_mtype(X_train, mtype="pd-multiindex", scitype="Panel", return_metadata=
 
 ```{code-cell} ipython3
 %%time
+#this cell takes 35s to run on a sample of 267 light curves
 
 #setup the classifier
 clf = Arsenal(time_limit_in_minutes=1, n_jobs = -1)
@@ -475,7 +470,7 @@ Our method is to do a cursory check of a bunch of classifiers and then later dri
 
 ```{raw-cell}
 %%time
-#This cell is currently not being run because it takes a while so is not good for testing/debugging
+#This cell is currently not being run because it takes a long time 
 
 #which classifiers are we interestd in
 #roughly one from each type of classifier
@@ -533,9 +528,9 @@ for name, clf in tqdm(zip(names, classifier_call)):
     plt.show()
 ```
 
-```{raw-cell}
+```{code-cell} ipython3
 #show the summary of the algorithms used and their accuracy score
-accscore_dict
+#accscore_dict
 ```
 
 ```{code-cell} ipython3
@@ -572,7 +567,6 @@ my_sample = pd.read_parquet(path_to_sample)
 #but it is pretty close.  We don't need to do all of the same cleaning because some of that 
 #was to appease sktime in training the algorithms.
 
-    
 
 #get rid of indices set in the light curve code and reset them as needed before sktime algorithms
 my_sample = my_sample.reset_index()  
