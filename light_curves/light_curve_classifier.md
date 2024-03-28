@@ -755,18 +755,36 @@ df_lc = local_normalization_max(df_lc, norm_column = "flux_W1")
       - SKtime wants multi-index
 
 ```{code-cell} ipython3
-#need to convert df_lc time into datetime
-mjd = df_lc.time
+def mjd_to_datetime(df_lc):
+    """
+    convert time column in dataframe into datetime
+       
+    Parameters
+    ----------
+    df_lc: Pandas dataframe with light curve info
 
-#convert to JD
-jd = mjd_to_jd(mjd)
+    Returns
+    --------
+    t.datetime: array of type datetime
+        
+    """
+    #need to convert df_lc time into datetime
+    mjd = df_lc.time
 
-#convert to individual components
-t = Time(jd, format = 'jd' )
+    #convert to JD
+    jd = mjd_to_jd(mjd)
 
-#t.datetime is now an array of type datetime
-#make it a column in the dataframe
-df_lc['datetime'] = t.datetime
+    #convert to individual components
+    t = Time(jd, format = 'jd' )
+
+    #t.datetime is now an array of type datetime
+    #make it a column in the dataframe
+    return t.datetime
+```
+
+```{code-cell} ipython3
+# need to make a datetime column
+df_lc['datetime'] = mjd_to_datetime(df_lc)
 ```
 
 ```{code-cell} ipython3
@@ -805,7 +823,6 @@ df_lc = df_lc.drop(columns=["label"]).set_index(["objectid", "datetime"])
 ```
 
 ```{code-cell} ipython3
-
 test_size = 0.25
 
 #want a stratified split based on label
@@ -1021,10 +1038,7 @@ my_sample = my_sample.reset_index()
 my_sample = local_normalization_max(my_sample, norm_column = "flux_W1")
 
 #make datetime column
-mjd = my_sample.time
-jd = mjd_to_jd(mjd)
-t = Time(jd, format = 'jd' )
-my_sample['datetime'] = t.datetime
+my_sample['datetime'] = mjd_to_datetime(my_sample)
 
 #set index expected by sktime
 my_sample = my_sample.set_index(["objectid", "label", "datetime"])
@@ -1038,7 +1052,6 @@ my_sample.drop(columns = ['time'],inplace = True)
 
  #make X 
 X_mysample  = my_sample.droplevel('label')
-
 ```
 
 ```{code-cell} ipython3
