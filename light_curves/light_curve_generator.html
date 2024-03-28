@@ -574,6 +574,9 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <span class="c1"># Remove duplicates, attach an objectid to the coords,</span>
 <span class="c1"># convert to astropy table to keep all relevant info together</span>
 <span class="n">sample_table</span> <span class="o">=</span> <span class="n">clean_sample</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+
+<span class="c1">#give this sample a name for use in saving files</span>
+<span class="n">sample_name</span> <span class="o">=</span> <span class="s2">&quot;yang_CLAGN&quot;</span>
 </pre></div>
 </div>
 </div>
@@ -591,7 +594,8 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 <p>For the format of the save file, we would suggest to choose from various formats that fully support astropy objects(eg., SkyCoord).  One example that works is Enhanced Character-Separated Values or <a class="reference external" href="https://docs.astropy.org/en/stable/io/ascii/ecsv.html">‘ecsv’</a></p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sample_table</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;data/input_sample.ecsv&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;ascii.ecsv&#39;</span><span class="p">,</span> <span class="n">overwrite</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">savename_sample</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;output/</span><span class="si">{</span><span class="n">sample_name</span><span class="si">}</span><span class="s2">_sample.ecsv&quot;</span>
+<span class="n">sample_table</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">savename_sample</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;ascii.ecsv&#39;</span><span class="p">,</span> <span class="n">overwrite</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -602,7 +606,7 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 <p>Do only this step from this section when you have a previously generated sample table</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sample_table</span> <span class="o">=</span> <span class="n">Table</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;data/input_sample.ecsv&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;ascii.ecsv&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#sample_table = Table.read(savename_sample, format=&#39;ascii.ecsv&#39;)</span>
 </pre></div>
 </div>
 </div>
@@ -879,9 +883,9 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save the data for future use with ML notebook</span>
-<span class="c1">#parquet_savename = &#39;output/df_lc_090723_yang.parquet&#39;</span>
-<span class="c1">#parallel_df_lc.data.to_parquet(parquet_savename)</span>
-<span class="c1">#print(&quot;file saved!&quot;)</span>
+<span class="n">parquet_savename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;output/</span><span class="si">{</span><span class="n">sample_name</span><span class="si">}</span><span class="s2">_df_lc.parquet&quot;</span>
+<span class="n">parallel_df_lc</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">parquet_savename</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;file saved!&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

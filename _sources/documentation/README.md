@@ -1,58 +1,38 @@
 # Fornax Science Console
 
-## What is the Fornax Science Console?
+##What is the Fornax Science Console?
 
-The Fornax Science Console is a compute system in the cloud near to NASA data in the cloud which provides a place where astronomers can do data intensive research with reduced barriers.
-The first barrier we remove is the need to install software and deal with packages on your personal computer.
-This greatly simplifies the setup and startup for any astronomer who now no longer needs to worry about setting up and maintaining a python working environment.
-Environments with pre-installed python software tailored to astronomers are provided upon login to Jupyterlab for all users of Fornax.
-The second barrier we remove is the need for every astronomer to buy compute/memory commensurate to data science level projects.
-You will no longer need to buy the fastest/ most memory intensive personal computer.
-When you need those capabilities, we will have it ready for you.
-When you need to just write or debug code, we have smaller compute ready for that too.
-These two things (increased compute/memory and ease of use) should lower the barrier of entry to data science projects for all NASA astronomers.
-You no longer need to have an expensive computer, you no longer need to be an expert at installing software, you just need to have an idea!
-Lastly, by lowering the barrier to entry, we also increase the potential for reproducibility of big data results in astronomy.
-Before, if you were wanting to reproduce some data intensive work done in the literature, it would have been challenging to to have the right compute and setup, now you just need a login....
+The Fornax Science Console is a NASA-funded web-based application that provides access to a limited amount of cloud computing via JupyterLab, which offers access to Jupyter Notebooks, Jupyter Console, and the terminal (command line). Users will need to register to login to the system, but usage is free. Once logged in, users will have access to data sets curated by repositories around the world, and can upload moderate amounts of private data. To get started quickly, users can choose from a variety of example Jupyter notebooks as well as pre-installed software environments. These can be modified to suit user needs. 
 
-### What does it do? (Basic Capabilities)
-  * Increased ease of use,
-  * Increased number of CPUs,
-  * Increased memory,
-  * Increased inclusion,
-  * Increased reproducibility
- 
-### Who is it for?
-  * All astronomers, particularly those interested in analysis of NASA astrophysics data. 
+The Fornax Science Console supports many astronomical use cases, but users will find it especially beneficial for analyses
+ * on large cloud-hosted data sets that would be cumbersome to download;
+ * that require complicated software pre-installed on the platform; or
+ * that are parallelizable and require more compute than they currently have access to.
+   
+### Fornax Science Console basic capabilities
+  * <b>CPUs</b>:  Upon logging in, users will have access to 4 CPUs provided by AWS. These are useful for smaller analyses and to test out larger analyses. Once a user has completed testing and is ready to scale up an analysis, they can request up to 128 CPUs.
+  * <b>RAM</b>: Upon logging in, users will have access to up to 16 GB of RAM. Up to 512 GB of RAM are available upon request.
+  * <b>User Storage</b>: Upon logging in, users will have access to 10 GB of storage; additional storage is available upon request.
+  * <b>GPUs</b>:  There are currently no GPUs available.
+      
+### Data access within the Fornax Science Console
 
-### Limits: What does it not do?
-  * Limits on cores/RAM:
-    * There are several options for the size of the compute.  Please select the smallest that you can use for testing and exploration.  Do not use the larger images unless you have already tested a smaller subset of the analysis on a smaller compute instance.
-    * There are currently no GPUs available.
-    * In JK's understanding (which needs to be updated) you get what the numbers say when you choose a server upon login, but for a limited time if you need slightly more, the code will not crash but will have access to slightly more. 
-    * Raen has seen some evidence of this "bursting" behavior, but doesn't have direct knowledge of the actual configuration. It would be good to know.
-  * Limits on disk ace:
-    * Current default is 10GB (Feb 2024).
-    * This can be increased on request.  
-  * Limits on incurred costs:
-    * Users ought to be able to access any data they both want and have permissions/credentials for, regardless of where it is (AWS S3, Google's GCS, NASA archive, personal computer, etc.).
-    * Any data downloaded (or pushed out) from the Fornax compute will incur egress costs to Fornax.  This should be limited to small analysis results only.  
-    * Aside:  Historically, the data holder (e.g., IRSA) typically covers the cost (e.g., egress) of delivering the data to the user, but cloud storage buckets are starting to change both the workflows and the cost models. Buckets support large-scale data access in ways that an archive like IRSA cannot support from on-premise. This is great, but also means more data requests and larger (and less predictable) costs. Data holders can often get the costs covered through grants, arrangements with the cloud provider (e.g., AWS), etc. But, in some cases they will decide that the best option is to make the data available in a bucket under what I would call the "cloud-pricing model" and sum up as "everyone pays for what *they* use". In particular, this means the data holder will pay the *storage* costs (which they can predict and easily control), and the requestor/end user will pay the *access* costs including egress (which the data holder cannot easily predict or control, but the requestor can). Individual charges are generally small and reasonable when read around in this way, and the the cloud provider often offers free access up to some small but reasonable limit. However, egress is a particular fee that often does not apply at all, but in other cases can balloon to $$$ very quickly. So it is absolutely something to be considered, planned for, and controlled. Lastly, who pays the access/egress costs is determined by a setting on the bucket. If the bucket is "requestor pays", the user/requestor will need (e.g.,) AWS credentials to access it -- charges are then billed to the AWS account that owns the credentials.
-    * As far as I can tell, the best (AWS) option for actual controls -- beyond just "monitoring" support -- is [AWS Budgets Actions](https://aws.amazon.com/blogs/aws-cloud-financial-management/get-started-with-aws-budgets-actions/).
-    * AWS may charge *ingress* fees to bring data into an SMCE pod or user instance. This would be completely separate from any egress fees. There Someone working more directly on Fornax Daskhub would need to answer whether/how ingress applies.
-### Fornax will be most beneficial to use cases which:
-  * can be significantly parallelized to make use of large numbers of CPUs
-  * require access to large amounts of data
-  * require access to cloud based data (AWS only?)
-### The Fornax will be least beneficial to use cases which:
-  * run codes which are not parallelized
-  * Some CPUs are more efficient than others. ie., the M1 is a very powerful CPU compared to what is on Fornax. (Is this true?) A user might expect a few tens of percent speed decrease when going from M1 to Fornax if there are no gains to be made from multiprocessing or cloud access
+Users of the Fornax Science Console will have access to data curated and published by data repositories around the world.
+   * AWS S3 buckets with data curated by the NASA Astrophysics Mission Archives (HEASARC, IRSA, MAST) are mounted under `s3/` in the user's `$HOME` directory and are browsable as if they were on the local filesystem.
+   * Many data repositories provide data access through application program interfaces (APIs), which can be invoked by users of the Fornax Science Console through standard Python (e.g. astroquery, pyvo) or command line methods (e.g. wget, curl).
+   * Users can upload a limited amount of datasets to AWS and interact with them as though they were on the local filesystem.
+
+### Software pre-installed on the Fornax Science Console
+
+Under construction: How can users get a list of pre-installed software without logging into the Fornax Science Console?
 
 ## Getting started
 ### How to get an account?
   * The platform is currently available by invitation only.  
 ### How to Log in?
   * Log in at  https://daskhub.fornaxdev.mysmce.com/
+  ### How to choose an instance?
+   There are several options for the size of the compute.  Please select the smallest that you can use for testing and exploration.  Do not use the larger images unless you have already tested a smaller subset of the analysis on a smaller compute instance.
 ### How to end a session?
   *  Before loggin out, please shut down your server.  This is an important step which insures the server you are using doesn't keep running in the background, thereby wasting resources.
   *  Go to `File` Menu and click on `hub control panel` as in the below image, which will bring up the option to `stop my server`(in red).  After stopping the server, please `logout` in the upper right of the jupyterhub window.
@@ -64,6 +44,8 @@ Before, if you were wanting to reproduce some data intensive work done in the li
 ### What is a kernel and how to choose one?
   * In Jupyter, kernels are the background processes that execute cells and return results for display.
   * To select the kernel on which you want to run your Notebook, go to the Kernel menu and choose Change Kernel. You can also click directly on the name of the active kernel to switch to another.
+### How will my analysis be limited by Memory?
+ *If your workload exceeds your server size, your server may be allowed to use additional resources temporarily. This can be convenient but should not be relied on. In particular, be aware that your job may be killed automatically and without warning if its RAM needs exceed the alloted memory. This behavior is not specific to Fornax or AWS, but users may encounter it more often on the science console due to the flexible machine sizing options. (Your laptop needs to have the max amount of memory that you will ever use while working on it. On the science console, you can choose a different server size every time you start it up -- this is much more efficient, but also requires you to be more aware of how much CPU and RAM your tasks need.)
     
 ## Navigating jupyter lab
 ### How to start a new notebook?
@@ -82,11 +64,7 @@ Before, if you were wanting to reproduce some data intensive work done in the li
   * If it is a large amount of data, consider creating a zip or tar archive first.  If it is a small file, you can right click on the file name in the file browser and scroll to `Download`  
   ![right_click_download](./static/images/right_click_download.png)
 ### Home directory
-  * When you log into the science console, the active directory is your $HOME directory.  This directory is unique to you: edits and uploads are not visible to other users.
-  * Raen thinks there are directories in $HOME that are shared (e.g., `efs` and `s3`), and perhaps just mirrored or symlinked into $HOME. It would be nice to get clarification. Specifically:
-    * Which directories are/aren't shared?
-    * Which directories does the user have write access to, and are there any restrictions/considerations for putting stuff there (other than disk size)?
-    * Which directories can/should the user look in to discover data they have access to? (e.g., `s3` has various archive data, `efs` has some data shared by users, anything else?)
+  * When you log into the science console for the first time, the active directory is your `$HOME` directory. It contains preexisting folders like `efs/` and `s3/` with shared data. You may also create your own directories and files here. Your edits outside of the shared folders are not visible to other users.
 ### Does work persist between sessions?
   * Files in your home directory will persist between sessions.
   * pip installs will persist across kernel restarts, but not across logging out and back in.
