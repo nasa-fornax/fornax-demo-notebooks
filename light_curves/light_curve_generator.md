@@ -117,14 +117,14 @@ labels = []
 #get_lyu_sample(coords, labels)  #z32022ApJ...927..227L
 #get_lopeznavas_sample(coords, labels)  #2022MNRAS.513L..57L
 #get_hon_sample(coords, labels)  #2022MNRAS.511...54H
-#get_yang_sample(coords, labels)   #2018ApJ...862..109Y
+get_yang_sample(coords, labels)   #2018ApJ...862..109Y
 
 # Get some "normal" QSOs 
 # there are ~500K of these, so choose the number based on
 # a balance between speed of running the light curves and whatever 
 # the ML algorithms would like to have
 
-#num_normal_QSO = 300
+#num_normal_QSO = 5000
 #get_SDSS_sample(coords, labels, num_normal_QSO)
 
 # Remove duplicates, attach an objectid to the coords,
