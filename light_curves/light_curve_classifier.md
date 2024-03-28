@@ -678,22 +678,43 @@ df_lc
 - this will put it in the format expected by sktime
 
 ```{code-cell} ipython3
-#keep some columns out of the mix when doing the pivot by bandname
-#set them as indices and they won't get pivoted into
-df_lc = df_lc.set_index(["objectid", "label", "time"])
+def reformat_df(df_lc):
+    """
+    Reformat dataframe into shape expected by sktime
+       
+    Parameters
+    ----------
+    df_lc: Pandas dataframe with light curve info
 
-#attach bandname to all the fluxes and uncertainties
-df_lc = df_lc.pivot(columns = "band")
+    Returns
+    --------
+    res_df: MultiIndexDFObject with sktime appropriate shape
+        
+    """
+ 
+    #keep some columns out of the mix when doing the pivot by bandname
+    #set them as indices and they won't get pivoted into
+    reformat_df = df_lc.set_index(["objectid", "label", "time"])
 
-#rename the columns
-df_lc.columns = ["_".join(col) for col in df_lc.columns.values]
+    #attach bandname to all the fluxes and uncertainties
+    reformat_df = reformat_df.pivot(columns = "band")
 
-#many of these flux columns still have a space in them from the bandnames, 
-#convert that space to underscore
-df_lc.columns = df_lc.columns.str.replace(' ', '_') 
+    #rename the columns
+    reformat_df.columns = ["_".join(col) for col in reformat_df.columns.values]
 
-#and get rid of that index to cleanup
-df_lc = df_lc.reset_index()  
+    #many of these flux columns still have a space in them from the bandnames, 
+    #convert that space to underscore
+    reformat_df.columns = reformat_df.columns.str.replace(' ', '_') 
+
+    #and get rid of that index to cleanup
+    reformat_df = reformat_df.reset_index()  
+
+    return reformat_df
+```
+
+```{code-cell} ipython3
+#reformat the data to have columns be the different flux bands
+df_lc = reformat_df(df_lc)
 ```
 
 ```{code-cell} ipython3
@@ -856,7 +877,8 @@ This test needs to pass in order for sktime to run
 
 ```{code-cell} ipython3
 #ask sktime if it likes the data type of X_train
-
+#if you change any of the functions or cells above this one, it is a good idea to 
+# look at the below output to make sure you haven't introduced any NaNs or unequal length series
 check_is_mtype(X_train, mtype="pd-multiindex", scitype="Panel", return_metadata=True)
 ```
 
@@ -1027,12 +1049,8 @@ df_interpol = uniform_length_spacing(my_sample, final_freq_interpol, include_plo
 my_sample = df_interpol.explode(["time", "flux","err"], ignore_index=True)
 my_sample = my_sample.astype({col: "float" for col in ["time", "flux", "err"]})
 
-#reformat
-my_sample = my_sample.set_index(["objectid", "label", "time"])
-my_sample = my_sample.pivot(columns = "band")
-my_sample.columns = ["_".join(col) for col in my_sample.columns.values]
-my_sample.columns = my_sample.columns.str.replace(' ', '_') 
-my_sample = my_sample.reset_index()  
+#reformat the data to have columns be the different flux bands
+my_sample = reformat_df(my_sample)
 
 #normalize
 my_sample = local_normalization_max(my_sample, norm_column = "flux_W1")
