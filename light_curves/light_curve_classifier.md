@@ -82,11 +82,9 @@ import sys
 
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-import numpy as np
 import pandas as pd
 from astropy.table import Table
 from google_drive_downloader import GoogleDriveDownloader as gdd
-from scipy.stats import sigmaclip
 from tqdm import tqdm
 import json
 
@@ -94,8 +92,6 @@ from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score, confusion_ma
 from sklearn.model_selection import train_test_split
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF
-from sklearn.metrics import matthews_corrcoef, f1_score
-from sklearn.metrics.cluster import completeness_score, homogeneity_score
 
 from sktime.classification.deep_learning import CNNClassifier
 from sktime.classification.dictionary_based import IndividualTDE
@@ -112,12 +108,11 @@ from sktime.datatypes import check_is_mtype
 
 # local code imports
 sys.path.append('code_src/')
-#from fluxconversions import mjd_to_jd
 from classifier_functions import sigmaclip_lightcurves, remove_objects_without_band, \
-remove_incomplete_data, make_zero_light_curve, missingdata_to_zeros, missingdata_drop_bands, \
+remove_incomplete_data, missingdata_to_zeros, missingdata_drop_bands, \
 uniform_length_spacing, reformat_df, local_normalization_max, mjd_to_datetime
 
-#improves memory usage
+#improves memory usage and avoids problems that trigger warnings
 pd.options.mode.copy_on_write = True
 ```
 

@@ -1,4 +1,3 @@
-import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -8,7 +7,6 @@ from sklearn.neighbors import KNeighborsRegressor
 from astropy.time import Time
 
 # local code imports
-sys.path.append('code_src/')
 from fluxconversions import mjd_to_jd
 
 def sigmaclip_lightcurves(df_lc, sigmaclip_value = 10.0, include_plot = False, verbose = False):
