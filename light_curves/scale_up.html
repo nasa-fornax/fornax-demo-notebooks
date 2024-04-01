@@ -1,0 +1,1120 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Make Multi-Wavelength Light Curves for Large Samples &#8212; Fornax Demo Notebooks</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'light_curves/scale_up';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/fornax_logo.png" class="logo__image only-light" alt="Fornax Demo Notebooks - Home"/>
+    <script>document.write(`<img src="../_static/fornax_logo.png" class="logo__image only-dark" alt="Fornax Demo Notebooks - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/fornax-navo/fornax-demo-notebooks" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../index.html">
+                    Tutorial Notebooks
+                </a>
+            </li>
+        </ul>
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../forced_photometry/README.html">Multi-band forced photometry</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../forced_photometry/multiband_photometry.html">Automated Multiband Forced Photometry on Large Datasets</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="README.html">Time Domain</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="light_curve_generator.html">Make Multi-Wavelength Light Curves Using Archival Data</a></li>
+</ul>
+</li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../documentation/README.html">Fornax Science Console</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/fornax-navo/fornax-demo-notebooks" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/fornax-navo/fornax-demo-notebooks/edit/main/light_curves/scale_up.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/fornax-navo/fornax-demo-notebooks/issues/new?title=Issue%20on%20page%20%2Flight_curves/scale_up.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/light_curves/scale_up.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Make Multi-Wavelength Light Curves for Large Samples</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#learning-goals">Learning Goals</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#overview">Overview</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-processing-methods-bash-script-vs-python-s-multiprocessing">Parallel processing methods: bash script vs. python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-python-helper">The python helper</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-bash-script">The bash script</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interpreting-top">Interpreting <code class="docutils literal notranslate"><span class="pre">top</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-1-multi-wavelength-light-curves-for-500-000-sdss-agn">Example 1: Multi-wavelength light curves for 500,000 SDSS AGN</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#launch-the-run">Launch the run</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cancel">Cancel</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#restart">Restart</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#monitor">Monitor</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#logs">Logs</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#top"><code class="docutils literal notranslate"><span class="pre">top</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-2-parallelizing-the-light-curve-generator-notebook">Example 2: Parallelizing the light_curve_generator notebook</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-3-keyword-arguments-and-script-flags">Example 3: Keyword arguments and script flags</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#python-kwargs-dict">Python <code class="docutils literal notranslate"><span class="pre">kwargs_dict</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bash-script-flags">Bash script flags</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-a-yaml-file">Using a yaml file</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#appendix-what-to-expect">Appendix: What to expect</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#challenges-of-large-scale-runs">Challenges of large-scale runs</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#needs-and-wants-for-large-scale-runs">Needs and wants for large-scale runs</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advice-for-the-user">Advice for the user</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about-this-notebook">About this notebook</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="make-multi-wavelength-light-curves-for-large-samples">
+<h1>Make Multi-Wavelength Light Curves for Large Samples<a class="headerlink" href="#make-multi-wavelength-light-curves-for-large-samples" title="Link to this heading">#</a></h1>
+<section id="learning-goals">
+<h2>Learning Goals<a class="headerlink" href="#learning-goals" title="Link to this heading">#</a></h2>
+<p>By the end of this tutorial, you will be able to:</p>
+<ul class="simple">
+<li><p>Parallelize the code demonstrated in the <a class="reference internal" href="light_curve_generator.html"><span class="std std-doc">light_curve_generator</span></a> notebook to get multi-wavelength light curves.</p></li>
+<li><p>Launch a run using a large sample of objects, monitor the run’s progress automatically, and understand its resource usage (CPU and RAM).</p></li>
+<li><p>Understand some general challenges and requirements when scaling up code.</p></li>
+</ul>
+</section>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
+<p>This notebook shows how to collect multi-wavelength light curves for a large sample of target objects.
+This is a scaling-up of the <a class="reference internal" href="light_curve_generator.html"><span class="std std-doc">light_curve_generator</span></a> and assumes you are familiar with the content of that notebook.</p>
+<p>Notebook sections are:</p>
+<ul class="simple">
+<li><p>Overview: Describes functionality of the included bash script and python helper functions. Compares some parallel processing options. Introduces <code class="docutils literal notranslate"><span class="pre">top</span></code> and what be aware of.</p></li>
+<li><p>Example 1: Shows how to launch a large-scale run using the bash script, monitor its progress automatically, and diagnose a problem (out of RAM). This method is recommended for sample sizes greater than a few hundred.</p></li>
+<li><p>Example 2: Shows how to parallelize the example from the light_curve_generator notebook using the helper and python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> library.</p></li>
+<li><p>Example 3: Details the helper parameter options and how to use them in python and bash.</p></li>
+<li><p>Appendix: Contains background information including a discussion of the challenges, needs, and wants encountered when scaling up this code, and general advice for the user which can be applied to other use cases.</p></li>
+</ul>
+<p>As written, this notebook is expected to require at least 1 CPU and 6G RAM.</p>
+<p><strong>Many of the bash commands below are shown in non-executable cells because they are not intended to be run in this notebook.</strong>
+Bash commands that are not executed below begin with the symbol <code class="docutils literal notranslate"><span class="pre">$</span> </code>, and those that are executed begin with <code class="docutils literal notranslate"><span class="pre">!</span></code>.
+Both types can be called from the command-line – open a new terminal and copy/paste the cell text without the beginning symbol. The bash script is not intended to be executed from within a notebook and may behave strangely if attempted.
+Also be aware that the script path shown in the commands below assumes you are in the same directory as this notebook. Adjust it if needed.</p>
+</section>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">#</a></h2>
+<section id="parallel-processing-methods-bash-script-vs-python-s-multiprocessing">
+<h3>Parallel processing methods: bash script vs. python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code><a class="headerlink" href="#parallel-processing-methods-bash-script-vs-python-s-multiprocessing" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Bash script. Recommended for most runs with medium to large samples. Allows ZTF to use additional parallelization internally, and so is often faster (ZTF often takes the longest and returns the most data for AGN-like samples). Writes stdout and stderr to log files, useful for monitoring jobs and resource usage. Can save <code class="docutils literal notranslate"><span class="pre">top</span></code> output to a file to help identify CPU and RAM usage/needs.</p></li>
+<li><p>Python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> library. May be convenient for runs with small to medium sample sizes (&lt; few thousand). Has drawbacks that may be significant including the inability to use ZTF’s internal parallelization and that it does not save the log output (stdout and stderr) to file. An advantage of the <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> example in this notebook over the light_curve_generator is that it automatically saves the sample and light curve data to disk after loading them and can automatically skip those functions in subsequent calls and use the files instead.</p></li>
+</ul>
+</section>
+<section id="the-python-helper">
+<h3>The python helper<a class="headerlink" href="#the-python-helper" title="Link to this heading">#</a></h3>
+<p>The python “helper” is a set of wrapper functions around the same ‘code_src/’ functions used in the light_curve_generator notebook.</p>
+<ul class="simple">
+<li><p>The wrappers facilitate parallelization and large-scale runs by automating tasks like saving the function outputs to files.</p></li>
+<li><p>The helper does not actually implement parallelization and can only run one function per call.</p></li>
+<li><p>The helper can be used in combination with any parallel processing method.</p></li>
+<li><p>The helper can load <code class="docutils literal notranslate"><span class="pre">top</span></code> output from a file to pandas DataFrames and make some figures.</p></li>
+</ul>
+</section>
+<section id="the-bash-script">
+<h3>The bash script<a class="headerlink" href="#the-bash-script" title="Link to this heading">#</a></h3>
+<p>The bash script allows the user to collect light curves from a large scale sample with a single command and provides options to help manage and monitor the run.
+In a nutshell, the script does the following when called using flags that “launch a run”:</p>
+<ul class="simple">
+<li><p>calls the helper to gather the requested sample and then launches jobs for each archive query in separate, parallel processes.</p></li>
+<li><p>redirects stdout and stderr to log files.</p></li>
+<li><p>tells the user what the process PIDs are and where the log and data files are.</p></li>
+<li><p>exits, leaving the archive jobs running in the background.</p></li>
+</ul>
+<p>In case all the archive calls need to be canceled after the script exits, the user can call the script again with a different flag to have it find and kill all the processes it launched.</p>
+<p>While the jobs are running, the user can call the script again with a different flag to have it save <code class="docutils literal notranslate"><span class="pre">top</span></code> output to a log file at a user-defined interval.
+The helper can be used to load this file to pandas DataFrames and make some figures.</p>
+</section>
+<section id="interpreting-top">
+<h3>Interpreting <code class="docutils literal notranslate"><span class="pre">top</span></code><a class="headerlink" href="#interpreting-top" title="Link to this heading">#</a></h3>
+<p>If you are unfamiliar with <code class="docutils literal notranslate"><span class="pre">top</span></code>, the answer to this <a class="reference external" href="https://superuser.com/questions/575202/understanding-top-command-in-unix">StackExchange question</a> contains a basic description of the fields in the output.
+Also, beware that <code class="docutils literal notranslate"><span class="pre">top</span></code> can be configured to display values in different ways (e.g., as a percentage of either a single CPU or of all available CPUs).
+To understand the local configuration, read the man page (run <code class="docutils literal notranslate"><span class="pre">man</span> <span class="pre">top</span></code> in a terminal), particularly the sections “SUMMARY Display” and “FIELDS / Columns Display”.</p>
+<p>When running on the Science Console, take note of the amount of CPU and RAM available to the server type you choose when starting the session.
+In particular, beware that <code class="docutils literal notranslate"><span class="pre">top</span></code> can show a larger amount of total RAM than is actually accessible to your server due to resource sharing between users.</p>
+</section>
+<section id="imports">
+<h3>Imports<a class="headerlink" href="#imports" title="Link to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Ensure all dependencies are installed</span>
+<span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">multiprocessing</span>  <span class="c1"># python parallelization method</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>  <span class="c1"># use a DataFrame to work with light-curve and other data</span>
+<span class="kn">import</span> <span class="nn">sys</span>  <span class="c1"># add code directories to the path</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;code_src/&quot;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">helpers.scale_up</span>  <span class="c1"># python &quot;helper&quot; for parallelization and large scale runs</span>
+<span class="kn">import</span> <span class="nn">helpers.top</span>  <span class="c1"># load `top` output to DataFrames and make figures</span>
+<span class="kn">from</span> <span class="nn">data_structures</span> <span class="kn">import</span> <span class="n">MultiIndexDFObject</span>  <span class="c1"># load light curve data as a MultiIndexDFObject</span>
+<span class="kn">from</span> <span class="nn">plot_functions</span> <span class="kn">import</span> <span class="n">create_figures</span>  <span class="c1"># make light curve figures</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="example-1-multi-wavelength-light-curves-for-500-000-sdss-agn">
+<h2>Example 1: Multi-wavelength light curves for 500,000 SDSS AGN<a class="headerlink" href="#example-1-multi-wavelength-light-curves-for-500-000-sdss-agn" title="Link to this heading">#</a></h2>
+<p>This example shows how to launch a large-scale collection of light curves using the bash script, monitor its performance, and diagnose a problem (out of RAM).
+This run collects light curves for 500,000 SDSS objects and takes several hours to complete, but is not actually executed here.
+Instead, we show the bash commands and then look at logs that were generated by running the commands on 2024/03/01.
+If executed, the run is expected to require at least 2 CPUs and 100G RAM.</p>
+<section id="launch-the-run">
+<h3>Launch the run<a class="headerlink" href="#launch-the-run" title="Link to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># This will launch a very large scale run.</span>
+<span class="c1"># See Example 3 for a detailed explanation of parameter options.</span>
+<span class="c1"># If you are running this for the first time, reduce the sample size 500000 -&gt; 50.</span>
+
+<span class="c1"># run_id will be used in future calls to manage this run, and also determines the name of the output directory.</span>
+<span class="c1"># If you are executing this, change run_id to your own value to avoid overwriting the demo logs.</span>
+$<span class="w"> </span><span class="nv">run_id</span><span class="o">=</span><span class="s2">&quot;demo-SDSS-500k&quot;</span>
+
+<span class="c1"># Execute the run.</span>
+<span class="c1"># This will get the sample and then call all archives specified by the &#39;-a&#39; flag.</span>
+<span class="c1"># Defaults will be used for all keyword arguments that are not specified.</span>
+$<span class="w"> </span>bash<span class="w"> </span>code_src/helpers/scale_up.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$run_id</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-j<span class="w"> </span><span class="s1">&#39;{&quot;get_samples&quot;: {&quot;SDSS&quot;: {&quot;num&quot;: 500000}}, &quot;archives&quot;: {&quot;ZTF&quot;: {&quot;nworkers&quot;: 8}}}&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-a<span class="w"> </span><span class="s2">&quot;Gaia HEASARC IceCube WISE ZTF&quot;</span>
+</pre></div>
+</div>
+<p>The script will run the ‘get sample’ job, then launch the archive query jobs in parallel and exit.
+Archive jobs will continue running in the background until they either complete or encounter an error.
+Example 2 shows how to load the data.</p>
+<p>Command output from 2024/03/01 logs:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="err">!</span><span class="n">cat</span> <span class="n">output</span><span class="o">/</span><span class="n">lightcurves</span><span class="o">-</span><span class="n">demo</span><span class="o">-</span><span class="n">SDSS</span><span class="o">-</span><span class="mi">500</span><span class="n">k</span><span class="o">/</span><span class="n">logs</span><span class="o">/</span><span class="n">scale_up</span><span class="o">.</span><span class="n">sh</span><span class="o">.</span><span class="n">log</span>
+<span class="c1"># There is a warning that the SDSS &#39;specObjID&#39; column was converted from an int to a string.</span>
+<span class="c1"># The column is immediately dropped. It is not used in the code.</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="cancel">
+<h3>Cancel<a class="headerlink" href="#cancel" title="Link to this heading">#</a></h3>
+<p>You can cancel jobs at any time.</p>
+<p>If the script is still running, press <code class="docutils literal notranslate"><span class="pre">Control-C</span></code>.</p>
+<p>If the script has exited, there are two options.</p>
+<ol class="arabic simple">
+<li><p>To cancel an individual job, kill the job’s process using:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nv">pid</span><span class="o">=</span><span class="m">0000</span><span class="w">  </span><span class="c1"># get the number from script output</span>
+$<span class="w"> </span><span class="nb">kill</span><span class="w"> </span><span class="nv">$pid</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>To cancel the entire run, use the <code class="docutils literal notranslate"><span class="pre">-k</span></code> (kill) flag:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>bash<span class="w"> </span>code_src/helpers/scale_up.sh<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$run_id</span><span class="s2">&quot;</span><span class="w"> </span>-k
+</pre></div>
+</div>
+</section>
+<section id="restart">
+<h3>Restart<a class="headerlink" href="#restart" title="Link to this heading">#</a></h3>
+<p>If you want to restart and skip step(s) that previously completed, run the first command again and add one or both “overwrite” flags set to false:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># use the same run_id as before</span>
+$<span class="w"> </span>bash<span class="w"> </span>code_src/helpers/scale_up.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$run_id</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-j<span class="w"> </span><span class="s1">&#39;{&quot;get_samples&quot;: {&quot;SDSS&quot;: {&quot;num&quot;: 500000}}, &quot;archives&quot;: {&quot;ZTF&quot;: {&quot;nworkers&quot;: 8}}}&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-a<span class="w"> </span><span class="s2">&quot;Gaia HEASARC IceCube WISE ZTF&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span><span class="s2">&quot;overwrite_existing_sample=false&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span><span class="s2">&quot;overwrite_existing_lightcurves=false&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="monitor">
+<h3>Monitor<a class="headerlink" href="#monitor" title="Link to this heading">#</a></h3>
+<p>There are at least three places to look for information about a run’s status.</p>
+<ul class="simple">
+<li><p>Check the logs for job status or errors. The bash script will redirect stdout and stderr to log files and print out the paths for you.</p></li>
+<li><p>Check for light curve (parquet) data. The script will print out the “parquet_dir”. <code class="docutils literal notranslate"><span class="pre">ls</span></code> this directory. You will see a subdirectory for each archive call that has completed successfully, assuming it retrieved data for the sample.</p></li>
+<li><p>Watch <code class="docutils literal notranslate"><span class="pre">top</span></code>. The script will print the job PIDs. The script can also monitor <code class="docutils literal notranslate"><span class="pre">top</span></code> for you and save the output to a log file.</p></li>
+</ul>
+<section id="logs">
+<h4>Logs<a class="headerlink" href="#logs" title="Link to this heading">#</a></h4>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Gaia log from 2024/03/01 (success)</span>
+<span class="err">!</span><span class="n">cat</span> <span class="n">output</span><span class="o">/</span><span class="n">lightcurves</span><span class="o">-</span><span class="n">demo</span><span class="o">-</span><span class="n">SDSS</span><span class="o">-</span><span class="mi">500</span><span class="n">k</span><span class="o">/</span><span class="n">logs</span><span class="o">/</span><span class="n">gaia</span><span class="o">.</span><span class="n">log</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ZTF log from 2024/03/01 (failure)</span>
+<span class="err">!</span><span class="n">cat</span> <span class="n">output</span><span class="o">/</span><span class="n">lightcurves</span><span class="o">-</span><span class="n">demo</span><span class="o">-</span><span class="n">SDSS</span><span class="o">-</span><span class="mi">500</span><span class="n">k</span><span class="o">/</span><span class="n">logs</span><span class="o">/</span><span class="n">ztf</span><span class="o">.</span><span class="n">log</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The logs above show that the ZTF job loaded the light curve data successfully (“100%”) but exited without writing the parquet file (no “Light curves saved” message like Gaia).
+The data was lost.
+There is also no indication of an error; the job just ends.
+We can diagnose what happened by looking at the <code class="docutils literal notranslate"><span class="pre">top</span></code> output.</p>
+</section>
+<section id="top">
+<h4><code class="docutils literal notranslate"><span class="pre">top</span></code><a class="headerlink" href="#top" title="Link to this heading">#</a></h4>
+<p>While the jobs are running, you can monitor <code class="docutils literal notranslate"><span class="pre">top</span></code> and save the output to a log file by calling the script again with the <code class="docutils literal notranslate"><span class="pre">-t</span></code> flag.
+This call must be separate from the call that launches the run.
+If you want to capture the sample step as well as the archive queries, open a second terminal and call the script with <code class="docutils literal notranslate"><span class="pre">-t</span></code> right after launching the run in the first terminal.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nv">interval</span><span class="o">=</span>10m<span class="w">  </span><span class="c1"># choose your interval</span>
+$<span class="w"> </span>bash<span class="w"> </span>code_src/helpers/scale_up.sh<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;run_id&quot;</span><span class="w"> </span>-t<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$interval</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p>The script will continue running until after all of run_id’s jobs have completed.
+You can cancel at anytime with <code class="docutils literal notranslate"><span class="pre">Control-C</span></code> and start it again with a new interval.</p>
+<p>Once saved to file, the helper can parse the <code class="docutils literal notranslate"><span class="pre">top</span></code> output into pandas DataFrames and make some figures.</p>
+<p><code class="docutils literal notranslate"><span class="pre">top</span></code> output from 2024/03/01:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">run_id</span> <span class="o">=</span> <span class="s2">&quot;demo-SDSS-500k&quot;</span>
+<span class="n">logs_dir</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">build</span><span class="o">=</span><span class="s2">&quot;logs_dir&quot;</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">)</span>
+
+<span class="n">toplog</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">load_top_output</span><span class="p">(</span><span class="n">toptxt_dir</span><span class="o">=</span><span class="n">logs_dir</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># System summary information from lines 1-5 of `top` output. One row per time step.</span>
+<span class="n">toplog</span><span class="o">.</span><span class="n">summary_df</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Information about running processes from lines 6+ of `top` output. One row per process, per time step.</span>
+<span class="n">toplog</span><span class="o">.</span><span class="n">pids_df</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">toplog</span><span class="o">.</span><span class="n">plot_overview</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>In the figure, panels 1 and 2 show CPU usage while 3 and 4 show memory usage.
+Panels 1 and 3 show system totals while panels 2 and 4 show usage by individual processes.
+Specifically:</p>
+<ul class="simple">
+<li><p>Panel 1: System CPU load, averaged over the previous one minute. A value of “1” means that all compute tasks could have been completed by one CPU working 100% of the time (in reality, the tasks would have been split between the available CPUs). If this value exceeds the number of CPUs available, some tasks will wait in a queue before being executed.</p></li>
+<li><p>Panel 2: Percentage of time the given process used a CPU. This can be greater than 100% if a process uses multiple threads.</p></li>
+<li><p>Panel 3: Amount of unused memory available to the system. If this nears zero, the system will start killing processes so that the entire machine doesn’t go down.</p></li>
+<li><p>Panel 4: Percentage of total RAM used by the given process.</p></li>
+</ul>
+<p>There are many interesting features in the figure that the reader may want to look at in more detail.
+For example, other than ZTF’s memory spike at the end, we see that the full run collecting multi-wavelength light curves for the SDSS 500k sample could be completed with about 2 CPU and 60G RAM.
+We also see that the IceCube call completes very quickly but requires a significant amount of memory.
+Another observation is that the WISE call’s CPU activity seems to slow down when the ZTF workers are running, indicating that a different number of ZTF workers may be more efficient overall.</p>
+<p>We want to learn why the ZTF job failed.
+Let’s zoom in on that time period:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">toplog</span><span class="o">.</span><span class="n">plot_overview</span><span class="p">(</span><span class="n">between_time</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;22:55&quot;</span><span class="p">,</span> <span class="s2">&quot;23:10&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>In the second panel above we see the ZTF worker processes (which load the light curve data) ending just after 23:00 and then the ZTF parent process continues by itself.
+Around 23:06 in the fourth panel, we see the ZTF job’s memory usage rise sharply to almost 100% and then drop immediately to zero when the job terminates.
+This coincides with the total available memory dropping to near zero in the third panel.
+This shows that the machine did not have enough memory for the ZTF call to successfully transform the light curve data collected by the workers into a <code class="docutils literal notranslate"><span class="pre">MultiIndexDFObject</span></code> and write it as a parquet file, so the machine killed the job.</p>
+<p>The solution is to rerun the ZTF archive call on a machine with more RAM.</p>
+<p>To learn exactly which step in <code class="docutils literal notranslate"><span class="pre">ztf_get_lightcurves</span></code> was causing this and how much memory it actually needed, additional print statements were inserted into the code similar to the following:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># this was inserted just before &quot;exploding&quot; the dataframe in ztf_functions.py</span>
+<span class="c1"># helpers.scale_up._now() prints the current timestamp</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">_now</span><span class="p">()</span><span class="si">}</span><span class="s2"> | starting explode&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># ztf_df = ztf_df.explode(...  # this is the next line in ztf_functions.py</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>ZTF was then rerun on a large machine and <code class="docutils literal notranslate"><span class="pre">top</span></code> output was saved.
+After the run, we manually compared timestamps between the ZTF log and <code class="docutils literal notranslate"><span class="pre">top</span></code> output and tagged relevant <code class="docutils literal notranslate"><span class="pre">top</span></code> timestamps with corresponding step names by appending the name to the ‘—-’ delineator, like this for the “explode” step:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="err">!</span><span class="n">cat</span> <span class="n">output</span><span class="o">/</span><span class="n">lightcurves</span><span class="o">-</span><span class="n">demo</span><span class="o">-</span><span class="n">SDSS</span><span class="o">-</span><span class="mi">500</span><span class="n">k</span><span class="o">/</span><span class="n">logs</span><span class="o">/</span><span class="n">top</span><span class="o">.</span><span class="n">tag</span><span class="o">-</span><span class="n">ztf</span><span class="o">.</span><span class="n">txt</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">A12</span> <span class="n">explode</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The helper can recognize these tags and show them on a figure:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ztf_toplog</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">load_top_output</span><span class="p">(</span><span class="n">toptxt_file</span><span class="o">=</span><span class="s2">&quot;top.tag-ztf.txt&quot;</span><span class="p">,</span> <span class="n">toptxt_dir</span><span class="o">=</span><span class="n">logs_dir</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">)</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">ztf_toplog</span><span class="o">.</span><span class="n">plot_time_tags</span><span class="p">(</span><span class="n">summary_y</span><span class="o">=</span><span class="s2">&quot;used_GiB&quot;</span><span class="p">)</span>
+<span class="c1"># (This run starts by reading a previously cached parquet file containing the raw data returned by workers.)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>This figure shows that almost 100G RAM is required for the ZTF job to succeed.
+It further shows that the “explode” step requires the most memory, followed by creating the MultiIndexDFObject.
+From here, the user can choose an appropriately sized machine and/or consider whether <code class="docutils literal notranslate"><span class="pre">ztf_get_lightcurves</span></code> could be made to use less memory.</p>
+</section>
+</section>
+</section>
+<section id="example-2-parallelizing-the-light-curve-generator-notebook">
+<h2>Example 2: Parallelizing the light_curve_generator notebook<a class="headerlink" href="#example-2-parallelizing-the-light-curve-generator-notebook" title="Link to this heading">#</a></h2>
+<p>This example shows how to parallelize the example from the light_curve_generator notebook using the helper and python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code>.
+An advantage of the method shown here is that it automatically saves the sample and light curve data to disk after loading them and can automatically skip those steps in subsequent calls and use the files instead.
+This is a small sample (Yang, 30 objects).
+If you want a sample larger than a few hundred, consider using the bash script instead.</p>
+<p>Define the keyword arguments for the run:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">kwargs_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;run_id&quot;</span><span class="p">:</span> <span class="s2">&quot;demo-Yang-sample&quot;</span><span class="p">,</span>
+    <span class="c1"># Paper names to gather the sample from.</span>
+    <span class="s2">&quot;get_samples&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Yang&quot;</span><span class="p">],</span>
+    <span class="c1"># Keyword arguments for *_get_lightcurves archive calls.</span>
+    <span class="s2">&quot;archives&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;Gaia&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;search_radius&quot;</span><span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">,</span> <span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+        <span class="s2">&quot;HEASARC&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;catalog_error_radii&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;FERMIGTRIG&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;SAXGRBMGRB&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">}},</span>
+        <span class="s2">&quot;IceCube&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;icecube_select_topN&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;max_search_radius&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">},</span>
+        <span class="s2">&quot;WISE&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;bandlist&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;W1&quot;</span><span class="p">,</span> <span class="s2">&quot;W2&quot;</span><span class="p">]},</span>
+        <span class="s2">&quot;ZTF&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;match_radius&quot;</span><span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">,</span> <span class="s2">&quot;nworkers&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+<span class="c1"># See Example 3 for a detailed explanation of parameter options.</span>
+<span class="n">kwargs_dict</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Decide which archives to query.
+This is a separate list because the helper can only run one archive call at a time.
+We will iterate over this list and launch each job separately.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># archive_names = [&quot;PanSTARRS&quot;, &quot;WISE&quot;]  # choose your own list</span>
+<span class="n">archive_names</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">ARCHIVE_NAMES</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">]</span>  <span class="c1"># predefined list</span>
+<span class="n">archive_names</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>In the next cell, we:</p>
+<ul class="simple">
+<li><p>collect the sample and write it as a .ecsv file; then</p></li>
+<li><p>query the archives in parallel using a <code class="docutils literal notranslate"><span class="pre">multiprocessing.Pool</span></code> and write the light curve data as .parquet files.</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
+<span class="n">sample_table</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">build</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_dict</span><span class="p">)</span>
+<span class="c1"># sample_table is returned if you want to look at it but it is not used below</span>
+
+<span class="k">with</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">archive_names</span><span class="p">))</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+    <span class="c1"># submit one job per archive</span>
+    <span class="k">for</span> <span class="n">archive</span> <span class="ow">in</span> <span class="n">archive_names</span><span class="p">:</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">run</span><span class="p">,</span> <span class="n">kwds</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;build&quot;</span><span class="p">:</span> <span class="s2">&quot;lightcurves&quot;</span><span class="p">,</span> <span class="s2">&quot;archive&quot;</span><span class="p">:</span> <span class="n">archive</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_dict</span><span class="p">})</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># signal that no more jobs will be submitted to the pool</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>  <span class="c1"># wait for all jobs to complete</span>
+
+<span class="c1"># Note: The console output from different archive calls gets jumbled together below.</span>
+<span class="c1"># Worse, error messages tend to get lost in the background and never displayed.</span>
+<span class="c1"># If you have trouble, consider running an archive call individually without the Pool</span>
+<span class="c1"># or using the bash script instead.</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The light curves are saved in the “parquet_dir” directory.
+Each archive call writes data to a parquet file in its own subdirectory.
+These can be loaded together as a single dataset:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># copy/paste the directory path from the output above, or ask the helper for it like this:</span>
+<span class="n">parquet_dir</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">build</span><span class="o">=</span><span class="s2">&quot;parquet_dir&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_dict</span><span class="p">)</span>
+<span class="n">df_lc</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">parquet_dir</span><span class="p">)</span>
+
+<span class="n">df_lc</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now we can make figures:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">_</span> <span class="o">=</span> <span class="n">create_figures</span><span class="p">(</span><span class="n">df_lc</span><span class="o">=</span><span class="n">MultiIndexDFObject</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df_lc</span><span class="p">),</span> <span class="n">show_nbr_figures</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">save_output</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="example-3-keyword-arguments-and-script-flags">
+<h2>Example 3: Keyword arguments and script flags<a class="headerlink" href="#example-3-keyword-arguments-and-script-flags" title="Link to this heading">#</a></h2>
+<p>This example shows the python <code class="docutils literal notranslate"><span class="pre">kwargs_dict</span></code> and bash script flag options in more detail.</p>
+<section id="python-kwargs-dict">
+<h3>Python <code class="docutils literal notranslate"><span class="pre">kwargs_dict</span></code><a class="headerlink" href="#python-kwargs-dict" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">kwargs_dict</span></code> is a dictionary containing all keyword arguments for the run. It can contain:</p>
+<ul class="simple">
+<li><p>names and keyword arguments for any of the <code class="docutils literal notranslate"><span class="pre">get_*_sample</span></code> functions.</p></li>
+<li><p>keyword arguments for any of the <code class="docutils literal notranslate"><span class="pre">*_get_lightcurves</span></code> functions.</p></li>
+<li><p>other keyword arguments used directly by the helper.
+These options and their defaults are shown below, further documented in the helper’s <code class="docutils literal notranslate"><span class="pre">run</span></code> function.</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># show kwargs_dict defaults</span>
+<span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">DEFAULTS</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># show parameter documentation</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="bash-script-flags">
+<h3>Bash script flags<a class="headerlink" href="#bash-script-flags" title="Link to this heading">#</a></h3>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">-h</span></code> (help) flag to view the script’s flag options:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># show flag documentation</span>
+<span class="err">!</span><span class="n">bash</span> <span class="n">code_src</span><span class="o">/</span><span class="n">helpers</span><span class="o">/</span><span class="n">scale_up</span><span class="o">.</span><span class="n">sh</span> <span class="o">-</span><span class="n">h</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="using-a-yaml-file">
+<h3>Using a yaml file<a class="headerlink" href="#using-a-yaml-file" title="Link to this heading">#</a></h3>
+<p>It can be convenient to save the parameters in a yaml file, especially when using the bash script or in cases where you want to store parameters for later reference or re-use.</p>
+<p>Define an extended set of parameters and save it as a yaml file:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">yaml_run_id</span> <span class="o">=</span> <span class="s2">&quot;demo-kwargs-yaml&quot;</span>
+
+<span class="n">get_samples</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;green&quot;</span><span class="p">:</span> <span class="p">{},</span>
+    <span class="s2">&quot;ruan&quot;</span><span class="p">:</span> <span class="p">{},</span>
+    <span class="s2">&quot;papers_list&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;paper_kwargs&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s2">&quot;paper_link&quot;</span><span class="p">:</span> <span class="s2">&quot;2022ApJ...933...37W&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Galex variable 22&quot;</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;paper_link&quot;</span><span class="p">:</span> <span class="s2">&quot;2020ApJ...896...10B&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Palomar variable 20&quot;</span><span class="p">},</span>
+        <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;SDSS&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;num&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;zmin&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">&quot;zmax&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;randomize_z&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+    <span class="s2">&quot;ZTF_objectid&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;objectids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ZTF18aabtxvd&quot;</span><span class="p">,</span> <span class="s2">&quot;ZTF18aahqkbt&quot;</span><span class="p">,</span> <span class="s2">&quot;ZTF18abxftqm&quot;</span><span class="p">,</span> <span class="s2">&quot;ZTF18acaqdaa&quot;</span><span class="p">]},</span>
+<span class="p">}</span>
+
+<span class="n">archives</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;Gaia&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;search_radius&quot;</span><span class="p">:</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">},</span>
+    <span class="s2">&quot;HEASARC&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;catalog_error_radii&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;FERMIGTRIG&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;SAXGRBMGRB&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">}},</span>
+    <span class="s2">&quot;IceCube&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;icecube_select_topN&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;max_search_radius&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">},</span>
+    <span class="s2">&quot;WISE&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;bandlist&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;W1&quot;</span><span class="p">,</span> <span class="s2">&quot;W2&quot;</span><span class="p">]},</span>
+    <span class="s2">&quot;ZTF&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;nworkers&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s2">&quot;match_radius&quot;</span><span class="p">:</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">},</span>
+<span class="p">}</span>
+
+<span class="n">yaml_kwargs_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;get_samples&quot;</span><span class="p">:</span> <span class="n">get_samples</span><span class="p">,</span>
+    <span class="s2">&quot;consolidate_nearby_objects&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">&quot;archives&quot;</span><span class="p">:</span> <span class="n">archives</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">write_kwargs_to_yaml</span><span class="p">(</span><span class="n">run_id</span><span class="o">=</span><span class="n">yaml_run_id</span><span class="p">,</span> <span class="o">**</span><span class="n">yaml_kwargs_dict</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The path to the yaml file is printed in the output above.
+You can alter the contents of the file as you like.
+To use the file, set the kwarg <code class="docutils literal notranslate"><span class="pre">use_yaml=True</span></code>.</p>
+<p>Python example for the get-sample step:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sample_table</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">build</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">yaml_run_id</span><span class="p">,</span> <span class="n">use_yaml</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Bash example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nv">yaml_run_id</span><span class="o">=</span>demo-kwargs-yaml
+$<span class="w"> </span>bash<span class="w"> </span>code_src/helpers/scale_up.sh<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$yaml_run_id</span><span class="s2">&quot;</span><span class="w"> </span>-d<span class="w"> </span><span class="s2">&quot;use_yaml=true&quot;</span><span class="w"> </span>-a<span class="w"> </span><span class="s2">&quot;Gaia HEASARC IceCube WISE ZTF&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="appendix-what-to-expect">
+<h2>Appendix: What to expect<a class="headerlink" href="#appendix-what-to-expect" title="Link to this heading">#</a></h2>
+<section id="challenges-of-large-scale-runs">
+<h3>Challenges of large-scale runs<a class="headerlink" href="#challenges-of-large-scale-runs" title="Link to this heading">#</a></h3>
+<p>Scaling up to large sample sizes brings new challenges.
+Even if things go smoothly, each function call may need to use a lot more resources like CPU, RAM, and bandwidth, and may take much longer to complete.
+Also, we’ll want to run some functions in parallel to save time overall, but that will mean they must compete with each other for resources.</p>
+<p>These issues are complicated by the fact that different combinations of samples and archive calls can trigger different problems.
+Inefficiencies in any part of the process – our code, archive backends, etc. – which may have been negligible at small scale can balloon into significant hurdles.</p>
+<p>Problems can manifest in different ways.
+For example, progress may slow to a crawl, or it may run smoothly for several hours and then crash suddenly.
+If the job is running in the background, print statements and error messages may get lost and never be displayed for the user if they are not redirected to a file.</p>
+</section>
+<section id="needs-and-wants-for-large-scale-runs">
+<h3>Needs and wants for large-scale runs<a class="headerlink" href="#needs-and-wants-for-large-scale-runs" title="Link to this heading">#</a></h3>
+<p>The main goal is to reduce the total time it takes to run the full code, so we want to look for opportunities to parallelize.
+We can group the light_curve_generator code into two main steps: (1) gather the target object sample; then (2) generate light curves by querying the archives and standardizing the returned data.
+All of the archive calls have to wait for the sample to be available before starting, but then they can run independently in parallel.
+This is fortunate, since gathering the sample does not take long compared to the archive calls.</p>
+<p>It is useful to be able to monitor the run’s resource usage and capture print statements, error messages, etc. to log files in order to understand if/when something goes wrong.
+Even with parallelization, gathering light curves for a large sample of objects is likely to take a few hours at least.
+So we want to automate the monitoring tasks as much as possible.</p>
+<p>If the run fails, we’d like to be able to restart it without having to redo steps that were previously successful.
+To accomplish this, the inputs and outputs need to be less tightly coupled than they are in the light_curve_generator notebook.
+Specifically, we want to save the sample and light curve data to file as soon as each piece is collected, and we want the archive functions to be able to get the <code class="docutils literal notranslate"><span class="pre">sample_table</span></code> input from file.</p>
+<p>The python helper and bash script were specifically designed to fulfill many of these wants and needs.</p>
+</section>
+<section id="advice-for-the-user">
+<h3>Advice for the user<a class="headerlink" href="#advice-for-the-user" title="Link to this heading">#</a></h3>
+<p>Getting started:</p>
+<ol class="arabic simple">
+<li><p>Skim this notebook to understand the process, available options, and potential sticking points.</p></li>
+<li><p>Try things with a small sample size first, then scale up to your desired full sample.</p></li>
+<li><p>Don’t be surprised if something goes wrong.
+Every new combination of factors can present different challenges and reasons for the code to fail.
+This includes the sample selection, which archives are called and what parameters are used, runtime environment, machine CPU and RAM capabilities, network bandwidth, etc.
+Scaling up any code base comes with challenges, and some of these cannot be fully managed by pre-written code.
+You may need to observe how the code performs, diagnose a problem, and adapt the input parameters, machine size, etc. in order to successfully execute.</p></li>
+</ol>
+<p>To execute a run:</p>
+<ol class="arabic simple">
+<li><p>Define all of the get-sample and get-lightcurve parameters.</p></li>
+<li><p>Launch the run by calling the bash script or some other multi-processing method.
+Capturing stdout, stderr and <code class="docutils literal notranslate"><span class="pre">top</span></code> output to log files is highly recommended.</p></li>
+<li><p>If a get-lightcurve (get-sample) job exits without writing a .parquet (.ecsv) file, inspect the logs and <code class="docutils literal notranslate"><span class="pre">top</span></code> output to try to determine the reason it failed.
+It could be anything from a missing python library (install it), to an archive encountering an internal error (wait a bit and try again), to the job getting killed prematurely because its needs exceeded the available RAM (try a machine with more RAM, a smaller sample size, or running fewer archive calls at a time), to many other things.</p></li>
+</ol>
+</section>
+</section>
+<section id="about-this-notebook">
+<h2>About this notebook<a class="headerlink" href="#about-this-notebook" title="Link to this heading">#</a></h2>
+<p><strong>Authors</strong>: Troy Raen, Jessica Krick, Brigitta Sipőcz, Shoubaneh Hemmati, Andreas Faisst, David Shupe</p>
+<p><strong>Updated On</strong>: 2024-03-31</p>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#learning-goals">Learning Goals</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#overview">Overview</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-processing-methods-bash-script-vs-python-s-multiprocessing">Parallel processing methods: bash script vs. python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-python-helper">The python helper</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-bash-script">The bash script</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interpreting-top">Interpreting <code class="docutils literal notranslate"><span class="pre">top</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-1-multi-wavelength-light-curves-for-500-000-sdss-agn">Example 1: Multi-wavelength light curves for 500,000 SDSS AGN</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#launch-the-run">Launch the run</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cancel">Cancel</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#restart">Restart</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#monitor">Monitor</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#logs">Logs</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#top"><code class="docutils literal notranslate"><span class="pre">top</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-2-parallelizing-the-light-curve-generator-notebook">Example 2: Parallelizing the light_curve_generator notebook</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-3-keyword-arguments-and-script-flags">Example 3: Keyword arguments and script flags</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#python-kwargs-dict">Python <code class="docutils literal notranslate"><span class="pre">kwargs_dict</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bash-script-flags">Bash script flags</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-a-yaml-file">Using a yaml file</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#appendix-what-to-expect">Appendix: What to expect</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#challenges-of-large-scale-runs">Challenges of large-scale runs</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#needs-and-wants-for-large-scale-runs">Needs and wants for large-scale runs</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advice-for-the-user">Advice for the user</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about-this-notebook">About this notebook</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Fornax developers
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2022-2023, Fornax developers.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -406,9 +406,13 @@ document.write(`
                   
   <section id="time-domain">
 <h1>Time Domain<a class="headerlink" href="#time-domain" title="Link to this heading">#</a></h1>
-<p>In this User Case Scenario we work towards creating multivariate light curves
-from multiple archival and publication resources and classifying and analysing
-them with machine learning tools.</p>
+<p>In this set of Use Case Scenario we work towards creating multi-band light curves from multiple archival and publication resources at scale and classifying and analyzing them with machine learning tools. Tutorials included in this folder are:</p>
+<ol class="arabic simple">
+<li><p>light_curve_generator.md This notebook automatically retrieves target positions from the literature and then queries archival sources for light curves of those targets. This notebook is intended to be run on a small number of sources (&lt;~ few hundred)</p></li>
+<li><p>scale_up.md This notebook uses the same functions as light_curve_generator (above) but is able to generate light curves for large number of sources (~1000 -&gt; millions?) and provides additional monitoring options.</p></li>
+<li><p>light_curve_classifier.md This notebook takes output from light_curve generator and trains a ML classifier to be able to differentiate amongst the samples based on their light curves.</p></li>
+<li><p>ML_AGNzoo.md This notebook takes output from the light_curve_generator (above) and visualizes/compares different labelled samples on a reduced dimension grid.</p></li>
+</ol>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="light_curve_generator.html">Make Multi-Wavelength Light Curves Using Archival Data</a></li>
