@@ -30,6 +30,8 @@ By the end of this tutorial, you will be able to:
  &bull; Light curve data storage is a tricky problem.  Currently we are using a MultiIndex Pandas dataframe, as the best existing choice for right now.  One downside is that we need to manually track the units of flux and time instead of relying on an astropy storage scheme which would be able to do some of the units worrying for us (even astropy can't do all magnitude to flux conversions).  Astropy does not currently have a good option for multi-band light curve storage.
  
  &bull; ML work using these time-series light curves is in two neighboring notebooks: ML_AGNzoo and lc_classifier.
+
+As written, this notebook is expected to require at least 2 CPU and 8G RAM.
  
 ## Input:
  &bull; choose from a list of known changing look AGN from the literature  
