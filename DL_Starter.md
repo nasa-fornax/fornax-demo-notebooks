@@ -115,7 +115,7 @@ centerwave_out = {'u':3826,'g':4877,'r':6231,'i':7618,'z':8828,'y':10214,'j':125
 ```
 
 ## Analysis
-In this problem, the dataset provides flux values in certain filters. From the plot above, we can see the flux-wavelength graph is approximately on a convex cruve. 
+In this problem, the dataset provides flux values in certain filters. From the plot above, we can see the flux-wavelength graph is approximately on a convex curve. 
 
 Next, let's take a look at the dataset. For example, here is the information of *GOODS-S* on given filters. There are quite a few abnormal values that we should deal with. 
 
@@ -129,19 +129,6 @@ pd.DataFrame(gs).describe().loc[:,centerwave_gs.keys()]
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -400,19 +387,6 @@ df_out
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -829,11 +803,11 @@ plt.show()
     
 
 
-This time, the predicted curve does not fit all data correctly but looks like a simple function. We may find out the exact relationship by trying the combination of basic functions with similar shapes.
+This time, the predicted curve does not fit all data perfectly but looks like a basic function. We may find out the exact relationship by trying the combination of functions with similar shapes.
 
-## Deep Learning - linear regression
+## Deep Learning - multilayer perceptron
 
-We can also solve the problem with deep learning models. Let's try a simple linear regression model with four layers, two of which are hidden. The first hidden layer has 16 nodes and the second one has 32 nodes.
+We can also solve the problem with deep learning models. Let's try a simple multilayer perceptron model with four layers, two of which are hidden. The first hidden layer has 16 nodes and the second one has 32 nodes.
 
 
 ```python
