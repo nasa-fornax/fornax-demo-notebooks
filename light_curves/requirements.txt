@@ -20,4 +20,4 @@ tqdm
 alerce
 umap-learn
 git+https://github.com/sevamoo/SOMPY
-numba
+gdown
