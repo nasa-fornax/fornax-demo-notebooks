@@ -72,9 +72,6 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.ERROR)
 
-import warnings
-warnings.filterwarnings('ignore')
-
 plt.style.use('bmh')
 colors = [
     "#3F51B5",  # Ultramarine Blue
