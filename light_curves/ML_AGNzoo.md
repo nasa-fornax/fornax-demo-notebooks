@@ -218,35 +218,21 @@ The combination of the tree bands into one longer arrays in order of increasing 
 
 ```{code-cell} ipython3
 r = np.random.randint(np.shape(dat)[1])
-plt.figure(figsize=(18,4))
-plt.subplot(1,3,1)
 
-for i,l in enumerate(bands_inlc):
+_, axs = plt.subplots(1, 3, figsize=(18, 4))
+ztf_data = [dat_notnormal, dat, datm]
+ylabels = [r'Flux ($\mu Jy$)', r'Normalized Flux (max r band)', r'Normalized Flux (mean r band)']
+fig_contents = list(zip(axs, ztf_data, ylabels))
+
+for i, l in enumerate(bands_inlc):
     s = int(np.shape(dat)[1]/len(bands_inlc))
     first = int(i*s)
     last = first+s
-    plt.plot(np.linspace(first,last,s),dat_notnormal[r,first:last],'o',linestyle='--',label=l)
-plt.xlabel(r'Time_[w1,w2,w3]',size=15)
-plt.ylabel(r'Flux ($\mu Jy$)',size=15)
-plt.legend(loc=2)
-
-plt.subplot(1,3,2)
-for i,l in enumerate(bands_inlc):
-    s = int(np.shape(dat)[1]/len(bands_inlc))
-    first = int(i*s)
-    last = first+s
-    plt.plot(np.linspace(first,last,s),dat[r,first:last],'o',linestyle='--',label=l)
-plt.xlabel(r'Time_[w1,w2,w3]',size=15)
-plt.ylabel(r'Normalized Flux (max r band)',size=15)
-
-plt.subplot(1,3,3)
-for i,l in enumerate(bands_inlc):
-    s = int(np.shape(dat)[1]/len(bands_inlc))
-    first = int(i*s)
-    last = first+s
-    plt.plot(np.linspace(first,last,s),datm[r,first:last],'o',linestyle='--',label=l)
-plt.xlabel(r'Time_[w1,w2,w3]',size=15)
-plt.ylabel(r'Normalized Flux (mean r band)',size=15)
+    for ax, ydata, ylabel in fig_contents:
+        ax.plot(np.linspace(first,last,s), ydata[r,first:last], 'o', linestyle='--', label=l)
+        ax.set_xlabel(r'Time_[w1,w2,w3]', size=15)
+        ax.set_ylabel(ylabel, size=15)
+_ = axs[0].legend(loc=2)
 ```
 
 ## 3) Learn the Manifold
