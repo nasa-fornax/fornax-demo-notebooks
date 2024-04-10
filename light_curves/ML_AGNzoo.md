@@ -43,33 +43,24 @@ Here are the libraries used in this network. They are also mostly mentioned in t
 - *matplotlib* *pyplot* and *cm* for plotting data
 - *astropy.io fits* for accessing FITS files
 - *astropy.table Table* for creating tidy tables of the data
-- *MultiIndexDFObject*, *ML_utils*, *sample_lc* for reading in and prepreocessing of lightcurve data
+- *ML_utils* for reading in and prepreocessing of lightcurve data
 - *umap* and *sompy* for manifold learning, dimensionality reduction and visualization
 
 ```{code-cell} ipython3
 #!pip install -r requirements.txt
 import sys
-import os
-import re
-import time
 
 import astropy.units as u
 from astropy.table import Table
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-import matplotlib.cm as cm
 from matplotlib.colors import LinearSegmentedColormap
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 import numpy as np
 import pandas as pd
 sys.path.append('code_src/')
-from data_structures import MultiIndexDFObject
 from ML_utils import unify_lc, unify_lc_gp, stat_bands, autopct_format, combine_bands,\
-mean_fractional_variation, normalize_mean_objects, normalize_max_objects, \
 normalize_clipmax_objects, shuffle_datalabel, dtw_distance, stretch_small_values_arctan, translate_bitwise_sum_to_labels, update_bitsums
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
 from collections import Counter,OrderedDict
 
 import umap
