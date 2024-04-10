@@ -2,7 +2,7 @@ import numpy as np
 from scipy import stats
 from scipy import interpolate
 import matplotlib.pyplot as plt
-import numba
+#import numba
 import pandas as pd
 
 from sklearn.gaussian_process import GaussianProcessRegressor
@@ -330,7 +330,7 @@ def shuffle_datalabel(data,labels):
     fzr=np.array(labels)[p.astype(int)]
     return data2,fzr,p
 
-@numba.njit()
+#@numba.njit()
 def dtw_distance(series1, series2):
     """
     Returns the DTW similarity distance between two 2-D
