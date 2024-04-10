@@ -70,7 +70,7 @@ import logging
 
 # Get the root logger
 logger = logging.getLogger()
-logger.setLevel(logging.ERROR)
+logger.setLevel(logging.WARNING)
 
 plt.style.use('bmh')
 colors = [
