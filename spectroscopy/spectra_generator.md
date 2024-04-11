@@ -245,7 +245,7 @@ df_spec.append(df_spec_DESIBOSS)
 ```
 
 ```python
-df_spec.data
+df_spec.data.sort_values(by = ['objectid'])
 ```
 
 ## 3. Make plots of luminosity as a function of time
