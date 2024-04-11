@@ -56,14 +56,12 @@ Also be aware that the script path shown in the commands below assumes you are i
 
 ### Parallel processing methods: bash script vs. python's `multiprocessing`
 
-+++
+- Bash script: Recommended for most runs with medium to large sample sizes (>~500). Allows ZTF to use additional parallelization internally, and so is often faster (ZTF often takes the longest and returns the most data for AGN-like samples). Writes stdout and stderr to log files, useful for monitoring jobs and resource usage. Can save `top` output to a file to help identify CPU and RAM usage/needs.
+- Python's `multiprocessing` library: Can be convenient for runs with small to medium sample sizes, up to ~500. Has drawbacks that may be significant including the inability to use ZTF's internal parallelization and that it does not save the log output (stdout and stderr) to file. An advantage of the `multiprocessing` example in this notebook over the light_curve_generator is that it automatically saves the sample and light curve data to disk after loading them and can automatically skip those functions in subsequent calls and use the files instead.
 
-- Bash script. Recommended for most runs with medium to large samples. Allows ZTF to use additional parallelization internally, and so is often faster (ZTF often takes the longest and returns the most data for AGN-like samples). Writes stdout and stderr to log files, useful for monitoring jobs and resource usage. Can save `top` output to a file to help identify CPU and RAM usage/needs.
-- Python's `multiprocessing` library. May be convenient for runs with small to medium sample sizes (< few thousand). Has drawbacks that may be significant including the inability to use ZTF's internal parallelization and that it does not save the log output (stdout and stderr) to file. An advantage of the `multiprocessing` example in this notebook over the light_curve_generator is that it automatically saves the sample and light curve data to disk after loading them and can automatically skip those functions in subsequent calls and use the files instead.
++++
 
 ### The python helper
-
-+++
 
 The python "helper" is a set of wrapper functions around the same 'code_src/' functions used in the light_curve_generator notebook.
 
@@ -71,6 +69,8 @@ The python "helper" is a set of wrapper functions around the same 'code_src/' fu
 - The helper does not actually implement parallelization and can only run one function per call.
 - The helper can be used in combination with any parallel processing method.
 - The helper can load `top` output from a file to pandas DataFrames and make some figures.
+
++++
 
 ### The bash script
 
@@ -95,8 +95,17 @@ If you are unfamiliar with `top`, the answer to this [StackExchange question](ht
 Also, beware that `top` can be configured to display values in different ways (e.g., as a percentage of either a single CPU or of all available CPUs).
 To understand the local configuration, read the man page (run `man top` in a terminal), particularly the sections "SUMMARY Display" and "FIELDS / Columns Display".
 
-When running on the Science Console, take note of the amount of CPU and RAM available to the server type you choose when starting the session.
++++
+
+### Fornax Science Console
+
+There are a couple of things to be aware of when running on the Fornax Science Console.
+
+Take note of the amount of CPU and RAM available to the server type you choose when starting the session.
 In particular, beware that `top` can show a larger amount of total RAM than is actually accessible to your server due to resource sharing between users.
+
+The Science Console is primarily intended for interactive use and will cull sessions which appear to be inactive.
+If you want a notebook or script to run for longer than about 30 minutes and you will not be interacting with the Console, running `top` during that time can help keep the session active.
 
 +++
 
@@ -592,4 +601,4 @@ To execute a run:
 
 **Authors**: Troy Raen, Jessica Krick, Brigitta Sipőcz, Shoubaneh Hemmati, Andreas Faisst, David Shupe
 
-**Updated On**: 2024-03-31
+**Updated On**: 2024-04-05
