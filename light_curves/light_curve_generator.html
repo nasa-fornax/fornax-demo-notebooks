@@ -453,8 +453,8 @@ document.write(`
 <section id="learning-goals">
 <h2>Learning Goals<a class="headerlink" href="#learning-goals" title="Link to this heading">#</a></h2>
 <p>By the end of this tutorial, you will be able to:<br />
-• Automatically load a catalog of sources<br />
-• Automatically &amp; efficiently search NASA and non-NASA resources for light curves at scale<br />
+• Automatically load a catalog of target sources<br />
+• Automatically &amp; efficiently search NASA and non-NASA resources for the light curves of up to ~500 targets<br />
 • Store &amp; manipulate light curves in a Pandas MultiIndex dataframe<br />
 • Plot all light curves on the same plot</p>
 </section>
@@ -463,7 +463,8 @@ document.write(`
 <p>• A user has a sample of interesting targets for which they would like to see a plot of available archival light curves.  We start with a small set of changing look AGN from Yang et al., 2018, which are automatically downloaded. Changing look AGN are cases where the broad emission lines appear or disappear (and not just that the flux is variable).</p>
 <p>• We model light curve plots after van Velzen et al. 2021.  We search through a curated list of time-domain NASA holdings as well as non-NASA sources.  HEASARC catalogs used are Fermi and Beppo-Sax, IRSA catalogs used are ZTF and WISE, and MAST catalogs used are Pan-STARRS, TESS, Kepler, and K2.  Non-NASA sources are Gaia and IceCube. This list is generalized enough to include many types of targets to make this notebook interesting for many types of science.  All of these time-domain archives are searched in an automated and efficient fashion using astroquery, pyvo, pyarrow or APIs.</p>
 <p>• Light curve data storage is a tricky problem.  Currently we are using a MultiIndex Pandas dataframe, as the best existing choice for right now.  One downside is that we need to manually track the units of flux and time instead of relying on an astropy storage scheme which would be able to do some of the units worrying for us (even astropy can’t do all magnitude to flux conversions).  Astropy does not currently have a good option for multi-band light curve storage.</p>
-<p>• ML work using these time-series light curves is in two neighboring notebooks: ML_AGNzoo and lc_classifier.</p>
+<p>• This notebook walks through the individual steps required to collect the targets and their light curves and create figures. It also shows how to speed up the collection of light curves using python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code>. This is expected to be sufficient for up to ~500 targets. For a larger number of targets, consider using the bash script demonstrated in the neighboring notebook <a class="reference internal" href="scale_up.html"><span class="std std-doc">scale_up</span></a>.</p>
+<p>• ML work using these time-series light curves is in two neighboring notebooks: <a class="reference internal" href="ML_AGNzoo.html"><span class="std std-doc">ML_AGNzoo</span></a> and <a class="reference internal" href="light_curve_classifier.html"><span class="std std-doc">light_curve_classifier</span></a>.</p>
 <p>As written, this notebook is expected to require at least 2 CPU and 8G RAM.</p>
 </section>
 <section id="input">
@@ -823,9 +824,10 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 <section id="parallel-processing-the-archive-calls">
 <h2>4. Parallel processing the archive calls<a class="headerlink" href="#parallel-processing-the-archive-calls" title="Link to this heading">#</a></h2>
 <p>This section shows how to increase the speed of the multi-archive search by running the calls in parallel using python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> library.
-This will speed up searches of light curves for numbers of targets ranging from a few tens to a few thousand.
-For larger sample sizes, the option to use ZTF’s internal parallelization, and/or improved monitoring options, please see the related tutorial notebook scale_up.md in the same folder as this one.
-Running this on very large samples (hundreds of thousands) may fail because of the way the platform is setup to cull users which appear to be inactive.</p>
+This can be a convenient and efficient method for small to medium sample sizes.
+One drawback is that error messages tend to get lost in the background and never displayed for the user.
+Running this on very large samples may fail because of the way the platform is setup to cull sessions which appear to be inactive.
+For sample sizes &gt;~500 and/or improved logging and monitoring options, consider using the bash script demonstrated in the related tutorial notebook <a class="reference internal" href="scale_up.html"><span class="std std-doc">scale_up</span></a>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># number of workers to use in the parallel processing pool</span>

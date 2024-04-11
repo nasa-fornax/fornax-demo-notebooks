@@ -16,8 +16,8 @@ kernelspec:
 
 ## Learning Goals    
 By the end of this tutorial, you will be able to:  
-  &bull; Automatically load a catalog of sources  
-  &bull; Automatically & efficiently search NASA and non-NASA resources for light curves at scale  
+  &bull; Automatically load a catalog of target sources  
+  &bull; Automatically & efficiently search NASA and non-NASA resources for the light curves of up to ~500 targets  
   &bull; Store & manipulate light curves in a Pandas MultiIndex dataframe  
   &bull; Plot all light curves on the same plot
  
@@ -29,7 +29,9 @@ By the end of this tutorial, you will be able to:
  
  &bull; Light curve data storage is a tricky problem.  Currently we are using a MultiIndex Pandas dataframe, as the best existing choice for right now.  One downside is that we need to manually track the units of flux and time instead of relying on an astropy storage scheme which would be able to do some of the units worrying for us (even astropy can't do all magnitude to flux conversions).  Astropy does not currently have a good option for multi-band light curve storage.
  
- &bull; ML work using these time-series light curves is in two neighboring notebooks: ML_AGNzoo and lc_classifier.
+ &bull; This notebook walks through the individual steps required to collect the targets and their light curves and create figures. It also shows how to speed up the collection of light curves using python's `multiprocessing`. This is expected to be sufficient for up to ~500 targets. For a larger number of targets, consider using the bash script demonstrated in the neighboring notebook [scale_up](scale_up.md).
+ 
+ &bull; ML work using these time-series light curves is in two neighboring notebooks: [ML_AGNzoo](ML_AGNzoo.md) and [light_curve_classifier](light_curve_classifier.md).
 
 As written, this notebook is expected to require at least 2 CPU and 8G RAM.
  
@@ -343,9 +345,10 @@ print('total time for serial archive calls is ', end_serial - start_serial, 's')
 ## 4. Parallel processing the archive calls
 
 This section shows how to increase the speed of the multi-archive search by running the calls in parallel using python's `multiprocessing` library.
-This will speed up searches of light curves for numbers of targets ranging from a few tens to a few thousand.
-For larger sample sizes, the option to use ZTF's internal parallelization, and/or improved monitoring options, please see the related tutorial notebook scale_up.md in the same folder as this one.
-Running this on very large samples (hundreds of thousands) may fail because of the way the platform is setup to cull users which appear to be inactive.
+This can be a convenient and efficient method for small to medium sample sizes.
+One drawback is that error messages tend to get lost in the background and never displayed for the user.
+Running this on very large samples may fail because of the way the platform is setup to cull sessions which appear to be inactive.
+For sample sizes >~500 and/or improved logging and monitoring options, consider using the bash script demonstrated in the related tutorial notebook [scale_up](scale_up.md).
 
 ```{code-cell} ipython3
 # number of workers to use in the parallel processing pool

@@ -412,6 +412,7 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-python-helper">The python helper</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-bash-script">The bash script</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interpreting-top">Interpreting <code class="docutils literal notranslate"><span class="pre">top</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fornax-science-console">Fornax Science Console</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
 </ul>
 </li>
@@ -485,8 +486,8 @@ Also be aware that the script path shown in the commands below assumes you are i
 <section id="parallel-processing-methods-bash-script-vs-python-s-multiprocessing">
 <h3>Parallel processing methods: bash script vs. python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code><a class="headerlink" href="#parallel-processing-methods-bash-script-vs-python-s-multiprocessing" title="Link to this heading">#</a></h3>
 <ul class="simple">
-<li><p>Bash script. Recommended for most runs with medium to large samples. Allows ZTF to use additional parallelization internally, and so is often faster (ZTF often takes the longest and returns the most data for AGN-like samples). Writes stdout and stderr to log files, useful for monitoring jobs and resource usage. Can save <code class="docutils literal notranslate"><span class="pre">top</span></code> output to a file to help identify CPU and RAM usage/needs.</p></li>
-<li><p>Python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> library. May be convenient for runs with small to medium sample sizes (&lt; few thousand). Has drawbacks that may be significant including the inability to use ZTF’s internal parallelization and that it does not save the log output (stdout and stderr) to file. An advantage of the <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> example in this notebook over the light_curve_generator is that it automatically saves the sample and light curve data to disk after loading them and can automatically skip those functions in subsequent calls and use the files instead.</p></li>
+<li><p>Bash script: Recommended for most runs with medium to large sample sizes (&gt;~500). Allows ZTF to use additional parallelization internally, and so is often faster (ZTF often takes the longest and returns the most data for AGN-like samples). Writes stdout and stderr to log files, useful for monitoring jobs and resource usage. Can save <code class="docutils literal notranslate"><span class="pre">top</span></code> output to a file to help identify CPU and RAM usage/needs.</p></li>
+<li><p>Python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> library: Can be convenient for runs with small to medium sample sizes, up to ~500. Has drawbacks that may be significant including the inability to use ZTF’s internal parallelization and that it does not save the log output (stdout and stderr) to file. An advantage of the <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> example in this notebook over the light_curve_generator is that it automatically saves the sample and light curve data to disk after loading them and can automatically skip those functions in subsequent calls and use the files instead.</p></li>
 </ul>
 </section>
 <section id="the-python-helper">
@@ -518,8 +519,14 @@ The helper can be used to load this file to pandas DataFrames and make some figu
 <p>If you are unfamiliar with <code class="docutils literal notranslate"><span class="pre">top</span></code>, the answer to this <a class="reference external" href="https://superuser.com/questions/575202/understanding-top-command-in-unix">StackExchange question</a> contains a basic description of the fields in the output.
 Also, beware that <code class="docutils literal notranslate"><span class="pre">top</span></code> can be configured to display values in different ways (e.g., as a percentage of either a single CPU or of all available CPUs).
 To understand the local configuration, read the man page (run <code class="docutils literal notranslate"><span class="pre">man</span> <span class="pre">top</span></code> in a terminal), particularly the sections “SUMMARY Display” and “FIELDS / Columns Display”.</p>
-<p>When running on the Science Console, take note of the amount of CPU and RAM available to the server type you choose when starting the session.
+</section>
+<section id="fornax-science-console">
+<h3>Fornax Science Console<a class="headerlink" href="#fornax-science-console" title="Link to this heading">#</a></h3>
+<p>There are a couple of things to be aware of when running on the Fornax Science Console.</p>
+<p>Take note of the amount of CPU and RAM available to the server type you choose when starting the session.
 In particular, beware that <code class="docutils literal notranslate"><span class="pre">top</span></code> can show a larger amount of total RAM than is actually accessible to your server due to resource sharing between users.</p>
+<p>The Science Console is primarily intended for interactive use and will cull sessions which appear to be inactive.
+If you want a notebook or script to run for longer than about 30 minutes and you will not be interacting with the Console, running <code class="docutils literal notranslate"><span class="pre">top</span></code> during that time can help keep the session active.</p>
 </section>
 <section id="imports">
 <h3>Imports<a class="headerlink" href="#imports" title="Link to this heading">#</a></h3>
@@ -1000,7 +1007,7 @@ It could be anything from a missing python library (install it), to an archive e
 <section id="about-this-notebook">
 <h2>About this notebook<a class="headerlink" href="#about-this-notebook" title="Link to this heading">#</a></h2>
 <p><strong>Authors</strong>: Troy Raen, Jessica Krick, Brigitta Sipőcz, Shoubaneh Hemmati, Andreas Faisst, David Shupe</p>
-<p><strong>Updated On</strong>: 2024-03-31</p>
+<p><strong>Updated On</strong>: 2024-04-05</p>
 </section>
 </section>
 
@@ -1056,6 +1063,7 @@ It could be anything from a missing python library (install it), to an archive e
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-python-helper">The python helper</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-bash-script">The bash script</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interpreting-top">Interpreting <code class="docutils literal notranslate"><span class="pre">top</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fornax-science-console">Fornax Science Console</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
 </ul>
 </li>
