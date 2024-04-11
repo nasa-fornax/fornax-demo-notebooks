@@ -462,34 +462,25 @@ document.write(`
 <li><p><em>matplotlib</em> <em>pyplot</em> and <em>cm</em> for plotting data</p></li>
 <li><p><em>astropy.io fits</em> for accessing FITS files</p></li>
 <li><p><em>astropy.table Table</em> for creating tidy tables of the data</p></li>
-<li><p><em>MultiIndexDFObject</em>, <em>ML_utils</em>, <em>sample_lc</em> for reading in and prepreocessing of lightcurve data</p></li>
+<li><p><em>ML_utils</em> for reading in and prepreocessing of lightcurve data</p></li>
 <li><p><em>umap</em> and <em>sompy</em> for manifold learning, dimensionality reduction and visualization</p></li>
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!pip install -r requirements.txt</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">time</span>
 
 <span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
 <span class="kn">from</span> <span class="nn">astropy.table</span> <span class="kn">import</span> <span class="n">Table</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
-<span class="kn">import</span> <span class="nn">matplotlib.cm</span> <span class="k">as</span> <span class="nn">cm</span>
 <span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LinearSegmentedColormap</span>
 <span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1</span> <span class="kn">import</span> <span class="n">make_axes_locatable</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;code_src/&#39;</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">data_structures</span> <span class="kn">import</span> <span class="n">MultiIndexDFObject</span>
 <span class="kn">from</span> <span class="nn">ML_utils</span> <span class="kn">import</span> <span class="n">unify_lc</span><span class="p">,</span> <span class="n">unify_lc_gp</span><span class="p">,</span> <span class="n">stat_bands</span><span class="p">,</span> <span class="n">autopct_format</span><span class="p">,</span> <span class="n">combine_bands</span><span class="p">,</span>\
-<span class="n">mean_fractional_variation</span><span class="p">,</span> <span class="n">normalize_mean_objects</span><span class="p">,</span> <span class="n">normalize_max_objects</span><span class="p">,</span> \
 <span class="n">normalize_clipmax_objects</span><span class="p">,</span> <span class="n">shuffle_datalabel</span><span class="p">,</span> <span class="n">dtw_distance</span><span class="p">,</span> <span class="n">stretch_small_values_arctan</span><span class="p">,</span> <span class="n">translate_bitwise_sum_to_labels</span><span class="p">,</span> <span class="n">update_bitsums</span>
-<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">KMeans</span>
-<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span><span class="p">,</span><span class="n">OrderedDict</span>
 
 <span class="kn">import</span> <span class="nn">umap</span>
@@ -499,10 +490,7 @@ document.write(`
 
 <span class="c1"># Get the root logger</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
-<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
-
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;bmh&#39;</span><span class="p">)</span>
 <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span>
@@ -532,8 +520,15 @@ document.write(`
 <p>Here we load a parquet file of light curves generated using the light_curve_generator notebook in this same GitHub repo. With that light_curve_generator notebook, you can build your favorite sample from different sources in the literature and grab the data from archives of interest. This sample contains both spatial coordinates and categorical labels for each AGN. The labels are generated by a bitwise addition of a set of binary indicators. Each binary indicator corresponds to the AGN’s membership in various categories, such as being an SDSS_QSO or a WISE_Variable. For example, an AGN that is both an SDSS_QSO, a WISE_Variable, and also shows ‘Turn_on’ characteristics, would have a label calculated by combining these specific binary indicators using bitwise addition.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#sample_table = Table.read(&#39;data/agnsample_feb7.ecsv&#39;, format=&quot;ascii.ecsv&quot;) # if needed, contains coordinates, redshift and all labels</span>
-<span class="n">df_lc</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="s1">&#39;data/df_lc_020724.parquet.gzip&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># To download the data file containing the light curves from Googledrive</span>
+<span class="err">!</span><span class="n">gdown</span> <span class="mi">11</span><span class="n">rC6rPae7kxdw</span><span class="o">-</span><span class="mi">5</span><span class="n">X1AzCEtArxCtbXvo8</span> <span class="o">-</span><span class="n">O</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">df_lc_020724</span><span class="o">.</span><span class="n">parquet</span><span class="o">.</span><span class="n">gzip</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df_lc</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="s1">&#39;data/df_lc_020724.parquet.gzip&#39;</span><span class="p">)</span>
 
 <span class="n">df_lc</span> <span class="o">=</span> <span class="n">df_lc</span><span class="p">[</span><span class="n">df_lc</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;64&#39;</span><span class="p">]</span> <span class="c1"># remove 64 for SPIDER only as its too large compared to the rest of the labels</span>
 <span class="n">df_lc</span> <span class="o">=</span> <span class="n">update_bitsums</span><span class="p">(</span><span class="n">df_lc</span><span class="p">)</span> <span class="c1"># remove all bitwise sums that had 64 in them</span>
@@ -664,35 +659,21 @@ The unify_lc, or unify_lc_gp functions do the unification of the lightcurve arra
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">dat</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
 
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bands_inlc</span><span class="p">):</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">ztf_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">dat_notnormal</span><span class="p">,</span> <span class="n">dat</span><span class="p">,</span> <span class="n">datm</span><span class="p">]</span>
+<span class="n">ylabels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">r</span><span class="s1">&#39;Flux ($\mu Jy$)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;Normalized Flux (max r band)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;Normalized Flux (mean r band)&#39;</span><span class="p">]</span>
+<span class="n">fig_contents</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">axs</span><span class="p">,</span> <span class="n">ztf_data</span><span class="p">,</span> <span class="n">ylabels</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bands_inlc</span><span class="p">):</span>
     <span class="n">s</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">dat</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">bands_inlc</span><span class="p">))</span>
     <span class="n">first</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="n">s</span><span class="p">)</span>
     <span class="n">last</span> <span class="o">=</span> <span class="n">first</span><span class="o">+</span><span class="n">s</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">first</span><span class="p">,</span><span class="n">last</span><span class="p">,</span><span class="n">s</span><span class="p">),</span><span class="n">dat_notnormal</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">first</span><span class="p">:</span><span class="n">last</span><span class="p">],</span><span class="s1">&#39;o&#39;</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">l</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Time_[w1,w2,w3]&#39;</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Flux ($\mu Jy$)&#39;</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bands_inlc</span><span class="p">):</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">dat</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">bands_inlc</span><span class="p">))</span>
-    <span class="n">first</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="n">s</span><span class="p">)</span>
-    <span class="n">last</span> <span class="o">=</span> <span class="n">first</span><span class="o">+</span><span class="n">s</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">first</span><span class="p">,</span><span class="n">last</span><span class="p">,</span><span class="n">s</span><span class="p">),</span><span class="n">dat</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">first</span><span class="p">:</span><span class="n">last</span><span class="p">],</span><span class="s1">&#39;o&#39;</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">l</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Time_[w1,w2,w3]&#39;</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Normalized Flux (max r band)&#39;</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bands_inlc</span><span class="p">):</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">dat</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">bands_inlc</span><span class="p">))</span>
-    <span class="n">first</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="n">s</span><span class="p">)</span>
-    <span class="n">last</span> <span class="o">=</span> <span class="n">first</span><span class="o">+</span><span class="n">s</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">first</span><span class="p">,</span><span class="n">last</span><span class="p">,</span><span class="n">s</span><span class="p">),</span><span class="n">datm</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">first</span><span class="p">:</span><span class="n">last</span><span class="p">],</span><span class="s1">&#39;o&#39;</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">l</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Time_[w1,w2,w3]&#39;</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Normalized Flux (mean r band)&#39;</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ydata</span><span class="p">,</span> <span class="n">ylabel</span> <span class="ow">in</span> <span class="n">fig_contents</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">first</span><span class="p">,</span><span class="n">last</span><span class="p">,</span><span class="n">s</span><span class="p">),</span> <span class="n">ydata</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">first</span><span class="p">:</span><span class="n">last</span><span class="p">],</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">l</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Time_[w1,w2,w3]&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylabel</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
