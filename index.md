@@ -10,13 +10,7 @@ light_curves/README
 ```
 
 
-% Including the main repo README as is
-
-```{include} README.md
-
-```
-
-## Documentation
+## User Documentation
 
 ```{toctree}
 ---
