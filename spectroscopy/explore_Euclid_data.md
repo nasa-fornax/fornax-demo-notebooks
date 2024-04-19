@@ -7,12 +7,13 @@ By the end of this tutorial, you will be able to:
 
  &bull; work with data in the cloud
 
- &bull; download and visualize Euclid images
+ &bull; get and visualize Euclid images
 
- &bull; download and visualize Euclid spectra
+ &bull; get and visualize Euclid spectra
 
  
 ## Introduction
+This notebook is written to be used in Fornax which is a cloud based computing platform using AWS.  It will access Euclid data stored in the cloud. The user does not need to know where the actual data are stored.  We will want to make sure the data access methods work from various locations.
 <!-- #endregion -->
 
 ## 1.  Define the Sample
@@ -49,7 +50,15 @@ Return a data structure of targets with Euclid data
  - images might be available via SIAv2
 
 *TODO: How do we access the spectra?
- - spectra will be available as datalinks from the MER catalog
+ - From Anastasia, there will be 2 ways to access Euclid spectra
+ - 1. Do a TAP search on the MER photometry catalog. The results will include a service descriptor to get the spectrum for rows of interest.
+   2. Query the Euclid datalink service directly for spectra.
+
+4/19 update: 
+- IRSA datalink service is not yet ready, maybe in a couple weeks
+- Alternatively, we could explore CADC
+- CADC runs almost entirely off datalink - their SIA and ObsTAP services return datalink tables that you have to follow to get to any of their products.
+
 
 
 ## 4. Visualize Euclid data
