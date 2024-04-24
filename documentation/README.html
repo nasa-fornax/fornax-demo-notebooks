@@ -39,7 +39,7 @@
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
     <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
@@ -173,7 +173,7 @@
         <ul class="nav bd-sidenav bd-sidenav__home-link">
             <li class="toctree-l1">
                 <a class="reference internal" href="../index.html">
-                    Tutorial Notebooks
+                    The Fornax Initiative
                 </a>
             </li>
         </ul>
@@ -572,15 +572,18 @@ document.write(`
 <section id="how-can-i-tell-which-computing-resources-are-available-on-the-fornax-science-console">
 <h3>How can I tell which computing resources are available on the Fornax Science Console?<a class="headerlink" href="#how-can-i-tell-which-computing-resources-are-available-on-the-fornax-science-console" title="Link to this heading">#</a></h3>
 <ul class="simple">
-<li><p>in JupyterHub, open a terminal window, and use one of the following commands:</p>
+<li><p>Generally you will have access to the CPU and RAM resources selected upon startup in Fornax.  It is possible to query in a terminal window to find the amount of CPU or RAM, however, beware that these methods can show a larger amount of total RAM than is actually accessible to your server due to resource sharing between users.</p></li>
+<li><p>In JupyterHub, open a terminal window, and use one of the below commands:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">nproc</span></code> will give you the number of processors</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">cat</span> <span class="pre">/proc/cpuinfo</span></code> will give you more detailed info on the processors</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">free</span> <span class="pre">-h</span></code> will give the amount of RAM available/used</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">cat</span> <span class="pre">/proc/meminfo</span></code> will give  more detailed info on the amount of RAM available/used</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">top</span></code> gives info on both CPU and RAM usage</p></li>
 </ul>
 </li>
 </ul>
+<p>Under construction: It appears that sometimes we are allowed to use more CPU than listed for a short amount of time.  Is this true? and what are the parameters of when and for what sizes that will be allowed?</p>
 </section>
 <section id="how-can-i-tell-if-i-am-close-to-using-up-my-allocation-of-compute-and-storage-resources">
 <h3>How can I tell if I am close to using up my allocation of compute and storage resources?<a class="headerlink" href="#how-can-i-tell-if-i-am-close-to-using-up-my-allocation-of-compute-and-storage-resources" title="Link to this heading">#</a></h3>
@@ -604,8 +607,9 @@ document.write(`
 </section>
 <section id="save-your-work">
 <h3>Save your work!<a class="headerlink" href="#save-your-work" title="Link to this heading">#</a></h3>
-<p>The Fornax Science Console will cull servers after a user is inactive for a certain amount of time.</p>
-<p>Under construction: how long?</p>
+<p>The Science Console is primarily intended for interactive use and will cull sessions which appear to be inactive.  Archive calls appear to Fornax as periods of inactivity (we see the irony in this too!), so might lead to your session being dropped from Fornax.
+If you want a notebook or script to run for longer than about 60 minutes and you will not be interacting with the Console, running <code class="docutils literal notranslate"><span class="pre">top</span></code> during that time can help keep the session active.</p>
+<p>Under construction: how long is the period of inactivity that gets culled?</p>
 </section>
 <section id="how-can-i-save-my-notebook-as-a-python-script">
 <h3>How can I save my notebook as a Python script?<a class="headerlink" href="#how-can-i-save-my-notebook-as-a-python-script" title="Link to this heading">#</a></h3>
@@ -778,7 +782,7 @@ document.write(`
 <ul class="simple">
 <li><p>Python built in <a class="reference external" href="https://irsa.ipac.caltech.edu/docs/notebooks/Parallelize_Convolution.html">multiprocessing</a></p></li>
 <li><p><a class="reference external" href="https://gateway.dask.org">Dask gateway</a></p></li>
-<li><p>How to [scale up] a notebook to big data</p></li>
+<li><p>Our <a class="reference external" href="https://github.com/fornax-navo/fornax-demo-notebooks/blob/main/light_curves/scale_up.md">scale up</a> notebook is a tutorial on parallelization of generating multiwavelength light curves with tools, tips, and suggestions relevant to many tasks.</p></li>
 </ul>
 </section>
 <section id="mast-science-examples">

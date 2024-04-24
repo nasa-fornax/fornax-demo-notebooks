@@ -68,11 +68,15 @@ The Fornax Science Platform additionally contains a JupyterLab extension called 
 ## Starting & Monitoring Analyses
 
 ### How can I tell which computing resources are available on the Fornax Science Console?
-  * in JupyterHub, open a terminal window, and use one of the following commands:
+  * Generally you will have access to the CPU and RAM resources selected upon startup in Fornax.  It is possible to query in a terminal window to find the amount of CPU or RAM, however, beware that these methods can show a larger amount of total RAM than is actually accessible to your server due to resource sharing between users.
+  * In JupyterHub, open a terminal window, and use one of the below commands:
     * `nproc` will give you the number of processors
     * `cat /proc/cpuinfo` will give you more detailed info on the processors
     * `free -h` will give the amount of RAM available/used
     * `cat /proc/meminfo` will give  more detailed info on the amount of RAM available/used
+    * `top` gives info on both CPU and RAM usage
+   
+Under construction: It appears that sometimes we are allowed to use more CPU than listed for a short amount of time.  Is this true? and what are the parameters of when and for what sizes that will be allowed?
 
 ### How can I tell if I am close to using up my allocation of compute and storage resources?
 
@@ -92,9 +96,10 @@ Under Construction: In Jupyter, kernels are the background processes that execut
   * If you want software installs to be persistent, consider setting up an environment: See below under "Making a conda environment that persists across sessions"
 
 ### Save your work!
-The Fornax Science Console will cull servers after a user is inactive for a certain amount of time.
+The Science Console is primarily intended for interactive use and will cull sessions which appear to be inactive.  Archive calls appear to Fornax as periods of inactivity (we see the irony in this too!), so might lead to your session being dropped from Fornax.
+If you want a notebook or script to run for longer than about 60 minutes and you will not be interacting with the Console, running `top` during that time can help keep the session active.
 
-Under construction: how long?
+Under construction: how long is the period of inactivity that gets culled?
 
 ### How can I save my notebook as a Python script?
   * from the command line: `jupyter nbconvert --to script notebookname.ipynb`
@@ -209,7 +214,7 @@ Software is installed in miniconda environments.  You can use "[conda list](http
 ### Optimizing code for multiple CPUs with parallelization
   * Python built in [multiprocessing](https://irsa.ipac.caltech.edu/docs/notebooks/Parallelize_Convolution.html)
   * [Dask gateway](https://gateway.dask.org)
-  * How to [scale up] a notebook to big data
+  * Our [scale up](https://github.com/fornax-navo/fornax-demo-notebooks/blob/main/light_curves/scale_up.md) notebook is a tutorial on parallelization of generating multiwavelength light curves with tools, tips, and suggestions relevant to many tasks.
     
 ### [MAST science examples](https://github.com/spacetelescope/tike_content/blob/main/markdown/science-examples.md)
 
