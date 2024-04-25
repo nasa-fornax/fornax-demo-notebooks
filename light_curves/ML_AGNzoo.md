@@ -43,33 +43,24 @@ Here are the libraries used in this network. They are also mostly mentioned in t
 - *matplotlib* *pyplot* and *cm* for plotting data
 - *astropy.io fits* for accessing FITS files
 - *astropy.table Table* for creating tidy tables of the data
-- *MultiIndexDFObject*, *ML_utils*, *sample_lc* for reading in and prepreocessing of lightcurve data
+- *ML_utils* for reading in and prepreocessing of lightcurve data
 - *umap* and *sompy* for manifold learning, dimensionality reduction and visualization
 
 ```{code-cell} ipython3
 !pip install -r requirements.txt
 import sys
-import os
-import re
-import time
 
 import astropy.units as u
 from astropy.table import Table
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-import matplotlib.cm as cm
 from matplotlib.colors import LinearSegmentedColormap
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 import numpy as np
 import pandas as pd
 sys.path.append('code_src/')
-from data_structures import MultiIndexDFObject
 from ML_utils import unify_lc, unify_lc_gp, stat_bands, autopct_format, combine_bands,\
-mean_fractional_variation, normalize_mean_objects, normalize_max_objects, \
 normalize_clipmax_objects, shuffle_datalabel, dtw_distance, stretch_small_values_arctan, translate_bitwise_sum_to_labels, update_bitsums
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
 from collections import Counter,OrderedDict
 
 import umap
@@ -79,10 +70,7 @@ import logging
 
 # Get the root logger
 logger = logging.getLogger()
-logger.setLevel(logging.ERROR)
-
-import warnings
-warnings.filterwarnings('ignore')
+logger.setLevel(logging.WARNING)
 
 plt.style.use('bmh')
 colors = [
@@ -234,35 +222,21 @@ The combination of the tree bands into one longer arrays in order of increasing 
 
 ```{code-cell} ipython3
 r = np.random.randint(np.shape(dat)[1])
-plt.figure(figsize=(18,4))
-plt.subplot(1,3,1)
 
-for i,l in enumerate(bands_inlc):
+_, axs = plt.subplots(1, 3, figsize=(18, 4))
+ztf_data = [dat_notnormal, dat, datm]
+ylabels = [r'Flux ($\mu Jy$)', r'Normalized Flux (max r band)', r'Normalized Flux (mean r band)']
+fig_contents = list(zip(axs, ztf_data, ylabels))
+
+for i, l in enumerate(bands_inlc):
     s = int(np.shape(dat)[1]/len(bands_inlc))
     first = int(i*s)
     last = first+s
-    plt.plot(np.linspace(first,last,s),dat_notnormal[r,first:last],'o',linestyle='--',label=l)
-plt.xlabel(r'Time_[w1,w2,w3]',size=15)
-plt.ylabel(r'Flux ($\mu Jy$)',size=15)
-plt.legend(loc=2)
-
-plt.subplot(1,3,2)
-for i,l in enumerate(bands_inlc):
-    s = int(np.shape(dat)[1]/len(bands_inlc))
-    first = int(i*s)
-    last = first+s
-    plt.plot(np.linspace(first,last,s),dat[r,first:last],'o',linestyle='--',label=l)
-plt.xlabel(r'Time_[w1,w2,w3]',size=15)
-plt.ylabel(r'Normalized Flux (max r band)',size=15)
-
-plt.subplot(1,3,3)
-for i,l in enumerate(bands_inlc):
-    s = int(np.shape(dat)[1]/len(bands_inlc))
-    first = int(i*s)
-    last = first+s
-    plt.plot(np.linspace(first,last,s),datm[r,first:last],'o',linestyle='--',label=l)
-plt.xlabel(r'Time_[w1,w2,w3]',size=15)
-plt.ylabel(r'Normalized Flux (mean r band)',size=15)
+    for ax, ydata, ylabel in fig_contents:
+        ax.plot(np.linspace(first,last,s), ydata[r,first:last], 'o', linestyle='--', label=l)
+        ax.set_xlabel(r'Time_[w1,w2,w3]', size=15)
+        ax.set_ylabel(ylabel, size=15)
+_ = axs[0].legend(loc=2)
 ```
 
 ## 3) Learn the Manifold
