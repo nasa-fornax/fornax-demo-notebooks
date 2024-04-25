@@ -5,11 +5,11 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.15.2
+      jupytext_version: 1.16.0
   kernelspec:
-    display_name: Python 3 (ipykernel)
+    display_name: science_demo
     language: python
-    name: python3
+    name: conda-env-science_demo-py
 ---
 
 <!-- #region -->
@@ -42,7 +42,6 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 | ------- | ------- | ----------- | ------------ | ------ |
 | IRSA    | Keck    | About 10,000 spectra on the COSMOS field from [Hasinger et al. (2018)](https://ui.adsabs.harvard.edu/abs/2018ApJ...858...77H/abstract) | [IRSA Archive](https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-scan?projshort=COSMOS) | Implemented with `astroquery.ipac.irsa`. (Table gives URLs to spectrum FITS files.) Note: only implemented for absolute calibrated spectra. |
 | IRSA    | Spitzer IRS | ~17,000 merged low-resolution IRS spectra | [IRS Enhanced Product](https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-dd?catalog=irs_enhv211) | Implemented with `astroquery.ipac.irsa`. (Table gives URLs to spectrum IPAC tables.) |
-| ~~IRSA~~    | ~~IRTF~~        | ~~Large library of stellar spectra~~ | | ~~Not included here because the data are not currently available in an easily accessible format~~|
 | IRSA    | Herschel*    | Some spectra, need to check reduction stage | | |
 | IRSA    | Euclid      | Spectra hosted at IRSA in FY25 -> preparation for ingestion | | Will use mock spectra with correct format for testing |
 | IRSA    | SPHEREx     | Spectra/cubes will be hosted at IRSA, first release in FY25 -> preparation for ingestion | | Will use mock spectra with correct format for testing |
@@ -84,6 +83,16 @@ Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, D
 &bull; Make more efficient (especially MAST searches)
 
 
+<!-- #endregion -->
+
+<!-- #region jupyter={"source_hidden": true} -->
+### Datasets that were considered but didn't end up being used:
+#### IRTF: 
+    - https://irsa.ipac.caltech.edu/Missions/irtf.html \
+    - The IRTF is a 3.2 meter telescope, optimized for infrared observations, and located at the summit of Mauna Kea, Hawaiʻi. \
+    - large library of stellar spectra \
+    - Not included here because the data are not currently available in an easily accessible, searchable format
+    
 <!-- #endregion -->
 
 ```python
