@@ -37,7 +37,9 @@ MER is the merged catalog of Euclid imaging & spectroscopy as well as external p
 Return a data structure of targets with Euclid data
 
 *TODO: how do we access MER?\
-*TODO: define this data structure (astropy table?) and what columns are interesting to keep
+*TODO: define this data structure (astropy table?) and what columns are interesting to keep\
+*TODO: May data release will be [early release observations](https://www.cosmos.esa.int/web/euclid/ero-data-release), what fraction of this notebook can we do with that dataset, and what fraction will we need to test on other datasets 
+
 
 
 
