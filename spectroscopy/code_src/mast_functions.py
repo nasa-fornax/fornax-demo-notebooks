@@ -73,21 +73,27 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir):
                 ## Download
                 download_results = Observations.download_products(data_products_list_filter, download_dir=this_data_dir)
             
-                
                 ## Create table
+                # NOTE: `download_results` has NOT the same order as `data_products_list_filter`. We therefore
+                # have to "manually" get the product file names here and then use those to open the files.
                 keys = ["filters","obs_collection","instrument_name","calib_level","t_obs_release","proposal_id","obsid","objID","distance"]
-                tab = Table(names=keys , dtype=[str,str,str,int,float,int,int,int,float])
-                for jj in range(len(download_results)):
-                    tmp = query_results[query_results["obsid"] == data_products_list_filter["obsID"][jj]][keys]
-                    tab.add_row( list(tmp[0]) )
+                tab = Table(names=keys + ["productFilename"] , dtype=[str,str,str,int,float,int,int,int,float]+[str])
+                for jj in range(len(data_products_list_filter)):
+                    idx_cross = np.where(query_results["obsid"] == data_products_list_filter["obsID"][jj] )[0]
+                    tmp = query_results[idx_cross][keys]
+                    tab.add_row( list(tmp[0]) + [data_products_list_filter["productFilename"][jj]] )
                 
                 ## Create multi-index object
                 for jj in range(len(tab)):
                 
+                    # find correct path name:
+                    # Note that `download_results` does NOT have same order as `tab`!!
+                    file_idx = np.where( [ tab["productFilename"][jj] in download_results["Local Path"][iii] for iii in range(len(download_results))] )[0]
+                    
                     # open spectrum
-                    filepath = download_results[jj]["Local Path"]
+                    filepath = download_results["Local Path"][file_idx[0]]
                     print(filepath)
-                    spec1d = Spectrum1D.read(filepath)  
+                    spec1d = Spectrum1D.read(filepath)
                     
                     dfsingle = pd.DataFrame(dict(wave=[spec1d.spectral_axis] , flux=[spec1d.flux], err=[np.repeat(0,len(spec1d.flux))],
                                                  label=[stab["label"]],
