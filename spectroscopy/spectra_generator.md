@@ -45,8 +45,8 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 | IRSA    | Herschel*    | Some spectra, need to check reduction stage | | |
 | IRSA    | Euclid      | Spectra hosted at IRSA in FY25 -> preparation for ingestion | | Will use mock spectra with correct format for testing |
 | IRSA    | SPHEREx     | Spectra/cubes will be hosted at IRSA, first release in FY25 -> preparation for ingestion | | Will use mock spectra with correct format for testing |
-| MAST    | HST*         | Slitless spectra would need reduction and extraction. There are some reduced slit spectra from COS in the Hubble Archive | `astroquery.mast`? | Implemented using `astroquery.mast` |
-| MAST    | JWST*        | Reduced slit MSA spectra that can be queried | `astroquery.mast`? | Should be straight forward using `astroquery.mast` |
+| MAST    | HST*         | Slitless spectra would need reduction and extraction. There are some reduced slit spectra from COS in the Hubble Archive | `astroquery.mast` | Implemented using `astroquery.mast` |
+| MAST    | JWST*        | Reduced slit MSA and Slit spectra that can be queried | `astroquery.mast` | Implemented using `astroquery.mast` |
 | SDSS    | SDSS optical| Optical spectra that are reduced | [Sky Server](https://skyserver.sdss.org/dr18/SearchTools) or `astroquery.sdss` (preferred) | Implemented using `astroquery.sdss`. |
 | DESI    | DESI*        | Optical spectra | [DESI public data release](https://data.desi.lbl.gov/public/) | Implemented with `SPARCL` library |
 | BOSS    | BOSS*        | Optical spectra | [BOSS webpage (part of SDSS)](https://www.sdss4.org/surveys/boss/) | Implemented with `SPARCL` library together with DESI |
@@ -118,7 +118,7 @@ from sample_selection import clean_sample
 from desi_functions import DESIBOSS_get_spec
 from spitzer_functions import SpitzerIRS_get_spec
 from sdss_functions import SDSS_get_spec
-from mast_functions import HST_get_spec
+from mast_functions import HST_get_spec, JWST_get_spec
 from keck_functions import KeckDEIMOS_get_spec
 from plot_functions import create_figures
 ```
@@ -158,8 +158,11 @@ labels.append("None")'''
 coords.append(SkyCoord("{} {}".format("+53.15508" , "-27.80178"), unit=(u.deg, u.deg) ))
 labels.append("JADESGS-z7-01-QU")
 
+coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg) ))
+labels.append("Test")
 
-sample_table = clean_sample(coords, labels , verbose=1)
+
+sample_table = clean_sample(coords, labels, precision=0.5 * u.arcsecond , verbose=1)
 
 print("Number of sources in sample table: {}".format(len(sample_table)))
 ```
@@ -224,7 +227,7 @@ This archive includes spectra taken by
 
  &bull; HST
  
- &bull; JWST (not implemented, yet)
+ &bull; JWST
 
 
 ```python
@@ -234,131 +237,9 @@ df_spec_HST = HST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = 
 df_spec.append(df_spec_HST)
 ```
 
-```python
-## Get JWST MSA spectra
-import os
-import numpy as np
-import astropy.units as u
-from astropy.coordinates import SkyCoord
-from astropy.table import Table
-import pandas as pd
-from astroquery.mast import Observations
-from data_structures_spec import MultiIndexDFObject
-from specutils import Spectrum1D
-
-
-def JWST_get_spec(sample_table, search_radius_arcsec, datadir):
-    '''
-    Retrieves HST spectra for a list of sources.
-
-    Parameters
-    ----------
-    sample_table : `~astropy.table.Table`
-        Table with the coordinates and journal reference labels of the sources
-    search_radius_arcsec : `float`
-        Search radius in arcseconds.
-    datadir : `str`
-        Data directory where to store the data. Each function will create a
-        separate data directory (for example "[datadir]/HST/" for HST data).
-
-    Returns
-    -------
-    df_lc : MultiIndexDFObject
-        The main data structure to store all spectra
-        
-    '''
-
-    ## Create directory
-    this_data_dir = os.path.join(datadir , "JWST/")
-    
-    
-    ## Initialize multi-index object:
-    df_spec = MultiIndexDFObject()
-    
-    for stab in sample_table:
-
-        print("Processing source {}".format(stab["label"]))
-
-        ## Query results
-        search_coords = stab["coord"]
-        query_results = Observations.query_criteria(coordinates = search_coords, radius = search_radius_arcsec * u.arcsec,
-                                                dataproduct_type=["spectrum"], obs_collection=["JWST"], intentType="science", calib_level=[3,4],
-                                                instrument_name=['NIRSPEC/MSA', 'NIRSPEC/SLIT'],
-                                                #filters=['CLEAR;PRISM','F070LP;G140M'],
-                                                dataRights=['PUBLIC']
-                                               )
-        print("Number of search results: {}".format(len(query_results)))
-
-        if len(query_results) > 0: # found some spectra
-            
-            
-            ## Retrieve spectra
-            data_products_list = Observations.get_product_list(query_results)
-            
-            ## Filter
-            data_products_list_filter = Observations.filter_products(data_products_list,
-                                                    productType=["SCIENCE"],
-                                                    #filters=['CLEAR;PRISM','F070LP;G140M'],
-                                                    #filters=['CLEAR;PRISM'],
-                                                    extension="fits",
-                                                    calib_level=[3,4], # only fully reduced or contributed
-                                                    productSubGroupDescription=["X1D"], # only 1D spectra
-                                                    dataRights=['PUBLIC'] # only public data
-                                                                    )
-            print("Number of files to download: {}".format(len(data_products_list_filter)))
-
-            if len(data_products_list_filter) > 0:
-                
-                ## Download
-                download_results = Observations.download_products(data_products_list_filter, download_dir=this_data_dir)
-            
-                
-                ## Create table
-                # NOTE: `download_results` has NOT the same order as `data_products_list_filter`. We therefore
-                # have to "manually" get the product file names here and then use those to open the files.
-                keys = ["filters","obs_collection","instrument_name","calib_level","t_obs_release","proposal_id","obsid","objID","distance"]
-                tab = Table(names=keys + ["productFilename"] , dtype=[str,str,str,int,float,int,int,int,float]+[str])
-                for jj in range(len(data_products_list_filter)):
-                    idx_cross = np.where(query_results["obsid"] == data_products_list_filter["obsID"][jj] )[0]
-                    tmp = query_results[idx_cross][keys]
-                    tab.add_row( list(tmp[0]) + [data_products_list_filter["productFilename"][jj]] )
-                print("number in table {}".format(len(tab)))
-                
-                ## Create multi-index object
-                for jj in range(len(tab)):
-
-                    # find correct path name:
-                    # Note that `download_results` does NOT have same order as `tab`!!
-                    file_idx = np.where( [ tab["productFilename"][jj] in download_results["Local Path"][iii] for iii in range(len(download_results))] )[0]
-                    
-                    # open spectrum
-                    filepath = download_results["Local Path"][file_idx[0]]
-                    print(filepath)
-                    spec1d = Spectrum1D.read(filepath)
-                    
-                    dfsingle = pd.DataFrame(dict(wave=[spec1d.spectral_axis] , flux=[spec1d.flux], err=[np.repeat(0,len(spec1d.flux))],
-                                                 label=[stab["label"]],
-                                                 objectid=[stab["objectid"]],
-                                                 #objID=[tab["objID"][jj]], # REMOVE
-                                                 #obsid=[tab["obsid"][jj]],
-                                                 mission=[tab["obs_collection"][jj]],
-                                                 instrument=[tab["instrument_name"][jj]],
-                                                 filter=[tab["filters"][jj]],
-                                                )).set_index(["objectid", "label", "filter", "mission"])
-                    df_spec.append(dfsingle)
-            
-            else:
-                print("Nothing to download for source {}.".format(stab["label"]))
-        else:
-            print("Source {} could not be found".format(stab["label"]))
-        
-
-    return(df_spec, download_results, tab, data_products_list_filter)
-```
-
 ```python jupyter={"source_hidden": true}
 ## REPRODUCABLE EXAMPLE:
-
+'''
 ## Query results
 search_coords = SkyCoord("{} {}".format("+53.15508" , "-27.80178"), unit=(u.deg, u.deg) )
 query_results = Observations.query_criteria(coordinates = search_coords, radius = 0.5 * u.arcsec,
@@ -388,56 +269,18 @@ plt.plot(tmp["WAVELENGTH"]/(1+7.3) , tmp["FLUX"])
 plt.xlim(0.1,0.5)
 #plt.yscale("log")
 #plt.ylim(1e-8,1e-7)
-plt.show()
+plt.show()'''
 ```
 
 ```python
-df_jwst, download_results, sumtab, data_products_list_filter = JWST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/")
+%%time
+## Get Spectra for HST
+df_jwst = JWST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/")
+df_spec.append(df_jwst)
 ```
 
 ```python
 df_jwst.data
-```
-
-```python
-
-### NEED TO FINISH THIS: MAKE NICE DF OUT OF IT.
-## Group and Stack spectra
-def jwst_group_spectra(df):
-
-    # ['CLEAR;PRISM' 'F070LP;G140M' 'F170LP;G235M' 'F290LP;G395H' 'F290LP;G395M']
-    tab = df.data.reset_index()
-    
-    filters_unique = np.unique(tab["filter"])
-    print(filters_unique)
-    
-    for filt in filters_unique:
-        print("Processing {}".format(filt))
-    
-        sel = np.where( (tab["filter"] == filt) )[0]
-        #tab_sel = tab.copy()[sel]
-        tab_sel = tab.iloc[sel]
-        print(" Number of items: {}".format( len(sel)) )
-        
-        ## get good ones
-        sum_flux = np.asarray([np.nansum(tab_sel.iloc[iii]["flux"]).value for iii in range(len(tab_sel)) ])
-        idx_good = np.where(sum_flux > 0)[0]
-        print("Number of good spectra: {}".format(len(idx_good)))
-    
-        if len(idx_good) > 0:
-            ## Create wavelength grid
-            wave_grid = tab_sel.iloc[idx_good[0]]["wave"] # NEED TO BE MADE BETTER LATER
-        
-            ## Interpolate fluxes
-            fluxes_int = np.asarray([ np.interp(wave_grid , tab_sel.iloc[idx]["wave"] , tab_sel.iloc[idx]["flux"]) for idx in idx_good ])
-            fluxes_stack = np.nanmedian(fluxes_int,axis=0)
-    
-            plt.plot(wave_grid , fluxes_stack)
-            plt.show()
-
-
-## run
-jwst_group_spectra(df=df_jwst)
 ```
 
 ### 2.3 SDSS Archive
@@ -462,14 +305,6 @@ df_spec_DESIBOSS = DESIBOSS_get_spec(sample_table, search_radius_arcsec=5)
 df_spec.append(df_spec_DESIBOSS)
 ```
 
-```python
-
-```
-
-```python
-df_spec.data.sort_values(by = ['objectid'])
-```
-
 ## 3. Make plots of luminosity as a function of time
 We show flux in mJy as a function of time for all available bands for each object. `show_nbr_figures` controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with `save_output`, they will be put in the output directory and labelled by sample number.
 
@@ -478,26 +313,8 @@ We show flux in mJy as a function of time for all available bands for each objec
 ```python
 ### Plotting ####
 create_figures(df_spec = df_spec,
-             bin_factor=10,
+             bin_factor=5,
              show_nbr_figures = 10,
              save_output = False,
              )
-```
-
-```python
-## BREAK SDSS
-import numpy as np
-import astropy.units as u
-from astropy.coordinates import SkyCoord
-from astropy.table import Table
-from astroquery.sdss import SDSS
-
-coord = SkyCoord("{} {}".format("09 54 49.40" , "+09 16 15.9"), unit=(u.hourangle, u.deg) )
-xid = SDSS.query_region(coord, radius=5 * u.arcsec, spectro=True, data_release=18)
-
-sp = SDSS.get_spectra(matches=xid, show_progress=True , data_release=18)
-```
-
-```python
-sp
 ```
