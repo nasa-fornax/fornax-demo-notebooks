@@ -131,7 +131,7 @@ Here we will define the sample of galaxies. For now, we just enter some "random"
 coords = []
 labels = []
 
-'''coords.append(SkyCoord("{} {}".format("09 54 49.40" , "+09 16 15.9"), unit=(u.hourangle, u.deg) ))
+coords.append(SkyCoord("{} {}".format("09 54 49.40" , "+09 16 15.9"), unit=(u.hourangle, u.deg) ))
 labels.append("NGC3049")
 
 coords.append(SkyCoord("{} {}".format("12 45 17.44 " , "27 07 31.8"), unit=(u.hourangle, u.deg) ))
@@ -150,19 +150,16 @@ coords.append(SkyCoord( 150.1024475 , 2.2815559, unit=u.deg ))
 labels.append("COSMOS2")
 
 coords.append(SkyCoord("{} {}".format("150.000" , "+2.00"), unit=(u.deg, u.deg) ))
-labels.append("None")'''
-
-#coords.append(SkyCoord("{} {}".format("09 54 49.40" , "+09 16 15.9"), unit=(u.hourangle, u.deg) ))
-#labels.append("NGC3049")
+labels.append("COSMOS3")
 
 coords.append(SkyCoord("{} {}".format("+53.15508" , "-27.80178"), unit=(u.deg, u.deg) ))
 labels.append("JADESGS-z7-01-QU")
 
 coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg) ))
-labels.append("Test")
+labels.append("TestJWST")
 
 
-sample_table = clean_sample(coords, labels, precision=0.5 * u.arcsecond , verbose=1)
+sample_table = clean_sample(coords, labels, precision=2.0* u.arcsecond , verbose=1)
 
 print("Number of sources in sample table: {}".format(len(sample_table)))
 ```
@@ -225,9 +222,9 @@ df_spec.append(df_spec_IRS)
 
 This archive includes spectra taken by 
 
- &bull; HST
+ &bull; HST (including slit spectroscopy)
  
- &bull; JWST
+ &bull; JWST (including MSA and slit spectroscopy)
 
 
 ```python
@@ -237,50 +234,11 @@ df_spec_HST = HST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = 
 df_spec.append(df_spec_HST)
 ```
 
-```python jupyter={"source_hidden": true}
-## REPRODUCABLE EXAMPLE:
-'''
-## Query results
-search_coords = SkyCoord("{} {}".format("+53.15508" , "-27.80178"), unit=(u.deg, u.deg) )
-query_results = Observations.query_criteria(coordinates = search_coords, radius = 0.5 * u.arcsec,
-                                        dataproduct_type=["spectrum"], obs_collection=["JWST"], intentType="science", calib_level=[3,4],
-                                        instrument_name=['NIRSPEC/MSA', 'NIRSPEC/SLIT'],
-                                        filters=['CLEAR;PRISM'],
-                                        dataRights=['PUBLIC']
-                                       )
-print("Number of search results: {}".format(len(query_results)))
-
-## Retrieve spectra
-data_products_list = Observations.get_product_list(query_results)
-
-## Filter
-data_products_list_filter = Observations.filter_products(data_products_list,
-                                        productType=["SCIENCE"],
-                                        filters=['CLEAR;PRISM'],
-                                        extension="fits",
-                                        calib_level=[3,4], # only fully reduced or contributed
-                                        productSubGroupDescription=["X1D"], # only 1D spectra
-                                        dataRights=['PUBLIC'] # only public data
-                                                        )
-print("Number of files to download: {}".format(len(data_products_list_filter)))
-
-tmp = Table.read("./data/JWST/mastDownload/JWST/jw01180-o135_s00001_nirspec_clear-prism/jw01180-o135_s00001_nirspec_clear-prism_x1d.fits",hdu=1)
-plt.plot(tmp["WAVELENGTH"]/(1+7.3) , tmp["FLUX"])
-plt.xlim(0.1,0.5)
-#plt.yscale("log")
-#plt.ylim(1e-8,1e-7)
-plt.show()'''
-```
-
 ```python
 %%time
 ## Get Spectra for HST
 df_jwst = JWST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/")
 df_spec.append(df_jwst)
-```
-
-```python
-df_jwst.data
 ```
 
 ### 2.3 SDSS Archive
@@ -296,7 +254,8 @@ df_spec.append(df_spec_SDSS)
 
 ### 2.4 DESI Archive
 
-This includes DESI spectra. Here, we use the `SPARCL` query.
+This includes DESI spectra. Here, we use the `SPARCL` query. Note that this can also be used
+for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is included.
 
 ```python
 %%time

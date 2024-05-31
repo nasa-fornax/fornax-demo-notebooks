@@ -61,7 +61,7 @@ def DESIBOSS_get_spec(sample_table, search_radius_arcsec):
                 'dec' : [search_coords.dec.deg-ddec.value  , search_coords.dec.deg+ddec.value ]
                }
         found_I = client.find(outfields=out, constraints=cons, limit=20) # search
-        print(found_I)
+        #print(found_I)
         
         ## Extract nice table and the spectra
         if len(found_I.records) > 0:
