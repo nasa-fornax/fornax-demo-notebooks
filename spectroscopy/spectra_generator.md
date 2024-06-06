@@ -96,6 +96,7 @@ Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, D
 ## IMPORTS
 import sys
 import numpy as np
+import os
 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -203,6 +204,102 @@ df_spec.append(df_spec_DEIMOS)
 ## Get Spitzer IRS Spectra
 df_spec_IRS = SpitzerIRS_get_spec(sample_table, search_radius_arcsec=1 , COMBINESPEC=False)
 df_spec.append(df_spec_IRS)
+
+```
+
+```python
+len(objectid_table)
+```
+
+```python
+for row in objectid_table:
+    print(type(row['observation_id']))
+    HSA.download_data(observation_id = row['observation_id'], retrieval_type='OBSERVATION', 
+                      instrument_name='PACS', download_dir = 'data/herschel')
+
+
+```
+
+```python
+a = 'test'
+type(a)
+```
+
+```python
+#minimum functional example
+from astroquery.esa.hsa import HSA
+
+test_table = HSA.query_hsa_tap("select top 10 observation_id from hsa.v_active_observation where "
+                  "contains(point('ICRS', hsa.v_active_observation.ra, hsa.v_active_observation.dec), "
+                  "circle('ICRS', 100.2417,9.895, 1.1))=1")
+
+for row in test_table:
+    print(str(row['observation_id']) ) #confirm that syntax is not the problem
+    try:
+        HSA.download_data(observation_id=str(row['observation_id']), retrieval_type='OBSERVATION', 
+                    instrument_name='PACS', download_dir = 'data/herschel')
+    except LoginError:
+        #there is some problem here with the observation_id which causes Herschel to think it is proprietary
+        #we just won't get this data, move on to the next observation
+        print("loginerror") 
+
+```
+
+```python
+## Herschel PACS & SPIRE (actually from ESA TAP)
+from astroquery.esa.hsa import HSA
+from astroquery.exceptions import LoginError
+
+## Initialize multi-index object:
+df_spec = MultiIndexDFObject()
+
+herschel_radius = 1.1  #units?
+for stab in sample_table:
+    search_coords = stab["coord"]
+    print("working on object", search_coords)
+    #first find the object ids from herschel
+    #docstring for query_hsa_tab doesn't say that it accepts an upload_table so do this one by one.
+    #this only grabs the first 2 observations, could consider changing that
+
+    #this works but returns both PACS and SPIRE which then download_data doesn't handle well
+    #objectid_table = HSA.query_hsa_tap("select top 2 observation_id from hsa.v_active_observation where "
+    #              "contains(point('ICRS', hsa.v_active_observation.ra, hsa.v_active_observation.dec), "
+    #              "circle('ICRS', "+str(search_coords.ra.deg)+", " + str(search_coords.dec.deg) +", " + str(herschel_radius) +"))=1")
+
+    for instrument_name in ['PACS', 'SPIRE']:
+        querystring = "select top 2 observation_id from hsa.v_active_observation join hsa.instrument using (instrument_oid) where contains(point('ICRS', hsa.v_active_observation.ra, hsa.v_active_observation.dec), circle('ICRS', "+str(search_coords.ra.deg)+", " + str(search_coords.dec.deg) +", " + str(herschel_radius) +"))=1 and hsa.instrument.instrument_name='"+str(instrument_name)+"'"
+        objectid_table = HSA.query_hsa_tap(querystring)
+
+        #for each observation_id
+         #download_data only accepts one observation_id
+        for tab_id in range(len(objectid_table)):
+            print(tab_id)
+            print(objectid_table[tab_id]['observation_id'])
+            HSA.download_data(observation_id=str(objectid_table[tab_id]['observation_id']), retrieval_type='OBSERVATION', 
+                        instrument_name=instrument_name, product_level = "LEVEL2, LEVEL_2_5, LEVEL_3", download_dir = 'data/herschel')
+        
+            #ok, now we have the tar files, need to read those into the right data structure
+            #there are a million files!!! how do I know which one I need?
+            #should be a HPSSPEC[B|R]/herschel.pacs.signal.PacsCentralSpectrum with a point source table???
+            #    https://www.cosmos.esa.int/documents/12133/996891/PACS+Spectrometer+Quick+Start+Guide
+            #once I figure out the file that has the data I want, try looking at mast_functions for 
+            #how to use specutils to read in the spectrum and add it to dataframe.
+
+            #and delete tar files
+            #filename_tar = f"data/herschel/{objectid_table[tab_id]['observation_id']}.tar"
+            #if os.path.exists(filename_tar):
+            #    os.remove(filename_tar)
+
+
+```
+
+```python
+    for tab_id in range(len(objectid_table)):
+        print(tab_id)
+        print(type(str(objectid_table[tab_id]['observation_id'])))
+        HSA.download_data(observation_id=str(objectid_table[1]['observation_id']), retrieval_type='OBSERVATION', 
+                      instrument_name='PACS', download_dir = 'data/herschel')
+
 
 ```
 
