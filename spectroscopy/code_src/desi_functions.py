@@ -47,8 +47,8 @@ def DESIBOSS_get_spec(sample_table, search_radius_arcsec):
     for stab in sample_table:
     
         ## Search
-        #data_releases = ['DESI-EDR','BOSS-DR16']
-        data_releases = ['DESI-EDR','BOSS-DR16','SDSS-DR16']
+        data_releases = ['DESI-EDR','BOSS-DR16']
+        #data_releases = ['DESI-EDR','BOSS-DR16','SDSS-DR16'] # we want to use DR17 directly using SDSS query
         
         search_coords = stab["coord"]
         dra = (search_radius_arcsec*u.arcsec).to(u.degree)

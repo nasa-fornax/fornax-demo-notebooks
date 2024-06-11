@@ -1,8 +1,10 @@
-import os
+import os, sys, io
 
 import numpy as np
+from contextlib import redirect_stdout
 
 import astropy.units as u
+import astropy.constants as const
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
 
@@ -17,7 +19,7 @@ from specutils import Spectrum1D
 import matplotlib.pyplot as plt
 
 
-def JWST_get_spec(sample_table, search_radius_arcsec, datadir):
+def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose):
     '''
     Retrieves HST spectra for a list of sources and groups/stacks them.
     This main function runs two sub-functions:
@@ -33,6 +35,8 @@ def JWST_get_spec(sample_table, search_radius_arcsec, datadir):
     datadir : `str`
         Data directory where to store the data. Each function will create a
         separate data directory (for example "[datadir]/HST/" for HST data).
+    verbose : `bool`
+        Verbosity level. Set to True for extra talking.
 
     Returns
     -------
@@ -43,17 +47,18 @@ def JWST_get_spec(sample_table, search_radius_arcsec, datadir):
 
     ## Get the spectra
     print("Searching and Downloading Spectra... ")
-    df_jwst_all = JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir)
-
+    df_jwst_all = JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose)
+    print("done")
+    
     ## Group
     print("Grouping Spectra... ")
-    df_jwst_group = JWST_group_spectra(df_jwst_all, verbose=True, quickplot=True)
-
+    df_jwst_group = JWST_group_spectra(df_jwst_all, verbose=verbose, quickplot=False)
+    print("done")
 
     return(df_jwst_group)
 
 
-def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir):
+def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose):
     '''
     Retrieves HST spectra for a list of sources.
 
@@ -66,6 +71,8 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir):
     datadir : `str`
         Data directory where to store the data. Each function will create a
         separate data directory (for example "[datadir]/HST/" for HST data).
+    verbose : `bool`
+        Verbosity level. Set to True for extra talking.
 
     Returns
     -------
@@ -75,6 +82,8 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir):
     '''
 
     ## Create directory
+    if not os.path.exists(datadir):
+        os.mkdir(datadir)
     this_data_dir = os.path.join(datadir , "JWST/")
     
     
@@ -116,9 +125,12 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir):
 
             if len(data_products_list_filter) > 0:
                 
-                ## Download
-                download_results = Observations.download_products(data_products_list_filter, download_dir=this_data_dir)
-            
+                ## Download (supress output)
+                trap = io.StringIO()
+                with redirect_stdout(trap):
+                    download_results = Observations.download_products(data_products_list_filter, download_dir=this_data_dir)
+                if verbose: print(trap.getvalue())
+                    
                 
                 ## Create table
                 # NOTE: `download_results` has NOT the same order as `data_products_list_filter`. We therefore
@@ -129,7 +141,7 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir):
                     idx_cross = np.where(query_results["obsid"] == data_products_list_filter["obsID"][jj] )[0]
                     tmp = query_results[idx_cross][keys]
                     tab.add_row( list(tmp[0]) + [data_products_list_filter["productFilename"][jj]] )
-                print("number in table {}".format(len(tab)))
+                #print("number in table {}".format(len(tab)))
                 
                 ## Create multi-index object
                 for jj in range(len(tab)):
@@ -140,7 +152,7 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir):
                     
                     # open spectrum
                     filepath = download_results["Local Path"][file_idx[0]]
-                    print(filepath)
+                    #print(filepath)
                     spec1d = Spectrum1D.read(filepath)
                     
                     dfsingle = pd.DataFrame(dict(wave=[spec1d.spectral_axis] , flux=[spec1d.flux], err=[np.repeat(0,len(spec1d.flux))],
@@ -222,8 +234,12 @@ def JWST_group_spectra(df, verbose, quickplot):
                 fluxes_stack = np.nanmedian(fluxes_int,axis=0)
                 if verbose: print("Units of fluxes for each spectrum: {}".format( ",".join([str(tt) for tt in fluxes_units]) ) )
 
+                ## Unit conversion to erg/s/cm2/A (note fluxes are nominally in Jy. So have to do the step with dividing by lam^2)
+                fluxes_stack_cgs = (fluxes_stack * fluxes_units[0]).to(u.erg / u.second / (u.centimeter**2) / u.hertz) * (const.c.to(u.angstrom/u.second)) / (wave_grid.to(u.angstrom)**2)
+                fluxes_stack_cgs = fluxes_stack_cgs.to(u.erg / u.second / (u.centimeter**2) / u.angstrom)
+
                 ## Add to data frame
-                dfsingle = pd.DataFrame(dict(wave=[wave_grid * u.micrometer] , flux=[fluxes_stack * fluxes_units[0]], err=[np.repeat(0,len(fluxes_stack))],
+                dfsingle = pd.DataFrame(dict(wave=[wave_grid.to(u.micrometer)] , flux=[fluxes_stack_cgs], err=[np.repeat(0,len(fluxes_stack_cgs))],
                                              label=[tab_sel["label"].iloc[0]],
                                              objectid=[tab_sel["objectid"].iloc[0]],
                                              mission=[tab_sel["mission"].iloc[0]],
@@ -244,7 +260,7 @@ def JWST_group_spectra(df, verbose, quickplot):
     
     return(df_spec)
 
-def HST_get_spec(sample_table, search_radius_arcsec, datadir):
+def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose):
     '''
     Retrieves HST spectra for a list of sources.
 
@@ -257,6 +273,8 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir):
     datadir : `str`
         Data directory where to store the data. Each function will create a
         separate data directory (for example "[datadir]/HST/" for HST data).
+    verbose : `bool`
+        Verbosity level. Set to True for extra talking.
 
     Returns
     -------
@@ -266,6 +284,8 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir):
     '''
 
     ## Create directory
+    if not os.path.exists(datadir):
+        os.mkdir(datadir)
     this_data_dir = os.path.join(datadir , "HST/")
     
     
@@ -301,7 +321,10 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir):
             if len(data_products_list_filter) > 0:
                 
                 ## Download
-                download_results = Observations.download_products(data_products_list_filter, download_dir=this_data_dir)
+                trap = io.StringIO()
+                with redirect_stdout(trap):
+                    download_results = Observations.download_products(data_products_list_filter, download_dir=this_data_dir)
+                if verbose: print(trap.getvalue())
             
                 ## Create table
                 # NOTE: `download_results` has NOT the same order as `data_products_list_filter`. We therefore
@@ -322,9 +345,10 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir):
                     
                     # open spectrum
                     filepath = download_results["Local Path"][file_idx[0]]
-                    print(filepath)
+                    #print(filepath)
                     spec1d = Spectrum1D.read(filepath)
-                    
+
+                    # Note: this should be in erg/s/cm2/A and any wavelength unit.
                     dfsingle = pd.DataFrame(dict(wave=[spec1d.spectral_axis] , flux=[spec1d.flux], err=[np.repeat(0,len(spec1d.flux))],
                                                  label=[stab["label"]],
                                                  objectid=[stab["objectid"]],

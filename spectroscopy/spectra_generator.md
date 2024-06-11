@@ -101,7 +101,7 @@ Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, D
 
 ```python
 ## IMPORTS
-import sys
+import sys, os
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -161,16 +161,17 @@ labels.append("TestJWST")
 
 sample_table = clean_sample(coords, labels, precision=2.0* u.arcsecond , verbose=1)
 
-print("Number of sources in sample table: {}".format(len(sample_table)))
 ```
 
 ### 1.2 Write out your sample to disk
 
-At this point you may wish to write out your sample to disk and reuse that in future work sessions, instead of creating it from scratch again.
+At this point you may wish to write out your sample to disk and reuse that in future work sessions, instead of creating it from scratch again. Note that we first check if the `data` directory exists and if not, we will create one.
 
 For the format of the save file, we would suggest to choose from various formats that fully support astropy objects(eg., SkyCoord).  One example that works is Enhanced Character-Separated Values or ['ecsv'](https://docs.astropy.org/en/stable/io/ascii/ecsv.html)
 
 ```python
+if not os.path.exists("./data"):
+    os.mkdir("./data")
 sample_table.write('data/input_sample.ecsv', format='ascii.ecsv', overwrite = True)
 ```
 
@@ -207,15 +208,16 @@ This archive includes spectra taken by
 
 ```python
 %%time
-
 ## Get Keck Spectra (COSMOS only)
 df_spec_DEIMOS = KeckDEIMOS_get_spec(sample_table = sample_table, search_radius_arcsec=1)
 df_spec.append(df_spec_DEIMOS)
+```
 
+```python
+%%time
 ## Get Spitzer IRS Spectra
 df_spec_IRS = SpitzerIRS_get_spec(sample_table, search_radius_arcsec=1 , COMBINESPEC=False)
 df_spec.append(df_spec_IRS)
-
 ```
 
 ### 2.2 MAST Archive
@@ -230,14 +232,14 @@ This archive includes spectra taken by
 ```python
 %%time
 ## Get Spectra for HST
-df_spec_HST = HST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/")
+df_spec_HST = HST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/", verbose = False)
 df_spec.append(df_spec_HST)
 ```
 
 ```python
 %%time
-## Get Spectra for HST
-df_jwst = JWST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/")
+## Get Spectra for JWST
+df_jwst = JWST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/", verbose = False)
 df_spec.append(df_jwst)
 ```
 
@@ -255,11 +257,11 @@ df_spec.append(df_spec_SDSS)
 ### 2.4 DESI Archive
 
 This includes DESI spectra. Here, we use the `SPARCL` query. Note that this can also be used
-for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is included.
+for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is included. Therefore, we will not include SDSS DR16 here (this is treated in the SDSS search above).
 
 ```python
 %%time
-## Get DESI and BOSS and SDSS spectra with SPARCL
+## Get DESI and BOSS spectra with SPARCL
 df_spec_DESIBOSS = DESIBOSS_get_spec(sample_table, search_radius_arcsec=5)
 df_spec.append(df_spec_DESIBOSS)
 ```
@@ -277,3 +279,7 @@ create_figures(df_spec = df_spec,
              save_output = False,
              )
 ```
+
+<!-- #raw -->
+
+<!-- #endraw -->
