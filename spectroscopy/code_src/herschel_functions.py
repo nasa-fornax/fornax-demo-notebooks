@@ -73,7 +73,7 @@ def Herschel_get_spec(sample_table, search_radius_arcsec, datadir, delete_tarfil
         #query_hsa_tap doesn't accept an upload_table, so do this so do this as a for loop over each instrument and object..
  
         for instrument_name in ['PACS', 'SPIRE']:
-            querystring = "select top 10 observation_id from hsa.v_active_observation join hsa.instrument using (instrument_oid) where contains(point('ICRS', hsa.v_active_observation.ra, hsa.v_active_observation.dec), circle('ICRS', "+str(search_coords.ra.deg)+", " + str(search_coords.dec.deg) +", " + str(search_radius_arcsec) +"))=1 and hsa.instrument.instrument_name='"+str(instrument_name)+"'"
+            querystring = "select observation_id from hsa.v_active_observation join hsa.instrument using (instrument_oid) where contains(point('ICRS', hsa.v_active_observation.ra, hsa.v_active_observation.dec), circle('ICRS', "+str(search_coords.ra.deg)+", " + str(search_coords.dec.deg) +", " + str(search_radius_arcsec) +"))=1 and hsa.instrument.instrument_name='"+str(instrument_name)+"'"
             objectid_table = HSA.query_hsa_tap(querystring)
 
             #download_data only accepts one observation_id so we need to loop over each observation_id
