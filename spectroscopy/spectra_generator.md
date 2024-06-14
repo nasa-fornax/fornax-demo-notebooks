@@ -232,7 +232,7 @@ This archive includes spectra taken by
 ```python
 %%time
 ## Get Spectra for HST
-df_spec_HST = HST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/", verbose = True)
+df_spec_HST = HST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/", verbose = False)
 df_spec.append(df_spec_HST)
 ```
 
@@ -241,10 +241,6 @@ df_spec.append(df_spec_HST)
 ## Get Spectra for JWST
 df_jwst = JWST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/", verbose = False)
 df_spec.append(df_jwst)
-```
-
-```python
-df_spec.data
 ```
 
 ### 2.3 SDSS Archive
