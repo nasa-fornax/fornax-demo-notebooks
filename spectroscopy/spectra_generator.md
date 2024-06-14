@@ -134,14 +134,14 @@ labels = []
 coords.append(SkyCoord("{} {}".format("09 54 49.40" , "+09 16 15.9"), unit=(u.hourangle, u.deg) ))
 labels.append("NGC3049")
 
-coords.append(SkyCoord("{} {}".format("12 45 17.44 " , "27 07 31.8"), unit=(u.hourangle, u.deg) ))
-labels.append("NGC4670")
+#coords.append(SkyCoord("{} {}".format("12 45 17.44 " , "27 07 31.8"), unit=(u.hourangle, u.deg) ))
+#labels.append("NGC4670")
 
-coords.append(SkyCoord("{} {}".format("14 01 19.92" , "−33 04 10.7"), unit=(u.hourangle, u.deg) ))
-labels.append("Tol_89")
+#coords.append(SkyCoord("{} {}".format("14 01 19.92" , "−33 04 10.7"), unit=(u.hourangle, u.deg) ))
+#labels.append("Tol_89")
 
-coords.append(SkyCoord(233.73856 , 23.50321, unit=u.deg ))
-labels.append("Arp220")
+#coords.append(SkyCoord(233.73856 , 23.50321, unit=u.deg ))
+#labels.append("Arp220")
 
 coords.append(SkyCoord( 150.091 , 2.2745833, unit=u.deg ))
 labels.append("COSMOS1")
@@ -149,8 +149,8 @@ labels.append("COSMOS1")
 coords.append(SkyCoord( 150.1024475 , 2.2815559, unit=u.deg ))
 labels.append("COSMOS2")
 
-coords.append(SkyCoord("{} {}".format("150.000" , "+2.00"), unit=(u.deg, u.deg) ))
-labels.append("COSMOS3")
+#coords.append(SkyCoord("{} {}".format("150.000" , "+2.00"), unit=(u.deg, u.deg) ))
+#labels.append("COSMOS3")
 
 coords.append(SkyCoord("{} {}".format("+53.15508" , "-27.80178"), unit=(u.deg, u.deg) ))
 labels.append("JADESGS-z7-01-QU")
@@ -232,7 +232,7 @@ This archive includes spectra taken by
 ```python
 %%time
 ## Get Spectra for HST
-df_spec_HST = HST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/", verbose = False)
+df_spec_HST = HST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/", verbose = True)
 df_spec.append(df_spec_HST)
 ```
 
@@ -241,6 +241,10 @@ df_spec.append(df_spec_HST)
 ## Get Spectra for JWST
 df_jwst = JWST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/", verbose = False)
 df_spec.append(df_jwst)
+```
+
+```python
+df_spec.data
 ```
 
 ### 2.3 SDSS Archive

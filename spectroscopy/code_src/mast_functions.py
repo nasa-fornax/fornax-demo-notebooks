@@ -151,11 +151,17 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose):
                     file_idx = np.where( [ tab["productFilename"][jj] in download_results["Local Path"][iii] for iii in range(len(download_results))] )[0]
                     
                     # open spectrum
+                    # Note that specutils returns the wrong units. Use Table.read() instead.
                     filepath = download_results["Local Path"][file_idx[0]]
-                    #print(filepath)
-                    spec1d = Spectrum1D.read(filepath)
+                    spec1d = Table.read(filepath , hdu=1)
                     
-                    dfsingle = pd.DataFrame(dict(wave=[spec1d.spectral_axis] , flux=[spec1d.flux], err=[np.repeat(0,len(spec1d.flux))],
+                    #print(filepath)
+                    #spec1d = Spectrum1D.read(filepath)
+                    
+                    dfsingle = pd.DataFrame(dict(#wave=[spec1d.spectral_axis] , flux=[spec1d.flux], err=[np.repeat(0,len(spec1d.flux))],,
+                                                 wave=[spec1d["WAVELENGTH"].data * spec1d["WAVELENGTH"].unit] ,
+                                                 flux=[spec1d["FLUX"].data * spec1d["FLUX"].unit],
+                                                 err=[spec1d["FLUX_ERROR"].data * spec1d["FLUX_ERROR"].unit],
                                                  label=[stab["label"]],
                                                  objectid=[stab["objectid"]],
                                                  #objID=[tab["objID"][jj]], # REMOVE
@@ -205,7 +211,7 @@ def JWST_group_spectra(df, verbose, quickplot):
     objects_unique = np.unique(tab["label"])
 
     for obj in objects_unique:
-        if verbose: print("++Processing Object {} ++".format(obj))
+        print("Grouping object {}".format(obj))
 
         ## Get filters
         filters_unique = np.unique(tab["filter"])
@@ -349,7 +355,8 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose):
                     spec1d = Spectrum1D.read(filepath)
 
                     # Note: this should be in erg/s/cm2/A and any wavelength unit.
-                    dfsingle = pd.DataFrame(dict(wave=[spec1d.spectral_axis] , flux=[spec1d.flux], err=[np.repeat(0,len(spec1d.flux))],
+                    dfsingle = pd.DataFrame(dict(#wave=[spec1d.spectral_axis] , flux=[spec1d.flux], err=[np.repeat(0,len(spec1d.flux))],
+                                                 wave=[spec1d.spectral_axis] , flux=[spec1d.flux], err=[spec1d.uncertainty.array * spec1d.uncertainty.unit],
                                                  label=[stab["label"]],
                                                  objectid=[stab["objectid"]],
                                                  #objID=[tab["objID"][jj]],
