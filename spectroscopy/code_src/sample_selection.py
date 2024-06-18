@@ -8,7 +8,7 @@ from astropy.table import Table, join, join_skycoord, unique
 #from astroquery.vizier import Vizier
 
 
-def clean_sample(coords_list, labels_list, verbose=1):
+def clean_sample(coords_list, labels_list, precision, verbose=1):
     """Makes a unique sample of skycoords and labels with no repeats. Attaches an object ID to the coords.
 
     Parameters
@@ -17,6 +17,8 @@ def clean_sample(coords_list, labels_list, verbose=1):
         list of Astropy SkyCoords derived from literature sources
     labels_list : list
         List of the first author name and publication year for tracking the sources
+    precision : float (astropy units)
+        Precision of matching/removing doubles. For example 0.5*u.arcsecond.
     verbose : int, optional
         Print out the length of the sample after applying this function
 
@@ -31,7 +33,7 @@ def clean_sample(coords_list, labels_list, verbose=1):
     # now join the table with itself within a defined radius.
     # We keep one set of original column names to avoid later need for renaming
     tjoin = join(sample_table, sample_table, keys='coord',
-                 join_funcs={'coord': join_skycoord(0.005 * u.deg)},
+                 join_funcs={'coord': join_skycoord(precision)},
                  uniq_col_name='{col_name}{table_name}', table_names=['', '_2'])
 
     # this join will return 4 entries for each redundant coordinate:
