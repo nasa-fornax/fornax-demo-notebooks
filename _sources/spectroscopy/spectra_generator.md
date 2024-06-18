@@ -5,11 +5,11 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.16.0
+      jupytext_version: 1.15.2
   kernelspec:
-    display_name: science_demo
+    display_name: Python 3 (ipykernel)
     language: python
-    name: conda-env-science_demo-py
+    name: python3
 ---
 
 <!-- #region -->
@@ -45,8 +45,8 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 | IRSA    | Herschel*    | Some spectra, need to check reduction stage | | |
 | IRSA    | Euclid      | Spectra hosted at IRSA in FY25 -> preparation for ingestion | | Will use mock spectra with correct format for testing |
 | IRSA    | SPHEREx     | Spectra/cubes will be hosted at IRSA, first release in FY25 -> preparation for ingestion | | Will use mock spectra with correct format for testing |
-| MAST    | HST*         | Slitless spectra would need reduction and extraction. There are some reduced slit spectra from COS in the Hubble Archive | `astroquery.mast`? | Implemented using `astroquery.mast` |
-| MAST    | JWST*        | Reduced slit MSA spectra that can be queried | `astroquery.mast`? | Should be straight forward using `astroquery.mast` |
+| MAST    | HST*         | Slitless spectra would need reduction and extraction. There are some reduced slit spectra from COS in the Hubble Archive | `astroquery.mast` | Implemented using `astroquery.mast` |
+| MAST    | JWST*        | Reduced slit MSA and Slit spectra that can be queried | `astroquery.mast` | Implemented using `astroquery.mast` |
 | SDSS    | SDSS optical| Optical spectra that are reduced | [Sky Server](https://skyserver.sdss.org/dr18/SearchTools) or `astroquery.sdss` (preferred) | Implemented using `astroquery.sdss`. |
 | DESI    | DESI*        | Optical spectra | [DESI public data release](https://data.desi.lbl.gov/public/) | Implemented with `SPARCL` library |
 | BOSS    | BOSS*        | Optical spectra | [BOSS webpage (part of SDSS)](https://www.sdss4.org/surveys/boss/) | Implemented with `SPARCL` library together with DESI |
@@ -85,7 +85,6 @@ Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, D
 
 <!-- #endregion -->
 
-<!-- #region jupyter={"source_hidden": true} -->
 ### Datasets that were considered but didn't end up being used:
 #### IRTF: 
     - https://irsa.ipac.caltech.edu/Missions/irtf.html \
@@ -93,7 +92,6 @@ Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, D
     - large library of stellar spectra \
     - Not included here because the data are not currently available in an easily accessible, searchable format
     
-<!-- #endregion -->
 
 ```python
 # Ensure all dependencies are installed
@@ -103,7 +101,7 @@ Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, D
 
 ```python
 ## IMPORTS
-import sys
+import sys, os
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -120,7 +118,7 @@ from sample_selection import clean_sample
 from desi_functions import DESIBOSS_get_spec
 from spitzer_functions import SpitzerIRS_get_spec
 from sdss_functions import SDSS_get_spec
-from mast_functions import HST_get_spec
+from mast_functions import HST_get_spec, JWST_get_spec
 from keck_functions import KeckDEIMOS_get_spec
 from plot_functions import create_figures
 ```
@@ -152,22 +150,27 @@ coords.append(SkyCoord( 150.1024475 , 2.2815559, unit=u.deg ))
 labels.append("COSMOS2")
 
 coords.append(SkyCoord("{} {}".format("150.000" , "+2.00"), unit=(u.deg, u.deg) ))
-labels.append("None")
+labels.append("COSMOS3")
 
+coords.append(SkyCoord("{} {}".format("+53.15508" , "-27.80178"), unit=(u.deg, u.deg) ))
+labels.append("JADESGS-z7-01-QU")
 
+coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg) ))
+labels.append("TestJWST")
 
-sample_table = clean_sample(coords, labels , verbose=1)
+sample_table = clean_sample(coords, labels, precision=2.0* u.arcsecond , verbose=1)
 
-print("Number of sources in sample table: {}".format(len(sample_table)))
 ```
 
 ### 1.2 Write out your sample to disk
 
-At this point you may wish to write out your sample to disk and reuse that in future work sessions, instead of creating it from scratch again.
+At this point you may wish to write out your sample to disk and reuse that in future work sessions, instead of creating it from scratch again. Note that we first check if the `data` directory exists and if not, we will create one.
 
 For the format of the save file, we would suggest to choose from various formats that fully support astropy objects(eg., SkyCoord).  One example that works is Enhanced Character-Separated Values or ['ecsv'](https://docs.astropy.org/en/stable/io/ascii/ecsv.html)
 
 ```python
+if not os.path.exists("./data"):
+    os.mkdir("./data")
 sample_table.write('data/input_sample.ecsv', format='ascii.ecsv', overwrite = True)
 ```
 
@@ -204,31 +207,39 @@ This archive includes spectra taken by
 
 ```python
 %%time
-
 ## Get Keck Spectra (COSMOS only)
 df_spec_DEIMOS = KeckDEIMOS_get_spec(sample_table = sample_table, search_radius_arcsec=1)
 df_spec.append(df_spec_DEIMOS)
+```
 
+```python
+%%time
 ## Get Spitzer IRS Spectra
 df_spec_IRS = SpitzerIRS_get_spec(sample_table, search_radius_arcsec=1 , COMBINESPEC=False)
 df_spec.append(df_spec_IRS)
-
 ```
 
 ### 2.2 MAST Archive
 
 This archive includes spectra taken by 
 
- &bull; HST
+ &bull; HST (including slit spectroscopy)
  
- &bull; JWST (not implemented, yet)
+ &bull; JWST (including MSA and slit spectroscopy)
 
 
 ```python
 %%time
 ## Get Spectra for HST
-df_spec_HST = HST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/")
+df_spec_HST = HST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/", verbose = False)
 df_spec.append(df_spec_HST)
+```
+
+```python
+%%time
+## Get Spectra for JWST
+df_jwst = JWST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/", verbose = False)
+df_spec.append(df_jwst)
 ```
 
 ### 2.3 SDSS Archive
@@ -238,23 +249,20 @@ This includes SDSS spectra.
 ```python
 %%time
 ## Get SDSS Spectra
-df_spec_SDSS = SDSS_get_spec(sample_table , search_radius_arcsec=5)
+df_spec_SDSS = SDSS_get_spec(sample_table , search_radius_arcsec=5, data_release=17)
 df_spec.append(df_spec_SDSS)
 ```
 
 ### 2.4 DESI Archive
 
-This includes DESI spectra. Here, we use the `SPARCL` query.
+This includes DESI spectra. Here, we use the `SPARCL` query. Note that this can also be used
+for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is included. Therefore, we will not include SDSS DR16 here (this is treated in the SDSS search above).
 
 ```python
 %%time
 ## Get DESI and BOSS spectra with SPARCL
 df_spec_DESIBOSS = DESIBOSS_get_spec(sample_table, search_radius_arcsec=5)
 df_spec.append(df_spec_DESIBOSS)
-```
-
-```python
-df_spec.data.sort_values(by = ['objectid'])
 ```
 
 ## 3. Make plots of luminosity as a function of time
@@ -265,12 +273,12 @@ We show flux in mJy as a function of time for all available bands for each objec
 ```python
 ### Plotting ####
 create_figures(df_spec = df_spec,
-             bin_factor=10,
+             bin_factor=5,
              show_nbr_figures = 10,
              save_output = False,
              )
 ```
 
-```python
+<!-- #raw -->
 
-```
+<!-- #endraw -->

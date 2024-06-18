@@ -14,36 +14,36 @@
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
-  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=3ee479438cf8b5e0d341"></script>
 
     <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'spectroscopy/spectra_generator';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -56,27 +56,23 @@
 
   
   
-  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
   <input type="checkbox"
           class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
   
   <input type="checkbox"
           class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
   
   <div class="search-button__wrapper">
     <div class="search-button__overlay"></div>
@@ -98,8 +94,13 @@
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form></div>
   </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
     </header>
   
 
@@ -177,17 +178,17 @@
             </li>
         </ul>
         <ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../forced_photometry/README.html">Multi-band forced photometry</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../forced_photometry/README.html">Multi-band forced photometry</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../forced_photometry/multiband_photometry.html">Automated Multiband Forced Photometry on Large Datasets</a></li>
 </ul>
-</li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../light_curves/README.html">Time Domain</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../light_curves/README.html">Time Domain</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../light_curves/light_curve_generator.html">Make Multi-Wavelength Light Curves Using Archival Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../light_curves/scale_up.html">Make Multi-Wavelength Light Curves for Large Samples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../light_curves/light_curve_classifier.html">Light Curve Classifier</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../light_curves/ML_AGNzoo.html">AGN Zoo: Comparison of AGN selected with different metrics</a></li>
 </ul>
-</li>
+</details></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../documentation/README.html">Fornax Science Console</a></li>
@@ -206,7 +207,7 @@
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
 
@@ -215,14 +216,14 @@
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
-        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
   <span class="fa-solid fa-bars"></span>
-</label></div>
+</button></div>
       
     </div>
   
@@ -380,9 +381,9 @@ document.write(`
   </button>
 `);
 </script>
-<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="fa-solid fa-list"></span>
-</label>
+</button>
 </div></div>
       
     </div>
@@ -467,7 +468,7 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 </section>
 <section id="list-of-spectroscopic-archives-and-status">
 <h3>List of Spectroscopic Archives and Status<a class="headerlink" href="#list-of-spectroscopic-archives-and-status" title="Link to this heading">#</a></h3>
-<table class="table">
+<div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Archive</p></th>
 <th class="head"><p>Spectra</p></th>
@@ -510,14 +511,14 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 <tr class="row-odd"><td><p>MAST</p></td>
 <td><p>HST*</p></td>
 <td><p>Slitless spectra would need reduction and extraction. There are some reduced slit spectra from COS in the Hubble Archive</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">astroquery.mast</span></code>?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">astroquery.mast</span></code></p></td>
 <td><p>Implemented using <code class="docutils literal notranslate"><span class="pre">astroquery.mast</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p>MAST</p></td>
 <td><p>JWST*</p></td>
-<td><p>Reduced slit MSA spectra that can be queried</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">astroquery.mast</span></code>?</p></td>
-<td><p>Should be straight forward using <code class="docutils literal notranslate"><span class="pre">astroquery.mast</span></code></p></td>
+<td><p>Reduced slit MSA and Slit spectra that can be queried</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">astroquery.mast</span></code></p></td>
+<td><p>Implemented using <code class="docutils literal notranslate"><span class="pre">astroquery.mast</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p>SDSS</p></td>
 <td><p>SDSS optical</p></td>
@@ -545,6 +546,7 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 </tr>
 </tbody>
 </table>
+</div>
 <p>The ones with an asterisk (*) are the challenging ones.</p>
 </section>
 </section>
@@ -575,7 +577,6 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 • Match to HEASARC
 • Make more efficient (especially MAST searches)</p>
 <!-- #endregion -->
-<!-- #region jupyter={"source_hidden": true} -->
 <section id="datasets-that-were-considered-but-didn-t-end-up-being-used">
 <h3>Datasets that were considered but didn’t end up being used:<a class="headerlink" href="#datasets-that-were-considered-but-didn-t-end-up-being-used" title="Link to this heading">#</a></h3>
 <section id="irtf">
@@ -586,14 +587,13 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 - Not included here because the data are not currently available in an easily accessible, searchable format
 </pre></div>
 </div>
-<!-- #endregion -->
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Ensure all dependencies are installed</span>
 
 <span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">## IMPORTS</span>
-<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -610,7 +610,7 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 <span class="kn">from</span> <span class="nn">desi_functions</span> <span class="kn">import</span> <span class="n">DESIBOSS_get_spec</span>
 <span class="kn">from</span> <span class="nn">spitzer_functions</span> <span class="kn">import</span> <span class="n">SpitzerIRS_get_spec</span>
 <span class="kn">from</span> <span class="nn">sdss_functions</span> <span class="kn">import</span> <span class="n">SDSS_get_spec</span>
-<span class="kn">from</span> <span class="nn">mast_functions</span> <span class="kn">import</span> <span class="n">HST_get_spec</span>
+<span class="kn">from</span> <span class="nn">mast_functions</span> <span class="kn">import</span> <span class="n">HST_get_spec</span><span class="p">,</span> <span class="n">JWST_get_spec</span>
 <span class="kn">from</span> <span class="nn">keck_functions</span> <span class="kn">import</span> <span class="n">KeckDEIMOS_get_spec</span>
 <span class="kn">from</span> <span class="nn">plot_functions</span> <span class="kn">import</span> <span class="n">create_figures</span>
 </pre></div>
@@ -643,20 +643,25 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;COSMOS2&quot;</span><span class="p">)</span>
 
 <span class="n">coords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SkyCoord</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;150.000&quot;</span> <span class="p">,</span> <span class="s2">&quot;+2.00&quot;</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span> <span class="p">))</span>
-<span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;None&quot;</span><span class="p">)</span>
+<span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;COSMOS3&quot;</span><span class="p">)</span>
 
+<span class="n">coords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SkyCoord</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;+53.15508&quot;</span> <span class="p">,</span> <span class="s2">&quot;-27.80178&quot;</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span> <span class="p">))</span>
+<span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;JADESGS-z7-01-QU&quot;</span><span class="p">)</span>
 
+<span class="n">coords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SkyCoord</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;+53.15398&quot;</span><span class="p">,</span> <span class="s2">&quot;-27.80095&quot;</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span> <span class="p">))</span>
+<span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;TestJWST&quot;</span><span class="p">)</span>
 
-<span class="n">sample_table</span> <span class="o">=</span> <span class="n">clean_sample</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">labels</span> <span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">sample_table</span> <span class="o">=</span> <span class="n">clean_sample</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mf">2.0</span><span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">arcsecond</span> <span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of sources in sample table: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_table</span><span class="p">)))</span>
 </pre></div>
 </div>
 <section id="write-out-your-sample-to-disk">
 <h3>1.2 Write out your sample to disk<a class="headerlink" href="#write-out-your-sample-to-disk" title="Link to this heading">#</a></h3>
-<p>At this point you may wish to write out your sample to disk and reuse that in future work sessions, instead of creating it from scratch again.</p>
+<p>At this point you may wish to write out your sample to disk and reuse that in future work sessions, instead of creating it from scratch again. Note that we first check if the <code class="docutils literal notranslate"><span class="pre">data</span></code> directory exists and if not, we will create one.</p>
 <p>For the format of the save file, we would suggest to choose from various formats that fully support astropy objects(eg., SkyCoord).  One example that works is Enhanced Character-Separated Values or <a class="reference external" href="https://docs.astropy.org/en/stable/io/ascii/ecsv.html">‘ecsv’</a></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sample_table</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;data/input_sample.ecsv&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;ascii.ecsv&#39;</span><span class="p">,</span> <span class="n">overwrite</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;./data&quot;</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s2">&quot;./data&quot;</span><span class="p">)</span>
+<span class="n">sample_table</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;data/input_sample.ecsv&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;ascii.ecsv&#39;</span><span class="p">,</span> <span class="n">overwrite</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -685,27 +690,33 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 <p>• Spitzer/IRS</p>
 <p>• Herschel (not implemented, yet)</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
-
 <span class="c1">## Get Keck Spectra (COSMOS only)</span>
 <span class="n">df_spec_DEIMOS</span> <span class="o">=</span> <span class="n">KeckDEIMOS_get_spec</span><span class="p">(</span><span class="n">sample_table</span> <span class="o">=</span> <span class="n">sample_table</span><span class="p">,</span> <span class="n">search_radius_arcsec</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">df_spec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_spec_DEIMOS</span><span class="p">)</span>
-
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
 <span class="c1">## Get Spitzer IRS Spectra</span>
 <span class="n">df_spec_IRS</span> <span class="o">=</span> <span class="n">SpitzerIRS_get_spec</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">search_radius_arcsec</span><span class="o">=</span><span class="mi">1</span> <span class="p">,</span> <span class="n">COMBINESPEC</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">df_spec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_spec_IRS</span><span class="p">)</span>
-
 </pre></div>
 </div>
 </section>
 <section id="mast-archive">
 <h3>2.2 MAST Archive<a class="headerlink" href="#mast-archive" title="Link to this heading">#</a></h3>
 <p>This archive includes spectra taken by</p>
-<p>• HST</p>
-<p>• JWST (not implemented, yet)</p>
+<p>• HST (including slit spectroscopy)</p>
+<p>• JWST (including MSA and slit spectroscopy)</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
 <span class="c1">## Get Spectra for HST</span>
-<span class="n">df_spec_HST</span> <span class="o">=</span> <span class="n">HST_get_spec</span><span class="p">(</span><span class="n">sample_table</span> <span class="p">,</span> <span class="n">search_radius_arcsec</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">datadir</span> <span class="o">=</span> <span class="s2">&quot;./data/&quot;</span><span class="p">)</span>
+<span class="n">df_spec_HST</span> <span class="o">=</span> <span class="n">HST_get_spec</span><span class="p">(</span><span class="n">sample_table</span> <span class="p">,</span> <span class="n">search_radius_arcsec</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">datadir</span> <span class="o">=</span> <span class="s2">&quot;./data/&quot;</span><span class="p">,</span> <span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
 <span class="n">df_spec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_spec_HST</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
+<span class="c1">## Get Spectra for JWST</span>
+<span class="n">df_jwst</span> <span class="o">=</span> <span class="n">JWST_get_spec</span><span class="p">(</span><span class="n">sample_table</span> <span class="p">,</span> <span class="n">search_radius_arcsec</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">datadir</span> <span class="o">=</span> <span class="s2">&quot;./data/&quot;</span><span class="p">,</span> <span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">df_spec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_jwst</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -714,21 +725,19 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 <p>This includes SDSS spectra.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
 <span class="c1">## Get SDSS Spectra</span>
-<span class="n">df_spec_SDSS</span> <span class="o">=</span> <span class="n">SDSS_get_spec</span><span class="p">(</span><span class="n">sample_table</span> <span class="p">,</span> <span class="n">search_radius_arcsec</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">df_spec_SDSS</span> <span class="o">=</span> <span class="n">SDSS_get_spec</span><span class="p">(</span><span class="n">sample_table</span> <span class="p">,</span> <span class="n">search_radius_arcsec</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">data_release</span><span class="o">=</span><span class="mi">17</span><span class="p">)</span>
 <span class="n">df_spec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_spec_SDSS</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="desi-archive">
 <h3>2.4 DESI Archive<a class="headerlink" href="#desi-archive" title="Link to this heading">#</a></h3>
-<p>This includes DESI spectra. Here, we use the <code class="docutils literal notranslate"><span class="pre">SPARCL</span></code> query.</p>
+<p>This includes DESI spectra. Here, we use the <code class="docutils literal notranslate"><span class="pre">SPARCL</span></code> query. Note that this can also be used
+for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is included. Therefore, we will not include SDSS DR16 here (this is treated in the SDSS search above).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
 <span class="c1">## Get DESI and BOSS spectra with SPARCL</span>
 <span class="n">df_spec_DESIBOSS</span> <span class="o">=</span> <span class="n">DESIBOSS_get_spec</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">search_radius_arcsec</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 <span class="n">df_spec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_spec_DESIBOSS</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df_spec</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;objectid&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 </section>
@@ -738,15 +747,14 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 <p>We show flux in mJy as a function of time for all available bands for each object. <code class="docutils literal notranslate"><span class="pre">show_nbr_figures</span></code> controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with <code class="docutils literal notranslate"><span class="pre">save_output</span></code>, they will be put in the output directory and labelled by sample number.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">### Plotting ####</span>
 <span class="n">create_figures</span><span class="p">(</span><span class="n">df_spec</span> <span class="o">=</span> <span class="n">df_spec</span><span class="p">,</span>
-             <span class="n">bin_factor</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+             <span class="n">bin_factor</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
              <span class="n">show_nbr_figures</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
              <span class="n">save_output</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
              <span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
+<!-- #raw -->
+<!-- #endraw -->
 </section>
 </section>
 
@@ -758,7 +766,7 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
 </div>
@@ -857,8 +865,8 @@ By Fornax developers
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341"></script>
 
   <footer class="bd-footer">
   </footer>

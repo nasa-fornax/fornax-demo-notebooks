@@ -235,8 +235,20 @@ Software is installed in miniconda environments.  You can use "[conda list](http
 
 
 ## Getting Help
-* ask your peers: User forum
-* ask Fornax: Helpdesk
+* ask your peers: User forum at #fornax-users slack channel
+* ask Fornax Helpdesk
+   * email  fornax-helpdesk@lists.nasa.gov
+* If you are reporting a problem or suspected bug, please include as much of the following information as possible. This will help minimize the time it takes for us to diagnose the problem and get you an answer. 
+
+      - date and time (with timezone) the problem occurred
+      - web browser (name and version) you are using to connect to the Fornax Science Console (e.g., Chrome 125.0.64422.142)
+      - where in the Fornax Science Console this happened (e.g., while running a notebook in JupyterHub; while using the S3 bucket menu; etc.) 
+      - what you were doing when the problem occurred
+      - what you expected to have happen
+      - what happened instead
+      - include any errors messages or info that were produced 
+      - please include any additional information you feel is relevant (e.g., successfully did this same thing previously on date NN at time NN and it worked then)
+      - if you have logs or a traceback, please include them
 
 ## Parallel and Distributed Processing
 Since one of the main drivers for using Fornax is the advantage of multiple CPUs, we provide here additional information on how to efficiently use those CPUs.
