@@ -134,14 +134,14 @@ labels = []
 coords.append(SkyCoord("{} {}".format("09 54 49.40" , "+09 16 15.9"), unit=(u.hourangle, u.deg) ))
 labels.append("NGC3049")
 
-#coords.append(SkyCoord("{} {}".format("12 45 17.44 " , "27 07 31.8"), unit=(u.hourangle, u.deg) ))
-#labels.append("NGC4670")
+coords.append(SkyCoord("{} {}".format("12 45 17.44 " , "27 07 31.8"), unit=(u.hourangle, u.deg) ))
+labels.append("NGC4670")
 
-#coords.append(SkyCoord("{} {}".format("14 01 19.92" , "−33 04 10.7"), unit=(u.hourangle, u.deg) ))
-#labels.append("Tol_89")
+coords.append(SkyCoord("{} {}".format("14 01 19.92" , "−33 04 10.7"), unit=(u.hourangle, u.deg) ))
+labels.append("Tol_89")
 
-#coords.append(SkyCoord(233.73856 , 23.50321, unit=u.deg ))
-#labels.append("Arp220")
+coords.append(SkyCoord(233.73856 , 23.50321, unit=u.deg ))
+labels.append("Arp220")
 
 coords.append(SkyCoord( 150.091 , 2.2745833, unit=u.deg ))
 labels.append("COSMOS1")
@@ -149,15 +149,14 @@ labels.append("COSMOS1")
 coords.append(SkyCoord( 150.1024475 , 2.2815559, unit=u.deg ))
 labels.append("COSMOS2")
 
-#coords.append(SkyCoord("{} {}".format("150.000" , "+2.00"), unit=(u.deg, u.deg) ))
-#labels.append("COSMOS3")
+coords.append(SkyCoord("{} {}".format("150.000" , "+2.00"), unit=(u.deg, u.deg) ))
+labels.append("COSMOS3")
 
 coords.append(SkyCoord("{} {}".format("+53.15508" , "-27.80178"), unit=(u.deg, u.deg) ))
 labels.append("JADESGS-z7-01-QU")
 
 coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg) ))
 labels.append("TestJWST")
-
 
 sample_table = clean_sample(coords, labels, precision=2.0* u.arcsecond , verbose=1)
 
