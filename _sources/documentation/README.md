@@ -182,12 +182,12 @@ Software is installed in miniconda environments.  You can use "[conda list](http
  *
  * Under Construction: Need a link and more instructions
    
-## [Examples and Tutorials](https://fornax-navo.github.io/fornax-demo-notebooks/)
+## [Examples and Tutorials](https://nasa-fornax.github.io/fornax-demo-notebooks/)
 
 ### Fully worked science use cases
-  * [Forced photometry](https://github.com/fornax-navo/fornax-demo-notebooks/tree/main/forced_photometry/)
-  * [Light curves](https://github.com/fornax-navo/fornax-demo-notebooks/tree/main/light_curves/)
-  * [ML dimensionality reduction](https://github.com/fornax-navo/fornax-demo-notebooks/blob/main/light_curves/ML_AGNzoo.md)
+  * [Forced photometry](https://github.com/nasa-fornax/fornax-demo-notebooks/tree/main/forced_photometry/)
+  * [Light curves](https://github.com/nasa-fornax/fornax-demo-notebooks/tree/main/light_curves/)
+  * [ML dimensionality reduction](https://github.com/nasa-fornax/fornax-demo-notebooks/blob/main/light_curves/ML_AGNzoo.md)
   * 
 ### Cloud 
   * [STScI](https://github.com/spacetelescope/tike_content/blob/main/content/notebooks/data-access/data-access.ipynb)
@@ -225,7 +225,7 @@ Software is installed in miniconda environments.  You can use "[conda list](http
 ### [Work with theoretical catalogs](https://irsa.ipac.caltech.edu/data/theory/Cosmosims/gator_docs/CosmoDC2_Mock_V1_Catalog.html)
 
 ### How can I contribute to existing Open-Source Fornax notebook tutorials?
-  * open issue or PR on Fornax Github [repo](https://github.com/fornax-navo/fornax-demo-notebooks)
+  * open issue or PR on Fornax Github [repo](https://github.com/nasa-fornax/fornax-demo-notebooks)
 
 ## Troubleshooting
 * If my internet connection goes away or is intermittent - what happens to the running notebook?
@@ -269,10 +269,10 @@ Since one of the main drivers for using Fornax is the advantage of multiple CPUs
 ### When should I use distributed or parallel processing?
 
 1. Your dataset is very large, but could be split into subsets that can be processed individually.
-  * The [forced photometry notebook](https://github.com/fornax-navo/fornax-demo-notebooks/blob/main/forced_photometry/multiband_photometry.md) is an example of this. It gathers a large number of images and then processes them all using the same piece of code (photometry extraction). The pipeline is parallelized by running workers that execute the same code on different images.
+  * The [forced photometry notebook](https://github.com/nasa-fornax/fornax-demo-notebooks/blob/main/forced_photometry/multiband_photometry.md) is an example of this. It gathers a large number of images and then processes them all using the same piece of code (photometry extraction). The pipeline is parallelized by running workers that execute the same code on different images.
 
 2. Your computations/operations take a long time, but can be split into subsets that are independent from each other (the input to one does not depend on the output of another).
-  * The [light curve generator notebook](https://github.com/fornax-navo/fornax-demo-notebooks/blob/main/light_curves/light_curve_generator.md) is an example of this. It gathers a sample of objects and then runs several, independent pieces of code (calls to different archives to retrieve light curves) on the full sample. The pipeline is parallelized by running workers that execute different pieces of code on the same object sample.
+  * The [light curve generator notebook](https://github.com/nasa-fornax/fornax-demo-notebooks/blob/main/light_curves/light_curve_generator.md) is an example of this. It gathers a sample of objects and then runs several, independent pieces of code (calls to different archives to retrieve light curves) on the full sample. The pipeline is parallelized by running workers that execute different pieces of code on the same object sample.
 
 ### Distributed processing with Dask DataFrames -- basic concepts
 
