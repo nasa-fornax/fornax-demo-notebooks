@@ -102,7 +102,7 @@ def unify_lc_for_rnn_multi_band(df_lc, redshifts, max_len, bands_inlc=['zr', 'zi
         redshifts = dict(zip(objids, redshifts))
     padded_times_all, padded_fluxes_all = [], []
     
-    for obj in objids:
+    for obj in tqdm(objids, desc="Processing objects"):
         redshift = redshifts.get(obj, None)
         if redshift is None:
             continue
@@ -142,18 +142,18 @@ def unify_lc_for_rnn_multi_band(df_lc, redshifts, max_len, bands_inlc=['zr', 'zi
     padded_fluxes_all = np.array(padded_fluxes_all)
     return padded_times_all, padded_fluxes_all
 
-# Set the maximum length for padding
-max_len = find_max_length(df_lc, bands_inlc=bands_inlc, subset_size=300)
-print(max_len)
 
-# Select a random subset of object IDs
-padding_value=-1
+# Select the first subset_size object IDs
 subset_size = 10000
-random_obj_ids = random.sample(list(df_lc.index.get_level_values('objectid').unique()), subset_size)
+obj_ids_subset = df_lc.index.get_level_values('objectid').unique()[:subset_size]
 
 # Extract the data for the selected objects
-df_lc_subset = df_lc.loc[random_obj_ids]
-redshifts_subset = {obj_id: redshifts[obj_id] for obj_id in random_obj_ids}
+df_lc_subset = df_lc.loc[obj_ids_subset]
+redshifts_subset = {obj_id: redshifts[obj_id] for obj_id in obj_ids_subset}
+
+# Set the maximum length for padding
+max_len = find_max_length(df_lc_subset, bands_inlc=bands_inlc, subset_size=300)
+print(max_len)
 
 # Use the modified function to prepare the data
 padded_times, padded_fluxes = unify_lc_for_rnn_multi_band(df_lc_subset, redshifts_subset, max_len)
@@ -194,17 +194,12 @@ class MultiBandTimeSeriesRNN(nn.Module):
         out = out.view(batch_size, num_bands, seq_len, -1)  # Reshape back to (batch_size, num_bands, seq_len, 1)
         return out
     
-
-# Create a dataset and dataloader
-dataset = TensorDataset(input_tensor, target_tensor)
-dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
-
 # Define the model parameters
 input_size = 2  # Time and flux as input
 hidden_size = 64
 num_bands = len(bands_inlc)  # Number of bands
 num_layers = 2
-
+padding_value = -1
 # Instantiate the model
 model = MultiBandTimeSeriesRNN(input_size, hidden_size, num_bands, num_layers)
 model.to(device)
@@ -217,34 +212,6 @@ print(model)
 ```python
 wandb.finish()
 wandb.init(project='lightcurve-RNN')
-
-# Define the model parameters
-input_size = 2  # Time and flux as input
-hidden_size = 64
-num_bands = len(bands_inlc)  # Number of bands
-num_layers = 2
-
-# Define the model
-class MultiBandTimeSeriesRNN(nn.Module):
-    def __init__(self, input_size, hidden_size, num_bands, num_layers=2):
-        super(MultiBandTimeSeriesRNN, self).__init__()
-        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
-        self.fc = nn.Linear(hidden_size, 1)  # Output is the flux value
-    
-    def forward(self, x):
-        batch_size, num_bands, seq_len, _ = x.size()
-        x = x.view(batch_size * num_bands, seq_len, -1)  # Combine batch and bands dimensions
-        h_0 = torch.zeros(self.lstm.num_layers, batch_size * num_bands, self.lstm.hidden_size).to(x.device)
-        c_0 = torch.zeros(self.lstm.num_layers, batch_size * num_bands, self.lstm.hidden_size).to(x.device)
-        
-        out, _ = self.lstm(x, (h_0, c_0))
-        out = self.fc(out)
-        out = out.view(batch_size, num_bands, seq_len, -1)  # Reshape back to (batch_size, num_bands, seq_len, 1)
-        return out
-
-# Instantiate the model
-model = MultiBandTimeSeriesRNN(input_size, hidden_size, num_bands, num_layers)
-model.to(device)
 
 # Define loss and optimizer
 criterion = nn.MSELoss(reduction='none')  # Use 'none' to apply mask later
@@ -259,7 +226,7 @@ best_loss = float('inf')
 best_model_path = "best_model_checkpoint.pth"
 
 # Training the model
-num_epochs = 30
+num_epochs = 500
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 wandb.watch(model, log="all")
