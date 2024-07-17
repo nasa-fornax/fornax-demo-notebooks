@@ -441,7 +441,10 @@ check_is_mtype(X_train, mtype="pd-multiindex", scitype="Panel", return_metadata=
 #this cell takes 35s to run on a sample of 267 light curves
 
 #setup the classifier
-clf = Arsenal(time_limit_in_minutes=1, n_jobs = -1)
+#n_jobs is the number of jobs to run in parallel. some environments have trouble with this.
+#if you encounter an error such as 'BrokenProcessPool' while training or predicting, you may
+#want to either set n_jobs = 1 or use a different compute environment.
+clf = Arsenal(time_limit_in_minutes=1, n_jobs = -1)  # '-1' n_jobs means use all processors
 
 #fit the classifier on the training dataset
 clf.fit(X_train, y_train)

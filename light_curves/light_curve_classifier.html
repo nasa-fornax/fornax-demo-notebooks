@@ -992,7 +992,10 @@ fewer data points.</p></li>
 <span class="c1">#this cell takes 35s to run on a sample of 267 light curves</span>
 
 <span class="c1">#setup the classifier</span>
-<span class="n">clf</span> <span class="o">=</span> <span class="n">Arsenal</span><span class="p">(</span><span class="n">time_limit_in_minutes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_jobs</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="c1">#n_jobs is the number of jobs to run in parallel. some environments have trouble with this.</span>
+<span class="c1">#if you encounter an error such as &#39;BrokenProcessPool&#39; while training or predicting, you may</span>
+<span class="c1">#want to either set n_jobs = 1 or use a different compute environment.</span>
+<span class="n">clf</span> <span class="o">=</span> <span class="n">Arsenal</span><span class="p">(</span><span class="n">time_limit_in_minutes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_jobs</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># &#39;-1&#39; n_jobs means use all processors</span>
 
 <span class="c1">#fit the classifier on the training dataset</span>
 <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
