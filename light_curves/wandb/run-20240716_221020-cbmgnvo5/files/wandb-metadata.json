@@ -1,0 +1,207 @@
+{
+    "os": "Linux-5.10.0-0.deb10.16-amd64-x86_64-with-debian-10.13",
+    "python": "3.7.3",
+    "heartbeatAt": "2024-07-17T05:10:22.000056",
+    "startedAt": "2024-07-17T05:10:20.311132",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "<python with no main file>",
+    "codePathLocal": null,
+    "git": {
+        "remote": "https://github.com/fornax-navo/fornax-demo-notebooks.git",
+        "commit": "f9581ef9d534c1235fadb8977f269d6dccc8e0c0"
+    },
+    "email": "shemmati@ipac.caltech.edu",
+    "root": "/home/shemmati/Work/Projects/fornax-demo-notebooks",
+    "host": "irsagpu2",
+    "username": "shemmati",
+    "executable": "/usr/bin/python3",
+    "cpu_count": 16,
+    "cpu_count_logical": 32,
+    "cpu_freq": {
+        "current": 1317.33371875,
+        "min": 1000.0,
+        "max": 4000.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2400.085,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 999.694,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 2399.908,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1000.144,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1000.271,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1000.217,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 2603.843,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1001.954,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 2603.416,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 999.967,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 2500.001,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1000.283,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 2301.123,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1000.338,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 2301.92,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1000.546,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 2399.895,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1000.387,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 2400.0,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 999.805,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 999.999,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1002.125,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 2600.0,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1001.519,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 2600.171,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1000.165,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 2498.372,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1002.049,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 2302.924,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1000.563,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 2303.227,
+            "min": 1000.0,
+            "max": 4000.0
+        },
+        {
+            "current": 998.928,
+            "min": 1000.0,
+            "max": 4000.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 431.51171875,
+            "used": 156.21382522583008
+        }
+    },
+    "gpu": "Quadro RTX 6000",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "Quadro RTX 6000",
+            "memory_total": 24159191040
+        }
+    ],
+    "memory": {
+        "total": 187.5542449951172
+    }
+}
