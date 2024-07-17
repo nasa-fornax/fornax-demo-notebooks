@@ -13,7 +13,7 @@ kernelspec:
 
 # Super WISE: To Enhance WISE images learning from Spitzer
 
-By the IPAC Science Platform Team, started: Apr 24, 2024- last edit: May 1st, 2024
+By the IPAC Science Platform Team, started: Apr 24, 2024- last edit: Apr 24, 2024
 
 ***
 
@@ -220,7 +220,7 @@ for boz in range(5):
     plt.show()
 ```
 
-## Training a unet model
+## Training a model
 
 ```{code-cell} ipython3
 import torch
@@ -286,6 +286,7 @@ model.eval()
 ```
 
 ```{code-cell} ipython3
+
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=5,shuffle=True, num_workers=int(0))
 inputs, classes = next(iter(dataloader))  
 
@@ -317,7 +318,7 @@ for k in range(inputs.shape[0]):
     plt.show()
 ```
 
-# Two channel unet model
+# Two channel model
 
 ```{code-cell} ipython3
 import torch
@@ -375,8 +376,11 @@ def train(model, dataloader, epochs, device):
             loss.backward()
             optimizer.step()
         print(f'Epoch {epoch+1}, Loss: {loss.item()}')
+<<<<<<< HEAD
         
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+=======
+>>>>>>> parent of 02581cb... more diffusion
 ```
 
 ```{code-cell} ipython3
@@ -392,6 +396,7 @@ model.eval()
 ```
 
 ```{code-cell} ipython3
+<<<<<<< HEAD
 device='cpu'
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=1,shuffle=True, num_workers=int(0))
 inputs, classes = next(iter(dataloader))  
@@ -521,9 +526,9 @@ model = SuperResolutionDiffusionModel().to(device)
 model.load_state_dict(torch.load('model_complete_2band.pth'))
 model.eval()
 ```
+=======
+>>>>>>> parent of 02581cb... more diffusion
 
-```{code-cell} ipython3
-device='cpu'
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=1,shuffle=True, num_workers=int(0))
 inputs, classes = next(iter(dataloader))  
 
@@ -539,48 +544,41 @@ for k in range(inputs.shape[0]):
         output = model(cutout)
 
 
-    plt.figure(figsize=(12,3))
-    plt.subplot(1,6,1)
+    plt.figure(figsize=(6,4))
+    plt.subplot(2,3,1)
     plt.imshow(w1in,origin='lower')
     plt.text(1,1,'W1',fontsize=10,color='y')
     plt.axis('off')
 
-    plt.subplot(1,6,2)
+    plt.subplot(2,3,4)
     plt.imshow(w2in,origin='lower')
     plt.text(1,1,'W2',fontsize=10,color='y')
     plt.axis('off')
 
-    plt.subplot(1,6,3)
+    plt.subplot(2,3,2)
     output_image = output.squeeze().cpu().numpy()  
     plt.imshow(output_image[0,:,:],origin='lower')  
-    plt.text(1,2,'W1 DL-Enhanced',fontsize=10,color='y')
+    plt.text(1,1,'W1 Enhanced',fontsize=10,color='y')
     plt.axis('off')
 
 
-    plt.subplot(1,6,4)
+    plt.subplot(2,3,5)
     plt.imshow(output_image[1,:,:],origin='lower')  
-    plt.text(1,2,'W2 DL-Enhanced',fontsize=10,color='y')
+    plt.text(1,1,'W2 Enhanced',fontsize=10,color='y')
     plt.axis('off')
 
-    plt.subplot(1,6,5)
+    plt.subplot(2,3,3)
     plt.imshow(ch1in,origin='lower')
     plt.text(1,1,'IRAC Ch1',fontsize=10,color='y')
     plt.axis('off')
 
-    plt.subplot(1,6,6)
+    plt.subplot(2,3,6)
     plt.imshow(ch2in,origin='lower')
     plt.text(1,1,'IRAC Ch2',fontsize=10,color='y')
     plt.axis('off')
 
     plt.tight_layout()
-    #plt.show()
-    
-    #plt.savefig('test.png')
-    
-    
-    
-    
-    
+    plt.show()
 ```
 
 ```{code-cell} ipython3
