@@ -232,6 +232,8 @@ df_spec.append(df_spec_HST)
 
 herschel_radius = 1.1  
 herschel_download_directory = 'data/herschel'
+if not os.path.exists(herschel_download_directory):
+    os.makedirs(herschel_download_directory, exist_ok=True)
 df_spec_herschel =  Herschel_get_spec(sample_table, herschel_radius, herschel_download_directory, delete_tarfiles = True)
 df_spec.append(df_spec_herschel)
 ```
