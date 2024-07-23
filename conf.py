@@ -48,6 +48,7 @@ exclude_patterns += ['documentation/notebook_review_process.md', 'spectroscopy/*
 
 # Myst-NB configuration
 nb_execution_timeout = 900
+#nb_execution_excludepatterns = ['multiband_photometry.md']
 
 # -- Options for HTML output -------------------------------------------------
 
