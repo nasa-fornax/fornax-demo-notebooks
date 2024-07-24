@@ -14,7 +14,7 @@ from data_structures_spec import MultiIndexDFObject
 
 from specutils import Spectrum1D
 
-def SDSS_get_spec(sample_table, search_radius_arcsec):
+def SDSS_get_spec(sample_table, search_radius_arcsec, data_release):
     '''
     Retrieves SDSS spectra for a list of sources. Note that no data will
     be directly downloaded. All will be saved in cache.
@@ -25,6 +25,8 @@ def SDSS_get_spec(sample_table, search_radius_arcsec):
         Table with the coordinates and journal reference labels of the sources
     search_radius_arcsec : `float`
         Search radius in arcseconds.
+    data_release : `int`
+        SDSS data release (e.g., 17 or 18)
 
     Returns
     -------
@@ -42,10 +44,10 @@ def SDSS_get_spec(sample_table, search_radius_arcsec):
         ## Get Spectra for SDSS
         search_coords = stab["coord"]
         
-        xid = SDSS.query_region(search_coords, radius=search_radius_arcsec * u.arcsec, spectro=True)
+        xid = SDSS.query_region(search_coords, radius=search_radius_arcsec * u.arcsec, spectro=True, data_release=data_release)
 
         if str(type(xid)) != "<class 'NoneType'>":
-            sp = SDSS.get_spectra(matches=xid, show_progress=True)
+            sp = SDSS.get_spectra(matches=xid, show_progress=True , data_release=data_release)
     
             ## Get data
             wave = 10**sp[0]["COADD"].data.loglam * u.angstrom # only one entry because we only search for one xid at a time. Could change that?

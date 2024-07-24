@@ -175,13 +175,13 @@ Details here may change as the prototype code is being added to the appropriate 
 
 ```{code-cell} ipython3
 # Temporary solution, remove when the fornax API is added to the image
-# This relies on the assumption that https://github.com/fornax-navo/fornax-cloud-access-API is being cloned to this environment. 
-# If it's not, then run a ``git clone https://github.com/fornax-navo/fornax-cloud-access-API --depth=1`` from a terminal at the highest directory root.
+# This relies on the assumption that https://github.com/nasa-fornax/fornax-cloud-access-API is being cloned to this environment. 
+# If it's not, then run a ``git clone https://github.com/nasa-fornax/fornax-cloud-access-API --depth=1`` from a terminal at the highest directory root.
 # You may need to update the fork if you forked it in the past
 
 import os
 if not os.path.exists('../../fornax-cloud-access-API'):
-    ! git clone https://github.com/fornax-navo/fornax-cloud-access-API --depth=1 ../../fornax-cloud-access-API
+    ! git clone https://github.com/nasa-fornax/fornax-cloud-access-API --depth=1 ../../fornax-cloud-access-API
 ```
 
 ```{code-cell} ipython3
@@ -218,7 +218,7 @@ spitzer['cloud_access'] = [(f'{{"aws": {{ "bucket_name": "irsa-mast-tike-spitzer
 
 ```{code-cell} ipython3
 # Adding function to download multiple files using the fornax API. 
-# Requires https://github.com/fornax-navo/fornax-cloud-access-API/pull/4
+# Requires https://github.com/nasa-fornax/fornax-cloud-access-API/pull/4
 def fornax_download(data_table, data_subdirectory, access_url_column='access_url',
                     fname_filter=None, verbose=False):
     working_dir = os.getcwd()
