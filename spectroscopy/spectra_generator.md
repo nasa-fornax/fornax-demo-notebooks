@@ -241,7 +241,6 @@ df_spec.append(df_spec_HST)
 ### 2.3 ESA Archive
 ```python
 # Herschel PACS & SPIRE from ESA TAP using astroquery
-
 herschel_radius = 1.1  
 herschel_download_directory = 'data/herschel'
 if not os.path.exists(herschel_download_directory):
