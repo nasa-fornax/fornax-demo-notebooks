@@ -433,8 +433,9 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#find-spectra-for-these-targets-in-nasa-and-other-ancillary-catalogs">2. Find spectra for these targets in NASA and other ancillary catalogs</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#irsa-archive">2.1 IRSA Archive</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-archive">2.2 MAST Archive</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sdss-archive">2.3 SDSS Archive</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#desi-archive">2.4 DESI Archive</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#esa-archive">2.3 ESA Archive</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sdss-archive">2.4 SDSS Archive</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#desi-archive">2.5 DESI Archive</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#make-plots-of-luminosity-as-a-function-of-time">3. Make plots of luminosity as a function of time</a></li>
@@ -493,54 +494,60 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 <td><p>Implemented with <code class="docutils literal notranslate"><span class="pre">astroquery.ipac.irsa</span></code>. (Table gives URLs to spectrum IPAC tables.)</p></td>
 </tr>
 <tr class="row-even"><td><p>IRSA</p></td>
-<td><p>Herschel*</p></td>
-<td><p>Some spectra, need to check reduction stage</p></td>
+<td><p>IRTF*</p></td>
+<td><p>Large library of stellar spectra</p></td>
 <td><p></p></td>
-<td><p></p></td>
+<td><p>does <code class="docutils literal notranslate"><span class="pre">astroquery.ipac.irsa</span></code> work??</p></td>
 </tr>
-<tr class="row-odd"><td><p>IRSA</p></td>
+<tr class="row-odd"><td><p>ESA</p></td>
+<td><p>Herschel*</p></td>
+<td><p>Some spectra</p></td>
+<td><p></p></td>
+<td><p>implemented with <a class="reference external" href="https://astroquery.readthedocs.io/en/latest/esa/hsa/hsa.html">astroquery</a></p></td>
+</tr>
+<tr class="row-even"><td><p>IRSA</p></td>
 <td><p>Euclid</p></td>
 <td><p>Spectra hosted at IRSA in FY25 -&gt; preparation for ingestion</p></td>
 <td><p></p></td>
 <td><p>Will use mock spectra with correct format for testing</p></td>
 </tr>
-<tr class="row-even"><td><p>IRSA</p></td>
+<tr class="row-odd"><td><p>IRSA</p></td>
 <td><p>SPHEREx</p></td>
 <td><p>Spectra/cubes will be hosted at IRSA, first release in FY25 -&gt; preparation for ingestion</p></td>
 <td><p></p></td>
 <td><p>Will use mock spectra with correct format for testing</p></td>
 </tr>
-<tr class="row-odd"><td><p>MAST</p></td>
+<tr class="row-even"><td><p>MAST</p></td>
 <td><p>HST*</p></td>
 <td><p>Slitless spectra would need reduction and extraction. There are some reduced slit spectra from COS in the Hubble Archive</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">astroquery.mast</span></code></p></td>
 <td><p>Implemented using <code class="docutils literal notranslate"><span class="pre">astroquery.mast</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>MAST</p></td>
+<tr class="row-odd"><td><p>MAST</p></td>
 <td><p>JWST*</p></td>
 <td><p>Reduced slit MSA and Slit spectra that can be queried</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">astroquery.mast</span></code></p></td>
 <td><p>Implemented using <code class="docutils literal notranslate"><span class="pre">astroquery.mast</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>SDSS</p></td>
+<tr class="row-even"><td><p>SDSS</p></td>
 <td><p>SDSS optical</p></td>
 <td><p>Optical spectra that are reduced</p></td>
 <td><p><a class="reference external" href="https://skyserver.sdss.org/dr18/SearchTools">Sky Server</a> or <code class="docutils literal notranslate"><span class="pre">astroquery.sdss</span></code> (preferred)</p></td>
 <td><p>Implemented using <code class="docutils literal notranslate"><span class="pre">astroquery.sdss</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p>DESI</p></td>
+<tr class="row-odd"><td><p>DESI</p></td>
 <td><p>DESI*</p></td>
 <td><p>Optical spectra</p></td>
 <td><p><a class="reference external" href="https://data.desi.lbl.gov/public/">DESI public data release</a></p></td>
 <td><p>Implemented with <code class="docutils literal notranslate"><span class="pre">SPARCL</span></code> library</p></td>
 </tr>
-<tr class="row-odd"><td><p>BOSS</p></td>
+<tr class="row-even"><td><p>BOSS</p></td>
 <td><p>BOSS*</p></td>
 <td><p>Optical spectra</p></td>
 <td><p><a class="reference external" href="https://www.sdss4.org/surveys/boss/">BOSS webpage (part of SDSS)</a></p></td>
 <td><p>Implemented with <code class="docutils literal notranslate"><span class="pre">SPARCL</span></code> library together with DESI</p></td>
 </tr>
-<tr class="row-even"><td><p>HEASARC</p></td>
+<tr class="row-odd"><td><p>HEASARC</p></td>
 <td><p>None</p></td>
 <td><p>Could link to Chandra observations to check AGN occurrence.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">astroquery.heasarc</span></code></p></td>
@@ -597,6 +604,7 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">## IMPORTS</span>
 <span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
@@ -615,6 +623,7 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 <span class="kn">from</span> <span class="nn">mast_functions</span> <span class="kn">import</span> <span class="n">HST_get_spec</span><span class="p">,</span> <span class="n">JWST_get_spec</span>
 <span class="kn">from</span> <span class="nn">keck_functions</span> <span class="kn">import</span> <span class="n">KeckDEIMOS_get_spec</span>
 <span class="kn">from</span> <span class="nn">plot_functions</span> <span class="kn">import</span> <span class="n">create_figures</span>
+<span class="kn">from</span> <span class="nn">herschel_functions</span> <span class="kn">import</span> <span class="n">Herschel_get_spec</span>
 </pre></div>
 </div>
 </section>
@@ -690,7 +699,6 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 <p>This archive includes spectra taken by</p>
 <p>• Keck</p>
 <p>• Spitzer/IRS</p>
-<p>• Herschel (not implemented, yet)</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
 <span class="c1">## Get Keck Spectra (COSMOS only)</span>
 <span class="n">df_spec_DEIMOS</span> <span class="o">=</span> <span class="n">KeckDEIMOS_get_spec</span><span class="p">(</span><span class="n">sample_table</span> <span class="o">=</span> <span class="n">sample_table</span><span class="p">,</span> <span class="n">search_radius_arcsec</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -715,15 +723,28 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 <span class="n">df_spec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_spec_HST</span><span class="p">)</span>
 </pre></div>
 </div>
+</section>
+<section id="esa-archive">
+<h3>2.3 ESA Archive<a class="headerlink" href="#esa-archive" title="Link to this heading">#</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Herschel PACS &amp; SPIRE from ESA TAP using astroquery</span>
+
+<span class="n">herschel_radius</span> <span class="o">=</span> <span class="mf">1.1</span>  
+<span class="n">herschel_download_directory</span> <span class="o">=</span> <span class="s1">&#39;data/herschel&#39;</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">herschel_download_directory</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">herschel_download_directory</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">df_spec_herschel</span> <span class="o">=</span>  <span class="n">Herschel_get_spec</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">herschel_radius</span><span class="p">,</span> <span class="n">herschel_download_directory</span><span class="p">,</span> <span class="n">delete_tarfiles</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">df_spec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_spec_herschel</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="sdss-archive">
+<h3>2.4 SDSS Archive<a class="headerlink" href="#sdss-archive" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
 <span class="c1">## Get Spectra for JWST</span>
 <span class="n">df_jwst</span> <span class="o">=</span> <span class="n">JWST_get_spec</span><span class="p">(</span><span class="n">sample_table</span> <span class="p">,</span> <span class="n">search_radius_arcsec</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">datadir</span> <span class="o">=</span> <span class="s2">&quot;./data/&quot;</span><span class="p">,</span> <span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
 <span class="n">df_spec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_jwst</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="sdss-archive">
-<h3>2.3 SDSS Archive<a class="headerlink" href="#sdss-archive" title="Link to this heading">#</a></h3>
 <p>This includes SDSS spectra.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
 <span class="c1">## Get SDSS Spectra</span>
@@ -733,7 +754,7 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 </div>
 </section>
 <section id="desi-archive">
-<h3>2.4 DESI Archive<a class="headerlink" href="#desi-archive" title="Link to this heading">#</a></h3>
+<h3>2.5 DESI Archive<a class="headerlink" href="#desi-archive" title="Link to this heading">#</a></h3>
 <p>This includes DESI spectra. Here, we use the <code class="docutils literal notranslate"><span class="pre">SPARCL</span></code> query. Note that this can also be used
 for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is included. Therefore, we will not include SDSS DR16 here (this is treated in the SDSS search above).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
@@ -814,8 +835,9 @@ for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is 
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#find-spectra-for-these-targets-in-nasa-and-other-ancillary-catalogs">2. Find spectra for these targets in NASA and other ancillary catalogs</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#irsa-archive">2.1 IRSA Archive</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-archive">2.2 MAST Archive</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sdss-archive">2.3 SDSS Archive</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#desi-archive">2.4 DESI Archive</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#esa-archive">2.3 ESA Archive</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sdss-archive">2.4 SDSS Archive</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#desi-archive">2.5 DESI Archive</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#make-plots-of-luminosity-as-a-function-of-time">3. Make plots of luminosity as a function of time</a></li>
