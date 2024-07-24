@@ -42,7 +42,8 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 | ------- | ------- | ----------- | ------------ | ------ |
 | IRSA    | Keck    | About 10,000 spectra on the COSMOS field from [Hasinger et al. (2018)](https://ui.adsabs.harvard.edu/abs/2018ApJ...858...77H/abstract) | [IRSA Archive](https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-scan?projshort=COSMOS) | Implemented with `astroquery.ipac.irsa`. (Table gives URLs to spectrum FITS files.) Note: only implemented for absolute calibrated spectra. |
 | IRSA    | Spitzer IRS | ~17,000 merged low-resolution IRS spectra | [IRS Enhanced Product](https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-dd?catalog=irs_enhv211) | Implemented with `astroquery.ipac.irsa`. (Table gives URLs to spectrum IPAC tables.) |
-| IRSA    | Herschel*    | Some spectra, need to check reduction stage | | |
+| IRSA    | IRTF*        | Large library of stellar spectra | | does `astroquery.ipac.irsa` work?? |
+| ESA    | Herschel*    | Some spectra | | implemented with [astroquery](https://astroquery.readthedocs.io/en/latest/esa/hsa/hsa.html) |
 | IRSA    | Euclid      | Spectra hosted at IRSA in FY25 -> preparation for ingestion | | Will use mock spectra with correct format for testing |
 | IRSA    | SPHEREx     | Spectra/cubes will be hosted at IRSA, first release in FY25 -> preparation for ingestion | | Will use mock spectra with correct format for testing |
 | MAST    | HST*         | Slitless spectra would need reduction and extraction. There are some reduced slit spectra from COS in the Hubble Archive | `astroquery.mast` | Implemented using `astroquery.mast` |
@@ -103,6 +104,7 @@ Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, D
 ## IMPORTS
 import sys, os
 import numpy as np
+import os
 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -121,6 +123,7 @@ from sdss_functions import SDSS_get_spec
 from mast_functions import HST_get_spec, JWST_get_spec
 from keck_functions import KeckDEIMOS_get_spec
 from plot_functions import create_figures
+from herschel_functions import Herschel_get_spec
 ```
 
 ## 1. Define the sample
@@ -202,7 +205,7 @@ This archive includes spectra taken by
  
  &bull; Spitzer/IRS
  
- &bull; Herschel (not implemented, yet)
+
 
 
 ```python
@@ -235,6 +238,19 @@ df_spec_HST = HST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = 
 df_spec.append(df_spec_HST)
 ```
 
+### 2.3 ESA Archive
+```python
+# Herschel PACS & SPIRE from ESA TAP using astroquery
+
+herschel_radius = 1.1  
+herschel_download_directory = 'data/herschel'
+if not os.path.exists(herschel_download_directory):
+    os.makedirs(herschel_download_directory, exist_ok=True)
+df_spec_herschel =  Herschel_get_spec(sample_table, herschel_radius, herschel_download_directory, delete_tarfiles = True)
+df_spec.append(df_spec_herschel)
+```
+
+### 2.4 SDSS Archive
 ```python
 %%time
 ## Get Spectra for JWST
@@ -242,7 +258,6 @@ df_jwst = JWST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./
 df_spec.append(df_jwst)
 ```
 
-### 2.3 SDSS Archive
 
 This includes SDSS spectra.
 
@@ -253,7 +268,7 @@ df_spec_SDSS = SDSS_get_spec(sample_table , search_radius_arcsec=5, data_release
 df_spec.append(df_spec_SDSS)
 ```
 
-### 2.4 DESI Archive
+### 2.5 DESI Archive
 
 This includes DESI spectra. Here, we use the `SPARCL` query. Note that this can also be used
 for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is included. Therefore, we will not include SDSS DR16 here (this is treated in the SDSS search above).
