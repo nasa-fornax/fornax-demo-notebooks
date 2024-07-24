@@ -117,7 +117,7 @@ def create_figures(df_spec, bin_factor, show_nbr_figures , save_output):
 
         ## Logarithmic or linear x-axis?
         all_instruments = [ list(singleobj_df.groupby('instrument'))[ii][0] for ii in range(len(list(singleobj_df.groupby('instrument')))) ]
-        if "IRS" in all_instruments:
+        if ("IRS" in all_instruments) | ("PACS" in all_instruments) | ("SPIRE" in all_instruments):
             LOGX = True
         else:
             LOGX = False
