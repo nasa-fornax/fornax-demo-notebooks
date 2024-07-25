@@ -43,7 +43,7 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 | IRSA    | Keck    | About 10,000 spectra on the COSMOS field from [Hasinger et al. (2018)](https://ui.adsabs.harvard.edu/abs/2018ApJ...858...77H/abstract) | [IRSA Archive](https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-scan?projshort=COSMOS) | Implemented with `astroquery.ipac.irsa`. (Table gives URLs to spectrum FITS files.) Note: only implemented for absolute calibrated spectra. |
 | IRSA    | Spitzer IRS | ~17,000 merged low-resolution IRS spectra | [IRS Enhanced Product](https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-dd?catalog=irs_enhv211) | Implemented with `astroquery.ipac.irsa`. (Table gives URLs to spectrum IPAC tables.) |
 | IRSA    | IRTF*        | Large library of stellar spectra | | does `astroquery.ipac.irsa` work?? |
-| ESA    | Herschel*    | Some spectra | | implemented with [astroquery](https://astroquery.readthedocs.io/en/latest/esa/hsa/hsa.html) |
+| ESA    | Herschel*    | Some spectra | astroquery.esa.hsa | implemented with [astroquery](https://astroquery.readthedocs.io/en/latest/esa/hsa/hsa.html) |
 | IRSA    | Euclid      | Spectra hosted at IRSA in FY25 -> preparation for ingestion | | Will use mock spectra with correct format for testing |
 | IRSA    | SPHEREx     | Spectra/cubes will be hosted at IRSA, first release in FY25 -> preparation for ingestion | | Will use mock spectra with correct format for testing |
 | MAST    | HST*         | Slitless spectra would need reduction and extraction. There are some reduced slit spectra from COS in the Hubble Archive | `astroquery.mast` | Implemented using `astroquery.mast` |
@@ -241,13 +241,14 @@ df_spec.append(df_spec_HST)
 ### 2.3 ESA Archive
 ```python
 # Herschel PACS & SPIRE from ESA TAP using astroquery
-
+#This search is fully functional, but is commented out because it is very slow.
 herschel_radius = 1.1  
 herschel_download_directory = 'data/herschel'
-if not os.path.exists(herschel_download_directory):
-    os.makedirs(herschel_download_directory, exist_ok=True)
-df_spec_herschel =  Herschel_get_spec(sample_table, herschel_radius, herschel_download_directory, delete_tarfiles = True)
-df_spec.append(df_spec_herschel)
+
+#if not os.path.exists(herschel_download_directory):
+#    os.makedirs(herschel_download_directory, exist_ok=True)
+#df_spec_herschel =  Herschel_get_spec(sample_table, herschel_radius, herschel_download_directory, delete_tarfiles = True)
+#df_spec.append(df_spec_herschel)
 ```
 
 ### 2.4 SDSS Archive
