@@ -502,7 +502,7 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 <tr class="row-odd"><td><p>ESA</p></td>
 <td><p>Herschel*</p></td>
 <td><p>Some spectra</p></td>
-<td><p></p></td>
+<td><p>astroquery.esa.hsa</p></td>
 <td><p>implemented with <a class="reference external" href="https://astroquery.readthedocs.io/en/latest/esa/hsa/hsa.html">astroquery</a></p></td>
 </tr>
 <tr class="row-even"><td><p>IRSA</p></td>
@@ -727,13 +727,14 @@ The notebook may focus on the COSMOS field for now, which has a large overlap of
 <section id="esa-archive">
 <h3>2.3 ESA Archive<a class="headerlink" href="#esa-archive" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Herschel PACS &amp; SPIRE from ESA TAP using astroquery</span>
-
+<span class="c1">#This search is fully functional, but is commented out because it is very slow.</span>
 <span class="n">herschel_radius</span> <span class="o">=</span> <span class="mf">1.1</span>  
 <span class="n">herschel_download_directory</span> <span class="o">=</span> <span class="s1">&#39;data/herschel&#39;</span>
-<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">herschel_download_directory</span><span class="p">):</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">herschel_download_directory</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">df_spec_herschel</span> <span class="o">=</span>  <span class="n">Herschel_get_spec</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">herschel_radius</span><span class="p">,</span> <span class="n">herschel_download_directory</span><span class="p">,</span> <span class="n">delete_tarfiles</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-<span class="n">df_spec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_spec_herschel</span><span class="p">)</span>
+
+<span class="c1">#if not os.path.exists(herschel_download_directory):</span>
+<span class="c1">#    os.makedirs(herschel_download_directory, exist_ok=True)</span>
+<span class="c1">#df_spec_herschel =  Herschel_get_spec(sample_table, herschel_radius, herschel_download_directory, delete_tarfiles = True)</span>
+<span class="c1">#df_spec.append(df_spec_herschel)</span>
 </pre></div>
 </div>
 </section>
