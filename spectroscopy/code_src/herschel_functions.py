@@ -1,7 +1,7 @@
 ## Herschel PACS & SPIRE (from ESA TAP)
 from astroquery.esa.hsa import HSA
 from astroquery.exceptions import LoginError
-from requests.exceptions import ChunkedEncodingError
+from requests.exceptions import ChunkedEncodingError, ConnectionError
 import tarfile 
 from astropy.io import fits
 import glob
@@ -137,8 +137,10 @@ def Herschel_get_spec(sample_table, search_radius_arcsec, datadir, delete_tarfil
 
                 except LoginError:
                     print("This observation is proprietary, which might mean that it is calibration data")
-                except:
+                except (ChunkedEncodingError, ConnectionError):
                     print("Connection to the ESA archive broken")
+                except tarfile.ReadError:
+                    print(f"Tarfile ReadError. This tarfile may be corrupt {path_to_file}")
 
                 #delete tar files
                 if delete_tarfiles:
@@ -149,4 +151,3 @@ def Herschel_get_spec(sample_table, search_radius_arcsec, datadir, delete_tarfil
                         os.remove(filename_tar)
 
     return df_spec
-                    
