@@ -26,6 +26,8 @@ For authors: consider these checklists requirements for your code.
 	- Is every function documented?
 	- Does it follow the style guide? https://github.com/spacetelescope/style-guides/blob/master/guides/jupyter-notebooks.md
    	- Do all code cells have corresponding narratives/comments?
+   	- Include information about runtime on fiducial Fornax server
+   	- Include information about which "image" the notebook uses when loggin into Fornax, ie., "Astrophysics default image"
 - Notebook execution, error handling, etc.:
 	- Does the notebook run end-to-end, out of the box?
  	- Are errors handled appropriately, with `try`/`except` statements that are narrow in scope?
@@ -38,7 +40,9 @@ For authors: consider these checklists requirements for your code.
 - Cleanup:
 	- Have blocks of code that need to be re-used been turned into functions (rather than being duplicated)?
 	- Have un-used libraries been removed from the requirements.txt file and the `import` statements?
-	- Has un-used code been removed (e.g., unused functions and commented-out lines)? 
+	- Has un-used code been removed (e.g., unused functions and commented-out lines)?
+   	- Are comment lines wrapped so all fit within a max of 90 - 100 characters per line?
+   	- Are code lines reasonably short where possible? some code lines can't easily be wrapped and that is ok
 
 ```python
 

@@ -241,7 +241,7 @@ df_spec.append(df_spec_HST)
 ### 2.3 ESA Archive
 ```python
 # Herschel PACS & SPIRE from ESA TAP using astroquery
-#This search is fully functional, but is commented out because it is very slow.
+#This search is fully functional, but is commented out because it takes ~4 hours to run to completion
 herschel_radius = 1.1  
 herschel_download_directory = 'data/herschel'
 
