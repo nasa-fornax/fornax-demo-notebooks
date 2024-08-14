@@ -582,7 +582,7 @@ document.write(`
 <li><p><code class="docutils literal notranslate"><span class="pre">cat</span> <span class="pre">/proc/cpuinfo</span></code> will give you more detailed info on the processors</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">free</span> <span class="pre">-h</span></code> will give the amount of RAM available/used</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">cat</span> <span class="pre">/proc/meminfo</span></code> will give  more detailed info on the amount of RAM available/used</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">top</span></code> gives info on both CPU and RAM usage</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">top</span></code> gives info on both CPU and RAM usage. Some numerical packages (e.g. numpy) use multithreading, so you may see that the CPU usage is more 100%. That means more than one CPU is used. You can see the individual CPU usage by pressing 1 while the <code class="docutils literal notranslate"><span class="pre">top</span></code> command is running.</p></li>
 </ul>
 </li>
 </ul>

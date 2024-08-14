@@ -99,7 +99,7 @@ Here we load a parquet file of light curves generated using the light_curve_gene
 
 ```{code-cell} ipython3
 # To download the data file containing the light curves from Googledrive
-!gdown 11rC6rPae7kxdw-5X1AzCEtArxCtbXvo8 -O ./data/df_lc_020724.parquet.gzip
+!gdown 1gb2vWn0V2unstElGTTrHIIWIftHbXJvz -O ./data/df_lc_020724.parquet.gzip
 ```
 
 ```{code-cell} ipython3

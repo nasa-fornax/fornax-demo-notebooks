@@ -74,7 +74,7 @@ The Fornax Science Platform additionally contains a JupyterLab extension called 
     * `cat /proc/cpuinfo` will give you more detailed info on the processors
     * `free -h` will give the amount of RAM available/used
     * `cat /proc/meminfo` will give  more detailed info on the amount of RAM available/used
-    * `top` gives info on both CPU and RAM usage
+    * `top` gives info on both CPU and RAM usage. Some numerical packages (e.g. numpy) use multithreading, so you may see that the CPU usage is more 100%. That means more than one CPU is used. You can see the individual CPU usage by pressing 1 while the `top` command is running.
    
 Under construction: It appears that sometimes we are allowed to use more CPU than listed for a short amount of time.  Is this true? and what are the parameters of when and for what sizes that will be allowed?
 
