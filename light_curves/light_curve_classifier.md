@@ -120,20 +120,27 @@ pd.options.mode.copy_on_write = True
 ```
 
 ## 1. Read in a dataset of archival light curves
+ We use here a sample of AGN including known CLAGN & random SDSS AGN
+ 
+ If you want to use your own sample, you can use the code [light_curve_generator.md](https://nasa-fornax.github.io/fornax-demo-notebooks/light_curves/light_curve_generator.html) in this same repo to make the required pandas dataframe which you will need to run this notebook. 
 
 ```{code-cell} ipython3
-#access structure of light curves made in the light curve generator notebook
-# has known CLAGN & random SDSS small sample of targets, all bands
+# First we want to load light curves made in the light curve generator notebook
+
+# The data is on google drive, this will download it for you and read it into 
+# a pandas dataframe
 savename_df_lc = './data/small_CLAGN_SDSS_df_lc.parquet'
 gdd.download_file_from_google_drive(file_id='1DrB-CWdBBBYuO0WzNnMl5uQnnckL7MWH',
                                     dest_path=savename_df_lc,
                                     unzip=True)
 
+#load the data into a pandas dataframe
 df_lc = pd.read_parquet(savename_df_lc)
 ```
 
 ```{code-cell} ipython3
-#get rid of indices set in the light curve code and reset them as needed before sktime algorithms
+#get rid of indices set in the light curve code and reset them as needed 
+#before sktime algorithms
 df_lc = df_lc.reset_index()  
 
 #what does the dataset look like at the start?
@@ -154,8 +161,9 @@ is to remove the sparsest datasets.
 ##what are the unique set of bands included in our light curves
 df_lc.band.unique()
 
-# get rid of some of the bands that don't have enough data for all the sources
-#CLAGN are generall fainter targets, and therefore mostly not found in datasets like TESS & K2
+#get rid of some of the bands that don't have enough data for all the sources
+#CLAGN are generall fainter targets, and therefore mostly not found 
+#in datasets like TESS & K2
 
 bands_to_drop = ["IceCube", "TESS", "FERMIGTRIG", "K2"]
 df_lc = df_lc[~df_lc["band"].isin(bands_to_drop)]
