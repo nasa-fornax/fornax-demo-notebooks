@@ -70,6 +70,9 @@ The ones with an asterisk (*) are the challenging ones.
 ## Non-standard Imports:
 
 &bull; ...
+## Runtime
+
+As of 2024 August, this notebook takes ~300s to run to completion on Fornax using the 'Astrophysics Default Image' and the 'Large' server with 16GB RAM/ 4CPU.
 
 ## Authors:
 Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, Dave Shupe
