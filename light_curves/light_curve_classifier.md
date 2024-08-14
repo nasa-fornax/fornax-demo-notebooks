@@ -4,11 +4,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.15.2
+    jupytext_version: 1.16.0
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  display_name: science_demo
   language: python
-  name: python3
+  name: conda-env-science_demo-py
 ---
 
 # Light Curve Classifier
@@ -63,6 +63,9 @@ Trained classifiers as well as estimates of their accuracy and plots of confusio
 - `scipy` for statistical analysis
 - `json` for storing intermediate files
 - `google_drive_downloader` to access files stored in google drive
+
+## Runtime
+This notebook takes ~170s to run to completion on Fornax using the 'Astrophysics Default Image' and the 'Large' server with 16GB RAM/ 4CPU. 
   
 ## Authors
 Jessica Krick, Shooby Hemmati, Troy Raen, Brigitta Sipocz, Andreas Faisst, Vandana Desai, Dave Shoop
