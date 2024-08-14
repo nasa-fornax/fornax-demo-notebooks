@@ -413,6 +413,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#runtime">Runtime</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#read-in-a-dataset-of-archival-light-curves">1. Read in a dataset of archival light curves</a></li>
@@ -511,6 +512,10 @@ document.write(`
 <li><p><code class="docutils literal notranslate"><span class="pre">google_drive_downloader</span></code> to access files stored in google drive</p></li>
 </ul>
 </section>
+<section id="runtime">
+<h2>Runtime<a class="headerlink" href="#runtime" title="Link to this heading">#</a></h2>
+<p>As of 2024 August, this notebook takes ~170s to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 16GB RAM/ 4CPU.</p>
+</section>
 <section id="authors">
 <h2>Authors<a class="headerlink" href="#authors" title="Link to this heading">#</a></h2>
 <p>Jessica Krick, Shooby Hemmati, Troy Raen, Brigitta Sipocz, Andreas Faisst, Vandana Desai, Dave Shoop</p>
@@ -573,15 +578,20 @@ document.write(`
 </section>
 <section id="read-in-a-dataset-of-archival-light-curves">
 <h2>1. Read in a dataset of archival light curves<a class="headerlink" href="#read-in-a-dataset-of-archival-light-curves" title="Link to this heading">#</a></h2>
+<p>We use here a sample of AGN including known CLAGN &amp; random SDSS AGN</p>
+<p>If you want to use your own sample, you can use the code <a class="reference external" href="https://nasa-fornax.github.io/fornax-demo-notebooks/light_curves/light_curve_generator.html">light_curve_generator.md</a> in this same repo to make the required pandas dataframe which you will need to run this notebook.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#access structure of light curves made in the light curve generator notebook</span>
-<span class="c1"># has known CLAGN &amp; random SDSS small sample of targets, all bands</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># First we want to load light curves made in the light curve generator notebook</span>
+
+<span class="c1"># The data is on google drive, this will download it for you and read it into </span>
+<span class="c1"># a pandas dataframe</span>
 <span class="n">savename_df_lc</span> <span class="o">=</span> <span class="s1">&#39;./data/small_CLAGN_SDSS_df_lc.parquet&#39;</span>
 <span class="n">gdd</span><span class="o">.</span><span class="n">download_file_from_google_drive</span><span class="p">(</span><span class="n">file_id</span><span class="o">=</span><span class="s1">&#39;1DrB-CWdBBBYuO0WzNnMl5uQnnckL7MWH&#39;</span><span class="p">,</span>
                                     <span class="n">dest_path</span><span class="o">=</span><span class="n">savename_df_lc</span><span class="p">,</span>
                                     <span class="n">unzip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
+<span class="c1">#load the data into a pandas dataframe</span>
 <span class="n">df_lc</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">savename_df_lc</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -589,7 +599,8 @@ document.write(`
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#get rid of indices set in the light curve code and reset them as needed before sktime algorithms</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#get rid of indices set in the light curve code and reset them as needed </span>
+<span class="c1">#before sktime algorithms</span>
 <span class="n">df_lc</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>  
 
 <span class="c1">#what does the dataset look like at the start?</span>
@@ -612,8 +623,9 @@ is to remove the sparsest datasets.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">##what are the unique set of bands included in our light curves</span>
 <span class="n">df_lc</span><span class="o">.</span><span class="n">band</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
 
-<span class="c1"># get rid of some of the bands that don&#39;t have enough data for all the sources</span>
-<span class="c1">#CLAGN are generall fainter targets, and therefore mostly not found in datasets like TESS &amp; K2</span>
+<span class="c1">#get rid of some of the bands that don&#39;t have enough data for all the sources</span>
+<span class="c1">#CLAGN are generall fainter targets, and therefore mostly not found </span>
+<span class="c1">#in datasets like TESS &amp; K2</span>
 
 <span class="n">bands_to_drop</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;IceCube&quot;</span><span class="p">,</span> <span class="s2">&quot;TESS&quot;</span><span class="p">,</span> <span class="s2">&quot;FERMIGTRIG&quot;</span><span class="p">,</span> <span class="s2">&quot;K2&quot;</span><span class="p">]</span>
 <span class="n">df_lc</span> <span class="o">=</span> <span class="n">df_lc</span><span class="p">[</span><span class="o">~</span><span class="n">df_lc</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">bands_to_drop</span><span class="p">)]</span>
@@ -1252,6 +1264,7 @@ Markus Löning, Tony Bagnall, Sajaysurya Ganesh, George Oastler, Jason Lines, Vi
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#runtime">Runtime</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#read-in-a-dataset-of-archival-light-curves">1. Read in a dataset of archival light curves</a></li>
