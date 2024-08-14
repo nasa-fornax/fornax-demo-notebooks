@@ -176,7 +176,7 @@ def load_lightcurves(locations_df, nworkers=6, chunksize=100):
         Dataframe of light curves. Expect one row per oid in locations_df. Each row
         stores a full light curve. Elements in the columns "mag", "hmjd", etc. are arrays.
     """
-    # We need to return an empty dataframe if no matches are found. If the TAP query returned matches 
+    # We need to return an empty dataframe if no matches are found. If the TAP query returned matches
     # but none of them are found in the parquet files, this function will naturally return an empty dataframe.
     # But if the TAP query found no matches, pd.concat (below) will throw a ValueError. Return now to avoid this.
     if len(locations_df.index) == 0:
@@ -188,7 +188,7 @@ def load_lightcurves(locations_df, nworkers=6, chunksize=100):
     # if no multiprocessing requested, loop over files serially and load data. return immediately
     if nworkers is None:
         lightcurves = []
-        for location in tqdm.tqdm(location_grps):
+        for location in tqdm.auto.tqdm(location_grps):
             lightcurves.append(load_lightcurves_one_file(location))
         return pd.concat(lightcurves, ignore_index=True)
 
@@ -204,7 +204,7 @@ def load_lightcurves(locations_df, nworkers=6, chunksize=100):
         # use imap because it's lazier than map and can reduce memory usage for long iterables
         # use unordered because we don't care about the order in which results are returned
         # using a large chunksize can make it much faster than the default of 1
-        for ztf_df in tqdm.tqdm(
+        for ztf_df in tqdm.auto.tqdm(
             pool.imap_unordered(load_lightcurves_one_file, location_grps, chunksize=chunksize),
             total=len(location_grps)  # must tell tqdm how many files we're iterating over
         ):
@@ -235,7 +235,7 @@ def load_lightcurves_one_file(location):
     location_keys, location_df = location
 
     # load light curves from this file, filtering for the ZTF object IDs in location_df.
-    # we could use pandas or pyarrow. pyarrow plays nicer with multiprocessing. pandas requires 
+    # we could use pandas or pyarrow. pyarrow plays nicer with multiprocessing. pandas requires
     # "spawning" new processes, which causes leaked semaphores in some cases.
     ztf_df = pyarrow.parquet.read_table(
         file_name(*location_keys),
@@ -293,7 +293,7 @@ def transform_lightcurves(ztf_df):
                 minoid = npointsmax_object.oid.min()
                 indexes_to_keep.extend(npointsmax_object.loc[npointsmax_object.oid == minoid].index)
     ztf_df = ztf_df.loc[sorted(indexes_to_keep)]
-    
+
     # store "hmjd" as "time".
     # note that other light curves in this notebook will have "time" as MJD instead of HMJD.
     # if your science depends on precise times, this will need to be corrected.

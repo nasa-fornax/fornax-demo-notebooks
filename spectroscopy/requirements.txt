@@ -13,3 +13,4 @@ scipy
 sparclclient
 specutils
 tqdm
+ipywidgets

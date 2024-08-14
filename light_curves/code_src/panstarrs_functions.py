@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import requests
 from astropy.table import Table
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from data_structures import MultiIndexDFObject
 

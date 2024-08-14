@@ -11,3 +11,4 @@ googledrivedownloader
 scikit-learn
 acstools
 requests
+ipywidgets

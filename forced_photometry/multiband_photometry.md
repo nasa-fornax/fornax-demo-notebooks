@@ -77,7 +77,7 @@ import pandas as pd
 import seaborn as sns
 import statsmodels
 import mpld3
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from astropy.nddata import Cutout2D
 from astropy.io import fits

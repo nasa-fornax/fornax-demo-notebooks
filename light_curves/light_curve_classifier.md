@@ -85,7 +85,7 @@ from matplotlib.lines import Line2D
 import pandas as pd
 from astropy.table import Table
 from google_drive_downloader import GoogleDriveDownloader as gdd
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import json
 
 from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score, confusion_matrix

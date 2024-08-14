@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from astropy.table import vstack
 import pyvo
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from data_structures import MultiIndexDFObject
 
