@@ -21,3 +21,4 @@ alerce
 umap-learn
 git+https://github.com/sevamoo/SOMPY
 gdown
+ipywidgets

@@ -5,7 +5,7 @@ import pyarrow.compute
 import pyarrow.dataset
 import pyarrow.fs
 from astropy.coordinates import SkyCoord
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from data_structures import MultiIndexDFObject
 from fluxconversions import convert_wise_flux_to_millijansky

@@ -1,6 +1,6 @@
 import lightkurve as lk
 import pandas as pd
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from data_structures import MultiIndexDFObject
 

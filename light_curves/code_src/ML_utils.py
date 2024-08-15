@@ -8,7 +8,7 @@ import pandas as pd
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF
 
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 def translate_bitwise_sum_to_labels(bitwise_sum):
     """
