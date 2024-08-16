@@ -66,6 +66,7 @@ import concurrent.futures
 import sys
 import os
 import re
+import shutil
 from typing import NamedTuple
 
 # Third party imports
@@ -232,7 +233,7 @@ def fornax_download(data_table, data_subdirectory, access_url_column='access_url
         temp_file = handler.download()
         # on-prem download returns temp file path, s3 download downloads file
         if temp_file:
-            os.rename(temp_file, os.path.basename(row['fname']))
+            shutil.move(temp_file, os.path.basename(row['fname']))
         
     os.chdir(working_dir)
 ```
