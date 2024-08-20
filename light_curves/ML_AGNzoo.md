@@ -46,8 +46,14 @@ Here are the libraries used in this network. They are also mostly mentioned in t
 - *ML_utils* for reading in and prepreocessing of lightcurve data
 - *umap* and *sompy* for manifold learning, dimensionality reduction and visualization
 
+This cell will install them if needed:
+
 ```{code-cell} ipython3
-!pip install -r requirements.txt
+# Uncomment the next line to install dependencies if needed.
+# !pip install -r requirements_ML_AGNzoo.txt
+```
+
+```{code-cell} ipython3
 import sys
 
 import astropy.units as u

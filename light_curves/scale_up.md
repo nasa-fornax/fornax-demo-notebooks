@@ -111,9 +111,11 @@ If you want a notebook or script to run for longer than about 30 minutes and you
 
 ### Imports
 
-```{code-cell}
-# Ensure all dependencies are installed
-!pip install -r requirements.txt
+This cell will install the dependencies, if needed:
+
+```{code-cell} ipython3#
+# Uncomment the next line to install dependencies if needed.
+# !pip install -r requirements_scale_up.txt
 ```
 
 ```{code-cell}
