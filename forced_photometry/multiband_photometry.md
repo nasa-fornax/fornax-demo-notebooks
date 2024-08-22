@@ -598,7 +598,7 @@ else:
     with Pool() as pool:
         results = pool.map(calculate_flux, paramlist)
     dtime = time.time() - t0
-    np.savez(fname, results=results)
+    np.savez(fname, results=np.array(results, dtype=object))
     print(f'Parallel calculation took {dtime} seconds')
 ```
 
