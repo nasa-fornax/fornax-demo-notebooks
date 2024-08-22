@@ -851,7 +851,7 @@ print('number of Galex detections =',np.sum(merged.galex_detect > 0))
 #overplot xray sources
 
 #first select on 24 micron 
-merged_24 = merged[(merged.flux_24 >= 0) ] 
+merged_24 = merged[(merged.flux_24 >= 0)].copy() 
 
 #negative Galex fluxes are causing problems, so set those to zero
 merged_24.loc[merged_24.fuvflux < 0, 'fuvflux'] = 0
