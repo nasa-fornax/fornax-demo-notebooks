@@ -1408,7 +1408,7 @@ as well as the increase in speed when going to parallelization</p></li>
 <span class="c1">#overplot xray sources</span>
 
 <span class="c1">#first select on 24 micron </span>
-<span class="n">merged_24</span> <span class="o">=</span> <span class="n">merged</span><span class="p">[(</span><span class="n">merged</span><span class="o">.</span><span class="n">flux_24</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">]</span> 
+<span class="n">merged_24</span> <span class="o">=</span> <span class="n">merged</span><span class="p">[(</span><span class="n">merged</span><span class="o">.</span><span class="n">flux_24</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> 
 
 <span class="c1">#negative Galex fluxes are causing problems, so set those to zero</span>
 <span class="n">merged_24</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">merged_24</span><span class="o">.</span><span class="n">fuvflux</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;fuvflux&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
