@@ -48,11 +48,16 @@ exclude_patterns += ['documentation/notebook_review_process.md', 'spectroscopy/*
 
 # Myst-NB configuration
 nb_execution_timeout = 900
+nb_execution_excludepatterns = []
 
 # Don't execute the forced photometry notebook until we base the CI on
 # the actual fornax image instead of the fresh installs
 # (aka tractor install pain).
-nb_execution_excludepatterns = ['multiband_photometry.md']
+nb_execution_excludepatterns += ['multiband_photometry.md',]
+
+# We use the non-public IRSA bucket for ZTF data, cannot execute the generator
+# notebook until https://github.com/nasa-fornax/fornax-demo-notebooks/issues/311 is addressed
+nb_execution_excludepatterns += ['light_curve_generator.md',]
 
 # -- Options for HTML output -------------------------------------------------
 
