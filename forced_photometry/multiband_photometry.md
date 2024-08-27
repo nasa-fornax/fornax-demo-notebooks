@@ -12,7 +12,7 @@ kernelspec:
 ---
 
 # Automated Multiband Forced Photometry on Large Datasets
-***
+
 
 ## Learning Goals:
 By the end of this tutorial, you will be able to:

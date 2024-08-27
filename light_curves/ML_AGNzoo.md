@@ -15,7 +15,7 @@ kernelspec:
 
 By the IPAC Science Platform Team, last edit: Feb 16th, 2024
 
-***
+
 
 
 ## Learning Goals
@@ -97,7 +97,7 @@ colors = [
 custom_cmap = LinearSegmentedColormap.from_list("custom_theme", colors[1:])
 ```
 
-***
+
 
 
 ## 1) Loading data
@@ -879,7 +879,3 @@ Datasets:
 Packages:
 * [`SOMPY`](https://github.com/sevamoo/SOMPY)
 * [`umap`](https://github.com/lmcinnes/umap)
-
-
-
-[Top of Page](#top)

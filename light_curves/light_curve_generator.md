@@ -12,7 +12,7 @@ kernelspec:
 ---
 
 # Make Multi-Wavelength Light Curves Using Archival Data
-***
+
 
 ## Learning Goals
 By the end of this tutorial, you will be able to:

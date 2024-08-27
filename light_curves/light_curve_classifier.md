@@ -12,7 +12,7 @@ kernelspec:
 ---
 
 # Light Curve Classifier
-***
+
 
 ## Learning Goals
 By the end of this tutorial, you will be able to:

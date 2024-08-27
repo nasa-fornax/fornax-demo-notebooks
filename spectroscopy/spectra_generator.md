@@ -14,7 +14,7 @@ jupyter:
 
 <!-- #region -->
 # Extract Multi-Wavelength Spectroscopy from Archival Data
-***
+
 
 ## Learning Goals    
 By the end of this tutorial, you will be able to:
