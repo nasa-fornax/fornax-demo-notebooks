@@ -177,7 +177,7 @@ print("Number of objects: ", len(cosmos_table))
 
 +++
 
-#### Use the fornax cloud access API to obtain the IRAC data from the IRSA S3 bucket.
+### Use the fornax cloud access API to obtain the IRAC data from the IRSA S3 bucket.
 
 Details here may change as the prototype code is being added to the appropriate libraries, as well as the data holding to the appropriate NGAP storage as opposed to IRSA resources.
 
@@ -250,7 +250,7 @@ fornax_download(spitzer, access_url_column='sia_url', fname_filter='go2_sci',
                 data_subdirectory='IRAC', verbose=False)
 ```
 
-#### Use IVOA image search and Fornax download to obtain Galex from the MAST archive
+### Use IVOA image search and Fornax download to obtain Galex from the MAST archive
 
 ```{code-cell} ipython3
 #the Galex mosaic of COSMOS is broken into 4 seperate images
