@@ -5,8 +5,7 @@ requests
 tqdm
 numpy
 scipy
-pandas
-pyarrow
+pandas[aws, parquet]
 matplotlib
 hpgeom
 astropy
