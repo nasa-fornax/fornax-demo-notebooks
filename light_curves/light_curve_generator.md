@@ -44,7 +44,7 @@ As written, this notebook is expected to require at least 2 CPU and 8G RAM.
  &bull; an archival optical + IR + neutrino light curve
 
 ## Authors:
-Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, Dave Shupe
+Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, David Shupe
 
 ## Acknowledgements:
 Suvi Gezari, Antara Basu-zych, Stephanie LaMassa
