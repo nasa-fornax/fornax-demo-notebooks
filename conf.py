@@ -36,7 +36,17 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'notes', '.tox', '.tmp', '.pytest_cache']
 
-# MyST-NB configuration
+# Top level README file's sole purpose is for the repo. We also don't include
+# the data and output directories that are to be populated while running the notebooks.
+exclude_patterns += ['README.md', '*/data/*', '*/output/*']
+
+# We exclude the documentation index.md as its sole purpose is for their CI.
+exclude_patterns += ['documentation/index.md',]
+
+# Not yet included in the rendering:
+exclude_patterns += ['documentation/notebook_review_process.md', 'spectroscopy/*', '*/code_src/*']
+
+# Myst-NB configuration
 nb_execution_timeout = 900
 
 # -- Options for HTML output -------------------------------------------------
