@@ -15,5 +15,7 @@ astroquery>=0.4.8.dev0
 acstools
 lightkurve
 alerce
+# Required by functionality we use from acstools
+scikit-image
 # Required for sensible progress bars
 ipywidgets
