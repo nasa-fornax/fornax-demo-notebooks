@@ -412,9 +412,10 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction:</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input:</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-standard-imports">Non-standard Imports</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors:</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-standard-dependencies">Non-standard Dependencies</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieve-initial-catalog-from-irsa">1. Retrieve Initial Catalog from IRSA</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-filter-catalog">1a. Filter Catalog</a></li>
 </ul>
@@ -485,15 +486,6 @@ document.write(`
 <li><p>IRAC color color plot for identifying interesting populations</p></li>
 </ul>
 </section>
-<section id="non-standard-imports">
-<h2>Non-standard Imports<a class="headerlink" href="#non-standard-imports" title="Link to this heading">#</a></h2>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">tractor</span></code> code which does the forced photometry from Lang et al., 2016</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">astroquery</span></code> to interface with archives APIs</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">astropy</span></code> to work with coordinates/units and data structures</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">skimage</span></code> to work with the images</p></li>
-</ul>
-</section>
 <section id="authors">
 <h2>Authors:<a class="headerlink" href="#authors" title="Link to this heading">#</a></h2>
 <p>Jessica Krick, David Shupe, Marziye JafariYazani, Brigitta Sipőcz, Vandana Desai, Steve Groom, Troy Raen</p>
@@ -502,10 +494,23 @@ document.write(`
 <h2>Acknowledgements:<a class="headerlink" href="#acknowledgements" title="Link to this heading">#</a></h2>
 <p>Kristina Nyland for the workflow of the tractor wrapper.<br />
 MAST, HEASARC, &amp; IRSA Fornax teams</p>
+</section>
+<section id="imports">
+<h2>Imports<a class="headerlink" href="#imports" title="Link to this heading">#</a></h2>
+</section>
+<section id="non-standard-dependencies">
+<h2>Non-standard Dependencies<a class="headerlink" href="#non-standard-dependencies" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">tractor</span></code> code which does the forced photometry from Lang et al., 2016</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">astroquery</span></code> to interface with archives APIs</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">astropy</span></code> to work with coordinates/units and data structures</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">skimage</span></code> to work with the images</p></li>
+</ul>
+<p>This cell will install the Python ones if needed:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#ensure all dependencies are installed</span>
-<span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Uncomment the next line to install dependencies if needed.</span>
+<span class="c1"># !pip install -r requirements_multiband_photometry.txt</span>
 </pre></div>
 </div>
 </div>
@@ -591,7 +596,7 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <span class="c1"># full area of COSMOS is radius = 48&#39;</span>
 <span class="c1"># running this code on the full COSMOS area takes ~24 hours on a 128core server, therefore</span>
 <span class="c1"># start with a manageable radius and increase as needed</span>
-<span class="n">radius</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">arcmin</span>  
+<span class="n">radius</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">arcmin</span>
 
 
 <span class="c1">#specify only select columns to limit the size of the catalog</span>
@@ -626,7 +631,7 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#an example of how to filter the catalog to </span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#an example of how to filter the catalog to</span>
 <span class="c1">#select those rows with either chandra fluxes or Galex NUV fluxes</span>
 
 <span class="c1">#example_table = cosmos_table[(cosmos_table[&#39;flux_chandra_05_10&#39;]&gt; 0) | (cosmos_table[&#39;flux_galex_fuv&#39;] &gt; 0)]</span>
@@ -644,7 +649,7 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Temporary solution, remove when the fornax API is added to the image</span>
-<span class="c1"># This relies on the assumption that https://github.com/nasa-fornax/fornax-cloud-access-API is being cloned to this environment. </span>
+<span class="c1"># This relies on the assumption that https://github.com/nasa-fornax/fornax-cloud-access-API is being cloned to this environment.</span>
 <span class="c1"># If it&#39;s not, then run a ``git clone https://github.com/nasa-fornax/fornax-cloud-access-API --depth=1`` from a terminal at the highest directory root.</span>
 <span class="c1"># You may need to update the fork if you forked it in the past</span>
 
@@ -683,7 +688,7 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Temporarily add the cloud_access metadata to the Atlas response. </span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Temporarily add the cloud_access metadata to the Atlas response.</span>
 <span class="c1"># This dataset has limited acces, thus &#39;region&#39; should be used instead of &#39;open&#39;.</span>
 <span class="c1"># S3 access should be available from the daskhub and those who has their IRSA token set up.</span>
 
@@ -698,12 +703,12 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Adding function to download multiple files using the fornax API. </span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Adding function to download multiple files using the fornax API.</span>
 <span class="c1"># Requires https://github.com/nasa-fornax/fornax-cloud-access-API/pull/4</span>
 <span class="k">def</span> <span class="nf">fornax_download</span><span class="p">(</span><span class="n">data_table</span><span class="p">,</span> <span class="n">data_subdirectory</span><span class="p">,</span> <span class="n">access_url_column</span><span class="o">=</span><span class="s1">&#39;access_url&#39;</span><span class="p">,</span>
                     <span class="n">fname_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">working_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-    
+
     <span class="n">data_directory</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;data/</span><span class="si">{</span><span class="n">data_subdirectory</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">data_directory</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data_table</span><span class="p">:</span>
@@ -714,7 +719,7 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
         <span class="c1"># on-prem download returns temp file path, s3 download downloads file</span>
         <span class="k">if</span> <span class="n">temp_file</span><span class="p">:</span>
             <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">temp_file</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;fname&#39;</span><span class="p">]))</span>
-        
+
     <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">working_dir</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -722,7 +727,7 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fornax_download</span><span class="p">(</span><span class="n">spitzer</span><span class="p">,</span> <span class="n">access_url_column</span><span class="o">=</span><span class="s1">&#39;sia_url&#39;</span><span class="p">,</span> <span class="n">fname_filter</span><span class="o">=</span><span class="s1">&#39;go2_sci&#39;</span><span class="p">,</span> 
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fornax_download</span><span class="p">(</span><span class="n">spitzer</span><span class="p">,</span> <span class="n">access_url_column</span><span class="o">=</span><span class="s1">&#39;sia_url&#39;</span><span class="p">,</span> <span class="n">fname_filter</span><span class="o">=</span><span class="s1">&#39;go2_sci&#39;</span><span class="p">,</span>
                 <span class="n">data_subdirectory</span><span class="o">=</span><span class="s1">&#39;IRAC&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -968,13 +973,13 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calc_instrflux</span><span class="p">(</span><span class="n">band</span><span class="p">,</span> <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">stype</span><span class="p">,</span> <span class="n">ks_flux_aper2</span><span class="p">,</span> <span class="n">img_pair</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate single-band instrumental fluxes and uncertainties at the given ra, dec </span>
+<span class="sd">    Calculate single-band instrumental fluxes and uncertainties at the given ra, dec</span>
 <span class="sd">    using tractor.</span>
 
 <span class="sd">    Parameters:</span>
 <span class="sd">    -----------</span>
 <span class="sd">    band : `Band`</span>
-<span class="sd">        Collection of parameters for a single band. </span>
+<span class="sd">        Collection of parameters for a single band.</span>
 <span class="sd">        A `Band` is a named tuple with the following attributes:</span>
 <span class="sd">            idx : int</span>
 <span class="sd">                Identifier for the band/channel.</span>
@@ -1017,7 +1022,7 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
     <span class="n">subimage</span><span class="p">,</span> <span class="n">bkgsubimage</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">subimage_wcs</span> <span class="o">=</span> <span class="n">cutout</span><span class="o">.</span><span class="n">extract_pair</span><span class="p">(</span>
         <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">img_pair</span><span class="o">=</span><span class="n">img_pair</span><span class="p">,</span> <span class="n">cutout_width</span><span class="o">=</span><span class="n">band</span><span class="o">.</span><span class="n">cutout_width</span><span class="p">,</span> <span class="n">mosaic_pix_scale</span><span class="o">=</span><span class="n">band</span><span class="o">.</span><span class="n">mosaic_pix_scale</span>
     <span class="p">)</span>
-    
+
     <span class="c1"># find nearby sources that are possible contaminants</span>
     <span class="n">objsrc</span><span class="p">,</span> <span class="n">nconfsrcs</span> <span class="o">=</span> <span class="n">find_nconfsources</span><span class="p">(</span>
         <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">stype</span><span class="p">,</span> <span class="n">ks_flux_aper2</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">band</span><span class="o">.</span><span class="n">cutout_width</span><span class="p">,</span> <span class="n">subimage_wcs</span><span class="p">,</span> <span class="n">df</span>
@@ -1154,7 +1159,7 @@ as well as the increase in speed when going to parallelization</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#When doing a large run of a large area, save the dataframe with the forced photometry </span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#When doing a large run of a large area, save the dataframe with the forced photometry</span>
 <span class="c1"># so we don&#39;t have to do the forced photometry every time</span>
 
 <span class="n">df</span><span class="o">.</span><span class="n">to_pickle</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;output/COSMOS_</span><span class="si">{</span><span class="n">radius</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">arcmin.pkl&#39;</span><span class="p">)</span>
@@ -1188,8 +1193,8 @@ as well as the increase in speed when going to parallelization</p></li>
 <span class="n">fluxmax</span> <span class="o">=</span> <span class="mi">200</span>
 <span class="n">ymax</span> <span class="o">=</span> <span class="mi">100</span>
 <span class="n">xmax</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="c1">#ch1 </span>
-<span class="c1">#first shrink the dataframe to only those rows where I have tractor photometry </span>
+<span class="c1">#ch1</span>
+<span class="c1">#first shrink the dataframe to only those rows where I have tractor photometry</span>
 <span class="n">df_tractor</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">splash_1_flux</span><span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">splash_1_flux</span> <span class="o">&lt;</span> <span class="n">fluxmax</span><span class="p">)]</span> <span class="c1">#200</span>
 <span class="c1">#sns.regplot(data = df_tractor, x = &quot;splash_1_flux&quot;, y = &quot;ch1flux&quot;, ax = ax1, robust = True)</span>
 <span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">df_tractor</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="s2">&quot;splash_1_flux&quot;</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="s2">&quot;ch1flux&quot;</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">ax1</span><span class="p">)</span>
@@ -1207,8 +1212,8 @@ as well as the increase in speed when going to parallelization</p></li>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="p">])</span>
 
 
-<span class="c1">#ch2 </span>
-<span class="c1">#first shrink the dataframe to only those rows where I have tractor photometry </span>
+<span class="c1">#ch2</span>
+<span class="c1">#first shrink the dataframe to only those rows where I have tractor photometry</span>
 <span class="n">df_tractor</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">splash_2_flux</span><span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">splash_2_flux</span> <span class="o">&lt;</span> <span class="n">fluxmax</span><span class="p">)]</span>
 <span class="c1">#sns.regplot(data = df_tractor, x = &quot;splash_2_flux&quot;, y = &quot;ch2flux&quot;, ax = ax2, robust = True)</span>
 <span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">df_tractor</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="s2">&quot;splash_2_flux&quot;</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="s2">&quot;ch2flux&quot;</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">ax2</span><span class="p">)</span>
@@ -1226,7 +1231,7 @@ as well as the increase in speed when going to parallelization</p></li>
 <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="p">])</span>
 
 
-<span class="c1">#ch3 </span>
+<span class="c1">#ch3</span>
 <span class="c1">#first shrink the dataframe to only those rows where I have tractor photometry</span>
 <span class="n">df_tractor</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">splash_3_flux</span><span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">splash_3_flux</span> <span class="o">&lt;</span> <span class="n">fluxmax</span><span class="p">)]</span>
 
@@ -1246,8 +1251,8 @@ as well as the increase in speed when going to parallelization</p></li>
 <span class="n">ax3</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="p">])</span>
 
 
-<span class="c1">#ch4 </span>
-<span class="c1">#first shrink the dataframe to only those rows where I have tractor photometry </span>
+<span class="c1">#ch4</span>
+<span class="c1">#first shrink the dataframe to only those rows where I have tractor photometry</span>
 <span class="n">df_tractor</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">splash_4_flux</span><span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">splash_4_flux</span> <span class="o">&lt;</span> <span class="n">fluxmax</span><span class="p">)]</span>
 
 <span class="c1">#sns.regplot(data = df_tractor, x = &quot;splash_4_flux&quot;, y = &quot;ch4flux&quot;, ax = ax4, robust = True)</span>
@@ -1291,7 +1296,7 @@ as well as the increase in speed when going to parallelization</p></li>
 <span class="n">heasarc</span> <span class="o">=</span> <span class="n">Heasarc</span><span class="p">()</span>
 <span class="n">table</span> <span class="o">=</span> <span class="n">heasarc</span><span class="o">.</span><span class="n">query_mission_list</span><span class="p">()</span>
 <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="s1">&#39;Mission&#39;</span><span class="p">]</span> <span class="o">==</span><span class="s2">&quot;CHANDRA&quot;</span><span class="p">)</span>
-<span class="n">chandratable</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>  
+<span class="n">chandratable</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
 
 <span class="c1">#find out which tables exist on Heasarc</span>
 <span class="c1">#chandratable.pprint(max_lines = 200, max_width = 130)</span>
@@ -1315,7 +1320,7 @@ as well as the increase in speed when going to parallelization</p></li>
 <span class="c1">#astropy doesn&#39;t recognize capitalized units</span>
 <span class="c1">#so there might be some warnings here on writing out the file, but we can safely ignore those</span>
 
-<span class="c1">#need to make the chandra catalog into a fits table </span>
+<span class="c1">#need to make the chandra catalog into a fits table</span>
 <span class="c1">#and needs to include area of the survey.</span>
 <span class="n">nway_write_header</span><span class="p">(</span><span class="s1">&#39;data/Chandra/COSMOS_chandra.fits&#39;</span><span class="p">,</span> <span class="s1">&#39;CHANDRA&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">ccosmoscat_rad</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span>
 
@@ -1335,7 +1340,7 @@ as well as the increase in speed when going to parallelization</p></li>
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># call nway</span>
 <span class="err">!</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">jovyan</span><span class="o">/.</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">nway</span><span class="o">.</span><span class="n">py</span> <span class="s1">&#39;data/Chandra/COSMOS_chandra.fits&#39;</span> <span class="p">:</span><span class="n">ERROR_RADIUS</span> <span class="s1">&#39;data/multiband_phot.fits&#39;</span> <span class="mf">0.1</span> <span class="o">--</span><span class="n">out</span><span class="o">=</span><span class="n">data</span><span class="o">/</span><span class="n">Chandra</span><span class="o">/</span><span class="n">chandra_multiband</span><span class="o">.</span><span class="n">fits</span> <span class="o">--</span><span class="n">radius</span> <span class="mi">15</span> <span class="o">--</span><span class="n">prior</span><span class="o">-</span><span class="n">completeness</span> <span class="mf">0.9</span>
-    
+
 <span class="c1">#!/opt/conda/bin/nway.py &#39;data/Chandra/COSMOS_chandra.fits&#39; :ERROR_RADIUS &#39;data/multiband_phot.fits&#39; 0.1 --out=data/Chandra/chandra_multiband.fits --radius 15 --prior-completeness 0.9</span>
 </pre></div>
 </div>
@@ -1360,7 +1365,7 @@ as well as the increase in speed when going to parallelization</p></li>
 <span class="c1">#remove all the rows which start with &quot;OPT&quot; because they are duplications of the original catalog</span>
 <span class="n">merged</span> <span class="o">=</span> <span class="n">merged</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="o">~</span><span class="n">merged</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;OPT&#39;</span><span class="p">)]</span>
 
-<span class="c1">#somehow the matching is giving negative fluxes in the band where there is no detection </span>
+<span class="c1">#somehow the matching is giving negative fluxes in the band where there is no detection</span>
 <span class="c1">#if there is a detection in the other band</span>
 <span class="c1">#clean that up to make those negative fluxes = 0</span>
 
@@ -1407,8 +1412,8 @@ as well as the increase in speed when going to parallelization</p></li>
 <span class="c1">#overplot galex sources</span>
 <span class="c1">#overplot xray sources</span>
 
-<span class="c1">#first select on 24 micron </span>
-<span class="n">merged_24</span> <span class="o">=</span> <span class="n">merged</span><span class="p">[(</span><span class="n">merged</span><span class="o">.</span><span class="n">flux_24</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> 
+<span class="c1">#first select on 24 micron</span>
+<span class="n">merged_24</span> <span class="o">=</span> <span class="n">merged</span><span class="p">[(</span><span class="n">merged</span><span class="o">.</span><span class="n">flux_24</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
 <span class="c1">#negative Galex fluxes are causing problems, so set those to zero</span>
 <span class="n">merged_24</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">merged_24</span><span class="o">.</span><span class="n">fuvflux</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;fuvflux&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1491,7 +1496,7 @@ as well as the increase in speed when going to parallelization</p></li>
 <span class="c1">#plt.legend([],[], frameon=False)</span>
 
 <span class="c1">#fig.savefig(&quot;output/color_color.png&quot;)</span>
-<span class="c1">#mpld3.display(fig)  </span>
+<span class="c1">#mpld3.display(fig)</span>
 </pre></div>
 </div>
 </div>
@@ -1561,9 +1566,10 @@ as well as the increase in speed when going to parallelization</p></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction:</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input:</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-standard-imports">Non-standard Imports</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors:</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-standard-dependencies">Non-standard Dependencies</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieve-initial-catalog-from-irsa">1. Retrieve Initial Catalog from IRSA</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-filter-catalog">1a. Filter Catalog</a></li>
 </ul>

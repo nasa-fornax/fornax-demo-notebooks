@@ -412,10 +412,10 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#runtime">Runtime</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#read-in-a-dataset-of-archival-light-curves">1. Read in a dataset of archival light curves</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-prep">2. Data Prep</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#remove-bands-with-not-enough-data">2.1 Remove bands with not enough data</a></li>
@@ -496,6 +496,18 @@ document.write(`
 <h2>Output<a class="headerlink" href="#output" title="Link to this heading">#</a></h2>
 <p>Trained classifiers as well as estimates of their accuracy and plots of confusion matrices</p>
 </section>
+<section id="runtime">
+<h2>Runtime<a class="headerlink" href="#runtime" title="Link to this heading">#</a></h2>
+<p>As of 2024 August, this notebook takes ~170s to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 16GB RAM/ 4CPU.</p>
+</section>
+<section id="authors">
+<h2>Authors<a class="headerlink" href="#authors" title="Link to this heading">#</a></h2>
+<p>Jessica Krick, Shooby Hemmati, Troy Raen, Brigitta Sipocz, Andreas Faisst, Vandana Desai, Dave Shoop</p>
+</section>
+<section id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading">#</a></h2>
+<p>Stephanie La Massa</p>
+</section>
 <section id="imports">
 <h2>Imports<a class="headerlink" href="#imports" title="Link to this heading">#</a></h2>
 <ul class="simple">
@@ -511,24 +523,11 @@ document.write(`
 <li><p><code class="docutils literal notranslate"><span class="pre">json</span></code> for storing intermediate files</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">google_drive_downloader</span></code> to access files stored in google drive</p></li>
 </ul>
-</section>
-<section id="runtime">
-<h2>Runtime<a class="headerlink" href="#runtime" title="Link to this heading">#</a></h2>
-<p>As of 2024 August, this notebook takes ~170s to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 16GB RAM/ 4CPU.</p>
-</section>
-<section id="authors">
-<h2>Authors<a class="headerlink" href="#authors" title="Link to this heading">#</a></h2>
-<p>Jessica Krick, Shooby Hemmati, Troy Raen, Brigitta Sipocz, Andreas Faisst, Vandana Desai, Dave Shoop</p>
-</section>
-<section id="acknowledgements">
-<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading">#</a></h2>
-<p>Stephanie La Massa</p>
+<p>This cell will install them if needed:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#insure all dependencies are installed</span>
-<span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">-</span><span class="n">lc_classifier</span><span class="o">.</span><span class="n">txt</span>
-<span class="c1">#need updated version of astropy, so this is here temporarily to make sure we grab that.</span>
-<span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">astropy</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Uncomment the next line to install dependencies if needed.</span>
+<span class="c1"># !pip install -r requirements_light_curve_classifier.txt</span>
 </pre></div>
 </div>
 </div>
@@ -584,7 +583,7 @@ document.write(`
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># First we want to load light curves made in the light curve generator notebook</span>
 
-<span class="c1"># The data is on google drive, this will download it for you and read it into </span>
+<span class="c1"># The data is on google drive, this will download it for you and read it into</span>
 <span class="c1"># a pandas dataframe</span>
 <span class="n">savename_df_lc</span> <span class="o">=</span> <span class="s1">&#39;./data/small_CLAGN_SDSS_df_lc.parquet&#39;</span>
 <span class="n">gdd</span><span class="o">.</span><span class="n">download_file_from_google_drive</span><span class="p">(</span><span class="n">file_id</span><span class="o">=</span><span class="s1">&#39;1DrB-CWdBBBYuO0WzNnMl5uQnnckL7MWH&#39;</span><span class="p">,</span>
@@ -599,9 +598,9 @@ document.write(`
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#get rid of indices set in the light curve code and reset them as needed </span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#get rid of indices set in the light curve code and reset them as needed</span>
 <span class="c1">#before sktime algorithms</span>
-<span class="n">df_lc</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>  
+<span class="n">df_lc</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
 
 <span class="c1">#what does the dataset look like at the start?</span>
 <span class="n">df_lc</span>
@@ -624,7 +623,7 @@ is to remove the sparsest datasets.</p>
 <span class="n">df_lc</span><span class="o">.</span><span class="n">band</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
 
 <span class="c1">#get rid of some of the bands that don&#39;t have enough data for all the sources</span>
-<span class="c1">#CLAGN are generall fainter targets, and therefore mostly not found </span>
+<span class="c1">#CLAGN are generall fainter targets, and therefore mostly not found</span>
 <span class="c1">#in datasets like TESS &amp; K2</span>
 
 <span class="n">bands_to_drop</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;IceCube&quot;</span><span class="p">,</span> <span class="s2">&quot;TESS&quot;</span><span class="p">,</span> <span class="s2">&quot;FERMIGTRIG&quot;</span><span class="p">,</span> <span class="s2">&quot;K2&quot;</span><span class="p">]</span>
@@ -922,7 +921,7 @@ fewer data points.</p></li>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#try dropping the uncertainty columns as variables for sktime</span>
-<span class="n">df_lc</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;err_panstarrs_g&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_panstarrs_i&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_panstarrs_r&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_panstarrs_y&#39;</span><span class="p">,</span>	
+<span class="n">df_lc</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;err_panstarrs_g&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_panstarrs_i&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_panstarrs_r&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_panstarrs_y&#39;</span><span class="p">,</span>
                       <span class="s1">&#39;err_panstarrs_z&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_W1&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_W2&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_zg&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_zr&#39;</span><span class="p">],</span> <span class="n">inplace</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
 
 <span class="c1">#drop also the time column because time shouldn&#39;t be a feature</span>
@@ -936,7 +935,7 @@ fewer data points.</p></li>
 <p>We use sklearn’s train test split to randomly split the data into training and testing datasets.  Because thre are uneven numbers of each type (many more SDSS than CLAGN), we want to make sure to stratify evenly by type.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#divide the dataframe into features and labels for ML algorithms </span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#divide the dataframe into features and labels for ML algorithms</span>
 <span class="n">labels</span> <span class="o">=</span> <span class="n">df_lc</span><span class="p">[[</span><span class="s2">&quot;objectid&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;objectid&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">label</span>
 <span class="n">df_lc</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s2">&quot;objectid&quot;</span><span class="p">,</span> <span class="s2">&quot;datetime&quot;</span><span class="p">])</span>
 </pre></div>
@@ -978,7 +977,7 @@ fewer data points.</p></li>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#ask sktime if it likes the data type of X_train</span>
-<span class="c1">#if you change any of the functions or cells above this one, it is a good idea to </span>
+<span class="c1">#if you change any of the functions or cells above this one, it is a good idea to</span>
 <span class="c1"># look at the below output to make sure you haven&#39;t introduced any NaNs or unequal length series</span>
 <span class="n">check_is_mtype</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">mtype</span><span class="o">=</span><span class="s2">&quot;pd-multiindex&quot;</span><span class="p">,</span> <span class="n">scitype</span><span class="o">=</span><span class="s2">&quot;Panel&quot;</span><span class="p">,</span> <span class="n">return_metadata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
@@ -1012,7 +1011,7 @@ fewer data points.</p></li>
 <span class="c1">#fit the classifier on the training dataset</span>
 <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
-<span class="c1">#make predictions on the test dataset using the trained model </span>
+<span class="c1">#make predictions on the test dataset using the trained model</span>
 <span class="n">y_pred</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Accuracy of Random Interval Classifier: </span><span class="si">{</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span><span class="w"> </span><span class="n">y_pred</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1021,7 +1020,7 @@ fewer data points.</p></li>
 <span class="n">cm</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">clf</span><span class="o">.</span><span class="n">classes_</span><span class="p">)</span>
 <span class="n">disp</span> <span class="o">=</span> <span class="n">ConfusionMatrixDisplay</span><span class="p">(</span><span class="n">confusion_matrix</span><span class="o">=</span><span class="n">cm</span><span class="p">,</span><span class="n">display_labels</span><span class="o">=</span><span class="n">clf</span><span class="o">.</span><span class="n">classes_</span><span class="p">)</span>
 <span class="n">disp</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-    
+
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -1081,12 +1080,12 @@ fewer data points.</p></li>
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#get dataset in same format as what was run through sktime</span>
 <span class="c1">#This is not exactly the same as re-running the whole notebook on a different sample,</span>
-<span class="c1">#but it is pretty close.  We don&#39;t need to do all of the same cleaning because some of that </span>
+<span class="c1">#but it is pretty close.  We don&#39;t need to do all of the same cleaning because some of that</span>
 <span class="c1">#was to appease sktime in training the algorithms.</span>
 
 
 <span class="c1">#get rid of indices set in the light curve code and reset them as needed before sktime algorithms</span>
-<span class="n">my_sample</span> <span class="o">=</span> <span class="n">my_sample</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>  
+<span class="n">my_sample</span> <span class="o">=</span> <span class="n">my_sample</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
 
 <span class="c1"># get rid of some of the bands that don&#39;t have enough data for all the sources</span>
 <span class="c1">#CLAGN are generall fainter targets, and therefore mostly not found in datasets like TESS &amp; K2</span>
@@ -1128,11 +1127,11 @@ fewer data points.</p></li>
 <span class="c1">#set index expected by sktime</span>
 <span class="n">my_sample</span> <span class="o">=</span> <span class="n">my_sample</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s2">&quot;objectid&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="s2">&quot;datetime&quot;</span><span class="p">])</span>
 
-<span class="c1">#drop the uncertainty and time columns </span>
-<span class="n">my_sample</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;err_panstarrs_g&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_panstarrs_i&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_panstarrs_r&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_panstarrs_y&#39;</span><span class="p">,</span>	
+<span class="c1">#drop the uncertainty and time columns</span>
+<span class="n">my_sample</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;err_panstarrs_g&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_panstarrs_i&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_panstarrs_r&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_panstarrs_y&#39;</span><span class="p">,</span>
                           <span class="s1">&#39;err_panstarrs_z&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_W1&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_W2&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_zg&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_zr&#39;</span><span class="p">,</span><span class="s1">&#39;time&#39;</span><span class="p">],</span> <span class="n">inplace</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
 
- <span class="c1">#make X </span>
+ <span class="c1">#make X</span>
 <span class="n">X_mysample</span>  <span class="o">=</span> <span class="n">my_sample</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1157,7 +1156,7 @@ fewer data points.</p></li>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#access the sample_table made in the light curve generator notebook</span>
-<span class="c1">#has information about the sample including ra &amp; dec </span>
+<span class="c1">#has information about the sample including ra &amp; dec</span>
 <span class="n">savename_sample</span> <span class="o">=</span> <span class="s1">&#39;./data/small_CLAGN_SDSS_sample.ecsv&#39;</span>
 <span class="n">gdd</span><span class="o">.</span><span class="n">download_file_from_google_drive</span><span class="p">(</span><span class="n">file_id</span><span class="o">=</span><span class="s1">&#39;1pSEKVP4LbrdWQK9ws3CaI90m3Z_2fazL&#39;</span><span class="p">,</span>
                                     <span class="n">dest_path</span><span class="o">=</span><span class="n">savename_sample</span><span class="p">,</span>
@@ -1172,7 +1171,7 @@ fewer data points.</p></li>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#associate these predicted CLAGN with RA &amp; Dec</span>
 
 <span class="c1">#need to first associate objectid with each of y_mysample</span>
-<span class="c1">#make a new df with a column = objectid which </span>
+<span class="c1">#make a new df with a column = objectid which</span>
 <span class="c1">#includes all the unique objectids.</span>
 <span class="n">test</span> <span class="o">=</span> <span class="n">X_mysample</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
 <span class="n">mysample_CLAGN</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">objectid</span><span class="o">.</span><span class="n">unique</span><span class="p">(),</span> <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;objectid&#39;</span><span class="p">])</span>
@@ -1263,10 +1262,10 @@ Markus Löning, Tony Bagnall, Sajaysurya Ganesh, George Oastler, Jason Lines, Vi
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#runtime">Runtime</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#read-in-a-dataset-of-archival-light-curves">1. Read in a dataset of archival light curves</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-prep">2. Data Prep</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#remove-bands-with-not-enough-data">2.1 Remove bands with not enough data</a></li>

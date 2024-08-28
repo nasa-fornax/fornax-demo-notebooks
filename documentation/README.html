@@ -545,7 +545,7 @@ document.write(`
 <section id="start-a-new-notebook">
 <h3>3. Start a new notebook.<a class="headerlink" href="#start-a-new-notebook" title="Link to this heading">#</a></h3>
 <ul class="simple">
-<li><p>Click on the the blue <code class="docutils literal notranslate"><span class="pre">+</span></code> in the upper left of the Jupyterlab window to open the launcher, which will give you the option to open a Notbook or a Terminal. Choose the “science_demo” kernal under “Notebook”. This will open a new notebook that you can start coding in and run on the platform.</p></li>
+<li><p>Click on the the blue <code class="docutils literal notranslate"><span class="pre">+</span></code> in the upper left of the JupyterLab window to open the launcher, which will give you the option to open a Notebook or a Terminal. Choose the “science_demo” kernel under “Notebook”. This will open a new notebook that you can start coding in and run on the platform.</p></li>
 </ul>
 <p><img alt="new launcher" src="../_images/new_launcher.png" /></p>
 </section>
@@ -565,7 +565,7 @@ document.write(`
 <ul class="simple">
 <li><p>https://jupyterlab.readthedocs.io/en/stable/user/interface.html</p></li>
 </ul>
-<p>The Fornax Science Platform additionally contains a JupyterLab extension called BXPlorer, which provides a UI to manage the cloud-hosted data in the Fornax Science Platform:</p>
+<p>The Fornax Science Platform additionally contains a JupyterLab extension called BXplorer, which provides a UI to manage the cloud-hosted data in the Fornax Science Platform:</p>
 <ul class="simple">
 <li><p>https://github.com/Navteca/jupyterlab-bxplorer</p></li>
 </ul>
@@ -598,7 +598,7 @@ document.write(`
 </section>
 <section id="what-is-a-kernel-and-how-do-i-choose-one">
 <h3>What is a kernel and how do I choose one?<a class="headerlink" href="#what-is-a-kernel-and-how-do-i-choose-one" title="Link to this heading">#</a></h3>
-<p>Under Construction: In Jupyter, kernels are the background processes that execute cells and return results for display. To select the kernel on which you want to run your Notebook, go to the Kernel menu and choose Change Kernel. You can also click directly on the name of the active kernel to switch to another one. The bottom of the JupterLab window lists the github branch as well as the name of the kernel in use. The kernel is listed as either ‘idle’ or ‘busy’, which is useful to know if your kernel is working or has crashed.</p>
+<p>Under Construction: In Jupyter, kernels are the background processes that execute cells and return results for display. To select the kernel on which you want to run your Notebook, go to the Kernel menu and choose Change Kernel. You can also click directly on the name of the active kernel to switch to another one. The bottom of the JupyterLab window lists the github branch as well as the name of the kernel in use. The kernel is listed as either ‘idle’ or ‘busy’, which is useful to know if your kernel is working or has crashed.</p>
 </section>
 <section id="does-work-persist-between-sessions">
 <h3>Does work persist between sessions?<a class="headerlink" href="#does-work-persist-between-sessions" title="Link to this heading">#</a></h3>
@@ -667,14 +667,14 @@ If you want a notebook or script to run for longer than about 60 minutes and you
 <h2>Managing Software<a class="headerlink" href="#managing-software" title="Link to this heading">#</a></h2>
 <section id="how-can-i-get-a-list-of-what-software-is-pre-installed-on-the-fornax-science-console">
 <h3>How can I get a list of what software is pre-installed on the Fornax Science Console?<a class="headerlink" href="#how-can-i-get-a-list-of-what-software-is-pre-installed-on-the-fornax-science-console" title="Link to this heading">#</a></h3>
-<p>Software is installed in miniconda environments.  You can use “<a class="reference external" href="https://conda.io/projects/conda/en/latest/commands/list.html">conda list</a>”  from a Terminal within the Fornax Science Console to list the contents of each environment.</p>
+<p>Software is installed in Miniconda environments.  You can use “<a class="reference external" href="https://conda.io/projects/conda/en/latest/commands/list.html">conda list</a>”  from a Terminal within the Fornax Science Console to list the contents of each environment.</p>
 </section>
 <section id="can-i-install-my-own-software-on-the-fornax-science-console">
 <h3>Can I install my own software on the Fornax Science Console?<a class="headerlink" href="#can-i-install-my-own-software-on-the-fornax-science-console" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Persistent User-Installed Software</p>
 <ul>
-<li><p>If the pre-installed environments don’t have the software you need, you can create your own persistent environment available across multiple sessions. Follow the instructions in the <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html">conda documentation</a>, specifically <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html#managing-envs">managing environments</a>.</p></li>
+<li><p>If the pre-installed environments don’t have the software you need, you can create your own persistent environment available across multiple sessions. Follow the instructions in the <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html">conda documentation</a>, specifically <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">managing environments</a>.</p></li>
 </ul>
 </li>
 <li><p>Non-persistent User-Installed Software</p>
@@ -689,7 +689,7 @@ If you want a notebook or script to run for longer than about 60 minutes and you
 <section id="what-is-the-terminal-command-to-list-package-version-info-using-pip">
 <h3>What is the terminal command to list package version info using pip?<a class="headerlink" href="#what-is-the-terminal-command-to-list-package-version-info-using-pip" title="Link to this heading">#</a></h3>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">show</span> <span class="pre">packagname</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">show</span> <span class="pre">package-name</span></code></p></li>
 </ul>
 </section>
 <section id="is-it-possible-to-bring-my-own-docker-image">
@@ -756,12 +756,12 @@ If you want a notebook or script to run for longer than about 60 minutes and you
 <section id="optimizing-code-for-cpu-usage-cpu-profiling">
 <h3>Optimizing code for CPU usage (CPU profiling)<a class="headerlink" href="#optimizing-code-for-cpu-usage-cpu-profiling" title="Link to this heading">#</a></h3>
 <ul class="simple">
-<li><p>profiliing within Fornax is possible, however vizualizing the profile is not yet possible</p></li>
-<li><p>profiling needs to be done on a .py script, and not a jupyter notebook</p></li>
+<li><p>profiling within Fornax is possible, however visualizing the profile is not yet possible</p></li>
+<li><p>profiling needs to be done on a .py script, and not a Jupyter notebook</p></li>
 <li><p>sample command on the Fornax command line: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">cProfile</span> <span class="pre">-o</span> <span class="pre">output_profile_name.prof</span>&#160; <span class="pre">code_name.py</span></code></p></li>
 <li><p>Then download the .prof file</p></li>
 <li><p>On your local computer command line: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">snakeviz</span> <span class="pre">output_profile_name.prof</span></code></p></li>
-<li><p>documentation for snakeviz: https://jiffyclub.github.io/snakeviz/</p></li>
+<li><p>documentation for SnakeViz: https://jiffyclub.github.io/snakeviz/</p></li>
 <li><p>This really only looks at CPU usage</p></li>
 </ul>
 </section>

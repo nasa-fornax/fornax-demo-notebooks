@@ -412,9 +412,9 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction:</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input:</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports:</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors:</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports:</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#define-the-sample">1. Define the sample</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#build-your-own-sample">1.1 Build your own sample</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#write-out-your-sample-to-disk">1.2 Write out your sample to disk</a></li>
@@ -455,10 +455,10 @@ document.write(`
 <hr class="docutils" />
 <section id="learning-goals">
 <h2>Learning Goals<a class="headerlink" href="#learning-goals" title="Link to this heading">#</a></h2>
-<p>By the end of this tutorial, you will be able to:<br />
-• Automatically load a catalog of target sources<br />
-• Automatically &amp; efficiently search NASA and non-NASA resources for the light curves of up to ~500 targets<br />
-• Store &amp; manipulate light curves in a Pandas MultiIndex dataframe<br />
+<p>By the end of this tutorial, you will be able to:
+• Automatically load a catalog of target sources
+• Automatically &amp; efficiently search NASA and non-NASA resources for the light curves of up to ~500 targets
+• Store &amp; manipulate light curves in a Pandas MultiIndex dataframe
 • Plot all light curves on the same plot</p>
 </section>
 <section id="introduction">
@@ -472,31 +472,13 @@ document.write(`
 </section>
 <section id="input">
 <h2>Input:<a class="headerlink" href="#input" title="Link to this heading">#</a></h2>
-<p>• choose from a list of known changing look AGN from the literature<br />
-OR -<br />
+<p>• choose from a list of known changing look AGN from the literature
+OR -
 • input your own sample</p>
 </section>
 <section id="output">
 <h2>Output:<a class="headerlink" href="#output" title="Link to this heading">#</a></h2>
 <p>• an archival optical + IR + neutrino light curve</p>
-</section>
-<section id="imports">
-<h2>Imports:<a class="headerlink" href="#imports" title="Link to this heading">#</a></h2>
-<p>• <code class="docutils literal notranslate"><span class="pre">acstools</span></code> to work with HST magnitude to flux conversion<br />
-• <code class="docutils literal notranslate"><span class="pre">astropy</span></code> to work with coordinates/units and data structures<br />
-• <code class="docutils literal notranslate"><span class="pre">astroquery</span></code> to interface with archives APIs<br />
-• <code class="docutils literal notranslate"><span class="pre">hpgeom</span></code> to locate coordinates in HEALPix space<br />
-• <code class="docutils literal notranslate"><span class="pre">lightkurve</span></code> to search TESS, Kepler, and K2 archives<br />
-• <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> for plotting<br />
-• <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> to use the power of multiple CPUs to get work done faster<br />
-• <code class="docutils literal notranslate"><span class="pre">numpy</span></code> for numerical processing<br />
-• <code class="docutils literal notranslate"><span class="pre">pandas</span></code> for their data structure DataFrame and all the accompanying functions<br />
-• <code class="docutils literal notranslate"><span class="pre">pyarrow</span></code> to work with Parquet files for WISE and ZTF<br />
-• <code class="docutils literal notranslate"><span class="pre">pyvo</span></code> for accessing Virtual Observatory(VO) standard data<br />
-• <code class="docutils literal notranslate"><span class="pre">requests</span></code> to get information from URLs<br />
-• <code class="docutils literal notranslate"><span class="pre">scipy</span></code> to do statistics<br />
-• <code class="docutils literal notranslate"><span class="pre">tqdm</span></code> to track progress on long running jobs<br />
-• <code class="docutils literal notranslate"><span class="pre">urllib</span></code> to handle archive searches with website interface</p>
 </section>
 <section id="authors">
 <h2>Authors:<a class="headerlink" href="#authors" title="Link to this heading">#</a></h2>
@@ -504,12 +486,31 @@ OR -<br />
 </section>
 <section id="acknowledgements">
 <h2>Acknowledgements:<a class="headerlink" href="#acknowledgements" title="Link to this heading">#</a></h2>
-<p>Suvi Gezari, Antara Basu-zych, Stephanie LaMassa<br />
+<p>Suvi Gezari, Antara Basu-zych, Stephanie LaMassa
 MAST, HEASARC, &amp; IRSA Fornax teams</p>
+</section>
+<section id="imports">
+<h2>Imports:<a class="headerlink" href="#imports" title="Link to this heading">#</a></h2>
+<p>• <code class="docutils literal notranslate"><span class="pre">acstools</span></code> to work with HST magnitude to flux conversion
+• <code class="docutils literal notranslate"><span class="pre">astropy</span></code> to work with coordinates/units and data structures
+• <code class="docutils literal notranslate"><span class="pre">astroquery</span></code> to interface with archives APIs
+• <code class="docutils literal notranslate"><span class="pre">hpgeom</span></code> to locate coordinates in HEALPix space
+• <code class="docutils literal notranslate"><span class="pre">lightkurve</span></code> to search TESS, Kepler, and K2 archives
+• <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> for plotting
+• <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> to use the power of multiple CPUs to get work done faster
+• <code class="docutils literal notranslate"><span class="pre">numpy</span></code> for numerical processing
+• <code class="docutils literal notranslate"><span class="pre">pandas</span></code> for their data structure DataFrame and all the accompanying functions
+• <code class="docutils literal notranslate"><span class="pre">pyarrow</span></code> to work with Parquet files for WISE and ZTF
+• <code class="docutils literal notranslate"><span class="pre">pyvo</span></code> for accessing Virtual Observatory(VO) standard data
+• <code class="docutils literal notranslate"><span class="pre">requests</span></code> to get information from URLs
+• <code class="docutils literal notranslate"><span class="pre">scipy</span></code> to do statistics
+• <code class="docutils literal notranslate"><span class="pre">tqdm</span></code> to track progress on long running jobs
+• <code class="docutils literal notranslate"><span class="pre">urllib</span></code> to handle archive searches with website interface</p>
+<p>This cell will install them if needed:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Ensure all dependencies are installed</span>
-<span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Uncomment the next line to install dependencies if needed.</span>
+<span class="c1"># !pip install -r requirements_light_curve_generator.txt</span>
 </pre></div>
 </div>
 </div>
@@ -569,9 +570,9 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <span class="c1">#get_hon_sample(coords, labels)  #2022MNRAS.511...54H</span>
 <span class="n">get_yang_sample</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>   <span class="c1">#2018ApJ...862..109Y</span>
 
-<span class="c1"># Get some &quot;normal&quot; QSOs </span>
+<span class="c1"># Get some &quot;normal&quot; QSOs</span>
 <span class="c1"># there are ~500K of these, so choose the number based on</span>
-<span class="c1"># a balance between speed of running the light curves and whatever </span>
+<span class="c1"># a balance between speed of running the light curves and whatever</span>
 <span class="c1"># the ML algorithms would like to have</span>
 
 <span class="c1"># num_normal_QSO = 5000</span>
@@ -647,7 +648,7 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 
 <span class="c1"># What is the size of error_radius for the catalogs that we will accept for our cross-matching?</span>
 <span class="c1"># in degrees; chosen based on histogram of all values for these catalogs</span>
-<span class="n">max_fermi_error_radius</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>  
+<span class="n">max_fermi_error_radius</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
 <span class="n">max_sax_error_radius</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
 
 <span class="c1"># catalogs to query and their corresponding max error radii</span>
@@ -930,10 +931,10 @@ For sample sizes &gt;~500 and/or improved logging and monitoring options, consid
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
 <p>This work made use of:</p>
-<p>• Astroquery; Ginsburg et al., 2019, 2019AJ….157…98G<br />
-• Astropy; Astropy Collaboration 2022, Astropy Collaboration 2018, Astropy Collaboration 2013,    2022ApJ…935..167A, 2018AJ….156..123A, 2013A&amp;A…558A..33A<br />
-• Lightkurve; Lightkurve Collaboration 2018, 2018ascl.soft12013L<br />
-• acstools; https://zenodo.org/record/7406933#.ZBH1HS-B0eY<br />
+<p>• Astroquery; Ginsburg et al., 2019, 2019AJ….157…98G
+• Astropy; Astropy Collaboration 2022, Astropy Collaboration 2018, Astropy Collaboration 2013,    2022ApJ…935..167A, 2018AJ….156..123A, 2013A&amp;A…558A..33A
+• Lightkurve; Lightkurve Collaboration 2018, 2018ascl.soft12013L
+• acstools; https://zenodo.org/record/7406933#.ZBH1HS-B0eY
 • unWISE light curves; Meisner et al., 2023, 2023AJ….165…36M</p>
 </section>
 </section>
@@ -987,9 +988,9 @@ For sample sizes &gt;~500 and/or improved logging and monitoring options, consid
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction:</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input:</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports:</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors:</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports:</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#define-the-sample">1. Define the sample</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#build-your-own-sample">1.1 Build your own sample</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#write-out-your-sample-to-disk">1.2 Write out your sample to disk</a></li>

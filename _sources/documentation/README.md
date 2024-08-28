@@ -47,7 +47,7 @@ https://daskhub.fornaxdev.mysmce.com/
 * Click "Start". In a few moments, you will find yourself in JupyterLab.
 
 ### 3. Start a new notebook.
-  * Click on the the blue `+` in the upper left of the Jupyterlab window to open the launcher, which will give you the option to open a Notbook or a Terminal. Choose the "science_demo" kernal under "Notebook". This will open a new notebook that you can start coding in and run on the platform.
+  * Click on the the blue `+` in the upper left of the JupyterLab window to open the launcher, which will give you the option to open a Notebook or a Terminal. Choose the "science_demo" kernel under "Notebook". This will open a new notebook that you can start coding in and run on the platform.
 
  ![new launcher](./static/images/new_launcher.png)
 
@@ -62,7 +62,7 @@ https://daskhub.fornaxdev.mysmce.com/
 The JupyterLab User Guide provides information on how to navigate the interface:
    * https://jupyterlab.readthedocs.io/en/stable/user/interface.html
 
-The Fornax Science Platform additionally contains a JupyterLab extension called BXPlorer, which provides a UI to manage the cloud-hosted data in the Fornax Science Platform:
+The Fornax Science Platform additionally contains a JupyterLab extension called BXplorer, which provides a UI to manage the cloud-hosted data in the Fornax Science Platform:
    * https://github.com/Navteca/jupyterlab-bxplorer
 
 ## Starting & Monitoring Analyses
@@ -88,7 +88,7 @@ If your workload exceeds your server size, your server may be allowed to use add
 
 ### What is a kernel and how do I choose one?
 
-Under Construction: In Jupyter, kernels are the background processes that execute cells and return results for display. To select the kernel on which you want to run your Notebook, go to the Kernel menu and choose Change Kernel. You can also click directly on the name of the active kernel to switch to another one. The bottom of the JupterLab window lists the github branch as well as the name of the kernel in use. The kernel is listed as either 'idle' or 'busy', which is useful to know if your kernel is working or has crashed.
+Under Construction: In Jupyter, kernels are the background processes that execute cells and return results for display. To select the kernel on which you want to run your Notebook, go to the Kernel menu and choose Change Kernel. You can also click directly on the name of the active kernel to switch to another one. The bottom of the JupyterLab window lists the github branch as well as the name of the kernel in use. The kernel is listed as either 'idle' or 'busy', which is useful to know if your kernel is working or has crashed.
 
 ### Does work persist between sessions?
   * Files in your home directory will persist between sessions.
@@ -145,18 +145,18 @@ Download them to favorite storage place (university Box account) or put in AWS c
 
 ### How can I get a list of what software is pre-installed on the Fornax Science Console?
 
-Software is installed in miniconda environments.  You can use "[conda list](https://conda.io/projects/conda/en/latest/commands/list.html)"  from a Terminal within the Fornax Science Console to list the contents of each environment.
+Software is installed in Miniconda environments.  You can use "[conda list](https://conda.io/projects/conda/en/latest/commands/list.html)"  from a Terminal within the Fornax Science Console to list the contents of each environment.
 
 ### Can I install my own software on the Fornax Science Console?
   * Persistent User-Installed Software
-    *  If the pre-installed environments don't have the software you need, you can create your own persistent environment available across multiple sessions. Follow the instructions in the [conda documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html), specifically [managing environments](https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html#managing-envs).
+    *  If the pre-installed environments don't have the software you need, you can create your own persistent environment available across multiple sessions. Follow the instructions in the [conda documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html), specifically [managing environments](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
   * Non-persistent User-Installed Software
     * You can !pip install your favorite software from inside a notebook.  This installed software will persist through kernel restarts, but will not be persistent if you stop your server and restart it (logging out and back in) unless you specify the - - user option, which will put the software in your home directory.  Note that an install done in one compute environment may or may not work in a container opened using another environment, even if the directory is still there.  Conda environments are useful to manage these.
     * For the tutorial notebooks we tend to have a requirements.txt file in the repo which lists all the software dependencies.  Then the first line in the notebook is `!pip install -r requirements.txt`  That way other people can run the notebook and will know which software is involved.
 * There is a limit on the space a user has access to, but not the number of packages, and packages are usually small.
 
 ### What is the terminal command to list package version info using pip?
-  * `pip show packagname`
+  * `pip show package-name`
 
 ### Is it possible to bring my own docker image?
  * This is not currently possible.
@@ -196,12 +196,12 @@ Software is installed in miniconda environments.  You can use "[conda list](http
   * [Image cutouts](https://docs.astropy.org/en/stable/io/fits/usage/cloud.html#using-cutout2d-with-cloud-hosted-fits-files)
 
 ### Optimizing code for CPU usage (CPU profiling)
-  * profiliing within Fornax is possible, however vizualizing the profile is not yet possible
-  * profiling needs to be done on a .py script, and not a jupyter notebook
+  * profiling within Fornax is possible, however visualizing the profile is not yet possible
+  * profiling needs to be done on a .py script, and not a Jupyter notebook
   * sample command on the Fornax command line: `python -m cProfile -o output_profile_name.prof  code_name.py`
   * Then download the .prof file
   * On your local computer command line: `python -m snakeviz output_profile_name.prof`
-  * documentation for snakeviz: https://jiffyclub.github.io/snakeviz/
+  * documentation for SnakeViz: https://jiffyclub.github.io/snakeviz/
   * This really only looks at CPU usage
 
 ### Optimizing code for memory usage [(memory profiling)](https://towardsdatascience.com/profile-memory-consumption-of-python-functions-in-a-single-line-of-code-6403101db419)
