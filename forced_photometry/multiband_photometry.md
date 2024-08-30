@@ -198,7 +198,7 @@ import fornax
 
 ```{code-cell} ipython3
 # Getting the COSMOS address from the registry to follow PyVO user case approach. We could hardwire it.
-image_services = pyvo.regsearch(servicetype='image')
+image_services = pyvo.regsearch(servicetype='sia')
 irsa_cosmos = [s for s in image_services if 'irsa' in s.ivoid and 'cosmos' in s.ivoid][0]
 
 # The search returns 11191 entries, but unfortunately we cannot really filter efficiently in the query
