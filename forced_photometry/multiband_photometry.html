@@ -675,7 +675,7 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Getting the COSMOS address from the registry to follow PyVO user case approach. We could hardwire it.</span>
-<span class="n">image_services</span> <span class="o">=</span> <span class="n">pyvo</span><span class="o">.</span><span class="n">regsearch</span><span class="p">(</span><span class="n">servicetype</span><span class="o">=</span><span class="s1">&#39;image&#39;</span><span class="p">)</span>
+<span class="n">image_services</span> <span class="o">=</span> <span class="n">pyvo</span><span class="o">.</span><span class="n">regsearch</span><span class="p">(</span><span class="n">servicetype</span><span class="o">=</span><span class="s1">&#39;sia&#39;</span><span class="p">)</span>
 <span class="n">irsa_cosmos</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">image_services</span> <span class="k">if</span> <span class="s1">&#39;irsa&#39;</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">ivoid</span> <span class="ow">and</span> <span class="s1">&#39;cosmos&#39;</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">ivoid</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="c1"># The search returns 11191 entries, but unfortunately we cannot really filter efficiently in the query</span>
