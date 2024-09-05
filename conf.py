@@ -47,7 +47,7 @@ nb_execution_timeout = 900
 html_theme = 'sphinx_book_theme'
 html_title = 'Fornax Demo Notebooks'
 html_logo = '_static/fornax_logo.png'
-#html_favicon = '_static/favicon.ico'
+html_favicon = '_static/fornax_favicon.ico'
 html_theme_options = {
     "github_url": "https://github.com/nasa-fornax/fornax-demo-notebooks",
     "repository_url": "https://github.com/nasa-fornax/fornax-demo-notebooks",
