@@ -84,6 +84,8 @@ Return a data structure of targets with Euclid data
 
 ```python
 #### IMPORTS ###
+!pip install -r requirements_euclid.txt
+
 import os, sys
 import numpy as np
 import glob
@@ -96,6 +98,7 @@ from astropy.io import fits, ascii
 from astropy.nddata import Cutout2D
 from astropy.wcs import WCS
 from astropy.table import Table, vstack, hstack
+from astropy.stats import sigma_clipped_stats
 #from astropy.visualization import LogStretch, SqrtStretch
 #from astropy.visualization.mpl_normalize import ImageNormalize
 #astroquery.__version__
@@ -138,8 +141,8 @@ def_cols = plt.rcParams['axes.prop_cycle'].by_key()['color']
 #dec = -4.1020057
 
 ## NGC 6397
-ra = 265.1689143
-dec = -53.6732471
+ra = 265.1764034
+dec = -53.6746141
 ```
 
 ```python
@@ -150,7 +153,7 @@ dec = -53.6732471
 
 ## Create coordinate object and retrieve image table from IRSA.
 coord = SkyCoord(ra, dec, unit=(u.deg,u.deg), frame='icrs')
-image_tab = Irsa.query_sia(pos=(coord, 1 * u.arcmin), collection='euclid_ero').to_table()
+image_tab = Irsa.query_sia(pos=(coord, 1.5 * u.arcmin), collection='euclid_ero').to_table()
 image_tab.sort('em_min') # sort by wavelength.
 ```
 
@@ -159,7 +162,8 @@ image_tab.sort('em_min') # sort by wavelength.
 
 ## Make basic selection
 # For example, we only want the "Flattened" images (= compact sources stack and not extended emission stack)
-sel_basic = np.where( ["Flattened" in tt["access_url"] for tt in image_tab] )[0]
+#sel_basic = np.where( ["Flattened" in tt["access_url"] for tt in image_tab] )[0]
+sel_basic = np.where( ["LSB" in tt["access_url"] for tt in image_tab] )[0]
 image_tab = image_tab[sel_basic]
 
 ## We now inspect the table and group the images.
@@ -202,7 +206,7 @@ for ii,filt in tqdm(enumerate(filters)):
         ## For here, just take the first one.
 
         with fits.open(image_tab['access_url'][sel[0]], use_fsspec=True) as hdul:
-            tmp = Cutout2D(hdul[0].section, position=coord, size=3 * u.arcmin, wcs=WCS(hdul[0].header)) # create cutout
+            tmp = Cutout2D(hdul[0].section, position=coord, size=0.5 * u.arcmin, wcs=WCS(hdul[0].header)) # create cutout
             
 
             if (product == "science") & (ii == 0): # if science image, then create a new hdu.
@@ -222,10 +226,6 @@ for ii,filt in tqdm(enumerate(filters)):
 
 ## Save the HDUL cube:
 hdulcutout.writeto("./data/euclid_images_test.fits", overwrite=True)
-```
-
-```python
-hdulcutout['VIS_SCIENCE'].header
 ```
 
 ```python
@@ -262,7 +262,331 @@ plt.show()
 ```
 
 ```python
-summary_table
+#### PHOTOMETRY PIPELINE ####
+import sep
+from photutils.detection import DAOStarFinder
+from photutils.psf import PSFPhotometry, IterativePSFPhotometry, IntegratedGaussianPRF, make_psf_model_image
+from photutils.background import LocalBackground, MMMBackground
+
+
+## Definitions (need to change based on image)
+psf_fwhm = 0.16 # arcsec
+pixscale = 0.1 # arcsec/px
+#psf_fwhm = 0.3 # arcsec
+#pixscale = 0.3 # arcsec/px
+
+## Get Data (this will be replaced later)
+img = hdulcutout["VIS_SCIENCE"].data
+#img = img[100:200,100:200].copy(order='C')
+img[img == 0] = np.nan
+
+## Create mask
+mask = np.isnan(img)
+
+## Get statistics
+mean, median, std = sigma_clipped_stats(img, sigma=3.0)  
+print(np.array((mean, median, std))) 
+
+## Object detection (using SEP - found that this is better compared to PHOTUTILS source detection)
+objects = sep.extract(img-median, thresh=1.2, err=std, minarea=3, mask=mask, deblend_cont=0.0002, deblend_nthresh=64 )
+print("Number of sources extracted: ", len(objects))
+
+## Aperture photometry (just for testing)
+flux, fluxerr, flag = sep.sum_circle(img-median, objects['x'], objects['y'],r=3.0, err=std, gain=1.0)
+
+## Do photometry fitting (using PHOTUTILS)
+init_params = Table([objects["x"],objects["y"]] , names=["x","y"]) # initial positions
+psf_model = IntegratedGaussianPRF(flux=1, sigma=psf_fwhm/pixscale / 2.35)
+psf_model.x_0.fixed = True
+psf_model.y_0.fixed = True
+psf_model.sigma.fixed = False
+fit_shape = (5, 5)
+psfphot = PSFPhotometry(psf_model,
+                        fit_shape,
+                        finder = DAOStarFinder(fwhm=0.1, threshold=3.*std, exclude_border=True), # not really needed because we are using fixed initial positions.
+                        aperture_radius = 2,
+                        progress_bar = True)
+phot = psfphot(img-median, error=None, mask=mask, init_params=init_params)
+resimage = psfphot.make_residual_image(img-median, (9, 9))
+
+
+## Test figure
+fig = plt.figure(figsize=(20,10))
+ax1 = fig.add_subplot(1,2,1)
+ax2 = fig.add_subplot(1,2,2)
+ax1.imshow(np.log10(img), cmap="Greys", origin="lower")
+#ax1.imshow(img, vmin=-20*std, vmax=20*std, cmap="Greys", origin="lower")
+ax1.plot(phot["x_init"], phot["y_init"] , "x", markersize=10 , markeredgecolor="red", fillstyle="none")
+ax1.plot(phot["x_fit"], phot["y_fit"] , "s", markersize=10 , markeredgecolor="red", fillstyle="none")
+
+ax2.imshow(resimage,vmin=-20*std, vmax=20*std, cmap="Greys", origin="lower")
+ax2.plot(phot["x_init"], phot["y_init"] , "x", markersize=10 , markeredgecolor="red", fillstyle="none")
+ax2.plot(phot["x_fit"], phot["y_fit"] , "s", markersize=10 , markeredgecolor="red", fillstyle="none")
+
+plt.show()
+```
+
+```python
+x = objects["flux"]
+y = phot["flux_fit"]
+
+plt.plot(x , y , "o", markersize=2)
+minlim = np.nanmin(np.concatenate((x,y)))
+maxlim = np.nanmax(np.concatenate((x,y)))
+
+plt.fill_between(np.asarray([minlim,maxlim]),np.asarray([minlim,maxlim])/1.5,np.asarray([minlim,maxlim])*1.5, color="gray", alpha=0.2, linewidth=0)
+plt.fill_between(np.asarray([minlim,maxlim]),np.asarray([minlim,maxlim])/1.2,np.asarray([minlim,maxlim])*1.2, color="gray", alpha=0.4, linewidth=0)
+plt.plot(np.asarray([minlim,maxlim]),np.asarray([minlim,maxlim]), ":", color="gray")
+
+plt.xlabel("Aperture Photometry [flux]")
+plt.ylabel("PSF forced-photometry [flux]")
+plt.xscale('log')
+plt.yscale('log')
+plt.show()
+```
+
+```python
+-2.5*np.log10(1.2)
+```
+
+```python
+END
+```
+
+```python
+### RUN SEP ###
+import sep
+
+## Get Data
+img = hdulcutout["VIS_SCIENCE"].data
+img = img[100:200,100:200].copy(order='C')
+img[img == 0] = np.nan
+mask = np.isnan(img)
+print(img.shape)
+
+## Get statistics
+mean, median, std = sigma_clipped_stats(img, sigma=3.0)  
+print(np.array((mean, median, std))) 
+
+## Get background
+#bkg = sep.Background(img, mask=mask, bw=64, bh=64, fw=3, fh=3)
+#print(bkg.globalback)
+#print(bkg.globalrms)
+
+## Object detection
+objects = sep.extract(img-median, thresh=1.5, err=std, minarea=3, mask=mask, deblend_cont=0.0005, deblend_nthresh=64 )
+print(len(objects))
+
+## Aperture photometry
+flux, fluxerr, flag = sep.sum_circle(img-median, objects['x'], objects['y'],r=3.0, err=std, gain=1.0)
+#objects["fluxaper"] = flux
+
+### Test plot
+fig = plt.figure(figsize=(10,10))
+ax1 = fig.add_subplot(1,1,1)
+#ax1.imshow(img, origin="lower", vmin=-0*std, vmax=30*std, cmap="Greys")
+ax1.imshow(np.log10(img), cmap="Greys", origin="lower")
+ax1.plot(objects["x"] , objects["y"] , "o", markersize=4 , markeredgecolor="red", fillstyle="none")
+#ax1.set_xlim(150,400)
+#ax1.set_ylim(150,400)
+plt.show()
+```
+
+```python
+## Extract sources
+daofind = DAOStarFinder(fwhm=0.1, threshold=1.5*std, exclude_border=True, )  
+sources = daofind(img - median)
+
+### Test plot
+fig = plt.figure(figsize=(10,10))
+ax1 = fig.add_subplot(1,1,1)
+#ax1.imshow(img, origin="lower", vmin=-0*std, vmax=30*std, cmap="Greys")
+ax1.imshow(np.log10(img), cmap="Greys", origin="lower")
+ax1.plot(sources["xcentroid"] , sources["ycentroid"] , "o", markersize=4 , markeredgecolor="red", fillstyle="none")
+#ax1.set_xlim(150,400)
+#ax1.set_ylim(150,400)
+plt.show()
+```
+
+```python
+plt.plot(flux, objects["a"] , "o", markersize=1)
+plt.xscale('log')
+plt.yscale('log')
+```
+
+```python
+#### RUN PHOTUTILS TO EXTRACT POINT SOURCES ###
+from photutils.detection import DAOStarFinder
+from photutils.psf import PSFPhotometry, IterativePSFPhotometry, IntegratedGaussianPRF, make_psf_model_image
+from photutils.background import LocalBackground, MMMBackground
+
+## Get data
+img = hdulcutout["VIS_SCIENCE"].data
+img = img[100:200,100:200].copy(order='C')
+img[img == 0] = np.nan
+mask = np.isnan(img)
+
+## Get statistics
+mean, median, std = sigma_clipped_stats(img, sigma=3.0)  
+print(np.array((mean, median, std)))  
+
+## Extract sources
+daofind = DAOStarFinder(fwhm=0.1, threshold=3.*std, exclude_border=True)  
+sources = daofind(img - median)
+
+## Do PSF fitting =====
+psf_fwhm = np.sqrt( 0.16**2 + 0.1**2)
+pixscale = 0.1
+psf_model = IntegratedGaussianPRF(flux=1, sigma=psf_fwhm/pixscale / 2.35)
+psf_model.sigma.fixed = False
+psf_model.x_0.fixed = False
+psf_model.y_0.fixed = False
+fit_shape = (5, 5)
+
+## Simple PSF fitting
+#psfphot = PSFPhotometry(psf_model, fit_shape, finder=daofind,aperture_radius=2, progress_bar=True)
+#phot = psfphot(img, error=None, mask=mask)
+#resimage = psfphot.make_residual_image(img, (9, 9))
+
+## Do iterative PSF fitting
+#psfphot = IterativePSFPhotometry(psf_model, fit_shape, finder=daofind, aperture_radius=2, progress_bar=True)
+#phot = psfphot(img-median, error=None, mask=mask, init_params=init_params)
+#resimage = psfphot.make_residual_image(img-median, (9, 9))
+
+## Do Forced photometry
+#init_params = Table([[73.72755041777279], [11.167575149761976]], names=["x","y"])
+init_params = Table([objects["x"],objects["y"]] , names=["x","y"])
+psf_model = IntegratedGaussianPRF(flux=1, sigma=psf_fwhm/pixscale / 2.35)
+psf_model.x_0.fixed = True
+psf_model.y_0.fixed = True
+psfphot = PSFPhotometry(psf_model, fit_shape, finder=daofind,aperture_radius=2, progress_bar=True)
+phot = psfphot(img, error=None, mask=mask, init_params=init_params)
+resimage = psfphot.make_residual_image(img, (9, 9))
+
+### Test plot
+sel = np.where((sources["roundness1"] < 0.3) & (sources["roundness2"] < 0.3))[0]
+fig = plt.figure(figsize=(20,10))
+ax1 = fig.add_subplot(1,2,1)
+ax2 = fig.add_subplot(1,2,2)
+#ax1.imshow(img, origin="lower", vmin=-0.001*std,vmax=50*std, cmap="Greys")
+ax1.imshow(np.log10(img), cmap="Greys", origin="lower")
+#ax1.imshow(img, vmin=-50*std, vmax=50*std, cmap="Greys", origin="lower")
+#ax1.plot(sources["xcentroid"][sel] , sources["ycentroid"][sel] , "o", markersize=7 , markeredgecolor="red", fillstyle="none")
+ax1.plot(phot["x_init"], phot["y_init"] , "x", markersize=10 , markeredgecolor="red", fillstyle="none")
+ax1.plot(phot["x_fit"], phot["y_fit"] , "s", markersize=10 , markeredgecolor="red", fillstyle="none")
+
+ax2.imshow(resimage,vmin=-50*std, vmax=50*std, cmap="Greys", origin="lower")
+#ax2.plot(sources["xcentroid"][sel] , sources["ycentroid"][sel] , "o", markersize=7 , markeredgecolor="red", fillstyle="none")
+ax2.plot(phot["x_init"], phot["y_init"] , "x", markersize=10 , markeredgecolor="red", fillstyle="none")
+ax2.plot(phot["x_fit"], phot["y_fit"] , "s", markersize=10 , markeredgecolor="red", fillstyle="none")
+#ax1.set_xlim(100,200)
+#ax1.set_ylim(100,200)
+#ax2.set_xlim(100,200)
+#ax2.set_ylim(100,200)
+
+plt.show()
+```
+
+```python
+phot
+```
+
+```python
+len(objects)
+```
+
+```python
+
+```
+
+```python
+plt.imshow(img, vmin=-0*std, vmax=50*std)
+plt.xlim(0,50)
+plt.ylim(0,50)
+```
+
+```python
+plt.imshow(resimage, vmin=-5*std, vmax=5*std)
+plt.xlim(0,50)
+plt.ylim(0,50)
+```
+
+```python
+resimage[45,15]
+```
+
+```python
+plt.imshow(resimage2, vmin=-0*std, vmax=50*std)
+plt.xlim(0,50)
+plt.ylim(0,50)
+```
+
+```python
+sources
+```
+
+```python
+phot
+```
+
+```python
+### PHOTUTILS WITH SEGMENTATION MAP ####
+from photutils.segmentation import detect_sources, deblend_sources, SourceCatalog
+
+## Get data
+img = hdulcutout["Y_SCIENCE"].data
+#img = img[150:400,150:400].copy(order='C')
+img[img == 0] = np.nan
+mask = np.isnan(img)
+
+## Get statistics
+mean, median, std = sigma_clipped_stats(img, sigma=3.0)  
+print(np.array((mean, median, std)))  
+
+## Segmentation map
+segment_map = detect_sources(img, threshold=median + 3.*std, npixels=3, mask=mask)
+segment_map.remove_masked_labels(mask)
+
+## Deblending step
+segm_deblend = deblend_sources(img, segment_map,
+                               npixels=5, nlevels=32, contrast=0.005,
+                               progress_bar=True)
+segm_deblend.remove_masked_labels(mask)
+
+## Source extraction
+cat = SourceCatalog(img, segm_deblend)
+sourcetab = cat.to_table()
+#print(cat)
+
+
+## Test figure
+fig = plt.figure(figsize=(10,10))
+ax1 = fig.add_subplot(1,1,1)
+
+#ax1.imshow(segment_map, origin="lower")
+#ax1.imshow(img, origin="lower", vmin=-0*std, vmax=20*std, cmap="Greys")
+ax1.imshow(np.log10(img), cmap="Greys", origin="lower")
+#ax1.plot(sources["xcentroid"] , sources["ycentroid"] , "o", markersize=7 , markeredgecolor="red", fillstyle="none")
+ax1.plot(sourcetab["xcentroid"] , sourcetab["ycentroid"] , "s", markersize=11 , markeredgecolor="red", fillstyle="none")
+
+#ax1.set_xlim(0,300)
+#ax1.set_ylim(0,300)
+```
+
+```python
+x = sourcetab["kron_flux"]
+y = np.sqrt(sourcetab["semimajor_sigma"]**2 + sourcetab["semiminor_sigma"]**2)
+plt.plot(x , y , "o", markersize=1)
+
+plt.xscale('log')
+plt.yscale('log')
+
+```
+
+```python
+plt.hist(sources["flux"])
+#plt.hist(sourcetab["segment_flux"])
+
 ```
 
 ```python
