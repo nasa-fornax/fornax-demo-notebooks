@@ -115,6 +115,9 @@ except ImportError:
     print("tractor is missing")
     pass
 
+# Add ~/.local/bin to path so executables installed with pip are available (needed for nway)
+os.environ['PATH'] = f"{os.environ['HOME']}/.local/bin:{os.environ['PATH']}"
+
 
 %matplotlib inline
 ```
@@ -794,7 +797,7 @@ nway_write_header('data/multiband_phot.fits', 'OPT', float((2*rad_in_arcmin/60)*
 
 ```{code-cell} ipython3
 # call nway
-!/home/jovyan/.local/bin/nway.py 'data/Chandra/COSMOS_chandra.fits' :ERROR_RADIUS 'data/multiband_phot.fits' 0.1 --out=data/Chandra/chandra_multiband.fits --radius 15 --prior-completeness 0.9
+!nway.py 'data/Chandra/COSMOS_chandra.fits' :ERROR_RADIUS 'data/multiband_phot.fits' 0.1 --out=data/Chandra/chandra_multiband.fits --radius 15 --prior-completeness 0.9
 
 #!/opt/conda/bin/nway.py 'data/Chandra/COSMOS_chandra.fits' :ERROR_RADIUS 'data/multiband_phot.fits' 0.1 --out=data/Chandra/chandra_multiband.fits --radius 15 --prior-completeness 0.9
 ```
