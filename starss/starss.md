@@ -4,11 +4,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.1
+    jupytext_version: 1.16.0
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  display_name: root *
   language: python
-  name: python3
+  name: conda-root-py
 ---
 
 # Will figure out the name later
@@ -32,7 +32,7 @@ By the end of this tutorial, you will:
 ## Introduction
 
 TBD
-
+starting with https://lsdb.readthedocs.io/en/stable/tutorials/getting_data.html 
 
 ## Imports
 Here are the libraries used in this network. They are also mostly mentioned in the requirements in case you don't have them installed.
@@ -57,6 +57,45 @@ import lsdb
 ```{code-cell} ipython3
 gaia_dr3 = lsdb.read_hipscat("https://data.lsdb.io/unstable/gaia_dr3/gaia/")
 gaia_dr3
+```
+
+```{code-cell} ipython3
+print(gaia_dr3.columns.tolist())
+```
+
+```{code-cell} ipython3
+gaia_dr3 = lsdb.read_hipscat(
+    "https://data.lsdb.io/unstable/gaia_dr3/gaia/",
+    margin_cache="https://data.lsdb.io/unstable/gaia_dr3/gaia_10arcs/",
+    columns=[
+        "source_id",
+        "ra",
+        "dec",
+        "phot_g_mean_mag",
+        "phot_rp_mean_mag",
+        "phot_bp_mean_mag",
+        "phot_proc_mode",
+        "azero_gspphot",
+        "teff_gspphot",
+        "classprob_dsc_combmod_star",
+    ],
+)
+gaia_dr3
+```
+
+```{code-cell} ipython3
+gaia_dr3.plot_pixels("Gaia DR3 Pixel Map")
+```
+
+```{code-cell} ipython3
+gaia_dr3.dtypes
+```
+
+```{code-cell} ipython3
+from dask.distributed import Client
+
+client = Client(n_workers=4, memory_limit="auto")
+client
 ```
 
 ```{code-cell} ipython3
