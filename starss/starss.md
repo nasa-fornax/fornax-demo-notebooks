@@ -32,7 +32,9 @@ By the end of this tutorial, you will:
 ## Introduction
 
 TBD
-starting with https://lsdb.readthedocs.io/en/stable/tutorials/getting_data.html 
+- starting with https://lsdb.readthedocs.io/en/stable/tutorials/getting_data.html 
+- for filtering with pandas or pyarrow: https://irsa.ipac.caltech.edu/docs/notebooks/wise-allwise-catalog-demo.html
+- usecase?
 
 ## Imports
 Here are the libraries used in this network. They are also mostly mentioned in the requirements in case you don't have them installed.
