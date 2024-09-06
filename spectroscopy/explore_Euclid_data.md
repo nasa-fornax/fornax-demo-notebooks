@@ -277,6 +277,7 @@ pixscale = 0.1 # arcsec/px
 
 ## Get Data (this will be replaced later)
 img = hdulcutout["VIS_SCIENCE"].data
+hdr = hdulcutout["VIS_SCIENCE"].header
 #img = img[100:200,100:200].copy(order='C')
 img[img == 0] = np.nan
 
@@ -304,7 +305,7 @@ fit_shape = (5, 5)
 psfphot = PSFPhotometry(psf_model,
                         fit_shape,
                         finder = DAOStarFinder(fwhm=0.1, threshold=3.*std, exclude_border=True), # not really needed because we are using fixed initial positions.
-                        aperture_radius = 2,
+                        aperture_radius = 4,
                         progress_bar = True)
 phot = psfphot(img-median, error=None, mask=mask, init_params=init_params)
 resimage = psfphot.make_residual_image(img-median, (9, 9))
@@ -316,17 +317,18 @@ ax1 = fig.add_subplot(1,2,1)
 ax2 = fig.add_subplot(1,2,2)
 ax1.imshow(np.log10(img), cmap="Greys", origin="lower")
 #ax1.imshow(img, vmin=-20*std, vmax=20*std, cmap="Greys", origin="lower")
-ax1.plot(phot["x_init"], phot["y_init"] , "x", markersize=10 , markeredgecolor="red", fillstyle="none")
+#ax1.plot(phot["x_init"], phot["y_init"] , "x", markersize=10 , markeredgecolor="red", fillstyle="none")
 ax1.plot(phot["x_fit"], phot["y_fit"] , "s", markersize=10 , markeredgecolor="red", fillstyle="none")
 
 ax2.imshow(resimage,vmin=-20*std, vmax=20*std, cmap="Greys", origin="lower")
-ax2.plot(phot["x_init"], phot["y_init"] , "x", markersize=10 , markeredgecolor="red", fillstyle="none")
+#ax2.plot(phot["x_init"], phot["y_init"] , "x", markersize=10 , markeredgecolor="red", fillstyle="none")
 ax2.plot(phot["x_fit"], phot["y_fit"] , "s", markersize=10 , markeredgecolor="red", fillstyle="none")
 
 plt.show()
 ```
 
 ```python
+## TEST THE DIFFERENCE BETWEEN APERTURE AND PSF PHOTOMETRY ##
 x = objects["flux"]
 y = phot["flux_fit"]
 
@@ -346,11 +348,73 @@ plt.show()
 ```
 
 ```python
--2.5*np.log10(1.2)
+## FORCE PHOTOMETER THE NISP IMAGE ##
+## Use the position priors from the VIS image. Need to convert to NISP x/y using the WCS.
+
+## Definitions (need to change based on image)
+#psf_fwhm = 0.16 # arcsec
+#pixscale = 0.1 # arcsec/px
+psf_fwhm = 0.3 # arcsec
+pixscale = 0.3 # arcsec/px
+
+## Get Data (this will be replaced later)
+img2 = hdulcutout["Y_SCIENCE"].data
+hdr2 = hdulcutout["Y_SCIENCE"].header
+img2[img2 == 0] = np.nan
+
+## Get statistics (not really needed)
+mean2, median2, std2 = sigma_clipped_stats(img2, sigma=3.0)  
+print(np.array((mean2, median2, std2))) 
+
+## Create mask
+mask2 = np.isnan(img2)
+
+## Get prior positions
+wcs = WCS(hdr) # VIS
+wcs2 = WCS(hdr2) # NISP
+radec = wcs.all_pix2world(objects["x"],objects["y"], 0)
+xy = wcs2.all_world2pix(radec[0],radec[1],0)
+
+
+## Do photometry fitting (using PHOTUTILS using VIS positions!)
+init_params = Table([xy[0],xy[1]] , names=["x","y"]) # initial positions
+psf_model = IntegratedGaussianPRF(flux=1, sigma=psf_fwhm/pixscale / 2.35)
+psf_model.x_0.fixed = True
+psf_model.y_0.fixed = True
+psf_model.sigma.fixed = False
+fit_shape = (3, 3)
+psfphot2 = PSFPhotometry(psf_model,
+                        fit_shape,
+                        finder = DAOStarFinder(fwhm=0.1, threshold=3.*std2, exclude_border=True), # not really needed because we are using fixed initial positions.
+                        aperture_radius = 4,
+                        progress_bar = True)
+phot2 = psfphot2(img2-median2, error=None, mask=mask2, init_params=init_params)
+resimage2 = psfphot2.make_residual_image(img2-median2, (3, 3))
+
+
+## Test figure
+fig = plt.figure(figsize=(20,10))
+ax1 = fig.add_subplot(1,2,1)
+ax2 = fig.add_subplot(1,2,2)
+#ax1.imshow(np.log10(img2), cmap="Greys", origin="lower")
+ax1.imshow(img2, vmin=-20*std2, vmax=20*std2, cmap="Greys", origin="lower")
+#ax1.plot(xy[0],xy[1] , "x", markersize=10 , markeredgecolor="red", fillstyle="none")
+#ax1.plot(phot2["x_init"], phot2["y_init"] , "x", markersize=10 , markeredgecolor="red", fillstyle="none")
+ax1.plot(phot2["x_fit"], phot2["y_fit"] , "s", markersize=10 , markeredgecolor="red", fillstyle="none")
+
+ax2.imshow(resimage2,vmin=-20*std2, vmax=20*std2, cmap="Greys", origin="lower")
+#ax2.plot(phot2["x_init"], phot2["y_init"] , "x", markersize=10 , markeredgecolor="red", fillstyle="none")
+ax2.plot(phot2["x_fit"], phot2["y_fit"] , "s", markersize=10 , markeredgecolor="red", fillstyle="none")
+
+plt.show()
 ```
 
 ```python
 END
+```
+
+```python
+phot2
 ```
 
 ```python
