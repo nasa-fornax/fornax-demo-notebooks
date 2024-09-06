@@ -574,6 +574,9 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;tractor is missing&quot;</span><span class="p">)</span>
     <span class="k">pass</span>
 
+<span class="c1"># Add ~/.local/bin to path so executables installed with pip are available (needed for nway)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;PATH&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;HOME&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/.local/bin:</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;PATH&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+
 
 <span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
 </pre></div>
@@ -1342,7 +1345,7 @@ as well as the increase in speed when going to parallelization</p></li>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># call nway</span>
-<span class="err">!</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">jovyan</span><span class="o">/.</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">nway</span><span class="o">.</span><span class="n">py</span> <span class="s1">&#39;data/Chandra/COSMOS_chandra.fits&#39;</span> <span class="p">:</span><span class="n">ERROR_RADIUS</span> <span class="s1">&#39;data/multiband_phot.fits&#39;</span> <span class="mf">0.1</span> <span class="o">--</span><span class="n">out</span><span class="o">=</span><span class="n">data</span><span class="o">/</span><span class="n">Chandra</span><span class="o">/</span><span class="n">chandra_multiband</span><span class="o">.</span><span class="n">fits</span> <span class="o">--</span><span class="n">radius</span> <span class="mi">15</span> <span class="o">--</span><span class="n">prior</span><span class="o">-</span><span class="n">completeness</span> <span class="mf">0.9</span>
+<span class="err">!</span><span class="n">nway</span><span class="o">.</span><span class="n">py</span> <span class="s1">&#39;data/Chandra/COSMOS_chandra.fits&#39;</span> <span class="p">:</span><span class="n">ERROR_RADIUS</span> <span class="s1">&#39;data/multiband_phot.fits&#39;</span> <span class="mf">0.1</span> <span class="o">--</span><span class="n">out</span><span class="o">=</span><span class="n">data</span><span class="o">/</span><span class="n">Chandra</span><span class="o">/</span><span class="n">chandra_multiband</span><span class="o">.</span><span class="n">fits</span> <span class="o">--</span><span class="n">radius</span> <span class="mi">15</span> <span class="o">--</span><span class="n">prior</span><span class="o">-</span><span class="n">completeness</span> <span class="mf">0.9</span>
 
 <span class="c1">#!/opt/conda/bin/nway.py &#39;data/Chandra/COSMOS_chandra.fits&#39; :ERROR_RADIUS &#39;data/multiband_phot.fits&#39; 0.1 --out=data/Chandra/chandra_multiband.fits --radius 15 --prior-completeness 0.9</span>
 </pre></div>
