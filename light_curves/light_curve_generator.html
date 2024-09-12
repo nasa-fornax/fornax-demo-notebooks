@@ -455,37 +455,44 @@ document.write(`
                   
   <section id="make-multi-wavelength-light-curves-using-archival-data">
 <h1>Make Multi-Wavelength Light Curves Using Archival Data<a class="headerlink" href="#make-multi-wavelength-light-curves-using-archival-data" title="Link to this heading">#</a></h1>
-<hr class="docutils" />
 <section id="learning-goals">
 <h2>Learning Goals<a class="headerlink" href="#learning-goals" title="Link to this heading">#</a></h2>
-<p>By the end of this tutorial, you will be able to:
-• Automatically load a catalog of target sources
-• Automatically &amp; efficiently search NASA and non-NASA resources for the light curves of up to ~500 targets
-• Store &amp; manipulate light curves in a Pandas MultiIndex dataframe
-• Plot all light curves on the same plot</p>
+<p>By the end of this tutorial, you will be able to:</p>
+<ul class="simple">
+<li><p>Automatically load a catalog of target sources</p></li>
+<li><p>Automatically &amp; efficiently search NASA and non-NASA resources for the light curves of up to ~500 targets</p></li>
+<li><p>Store &amp; manipulate light curves in a Pandas MultiIndex dataframe</p></li>
+<li><p>Plot all light curves on the same plot</p></li>
+</ul>
 </section>
 <section id="introduction">
 <h2>Introduction:<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
-<p>• A user has a sample of interesting targets for which they would like to see a plot of available archival light curves.  We start with a small set of changing look AGN from Yang et al., 2018, which are automatically downloaded. Changing look AGN are cases where the broad emission lines appear or disappear (and not just that the flux is variable).</p>
-<p>• We model light curve plots after van Velzen et al. 2021.  We search through a curated list of time-domain NASA holdings as well as non-NASA sources.  HEASARC catalogs used are Fermi and Beppo-Sax, IRSA catalogs used are ZTF and WISE, and MAST catalogs used are Pan-STARRS, TESS, Kepler, and K2.  Non-NASA sources are Gaia and IceCube. This list is generalized enough to include many types of targets to make this notebook interesting for many types of science.  All of these time-domain archives are searched in an automated and efficient fashion using astroquery, pyvo, pyarrow or APIs.</p>
-<p>• Light curve data storage is a tricky problem.  Currently we are using a MultiIndex Pandas dataframe, as the best existing choice for right now.  One downside is that we need to manually track the units of flux and time instead of relying on an astropy storage scheme which would be able to do some of the units worrying for us (even astropy can’t do all magnitude to flux conversions).  Astropy does not currently have a good option for multi-band light curve storage.</p>
-<p>• This notebook walks through the individual steps required to collect the targets and their light curves and create figures. It also shows how to speed up the collection of light curves using python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code>. This is expected to be sufficient for up to ~500 targets. For a larger number of targets, consider using the bash script demonstrated in the neighboring notebook <a class="reference internal" href="scale_up.html"><span class="std std-doc">scale_up</span></a>.</p>
-<p>• ML work using these time-series light curves is in two neighboring notebooks: <a class="reference internal" href="ML_AGNzoo.html"><span class="std std-doc">ML_AGNzoo</span></a> and <a class="reference internal" href="light_curve_classifier.html"><span class="std std-doc">light_curve_classifier</span></a>.</p>
+<ul class="simple">
+<li><p>A user has a sample of interesting targets for which they would like to see a plot of available archival light curves.  We start with a small set of changing look AGN from Yang et al., 2018, which are automatically downloaded. Changing look AGN are cases where the broad emission lines appear or disappear (and not just that the flux is variable).</p></li>
+<li><p>We model light curve plots after van Velzen et al. 2021.  We search through a curated list of time-domain NASA holdings as well as non-NASA sources.  HEASARC catalogs used are Fermi and Beppo-Sax, IRSA catalogs used are ZTF and WISE, and MAST catalogs used are Pan-STARRS, TESS, Kepler, and K2.  Non-NASA sources are Gaia and IceCube. This list is generalized enough to include many types of targets to make this notebook interesting for many types of science.  All of these time-domain archives are searched in an automated and efficient fashion using astroquery, pyvo, pyarrow or APIs.</p></li>
+<li><p>Light curve data storage is a tricky problem.  Currently we are using a MultiIndex Pandas dataframe, as the best existing choice for right now.  One downside is that we need to manually track the units of flux and time instead of relying on an astropy storage scheme which would be able to do some of the units worrying for us (even astropy can’t do all magnitude to flux conversions).  Astropy does not currently have a good option for multi-band light curve storage.</p></li>
+<li><p>This notebook walks through the individual steps required to collect the targets and their light curves and create figures. It also shows how to speed up the collection of light curves using python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code>. This is expected to be sufficient for up to ~500 targets. For a larger number of targets, consider using the bash script demonstrated in the neighboring notebook <a class="reference internal" href="scale_up.html"><span class="std std-doc">scale_up</span></a>.</p></li>
+<li><p>ML work using these time-series light curves is in two neighboring notebooks: <a class="reference internal" href="ML_AGNzoo.html"><span class="std std-doc">ML_AGNzoo</span></a> and <a class="reference internal" href="light_curve_classifier.html"><span class="std std-doc">light_curve_classifier</span></a>.</p></li>
+</ul>
 <p>As written, this notebook is expected to require at least 2 CPU and 8G RAM.</p>
 </section>
 <section id="input">
 <h2>Input:<a class="headerlink" href="#input" title="Link to this heading">#</a></h2>
-<p>• choose from a list of known changing look AGN from the literature
-OR -
-• input your own sample</p>
+<ul class="simple">
+<li><p>choose from a list of known changing look AGN from the literature
+OR -</p></li>
+<li><p>input your own sample</p></li>
+</ul>
 </section>
 <section id="output">
 <h2>Output:<a class="headerlink" href="#output" title="Link to this heading">#</a></h2>
-<p>• an archival optical + IR + neutrino light curve</p>
+<ul class="simple">
+<li><p>an archival optical + IR + neutrino light curve</p></li>
+</ul>
 </section>
 <section id="authors">
 <h2>Authors:<a class="headerlink" href="#authors" title="Link to this heading">#</a></h2>
-<p>Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, Dave Shupe</p>
+<p>Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, David Shupe</p>
 </section>
 <section id="acknowledgements">
 <h2>Acknowledgements:<a class="headerlink" href="#acknowledgements" title="Link to this heading">#</a></h2>
@@ -494,21 +501,23 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 </section>
 <section id="imports">
 <h2>Imports:<a class="headerlink" href="#imports" title="Link to this heading">#</a></h2>
-<p>• <code class="docutils literal notranslate"><span class="pre">acstools</span></code> to work with HST magnitude to flux conversion
-• <code class="docutils literal notranslate"><span class="pre">astropy</span></code> to work with coordinates/units and data structures
-• <code class="docutils literal notranslate"><span class="pre">astroquery</span></code> to interface with archives APIs
-• <code class="docutils literal notranslate"><span class="pre">hpgeom</span></code> to locate coordinates in HEALPix space
-• <code class="docutils literal notranslate"><span class="pre">lightkurve</span></code> to search TESS, Kepler, and K2 archives
-• <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> for plotting
-• <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> to use the power of multiple CPUs to get work done faster
-• <code class="docutils literal notranslate"><span class="pre">numpy</span></code> for numerical processing
-• <code class="docutils literal notranslate"><span class="pre">pandas</span></code> for their data structure DataFrame and all the accompanying functions
-• <code class="docutils literal notranslate"><span class="pre">pyarrow</span></code> to work with Parquet files for WISE and ZTF
-• <code class="docutils literal notranslate"><span class="pre">pyvo</span></code> for accessing Virtual Observatory(VO) standard data
-• <code class="docutils literal notranslate"><span class="pre">requests</span></code> to get information from URLs
-• <code class="docutils literal notranslate"><span class="pre">scipy</span></code> to do statistics
-• <code class="docutils literal notranslate"><span class="pre">tqdm</span></code> to track progress on long running jobs
-• <code class="docutils literal notranslate"><span class="pre">urllib</span></code> to handle archive searches with website interface</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">acstools</span></code> to work with HST magnitude to flux conversion</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">astropy</span></code> to work with coordinates/units and data structures</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">astroquery</span></code> to interface with archives APIs</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hpgeom</span></code> to locate coordinates in HEALPix space</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lightkurve</span></code> to search TESS, Kepler, and K2 archives</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> for plotting</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> to use the power of multiple CPUs to get work done faster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">numpy</span></code> for numerical processing</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pandas</span></code> with their <code class="docutils literal notranslate"><span class="pre">[aws]</span></code> extras for their data structure DataFrame and all the accompanying functions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyarrow</span></code> to work with Parquet files for WISE and ZTF</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyvo</span></code> for accessing Virtual Observatory(VO) standard data</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">requests</span></code> to get information from URLs</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scipy</span></code> to do statistics</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tqdm</span></code> to track progress on long running jobs</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">urllib</span></code> to handle archive searches with website interface</p></li>
+</ul>
 <p>This cell will install them if needed:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -934,11 +943,13 @@ For sample sizes &gt;~500 and/or improved logging and monitoring options, consid
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
 <p>This work made use of:</p>
-<p>• Astroquery; Ginsburg et al., 2019, 2019AJ….157…98G
-• Astropy; Astropy Collaboration 2022, Astropy Collaboration 2018, Astropy Collaboration 2013,    2022ApJ…935..167A, 2018AJ….156..123A, 2013A&amp;A…558A..33A
-• Lightkurve; Lightkurve Collaboration 2018, 2018ascl.soft12013L
-• acstools; https://zenodo.org/record/7406933#.ZBH1HS-B0eY
-• unWISE light curves; Meisner et al., 2023, 2023AJ….165…36M</p>
+<ul class="simple">
+<li><p>Astroquery; Ginsburg et al., 2019, 2019AJ….157…98G</p></li>
+<li><p>Astropy; Astropy Collaboration 2022, Astropy Collaboration 2018, Astropy Collaboration 2013,    2022ApJ…935..167A, 2018AJ….156..123A, 2013A&amp;A…558A..33A</p></li>
+<li><p>Lightkurve; Lightkurve Collaboration 2018, 2018ascl.soft12013L</p></li>
+<li><p>acstools; https://zenodo.org/record/7406933#.ZBH1HS-B0eY</p></li>
+<li><p>unWISE light curves; Meisner et al., 2023, 2023AJ….165…36M</p></li>
+</ul>
 </section>
 </section>
 
@@ -1042,7 +1053,7 @@ By Fornax developers
 
   <p class="copyright">
     
-      © Copyright 2022-2023, Fornax developers.
+      © Copyright 2022-2024, Fornax developers.
       <br/>
     
   </p>

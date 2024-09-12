@@ -9,11 +9,32 @@ The Fornax Science Console supports many astronomical use cases, but users will 
  * that require complicated software pre-installed on the platform; or
  * that are parallelizable and require more compute than they currently have access to.
 
-### Fornax Science Console basic capabilities
-  * <b>CPUs</b>:  Upon logging in, users will have access to 4 CPUs provided by AWS. These are useful for smaller analyses and to test out larger analyses. Once a user has completed testing and is ready to scale up an analysis, they can request up to 128 CPUs.
+### Fornax Science Console basic capabilities and selection guidelines
+
+After logging in, users will be presented with choices for their working environment.  
+
+* <b>Compute size</b>:  the amount of compute (CPUs) and memory (RAM) available is configurable.  Options are briefly described below.
+* <b>Compute environment</b>: the software environment including the operating system, system library versions, and pre-installed software selections.
+
+The compute size you select largely determines the costs you will accrue while it is running.  We therefore need our users to be more conscious of the compute you are using than you would be on your own hardware. We ask users to follow these guidelines:
+
+* You will have a choice of server types. Please test your use case on the smallest server that can serve as a test, and run tests with a limited scope (e.g., number of sources, iterations, etc.). Only expand the scope and/or select a larger server when you have successfully tested the smaller case.
+* Please also note that if you start an instance, closing your browser window does not necessarily stop the instance you started.  Especially with the larger instances, **please explicitly use the “Stop My Server” button** (under File->Hub Control Panel)  when done. 
+* Any time you need to use the biggest 128-core compute instance, please reach out to the Help Desk for explicit permission _before_ starting it. This will help us to be aware of resource usage for this development system, which does not yet have fully automated resource usage guardrails. Give us a brief idea of what the science use case is and an estimate for the _total_ run time. Note that if your job (or jobs) runs significantly longer than we expect, we may contact you about terminating it. If you need to stop and restart your instance, you don’t need to get permission every time as long as you are still within the original estimated total run time. If you need more time than expected, please write to the help desk with a brief justification. Our review process is more about visibility than control, so you’ll probably be approved.
+
+The compute options: 
+
+  * <b>CPUs</b>:  By default, users will have access to 4 CPUs provided by AWS. These are useful for smaller analyses and to test out larger analyses. Once a user has completed testing and is ready to scale up an analysis, they can request up to 128 CPUs.
   * <b>RAM</b>: Upon logging in, users will have access to up to 16 GB of RAM. Up to 512 GB of RAM are available upon request.
   * <b>User Storage</b>: Upon logging in, users will have access to 10 GB of storage; additional storage is available upon request.
   * <b>GPUs</b>:  There are currently no GPUs available.
+
+Software environment options:
+
+* A base environment contains common astronomy libraries such as Astropy.
+* The forced photometry tool called Tractor is available in a customized environment.
+* The HEASoft high-energy astrophysics software is available in another customized environment.
+* More environments will be created as need.  
 
 ### Data access within the Fornax Science Console
 
@@ -21,10 +42,6 @@ Users of the Fornax Science Console will have access to data curated and publish
    * AWS S3 buckets with data curated by the NASA Astrophysics Mission Archives (HEASARC, IRSA, MAST) are mounted under `s3/` in the user's `$HOME` directory and are browsable as if they were on the local filesystem.
    * Many data repositories provide data access through application program interfaces (APIs), which can be invoked by users of the Fornax Science Console through standard Python (e.g. astroquery, pyvo) or command line methods (e.g. wget, curl).
    * Users can upload a limited amount of datasets to AWS and interact with them as though they were on the local filesystem.
-
-### Software pre-installed on the Fornax Science Console
-
-Under construction: How can users get a list of pre-installed software without logging into the Fornax Science Console?
 
 ## Quick Start Guide
 
