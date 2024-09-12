@@ -12,7 +12,7 @@ kernelspec:
 ---
 
 # Light Curve Classifier
-***
+
 
 ## Learning Goals
 By the end of this tutorial, you will be able to:
@@ -55,7 +55,7 @@ Trained classifiers as well as estimates of their accuracy and plots of confusio
 As of 2024 August, this notebook takes ~170s to run to completion on Fornax using the 'Astrophysics Default Image' and the 'Large' server with 16GB RAM/ 4CPU.
 
 ## Authors
-Jessica Krick, Shooby Hemmati, Troy Raen, Brigitta Sipocz, Andreas Faisst, Vandana Desai, Dave Shoop
+Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, Andreas Faisst, Vandana Desai, David Shupe
 
 ## Acknowledgements
 Stephanie La Massa
