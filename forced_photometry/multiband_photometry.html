@@ -566,7 +566,10 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <span class="kn">from</span> <span class="nn">photometry</span> <span class="kn">import</span> <span class="n">lookup_img_pair</span>
 <span class="c1">#from prepare_prf import prepare_prf</span>
 
-<span class="c1"># temporarily let the notebook start without tractor as dependency</span>
+<span class="c1"># This code is to parse cloud access information; currently in `code_src`, eventually will be part of pyvo</span>
+<span class="kn">import</span> <span class="nn">fornax</span>
+
+<span class="c1"># temporarily let the notebook start without tractor as a dependency</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">find_nconfsources</span> <span class="kn">import</span> <span class="n">find_nconfsources</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
@@ -651,30 +654,6 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <section id="use-the-fornax-cloud-access-api-to-obtain-the-irac-data-from-the-irsa-s3-bucket">
 <h3>Use the fornax cloud access API to obtain the IRAC data from the IRSA S3 bucket.<a class="headerlink" href="#use-the-fornax-cloud-access-api-to-obtain-the-irac-data-from-the-irsa-s3-bucket" title="Link to this heading">#</a></h3>
 <p>Details here may change as the prototype code is being added to the appropriate libraries, as well as the data holding to the appropriate NGAP storage as opposed to IRSA resources.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Temporary solution, remove when the fornax API is added to the image</span>
-<span class="c1"># This relies on the assumption that https://github.com/nasa-fornax/fornax-cloud-access-API is being cloned to this environment.</span>
-<span class="c1"># If it&#39;s not, then run a ``git clone https://github.com/nasa-fornax/fornax-cloud-access-API --depth=1`` from a terminal at the highest directory root.</span>
-<span class="c1"># You may need to update the fork if you forked it in the past</span>
-
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;../../fornax-cloud-access-API&#39;</span><span class="p">):</span>
-    <span class="err">!</span> <span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">nasa</span><span class="o">-</span><span class="n">fornax</span><span class="o">/</span><span class="n">fornax</span><span class="o">-</span><span class="n">cloud</span><span class="o">-</span><span class="n">access</span><span class="o">-</span><span class="n">API</span> <span class="o">--</span><span class="n">depth</span><span class="o">=</span><span class="mi">1</span> <span class="o">../../</span><span class="n">fornax</span><span class="o">-</span><span class="n">cloud</span><span class="o">-</span><span class="n">access</span><span class="o">-</span><span class="n">API</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;../../fornax-cloud-access-API&#39;</span><span class="p">)</span>
-
-<span class="kn">import</span> <span class="nn">pyvo</span>
-<span class="kn">import</span> <span class="nn">fornax</span>
-</pre></div>
-</div>
-</div>
-</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Getting the COSMOS address from the registry to follow PyVO user case approach. We could hardwire it.</span>
@@ -1343,10 +1322,10 @@ as well as the increase in speed when going to parallelization</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># call nway</span>
-<span class="err">!</span><span class="n">nway</span><span class="o">.</span><span class="n">py</span> <span class="s1">&#39;data/Chandra/COSMOS_chandra.fits&#39;</span> <span class="p">:</span><span class="n">ERROR_RADIUS</span> <span class="s1">&#39;data/multiband_phot.fits&#39;</span> <span class="mf">0.1</span> <span class="o">--</span><span class="n">out</span><span class="o">=</span><span class="n">data</span><span class="o">/</span><span class="n">Chandra</span><span class="o">/</span><span class="n">chandra_multiband</span><span class="o">.</span><span class="n">fits</span> <span class="o">--</span><span class="n">radius</span> <span class="mi">15</span> <span class="o">--</span><span class="n">prior</span><span class="o">-</span><span class="n">completeness</span> <span class="mf">0.9</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">bash</span>
 
-<span class="c1">#!/opt/conda/bin/nway.py &#39;data/Chandra/COSMOS_chandra.fits&#39; :ERROR_RADIUS &#39;data/multiband_phot.fits&#39; 0.1 --out=data/Chandra/chandra_multiband.fits --radius 15 --prior-completeness 0.9</span>
+<span class="c1"># call nway</span>
+<span class="n">nway</span><span class="o">.</span><span class="n">py</span> <span class="s1">&#39;data/Chandra/COSMOS_chandra.fits&#39;</span> <span class="p">:</span><span class="n">ERROR_RADIUS</span> <span class="s1">&#39;data/multiband_phot.fits&#39;</span> <span class="mf">0.1</span> <span class="o">--</span><span class="n">out</span><span class="o">=</span><span class="n">data</span><span class="o">/</span><span class="n">Chandra</span><span class="o">/</span><span class="n">chandra_multiband</span><span class="o">.</span><span class="n">fits</span> <span class="o">--</span><span class="n">radius</span> <span class="mi">15</span> <span class="o">--</span><span class="n">prior</span><span class="o">-</span><span class="n">completeness</span> <span class="mf">0.9</span>
 </pre></div>
 </div>
 </div>

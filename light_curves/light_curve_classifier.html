@@ -528,7 +528,7 @@ document.write(`
 <p>This cell will install them if needed:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Uncomment the next line to install dependencies if needed.</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Uncomment the next line to install dependencies if needed.</span>
 <span class="c1"># !pip install -r requirements_light_curve_classifier.txt</span>
 </pre></div>
 </div>
@@ -536,7 +536,7 @@ document.write(`
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">matplotlib.lines</span> <span class="kn">import</span> <span class="n">Line2D</span>
@@ -583,7 +583,7 @@ document.write(`
 <p>If you want to use your own sample, you can use the code <a class="reference external" href="https://nasa-fornax.github.io/fornax-demo-notebooks/light_curves/light_curve_generator.html">light_curve_generator.md</a> in this same repo to make the required pandas dataframe which you will need to run this notebook.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># First we want to load light curves made in the light curve generator notebook</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># First we want to load light curves made in the light curve generator notebook</span>
 
 <span class="c1"># The data is on google drive, this will download it for you and read it into</span>
 <span class="c1"># a pandas dataframe</span>
@@ -597,10 +597,23 @@ document.write(`
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading 1DrB-CWdBBBYuO0WzNnMl5uQnnckL7MWH into ./data/small_CLAGN_SDSS_df_lc.parquet... 
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Done.
+Unzipping...
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/runner/work/fornax-demo-notebooks/fornax-demo-notebooks/.tox/py311-buildhtml/lib/python3.11/site-packages/google_drive_downloader/google_drive_downloader.py:78: UserWarning: Ignoring `unzip` since &quot;1DrB-CWdBBBYuO0WzNnMl5uQnnckL7MWH&quot; does not look like a valid zip file
+  warnings.warn(&#39;Ignoring `unzip` since &quot;{}&quot; does not look like a valid zip file&#39;.format(file_id))
+</pre></div>
+</div>
+</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#get rid of indices set in the light curve code and reset them as needed</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#get rid of indices set in the light curve code and reset them as needed</span>
 <span class="c1">#before sktime algorithms</span>
 <span class="n">df_lc</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
 
@@ -609,6 +622,137 @@ document.write(`
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>objectid</th>
+      <th>label</th>
+      <th>band</th>
+      <th>time</th>
+      <th>flux</th>
+      <th>err</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>15</td>
+      <td>MacLeod 19</td>
+      <td>SAXGRBMGRB</td>
+      <td>50335.861597</td>
+      <td>0.100000</td>
+      <td>0.1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>240</td>
+      <td>SDSS</td>
+      <td>SAXGRBMGRB</td>
+      <td>51601.900023</td>
+      <td>0.100000</td>
+      <td>0.1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>364</td>
+      <td>SDSS</td>
+      <td>SAXGRBMGRB</td>
+      <td>50594.078796</td>
+      <td>0.100000</td>
+      <td>0.1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>169</td>
+      <td>SDSS</td>
+      <td>SAXGRBMGRB</td>
+      <td>51373.759595</td>
+      <td>0.100000</td>
+      <td>0.1</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>446</td>
+      <td>SDSS</td>
+      <td>SAXGRBMGRB</td>
+      <td>50991.525394</td>
+      <td>0.100000</td>
+      <td>0.1</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>458312</th>
+      <td>453</td>
+      <td>SDSS</td>
+      <td>K2</td>
+      <td>60148.521180</td>
+      <td>1.020081</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>458313</th>
+      <td>453</td>
+      <td>SDSS</td>
+      <td>K2</td>
+      <td>60149.195427</td>
+      <td>1.014221</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>458314</th>
+      <td>453</td>
+      <td>SDSS</td>
+      <td>K2</td>
+      <td>60149.930970</td>
+      <td>1.009093</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>458315</th>
+      <td>453</td>
+      <td>SDSS</td>
+      <td>K2</td>
+      <td>60150.584787</td>
+      <td>1.003534</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>458316</th>
+      <td>453</td>
+      <td>SDSS</td>
+      <td>K2</td>
+      <td>60151.238603</td>
+      <td>1.000992</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+<p>458317 rows × 6 columns</p>
+</div></div></div>
 </div>
 </section>
 <section id="data-prep">
@@ -621,7 +765,7 @@ that are known to be sparse.  Most ML algorithms cannot handle sparse data so on
 is to remove the sparsest datasets.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">##what are the unique set of bands included in our light curves</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">##what are the unique set of bands included in our light curves</span>
 <span class="n">df_lc</span><span class="o">.</span><span class="n">band</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
 
 <span class="c1">#get rid of some of the bands that don&#39;t have enough data for all the sources</span>
@@ -640,7 +784,7 @@ is to remove the sparsest datasets.</p>
 <p>All CLAGN start in the dataset as having labels based on their discovery paper.  Because we want one sample with all known CLAGN, we change those discovery names to be simply “CLAGN” for all CLAGN, regardless of origin.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df_lc</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;MacLeod 16&#39;</span><span class="p">,</span> <span class="s1">&#39;CLAGN&#39;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_lc</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;MacLeod 16&#39;</span><span class="p">,</span> <span class="s1">&#39;CLAGN&#39;</span><span class="p">)</span>
 <span class="n">df_lc</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;LaMassa 15&#39;</span><span class="p">,</span> <span class="s1">&#39;CLAGN&#39;</span><span class="p">)</span>
 <span class="n">df_lc</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;Yang 18&#39;</span><span class="p">,</span> <span class="s1">&#39;CLAGN&#39;</span><span class="p">)</span>
 <span class="n">df_lc</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;Lyu 22&#39;</span><span class="p">,</span> <span class="s1">&#39;CLAGN&#39;</span><span class="p">)</span>
@@ -655,7 +799,12 @@ is to remove the sparsest datasets.</p>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">df_lc</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;objectid&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">ngroups</span><span class="p">,</span> <span class="s2">&quot;n objects before removing missing band data&quot;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">df_lc</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;objectid&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">ngroups</span><span class="p">,</span> <span class="s2">&quot;n objects before removing missing band data&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>451 n objects before removing missing band data
 </pre></div>
 </div>
 </div>
@@ -668,15 +817,22 @@ is to remove the sparsest datasets.</p>
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#chhose your own adventure, the bands from which you can choose are:</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#chhose your own adventure, the bands from which you can choose are:</span>
 <span class="n">df_lc</span><span class="o">.</span><span class="n">band</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([&#39;SAXGRBMGRB&#39;, &#39;G&#39;, &#39;BP&#39;, &#39;RP&#39;, &#39;panstarrs i&#39;, &#39;panstarrs y&#39;,
+       &#39;panstarrs z&#39;, &#39;panstarrs g&#39;, &#39;panstarrs r&#39;, &#39;zg&#39;, &#39;zi&#39;, &#39;zr&#39;,
+       &#39;W1&#39;, &#39;W2&#39;, &#39;k2&#39;], dtype=object)
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#plot a single band for all objects</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#plot a single band for all objects</span>
 <span class="n">band_of_interest</span> <span class="o">=</span> <span class="s1">&#39;zr&#39;</span>
 <span class="n">band_lc</span> <span class="o">=</span> <span class="n">df_lc</span><span class="p">[</span><span class="n">df_lc</span><span class="p">[</span><span class="s1">&#39;band&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">band_of_interest</span><span class="p">]</span>
 <span class="c1">#reset zero time to be start of that mission</span>
@@ -726,6 +882,16 @@ is to remove the sparsest datasets.</p>
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2 n objects CLAGN 
+34 n objects SDSS 
+</pre></div>
+</div>
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(1000.0, 1250.0)
+</pre></div>
+</div>
+<img alt="../_images/5741aaf2c91b7528112715e22795075286808c7b82d6c32c6991cdde170b9370.png" src="../_images/5741aaf2c91b7528112715e22795075286808c7b82d6c32c6991cdde170b9370.png" />
+</div>
 </div>
 </section>
 <section id="clean-the-dataset-of-unwanted-data">
@@ -761,7 +927,7 @@ fewer data points.</p></li>
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#drop rows which have Nans</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#drop rows which have Nans</span>
 <span class="n">df_lc</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">inplace</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
 
 <span class="c1">#drop rows with zero flux</span>
@@ -784,6 +950,15 @@ fewer data points.</p></li>
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>451 n objects after sigma clipping
+18 objects without W1  were removed
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>431 n objects after cleaning the data
+</pre></div>
+</div>
+</div>
 </div>
 </section>
 <section id="missing-data">
@@ -797,11 +972,17 @@ fewer data points.</p></li>
 <p>Functions are inlcuded for both options.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#choose what to do with missing data...</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#choose what to do with missing data...</span>
 <span class="c1">#df_lc = missingdata_to_zeros(df_lc)</span>
 <span class="c1">#or</span>
 <span class="n">bands_to_keep</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;W1&#39;</span><span class="p">,</span><span class="s1">&#39;W2&#39;</span><span class="p">,</span><span class="s1">&#39;panstarrs g&#39;</span><span class="p">,</span><span class="s1">&#39;panstarrs i&#39;</span><span class="p">,</span> <span class="s1">&#39;panstarrs r&#39;</span><span class="p">,</span><span class="s1">&#39;panstarrs y&#39;</span><span class="p">,</span><span class="s1">&#39;panstarrs z&#39;</span><span class="p">,</span><span class="s1">&#39;zg&#39;</span><span class="p">,</span><span class="s1">&#39;zr&#39;</span><span class="p">]</span>
 <span class="n">df_lc</span> <span class="o">=</span> <span class="n">missingdata_drop_bands</span><span class="p">(</span><span class="n">df_lc</span><span class="p">,</span> <span class="n">bands_to_keep</span><span class="p">,</span> <span class="n">verbose</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>431 n objects before removing missing band data
+357 n objects after removing missing band data
 </pre></div>
 </div>
 </div>
@@ -813,15 +994,146 @@ fewer data points.</p></li>
 <p>It is important to choose the frequency over which the data is interpolated wisely.  Experimentation with treating this variable like a hyperparam and testing sktime algorithms shows slightly higher accuracy values for a suite of algorithms for a frequency of one interpolated observation per 60 days.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#what does the dataframe look like at this point in the code?</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#what does the dataframe look like at this point in the code?</span>
 <span class="n">df_lc</span>
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>objectid</th>
+      <th>label</th>
+      <th>band</th>
+      <th>time</th>
+      <th>flux</th>
+      <th>err</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>12489</th>
+      <td>1</td>
+      <td>CLAGN</td>
+      <td>panstarrs i</td>
+      <td>55174.305492</td>
+      <td>0.100490</td>
+      <td>0.001102</td>
+    </tr>
+    <tr>
+      <th>12490</th>
+      <td>1</td>
+      <td>CLAGN</td>
+      <td>panstarrs i</td>
+      <td>55174.308519</td>
+      <td>0.090206</td>
+      <td>0.000985</td>
+    </tr>
+    <tr>
+      <th>12491</th>
+      <td>1</td>
+      <td>CLAGN</td>
+      <td>panstarrs y</td>
+      <td>55416.614225</td>
+      <td>0.130497</td>
+      <td>0.007047</td>
+    </tr>
+    <tr>
+      <th>12492</th>
+      <td>1</td>
+      <td>CLAGN</td>
+      <td>panstarrs y</td>
+      <td>55416.625133</td>
+      <td>0.133000</td>
+      <td>0.006277</td>
+    </tr>
+    <tr>
+      <th>12493</th>
+      <td>1</td>
+      <td>CLAGN</td>
+      <td>panstarrs z</td>
+      <td>55427.627576</td>
+      <td>0.118545</td>
+      <td>0.002673</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>412825</th>
+      <td>458</td>
+      <td>SDSS</td>
+      <td>W2</td>
+      <td>58283.310746</td>
+      <td>1.793368</td>
+      <td>0.015925</td>
+    </tr>
+    <tr>
+      <th>412826</th>
+      <td>458</td>
+      <td>SDSS</td>
+      <td>W2</td>
+      <td>58490.115697</td>
+      <td>1.630802</td>
+      <td>0.017747</td>
+    </tr>
+    <tr>
+      <th>412827</th>
+      <td>458</td>
+      <td>SDSS</td>
+      <td>W2</td>
+      <td>58650.370860</td>
+      <td>1.674718</td>
+      <td>0.017944</td>
+    </tr>
+    <tr>
+      <th>412828</th>
+      <td>458</td>
+      <td>SDSS</td>
+      <td>W2</td>
+      <td>58854.359409</td>
+      <td>1.475255</td>
+      <td>0.017491</td>
+    </tr>
+    <tr>
+      <th>412829</th>
+      <td>458</td>
+      <td>SDSS</td>
+      <td>W2</td>
+      <td>59014.562406</td>
+      <td>1.400782</td>
+      <td>0.017341</td>
+    </tr>
+  </tbody>
+</table>
+<p>346191 rows × 6 columns</p>
+</div></div></div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#this cell takes 13seconds to run on the sample of 458 sources</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#this cell takes 13seconds to run on the sample of 458 sources</span>
 <span class="c1">#change this to change the frequency of the time array</span>
 <span class="n">final_freq_interpol</span> <span class="o">=</span> <span class="mi">60</span>  <span class="c1">#this is the timescale of interpolation in units of days</span>
 
@@ -835,6 +1147,9 @@ fewer data points.</p></li>
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<img alt="../_images/4165ec8eac959edb90cb83dc35406d251bbadab0c0744a60e8a4452c6e46c89a.png" src="../_images/4165ec8eac959edb90cb83dc35406d251bbadab0c0744a60e8a4452c6e46c89a.png" />
+</div>
 </div>
 </section>
 <section id="restructure-dataframe">
@@ -846,7 +1161,7 @@ fewer data points.</p></li>
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#reformat the data to have columns be the different flux bands</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#reformat the data to have columns be the different flux bands</span>
 <span class="n">df_lc</span> <span class="o">=</span> <span class="n">reformat_df</span><span class="p">(</span><span class="n">df_lc</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -854,13 +1169,324 @@ fewer data points.</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#look at a single object to see what this array looks like</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#look at a single object to see what this array looks like</span>
 <span class="n">ob_of_interest</span> <span class="o">=</span> <span class="mi">12</span>
 <span class="n">singleob</span> <span class="o">=</span> <span class="n">df_lc</span><span class="p">[</span><span class="n">df_lc</span><span class="p">[</span><span class="s1">&#39;objectid&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ob_of_interest</span><span class="p">]</span>
 <span class="n">singleob</span>
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>objectid</th>
+      <th>label</th>
+      <th>time</th>
+      <th>flux_W1</th>
+      <th>flux_W2</th>
+      <th>flux_panstarrs_g</th>
+      <th>flux_panstarrs_i</th>
+      <th>flux_panstarrs_r</th>
+      <th>flux_panstarrs_y</th>
+      <th>flux_panstarrs_z</th>
+      <th>...</th>
+      <th>flux_zr</th>
+      <th>err_W1</th>
+      <th>err_W2</th>
+      <th>err_panstarrs_g</th>
+      <th>err_panstarrs_i</th>
+      <th>err_panstarrs_r</th>
+      <th>err_panstarrs_y</th>
+      <th>err_panstarrs_z</th>
+      <th>err_zg</th>
+      <th>err_zr</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>850</th>
+      <td>12</td>
+      <td>CLAGN</td>
+      <td>54985.275796</td>
+      <td>0.171426</td>
+      <td>0.183990</td>
+      <td>0.014124</td>
+      <td>0.083940</td>
+      <td>0.043920</td>
+      <td>0.068864</td>
+      <td>0.085598</td>
+      <td>...</td>
+      <td>0.065361</td>
+      <td>0.007365</td>
+      <td>0.018009</td>
+      <td>0.00128</td>
+      <td>0.002069</td>
+      <td>0.002013</td>
+      <td>0.007337</td>
+      <td>0.004</td>
+      <td>0.003695</td>
+      <td>0.00521</td>
+    </tr>
+    <tr>
+      <th>851</th>
+      <td>12</td>
+      <td>CLAGN</td>
+      <td>55045.275796</td>
+      <td>0.171426</td>
+      <td>0.183990</td>
+      <td>0.014124</td>
+      <td>0.083940</td>
+      <td>0.043920</td>
+      <td>0.068864</td>
+      <td>0.085598</td>
+      <td>...</td>
+      <td>0.065361</td>
+      <td>0.007365</td>
+      <td>0.018009</td>
+      <td>0.00128</td>
+      <td>0.002069</td>
+      <td>0.002013</td>
+      <td>0.007337</td>
+      <td>0.004</td>
+      <td>0.003695</td>
+      <td>0.00521</td>
+    </tr>
+    <tr>
+      <th>852</th>
+      <td>12</td>
+      <td>CLAGN</td>
+      <td>55105.275796</td>
+      <td>0.171426</td>
+      <td>0.183990</td>
+      <td>0.014124</td>
+      <td>0.083940</td>
+      <td>0.043920</td>
+      <td>0.068864</td>
+      <td>0.085598</td>
+      <td>...</td>
+      <td>0.065361</td>
+      <td>0.007365</td>
+      <td>0.018009</td>
+      <td>0.00128</td>
+      <td>0.002069</td>
+      <td>0.002013</td>
+      <td>0.007337</td>
+      <td>0.004</td>
+      <td>0.003695</td>
+      <td>0.00521</td>
+    </tr>
+    <tr>
+      <th>853</th>
+      <td>12</td>
+      <td>CLAGN</td>
+      <td>55165.275796</td>
+      <td>0.171426</td>
+      <td>0.183990</td>
+      <td>0.014124</td>
+      <td>0.083940</td>
+      <td>0.043920</td>
+      <td>0.068864</td>
+      <td>0.085598</td>
+      <td>...</td>
+      <td>0.065361</td>
+      <td>0.007365</td>
+      <td>0.018009</td>
+      <td>0.00128</td>
+      <td>0.002069</td>
+      <td>0.002013</td>
+      <td>0.007337</td>
+      <td>0.004</td>
+      <td>0.003695</td>
+      <td>0.00521</td>
+    </tr>
+    <tr>
+      <th>854</th>
+      <td>12</td>
+      <td>CLAGN</td>
+      <td>55225.275796</td>
+      <td>0.171426</td>
+      <td>0.183990</td>
+      <td>0.014124</td>
+      <td>0.083940</td>
+      <td>0.043920</td>
+      <td>0.068864</td>
+      <td>0.085598</td>
+      <td>...</td>
+      <td>0.065361</td>
+      <td>0.007365</td>
+      <td>0.018009</td>
+      <td>0.00128</td>
+      <td>0.002069</td>
+      <td>0.002013</td>
+      <td>0.007337</td>
+      <td>0.004</td>
+      <td>0.003695</td>
+      <td>0.00521</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>930</th>
+      <td>12</td>
+      <td>CLAGN</td>
+      <td>59785.275796</td>
+      <td>0.193756</td>
+      <td>0.167459</td>
+      <td>0.024364</td>
+      <td>0.059121</td>
+      <td>0.042884</td>
+      <td>0.097297</td>
+      <td>0.087929</td>
+      <td>...</td>
+      <td>0.057135</td>
+      <td>0.007365</td>
+      <td>0.018009</td>
+      <td>0.00128</td>
+      <td>0.002069</td>
+      <td>0.002013</td>
+      <td>0.007337</td>
+      <td>0.004</td>
+      <td>0.003695</td>
+      <td>0.00521</td>
+    </tr>
+    <tr>
+      <th>931</th>
+      <td>12</td>
+      <td>CLAGN</td>
+      <td>59845.275796</td>
+      <td>0.193756</td>
+      <td>0.167459</td>
+      <td>0.024364</td>
+      <td>0.059121</td>
+      <td>0.042884</td>
+      <td>0.097297</td>
+      <td>0.087929</td>
+      <td>...</td>
+      <td>0.061469</td>
+      <td>0.007365</td>
+      <td>0.018009</td>
+      <td>0.00128</td>
+      <td>0.002069</td>
+      <td>0.002013</td>
+      <td>0.007337</td>
+      <td>0.004</td>
+      <td>0.003695</td>
+      <td>0.00521</td>
+    </tr>
+    <tr>
+      <th>932</th>
+      <td>12</td>
+      <td>CLAGN</td>
+      <td>59905.275796</td>
+      <td>0.193756</td>
+      <td>0.167459</td>
+      <td>0.024364</td>
+      <td>0.059121</td>
+      <td>0.042884</td>
+      <td>0.097297</td>
+      <td>0.087929</td>
+      <td>...</td>
+      <td>0.064667</td>
+      <td>0.007365</td>
+      <td>0.018009</td>
+      <td>0.00128</td>
+      <td>0.002069</td>
+      <td>0.002013</td>
+      <td>0.007337</td>
+      <td>0.004</td>
+      <td>0.003695</td>
+      <td>0.00521</td>
+    </tr>
+    <tr>
+      <th>933</th>
+      <td>12</td>
+      <td>CLAGN</td>
+      <td>59965.275796</td>
+      <td>0.193756</td>
+      <td>0.167459</td>
+      <td>0.024364</td>
+      <td>0.059121</td>
+      <td>0.042884</td>
+      <td>0.097297</td>
+      <td>0.087929</td>
+      <td>...</td>
+      <td>0.063702</td>
+      <td>0.007365</td>
+      <td>0.018009</td>
+      <td>0.00128</td>
+      <td>0.002069</td>
+      <td>0.002013</td>
+      <td>0.007337</td>
+      <td>0.004</td>
+      <td>0.003695</td>
+      <td>0.00521</td>
+    </tr>
+    <tr>
+      <th>934</th>
+      <td>12</td>
+      <td>CLAGN</td>
+      <td>60025.275796</td>
+      <td>0.193756</td>
+      <td>0.167459</td>
+      <td>0.024364</td>
+      <td>0.059121</td>
+      <td>0.042884</td>
+      <td>0.097297</td>
+      <td>0.087929</td>
+      <td>...</td>
+      <td>0.063702</td>
+      <td>0.007365</td>
+      <td>0.018009</td>
+      <td>0.00128</td>
+      <td>0.002069</td>
+      <td>0.002013</td>
+      <td>0.007337</td>
+      <td>0.004</td>
+      <td>0.003695</td>
+      <td>0.00521</td>
+    </tr>
+  </tbody>
+</table>
+<p>85 rows × 21 columns</p>
+</div></div></div>
 </div>
 </section>
 <section id="normalize">
@@ -870,7 +1496,7 @@ fewer data points.</p></li>
 <p>We chose to normalize by the maximum flux in one band, and not median or mean because there are some objects where the median flux = 0.0 if we did a replacement by zeros for missing data.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#normalize by W1 band</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#normalize by W1 band</span>
 <span class="n">df_lc</span> <span class="o">=</span> <span class="n">local_normalization_max</span><span class="p">(</span><span class="n">df_lc</span><span class="p">,</span> <span class="n">norm_column</span> <span class="o">=</span> <span class="s2">&quot;flux_W1&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -889,7 +1515,7 @@ fewer data points.</p></li>
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># need to make a datetime column</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># need to make a datetime column</span>
 <span class="n">df_lc</span><span class="p">[</span><span class="s1">&#39;datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mjd_to_datetime</span><span class="p">(</span><span class="n">df_lc</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -897,7 +1523,7 @@ fewer data points.</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#save this dataframe to use for the ML below so we don&#39;t have to make it every time</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#save this dataframe to use for the ML below so we don&#39;t have to make it every time</span>
 <span class="n">parquet_savename</span> <span class="o">=</span> <span class="s1">&#39;output/df_lc_ML.parquet&#39;</span>
 <span class="c1">#df_lc.to_parquet(parquet_savename)</span>
 <span class="c1">#print(&quot;file saved!&quot;)</span>
@@ -911,7 +1537,7 @@ fewer data points.</p></li>
 <h2>3. Prep for ML algorithms<a class="headerlink" href="#prep-for-ml-algorithms" title="Link to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># could load a previously saved file in order to plot</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># could load a previously saved file in order to plot</span>
 <span class="c1">#parquet_loadname = &#39;output/df_lc_ML.parquet&#39;</span>
 <span class="c1">#df_lc = MultiIndexDFObject()</span>
 <span class="c1">#df_lc.data = pd.read_parquet(parquet_loadname)</span>
@@ -922,7 +1548,7 @@ fewer data points.</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#try dropping the uncertainty columns as variables for sktime</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#try dropping the uncertainty columns as variables for sktime</span>
 <span class="n">df_lc</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;err_panstarrs_g&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_panstarrs_i&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_panstarrs_r&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_panstarrs_y&#39;</span><span class="p">,</span>
                       <span class="s1">&#39;err_panstarrs_z&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_W1&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_W2&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_zg&#39;</span><span class="p">,</span>	<span class="s1">&#39;err_zr&#39;</span><span class="p">],</span> <span class="n">inplace</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
 
@@ -937,7 +1563,7 @@ fewer data points.</p></li>
 <p>We use sklearn’s train test split to randomly split the data into training and testing datasets.  Because thre are uneven numbers of each type (many more SDSS than CLAGN), we want to make sure to stratify evenly by type.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#divide the dataframe into features and labels for ML algorithms</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#divide the dataframe into features and labels for ML algorithms</span>
 <span class="n">labels</span> <span class="o">=</span> <span class="n">df_lc</span><span class="p">[[</span><span class="s2">&quot;objectid&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;objectid&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">label</span>
 <span class="n">df_lc</span> <span class="o">=</span> <span class="n">df_lc</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s2">&quot;objectid&quot;</span><span class="p">,</span> <span class="s2">&quot;datetime&quot;</span><span class="p">])</span>
 </pre></div>
@@ -946,7 +1572,7 @@ fewer data points.</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">test_size</span> <span class="o">=</span> <span class="mf">0.25</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">test_size</span> <span class="o">=</span> <span class="mf">0.25</span>
 
 <span class="c1">#want a stratified split based on label</span>
 <span class="n">train_ix</span><span class="p">,</span> <span class="n">test_ix</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">df_lc</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">stratify</span> <span class="o">=</span> <span class="n">labels</span><span class="p">,</span> <span class="n">shuffle</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span> <span class="o">=</span> <span class="mi">43</span><span class="p">,</span> <span class="n">test_size</span> <span class="o">=</span> <span class="n">test_size</span><span class="p">)</span>
@@ -965,6 +1591,9 @@ fewer data points.</p></li>
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<img alt="../_images/aa7e5a161e8790a7fedb1e6e060c4a990e31002d4c71c2ca0f517f7bb8bd57f6.png" src="../_images/aa7e5a161e8790a7fedb1e6e060c4a990e31002d4c71c2ca0f517f7bb8bd57f6.png" />
+</div>
 </div>
 </section>
 </section>
@@ -978,17 +1607,62 @@ fewer data points.</p></li>
 <p>This test needs to pass in order for sktime to run</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#ask sktime if it likes the data type of X_train</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#ask sktime if it likes the data type of X_train</span>
 <span class="c1">#if you change any of the functions or cells above this one, it is a good idea to</span>
 <span class="c1"># look at the below output to make sure you haven&#39;t introduced any NaNs or unequal length series</span>
 <span class="n">check_is_mtype</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">mtype</span><span class="o">=</span><span class="s2">&quot;pd-multiindex&quot;</span><span class="p">,</span> <span class="n">scitype</span><span class="o">=</span><span class="s2">&quot;Panel&quot;</span><span class="p">,</span> <span class="n">return_metadata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(True,
+ None,
+ {&#39;is_univariate&#39;: False,
+  &#39;is_empty&#39;: False,
+  &#39;has_nans&#39;: np.False_,
+  &#39;n_features&#39;: 9,
+  &#39;feature_names&#39;: [&#39;flux_W1&#39;,
+   &#39;flux_W2&#39;,
+   &#39;flux_panstarrs_g&#39;,
+   &#39;flux_panstarrs_i&#39;,
+   &#39;flux_panstarrs_r&#39;,
+   &#39;flux_panstarrs_y&#39;,
+   &#39;flux_panstarrs_z&#39;,
+   &#39;flux_zg&#39;,
+   &#39;flux_zr&#39;],
+  &#39;dtypekind_dfip&#39;: [&lt;DtypeKind.FLOAT: 2&gt;,
+   &lt;DtypeKind.FLOAT: 2&gt;,
+   &lt;DtypeKind.FLOAT: 2&gt;,
+   &lt;DtypeKind.FLOAT: 2&gt;,
+   &lt;DtypeKind.FLOAT: 2&gt;,
+   &lt;DtypeKind.FLOAT: 2&gt;,
+   &lt;DtypeKind.FLOAT: 2&gt;,
+   &lt;DtypeKind.FLOAT: 2&gt;,
+   &lt;DtypeKind.FLOAT: 2&gt;],
+  &#39;feature_kind&#39;: [&lt;DtypeKind.FLOAT: 2&gt;,
+   &lt;DtypeKind.FLOAT: 2&gt;,
+   &lt;DtypeKind.FLOAT: 2&gt;,
+   &lt;DtypeKind.FLOAT: 2&gt;,
+   &lt;DtypeKind.FLOAT: 2&gt;,
+   &lt;DtypeKind.FLOAT: 2&gt;,
+   &lt;DtypeKind.FLOAT: 2&gt;,
+   &lt;DtypeKind.FLOAT: 2&gt;,
+   &lt;DtypeKind.FLOAT: 2&gt;],
+  &#39;n_instances&#39;: 267,
+  &#39;is_one_series&#39;: False,
+  &#39;is_equal_length&#39;: np.True_,
+  &#39;is_equally_spaced&#39;: True,
+  &#39;n_panels&#39;: 1,
+  &#39;is_one_panel&#39;: True,
+  &#39;mtype&#39;: &#39;pd-multiindex&#39;,
+  &#39;scitype&#39;: &#39;Panel&#39;})
+</pre></div>
+</div>
+</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#show the list of all possible classifiers that work with multivariate data</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#show the list of all possible classifiers that work with multivariate data</span>
 <span class="c1">#all_tags(estimator_types = &#39;classifier&#39;)</span>
 <span class="c1">#classifiers = all_estimators(&quot;classifier&quot;, filter_tags={&#39;capability:multivariate&#39;:True})</span>
 <span class="c1">#classifiers</span>
@@ -1001,7 +1675,7 @@ fewer data points.</p></li>
 <h3>4.1 A single Classifier<a class="headerlink" href="#a-single-classifier" title="Link to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
 <span class="c1">#this cell takes 35s to run on a sample of 267 light curves</span>
 
 <span class="c1">#setup the classifier</span>
@@ -1027,6 +1701,16 @@ fewer data points.</p></li>
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Accuracy of Random Interval Classifier: 0.7444444444444445
+</pre></div>
+</div>
+<img alt="../_images/668349cb4d86a5eb3b8d1b57427ce7df51877bf6ddc16b9d195371c632a0e85e.png" src="../_images/668349cb4d86a5eb3b8d1b57427ce7df51877bf6ddc16b9d195371c632a0e85e.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: user 2.14 s, sys: 1.81 s, total: 3.95 s
+Wall time: 1min 15s
+</pre></div>
+</div>
+</div>
 </div>
 </section>
 <section id="loop-over-a-bunch-of-classifiers">
@@ -1034,7 +1718,7 @@ fewer data points.</p></li>
 <p>Our method is to do a cursory check of a bunch of classifiers and then later drill down deeper on anything with good initial results.  We choose to run a loop over ~10 classifiers that seem promising and check the accuracy scores for each one.  Any classifier with a promising accuracy score could then be followed up with detailed hyperparameter tuning, or potentially with considering other classifiers in that same type.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#show the summary of the algorithms used and their accuracy score</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#show the summary of the algorithms used and their accuracy score</span>
 <span class="c1">#accscore_dict</span>
 </pre></div>
 </div>
@@ -1042,7 +1726,7 @@ fewer data points.</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#save statistics from these runs</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#save statistics from these runs</span>
 
 <span class="c1"># Serialize data into file:</span>
 <span class="c1">#json.dump( accscore_dict, open( &quot;output/accscore.json&quot;, &#39;w&#39; ) )</span>
@@ -1069,7 +1753,7 @@ fewer data points.</p></li>
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#read in a dataframe of our new sample:</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#read in a dataframe of our new sample:</span>
 <span class="c1"># we are going to cheat here and use the same file as we used for input to the above, but you should</span>
 <span class="c1"># replace this with your favorite sample run through the light_curve_generator in this same repo.</span>
 <span class="n">path_to_sample</span> <span class="o">=</span> <span class="s1">&#39;./data/small_CLAGN_SDSS_df_lc.parquet&#39;</span>
@@ -1080,7 +1764,7 @@ fewer data points.</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#get dataset in same format as what was run through sktime</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#get dataset in same format as what was run through sktime</span>
 <span class="c1">#This is not exactly the same as re-running the whole notebook on a different sample,</span>
 <span class="c1">#but it is pretty close.  We don&#39;t need to do all of the same cleaning because some of that</span>
 <span class="c1">#was to appease sktime in training the algorithms.</span>
@@ -1141,15 +1825,199 @@ fewer data points.</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#what does this look like to make sure we are on track</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#what does this look like to make sure we are on track</span>
 <span class="n">X_mysample</span>
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>flux_W1</th>
+      <th>flux_W2</th>
+      <th>flux_panstarrs_g</th>
+      <th>flux_panstarrs_i</th>
+      <th>flux_panstarrs_r</th>
+      <th>flux_panstarrs_y</th>
+      <th>flux_panstarrs_z</th>
+      <th>flux_zg</th>
+      <th>flux_zr</th>
+    </tr>
+    <tr>
+      <th>objectid</th>
+      <th>datetime</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="5" valign="top">1</th>
+      <th>2009-06-03 06:37:08.765742</th>
+      <td>1.000000</td>
+      <td>0.927367</td>
+      <td>0.140308</td>
+      <td>0.331437</td>
+      <td>0.267991</td>
+      <td>0.461279</td>
+      <td>0.464892</td>
+      <td>0.116756</td>
+      <td>0.286475</td>
+    </tr>
+    <tr>
+      <th>2009-08-02 06:37:08.765742</th>
+      <td>1.000000</td>
+      <td>0.927367</td>
+      <td>0.140308</td>
+      <td>0.331437</td>
+      <td>0.267991</td>
+      <td>0.461279</td>
+      <td>0.464892</td>
+      <td>0.116756</td>
+      <td>0.286475</td>
+    </tr>
+    <tr>
+      <th>2009-10-01 06:37:08.765742</th>
+      <td>1.000000</td>
+      <td>0.927367</td>
+      <td>0.140308</td>
+      <td>0.331437</td>
+      <td>0.267991</td>
+      <td>0.461279</td>
+      <td>0.464892</td>
+      <td>0.116756</td>
+      <td>0.286475</td>
+    </tr>
+    <tr>
+      <th>2009-11-30 06:37:08.765742</th>
+      <td>1.000000</td>
+      <td>0.927367</td>
+      <td>0.140308</td>
+      <td>0.331437</td>
+      <td>0.267991</td>
+      <td>0.461279</td>
+      <td>0.464892</td>
+      <td>0.116756</td>
+      <td>0.286475</td>
+    </tr>
+    <tr>
+      <th>2010-01-29 06:37:08.765742</th>
+      <td>1.000000</td>
+      <td>0.927367</td>
+      <td>0.140308</td>
+      <td>0.331437</td>
+      <td>0.267991</td>
+      <td>0.461279</td>
+      <td>0.464892</td>
+      <td>0.116756</td>
+      <td>0.286475</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th rowspan="5" valign="top">458</th>
+      <th>2022-07-25 06:37:08.765742</th>
+      <td>0.787245</td>
+      <td>0.568910</td>
+      <td>0.118627</td>
+      <td>0.414211</td>
+      <td>0.219828</td>
+      <td>0.393996</td>
+      <td>0.406282</td>
+      <td>0.125963</td>
+      <td>0.283218</td>
+    </tr>
+    <tr>
+      <th>2022-09-23 06:37:08.765742</th>
+      <td>0.787245</td>
+      <td>0.568910</td>
+      <td>0.118627</td>
+      <td>0.414211</td>
+      <td>0.219828</td>
+      <td>0.393996</td>
+      <td>0.406282</td>
+      <td>0.125963</td>
+      <td>0.311635</td>
+    </tr>
+    <tr>
+      <th>2022-11-22 06:37:08.765742</th>
+      <td>0.787245</td>
+      <td>0.568910</td>
+      <td>0.118627</td>
+      <td>0.414211</td>
+      <td>0.219828</td>
+      <td>0.393996</td>
+      <td>0.406282</td>
+      <td>0.135551</td>
+      <td>0.311296</td>
+    </tr>
+    <tr>
+      <th>2023-01-21 06:37:08.765742</th>
+      <td>0.787245</td>
+      <td>0.568910</td>
+      <td>0.118627</td>
+      <td>0.414211</td>
+      <td>0.219828</td>
+      <td>0.393996</td>
+      <td>0.406282</td>
+      <td>0.139684</td>
+      <td>0.305088</td>
+    </tr>
+    <tr>
+      <th>2023-03-22 06:37:08.765742</th>
+      <td>0.787245</td>
+      <td>0.568910</td>
+      <td>0.118627</td>
+      <td>0.414211</td>
+      <td>0.219828</td>
+      <td>0.393996</td>
+      <td>0.406282</td>
+      <td>0.127343</td>
+      <td>0.265804</td>
+    </tr>
+  </tbody>
+</table>
+<p>30345 rows × 9 columns</p>
+</div></div></div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#use the trained sktime algorithm to make predictions on the test dataset</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#use the trained sktime algorithm to make predictions on the test dataset</span>
 <span class="n">y_mysample</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_mysample</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1157,7 +2025,7 @@ fewer data points.</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#access the sample_table made in the light curve generator notebook</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#access the sample_table made in the light curve generator notebook</span>
 <span class="c1">#has information about the sample including ra &amp; dec</span>
 <span class="n">savename_sample</span> <span class="o">=</span> <span class="s1">&#39;./data/small_CLAGN_SDSS_sample.ecsv&#39;</span>
 <span class="n">gdd</span><span class="o">.</span><span class="n">download_file_from_google_drive</span><span class="p">(</span><span class="n">file_id</span><span class="o">=</span><span class="s1">&#39;1pSEKVP4LbrdWQK9ws3CaI90m3Z_2fazL&#39;</span><span class="p">,</span>
@@ -1167,10 +2035,23 @@ fewer data points.</p></li>
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading 1pSEKVP4LbrdWQK9ws3CaI90m3Z_2fazL into ./data/small_CLAGN_SDSS_sample.ecsv... 
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Done.
+Unzipping...
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/runner/work/fornax-demo-notebooks/fornax-demo-notebooks/.tox/py311-buildhtml/lib/python3.11/site-packages/google_drive_downloader/google_drive_downloader.py:78: UserWarning: Ignoring `unzip` since &quot;1pSEKVP4LbrdWQK9ws3CaI90m3Z_2fazL&quot; does not look like a valid zip file
+  warnings.warn(&#39;Ignoring `unzip` since &quot;{}&quot; does not look like a valid zip file&#39;.format(file_id))
+</pre></div>
+</div>
+</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#associate these predicted CLAGN with RA &amp; Dec</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#associate these predicted CLAGN with RA &amp; Dec</span>
 
 <span class="c1">#need to first associate objectid with each of y_mysample</span>
 <span class="c1">#make a new df with a column = objectid which</span>
@@ -1192,11 +2073,130 @@ fewer data points.</p></li>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#show the CLAGN candidates ra &amp; dec</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#show the CLAGN candidates ra &amp; dec</span>
 <span class="n">candidate_CLAGN</span>
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>objectid</th>
+      <th>predicted_label</th>
+      <th>coord.ra</th>
+      <th>coord.dec</th>
+      <th>label</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>CLAGN</td>
+      <td>29.990000</td>
+      <td>0.553010</td>
+      <td>LaMassa 15</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>CLAGN</td>
+      <td>5.796083</td>
+      <td>0.588203</td>
+      <td>Green 22</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>CLAGN</td>
+      <td>36.483625</td>
+      <td>0.507417</td>
+      <td>MacLeod 16</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>5</td>
+      <td>CLAGN</td>
+      <td>150.584042</td>
+      <td>45.157583</td>
+      <td>MacLeod 16</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>6</td>
+      <td>CLAGN</td>
+      <td>155.468083</td>
+      <td>46.754333</td>
+      <td>MacLeod 16</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>204</td>
+      <td>CLAGN</td>
+      <td>171.400690</td>
+      <td>54.382555</td>
+      <td>SDSS</td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>282</td>
+      <td>CLAGN</td>
+      <td>161.163170</td>
+      <td>38.759552</td>
+      <td>SDSS</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>314</td>
+      <td>CLAGN</td>
+      <td>259.412720</td>
+      <td>32.704313</td>
+      <td>SDSS</td>
+    </tr>
+    <tr>
+      <th>100</th>
+      <td>380</td>
+      <td>CLAGN</td>
+      <td>188.156210</td>
+      <td>66.414533</td>
+      <td>SDSS</td>
+    </tr>
+    <tr>
+      <th>101</th>
+      <td>415</td>
+      <td>CLAGN</td>
+      <td>200.730970</td>
+      <td>8.161559</td>
+      <td>SDSS</td>
+    </tr>
+  </tbody>
+</table>
+<p>102 rows × 5 columns</p>
+</div></div></div>
 </div>
 </section>
 <section id="conclusions">
