@@ -47,7 +47,25 @@ exclude_patterns += ['documentation/index.md',]
 exclude_patterns += ['documentation/notebook_review_process.md', 'spectroscopy/*', '*/code_src/*']
 
 # Myst-NB configuration
+# Override kernelspec.name for rendering for all the notebooks.
+# "python3" kernel is created by ipython.
+nb_kernel_rgx_aliases = {".*": "python3"}
+
 nb_execution_timeout = 900
+nb_execution_excludepatterns = []
+
+# Don't execute the forced photometry notebook until we base the CI on
+# the actual fornax image instead of the fresh installs
+# (aka tractor install pain).
+nb_execution_excludepatterns += ['multiband_photometry.md',]
+
+# We use the non-public IRSA bucket for ZTF data, cannot execute the generator
+# notebook until https://github.com/nasa-fornax/fornax-demo-notebooks/issues/311 is addressed
+nb_execution_excludepatterns += ['light_curve_generator.md',]
+
+# DTW distance runs too long, exclude notebooks for now, see
+# https://github.com/nasa-fornax/fornax-demo-notebooks/issues/324
+nb_execution_excludepatterns += ['ML_AGNzoo.md',]
 
 # -- Options for HTML output -------------------------------------------------
 
