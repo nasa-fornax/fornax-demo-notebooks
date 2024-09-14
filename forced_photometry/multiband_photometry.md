@@ -108,7 +108,10 @@ from photometry import Band
 from photometry import lookup_img_pair
 #from prepare_prf import prepare_prf
 
-# temporarily let the notebook start without tractor as dependency
+# This code is to parse cloud access information; currently in `code_src`, eventually will be part of pyvo
+import fornax
+
+# temporarily let the notebook start without tractor as a dependency
 try:
     from find_nconfsources import find_nconfsources
 except ImportError:
@@ -180,24 +183,6 @@ print("Number of objects: ", len(cosmos_table))
 ### Use the fornax cloud access API to obtain the IRAC data from the IRSA S3 bucket.
 
 Details here may change as the prototype code is being added to the appropriate libraries, as well as the data holding to the appropriate NGAP storage as opposed to IRSA resources.
-
-```{code-cell} ipython3
-# Temporary solution, remove when the fornax API is added to the image
-# This relies on the assumption that https://github.com/nasa-fornax/fornax-cloud-access-API is being cloned to this environment.
-# If it's not, then run a ``git clone https://github.com/nasa-fornax/fornax-cloud-access-API --depth=1`` from a terminal at the highest directory root.
-# You may need to update the fork if you forked it in the past
-
-import os
-if not os.path.exists('../../fornax-cloud-access-API'):
-    ! git clone https://github.com/nasa-fornax/fornax-cloud-access-API --depth=1 ../../fornax-cloud-access-API
-```
-
-```{code-cell} ipython3
-sys.path.append('../../fornax-cloud-access-API')
-
-import pyvo
-import fornax
-```
 
 ```{code-cell} ipython3
 # Getting the COSMOS address from the registry to follow PyVO user case approach. We could hardwire it.
@@ -796,10 +781,10 @@ nway_write_header('data/multiband_phot.fits', 'OPT', float((2*rad_in_arcmin/60)*
 ```
 
 ```{code-cell} ipython3
-# call nway
-!nway.py 'data/Chandra/COSMOS_chandra.fits' :ERROR_RADIUS 'data/multiband_phot.fits' 0.1 --out=data/Chandra/chandra_multiband.fits --radius 15 --prior-completeness 0.9
+%%bash
 
-#!/opt/conda/bin/nway.py 'data/Chandra/COSMOS_chandra.fits' :ERROR_RADIUS 'data/multiband_phot.fits' 0.1 --out=data/Chandra/chandra_multiband.fits --radius 15 --prior-completeness 0.9
+# call nway
+nway.py 'data/Chandra/COSMOS_chandra.fits' :ERROR_RADIUS 'data/multiband_phot.fits' 0.1 --out=data/Chandra/chandra_multiband.fits --radius 15 --prior-completeness 0.9
 ```
 
 ```{code-cell} ipython3
