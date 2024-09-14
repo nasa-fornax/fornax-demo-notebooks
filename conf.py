@@ -47,6 +47,10 @@ exclude_patterns += ['documentation/index.md',]
 exclude_patterns += ['documentation/notebook_review_process.md', 'spectroscopy/*', '*/code_src/*']
 
 # Myst-NB configuration
+# Override kernelspec.name for rendering for all the notebooks.
+# "python3" kernel is created by ipython.
+nb_kernel_rgx_aliases = {".*": "python3"}
+
 nb_execution_timeout = 900
 nb_execution_excludepatterns = []
 
