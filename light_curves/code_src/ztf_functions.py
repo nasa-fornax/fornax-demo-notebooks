@@ -16,14 +16,10 @@ from data_structures import MultiIndexDFObject
 DATARELEASE = "dr18"
 BUCKET = "irsa-mast-tike-spitzer-data"
 CATALOG_ROOT = f"{BUCKET}/data/ZTF/lc/lc_{DATARELEASE}/"
-
-# get a list of files in the dataset using the checksums file
-CATALOG_FILES = (
-    pd.read_table(f"s3://{CATALOG_ROOT}checksum.md5", sep="\s+", names=["md5", "path"], usecols=["path"])
-    .squeeze()  # there's only 1 column. squeeze it into a Series
-    .str.removeprefix("./")
-    .to_list()
-)
+# We need a list of files in the dataset, but it's fairly large and we may need to send it
+# into multiple background processes. So we'll use a global variable, but lazy-load it
+# to avoid hitting the S3 bucket when this module is imported.
+CATALOG_FILES = None
 
 
 def ztf_get_lightcurves(sample_table, *, nworkers=6, match_radius=1/3600):
@@ -181,6 +177,16 @@ def load_lightcurves(locations_df, nworkers=6, chunksize=100):
     # But if the TAP query found no matches, pd.concat (below) will throw a ValueError. Return now to avoid this.
     if len(locations_df.index) == 0:
         return pd.DataFrame()
+
+    # If CATALOG_FILES hasn't been loaded yet, do it now. We'll use the checksums file to get the list.
+    global CATALOG_FILES
+    if CATALOG_FILES is None:
+        CATALOG_FILES = (
+            pd.read_table(f"s3://{CATALOG_ROOT}checksum.md5", sep="\s+", names=["md5", "path"], usecols=["path"])
+            .squeeze()  # there's only 1 column. squeeze it into a Series
+            .str.removeprefix("./")
+            .to_list()
+        )
 
     # one group per parquet file
     location_grps = locations_df.groupby(["filtercode", "field", "ccdid", "qid"])
