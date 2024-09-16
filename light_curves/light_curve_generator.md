@@ -96,9 +96,9 @@ from plot_functions import create_figures
 from sample_selection import (clean_sample, get_green_sample, get_hon_sample, get_lamassa_sample, get_lopeznavas_sample,
     get_lyu_sample, get_macleod16_sample, get_macleod19_sample, get_ruan_sample, get_sdss_sample, get_sheng_sample, get_yang_sample)
 from tess_kepler_functions import tess_kepler_get_lightcurves
-# Note: WISE and ZTF data are temporarily located in a non-public AWS S3 bucket. It is automatically
-# available from the Fornax SMCE, but will require user credentials for access outside the SMCE.
 from wise_functions import wise_get_lightcurves
+# Note: ZTF data is temporarily located in a non-public AWS S3 bucket. It is automatically available
+# from the Fornax Science Console, but otherwise will require explicit user credentials.
 from ztf_functions import ztf_get_lightcurves
 ```
 
