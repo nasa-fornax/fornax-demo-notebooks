@@ -14,23 +14,23 @@ kernelspec:
 # Extract Multi-Wavelength Spectroscopy from Archival Data
 
 
-## Learning Goals    
+## Learning Goals
 By the end of this tutorial, you will be able to:
 
  &bull; automatically load a catalog of sources
- 
+
  &bull; search NASA and non-NASA resources for fully reduced spectra and load them using specutils
- 
+
  &bull; store the spectra in a Pandas multiindex dataframe
- 
+
  &bull; plot all the spectra of a given source
- 
- 
+
+
 ## Introduction:
 
 ### Motivation
-A user has a source (or a sample of sources) for which they want to obtain spectra covering ranges of wavelengths from the UV to the far-IR. The large amount of spectra available enables multi-wavelength spectroscopic studies, which is crucial to understand the physics of stars, galaxies, and AGN. However, gathering and analysing spectra is a difficult endeavor as the spectra are distributed over different archives and in addition they have different formats which complicates their handling. This notebook showcases a tool for the user to conveniently query the spectral archives and collect the spectra for a set of objects in a format that can be read in using common software such as the Python `specutils` package. For simplicity, we limit the tool to query already reduced and calibrated spectra. 
-The notebook may focus on the COSMOS field for now, which has a large overlap of spectroscopic surveys such as with SDSS, DESI, Keck, HST, JWST, Spitzer, and Herschel. In addition, the tool enables the capability to search and ingest spectra from Euclid and SPHEREx in the feature. For this to work, the `specutils` functions may have to be update or a wrapper has to be implemented. 
+A user has a source (or a sample of sources) for which they want to obtain spectra covering ranges of wavelengths from the UV to the far-IR. The large amount of spectra available enables multi-wavelength spectroscopic studies, which is crucial to understand the physics of stars, galaxies, and AGN. However, gathering and analysing spectra is a difficult endeavor as the spectra are distributed over different archives and in addition they have different formats which complicates their handling. This notebook showcases a tool for the user to conveniently query the spectral archives and collect the spectra for a set of objects in a format that can be read in using common software such as the Python `specutils` package. For simplicity, we limit the tool to query already reduced and calibrated spectra.
+The notebook may focus on the COSMOS field for now, which has a large overlap of spectroscopic surveys such as with SDSS, DESI, Keck, HST, JWST, Spitzer, and Herschel. In addition, the tool enables the capability to search and ingest spectra from Euclid and SPHEREx in the feature. For this to work, the `specutils` functions may have to be update or a wrapper has to be implemented.
 
 
 ### List of Spectroscopic Archives and Status
@@ -56,15 +56,15 @@ The ones with an asterisk (*) are the challenging ones.
 ## Input:
 
  &bull; Coordinates for a single source or a sample on the COSMOS field
- 
+
 
 
 ## Output:
- 
+
  &bull; A Pandas data frame including the spectra from different facilities
- 
+
  &bull; A plot comparing the different spectra extracted for each source
- 
+
 ## Non-standard Imports:
 
 &bull; ...
@@ -88,22 +88,24 @@ Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, D
 +++
 
 ### Datasets that were considered but didn't end up being used:
-#### IRTF: 
+#### IRTF:
     - https://irsa.ipac.caltech.edu/Missions/irtf.html \
     - The IRTF is a 3.2 meter telescope, optimized for infrared observations, and located at the summit of Mauna Kea, Hawaiʻi. \
     - large library of stellar spectra \
     - Not included here because the data are not currently available in an easily accessible, searchable format
-    
+
+
+## Imports
+
+This cell will install them if needed:
 
 ```{code-cell}
-# Ensure all dependencies are installed
-
-!pip install -r requirements.txt
+# Uncomment the next line to install dependencies if needed.
+# !pip install -r requirements_spectra_generator.txt
 ```
 
 ```{code-cell}
-## IMPORTS
-import sys, os
+import sys
 import numpy as np
 import os
 
@@ -200,12 +202,12 @@ We search a curated list of NASA astrophysics archives.  Because each archive is
 
 ### 2.1 IRSA Archive
 
-This archive includes spectra taken by 
+This archive includes spectra taken by
 
  &bull; Keck
- 
+
  &bull; Spitzer/IRS
- 
+
 
 
 ```{code-cell}
@@ -224,10 +226,10 @@ df_spec.append(df_spec_IRS)
 
 ### 2.2 MAST Archive
 
-This archive includes spectra taken by 
+This archive includes spectra taken by
 
  &bull; HST (including slit spectroscopy)
- 
+
  &bull; JWST (including MSA and slit spectroscopy)
 
 ```{code-cell}
@@ -242,7 +244,7 @@ df_spec.append(df_spec_HST)
 ```{code-cell}
 # Herschel PACS & SPIRE from ESA TAP using astroquery
 #This search is fully functional, but is commented out because it takes ~4 hours to run to completion
-herschel_radius = 1.1  
+herschel_radius = 1.1
 herschel_download_directory = 'data/herschel'
 
 #if not os.path.exists(herschel_download_directory):
