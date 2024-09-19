@@ -51,6 +51,8 @@ exclude_patterns += ['documentation/notebook_review_process.md', 'spectroscopy/*
 # "python3" kernel is created by ipython.
 nb_kernel_rgx_aliases = {".*": "python3"}
 
+nb_merge_streams = True
+
 nb_execution_timeout = 900
 nb_execution_excludepatterns = []
 
