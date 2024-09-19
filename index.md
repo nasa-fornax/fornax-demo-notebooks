@@ -14,6 +14,7 @@ caption: Tutorial Notebooks
 
 forced_photometry/README
 light_curves/README
+spectroscopy/README
 ```
 
 
