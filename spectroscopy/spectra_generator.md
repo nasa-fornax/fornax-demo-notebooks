@@ -1,18 +1,16 @@
 ---
-jupyter:
-  jupytext:
-    text_representation:
-      extension: .md
-      format_name: markdown
-      format_version: '1.3'
-      jupytext_version: 1.15.2
-  kernelspec:
-    display_name: Python 3 (ipykernel)
-    language: python
-    name: python3
+jupytext:
+  text_representation:
+    extension: .md
+    format_name: myst
+    format_version: 0.13
+    jupytext_version: 1.16.4
+kernelspec:
+  display_name: Python 3 (ipykernel)
+  language: python
+  name: python3
 ---
 
-<!-- #region -->
 # Extract Multi-Wavelength Spectroscopy from Archival Data
 
 
@@ -87,7 +85,7 @@ Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, D
 &bull; Make more efficient (especially MAST searches)
 
 
-<!-- #endregion -->
++++
 
 ### Datasets that were considered but didn't end up being used:
 #### IRTF: 
@@ -97,13 +95,13 @@ Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, D
     - Not included here because the data are not currently available in an easily accessible, searchable format
     
 
-```python
+```{code-cell}
 # Ensure all dependencies are installed
 
 !pip install -r requirements.txt
 ```
 
-```python
+```{code-cell}
 ## IMPORTS
 import sys, os
 import numpy as np
@@ -133,7 +131,7 @@ from herschel_functions import Herschel_get_spec
 
 Here we will define the sample of galaxies. For now, we just enter some "random" coordinates to test the code.
 
-```python
+```{code-cell}
 coords = []
 labels = []
 
@@ -165,7 +163,6 @@ coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.
 labels.append("TestJWST")
 
 sample_table = clean_sample(coords, labels, precision=2.0* u.arcsecond , verbose=1)
-
 ```
 
 ### 1.2 Write out your sample to disk
@@ -174,7 +171,7 @@ At this point you may wish to write out your sample to disk and reuse that in fu
 
 For the format of the save file, we would suggest to choose from various formats that fully support astropy objects(eg., SkyCoord).  One example that works is Enhanced Character-Separated Values or ['ecsv'](https://docs.astropy.org/en/stable/io/ascii/ecsv.html)
 
-```python
+```{code-cell}
 if not os.path.exists("./data"):
     os.mkdir("./data")
 sample_table.write('data/input_sample.ecsv', format='ascii.ecsv', overwrite = True)
@@ -184,14 +181,14 @@ sample_table.write('data/input_sample.ecsv', format='ascii.ecsv', overwrite = Tr
 
 Do only this step from this section when you have a previously generated sample table
 
-```python
+```{code-cell}
 sample_table = Table.read('data/input_sample.ecsv', format='ascii.ecsv')
 ```
 
 ### 1.4 Initialize data structure to hold the spectra
 Here, we initialize the MultiIndex data structure that will hold the spectra.
 
-```python
+```{code-cell}
 df_spec = MultiIndexDFObject()
 ```
 
@@ -199,6 +196,7 @@ df_spec = MultiIndexDFObject()
 
 We search a curated list of NASA astrophysics archives.  Because each archive is different, and in many cases each catalog is different, each function to access a catalog is necesarily specialized to the location and format of that particular catalog.
 
++++
 
 ### 2.1 IRSA Archive
 
@@ -210,15 +208,14 @@ This archive includes spectra taken by
  
 
 
-
-```python
+```{code-cell}
 %%time
 ## Get Keck Spectra (COSMOS only)
 df_spec_DEIMOS = KeckDEIMOS_get_spec(sample_table = sample_table, search_radius_arcsec=1)
 df_spec.append(df_spec_DEIMOS)
 ```
 
-```python
+```{code-cell}
 %%time
 ## Get Spitzer IRS Spectra
 df_spec_IRS = SpitzerIRS_get_spec(sample_table, search_radius_arcsec=1 , COMBINESPEC=False)
@@ -233,8 +230,7 @@ This archive includes spectra taken by
  
  &bull; JWST (including MSA and slit spectroscopy)
 
-
-```python
+```{code-cell}
 %%time
 ## Get Spectra for HST
 df_spec_HST = HST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/", verbose = False)
@@ -242,7 +238,8 @@ df_spec.append(df_spec_HST)
 ```
 
 ### 2.3 ESA Archive
-```python
+
+```{code-cell}
 # Herschel PACS & SPIRE from ESA TAP using astroquery
 #This search is fully functional, but is commented out because it takes ~4 hours to run to completion
 herschel_radius = 1.1  
@@ -255,17 +252,17 @@ herschel_download_directory = 'data/herschel'
 ```
 
 ### 2.4 SDSS Archive
-```python
+
+```{code-cell}
 %%time
 ## Get Spectra for JWST
 df_jwst = JWST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/", verbose = False)
 df_spec.append(df_jwst)
 ```
 
-
 This includes SDSS spectra.
 
-```python
+```{code-cell}
 %%time
 ## Get SDSS Spectra
 df_spec_SDSS = SDSS_get_spec(sample_table , search_radius_arcsec=5, data_release=17)
@@ -277,7 +274,7 @@ df_spec.append(df_spec_SDSS)
 This includes DESI spectra. Here, we use the `SPARCL` query. Note that this can also be used
 for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is included. Therefore, we will not include SDSS DR16 here (this is treated in the SDSS search above).
 
-```python
+```{code-cell}
 %%time
 ## Get DESI and BOSS spectra with SPARCL
 df_spec_DESIBOSS = DESIBOSS_get_spec(sample_table, search_radius_arcsec=5)
@@ -288,8 +285,7 @@ df_spec.append(df_spec_DESIBOSS)
 We show flux in mJy as a function of time for all available bands for each object. `show_nbr_figures` controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with `save_output`, they will be put in the output directory and labelled by sample number.
 
 
-
-```python
+```{code-cell}
 ### Plotting ####
 create_figures(df_spec = df_spec,
              bin_factor=5,
@@ -298,6 +294,6 @@ create_figures(df_spec = df_spec,
              )
 ```
 
-<!-- #raw -->
+```{raw-cell}
 
-<!-- #endraw -->
+```
