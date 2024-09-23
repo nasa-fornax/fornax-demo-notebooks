@@ -70,9 +70,9 @@ MAST, HEASARC, & IRSA Fornax teams
 
 This cell will install them if needed:
 
-```{code-cell} ipython3#
+```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-# !pip install -r requirements_light_curve_generator.txt
+!pip install -r requirements_light_curve_generator.txt
 ```
 
 ```{code-cell} ipython3
@@ -83,6 +83,11 @@ import time
 import astropy.units as u
 import pandas as pd
 from astropy.table import Table
+
+import lsdb
+from dask.distributed import Client
+
+import numpy as np
 
 # local code imports
 sys.path.append('code_src/')
@@ -98,8 +103,8 @@ from sample_selection import (clean_sample, get_green_sample, get_hon_sample, ge
 from tess_kepler_functions import tess_kepler_get_lightcurves
 # Note: WISE and ZTF data are temporarily located in a non-public AWS S3 bucket. It is automatically
 # available from the Fornax SMCE, but will require user credentials for access outside the SMCE.
-from wise_functions import wise_get_lightcurves
-from ztf_functions import ztf_get_lightcurves
+#from wise_functions import wise_get_lightcurves
+#from ztf_functions import ztf_get_lightcurves
 ```
 
 ## 1. Define the sample
@@ -124,17 +129,17 @@ labels = []
 #get_lyu_sample(coords, labels)  #z32022ApJ...927..227L
 #get_lopeznavas_sample(coords, labels)  #2022MNRAS.513L..57L
 #get_hon_sample(coords, labels)  #2022MNRAS.511...54H
-get_yang_sample(coords, labels)   #2018ApJ...862..109Y
+#get_yang_sample(coords, labels)   #2018ApJ...862..109Y
 
 # Get some "normal" QSOs
 # there are ~500K of these, so choose the number based on
 # a balance between speed of running the light curves and whatever
 # the ML algorithms would like to have
 
-# num_normal_QSO = 5000
-# zmin, zmax = 0, 10
-# randomize_z = False
-#get_sdss_sample(coords, labels, num=num_normal_QSO, zmin=zmin, zmax=zmax, randomize_z=randomize_z)
+num_normal_QSO = 300
+zmin, zmax = 0, 10
+randomize_z = False
+get_sdss_sample(coords, labels, num=num_normal_QSO, zmin=zmin, zmax=zmax, randomize_z=randomize_z)
 
 # Remove duplicates, attach an objectid to the coords,
 # convert to astropy table to keep all relevant info together
@@ -142,6 +147,10 @@ sample_table = clean_sample(coords, labels)
 
 #give this sample a name for use in saving files
 sample_name = "yang_CLAGN"
+```
+
+```{code-cell} ipython3
+sample_table
 ```
 
 ### 1.1 Build your own sample
@@ -265,6 +274,214 @@ df_lc.append(df_lc_panstarrs)
 print('Panstarrs search took:', time.time() - panstarrsstarttime, 's')
 ```
 
+```{code-cell} ipython3
+#panstarrs light curves from hipscat catalog using LSDB
+def panstarrs_get_lightcurves_lsdb(sample_table, radius):
+    """Searches panstarrs hipscat files for light curves from a list of input coordinates.  
+    
+    Parameters
+    ----------
+    sample_table : `~astropy.table.Table`
+        Table with the coordinates and journal reference labels of the sources
+    radius : float
+        search radius, how far from the source should the archives return results
+
+    Returns
+    -------
+    df_lc : MultiIndexDFObject
+        the main data structure to store all light curves
+    """
+    
+    #read in the hipscat object table to lsdb
+    panstarrs_object = lsdb.read_hipscat(
+        's3://stpubdata/panstarrs/ps1/public/hipscat/otmo', 
+        storage_options={'anon': True},
+        columns=[
+            "objID",  # PS1 ID
+            "raMean", "decMean",  # coordinates to use for cross-matching
+            "nStackDetections",  # some other data to use
+        ]
+    )
+    #read in the hipscat light curves to lsdb
+    panstarrs_detect = lsdb.read_hipscat(
+        's3://stpubdata/panstarrs/ps1/public/hipscat/detection', 
+        storage_options={'anon': True},
+        columns=[
+            "objID",  # PS1 object ID
+            "detectID",  # PS1 detection ID
+            "ra", "dec",
+            # light-curve stuff
+            "obsTime", "filterID", "psfFlux", "psfFluxErr",
+        ],
+    )
+    #convert astropy table to pandas dataframe
+    #special care for the SkyCoords in the table
+    sample_df = pd.DataFrame({'objectid': sample_table['objectid'],
+                          'ra_deg': sample_table['coord'].ra.deg,
+                          'dec_deg':sample_table['coord'].dec.deg,
+                          'label':sample_table['label']})
+    
+    #convert dataframe to hipscat
+    sample_lsdb = lsdb.from_dataframe(
+        sample_df, 
+        ra_column="ra_deg", 
+        dec_column="dec_deg", 
+        margin_threshold=10,
+        # Optimize partition size
+        drop_empty_siblings=True
+    )
+
+    #plan to cross match panstarrs object with my sample 
+    #only keep the best match
+    yang_ps = panstarrs_object.crossmatch(
+        sample_lsdb, 
+        radius_arcsec=radius, 
+        n_neighbors=1, 
+        suffixes=("", "")
+
+    )
+        
+    # plan to join that cross match with detections to get light-curves
+    yang_ps_lc = yang_ps.join(
+        panstarrs_detect,
+        left_on="objID",
+        right_on="objID",
+         output_catalog_name="yang_ps_lc",
+        suffixes = ["",""]
+    )
+    
+    # Create default local cluster
+    # here is where the actual work gets done
+    with Client():
+        #compute the cross match with object table
+        #and the join with the detections table
+        matched_df = yang_ps_lc.compute()
+    
+        
+    #cleanup the filter names to the expected letters
+    filter_id_to_name = dict(zip(range(1, 6), "grizy"))
+    if len(matched_df["filterID"]) > 0:
+        get_name_from_filter_id = np.vectorize(filter_id_to_name.get)
+        filtername = get_name_from_filter_id(matched_df["filterID"])
+    else:
+        # Handle the case where the array is empty
+        filtername = []
+    
+    # setup to build dataframe 
+    t_panstarrs = matched_df["obsTime"]
+    flux_panstarrs = matched_df['psfFlux']*1E3  # in mJy
+    err_panstarrs = matched_df['psfFluxErr'] *1E3
+    lab = matched_df['label']
+    objectid = matched_df['objectid']
+
+    #make the dataframe of light curves
+    df_lc = pd.DataFrame(
+        dict(flux=flux_panstarrs, 
+             err=err_panstarrs, 
+             time=t_panstarrs, 
+             objectid=objectid, 
+             band=filtername, 
+             label=lab)).set_index(["objectid","label", "band", "time"])
+
+    return df_lc
+```
+
+```{code-cell} ipython3
+panstarrsstarttime = time.time()
+
+panstarrs_search_radius_lsdb = 1.0 # search radius in arcsec
+# get panstarrs light curves
+df_lc_panstarrs = panstarrs_get_lightcurves_lsdb(sample_table, panstarrs_search_radius_lsdb)
+
+# add the resulting dataframe to all other archives
+df_lc.append(df_lc_panstarrs)
+
+print('Panstarrs search took:', time.time() - panstarrsstarttime, 's')
+
+# Warnings from the panstarrs query about both NESTED and margins are known issues
+```
+
+```{code-cell} ipython3
+df_lc_panstarrs
+```
+
+```{code-cell} ipython3
+#do some benchmarking
+
+num_QSO_list = [300, 3000, 30000]
+panstarrs_search_radius_lsdb = 1.0#/3600.0    # search radius = 1 arcsec
+panstarrs_search_radius = 1.0/3600.0    # search radius = 1 arcsec
+
+results= []
+for num_QSO in num_QSO_list:
+    coords =[]
+    labels = []
+
+    zmin, zmax = 0, 10
+    randomize_z = False
+    get_sdss_sample(coords, labels, num=num_QSO, zmin=zmin, zmax=zmax, randomize_z=randomize_z)
+
+    # Remove duplicates, attach an objectid to the coords,
+    # convert to astropy table to keep all relevant info together
+    sample_table = clean_sample(coords, labels)
+
+    #timing for lsdb version
+    starttime = time.time()
+    df_lc_panstarrs = panstarrs_get_lightcurves_lsdb(sample_table, radius=panstarrs_search_radius_lsdb)
+    
+    # add the resulting dataframe to all other archives
+    df_lc.append(df_lc_panstarrs)
+    endtime = time.time()
+    execution_time = endtime - starttime
+        
+    # Store the results
+    results.append({
+        'num_QSO': num_QSO,
+        'function_name': 'panstarrs_get_lightcurves_lsdb',
+        'execution_time': execution_time
+        })
+    #------
+
+    #timing for lsdb version
+    starttime = time.time()
+    df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius=panstarrs_search_radius)
+    
+    # add the resulting dataframe to all other archives
+    df_lc.append(df_lc_panstarrs)
+    endtime = time.time()
+    execution_time = endtime - starttime
+        
+    # Store the results
+    results.append({
+        'num_QSO': num_QSO,
+        'function_name': 'panstarrs_get_lightcurves',
+        'execution_time': execution_time
+        })
+```
+
+```{code-cell} ipython3
+#because this is a smal sample, I can visually check the cross matches
+first_instances_df = matched_df.drop_duplicates(subset="objectid", keep="first")
+first_instances_df[["objID", "objectid", "_dist_arcsec", "raMean", "decMean", "ra_deg", "dec_deg"
+]].sort_values(by=["_dist_arcsec"])
+```
+
+```{code-cell} ipython3
+import numpy as np
+filter_id_to_name = dict(zip(range(1, 6), "grizy"))
+get_name_from_filter_id = np.vectorize(filter_id_to_name.get)
+
+#take what I need for the light_curve_generator notebook
+filtername = get_name_from_filter_id(matched_df["filterID"])
+t_panstarrs = matched_df["obsTime"]
+flux_panstarrs = matched_df['psfFlux']*1E3  # in mJy
+err_panstarrs = matched_df['psfFluxErr'] *1E3
+lab = matched_df['label']
+objectid = matched_df['objectid']
+
+df_lc = pd.DataFrame(dict(flux=flux_panstarrs, err=err_panstarrs, time=t_panstarrs, objectid=objectid, band=filtername, label=lab)).set_index(["objectid","label", "band", "time"])
+```
+
 ### 2.5 MAST: TESS, Kepler and K2
 The function to retrieve lightcurves from these three missions currently uses the open source package [`lightKurve`](https://docs.lightkurve.org/index.html).  This search is not efficient at scale and we expect it to be replaced in the future.
 
@@ -362,7 +579,7 @@ n_workers = 8
 heasarc_kwargs = dict(catalog_error_radii={"FERMIGTRIG": "1.0", "SAXGRBMGRB": "3.0"})
 ztf_kwargs = dict(nworkers=None)  # the internal parallelization is incompatible with Pool
 wise_kwargs = dict(radius=1.0, bandlist=['W1', 'W2'])
-panstarrs_kwargs = dict(radius=1.0/3600.0)
+panstarrs_search_radius_lsdb = 1.0 # arcsec
 tess_kepler_kwargs = dict(radius=1.0)
 hcv_kwargs = dict(radius=1.0/3600.0)
 gaia_kwargs = dict(search_radius=1/3600, verbose=0)
@@ -381,7 +598,6 @@ with mp.Pool(processes=n_workers) as pool:
     pool.apply_async(heasarc_get_lightcurves, args=(sample_table,), kwds=heasarc_kwargs, callback=callback)
     pool.apply_async(ztf_get_lightcurves, args=(sample_table,), kwds=ztf_kwargs, callback=callback)
     pool.apply_async(wise_get_lightcurves, args=(sample_table,), kwds=wise_kwargs, callback=callback)
-    pool.apply_async(panstarrs_get_lightcurves, args=(sample_table,), kwds=panstarrs_kwargs, callback=callback)
     pool.apply_async(tess_kepler_get_lightcurves, args=(sample_table,), kwds=tess_kepler_kwargs, callback=callback)
     pool.apply_async(hcv_get_lightcurves, args=(sample_table,), kwds=hcv_kwargs, callback=callback)
     pool.apply_async(gaia_get_lightcurves, args=(sample_table,), kwds=gaia_kwargs, callback=callback)
@@ -390,10 +606,17 @@ with mp.Pool(processes=n_workers) as pool:
     pool.close()  # signal that no more jobs will be submitted to the pool
     pool.join()  # wait for all jobs to complete, including the callback
 
+# run panstarrs query outside of multiprocessing since it is using dask distributed under the hood
+# which doesn't work with multiprocessing, and dask is already parallelized
+df_lc_panstarrs = panstarrs_get_lightcurves_lsdb(sample_table, radius=panstarrs_search_radius_lsdb)
+parallel_df_lc.append(df_lc_panstarrs) # add the panstarrs dataframe to all other archives
+
 parallel_endtime = time.time()
 
 # LightKurve will return an "Error" when it doesn't find a match for a target
 # These are not real errors and can be safely ignored.
+
+# Warnings from the panstarrs query about both NESTED and margins are known issues
 ```
 
 ```{code-cell} ipython3
