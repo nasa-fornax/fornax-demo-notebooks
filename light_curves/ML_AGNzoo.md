@@ -4,11 +4,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.0
+    jupytext_version: 1.16.4
 kernelspec:
-  display_name: root *
+  display_name: science_demo
   language: python
-  name: conda-root-py
+  name: conda-env-science_demo-py
 ---
 
 # AGN Zoo: Comparison of AGN selected with different metrics
@@ -20,9 +20,8 @@ By the IPAC Science Platform Team, last edit: Feb 16th, 2024
 
 ## Learning Goals
 
-```
 By the end of this tutorial, you will:
-
+```
 - Work with multi-band lightcurve data
 - Learn high dimensional manifold of light curves with UMAPs and SOMs
 - Visualize and compare different samples on reduced dimension projections/grids
@@ -35,6 +34,8 @@ Active Galactic Nuclei (AGNs), some of the most powerful sources in the universe
 
 We use manifold learning and dimensionality reduction to learn the distribution of AGN lightcurves observed with different facilities. We mostly focus on UMAP ([Uniform Manifold Approximation and Projection, McInnes 2020](https://arxiv.org/pdf/1802.03426.pdf)) but also show SOM ([Self organizing Map, Kohonen 1990](https://ieeexplore.ieee.org/document/58325)) examples. The reduced 2D projections from these two unsupervised ML techniques reveal similarities and overlaps of different selection techniques. Coloring the projections with various statistical physical properties (e.g., mean brightness, fractional lightcurve variation) is informative of correlations of the selections technique with physics such as AGN variability. Using different parts of the EM in training (or in building the initial higher dimensional manifold) demonstrates how much information if any is in that part of the data for each labeling scheme, for example whether with ZTF optical light curves alone, we can identify sources with variability in WISE near IR bands. These techniques also have a potential for identifying targets of a specific class or characteristic for future follow up observations.
 
+## Runtime
+This notebook takes 160s to run to completion, after installs and imports.  This runtime was calculated using the Fornax 'Default Astrophyiscs' environment with the 'Large' server type with 16GB RAM and 4 CPU.  
 
 ## Imports
 Here are the libraries used in this network. They are also mostly mentioned in the requirements in case you don't have them installed.
@@ -50,7 +51,7 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-# !pip install -r requirements_ML_AGNzoo.txt
+#!pip install -r requirements_ML_AGNzoo.txt
 ```
 
 ```{code-cell} ipython3
@@ -689,8 +690,9 @@ for index, f in enumerate(fzr):
 ```{code-cell} ipython3
 plt.figure(figsize=(18,6))
 markersize=200
-#mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='manhattan',random_state=4).fit(data)
-mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric=dtw_distance,random_state=20).fit(data) #this distance takes long
+mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='manhattan',random_state=4).fit(data)
+#using dtw distance takes a long time
+#mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric=dtw_distance,random_state=20).fit(data) 
 
 
 ax1 = plt.subplot(1,3,2)
@@ -823,7 +825,7 @@ plt.tight_layout()
 ```
 
 ## 6) UMAP with different metrics/distances on ZTF+WISE
-DTW takes a bit longer compared to other metrics.
+DTW takes a bit longer compared to other metrics, so it is commented out in the cell below.
 
 ```{code-cell} ipython3
 plt.figure(figsize=(12,10))
@@ -844,12 +846,12 @@ for label, indices in (labc.items()):
 plt.axis('off')
 
 
-mapperg = umap.UMAP(n_neighbors=50,min_dist=0.9,metric=dtw_distance,random_state=20).fit(data) #this distance takes long
-ax2 = plt.subplot(2,2,3)
-ax2.set_title(r'DTW Distance, min_d=0.9,n_neighbors=50',size=12)
-for label, indices in (labc.items()):
-     cf = ax2.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
-plt.axis('off')
+#mapperg = umap.UMAP(n_neighbors=50,min_dist=0.9,metric=dtw_distance,random_state=20).fit(data) #this distance takes long
+#ax2 = plt.subplot(2,2,3)
+#ax2.set_title(r'DTW Distance, min_d=0.9,n_neighbors=50',size=12)
+#for label, indices in (labc.items()):
+#     cf = ax2.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
+#plt.axis('off')
 
 
 mapper = umap.UMAP(n_neighbors=50,min_dist=0.1,metric='manhattan',random_state=20).fit(data)
