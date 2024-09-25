@@ -19,7 +19,7 @@ from specutils import Spectrum1D
 import matplotlib.pyplot as plt
 
 
-def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose):
+def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose, delete_downloaded_data = True):
     '''
     Retrieves HST spectra for a list of sources and groups/stacks them.
     This main function runs two sub-functions:
@@ -37,6 +37,8 @@ def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose):
         separate data directory (for example "[datadir]/HST/" for HST data).
     verbose : `bool`
         Verbosity level. Set to True for extra talking.
+    delete_downloaded_data : `bool`, optional
+        If True, delete the downloaded data files. Default is True.
 
     Returns
     -------
@@ -47,7 +49,7 @@ def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose):
 
     ## Get the spectra
     print("Searching and Downloading Spectra... ")
-    df_jwst_all = JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose)
+    df_jwst_all = JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose, delete_downloaded_data)
     print("done")
     
     ## Group
@@ -58,7 +60,7 @@ def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose):
     return(df_jwst_group)
 
 
-def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose):
+def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose, delete_downloaded_data ):
     '''
     Retrieves HST spectra for a list of sources.
 
@@ -73,6 +75,8 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose):
         separate data directory (for example "[datadir]/HST/" for HST data).
     verbose : `bool`
         Verbosity level. Set to True for extra talking.
+    delete_downloaded_data : `bool`, optional
+        If True, delete the downloaded data files.
 
     Returns
     -------
@@ -171,6 +175,10 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose):
                                                  filter=[tab["filters"][jj]],
                                                 )).set_index(["objectid", "label", "filter", "mission"])
                     df_spec.append(dfsingle)
+
+                if delete_downloaded_data:
+                    shutil.rmtree(this_data_dir)
+
             
             else:
                 print("Nothing to download for source {}.".format(stab["label"]))
