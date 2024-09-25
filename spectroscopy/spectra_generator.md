@@ -70,7 +70,7 @@ The ones with an asterisk (*) are the challenging ones.
 &bull; ...
 ## Runtime
 
-As of 2024 August, this notebook takes ~300s to run to completion on Fornax using the 'Astrophysics Default Image' and the 'Large' server with 16GB RAM/ 4CPU.
+As of 2024 August, this notebook takes ~330s to run to completion on Fornax using the 'Astrophysics Default Image' and the 'Large' server with 16GB RAM/ 4CPU.
 
 ## Authors:
 Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, David Shupe
@@ -78,11 +78,6 @@ Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, D
 ## Acknowledgements:
 ...
 
-## Open Issues:
-
-&bull; Implement queries for: Herschel, Euclid (use mock data), SPHEREx (use mock data)
-&bull; Match to HEASARC
-&bull; Make more efficient (especially MAST searches)
 
 +++
 
@@ -100,13 +95,14 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-# !pip install -r requirements_spectra_generator.txt
+!pip install -r requirements_spectra_generator.txt
 ```
 
 ```{code-cell} ipython3
 import sys
 import numpy as np
 import os
+import time
 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -232,12 +228,27 @@ This archive includes spectra taken by
 ```{code-cell} ipython3
 %%time
 ## Get Spectra for HST
-df_spec_HST = HST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/", verbose = False)
+df_spec_HST = HST_get_spec(
+    sample_table , 
+    search_radius_arcsec = 0.5, 
+    datadir = "./data/", 
+    verbose = False, 
+    delete_downloaded_data = True
+)
 df_spec.append(df_spec_HST)
 ```
 
 ```{code-cell} ipython3
-
+%%time
+## Get Spectra for JWST
+df_jwst = JWST_get_spec(
+    sample_table , 
+    search_radius_arcsec = 0.5, 
+    datadir = "./data/", 
+    verbose = False,
+    delete_downloaded_data = True
+)
+df_spec.append(df_jwst)
 ```
 
 ### 2.3 ESA Archive
@@ -250,20 +261,11 @@ herschel_download_directory = 'data/herschel'
 
 #if not os.path.exists(herschel_download_directory):
 #    os.makedirs(herschel_download_directory, exist_ok=True)
-#df_spec_herschel =  Herschel_get_spec(sample_table, herschel_radius, herschel_download_directory, delete_tarfiles = True)
+#df_spec_herschel =  Herschel_get_spec(sample_table, herschel_radius, herschel_download_directory, delete_downloaded_data = True)
 #df_spec.append(df_spec_herschel)
 ```
 
 ### 2.4 SDSS Archive
-
-```{code-cell} ipython3
-%%time
-## Get Spectra for JWST
-df_jwst = JWST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/", verbose = False)
-df_spec.append(df_jwst)
-```
-
-This includes SDSS spectra.
 
 ```{code-cell} ipython3
 %%time
@@ -296,6 +298,6 @@ create_figures(df_spec = df_spec,
              )
 ```
 
-```{raw-cell}
+```{code-cell} ipython3
 
 ```
