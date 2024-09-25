@@ -415,8 +415,8 @@ def get_indices_by_label(labc, label):
     return labc.get(label, [])
 
 # Example usage
-u = labc.get('SDSS_QSO', [])
-dsdss = data[u, :]
+used = labc.get('SDSS_QSO', [])
+dsdss = data[used, :]
 asdss = sm.bmu_ind_to_xy(sm.project_data(dsdss))
 x, y = np.zeros(len(asdss)), np.zeros(len(asdss))
 k = 0
@@ -430,8 +430,8 @@ plt.subplot(3, 4, 2)
 plt.title('WISE_Variable', fontsize=15)
 cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('WISE_Variable', [])
-dwise = data[u, :]
+used = labc.get('WISE_Variable', [])
+dwise = data[used, :]
 awise = sm.bmu_ind_to_xy(sm.project_data(dwise))
 x, y = np.zeros(len(awise)), np.zeros(len(awise))
 k = 0
@@ -445,8 +445,8 @@ plt.subplot(3, 4, 3)
 plt.title('Optical_Variable', fontsize=15)
 cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('Optical_Variable', [])
-dcic = data[u, :]
+used = labc.get('Optical_Variable', [])
+dcic = data[used, :]
 acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
 x, y = np.zeros(len(acic)), np.zeros(len(acic))
 k = 0
@@ -461,8 +461,8 @@ plt.subplot(3, 4, 4)
 plt.title('Galex_Variable', fontsize=15)
 cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('Galex_Variable', [])
-dcic = data[u, :]
+used = labc.get('Galex_Variable', [])
+dcic = data[used, :]
 acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
 x, y = np.zeros(len(acic)), np.zeros(len(acic))
 k = 0
@@ -476,8 +476,8 @@ plt.subplot(3, 4, 5)
 plt.title('SPIDER_AGN', fontsize=15)
 cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('SPIDER_AGN', [])
-dcic = data[u, :]
+used = labc.get('SPIDER_AGN', [])
+dcic = data[used, :]
 acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
 x, y = np.zeros(len(acic)), np.zeros(len(acic))
 k = 0
@@ -491,8 +491,8 @@ plt.subplot(3, 4, 6)
 plt.title('SPIDER_AGNBL', fontsize=15)
 cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('SPIDER_AGNBL', [])
-dcic = data[u, :]
+used = labc.get('SPIDER_AGNBL', [])
+dcic = data[used, :]
 acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
 x, y = np.zeros(len(acic)), np.zeros(len(acic))
 k = 0
@@ -506,8 +506,8 @@ plt.subplot(3, 4, 7)
 plt.title('SPIDER_QSOBL', fontsize=15)
 cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('SPIDER_QSOBL', [])
-dcic = data[u, :]
+used = labc.get('SPIDER_QSOBL', [])
+dcic = data[used, :]
 acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
 x, y = np.zeros(len(acic)), np.zeros(len(acic))
 k = 0
@@ -521,8 +521,8 @@ plt.subplot(3, 4, 8)
 plt.title('SPIDER_BL', fontsize=15)
 cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('SPIDER_BL', [])
-dcic = data[u, :]
+used = labc.get('SPIDER_BL', [])
+dcic = data[used, :]
 acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
 x, y = np.zeros(len(acic)), np.zeros(len(acic))
 k = 0
@@ -536,8 +536,8 @@ plt.subplot(3, 4, 9)
 plt.title('Turn-off', fontsize=15)
 cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('Turn-off', [])
-dcic = data[u, :]
+used = labc.get('Turn-off', [])
+dcic = data[used, :]
 acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
 x, y = np.zeros(len(acic)), np.zeros(len(acic))
 k = 0
@@ -552,8 +552,8 @@ plt.subplot(3, 4, 10)
 plt.title('Turn-on', fontsize=15)
 cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('Turn-on', [])
-dcic = data[u, :]
+used = labc.get('Turn-on', [])
+dcic = data[used, :]
 acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
 x, y = np.zeros(len(acic)), np.zeros(len(acic))
 k = 0
@@ -567,8 +567,8 @@ plt.subplot(3, 4, 11)
 plt.title('TDE', fontsize=15)
 cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('TDE', [])
-dcic = data[u, :]
+used = labc.get('TDE', [])
+dcic = data[used, :]
 acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
 x, y = np.zeros(len(acic)), np.zeros(len(acic))
 k = 0
@@ -629,8 +629,8 @@ def get_indices_by_label(labc, label):
     return labc.get(label, [])
 
 # Example usage
-u = labc.get('SDSS_QSO', [])
-dsdss = data[u, :]
+used = labc.get('SDSS_QSO', [])
+dsdss = data[used, :]
 asdss = sm.bmu_ind_to_xy(sm.project_data(dsdss))
 x, y = np.zeros(len(asdss)), np.zeros(len(asdss))
 k = 0
@@ -644,8 +644,8 @@ plt.subplot(1, 4, 2)
 plt.title('WISE_Variable', fontsize=15)
 cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('WISE_Variable', [])
-dwise = data[u, :]
+used = labc.get('WISE_Variable', [])
+dwise = data[used, :]
 awise = sm.bmu_ind_to_xy(sm.project_data(dwise))
 x, y = np.zeros(len(awise)), np.zeros(len(awise))
 k = 0
@@ -659,8 +659,8 @@ plt.subplot(1, 4, 3)
 plt.title('Turn-on', fontsize=15)
 cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('Turn-on', [])
-dcic = data[u, :]
+used = labc.get('Turn-on', [])
+dcic = data[used, :]
 acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
 x, y = np.zeros(len(acic)), np.zeros(len(acic))
 k = 0
@@ -675,8 +675,8 @@ plt.subplot(1, 4, 4)
 plt.title('Turn-off', fontsize=15)
 cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('Turn-off', [])
-dcic = data[u, :]
+used = labc.get('Turn-off', [])
+dcic = data[used, :]
 acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
 x, y = np.zeros(len(acic)), np.zeros(len(acic))
 k = 0
