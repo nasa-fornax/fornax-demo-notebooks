@@ -4,11 +4,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.0
+    jupytext_version: 1.16.4
 kernelspec:
-  display_name: root *
+  display_name: science_demo
   language: python
-  name: conda-root-py
+  name: conda-env-science_demo-py
 ---
 
 # AGN Zoo: Comparison of AGN selected with different metrics
@@ -20,9 +20,8 @@ By the IPAC Science Platform Team, last edit: Feb 16th, 2024
 
 ## Learning Goals
 
-```
 By the end of this tutorial, you will:
-
+```
 - Work with multi-band lightcurve data
 - Learn high dimensional manifold of light curves with UMAPs and SOMs
 - Visualize and compare different samples on reduced dimension projections/grids
@@ -35,6 +34,8 @@ Active Galactic Nuclei (AGNs), some of the most powerful sources in the universe
 
 We use manifold learning and dimensionality reduction to learn the distribution of AGN lightcurves observed with different facilities. We mostly focus on UMAP ([Uniform Manifold Approximation and Projection, McInnes 2020](https://arxiv.org/pdf/1802.03426.pdf)) but also show SOM ([Self organizing Map, Kohonen 1990](https://ieeexplore.ieee.org/document/58325)) examples. The reduced 2D projections from these two unsupervised ML techniques reveal similarities and overlaps of different selection techniques. Coloring the projections with various statistical physical properties (e.g., mean brightness, fractional lightcurve variation) is informative of correlations of the selections technique with physics such as AGN variability. Using different parts of the EM in training (or in building the initial higher dimensional manifold) demonstrates how much information if any is in that part of the data for each labeling scheme, for example whether with ZTF optical light curves alone, we can identify sources with variability in WISE near IR bands. These techniques also have a potential for identifying targets of a specific class or characteristic for future follow up observations.
 
+### Runtime
+As of 2024 September, this notebook takes ~160s to run to completion (after installs and imports) on Fornax using the ‘Astrophysics Default Image’ environment and the ‘Large’ server with 16GB RAM/ 4CPU.
 
 ## Imports
 Here are the libraries used in this network. They are also mostly mentioned in the requirements in case you don't have them installed.
@@ -65,12 +66,15 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 import pandas as pd
 sys.path.append('code_src/')
-from ML_utils import unify_lc, unify_lc_gp, stat_bands, autopct_format, combine_bands,\
-normalize_clipmax_objects, shuffle_datalabel, dtw_distance, stretch_small_values_arctan, translate_bitwise_sum_to_labels, update_bitsums
+from ML_utils import (unify_lc, unify_lc_gp, stat_bands, autopct_format, combine_bands,
+                      normalize_clipmax_objects, shuffle_datalabel, dtw_distance,
+                      stretch_small_values_arctan, translate_bitwise_sum_to_labels, update_bitsums)
 from collections import Counter,OrderedDict
 
 import umap
-from sompy import * #using the SOMPY package from https://github.com/sevamoo/SOMPY
+
+# using the SOMPY package from https://github.com/sevamoo/SOMPY
+from sompy import *
 
 import logging
 
@@ -110,8 +114,10 @@ gdown 1gb2vWn0V2unstElGTTrHIIWIftHbXJvz -O ./data/df_lc_020724.parquet.gzip
 ```{code-cell} ipython3
 df_lc = pd.read_parquet('data/df_lc_020724.parquet.gzip')
 
-df_lc = df_lc[df_lc.index.get_level_values('label') != '64'] # remove 64 for SPIDER only as its too large compared to the rest of the labels
-df_lc = update_bitsums(df_lc) # remove all bitwise sums that had 64 in them
+# remove 64 for SPIDER only as its too large compared to the rest of the labels
+df_lc = df_lc[df_lc.index.get_level_values('label') != '64']
+# remove all bitwise sums that had 64 in them
+df_lc = update_bitsums(df_lc)
 ```
 
 ```{code-cell} ipython3
@@ -129,18 +135,19 @@ seen = Counter()
 for (objectid, label), singleobj in df_lc.groupby(level=["objectid", "label"]):
     bitwise_sum = int(label)
     active_labels = translate_bitwise_sum_to_labels(bitwise_sum)
-    #active_labels = translate_bitwise_sum_to_labels(label[0])
     seen.update(active_labels)
-#changing order of labels in dictionary only for text to be readable on the plot
-key_order = ('SDSS_QSO', 'SPIDER_AGN','SPIDER_BL','SPIDER_QSOBL', 'SPIDER_AGNBL',
-             'WISE_Variable','Optical_Variable','Galex_Variable','Turn-on', 'Turn-off','TDE')
+# changing order of labels in dictionary only for text to be readable on the plot
+key_order = ('SDSS_QSO', 'SPIDER_AGN', 'SPIDER_BL', 'SPIDER_QSOBL', 'SPIDER_AGNBL',
+             'WISE_Variable', 'Optical_Variable', 'Galex_Variable', 'Turn-on', 'Turn-off', 'TDE')
 new_queue = OrderedDict()
 for k in key_order:
     new_queue[k] = seen[k]
 
-plt.figure(figsize=(8,8))
-plt.title(r'Sample consists of:',size=15)
-h = plt.pie(new_queue.values(),labels=new_queue.keys(),autopct=autopct_format(new_queue.values()), textprops={'fontsize': 15},startangle=30,  labeldistance=1.1, wedgeprops = { 'linewidth' : 3, 'edgecolor' : 'white' }, colors=colors)
+plt.figure(figsize=(8, 8))
+plt.title(r'Sample consists of:', size=15)
+h = plt.pie(new_queue.values(), labels=new_queue.keys(), autopct=autopct_format(new_queue.values()),
+            textprops={'fontsize': 15}, startangle=30, labeldistance=1.1,
+            wedgeprops={'linewidth': 3, 'edgecolor': 'white'}, colors=colors)
 ```
 
 In this particular example, the largest subsamples of AGNs, all with a criteria on redshift (z<1), are from the optical spectra by the [SDSS quasar sample DR16Q](https://www.sdss4.org/dr17/algorithms/qso_catalog/), the value added SDSS spectra from [SPIDERS](https://www.sdss.org/dr18/bhm/programs/spiders/), and a subset of AGNs selected in MIR WISE bands based on their variability ([csv in data folder credit RChary](https://ui.adsabs.harvard.edu/abs/2019AAS...23333004P/abstract)). We also include some smaller samples from the literature to see where they sit compared to the rest of the population and if they are localized on the 2D projection. These include the Changing Look AGNs from the literature (e.g., [LaMassa et al. 2015](https://ui.adsabs.harvard.edu/abs/2015ApJ...800..144L/abstract), [Lyu et al. 2022](https://ui.adsabs.harvard.edu/abs/2022ApJ...927..227L/abstract), [Hon et al. 2022](https://ui.adsabs.harvard.edu/abs/2022MNRAS.511...54H/abstract)), a sample which showed variability in Galex UV images ([Wasleske et al. 2022](https://ui.adsabs.harvard.edu/abs/2022ApJ...933...37W/abstract)), a sample of variable sources identified in optical Palomar observarions ([Baldassare et al. 2020](https://ui.adsabs.harvard.edu/abs/2020ApJ...896...10B/abstract)), and the optically variable AGNs in the COSMOS field from a three year program on VLT([De Cicco et al. 2019](https://ui.adsabs.harvard.edu/abs/2019A%26A...627A..33D/abstract)). We also include 30 Tidal Disruption Event coordinates identified from ZTF light curves [Hammerstein et al. 2023](https://iopscience.iop.org/article/10.3847/1538-4357/aca283/meta).
@@ -149,34 +156,33 @@ In this particular example, the largest subsamples of AGNs, all with a criteria 
 seen = Counter()
 seen = df_lc.reset_index().groupby('band').objectid.nunique().to_dict()
 
-plt.figure(figsize=(20,4))
-plt.title(r'Number of lightcurves in each waveband in this sample:',size=20)
+plt.figure(figsize=(20, 4))
+plt.title(r'Number of lightcurves in each waveband in this sample:', size=20)
 h = plt.bar(seen.keys(), seen.values())
-plt.ylabel(r'#',size=20)
+plt.ylabel(r'#', size=20)
 ```
 
 The histogram shows the number of lightcurves which ended up in the multi-index data frame from each of the archive calls in different wavebands/filters.
 
 ```{code-cell} ipython3
-cadence = dict((el,[]) for el in seen.keys())
-timerange = dict((el,[]) for el in seen.keys())
+cadence = dict((el, []) for el in seen.keys())
+timerange = dict((el, []) for el in seen.keys())
 
 for (_, band), times in df_lc.reset_index().groupby(["objectid", "band"]).time:
     cadence[band].append(len(times))
     if times.max() - times.min() > 0:
         timerange[band].append(np.round(times.max() - times.min(), 1))
 
-plt.figure(figsize=(20,4))
+plt.figure(figsize=(20, 4))
 plt.title(r'Time range and cadence covered in each in each waveband averaged over this sample:')
 for el in cadence.keys():
-    #print(el,len(cadence[el]),np.mean(cadence[el]),np.std(cadence[el]))
-    #print(el,len(timerange[el]),np.mean(timerange[el]),np.std(timerange[el]))
-    plt.scatter(np.mean(timerange[el]),np.mean(cadence[el]),label=el,s=len(timerange[el]))
-    plt.errorbar(np.mean(timerange[el]),np.mean(cadence[el]),xerr=np.std(timerange[el]),yerr=np.std(cadence[el]),alpha=0.2)
-    plt.annotate(el,(np.mean(timerange[el]),np.mean(cadence[el])+2),size=12, rotation=40)
-plt.ylabel(r'Average number of visits',size=20)
-plt.xlabel(r'Average baseline (days)',size=20)
-plt.xlim([0,4000])
+    plt.scatter(np.mean(timerange[el]), np.mean(cadence[el]), label=el, s=len(timerange[el]))
+    plt.errorbar(np.mean(timerange[el]), np.mean(cadence[el]),
+                 xerr=np.std(timerange[el]), yerr=np.std(cadence[el]), alpha=0.2)
+    plt.annotate(el, (np.mean(timerange[el]), np.mean(cadence[el])+2), size=12, rotation=40)
+plt.ylabel(r'Average number of visits', size=20)
+plt.xlabel(r'Average baseline (days)', size=20)
+plt.xlim([0, 4000])
 plt.yscale('log')
 ```
 
@@ -190,37 +196,46 @@ We first look at this sample only in ZTF bands which have the largest number of 
 The unify_lc, or unify_lc_gp functions do the unification of the lightcurve arrays. For details please see the codes. The time arrays are chosen based on the average duration of observations, with ZTF and WISE covering 1600, 4000 days respectively. We note that we disregard the time of observation of each source, by subtracting the initial time from the array and bringing all lightcurves to the same footing. This has to be taken into account if it influences the science of interest. We then interoplate the time arrays with linear or Gaussian Process regression (unift_lc/ unify_lc_gp respectively). We also remove from the sample objects with less than 5 datapoints in their light curve. We measure basic statistics and combine the tree observed ZTF bands into one longer array as input to dimensionailty reduction after deciding on normalization. We also do a shuffling of the sample to be sure that the separations of different classes by ML are not simply due to the order they are seen in training (in case it is not done by the ML routine itself).
 
 ```{code-cell} ipython3
-bands_inlc = ['zg','zr','zi']
+bands_inlc = ['zg', 'zr', 'zi']
 
-objects,dobjects,flabels,keeps = unify_lc(df_lc,bands_inlc,xres=60,numplots=5,low_limit_size=5) #nearest neightbor linear interpolation
-#objects,dobjects,flabels,keeps = unify_lc_gp(df_lc,bands_inlc,xres=60,numplots=5,low_limit_size=5) #Gaussian process unification
+# nearest neighbor linear interpolation:
+objects, dobjects, flabels, keeps = unify_lc(df_lc, bands_inlc, xres=60, numplots=5,
+                                             low_limit_size=5)
 
-## keeps can be used as index of objects that are kept in "objects" from
-##the initial "df_lc", in case information about some properties of samplen(e.g., redshifts) is of interest this array of indecies would be helpful
+# Gaussian process unification
+# objects, dobjects, flabels, keeps = unify_lc_gp(df_lc, bands_inlc, xres=60, numplots=5,
+#                                                 low_limit_size=5)
+
+# keeps can be used as index of objects that are kept in "objects" from the initial "df_lc",
+# in case information about some properties of sample (e.g., redshifts) is of interest
+# this array of indecies would be helpful
 
 # calculate some basic statistics with a sigmaclipping with width 5sigma
-fvar, maxarray, meanarray = stat_bands(objects,dobjects,bands_inlc,sigmacl=5)
+fvar, maxarray, meanarray = stat_bands(objects, dobjects, bands_inlc, sigmacl=5)
 
 # combine different waveband into one array
-dat_notnormal = combine_bands(objects,bands_inlc)
+dat_notnormal = combine_bands(objects, bands_inlc)
 
 # Normalize the combinde array by maximum of brightness in a waveband after clipping outliers:
-dat = normalize_clipmax_objects(dat_notnormal,maxarray,band = 1)
+dat = normalize_clipmax_objects(dat_notnormal, maxarray, band=1)
 
 # Normalize the combinde array by mean brightness in a waveband after clipping outliers:
-datm = normalize_clipmax_objects(dat_notnormal,meanarray,band = 1)
+datm = normalize_clipmax_objects(dat_notnormal, meanarray, band=1)
 
 # shuffle data incase the ML routines are sensitive to order
-data,fzr,p = shuffle_datalabel(dat,flabels)
-fvar_arr,maximum_arr,average_arr = fvar[:,p],maxarray[:,p],meanarray[:,p]
+data, fzr, p = shuffle_datalabel(dat, flabels)
+fvar_arr, maximum_arr, average_arr = fvar[:, p], maxarray[:, p], meanarray[:, p]
 
-labc = {}  # Initialize labc to hold indices of each unique label
+# Initialize labc to hold indices of each unique label
+labc = {}
 for index, f in enumerate(fzr):
     lab = translate_bitwise_sum_to_labels(int(f))
     for label in lab:
         if label not in labc:
-            labc[label] = []  # Initialize the list for this label if it's not already in labc
-        labc[label].append(index)  # Append the current index to the list of indices for this label
+            # Initialize the list for this label if it's not already in labc
+            labc[label] = []
+        # Append the current index to the list of indices for this label
+        labc[label].append(index)
 ```
 
 The combination of the tree bands into one longer arrays in order of increasing wavelength, can be seen as providing both the SED shape as well as variability in each from the light curve. Figure below demonstrates this as well as our normalization choice. We normalize the data in ZTF R band as it has a higher average numbe of visits compared to G and I band. We remove outliers before measuring the mean and max of the light curve and normalizing by it. This normalization can be skipped if one is mearly interested in comparing brightnesses of the data in this sample, but as dependence on flux is strong to look for variability and compare shapes of light curves a normalization helps.
@@ -238,8 +253,8 @@ for i, l in enumerate(bands_inlc):
     first = int(i*s)
     last = first+s
     for ax, ydata, ylabel in fig_contents:
-        ax.plot(np.linspace(first,last,s), ydata[r,first:last], 'o', linestyle='--', label=l)
-        ax.set_xlabel(r'Time_[w1,w2,w3]', size=15)
+        ax.plot(np.linspace(first, last, s), ydata[r, first:last], 'o', linestyle='--', label=l)
+        ax.set_xlabel(r'Time_[w1, w2, w3]', size=15)
         ax.set_ylabel(ylabel, size=15)
 _ = axs[0].legend(loc=2)
 ```
@@ -250,34 +265,38 @@ _ = axs[0].legend(loc=2)
 Now we can train a UMAP with the processed data vectors above. Different choices for the number of neighbors, minimum distance and metric can be made and a parameter space can be explored. We show here our preferred combination given this data. We choose manhattan distance (also called [the L1 distance](https://en.wikipedia.org/wiki/Taxicab_geometry)) as it is optimal for the kind of grid we interpolated on, for instance we want the distance to not change if there are observations missing. Another metric appropriate for our purpose in time domain analysis is Dynamic Time Warping ([DTW](https://en.wikipedia.org/wiki/Dynamic_time_warping)), which is insensitive to a shift in time. This is helpful as we interpolate the observations onto a grid starting from time 0 and when discussing variability we care less about when it happens and more about whether and how strong it happened. As the measurement of the DTW distance takes longer compared to the other metrics we show examples here with manhattan and only show one example exploring the parameter space including a DTW metric in the last cell of this notebook.
 
 ```{code-cell} ipython3
-plt.figure(figsize=(18,6))
+plt.figure(figsize=(18, 6))
 markersize=200
-mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='manhattan',random_state=20).fit(data)
+mapper = umap.UMAP(n_neighbors=50, min_dist=0.9, metric='manhattan', random_state=20).fit(data)
 
 
-ax1 = plt.subplot(1,3,2)
-ax1.set_title(r'mean brightness',size=20)
-cf = ax1.scatter(mapper.embedding_[:,0],mapper.embedding_[:,1],s=markersize,c=np.log10(np.nansum(meanarray,axis=0)),edgecolor='gray')
+ax1 = plt.subplot(1, 3, 2)
+ax1.set_title(r'mean brightness', size=20)
+cf = ax1.scatter(mapper.embedding_[:, 0], mapper.embedding_[:, 1], s=markersize,
+                 c=np.log10(np.nansum(meanarray, axis=0)), edgecolor='gray')
 plt.axis('off')
 divider = make_axes_locatable(ax1)
 cax = divider.append_axes("right", size="5%", pad=0.05)
-plt.colorbar(cf,cax=cax)
+plt.colorbar(cf, cax=cax)
 
 
-ax0 = plt.subplot(1,3,3)
-ax0.set_title(r'mean fractional variation',size=20)
-cf = ax0.scatter(mapper.embedding_[:,0],mapper.embedding_[:,1],s=markersize,c=stretch_small_values_arctan(np.nansum(fvar_arr,axis=0),factor=3),edgecolor='gray')
+ax0 = plt.subplot(1, 3, 3)
+ax0.set_title(r'mean fractional variation', size=20)
+cf = ax0.scatter(mapper.embedding_[:, 0], mapper.embedding_[:, 1], s=markersize,
+                 c=stretch_small_values_arctan(np.nansum(fvar_arr, axis=0), factor=3),
+                 edgecolor='gray')
 plt.axis('off')
 divider = make_axes_locatable(ax0)
 cax = divider.append_axes("right", size="5%", pad=0.05)
-plt.colorbar(cf,cax=cax)
+plt.colorbar(cf, cax=cax)
 
-ax2 = plt.subplot(1,3,1)
-ax2.set_title('sample origin',size=20)
+ax2 = plt.subplot(1, 3, 1)
+ax2.set_title('sample origin', size=20)
 counts = 1
 for label, indices in labc.items():
-    cf = ax2.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=markersize,c = colors[counts],alpha=0.5,edgecolor='gray',label=label)
-    counts+=1
+    cf = ax2.scatter(mapper.embedding_[indices, 0], mapper.embedding_[indices, 1], s=markersize,
+                     c=colors[counts], alpha=0.5, edgecolor='gray', label=label)
+    counts += 1
 plt.legend(fontsize=12)
 #plt.colorbar(cf)
 plt.axis('off')
@@ -298,9 +317,9 @@ y_grid = np.linspace(y_min, y_max, grid_resolution)
 x_centers, y_centers = np.meshgrid(x_grid, y_grid)
 
 # Calculate mean property in each grid cell
-mean_property1,mean_property2 = np.zeros_like(x_centers),np.zeros_like(x_centers)
-propmean=stretch_small_values_arctan(np.nansum(meanarray,axis=0),factor=2)
-propfvar=stretch_small_values_arctan(np.nansum(fvar_arr,axis=0),factor=2)
+mean_property1, mean_property2 = np.zeros_like(x_centers), np.zeros_like(x_centers)
+propmean=stretch_small_values_arctan(np.nansum(meanarray, axis=0), factor=2)
+propfvar=stretch_small_values_arctan(np.nansum(fvar_arr, axis=0), factor=2)
 for i in range(grid_resolution - 1):
     for j in range(grid_resolution - 1):
         mask = (
@@ -314,22 +333,22 @@ for i in range(grid_resolution - 1):
             mean_property2[j, i] = np.mean(propfvar[mask])
 
 
-plt.figure(figsize=(12,4))
-plt.subplot(1,2,1)
+plt.figure(figsize=(12, 4))
+plt.subplot(1, 2, 1)
 plt.title('mean brightness')
 cf = plt.contourf(x_centers, y_centers, mean_property1, cmap='viridis', alpha=0.9)
 plt.axis('off')
 divider = make_axes_locatable(plt.gca())
 cax = divider.append_axes("right", size="5%", pad=0.05)
-plt.colorbar(cf,cax=cax)
+plt.colorbar(cf, cax=cax)
 
-plt.subplot(1,2,2)
+plt.subplot(1, 2, 2)
 plt.title('mean fractional variation')
 cf = plt.contourf(x_centers, y_centers, mean_property2, cmap='viridis', alpha=0.9)
 plt.axis('off')
 divider = make_axes_locatable(plt.gca())
 cax = divider.append_axes("right", size="5%", pad=0.05)
-plt.colorbar(cf,cax=cax)
+plt.colorbar(cf, cax=cax)
 ```
 
 ### 3.1) Sample comparison on the UMAP
@@ -337,20 +356,23 @@ plt.colorbar(cf,cax=cax)
 ```{code-cell} ipython3
 # Calculate 2D histogram
 hist, x_edges, y_edges = np.histogram2d(mapper.embedding_[:, 0], mapper.embedding_[:, 1], bins=12)
-plt.figure(figsize=(15,12))
+plt.figure(figsize=(15, 12))
 i=1
-ax0 = plt.subplot(4,4,12)
+ax0 = plt.subplot(4, 4, 12)
 for label, indices in sorted(labc.items()):
-    hist_per_cluster, _, _ = np.histogram2d(mapper.embedding_[indices,0], mapper.embedding_[indices,1], bins=(x_edges, y_edges))
+    hist_per_cluster, _, _ = np.histogram2d(mapper.embedding_[indices, 0],
+                                            mapper.embedding_[indices, 1],
+                                            bins=(x_edges, y_edges))
     prob = hist_per_cluster / hist
-    plt.subplot(4,4,i)
+    plt.subplot(4, 4, i)
     plt.title(label)
-    plt.contourf(x_edges[:-1], y_edges[:-1], prob.T, levels=20, alpha=0.8,cmap=custom_cmap)
+    plt.contourf(x_edges[:-1], y_edges[:-1], prob.T, levels=20, alpha=0.8, cmap=custom_cmap)
     plt.colorbar()
     plt.axis('off')
-    cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label,c=colors[i-1])
-    i+=1
-ax0.legend(loc=4,fontsize=7)
+    cf = ax0.scatter(mapper.embedding_[indices, 0], mapper.embedding_[indices, 1], s=80,
+                     alpha=0.5, edgecolor='gray', label=label, c=colors[i-1])
+    i += 1
+ax0.legend(loc=4, fontsize=7)
 ax0.axis('off')
 plt.tight_layout()
 ```
@@ -361,199 +383,200 @@ Figure above shows how with ZTF light curves alone we can separate some of these
 ### 3.2) Reduced dimensions on a SOM grid
 
 ```{code-cell} ipython3
-msz0,msz1 = 15,15
-sm = sompy.SOMFactory.build(data, mapsize=[msz0,msz1], mapshape='planar', lattice='rect', initialization='pca')
-sm.train(n_job=4, shared_memory = 'no')
+msz0, msz1 = 15, 15
+sm = sompy.SOMFactory.build(data, mapsize=[msz0, msz1], mapshape='planar', lattice='rect',
+                            initialization='pca')
+sm.train(n_job=4, shared_memory='no')
 ```
 
 ```{code-cell} ipython3
-a=sm.bmu_ind_to_xy(sm.project_data(data))
-x,y=np.zeros(len(a)),np.zeros(len(a))
-k=0
+a = sm.bmu_ind_to_xy(sm.project_data(data))
+x, y = np.zeros(len(a)), np.zeros(len(a))
+k = 0
 for i in a:
-    x[k]=i[0]
-    y[k]=i[1]
-    k+=1
-med_r=np.zeros([msz0,msz1])
-fvar_new = stretch_small_values_arctan(np.nansum(fvar_arr,axis=0),factor=1)
+    x[k] = i[0]
+    y[k] = i[1]
+    k += 1
+med_r = np.zeros([msz0, msz1])
+fvar_new = stretch_small_values_arctan(np.nansum(fvar_arr, axis=0), factor=1)
 for i in range(msz0):
     for j in range(msz1):
-        unja=(x==i)&(y==j)
-        med_r[i,j]=(np.nanmedian(fvar_new[unja]))
+        unja = (x == i) & (y == j)
+        med_r[i, j] = (np.nanmedian(fvar_new[unja]))
 
 
-plt.figure(figsize=(18,12))
-plt.subplot(3,4,1)
-plt.title('SDSS',fontsize=15)
-cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.figure(figsize=(18, 12))
+plt.subplot(3, 4, 1)
+plt.title('SDSS', fontsize=15)
+cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
 
 def get_indices_by_label(labc, label):
     return labc.get(label, [])
 
 # Example usage
-u = labc.get('SDSS_QSO',[])
-dsdss = data[u,:]
-asdss=sm.bmu_ind_to_xy(sm.project_data(dsdss))
-x,y=np.zeros(len(asdss)),np.zeros(len(asdss))
-k=0
+used = labc.get('SDSS_QSO', [])
+dsdss = data[used, :]
+asdss = sm.bmu_ind_to_xy(sm.project_data(dsdss))
+x, y = np.zeros(len(asdss)), np.zeros(len(asdss))
+k = 0
 for i in asdss:
-    x[k]=i[0]
-    y[k]=i[1]
-    k+=1
-plt.plot(y,x,'rx',alpha=0.8)
+    x[k] = i[0]
+    y[k] = i[1]
+    k += 1
+plt.plot(y, x, 'rx', alpha=0.8)
 
-plt.subplot(3,4,2)
-plt.title('WISE_Variable',fontsize=15)
-cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.subplot(3, 4, 2)
+plt.title('WISE_Variable', fontsize=15)
+cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('WISE_Variable',[])
-dwise = data[u,:]
-awise=sm.bmu_ind_to_xy(sm.project_data(dwise))
-x,y=np.zeros(len(awise)),np.zeros(len(awise))
-k=0
+used = labc.get('WISE_Variable', [])
+dwise = data[used, :]
+awise = sm.bmu_ind_to_xy(sm.project_data(dwise))
+x, y = np.zeros(len(awise)), np.zeros(len(awise))
+k = 0
 for i in awise:
-    x[k]=i[0]
-    y[k]=i[1]
-    k+=1
-plt.plot(y,x,'rx',alpha=0.8)
+    x[k] = i[0]
+    y[k] = i[1]
+    k += 1
+plt.plot(y, x, 'rx', alpha=0.8)
 
-plt.subplot(3,4,3)
-plt.title('Optical_Variable',fontsize=15)
-cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.subplot(3, 4, 3)
+plt.title('Optical_Variable', fontsize=15)
+cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('Optical_Variable',[])
-dcic = data[u,:]
-acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
-x,y=np.zeros(len(acic)),np.zeros(len(acic))
-k=0
+used = labc.get('Optical_Variable', [])
+dcic = data[used, :]
+acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
+x, y = np.zeros(len(acic)), np.zeros(len(acic))
+k = 0
 for i in acic:
-    x[k]=i[0]
-    y[k]=i[1]
-    k+=1
-plt.plot(y,x,'rx',alpha=0.8)
+    x[k] = i[0]
+    y[k] = i[1]
+    k += 1
+plt.plot(y, x, 'rx', alpha=0.8)
 
 
-plt.subplot(3,4,4)
-plt.title('Galex_Variable',fontsize=15)
-cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.subplot(3, 4, 4)
+plt.title('Galex_Variable', fontsize=15)
+cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('Galex_Variable',[])
-dcic = data[u,:]
-acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
-x,y=np.zeros(len(acic)),np.zeros(len(acic))
-k=0
+used = labc.get('Galex_Variable', [])
+dcic = data[used, :]
+acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
+x, y = np.zeros(len(acic)), np.zeros(len(acic))
+k = 0
 for i in acic:
-    x[k]=i[0]
-    y[k]=i[1]
-    k+=1
-plt.plot(y,x,'rx',alpha=0.8)
+    x[k] = i[0]
+    y[k] = i[1]
+    k += 1
+plt.plot(y, x, 'rx', alpha=0.8)
 
-plt.subplot(3,4,5)
-plt.title('SPIDER_AGN',fontsize=15)
-cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.subplot(3, 4, 5)
+plt.title('SPIDER_AGN', fontsize=15)
+cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('SPIDER_AGN',[])
-dcic = data[u,:]
-acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
-x,y=np.zeros(len(acic)),np.zeros(len(acic))
-k=0
+used = labc.get('SPIDER_AGN', [])
+dcic = data[used, :]
+acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
+x, y = np.zeros(len(acic)), np.zeros(len(acic))
+k = 0
 for i in acic:
-    x[k]=i[0]
-    y[k]=i[1]
-    k+=1
-plt.plot(y,x,'rx',alpha=0.8)
+    x[k] = i[0]
+    y[k] = i[1]
+    k += 1
+plt.plot(y, x, 'rx', alpha=0.8)
 
-plt.subplot(3,4,6)
-plt.title('SPIDER_AGNBL',fontsize=15)
-cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.subplot(3, 4, 6)
+plt.title('SPIDER_AGNBL', fontsize=15)
+cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('SPIDER_AGNBL',[])
-dcic = data[u,:]
-acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
-x,y=np.zeros(len(acic)),np.zeros(len(acic))
-k=0
+used = labc.get('SPIDER_AGNBL', [])
+dcic = data[used, :]
+acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
+x, y = np.zeros(len(acic)), np.zeros(len(acic))
+k = 0
 for i in acic:
-    x[k]=i[0]
-    y[k]=i[1]
-    k+=1
-plt.plot(y,x,'rx',alpha=0.8)
+    x[k] = i[0]
+    y[k] = i[1]
+    k += 1
+plt.plot(y, x, 'rx', alpha=0.8)
 
-plt.subplot(3,4,7)
-plt.title('SPIDER_QSOBL',fontsize=15)
-cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.subplot(3, 4, 7)
+plt.title('SPIDER_QSOBL', fontsize=15)
+cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('SPIDER_QSOBL',[])
-dcic = data[u,:]
-acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
-x,y=np.zeros(len(acic)),np.zeros(len(acic))
-k=0
+used = labc.get('SPIDER_QSOBL', [])
+dcic = data[used, :]
+acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
+x, y = np.zeros(len(acic)), np.zeros(len(acic))
+k = 0
 for i in acic:
-    x[k]=i[0]
-    y[k]=i[1]
-    k+=1
-plt.plot(y,x,'rx',alpha=0.8)
+    x[k] = i[0]
+    y[k] = i[1]
+    k += 1
+plt.plot(y, x, 'rx', alpha=0.8)
 
-plt.subplot(3,4,8)
-plt.title('SPIDER_BL',fontsize=15)
-cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.subplot(3, 4, 8)
+plt.title('SPIDER_BL', fontsize=15)
+cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('SPIDER_BL',[])
-dcic = data[u,:]
-acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
-x,y=np.zeros(len(acic)),np.zeros(len(acic))
-k=0
+used = labc.get('SPIDER_BL', [])
+dcic = data[used, :]
+acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
+x, y = np.zeros(len(acic)), np.zeros(len(acic))
+k = 0
 for i in acic:
-    x[k]=i[0]
-    y[k]=i[1]
-    k+=1
-plt.plot(y,x,'rx',alpha=0.8)
+    x[k] = i[0]
+    y[k] = i[1]
+    k += 1
+plt.plot(y, x, 'rx', alpha=0.8)
 
-plt.subplot(3,4,9)
-plt.title('Turn-off',fontsize=15)
-cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.subplot(3, 4, 9)
+plt.title('Turn-off', fontsize=15)
+cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('Turn-off',[])
-dcic = data[u,:]
-acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
-x,y=np.zeros(len(acic)),np.zeros(len(acic))
-k=0
+used = labc.get('Turn-off', [])
+dcic = data[used, :]
+acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
+x, y = np.zeros(len(acic)), np.zeros(len(acic))
+k = 0
 for i in acic:
-    x[k]=i[0]
-    y[k]=i[1]
-    k+=1
-plt.plot(y,x,'rx',alpha=0.8)
+    x[k] = i[0]
+    y[k] = i[1]
+    k += 1
+plt.plot(y, x, 'rx', alpha=0.8)
 
 
-plt.subplot(3,4,10)
-plt.title('Turn-on',fontsize=15)
-cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.subplot(3, 4, 10)
+plt.title('Turn-on', fontsize=15)
+cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('Turn-on',[])
-dcic = data[u,:]
-acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
-x,y=np.zeros(len(acic)),np.zeros(len(acic))
-k=0
+used = labc.get('Turn-on', [])
+dcic = data[used, :]
+acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
+x, y = np.zeros(len(acic)), np.zeros(len(acic))
+k = 0
 for i in acic:
-    x[k]=i[0]
-    y[k]=i[1]
-    k+=1
-plt.plot(y,x,'rx',alpha=0.8)
+    x[k] = i[0]
+    y[k] = i[1]
+    k += 1
+plt.plot(y, x, 'rx', alpha=0.8)
 
-plt.subplot(3,4,11)
-plt.title('TDE',fontsize=15)
-cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.subplot(3, 4, 11)
+plt.title('TDE', fontsize=15)
+cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('TDE',[])
-dcic = data[u,:]
-acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
-x,y=np.zeros(len(acic)),np.zeros(len(acic))
-k=0
+used = labc.get('TDE', [])
+dcic = data[used, :]
+acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
+x, y = np.zeros(len(acic)), np.zeros(len(acic))
+k = 0
 for i in acic:
-    x[k]=i[0]
-    y[k]=i[1]
-    k+=1
-plt.plot(y,x,'rx',alpha=0.8)
+    x[k] = i[0]
+    y[k] = i[1]
+    k += 1
+plt.plot(y, x, 'rx', alpha=0.8)
 
 plt.tight_layout()
 ```
@@ -562,102 +585,106 @@ The above SOMs are colored by the mean fractional variation of the lightcurves i
 
 ```{code-cell} ipython3
 # shuffle data incase the ML routines are sensitive to order
-data,fzr,p = shuffle_datalabel(dat_notnormal,flabels)
-fvar_arr,maximum_arr,average_arr = fvar[:,p],maxarray[:,p],meanarray[:,p]
-labc = {}  # Initialize labc to hold indices of each unique label
+data, fzr, p = shuffle_datalabel(dat_notnormal, flabels)
+fvar_arr, maximum_arr, average_arr = fvar[:, p], maxarray[:, p], meanarray[:, p]
+# Initialize labc to hold indices of each unique label
+labc = {}
 for index, f in enumerate(fzr):
     lab = translate_bitwise_sum_to_labels(int(f))
     for label in lab:
         if label not in labc:
-            labc[label] = []  # Initialize the list for this label if it's not already in labc
-        labc[label].append(index)  # Append the current index to the list of indices for this label
+            # Initialize the list for this label if it's not already in labc
+            labc[label] = []
+        # Append the current index to the list of indices for this label
+        labc[label].append(index)
 
-sm = sompy.SOMFactory.build(data, mapsize=[msz0,msz1], mapshape='planar', lattice='rect', initialization='pca')
-sm.train(n_job=4, shared_memory = 'no')
+sm = sompy.SOMFactory.build(data, mapsize=[msz0, msz1], mapshape='planar',
+                            lattice='rect', initialization='pca')
+sm.train(n_job=4, shared_memory='no')
 ```
 
 ```{code-cell} ipython3
-a=sm.bmu_ind_to_xy(sm.project_data(data))
-x,y=np.zeros(len(a)),np.zeros(len(a))
-k=0
+a = sm.bmu_ind_to_xy(sm.project_data(data))
+x, y = np.zeros(len(a)), np.zeros(len(a))
+k = 0
 for i in a:
-    x[k]=i[0]
-    y[k]=i[1]
-    k+=1
-med_r=np.zeros([msz0,msz1])
-fvar_new = stretch_small_values_arctan(np.nansum(fvar_arr,axis=0),factor=1)
+    x[k] = i[0]
+    y[k] = i[1]
+    k += 1
+med_r = np.zeros([msz0, msz1])
+fvar_new = stretch_small_values_arctan(np.nansum(fvar_arr, axis=0), factor=1)
 for i in range(msz0):
     for j in range(msz1):
-        unja=(x==i)&(y==j)
-        med_r[i,j]=(np.nanmedian(fvar_new[unja]))
+        unja = (x == i) & (y == j)
+        med_r[i, j] = (np.nanmedian(fvar_new[unja]))
 
 
-plt.figure(figsize=(18,8))
-plt.subplot(1,4,1)
-plt.title('SDSS',fontsize=15)
-cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.figure(figsize=(18, 8))
+plt.subplot(1, 4, 1)
+plt.title('SDSS', fontsize=15)
+cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
 
 def get_indices_by_label(labc, label):
     return labc.get(label, [])
 
 # Example usage
-u = labc.get('SDSS_QSO',[])
-dsdss = data[u,:]
-asdss=sm.bmu_ind_to_xy(sm.project_data(dsdss))
-x,y=np.zeros(len(asdss)),np.zeros(len(asdss))
-k=0
+used = labc.get('SDSS_QSO', [])
+dsdss = data[used, :]
+asdss = sm.bmu_ind_to_xy(sm.project_data(dsdss))
+x, y = np.zeros(len(asdss)), np.zeros(len(asdss))
+k = 0
 for i in asdss:
-    x[k]=i[0]
-    y[k]=i[1]
-    k+=1
-plt.plot(y,x,'rx',alpha=0.5)
+    x[k] = i[0]
+    y[k] = i[1]
+    k += 1
+plt.plot(y, x, 'rx', alpha=0.5)
 
-plt.subplot(1,4,2)
-plt.title('WISE_Variable',fontsize=15)
-cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.subplot(1, 4, 2)
+plt.title('WISE_Variable', fontsize=15)
+cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('WISE_Variable',[])
-dwise = data[u,:]
-awise=sm.bmu_ind_to_xy(sm.project_data(dwise))
-x,y=np.zeros(len(awise)),np.zeros(len(awise))
-k=0
+used = labc.get('WISE_Variable', [])
+dwise = data[used, :]
+awise = sm.bmu_ind_to_xy(sm.project_data(dwise))
+x, y = np.zeros(len(awise)), np.zeros(len(awise))
+k = 0
 for i in awise:
-    x[k]=i[0]
-    y[k]=i[1]
-    k+=1
-plt.plot(y,x,'rx',alpha=0.5)
+    x[k] = i[0]
+    y[k] = i[1]
+    k += 1
+plt.plot(y, x, 'rx', alpha=0.5)
 
-plt.subplot(1,4,3)
-plt.title('Turn-on',fontsize=15)
-cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.subplot(1, 4, 3)
+plt.title('Turn-on', fontsize=15)
+cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('Turn-on',[])
-dcic = data[u,:]
-acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
-x,y=np.zeros(len(acic)),np.zeros(len(acic))
-k=0
+used = labc.get('Turn-on', [])
+dcic = data[used, :]
+acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
+x, y = np.zeros(len(acic)), np.zeros(len(acic))
+k = 0
 for i in acic:
-    x[k]=i[0]
-    y[k]=i[1]
-    k+=1
-plt.plot(y,x,'rx',alpha=0.5)
+    x[k] = i[0]
+    y[k] = i[1]
+    k += 1
+plt.plot(y, x, 'rx', alpha=0.5)
 
 
-plt.subplot(1,4,4)
-plt.title('Turn-off',fontsize=15)
-cf=plt.imshow(med_r,origin='lower',cmap='viridis')
+plt.subplot(1, 4, 4)
+plt.title('Turn-off', fontsize=15)
+cf = plt.imshow(med_r, origin='lower', cmap='viridis')
 plt.axis('off')
-u = labc.get('Turn-off',[])
-dcic = data[u,:]
-acic=sm.bmu_ind_to_xy(sm.project_data(dcic))
-x,y=np.zeros(len(acic)),np.zeros(len(acic))
-k=0
+used = labc.get('Turn-off', [])
+dcic = data[used, :]
+acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
+x, y = np.zeros(len(acic)), np.zeros(len(acic))
+k = 0
 for i in acic:
-    x[k]=i[0]
-    y[k]=i[1]
-    k+=1
-plt.plot(y,x,'rx',alpha=0.5)
+    x[k] = i[0]
+    y[k] = i[1]
+    k += 1
+plt.plot(y, x, 'rx', alpha=0.5)
 
 plt.tight_layout()
 ```
@@ -668,54 +695,62 @@ skipping the normalization of lightcurves, further separates turn on/off CLAGNs 
 ## 4) Repeating the above, this time with ZTF + WISE manifold
 
 ```{code-cell} ipython3
-bands_inlc = ['zg','zr','zi','W1','W2']
-objects,dobjects,flabels,keeps = unify_lc(df_lc,bands_inlc,xres=30,numplots=3)
+bands_inlc = ['zg', 'zr', 'zi', 'W1', 'W2']
+objects, dobjects, flabels, keeps = unify_lc(df_lc, bands_inlc, xres=30, numplots=3)
 # calculate some basic statistics
-fvar, maxarray, meanarray = stat_bands(objects,dobjects,bands_inlc)
-dat_notnormal = combine_bands(objects,bands_inlc)
-dat = normalize_clipmax_objects(dat_notnormal,maxarray,band = -1)
-data,fzr,p = shuffle_datalabel(dat,flabels)
-fvar_arr,maximum_arr,average_arr = fvar[:,p],maxarray[:,p],meanarray[:,p]
+fvar, maxarray, meanarray = stat_bands(objects, dobjects, bands_inlc)
+dat_notnormal = combine_bands(objects, bands_inlc)
+dat = normalize_clipmax_objects(dat_notnormal, maxarray, band=-1)
+data, fzr, p = shuffle_datalabel(dat, flabels)
+fvar_arr, maximum_arr, average_arr = fvar[:, p], maxarray[:, p], meanarray[:, p]
 
-labc = {}  # Initialize labc to hold indices of each unique label
+# Initialize labc to hold indices of each unique label
+labc = {}
 for index, f in enumerate(fzr):
     lab = translate_bitwise_sum_to_labels(int(f))
     for label in lab:
         if label not in labc:
-            labc[label] = []  # Initialize the list for this label if it's not already in labc
-        labc[label].append(index)  # Append the current index to the list of indices for this label
+            # Initialize the list for this label if it's not already in labc
+            labc[label] = []
+        # Append the current index to the list of indices for this label
+        labc[label].append(index)
 ```
 
 ```{code-cell} ipython3
-plt.figure(figsize=(18,6))
+plt.figure(figsize=(18, 6))
 markersize=200
-#mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='manhattan',random_state=4).fit(data)
-mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric=dtw_distance,random_state=20).fit(data) #this distance takes long
+mapper = umap.UMAP(n_neighbors=50, min_dist=0.9, metric='manhattan', random_state=4).fit(data)
+# using dtw distance takes a long time
+# mapper = umap.UMAP(n_neighbors=50, min_dist=0.9, metric=dtw_distance, random_state=20).fit(data)
 
 
-ax1 = plt.subplot(1,3,2)
-ax1.set_title(r'mean brightness',size=20)
-cf = ax1.scatter(mapper.embedding_[:,0],mapper.embedding_[:,1],s=markersize,c=np.log10(np.nansum(meanarray,axis=0)),edgecolor='gray')
+ax1 = plt.subplot(1, 3, 2)
+ax1.set_title(r'mean brightness', size=20)
+cf = ax1.scatter(mapper.embedding_[:, 0], mapper.embedding_[:, 1], s=markersize,
+                 c=np.log10(np.nansum(meanarray, axis=0)), edgecolor='gray')
 plt.axis('off')
 divider = make_axes_locatable(ax1)
 cax = divider.append_axes("right", size="5%", pad=0.05)
-plt.colorbar(cf,cax=cax)
+plt.colorbar(cf, cax=cax)
 
 
-ax0 = plt.subplot(1,3,3)
-ax0.set_title(r'mean fractional variation',size=20)
-cf = ax0.scatter(mapper.embedding_[:,0],mapper.embedding_[:,1],s=markersize,c=stretch_small_values_arctan(np.nansum(fvar_arr,axis=0),factor=3),edgecolor='gray')
+ax0 = plt.subplot(1, 3, 3)
+ax0.set_title(r'mean fractional variation', size=20)
+cf = ax0.scatter(mapper.embedding_[:, 0], mapper.embedding_[:, 1], s=markersize,
+                 c=stretch_small_values_arctan(np.nansum(fvar_arr, axis=0), factor=3),
+                 edgecolor='gray')
 plt.axis('off')
 divider = make_axes_locatable(ax0)
 cax = divider.append_axes("right", size="5%", pad=0.05)
-plt.colorbar(cf,cax=cax)
+plt.colorbar(cf, cax=cax)
 
-ax2 = plt.subplot(1,3,1)
-ax2.set_title('sample origin',size=20)
+ax2 = plt.subplot(1, 3, 1)
+ax2.set_title('sample origin', size=20)
 counts = 1
 for label, indices in labc.items():
-    cf = ax2.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=markersize,c = colors[counts],alpha=0.5,edgecolor='gray',label=label)
-    counts+=1
+    cf = ax2.scatter(mapper.embedding_[indices, 0], mapper.embedding_[indices, 1], s=markersize,
+                     c=colors[counts], alpha=0.5, edgecolor='gray', label=label)
+    counts += 1
 plt.legend(fontsize=12)
 #plt.colorbar(cf)
 plt.axis('off')
@@ -726,20 +761,23 @@ plt.tight_layout()
 ```{code-cell} ipython3
 # Calculate 2D histogram
 hist, x_edges, y_edges = np.histogram2d(mapper.embedding_[:, 0], mapper.embedding_[:, 1], bins=12)
-plt.figure(figsize=(15,12))
+plt.figure(figsize=(15, 12))
 i=1
-ax0 = plt.subplot(4,4,12)
+ax0 = plt.subplot(4, 4, 12)
 for label, indices in sorted(labc.items()):
-    hist_per_cluster, _, _ = np.histogram2d(mapper.embedding_[indices,0], mapper.embedding_[indices,1], bins=(x_edges, y_edges))
+    hist_per_cluster, _, _ = np.histogram2d(mapper.embedding_[indices, 0],
+                                            mapper.embedding_[indices, 1],
+                                            bins=(x_edges, y_edges))
     prob = hist_per_cluster / hist
-    plt.subplot(4,4,i)
+    plt.subplot(4, 4, i)
     plt.title(label)
-    plt.contourf(x_edges[:-1], y_edges[:-1], prob.T, levels=20, alpha=0.8,cmap=custom_cmap)
+    plt.contourf(x_edges[:-1], y_edges[:-1], prob.T, levels=20, alpha=0.8, cmap=custom_cmap)
     plt.colorbar()
     plt.axis('off')
-    cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label,c=colors[i-1])
-    i+=1
-ax0.legend(loc=4,fontsize=7)
+    cf = ax0.scatter(mapper.embedding_[indices, 0], mapper.embedding_[indices, 1], s=80,
+                     alpha=0.5, edgecolor='gray', label=label, c=colors[i-1])
+    i += 1
+ax0.legend(loc=4, fontsize=7)
 ax0.axis('off')
 plt.tight_layout()
 ```
@@ -747,53 +785,60 @@ plt.tight_layout()
 ## 5) Wise bands alone
 
 ```{code-cell} ipython3
-bands_inlcw = ['W1','W2']
-objectsw,dobjectsw,flabelsw,keepsw = unify_lc(df_lc,bands_inlc,xres=30)
+bands_inlcw = ['W1', 'W2']
+objectsw, dobjectsw, flabelsw, keepsw = unify_lc(df_lc, bands_inlc, xres=30)
 # calculate some basic statistics
-fvarw, maxarrayw, meanarrayw = stat_bands(objectsw,dobjectsw,bands_inlcw)
-dat_notnormalw = combine_bands(objects,bands_inlcw)
-datw = normalize_clipmax_objects(dat_notnormalw,maxarrayw,band = -1)
-dataw,fzrw,pw = shuffle_datalabel(datw,flabelsw)
-fvar_arrw,maximum_arrw,average_arrw = fvarw[:,pw],maxarrayw[:,pw],meanarrayw[:,pw]
+fvarw, maxarrayw, meanarrayw = stat_bands(objectsw, dobjectsw, bands_inlcw)
+dat_notnormalw = combine_bands(objects, bands_inlcw)
+datw = normalize_clipmax_objects(dat_notnormalw, maxarrayw, band=-1)
+dataw, fzrw, pw = shuffle_datalabel(datw, flabelsw)
+fvar_arrw, maximum_arrw, average_arrw = fvarw[:, pw], maxarrayw[:, pw], meanarrayw[:, pw]
 
-labcw = {}  # Initialize labc to hold indices of each unique label
+# Initialize labc to hold indices of each unique label
+labcw = {}
 for index, f in enumerate(fzrw):
     lab = translate_bitwise_sum_to_labels(int(f))
     for label in lab:
         if label not in labcw:
-            labcw[label] = []  # Initialize the list for this label if it's not already in labc
-        labcw[label].append(index)  # Append the current index to the list of indices for this label
+            # Initialize the list for this label if it's not already in labc
+            labcw[label] = []
+        # Append the current index to the list of indices for this label
+        labcw[label].append(index)
 ```
 
 ```{code-cell} ipython3
-plt.figure(figsize=(18,6))
+plt.figure(figsize=(18, 6))
 markersize=200
-mapp = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='manhattan',random_state=20).fit(dataw)
+mapp = umap.UMAP(n_neighbors=50, min_dist=0.9, metric='manhattan', random_state=20).fit(dataw)
 
 
-ax1 = plt.subplot(1,3,2)
-ax1.set_title(r'mean brightness',size=20)
-cf = ax1.scatter(mapp.embedding_[:,0],mapp.embedding_[:,1],s=markersize,c=np.log10(np.nansum(meanarrayw,axis=0)),edgecolor='gray')
+ax1 = plt.subplot(1, 3, 2)
+ax1.set_title(r'mean brightness', size=20)
+cf = ax1.scatter(mapp.embedding_[:, 0], mapp.embedding_[:, 1], s=markersize,
+                 c=np.log10(np.nansum(meanarrayw, axis=0)), edgecolor='gray')
 plt.axis('off')
 divider = make_axes_locatable(ax1)
 cax = divider.append_axes("right", size="5%", pad=0.05)
-plt.colorbar(cf,cax=cax)
+plt.colorbar(cf, cax=cax)
 
 
-ax0 = plt.subplot(1,3,3)
-ax0.set_title(r'mean fractional variation',size=20)
-cf = ax0.scatter(mapp.embedding_[:,0],mapp.embedding_[:,1],s=markersize,c=stretch_small_values_arctan(np.nansum(fvar_arrw,axis=0),factor=3),edgecolor='gray')
+ax0 = plt.subplot(1, 3, 3)
+ax0.set_title(r'mean fractional variation', size=20)
+cf = ax0.scatter(mapp.embedding_[:, 0], mapp.embedding_[:, 1], s=markersize,
+                 c=stretch_small_values_arctan(np.nansum(fvar_arrw, axis=0), factor=3),
+                 edgecolor='gray')
 plt.axis('off')
 divider = make_axes_locatable(ax0)
 cax = divider.append_axes("right", size="5%", pad=0.05)
-plt.colorbar(cf,cax=cax)
+plt.colorbar(cf, cax=cax)
 
-ax2 = plt.subplot(1,3,1)
-ax2.set_title('sample origin',size=20)
+ax2 = plt.subplot(1, 3, 1)
+ax2.set_title('sample origin', size=20)
 counts = 1
 for label, indices in labcw.items():
-    cf = ax2.scatter(mapp.embedding_[indices,0],mapp.embedding_[indices,1],s=markersize,c = colors[counts],alpha=0.5,edgecolor='gray',label=label)
-    counts+=1
+    cf = ax2.scatter(mapp.embedding_[indices, 0], mapp.embedding_[indices, 1], s=markersize,
+                     c=colors[counts], alpha=0.5, edgecolor='gray', label=label)
+    counts += 1
 plt.legend(fontsize=12)
 #plt.colorbar(cf)
 plt.axis('off')
@@ -804,59 +849,67 @@ plt.tight_layout()
 ```{code-cell} ipython3
 # Calculate 2D histogram
 hist, x_edges, y_edges = np.histogram2d(mapp.embedding_[:, 0], mapp.embedding_[:, 1], bins=12)
-plt.figure(figsize=(15,12))
+plt.figure(figsize=(15, 12))
 i=1
-ax0 = plt.subplot(4,4,12)
+ax0 = plt.subplot(4, 4, 12)
 for label, indices in sorted(labcw.items()):
-    hist_per_cluster, _, _ = np.histogram2d(mapp.embedding_[indices,0], mapp.embedding_[indices,1], bins=(x_edges, y_edges))
+    hist_per_cluster, _, _ = np.histogram2d(mapp.embedding_[indices, 0],
+                                            mapp.embedding_[indices, 1],
+                                            bins=(x_edges, y_edges))
     prob = hist_per_cluster / hist
-    plt.subplot(4,4,i)
+    plt.subplot(4, 4, i)
     plt.title(label)
-    plt.contourf(x_edges[:-1], y_edges[:-1], prob.T, levels=20, alpha=0.8,cmap=custom_cmap)
+    plt.contourf(x_edges[:-1], y_edges[:-1], prob.T, levels=20, alpha=0.8, cmap=custom_cmap)
     plt.colorbar()
     plt.axis('off')
-    cf = ax0.scatter(mapp.embedding_[indices,0],mapp.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label,c=colors[i-1])
-    i+=1
-ax0.legend(loc=4,fontsize=7)
+    cf = ax0.scatter(mapp.embedding_[indices, 0], mapp.embedding_[indices, 1], s=80,
+                     alpha=0.5, edgecolor='gray', label=label, c=colors[i-1])
+    i += 1
+ax0.legend(loc=4, fontsize=7)
 ax0.axis('off')
 plt.tight_layout()
 ```
 
 ## 6) UMAP with different metrics/distances on ZTF+WISE
-DTW takes a bit longer compared to other metrics.
+DTW takes a bit longer compared to other metrics, so it is commented out in the cell below.
 
 ```{code-cell} ipython3
-plt.figure(figsize=(12,10))
+plt.figure(figsize=(12, 10))
 markersize=200
 
-mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='euclidean',random_state=20).fit(data)
-ax0 = plt.subplot(2,2,1)
-ax0.set_title(r'Euclidean Distance, min_d=0.9, n_neighbors=50',size=12)
+mapper = umap.UMAP(n_neighbors=50, min_dist=0.9, metric='euclidean', random_state=20).fit(data)
+ax0 = plt.subplot(2, 2, 1)
+ax0.set_title(r'Euclidean Distance, min_d=0.9, n_neighbors=50', size=12)
 for label, indices in (labc.items()):
-     cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
+     cf = ax0.scatter(mapper.embedding_[indices, 0], mapper.embedding_[indices, 1], s=80,
+                      alpha=0.5, edgecolor='gray', label=label)
 plt.axis('off')
 
-mapper = umap.UMAP(n_neighbors=50,min_dist=0.9,metric='manhattan',random_state=20).fit(data)
-ax0 = plt.subplot(2,2,2)
-ax0.set_title(r'Manhattan Distance, min_d=0.9, n_neighbors=50',size=12)
+mapper = umap.UMAP(n_neighbors=50, min_dist=0.9, metric='manhattan', random_state=20).fit(data)
+ax0 = plt.subplot(2, 2, 2)
+ax0.set_title(r'Manhattan Distance, min_d=0.9, n_neighbors=50', size=12)
 for label, indices in (labc.items()):
-     cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
-plt.axis('off')
-
-
-mapperg = umap.UMAP(n_neighbors=50,min_dist=0.9,metric=dtw_distance,random_state=20).fit(data) #this distance takes long
-ax2 = plt.subplot(2,2,3)
-ax2.set_title(r'DTW Distance, min_d=0.9,n_neighbors=50',size=12)
-for label, indices in (labc.items()):
-     cf = ax2.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
+     cf = ax0.scatter(mapper.embedding_[indices, 0], mapper.embedding_[indices, 1], s=80,
+                      alpha=0.5, edgecolor='gray', label=label)
 plt.axis('off')
 
 
-mapper = umap.UMAP(n_neighbors=50,min_dist=0.1,metric='manhattan',random_state=20).fit(data)
-ax0 = plt.subplot(2,2,4)
-ax0.set_title(r'Manhattan Distance, min_d=0.1, n_neighbors=50',size=12)
+# This distance takes long
+# mapperg = umap.UMAP(n_neighbors=50, min_dist=0.9, metric=dtw_distance, random_state=20).fit(data)
+# ax2 = plt.subplot(2, 2, 3)
+# ax2.set_title(r'DTW Distance, min_d=0.9, n_neighbors=50', size=12)
+# for label, indices in (labc.items()):
+#      cf = ax2.scatter(mapper.embedding_[indices, 0], mapper.embedding_[indices, 1], s=80,
+#                       alpha=0.5, edgecolor='gray', label=label)
+# plt.axis('off')
+
+
+mapper = umap.UMAP(n_neighbors=50, min_dist=0.1, metric='manhattan', random_state=20).fit(data)
+ax0 = plt.subplot(2, 2, 4)
+ax0.set_title(r'Manhattan Distance, min_d=0.1, n_neighbors=50', size=12)
 for label, indices in (labc.items()):
-     cf = ax0.scatter(mapper.embedding_[indices,0],mapper.embedding_[indices,1],s=80,alpha=0.5,edgecolor='gray',label=label)
+     cf = ax0.scatter(mapper.embedding_[indices, 0], mapper.embedding_[indices, 1], s=80,
+                      alpha=0.5, edgecolor='gray', label=label)
 plt.legend(fontsize=12)
 plt.axis('off')
 ```

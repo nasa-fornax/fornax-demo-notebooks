@@ -65,10 +65,6 @@ nb_execution_excludepatterns += ['multiband_photometry.md',]
 # notebook until https://github.com/nasa-fornax/fornax-demo-notebooks/issues/311 is addressed
 nb_execution_excludepatterns += ['light_curve_generator.md',]
 
-# DTW distance runs too long, exclude notebooks for now, see
-# https://github.com/nasa-fornax/fornax-demo-notebooks/issues/324
-nb_execution_excludepatterns += ['ML_AGNzoo.md',]
-
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
