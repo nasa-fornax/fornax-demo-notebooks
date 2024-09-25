@@ -1,5 +1,5 @@
 import os, sys, io
-
+import shutil
 import numpy as np
 from contextlib import redirect_stdout
 
@@ -266,7 +266,7 @@ def JWST_group_spectra(df, verbose, quickplot):
     
     return(df_spec)
 
-def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose, delete_data = True):
+def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose, delete_downloaded_data = True):
     '''
     Retrieves HST spectra for a list of sources.
 
@@ -281,7 +281,7 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose, delete_da
         separate data directory (for example "[datadir]/HST/" for HST data).
     verbose : `bool`
         Verbosity level. Set to True for extra talking.
-    delete_data : `bool`, optional
+    delete_downloaded_data : `bool`, optional
         If True, delete the downloaded data files. Default is True.
 
 
@@ -370,10 +370,8 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose, delete_da
                                                 )).set_index(["objectid", "label", "filter", "mission"])
                     df_spec.append(dfsingle)
                 
-                if delete_data:
-                    for file in download_results["Local Path"]:
-                        if os.path.exists(file):
-                            os.remove(file)
+                if delete_downloaded_data:
+                    shutil.rmtree(this_data_dir)
                     
             else:
                 print("Nothing to download for source {}.".format(stab["label"]))
