@@ -266,7 +266,7 @@ def JWST_group_spectra(df, verbose, quickplot):
     
     return(df_spec)
 
-def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose):
+def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose, delete_data = True):
     '''
     Retrieves HST spectra for a list of sources.
 
@@ -281,6 +281,9 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose):
         separate data directory (for example "[datadir]/HST/" for HST data).
     verbose : `bool`
         Verbosity level. Set to True for extra talking.
+    delete_data : `bool`, optional
+        If True, delete the downloaded data files. Default is True.
+
 
     Returns
     -------
@@ -366,7 +369,12 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose):
                                                  filter=[tab["filters"][jj]],
                                                 )).set_index(["objectid", "label", "filter", "mission"])
                     df_spec.append(dfsingle)
-            
+                
+                if delete_data:
+                    for file in download_results["Local Path"]:
+                        if os.path.exists(file):
+                            os.remove(file)
+                    
             else:
                 print("Nothing to download for source {}.".format(stab["label"]))
         else:
