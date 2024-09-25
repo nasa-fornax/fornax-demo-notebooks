@@ -39,7 +39,7 @@ def find_max_flux_column(df):
   return max_flux_col
 
 
-def Herschel_get_spec(sample_table, search_radius_arcsec, datadir, delete_tarfiles = False):
+def Herschel_get_spec(sample_table, search_radius_arcsec, datadir, delete_downloaded_data = True):
     '''
     Retrieves Herschel spectra from a subset of modes for a list of sources.
 
@@ -52,7 +52,7 @@ def Herschel_get_spec(sample_table, search_radius_arcsec, datadir, delete_tarfil
     datadir : `str`
         Data directory where to store the data. Each function will create a
         separate data directory (for example "[datadir]/HST/" for HST data).
-    delete_tarfiles: True/False
+    delete_downloaded_data: True/False
         Should the tarfiles be deteled after spectra are extracted?
         
     Returns
@@ -143,7 +143,7 @@ def Herschel_get_spec(sample_table, search_radius_arcsec, datadir, delete_tarfil
                     print(f"Tarfile ReadError. This tarfile may be corrupt {path_to_file}")
 
                 #delete tar files
-                if delete_tarfiles:
+                if delete_downloaded_data:
                     filename_tar = f"data/herschel/{objectid_table[tab_id]['observation_id']}.tar"
                     print('filename_tar', filename_tar)
                     if os.path.exists(filename_tar):
