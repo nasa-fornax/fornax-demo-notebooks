@@ -39,9 +39,8 @@ Software environment options:
 ### Data access within the Fornax Science Console
 
 Users of the Fornax Science Console will have access to data curated and published by data repositories around the world.
-   * AWS S3 buckets with data curated by the NASA Astrophysics Mission Archives (HEASARC, IRSA, MAST) are mounted under `s3/` in the user's `$HOME` directory and are browsable as if they were on the local filesystem.
-   * Many data repositories provide data access through application program interfaces (APIs), which can be invoked by users of the Fornax Science Console through standard Python (e.g. astroquery, pyvo) or command line methods (e.g. wget, curl).
-   * Users can upload a limited amount of datasets to AWS and interact with them as though they were on the local filesystem.
+   * The NASA Astrophysics Mission Archives (HEASARC, IRSA, MAST) offer curated datasets through the AWS Open Data program, which can be found by searching [https://registry.opendata.aws/](https://registry.opendata.aws/).
+   * In addition, most data archives, including NASA archives and others around the world, provide access through application program interfaces (APIs), which can be invoked by users of the Fornax Science Console through standard Python (e.g. astroquery, pyvo) or command line methods (e.g. wget, curl).
 
 ## Quick Start Guide
 
@@ -128,7 +127,7 @@ Under Construction.
 
 ### How can I upload my own data for use with compute provided by the Fornax Science Console?
 
-The `uparrow` in the upper left allows you to upload data.  If it is a large amount of data, consider creating a zip or tar archive first. From within JupyterLab, you can also use a terminal to transfer data with the usual methods (`scp`, `wget`, `curl` should all work). The current (Feb 2024) default storage limit for uploaded data is 10GB (Feb 2024). When you log into the science console for the first time, the active directory is your `$HOME` directory. It contains preexisting folders like `efs/` and `s3/` with shared data. You may also create your own directories and files here. Your edits outside of the shared folders are not visible to other users.
+The `uparrow` in the upper left allows you to upload data.  If it is a large amount of data, consider creating a zip or tar archive first. From within JupyterLab, you can also use a terminal to transfer data with the usual methods (`scp`, `wget`, `curl` should all work). The current (Feb 2024) default storage limit for uploaded data is 10GB (Feb 2024). When you log into the science console for the first time, the active directory is your `$HOME` directory. It contains preexisting folders like `efs/` with shared data. You may also create your own directories and files here. Your edits outside of the shared folders are not visible to other users.
 
    ![upload_button](./static/images/upload_button.png)
 
@@ -259,7 +258,7 @@ Software is installed in Miniconda environments.  You can use "[conda list](http
 
       - date and time (with timezone) the problem occurred
       - web browser (name and version) you are using to connect to the Fornax Science Console (e.g., Chrome 125.0.64422.142)
-      - where in the Fornax Science Console this happened (e.g., while running a notebook in JupyterHub; while using the S3 bucket menu; etc.)
+      - where in the Fornax Science Console this happened (e.g., while running a notebook in JupyterHub; while using the Dask extension; etc.)
       - what you were doing when the problem occurred
       - what you expected to have happen
       - what happened instead

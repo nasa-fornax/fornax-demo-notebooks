@@ -532,9 +532,8 @@ document.write(`
 <h3>Data access within the Fornax Science Console<a class="headerlink" href="#data-access-within-the-fornax-science-console" title="Link to this heading">#</a></h3>
 <p>Users of the Fornax Science Console will have access to data curated and published by data repositories around the world.</p>
 <ul class="simple">
-<li><p>AWS S3 buckets with data curated by the NASA Astrophysics Mission Archives (HEASARC, IRSA, MAST) are mounted under <code class="docutils literal notranslate"><span class="pre">s3/</span></code> in the user’s <code class="docutils literal notranslate"><span class="pre">$HOME</span></code> directory and are browsable as if they were on the local filesystem.</p></li>
-<li><p>Many data repositories provide data access through application program interfaces (APIs), which can be invoked by users of the Fornax Science Console through standard Python (e.g. astroquery, pyvo) or command line methods (e.g. wget, curl).</p></li>
-<li><p>Users can upload a limited amount of datasets to AWS and interact with them as though they were on the local filesystem.</p></li>
+<li><p>The NASA Astrophysics Mission Archives (HEASARC, IRSA, MAST) offer curated datasets through the AWS Open Data program, which can be found by searching <a class="reference external" href="https://registry.opendata.aws/">https://registry.opendata.aws/</a>.</p></li>
+<li><p>In addition, most data archives, including NASA archives and others around the world, provide access through application program interfaces (APIs), which can be invoked by users of the Fornax Science Console through standard Python (e.g. astroquery, pyvo) or command line methods (e.g. wget, curl).</p></li>
 </ul>
 </section>
 </section>
@@ -646,7 +645,7 @@ If you want a notebook or script to run for longer than about 60 minutes and you
 <h2>Data Management<a class="headerlink" href="#data-management" title="Link to this heading">#</a></h2>
 <section id="how-can-i-upload-my-own-data-for-use-with-compute-provided-by-the-fornax-science-console">
 <h3>How can I upload my own data for use with compute provided by the Fornax Science Console?<a class="headerlink" href="#how-can-i-upload-my-own-data-for-use-with-compute-provided-by-the-fornax-science-console" title="Link to this heading">#</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">uparrow</span></code> in the upper left allows you to upload data.  If it is a large amount of data, consider creating a zip or tar archive first. From within JupyterLab, you can also use a terminal to transfer data with the usual methods (<code class="docutils literal notranslate"><span class="pre">scp</span></code>, <code class="docutils literal notranslate"><span class="pre">wget</span></code>, <code class="docutils literal notranslate"><span class="pre">curl</span></code> should all work). The current (Feb 2024) default storage limit for uploaded data is 10GB (Feb 2024). When you log into the science console for the first time, the active directory is your <code class="docutils literal notranslate"><span class="pre">$HOME</span></code> directory. It contains preexisting folders like <code class="docutils literal notranslate"><span class="pre">efs/</span></code> and <code class="docutils literal notranslate"><span class="pre">s3/</span></code> with shared data. You may also create your own directories and files here. Your edits outside of the shared folders are not visible to other users.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">uparrow</span></code> in the upper left allows you to upload data.  If it is a large amount of data, consider creating a zip or tar archive first. From within JupyterLab, you can also use a terminal to transfer data with the usual methods (<code class="docutils literal notranslate"><span class="pre">scp</span></code>, <code class="docutils literal notranslate"><span class="pre">wget</span></code>, <code class="docutils literal notranslate"><span class="pre">curl</span></code> should all work). The current (Feb 2024) default storage limit for uploaded data is 10GB (Feb 2024). When you log into the science console for the first time, the active directory is your <code class="docutils literal notranslate"><span class="pre">$HOME</span></code> directory. It contains preexisting folders like <code class="docutils literal notranslate"><span class="pre">efs/</span></code> with shared data. You may also create your own directories and files here. Your edits outside of the shared folders are not visible to other users.</p>
 <p><img alt="upload_button" src="../_images/upload_button.png" /></p>
 </section>
 <section id="how-can-i-access-data-that-has-been-hosted-on-the-cloud-by-the-fornax-archives">
@@ -846,7 +845,7 @@ If you want a notebook or script to run for longer than about 60 minutes and you
 <li><p>If you are reporting a problem or suspected bug, please include as much of the following information as possible. This will help minimize the time it takes for us to diagnose the problem and get you an answer.</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>- date and time (with timezone) the problem occurred
 - web browser (name and version) you are using to connect to the Fornax Science Console (e.g., Chrome 125.0.64422.142)
-- where in the Fornax Science Console this happened (e.g., while running a notebook in JupyterHub; while using the S3 bucket menu; etc.)
+- where in the Fornax Science Console this happened (e.g., while running a notebook in JupyterHub; while using the Dask extension; etc.)
 - what you were doing when the problem occurred
 - what you expected to have happen
 - what happened instead
