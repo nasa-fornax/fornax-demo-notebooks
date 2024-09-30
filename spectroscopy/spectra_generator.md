@@ -228,10 +228,10 @@ This archive includes spectra taken by
 ## Get Spectra for HST
 df_spec_HST = HST_get_spec(
     sample_table , 
-    search_radius_arcsec = 0.5, 
-    datadir = "./data/", 
-    verbose = False, 
-    delete_downloaded_data = True
+    search_radius_arcsec=0.5, 
+    datadir="./data/", 
+    verbose=False, 
+    delete_downloaded_data=True
 )
 df_spec.append(df_spec_HST)
 ```
@@ -241,10 +241,10 @@ df_spec.append(df_spec_HST)
 ## Get Spectra for JWST
 df_jwst = JWST_get_spec(
     sample_table , 
-    search_radius_arcsec = 0.5, 
-    datadir = "./data/", 
-    verbose = False,
-    delete_downloaded_data = True
+    search_radius_arcsec=0.5, 
+    datadir="./data/", 
+    verbose=False,
+    delete_downloaded_data=True
 )
 df_spec.append(df_jwst)
 ```
@@ -259,7 +259,7 @@ herschel_download_directory = 'data/herschel'
 
 #if not os.path.exists(herschel_download_directory):
 #    os.makedirs(herschel_download_directory, exist_ok=True)
-#df_spec_herschel =  Herschel_get_spec(sample_table, herschel_radius, herschel_download_directory, delete_downloaded_data = True)
+#df_spec_herschel =  Herschel_get_spec(sample_table, herschel_radius, herschel_download_directory, delete_downloaded_data=True)
 #df_spec.append(df_spec_herschel)
 ```
 
@@ -296,6 +296,3 @@ create_figures(df_spec = df_spec,
              )
 ```
 
-```{code-cell} ipython3
-
-```

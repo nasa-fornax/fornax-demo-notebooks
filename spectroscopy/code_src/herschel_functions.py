@@ -40,7 +40,7 @@ def find_max_flux_column(df):
 
 
 def Herschel_get_spec(sample_table, search_radius_arcsec, datadir, 
-                      delete_downloaded_data = True):
+                      delete_downloaded_data=True):
     '''
     Retrieves Herschel spectra from a subset of modes for a list of sources.
 
