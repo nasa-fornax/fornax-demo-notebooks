@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.16.4
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  display_name: science_demo
   language: python
-  name: python3
+  name: conda-env-science_demo-py
 ---
 
 # Extract Multi-Wavelength Spectroscopy from Archival Data
@@ -70,20 +70,13 @@ The ones with an asterisk (*) are the challenging ones.
 &bull; ...
 ## Runtime
 
-As of 2024 August, this notebook takes ~300s to run to completion on Fornax using the 'Astrophysics Default Image' and the 'Large' server with 16GB RAM/ 4CPU.
+As of 2024 August, this notebook takes ~330s to run to completion on Fornax using the 'Astrophysics Default Image' and the 'Large' server with 16GB RAM/ 4CPU.
 
 ## Authors:
 Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, David Shupe
 
 ## Acknowledgements:
 ...
-
-## Open Issues:
-
-&bull; Implement queries for: Herschel, Euclid (use mock data), SPHEREx (use mock data)
-&bull; Match to HEASARC
-&bull; Make more efficient (especially MAST searches)
-
 
 +++
 
@@ -99,12 +92,12 @@ Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, D
 
 This cell will install them if needed:
 
-```{code-cell}
+```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
 # !pip install -r requirements_spectra_generator.txt
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 import sys
 import numpy as np
 import os
@@ -133,7 +126,7 @@ from herschel_functions import Herschel_get_spec
 
 Here we will define the sample of galaxies. For now, we just enter some "random" coordinates to test the code.
 
-```{code-cell}
+```{code-cell} ipython3
 coords = []
 labels = []
 
@@ -173,7 +166,7 @@ At this point you may wish to write out your sample to disk and reuse that in fu
 
 For the format of the save file, we would suggest to choose from various formats that fully support astropy objects(eg., SkyCoord).  One example that works is Enhanced Character-Separated Values or ['ecsv'](https://docs.astropy.org/en/stable/io/ascii/ecsv.html)
 
-```{code-cell}
+```{code-cell} ipython3
 if not os.path.exists("./data"):
     os.mkdir("./data")
 sample_table.write('data/input_sample.ecsv', format='ascii.ecsv', overwrite = True)
@@ -183,14 +176,14 @@ sample_table.write('data/input_sample.ecsv', format='ascii.ecsv', overwrite = Tr
 
 Do only this step from this section when you have a previously generated sample table
 
-```{code-cell}
+```{code-cell} ipython3
 sample_table = Table.read('data/input_sample.ecsv', format='ascii.ecsv')
 ```
 
 ### 1.4 Initialize data structure to hold the spectra
 Here, we initialize the MultiIndex data structure that will hold the spectra.
 
-```{code-cell}
+```{code-cell} ipython3
 df_spec = MultiIndexDFObject()
 ```
 
@@ -208,16 +201,14 @@ This archive includes spectra taken by
 
  &bull; Spitzer/IRS
 
-
-
-```{code-cell}
+```{code-cell} ipython3
 %%time
 ## Get Keck Spectra (COSMOS only)
 df_spec_DEIMOS = KeckDEIMOS_get_spec(sample_table = sample_table, search_radius_arcsec=1)
 df_spec.append(df_spec_DEIMOS)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 %%time
 ## Get Spitzer IRS Spectra
 df_spec_IRS = SpitzerIRS_get_spec(sample_table, search_radius_arcsec=1 , COMBINESPEC=False)
@@ -232,16 +223,35 @@ This archive includes spectra taken by
 
  &bull; JWST (including MSA and slit spectroscopy)
 
-```{code-cell}
+```{code-cell} ipython3
 %%time
 ## Get Spectra for HST
-df_spec_HST = HST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/", verbose = False)
+df_spec_HST = HST_get_spec(
+    sample_table , 
+    search_radius_arcsec=0.5, 
+    datadir="./data/", 
+    verbose=False, 
+    delete_downloaded_data=True
+)
 df_spec.append(df_spec_HST)
+```
+
+```{code-cell} ipython3
+%%time
+## Get Spectra for JWST
+df_jwst = JWST_get_spec(
+    sample_table , 
+    search_radius_arcsec=0.5, 
+    datadir="./data/", 
+    verbose=False,
+    delete_downloaded_data=True
+)
+df_spec.append(df_jwst)
 ```
 
 ### 2.3 ESA Archive
 
-```{code-cell}
+```{code-cell} ipython3
 # Herschel PACS & SPIRE from ESA TAP using astroquery
 #This search is fully functional, but is commented out because it takes ~4 hours to run to completion
 herschel_radius = 1.1
@@ -249,22 +259,13 @@ herschel_download_directory = 'data/herschel'
 
 #if not os.path.exists(herschel_download_directory):
 #    os.makedirs(herschel_download_directory, exist_ok=True)
-#df_spec_herschel =  Herschel_get_spec(sample_table, herschel_radius, herschel_download_directory, delete_tarfiles = True)
+#df_spec_herschel =  Herschel_get_spec(sample_table, herschel_radius, herschel_download_directory, delete_downloaded_data=True)
 #df_spec.append(df_spec_herschel)
 ```
 
 ### 2.4 SDSS Archive
 
-```{code-cell}
-%%time
-## Get Spectra for JWST
-df_jwst = JWST_get_spec(sample_table , search_radius_arcsec = 0.5, datadir = "./data/", verbose = False)
-df_spec.append(df_jwst)
-```
-
-This includes SDSS spectra.
-
-```{code-cell}
+```{code-cell} ipython3
 %%time
 ## Get SDSS Spectra
 df_spec_SDSS = SDSS_get_spec(sample_table , search_radius_arcsec=5, data_release=17)
@@ -276,7 +277,7 @@ df_spec.append(df_spec_SDSS)
 This includes DESI spectra. Here, we use the `SPARCL` query. Note that this can also be used
 for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is included. Therefore, we will not include SDSS DR16 here (this is treated in the SDSS search above).
 
-```{code-cell}
+```{code-cell} ipython3
 %%time
 ## Get DESI and BOSS spectra with SPARCL
 df_spec_DESIBOSS = DESIBOSS_get_spec(sample_table, search_radius_arcsec=5)
@@ -286,8 +287,7 @@ df_spec.append(df_spec_DESIBOSS)
 ## 3. Make plots of luminosity as a function of time
 We show flux in mJy as a function of time for all available bands for each object. `show_nbr_figures` controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with `save_output`, they will be put in the output directory and labelled by sample number.
 
-
-```{code-cell}
+```{code-cell} ipython3
 ### Plotting ####
 create_figures(df_spec = df_spec,
              bin_factor=5,
@@ -296,6 +296,3 @@ create_figures(df_spec = df_spec,
              )
 ```
 
-```{raw-cell}
-
-```
