@@ -78,7 +78,6 @@ Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, D
 ## Acknowledgements:
 ...
 
-
 +++
 
 ### Datasets that were considered but didn't end up being used:
@@ -95,14 +94,13 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-!pip install -r requirements_spectra_generator.txt
+# !pip install -r requirements_spectra_generator.txt
 ```
 
 ```{code-cell} ipython3
 import sys
 import numpy as np
 import os
-import time
 
 import matplotlib.pyplot as plt
 import matplotlib as mpl

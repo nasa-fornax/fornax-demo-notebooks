@@ -19,7 +19,8 @@ from specutils import Spectrum1D
 import matplotlib.pyplot as plt
 
 
-def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose, delete_downloaded_data = True):
+def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose, 
+                  delete_downloaded_data = True):
     '''
     Retrieves HST spectra for a list of sources and groups/stacks them.
     This main function runs two sub-functions:
@@ -60,7 +61,8 @@ def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose, delete_d
     return(df_jwst_group)
 
 
-def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose, delete_downloaded_data ):
+def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose, 
+                         delete_downloaded_data ):
     '''
     Retrieves HST spectra for a list of sources.
 
@@ -274,7 +276,8 @@ def JWST_group_spectra(df, verbose, quickplot):
     
     return(df_spec)
 
-def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose, delete_downloaded_data = True):
+def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose, 
+                 delete_downloaded_data = True):
     '''
     Retrieves HST spectra for a list of sources.
 
