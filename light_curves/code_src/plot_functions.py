@@ -116,11 +116,12 @@ def _clean_lightcurves(singleobj_df):
 
     # Remove rows containing NaN in time, flux, or err
     singleobj = singleobj.dropna(subset=["time", "flux", "err"])
-
     # Do sigma-clipping per band.
     band_groups = singleobj.groupby("band").flux
     zscore = band_groups.transform(lambda fluxes: np.abs(stats.zscore(fluxes)))
     n_points = band_groups.transform("size")  # number of data points in the band
+    print('inside clean_lightcurves, zscore, n_points', zscore, n_points)
+
     # Keep data points with a zscore < 3 or in a band with less than 10 data points.
     singleobj = singleobj[(zscore < 3.0) | (n_points < 10)]
 
