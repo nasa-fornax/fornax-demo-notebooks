@@ -74,7 +74,7 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-# !pip install -r requirements_light_curve_generator.txt
+!pip install -r requirements_light_curve_generator.txt
 ```
 
 ```{code-cell} ipython3
@@ -85,8 +85,6 @@ import time
 import astropy.units as u
 import pandas as pd
 from astropy.table import Table
-
-import numpy as np
 
 # local code imports
 sys.path.append('code_src/')
@@ -263,9 +261,9 @@ The function to retrieve lightcurves from Pan-STARRS uses a version of both the 
 ```{code-cell} ipython3
 panstarrsstarttime = time.time()
 
-panstarrs_search_radius = 1.0 # search radius in arcsec
+panstarrs_search_radius = 1.0 # search radius = 1 arcsec
 # get panstarrs light curves
-df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, panstarrs_search_radius)
+df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius = panstarrs_search_radius)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_panstarrs)

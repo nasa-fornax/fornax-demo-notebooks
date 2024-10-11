@@ -15,8 +15,8 @@ acstools
 lightkurve
 alerce
 lsdb
-s3fs
-nested_pandas
+#s3fs
+#nested_pandas
 # Required by functionality we use from acstools
 scikit-image
 # Required for sensible progress bars
