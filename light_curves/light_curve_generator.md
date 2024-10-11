@@ -74,7 +74,7 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-!pip install -r requirements_light_curve_generator.txt
+# !pip install -r requirements_light_curve_generator.txt
 ```
 
 ```{code-cell} ipython3
@@ -133,9 +133,9 @@ get_yang_sample(coords, labels)   #2018ApJ...862..109Y
 # a balance between speed of running the light curves and whatever
 # the ML algorithms would like to have
 
-#num_normal_QSO = 30
-#zmin, zmax = 0, 10
-#randomize_z = False
+# num_normal_QSO = 5000
+# zmin, zmax = 0, 10
+# randomize_z = False
 #get_sdss_sample(coords, labels, num=num_normal_QSO, zmin=zmin, zmax=zmax, randomize_z=randomize_z)
 
 # Remove duplicates, attach an objectid to the coords,
@@ -263,7 +263,7 @@ panstarrsstarttime = time.time()
 
 panstarrs_search_radius = 1.0 # search radius = 1 arcsec
 # get panstarrs light curves
-df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius = panstarrs_search_radius)
+df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius=panstarrs_search_radius)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_panstarrs)

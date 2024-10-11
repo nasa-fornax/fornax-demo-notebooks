@@ -8,8 +8,8 @@ from dask.distributed import Client
 from data_structures import MultiIndexDFObject
 
 
-#panstarrs light curves from hipscat catalog in S3 using lsdb
-def panstarrs_get_lightcurves(sample_table, radius = 1):
+# panstarrs light curves from hipscat catalog in S3 using lsdb
+def panstarrs_get_lightcurves(sample_table, *, radius=1):
     """Searches panstarrs hipscat files for light curves from a list of input coordinates.  
     
     Parameters
