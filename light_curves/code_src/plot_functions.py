@@ -15,7 +15,7 @@ ZTF_BANDS = ["zg", "zr", "zi"]  # will be plotted in "B" zoom-in for better visi
 OTHER_BANDS = ["F814W",  # HCV
                "FERMIGTRIG", "SAXGRBMGRB",  # HEASARC
                "G", "BP", "RP",  # Gaia
-               "panstarrs g", "panstarrs i", "panstarrs r", "panstarrs y", "panstarrs z",  # Pan-STARRS
+               "Pan-STARRS g", "Pan-STARRS i", "Pan-STARRS r", "Pan-STARRS y", "Pan-STARRS z",  # Pan-STARRS
                "W1", "W2"]  # WISE
 
 # Set a color for each band.
@@ -120,7 +120,6 @@ def _clean_lightcurves(singleobj_df):
     band_groups = singleobj.groupby("band").flux
     zscore = band_groups.transform(lambda fluxes: np.abs(stats.zscore(fluxes)))
     n_points = band_groups.transform("size")  # number of data points in the band
-    print('inside clean_lightcurves, zscore, n_points', zscore, n_points)
 
     # Keep data points with a zscore < 3 or in a band with less than 10 data points.
     singleobj = singleobj[(zscore < 3.0) | (n_points < 10)]

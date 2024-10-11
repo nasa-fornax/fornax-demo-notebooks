@@ -43,7 +43,7 @@ By the end of this tutorial, you will be able to:
  * an archival optical + IR + neutrino light curve
 
 ## Runtime:
-- As of 2024 October, this notebook takes ~XXs to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 16GB RAM/ 4CPU.
+- As of 2024 October, this notebook takes ~800s to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 16GB RAM/ 4CPU.
 
 ## Authors:
 Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, David Shupe
@@ -74,7 +74,7 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-!pip install -r requirements_light_curve_generator.txt
+# !pip install -r requirements_light_curve_generator.txt
 ```
 
 ```{code-cell} ipython3
@@ -102,18 +102,14 @@ from sample_selection import (clean_sample, get_green_sample, get_hon_sample, ge
 from tess_kepler_functions import tess_kepler_get_lightcurves
 # Note: WISE and ZTF data are temporarily located in a non-public AWS S3 bucket. It is automatically
 # available from the Fornax SMCE, but will require user credentials for access outside the SMCE.
-#from wise_functions import wise_get_lightcurves
-#from ztf_functions import ztf_get_lightcurves
+from wise_functions import wise_get_lightcurves
+from ztf_functions import ztf_get_lightcurves
 ```
 
 ## 1. Define the sample
 We define here a "gold" sample of spectroscopically confirmed changing look AGN and quasars. This sample includes both objects which change from type 1 to type 2 and also the opposite.  Future studies may want to treat these as separate objects or separate QSOs from AGN.  Bibcodes for the samples used are listed next to their functions for reference.
 
 Significant work went into the functions which grab the samples from the papers.  They use Astroquery, NED, SIMBAD, Vizier, and in a few cases grab the tables from the html versions of the paper.  There are trickeries involved in accessing coordinates from tables in the literature. Not every literature table is stored in its entirety in all of these resources, so be sure to check that your chosen method is actually getting the information that you see in the paper table.  Warning: You will get false results if using NED or SIMBAD on a table that has more rows than are printed in the journal.
-
-```{code-cell} ipython3
-t1 = time.time()
-```
 
 ```{code-cell} ipython3
 # Build up the sample
@@ -262,7 +258,7 @@ print('WISE search took:', time.time() - WISEstarttime, 's')
 ```
 
 ### 2.4 MAST: Pan-STARRS
-The function to retrieve lightcurves from Pan-STARRS currently uses their API; based on this [example](https://ps1images.stsci.edu/ps1_dr2_api.html).  This search is not efficient at scale and we expect it to be replaced in the future.
+The function to retrieve lightcurves from Pan-STARRS uses a version of both the object and light curve catalogs that are stored in the cloud and accessd using [lsdb](https://docs.lsdb.io/en/stable/).  This function is efficient at large scale (sample sizes > ~1000).
 
 ```{code-cell} ipython3
 panstarrsstarttime = time.time()
@@ -281,16 +277,16 @@ print('Panstarrs search took:', time.time() - panstarrsstarttime, 's')
 
 ```{code-cell} ipython3
 # Save the data for future use with ML notebook
-parquet_savename = "output/df_lc_panstarrs.parquet"
-#df_lc.data.to_parquet(parquet_savename)
-#print("file saved!")
+# parquet_savename = "output/df_lc_panstarrs.parquet"
+# df_lc.data.to_parquet(parquet_savename)
+# print("file saved!")
 
 
 # Could load a previously saved file in order to plot
-#parquet_loadname = 'output/df_lc_090723_yang.parquet'
-df_lc = MultiIndexDFObject()
-df_lc.data = pd.read_parquet(parquet_savename)
-#print("file loaded!")
+# parquet_loadname = 'output/df_lc_090723_yang.parquet'
+# df_lc = MultiIndexDFObject()
+# df_lc.data = pd.read_parquet(parquet_savename)
+# print("file loaded!")
 ```
 
 ### 2.5 MAST: TESS, Kepler and K2
@@ -390,7 +386,7 @@ n_workers = 8
 heasarc_kwargs = dict(catalog_error_radii={"FERMIGTRIG": "1.0", "SAXGRBMGRB": "3.0"})
 ztf_kwargs = dict(nworkers=None)  # the internal parallelization is incompatible with Pool
 wise_kwargs = dict(radius=1.0, bandlist=['W1', 'W2'])
-panstarrs_search_radius_lsdb = 1.0 # arcsec
+panstarrs_search_radius = 1.0 # arcsec
 tess_kepler_kwargs = dict(radius=1.0)
 hcv_kwargs = dict(radius=1.0/3600.0)
 gaia_kwargs = dict(search_radius=1/3600, verbose=0)
@@ -407,8 +403,8 @@ with mp.Pool(processes=n_workers) as pool:
 
     # start the processes that call the archives
     pool.apply_async(heasarc_get_lightcurves, args=(sample_table,), kwds=heasarc_kwargs, callback=callback)
-    #pool.apply_async(ztf_get_lightcurves, args=(sample_table,), kwds=ztf_kwargs, callback=callback)
-    #pool.apply_async(wise_get_lightcurves, args=(sample_table,), kwds=wise_kwargs, callback=callback)
+    pool.apply_async(ztf_get_lightcurves, args=(sample_table,), kwds=ztf_kwargs, callback=callback)
+    pool.apply_async(wise_get_lightcurves, args=(sample_table,), kwds=wise_kwargs, callback=callback)
     pool.apply_async(tess_kepler_get_lightcurves, args=(sample_table,), kwds=tess_kepler_kwargs, callback=callback)
     pool.apply_async(hcv_get_lightcurves, args=(sample_table,), kwds=hcv_kwargs, callback=callback)
     pool.apply_async(gaia_get_lightcurves, args=(sample_table,), kwds=gaia_kwargs, callback=callback)
@@ -419,8 +415,8 @@ with mp.Pool(processes=n_workers) as pool:
 
 # run panstarrs query outside of multiprocessing since it is using dask distributed under the hood
 # which doesn't work with multiprocessing, and dask is already parallelized
-#df_lc_panstarrs = panstarrs_get_lightcurves_lsdb(sample_table, radius=panstarrs_search_radius_lsdb)
-#parallel_df_lc.append(df_lc_panstarrs) # add the panstarrs dataframe to all other archives
+df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius=panstarrs_search_radius)
+parallel_df_lc.append(df_lc_panstarrs) # add the panstarrs dataframe to all other archives
 
 parallel_endtime = time.time()
 
@@ -439,14 +435,14 @@ parallel_df_lc.data
 
 ```{code-cell} ipython3
 # Save the data for future use with ML notebook
-parquet_savename = f"output/{sample_name}_df_lc.parquet"
+#parquet_savename = f"output/{sample_name}_df_lc.parquet"
 #parallel_df_lc.data.to_parquet(parquet_savename)
 #print("file saved!")
 ```
 
 ```{code-cell} ipython3
 # Could load a previously saved file in order to plot
-#parquet_loadname = 'output/df_lc_090723_yang.parquet'
+#parquet_loadname = 'output/yang_CLAGN_df_lc.parquet'
 #parallel_df_lc = MultiIndexDFObject()
 #parallel_df_lc.data = pd.read_parquet(parquet_loadname)
 #print("file loaded!")
@@ -458,7 +454,7 @@ These plots are modelled after [van Velzen et al., 2021](https://arxiv.org/pdf/2
 __Note__ that in the following, we can either plot the results from `df_lc` (from the serial call) or `parallel_df_lc` (from the parallel call). By default (see next cell) the output of the parallel call is used.
 
 ```{code-cell} ipython3
-_ = create_figures(df_lc = df_lc, # either df_lc (serial call) or parallel_df_lc (parallel call)
+_ = create_figures(df_lc = parallel_df_lc, # either df_lc (serial call) or parallel_df_lc (parallel call)
                    show_nbr_figures = 5,  # how many plots do you actually want to see?
                    save_output = False ,  # should the resulting plots be saved?
                   )
@@ -473,7 +469,3 @@ This work made use of:
 * Lightkurve; Lightkurve Collaboration 2018, 2018ascl.soft12013L
 * acstools; https://zenodo.org/record/7406933#.ZBH1HS-B0eY
 * unWISE light curves; Meisner et al., 2023, 2023AJ....165...36M
-
-```{code-cell} ipython3
-print('total run time', time.time() - t1)
-```
