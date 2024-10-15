@@ -419,16 +419,15 @@ parallel_df_lc.data
 
 ```{code-cell} ipython3
 # Save the data for future use with ML notebook
-#parquet_savename = f"output/{sample_name}_df_lc.parquet"
+#parquet_filename = f"output/{sample_name}_df_lc.parquet"
 #parallel_df_lc.data.to_parquet(parquet_savename)
 #print("file saved!")
 ```
 
 ```{code-cell} ipython3
 # Could load a previously saved file in order to plot
-#parquet_loadname = 'output/yang_CLAGN_df_lc.parquet'
 #parallel_df_lc = MultiIndexDFObject()
-#parallel_df_lc.data = pd.read_parquet(parquet_loadname)
+#parallel_df_lc.data = pd.read_parquet(parquet_filename)
 #print("file loaded!")
 ```
 
