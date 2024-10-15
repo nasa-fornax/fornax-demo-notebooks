@@ -69,7 +69,7 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
 
     #plan to cross match panstarrs object with my sample 
     #only keep the best match
-    yang_ps = panstarrs_object.crossmatch(
+    matched_objects = panstarrs_object.crossmatch(
         sample_lsdb, 
         radius_arcsec=radius, 
         n_neighbors=1, 
@@ -78,7 +78,7 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
     )
         
     # plan to join that cross match with detections to get light-curves
-    yang_ps_lc = yang_ps.join(
+    matched_lc = matched_objects.join(
         panstarrs_detect,
         left_on="objID",
         right_on="objID",
@@ -91,7 +91,7 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
     with Client():
         #compute the cross match with object table
         #and the join with the detections table
-        matched_df = yang_ps_lc.compute()
+        matched_df = matched_lc.compute()
     
         
     #cleanup the filter names to the expected letters
