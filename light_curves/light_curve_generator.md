@@ -273,20 +273,6 @@ print('Panstarrs search took:', time.time() - panstarrsstarttime, 's')
 # Warnings from the panstarrs query about both NESTED and margins are known issues
 ```
 
-```{code-cell} ipython3
-# Save the data for future use with ML notebook
-# parquet_savename = "output/df_lc_panstarrs.parquet"
-# df_lc.data.to_parquet(parquet_savename)
-# print("file saved!")
-
-
-# Could load a previously saved file in order to plot
-# parquet_loadname = 'output/df_lc_090723_yang.parquet'
-# df_lc = MultiIndexDFObject()
-# df_lc.data = pd.read_parquet(parquet_savename)
-# print("file loaded!")
-```
-
 ### 2.5 MAST: TESS, Kepler and K2
 The function to retrieve lightcurves from these three missions currently uses the open source package [`lightKurve`](https://docs.lightkurve.org/index.html).  This search is not efficient at scale and we expect it to be replaced in the future.
 
