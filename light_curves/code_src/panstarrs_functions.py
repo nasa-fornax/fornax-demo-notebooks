@@ -25,7 +25,7 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
         the main data structure to store all light curves
     """
     
-    #read in the hipscat object table to lsdb
+    #read in the panstarrs object table to lsdb
     #this table will be used for cross matching with our sample's ra and decs
     #but does not have light curve information
     panstarrs_object = lsdb.read_hipscat(
@@ -37,7 +37,7 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
             "nStackDetections",  # some other data to use
         ]
     )
-    #read in the hipscat light curves to lsdb
+    #read in the panstarrs light curves to lsdb
     #panstarrs recommendation is not to index into this table with ra and dec
     #but to use object ids from the above object table
     panstarrs_detect = lsdb.read_hipscat(
@@ -46,7 +46,6 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
         columns=[
             "objID",  # PS1 object ID
             "detectID",  # PS1 detection ID
-            "ra", "dec",
             # light-curve stuff
             "obsTime", "filterID", "psfFlux", "psfFluxErr",
         ],

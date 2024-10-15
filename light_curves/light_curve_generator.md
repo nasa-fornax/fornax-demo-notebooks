@@ -256,7 +256,7 @@ print('WISE search took:', time.time() - WISEstarttime, 's')
 ```
 
 ### 2.4 MAST: Pan-STARRS
-The function to retrieve lightcurves from Pan-STARRS uses a version of both the object and light curve catalogs that are stored in the cloud and accessd using [lsdb](https://docs.lsdb.io/en/stable/).  This function is efficient at large scale (sample sizes > ~1000).
+The function to retrieve lightcurves from Pan-STARRS uses a version of both the object and light curve catalogs that are stored in the cloud and accessed using [lsdb](https://docs.lsdb.io/en/stable/).  This function is efficient at large scale (sample sizes > ~1000).
 
 ```{code-cell} ipython3
 panstarrsstarttime = time.time()
