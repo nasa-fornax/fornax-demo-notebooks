@@ -3,8 +3,6 @@ import pandas as pd
 from astropy.table import Table
 import lsdb
 from dask.distributed import Client
-
-
 from data_structures import MultiIndexDFObject
 
 
@@ -92,8 +90,11 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
         #compute the cross match with object table
         #and the join with the detections table
         matched_df = matched_lc.compute()
-    
-        
+
+    #catch the case where there are no matches and return empty df
+    if len(matched_df["filterID"]) == 0:
+        return MultiIndexDFObject(data=pd.DataFrame())
+
     #cleanup the filter names to the expected letters
     filter_id_to_name = {
     1: 'Pan-STARRS g',
@@ -102,13 +103,10 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
     4: 'Pan-STARRS z',
     5: 'Pan-STARRS y'
     }
-    if len(matched_df["filterID"]) > 0:
-        get_name_from_filter_id = np.vectorize(filter_id_to_name.get)
-        filtername = get_name_from_filter_id(matched_df["filterID"])
-    else:
-        # Handle the case where the array is empty
-        filtername = []
-    
+
+    get_name_from_filter_id = np.vectorize(filter_id_to_name.get)
+    filtername = get_name_from_filter_id(matched_df["filterID"])
+      
     # setup to build dataframe 
     t_panstarrs = matched_df["obsTime"]
     flux_panstarrs = matched_df['psfFlux']*1E3  # in mJy
