@@ -72,7 +72,6 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
         radius_arcsec=radius, 
         n_neighbors=1, 
         suffixes=("", "")
-
     )
         
     # plan to join that cross match with detections to get light-curves
@@ -91,7 +90,7 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
         #and the join with the detections table
         matched_df = matched_lc.compute()
 
-    #catch the case where there are no matches and return empty df
+    #handle the case where there are no matches and return empty df
     if len(matched_df["filterID"]) == 0:
         return MultiIndexDFObject(data=pd.DataFrame())
 
@@ -107,21 +106,17 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
     get_name_from_filter_id = np.vectorize(filter_id_to_name.get)
     filtername = get_name_from_filter_id(matched_df["filterID"])
       
-    # setup to build dataframe 
-    t_panstarrs = matched_df["obsTime"]
-    flux_panstarrs = matched_df['psfFlux']*1E3  # in mJy
-    err_panstarrs = matched_df['psfFluxErr'] *1E3
-    lab = matched_df['label']
-    objectid = matched_df['objectid']
-
     #make the dataframe of light curves
-    df_lc = pd.DataFrame(
-        dict(flux=pd.to_numeric(flux_panstarrs, errors='coerce').astype(np.float64), 
-             err=pd.to_numeric(err_panstarrs, errors='coerce').astype(np.float64), 
-             time=pd.to_numeric(t_panstarrs, errors='coerce').astype(np.float64), 
-             objectid=pd.to_numeric(objectid, errors='coerce').astype(np.int64), 
-             band=filtername, 
-             label=lab.astype(str))).set_index(["objectid","label", "band", "time"])
-
+    #the data conversions are to change from pyarrow datatypes to numpy datatypes
+    
+    df_lc = pd.DataFrame({
+        'flux': pd.to_numeric(matched_df['psfFlux'] * 1e3, errors='coerce').astype(np.float64),
+        'err': pd.to_numeric(matched_df['psfFluxErr'] * 1e3, errors='coerce').astype(np.float64),
+        'time': pd.to_numeric(matched_df['obsTime'], errors='coerce').astype(np.float64),
+        'objectid': matched_df['objectid'].astype(np.int64),
+        'band': filtername,
+        'label': matched_df['label'].astype(str)
+    }).set_index(["objectid", "label", "band", "time"])
+    
     return MultiIndexDFObject(data=df_lc)
     
