@@ -125,4 +125,5 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
              band=filtername, 
              label=lab.astype(str))).set_index(["objectid","label", "band", "time"])
 
-    return df_lc
+    return MultiIndexDFObject(data=df_lc)
+    
