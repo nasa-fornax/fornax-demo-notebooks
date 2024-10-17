@@ -15,7 +15,7 @@ acstools
 lightkurve
 alerce
 lsdb
-dask[distributed]
+dask[distributed,dataframe]
 # Required by functionality we use from acstools
 scikit-image
 # Required for sensible progress bars
