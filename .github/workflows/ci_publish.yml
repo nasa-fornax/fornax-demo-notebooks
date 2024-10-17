@@ -17,9 +17,9 @@ concurrency:
 
 jobs:
 
-  publish:
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-    name: Publish HTML
+  build_docs:
+    if: ${{ (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main' }}
+    name: Build HTML
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,6 +35,12 @@ jobs:
       - name: Execute notebooks as testing
         run: tox -e py311-buildhtml
 
+  publish:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    name: Publish HTML
+    needs: build_docs
+    runs-on: ubuntu-latest
+    steps:
       - name: Publish
         uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4.0.0
         with:
