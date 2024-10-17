@@ -15,6 +15,8 @@ acstools
 lightkurve
 alerce
 lsdb
+# We use distributed in this notebook, but installing any dask would make the [dataframe] extras required by dependencies for other notebooks. 
+# It feels to be the cleanest solution to add the dependency here as we don't directly use it elsewhere. 
 dask[distributed,dataframe]
 # Required by functionality we use from acstools
 scikit-image
