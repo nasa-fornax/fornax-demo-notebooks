@@ -4,11 +4,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.15.2
+    jupytext_version: 1.16.4
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  display_name: science_demo
   language: python
-  name: python3
+  name: conda-env-science_demo-py
 ---
 
 # Make Multi-Wavelength Light Curves Using Archival Data
@@ -33,7 +33,6 @@ By the end of this tutorial, you will be able to:
 
  * ML work using these time-series light curves is in two neighboring notebooks: [ML_AGNzoo](ML_AGNzoo.md) and [light_curve_classifier](light_curve_classifier.md).
 
-As written, this notebook is expected to require at least 2 CPU and 8G RAM.
 
 ## Input:
  * choose from a list of known changing look AGN from the literature
@@ -42,6 +41,9 @@ As written, this notebook is expected to require at least 2 CPU and 8G RAM.
 
 ## Output:
  * an archival optical + IR + neutrino light curve
+
+## Runtime:
+- As of 2024 October, this notebook takes ~800s to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 16GB RAM/ 4CPU.
 
 ## Authors:
 Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, David Shupe
@@ -70,7 +72,7 @@ MAST, HEASARC, & IRSA Fornax teams
 
 This cell will install them if needed:
 
-```{code-cell} ipython3#
+```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
 # !pip install -r requirements_light_curve_generator.txt
 ```
@@ -142,6 +144,10 @@ sample_table = clean_sample(coords, labels)
 
 #give this sample a name for use in saving files
 sample_name = "yang_CLAGN"
+```
+
+```{code-cell} ipython3
+sample_table
 ```
 
 ### 1.1 Build your own sample
@@ -250,12 +256,12 @@ print('WISE search took:', time.time() - WISEstarttime, 's')
 ```
 
 ### 2.4 MAST: Pan-STARRS
-The function to retrieve lightcurves from Pan-STARRS currently uses their API; based on this [example](https://ps1images.stsci.edu/ps1_dr2_api.html).  This search is not efficient at scale and we expect it to be replaced in the future.
+The function to retrieve lightcurves from Pan-STARRS uses a version of both the object and light curve catalogs that are stored in the cloud and accessed using [lsdb](https://docs.lsdb.io/en/stable/).  This function is efficient at large scale (sample sizes > ~1000).
 
 ```{code-cell} ipython3
 panstarrsstarttime = time.time()
 
-panstarrs_search_radius = 1.0/3600.0    # search radius = 1 arcsec
+panstarrs_search_radius = 1.0 # search radius = 1 arcsec
 # get panstarrs light curves
 df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius=panstarrs_search_radius)
 
@@ -263,6 +269,8 @@ df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius=panstarrs_searc
 df_lc.append(df_lc_panstarrs)
 
 print('Panstarrs search took:', time.time() - panstarrsstarttime, 's')
+
+# Warnings from the panstarrs query about both NESTED and margins are known issues
 ```
 
 ### 2.5 MAST: TESS, Kepler and K2
@@ -362,7 +370,7 @@ n_workers = 8
 heasarc_kwargs = dict(catalog_error_radii={"FERMIGTRIG": "1.0", "SAXGRBMGRB": "3.0"})
 ztf_kwargs = dict(nworkers=None)  # the internal parallelization is incompatible with Pool
 wise_kwargs = dict(radius=1.0, bandlist=['W1', 'W2'])
-panstarrs_kwargs = dict(radius=1.0/3600.0)
+panstarrs_search_radius = 1.0 # arcsec
 tess_kepler_kwargs = dict(radius=1.0)
 hcv_kwargs = dict(radius=1.0/3600.0)
 gaia_kwargs = dict(search_radius=1/3600, verbose=0)
@@ -381,7 +389,6 @@ with mp.Pool(processes=n_workers) as pool:
     pool.apply_async(heasarc_get_lightcurves, args=(sample_table,), kwds=heasarc_kwargs, callback=callback)
     pool.apply_async(ztf_get_lightcurves, args=(sample_table,), kwds=ztf_kwargs, callback=callback)
     pool.apply_async(wise_get_lightcurves, args=(sample_table,), kwds=wise_kwargs, callback=callback)
-    pool.apply_async(panstarrs_get_lightcurves, args=(sample_table,), kwds=panstarrs_kwargs, callback=callback)
     pool.apply_async(tess_kepler_get_lightcurves, args=(sample_table,), kwds=tess_kepler_kwargs, callback=callback)
     pool.apply_async(hcv_get_lightcurves, args=(sample_table,), kwds=hcv_kwargs, callback=callback)
     pool.apply_async(gaia_get_lightcurves, args=(sample_table,), kwds=gaia_kwargs, callback=callback)
@@ -390,10 +397,17 @@ with mp.Pool(processes=n_workers) as pool:
     pool.close()  # signal that no more jobs will be submitted to the pool
     pool.join()  # wait for all jobs to complete, including the callback
 
+# run panstarrs query outside of multiprocessing since it is using dask distributed under the hood
+# which doesn't work with multiprocessing, and dask is already parallelized
+df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius=panstarrs_search_radius)
+parallel_df_lc.append(df_lc_panstarrs) # add the panstarrs dataframe to all other archives
+
 parallel_endtime = time.time()
 
 # LightKurve will return an "Error" when it doesn't find a match for a target
 # These are not real errors and can be safely ignored.
+
+# Warnings from the panstarrs query about both NESTED and margins are known issues
 ```
 
 ```{code-cell} ipython3
@@ -405,16 +419,15 @@ parallel_df_lc.data
 
 ```{code-cell} ipython3
 # Save the data for future use with ML notebook
-parquet_savename = f"output/{sample_name}_df_lc.parquet"
-parallel_df_lc.data.to_parquet(parquet_savename)
-print("file saved!")
+#parquet_filename = f"output/{sample_name}_df_lc.parquet"
+#parallel_df_lc.data.to_parquet(parquet_savename)
+#print("file saved!")
 ```
 
 ```{code-cell} ipython3
 # Could load a previously saved file in order to plot
-#parquet_loadname = 'output/df_lc_090723_yang.parquet'
 #parallel_df_lc = MultiIndexDFObject()
-#parallel_df_lc.data = pd.read_parquet(parquet_loadname)
+#parallel_df_lc.data = pd.read_parquet(parquet_filename)
 #print("file loaded!")
 ```
 
@@ -426,7 +439,7 @@ __Note__ that in the following, we can either plot the results from `df_lc` (fro
 ```{code-cell} ipython3
 _ = create_figures(df_lc = parallel_df_lc, # either df_lc (serial call) or parallel_df_lc (parallel call)
                    show_nbr_figures = 5,  # how many plots do you actually want to see?
-                   save_output = True ,  # should the resulting plots be saved?
+                   save_output = False ,  # should the resulting plots be saved?
                   )
 ```
 
@@ -439,7 +452,3 @@ This work made use of:
 * Lightkurve; Lightkurve Collaboration 2018, 2018ascl.soft12013L
 * acstools; https://zenodo.org/record/7406933#.ZBH1HS-B0eY
 * unWISE light curves; Meisner et al., 2023, 2023AJ....165...36M
-
-```{code-cell} ipython3
-
-```
