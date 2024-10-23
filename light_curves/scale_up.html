@@ -1,0 +1,1913 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Make Multi-Wavelength Light Curves for Large Samples &#8212; Fornax Demo Notebooks</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!-- 
+    this give us a css class that will be invisible only if js is disabled 
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script type="application/vnd.jupyter.widget-state+json">{"state": {"8e61e9580f924e4f97a84070fa00dcc4": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "4071d99c2f21419eab360831730e1e27": {"model_name": "ProgressStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "af9e1c080f8b4b51b08388460bb9ccfd": {"model_name": "FloatProgressModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_8e61e9580f924e4f97a84070fa00dcc4", "max": 30.0, "min": 0.0, "orientation": "horizontal", "style": "IPY_MODEL_4071d99c2f21419eab360831730e1e27", "tabbable": null, "tooltip": null, "value": 30.0}}, "5613914e1c9846e59cf01d7d2c3269c0": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "e42bf5877c4549f6800e069ee92b956d": {"model_name": "HTMLStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "20cf0ea8d28741939fce68d76dc11415": {"model_name": "HTMLModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_5613914e1c9846e59cf01d7d2c3269c0", "placeholder": "\u200b", "style": "IPY_MODEL_e42bf5877c4549f6800e069ee92b956d", "tabbable": null, "tooltip": null, "value": "100%"}}, "a126a40c6ae343e8a6734a67d5ae061d": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "a17cc61a1dd94e8cbfb2b00529bc42f4": {"model_name": "HTMLStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "da23f184e4d94bbaa683c9ff9f4a002c": {"model_name": "HTMLModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_a126a40c6ae343e8a6734a67d5ae061d", "placeholder": "\u200b", "style": "IPY_MODEL_a17cc61a1dd94e8cbfb2b00529bc42f4", "tabbable": null, "tooltip": null, "value": "\u200730/30\u2007[03:29&lt;00:00,\u200712.07s/it]"}}, "7cd77e5f2ef845a5b1d25d98c230ee1d": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "518845bac92241959bbfc9a67f94cb5f": {"model_name": "HBoxModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_20cf0ea8d28741939fce68d76dc11415", "IPY_MODEL_af9e1c080f8b4b51b08388460bb9ccfd", "IPY_MODEL_da23f184e4d94bbaa683c9ff9f4a002c"], "layout": "IPY_MODEL_7cd77e5f2ef845a5b1d25d98c230ee1d", "tabbable": null, "tooltip": null}}, "8906f4eaa6f343f69418c08cc640db4b": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "a8be5a97c8334de7b2cfd1d2b0e93c3d": {"model_name": "ProgressStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "db8e6cd6bdd74404b293115321afa2a9": {"model_name": "FloatProgressModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_8906f4eaa6f343f69418c08cc640db4b", "max": 2.0, "min": 0.0, "orientation": "horizontal", "style": "IPY_MODEL_a8be5a97c8334de7b2cfd1d2b0e93c3d", "tabbable": null, "tooltip": null, "value": 2.0}}, "6bcc79ca72594487917a67da42113f5c": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "16bf2f47fd294d36924eaba24de2b177": {"model_name": "HTMLStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "e9d2cd1a68a84fd8aa65608810d6a3a5": {"model_name": "HTMLModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_6bcc79ca72594487917a67da42113f5c", "placeholder": "\u200b", "style": "IPY_MODEL_16bf2f47fd294d36924eaba24de2b177", "tabbable": null, "tooltip": null, "value": "100%"}}, "700e8e04d3144ac5a61758b9d2a8d0e1": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "0eb503972845454bb2848a1a0ca14306": {"model_name": "HTMLStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "28f16dd663de4ac69346f8b7f560e585": {"model_name": "HTMLModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_700e8e04d3144ac5a61758b9d2a8d0e1", "placeholder": "\u200b", "style": "IPY_MODEL_0eb503972845454bb2848a1a0ca14306", "tabbable": null, "tooltip": null, "value": "\u20072/2\u2007[00:04&lt;00:00,\u2007\u20071.98s/it]"}}, "adeee696a3e34fc1a45046765b89caff": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "be6484c49b29492d9aec0e310dd1dcf0": {"model_name": "HBoxModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_e9d2cd1a68a84fd8aa65608810d6a3a5", "IPY_MODEL_db8e6cd6bdd74404b293115321afa2a9", "IPY_MODEL_28f16dd663de4ac69346f8b7f560e585"], "layout": "IPY_MODEL_adeee696a3e34fc1a45046765b89caff", "tabbable": null, "tooltip": null}}, "a6fea194e9a349bdb52b50436f031648": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "d83683f6e51e4c069a590b8213413d11": {"model_name": "ProgressStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "d0b574c608e242b9a4087140bdf0358e": {"model_name": "FloatProgressModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_a6fea194e9a349bdb52b50436f031648", "max": 42.0, "min": 0.0, "orientation": "horizontal", "style": "IPY_MODEL_d83683f6e51e4c069a590b8213413d11", "tabbable": null, "tooltip": null, "value": 42.0}}, "7730787ac8474284b368b1988d3a6d18": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "5dcca364ad81489c9dc27ca3d0ea4540": {"model_name": "HTMLStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "5f269fdebe3a41f5a3240aec98f5ae24": {"model_name": "HTMLModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_7730787ac8474284b368b1988d3a6d18", "placeholder": "\u200b", "style": "IPY_MODEL_5dcca364ad81489c9dc27ca3d0ea4540", "tabbable": null, "tooltip": null, "value": "100%"}}, "20e47734bf6145db8488db1a8731fd74": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "0df7c4af2c0d43fe84a5a23cb06e17e3": {"model_name": "HTMLStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "bfe1f87435264aeabaf806752158d2b7": {"model_name": "HTMLModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_20e47734bf6145db8488db1a8731fd74", "placeholder": "\u200b", "style": "IPY_MODEL_0df7c4af2c0d43fe84a5a23cb06e17e3", "tabbable": null, "tooltip": null, "value": "\u200742/42\u2007[02:20&lt;00:00,\u2007\u20073.40s/it]"}}, "ab66dc40bbe74a6fbedcfa8654adf686": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "f3c34fb492c045cc867efb8368ac444e": {"model_name": "HBoxModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_5f269fdebe3a41f5a3240aec98f5ae24", "IPY_MODEL_d0b574c608e242b9a4087140bdf0358e", "IPY_MODEL_bfe1f87435264aeabaf806752158d2b7"], "layout": "IPY_MODEL_ab66dc40bbe74a6fbedcfa8654adf686", "tabbable": null, "tooltip": null}}}, "version_major": 2, "version_minor": 0}</script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script crossorigin="anonymous" data-jupyter-widgets-cdn="https://cdn.jsdelivr.net/npm/" src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@1.0.6/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'light_curves/scale_up';</script>
+    <link rel="icon" href="../_static/fornax_favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Light Curve Classifier" href="light_curve_classifier.html" />
+    <link rel="prev" title="Make Multi-Wavelength Light Curves Using Archival Data" href="light_curve_generator.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/fornax_logo.png" class="logo__image only-light" alt="Fornax Demo Notebooks - Home"/>
+    <img src="../_static/fornax_logo.png" class="logo__image only-dark pst-js-only" alt="Fornax Demo Notebooks - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/nasa-fornax/fornax-demo-notebooks" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../index.html">
+                    The Fornax Initiative
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorial Notebooks</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../forced_photometry/README.html">Multi-band forced photometry</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../forced_photometry/multiband_photometry.html">Automated Multiband Forced Photometry on Large Datasets</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="README.html">Time Domain</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="light_curve_generator.html">Make Multi-Wavelength Light Curves Using Archival Data</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Make Multi-Wavelength Light Curves for Large Samples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="light_curve_classifier.html">Light Curve Classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ML_AGNzoo.html">AGN Zoo: Comparison of AGN selected with different metrics</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">User Documentation</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../documentation/README.html">Fornax Science Console</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/nasa-fornax/fornax-demo-notebooks" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/nasa-fornax/fornax-demo-notebooks/edit/main/light_curves/scale_up.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/nasa-fornax/fornax-demo-notebooks/issues/new?title=Issue%20on%20page%20%2Flight_curves/scale_up.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/light_curves/scale_up.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Make Multi-Wavelength Light Curves for Large Samples</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#learning-goals">Learning Goals</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#overview">Overview</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-processing-methods-bash-script-vs-python-s-multiprocessing">Parallel processing methods: bash script vs. python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-python-helper">The python helper</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-bash-script">The bash script</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interpreting-top">Interpreting <code class="docutils literal notranslate"><span class="pre">top</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fornax-science-console">Fornax Science Console</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-1-multi-wavelength-light-curves-for-500-000-sdss-agn">Example 1: Multi-wavelength light curves for 500,000 SDSS AGN</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#launch-the-run">Launch the run</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cancel">Cancel</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#restart">Restart</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#monitor">Monitor</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#logs">Logs</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#top"><code class="docutils literal notranslate"><span class="pre">top</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-2-parallelizing-the-light-curve-generator-notebook">Example 2: Parallelizing the light_curve_generator notebook</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-3-keyword-arguments-and-script-flags">Example 3: Keyword arguments and script flags</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#python-kwargs-dict">Python <code class="docutils literal notranslate"><span class="pre">kwargs_dict</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bash-script-flags">Bash script flags</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-a-yaml-file">Using a yaml file</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#appendix-what-to-expect">Appendix: What to expect</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#challenges-of-large-scale-runs">Challenges of large-scale runs</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#needs-and-wants-for-large-scale-runs">Needs and wants for large-scale runs</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advice-for-the-user">Advice for the user</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about-this-notebook">About this notebook</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="make-multi-wavelength-light-curves-for-large-samples">
+<h1>Make Multi-Wavelength Light Curves for Large Samples<a class="headerlink" href="#make-multi-wavelength-light-curves-for-large-samples" title="Link to this heading">#</a></h1>
+<section id="learning-goals">
+<h2>Learning Goals<a class="headerlink" href="#learning-goals" title="Link to this heading">#</a></h2>
+<p>By the end of this tutorial, you will be able to:</p>
+<ul class="simple">
+<li><p>Parallelize the code demonstrated in the <a class="reference internal" href="light_curve_generator.html"><span class="std std-doc">light_curve_generator</span></a> notebook to get multi-wavelength light curves.</p></li>
+<li><p>Launch a run using a large sample of objects, monitor the run’s progress automatically, and understand its resource usage (CPU and RAM).</p></li>
+<li><p>Understand some general challenges and requirements when scaling up code.</p></li>
+</ul>
+</section>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
+<p>This notebook shows how to collect multi-wavelength light curves for a large sample of target objects.
+This is a scaling-up of the <a class="reference internal" href="light_curve_generator.html"><span class="std std-doc">light_curve_generator</span></a> and assumes you are familiar with the content of that notebook.</p>
+<p>Notebook sections are:</p>
+<ul class="simple">
+<li><p>Overview: Describes functionality of the included bash script and python helper functions. Compares some parallel processing options. Introduces <code class="docutils literal notranslate"><span class="pre">top</span></code> and what be aware of.</p></li>
+<li><p>Example 1: Shows how to launch a large-scale run using the bash script, monitor its progress automatically, and diagnose a problem (out of RAM). This method is recommended for sample sizes greater than a few hundred.</p></li>
+<li><p>Example 2: Shows how to parallelize the example from the light_curve_generator notebook using the helper and python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> library.</p></li>
+<li><p>Example 3: Details the helper parameter options and how to use them in python and bash.</p></li>
+<li><p>Appendix: Contains background information including a discussion of the challenges, needs, and wants encountered when scaling up this code, and general advice for the user which can be applied to other use cases.</p></li>
+</ul>
+<p>As written, this notebook is expected to require at least 1 CPU and 6G RAM.</p>
+<p><strong>Many of the bash commands below are shown in non-executable cells because they are not intended to be run in this notebook.</strong>
+Bash commands that are not executed below begin with the symbol <code class="docutils literal notranslate"><span class="pre">$</span> </code>, and those that are executed begin with <code class="docutils literal notranslate"><span class="pre">!</span></code>.
+Both types can be called from the command-line – open a new terminal and copy/paste the cell text without the beginning symbol. The bash script is not intended to be executed from within a notebook and may behave strangely if attempted.
+Also be aware that the script path shown in the commands below assumes you are in the same directory as this notebook. Adjust it if needed.</p>
+</section>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">#</a></h2>
+<section id="parallel-processing-methods-bash-script-vs-python-s-multiprocessing">
+<h3>Parallel processing methods: bash script vs. python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code><a class="headerlink" href="#parallel-processing-methods-bash-script-vs-python-s-multiprocessing" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Bash script: Recommended for most runs with medium to large sample sizes (&gt;~500). Allows ZTF to use additional parallelization internally, and so is often faster (ZTF often takes the longest and returns the most data for AGN-like samples). Writes stdout and stderr to log files, useful for monitoring jobs and resource usage. Can save <code class="docutils literal notranslate"><span class="pre">top</span></code> output to a file to help identify CPU and RAM usage/needs.</p></li>
+<li><p>Python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> library: Can be convenient for runs with small to medium sample sizes, up to ~500. Has drawbacks that may be significant including the inability to use ZTF’s internal parallelization and that it does not save the log output (stdout and stderr) to file. An advantage of the <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> example in this notebook over the light_curve_generator is that it automatically saves the sample and light curve data to disk after loading them and can automatically skip those functions in subsequent calls and use the files instead.</p></li>
+</ul>
+</section>
+<section id="the-python-helper">
+<h3>The python helper<a class="headerlink" href="#the-python-helper" title="Link to this heading">#</a></h3>
+<p>The python “helper” is a set of wrapper functions around the same ‘code_src/’ functions used in the light_curve_generator notebook.</p>
+<ul class="simple">
+<li><p>The wrappers facilitate parallelization and large-scale runs by automating tasks like saving the function outputs to files.</p></li>
+<li><p>The helper does not actually implement parallelization and can only run one function per call.</p></li>
+<li><p>The helper can be used in combination with any parallel processing method.</p></li>
+<li><p>The helper can load <code class="docutils literal notranslate"><span class="pre">top</span></code> output from a file to pandas DataFrames and make some figures.</p></li>
+</ul>
+</section>
+<section id="the-bash-script">
+<h3>The bash script<a class="headerlink" href="#the-bash-script" title="Link to this heading">#</a></h3>
+<p>The bash script allows the user to collect light curves from a large scale sample with a single command and provides options to help manage and monitor the run.
+In a nutshell, the script does the following when called using flags that “launch a run”:</p>
+<ul class="simple">
+<li><p>calls the helper to gather the requested sample and then launches jobs for each archive query in separate, parallel processes.</p></li>
+<li><p>redirects stdout and stderr to log files.</p></li>
+<li><p>tells the user what the process PIDs are and where the log and data files are.</p></li>
+<li><p>exits, leaving the archive jobs running in the background.</p></li>
+</ul>
+<p>In case all the archive calls need to be canceled after the script exits, the user can call the script again with a different flag to have it find and kill all the processes it launched.</p>
+<p>While the jobs are running, the user can call the script again with a different flag to have it save <code class="docutils literal notranslate"><span class="pre">top</span></code> output to a log file at a user-defined interval.
+The helper can be used to load this file to pandas DataFrames and make some figures.</p>
+</section>
+<section id="interpreting-top">
+<h3>Interpreting <code class="docutils literal notranslate"><span class="pre">top</span></code><a class="headerlink" href="#interpreting-top" title="Link to this heading">#</a></h3>
+<p>If you are unfamiliar with <code class="docutils literal notranslate"><span class="pre">top</span></code>, the answer to this <a class="reference external" href="https://superuser.com/questions/575202/understanding-top-command-in-unix">StackExchange question</a> contains a basic description of the fields in the output.
+Also, beware that <code class="docutils literal notranslate"><span class="pre">top</span></code> can be configured to display values in different ways (e.g., as a percentage of either a single CPU or of all available CPUs).
+To understand the local configuration, read the man page (run <code class="docutils literal notranslate"><span class="pre">man</span> <span class="pre">top</span></code> in a terminal), particularly the sections “SUMMARY Display” and “FIELDS / Columns Display”.</p>
+</section>
+<section id="fornax-science-console">
+<h3>Fornax Science Console<a class="headerlink" href="#fornax-science-console" title="Link to this heading">#</a></h3>
+<p>There are a couple of things to be aware of when running on the Fornax Science Console.</p>
+<p>Take note of the amount of CPU and RAM available to the server type you choose when starting the session.
+In particular, beware that <code class="docutils literal notranslate"><span class="pre">top</span></code> can show a larger amount of total RAM than is actually accessible to your server due to resource sharing between users.</p>
+<p>The Science Console is primarily intended for interactive use and will cull sessions which appear to be inactive.
+If you want a notebook or script to run for longer than about 30 minutes and you will not be interacting with the Console, running <code class="docutils literal notranslate"><span class="pre">top</span></code> during that time can help keep the session active.</p>
+</section>
+<section id="imports">
+<h3>Imports<a class="headerlink" href="#imports" title="Link to this heading">#</a></h3>
+<p>This cell will install the dependencies, if needed:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Uncomment the next line to install dependencies if needed.</span>
+<span class="c1"># !pip install -r requirements_scale_up.txt</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">multiprocessing</span>  <span class="c1"># python parallelization method</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>  <span class="c1"># use a DataFrame to work with light-curve and other data</span>
+<span class="kn">import</span> <span class="nn">sys</span>  <span class="c1"># add code directories to the path</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;code_src/&quot;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">helpers.scale_up</span>  <span class="c1"># python &quot;helper&quot; for parallelization and large scale runs</span>
+<span class="kn">import</span> <span class="nn">helpers.top</span>  <span class="c1"># load `top` output to DataFrames and make figures</span>
+<span class="kn">from</span> <span class="nn">data_structures</span> <span class="kn">import</span> <span class="n">MultiIndexDFObject</span>  <span class="c1"># load light curve data as a MultiIndexDFObject</span>
+<span class="kn">from</span> <span class="nn">plot_functions</span> <span class="kn">import</span> <span class="n">create_figures</span>  <span class="c1"># make light curve figures</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="example-1-multi-wavelength-light-curves-for-500-000-sdss-agn">
+<h2>Example 1: Multi-wavelength light curves for 500,000 SDSS AGN<a class="headerlink" href="#example-1-multi-wavelength-light-curves-for-500-000-sdss-agn" title="Link to this heading">#</a></h2>
+<p>This example shows how to launch a large-scale collection of light curves using the bash script, monitor its performance, and diagnose a problem (out of RAM).
+This run collects light curves for 500,000 SDSS objects and takes several hours to complete, but is not actually executed here.
+Instead, we show the bash commands and then look at logs that were generated by running the commands on 2024/03/01.
+If executed, the run is expected to require at least 2 CPUs and 100G RAM.</p>
+<section id="launch-the-run">
+<h3>Launch the run<a class="headerlink" href="#launch-the-run" title="Link to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># This will launch a very large scale run.</span>
+<span class="c1"># See Example 3 for a detailed explanation of parameter options.</span>
+<span class="c1"># If you are running this for the first time, reduce the sample size 500000 -&gt; 50.</span>
+
+<span class="c1"># run_id will be used in future calls to manage this run, and also determines the name of the output directory.</span>
+<span class="c1"># If you are executing this, change run_id to your own value to avoid overwriting the demo logs.</span>
+$<span class="w"> </span><span class="nv">run_id</span><span class="o">=</span><span class="s2">&quot;demo-SDSS-500k&quot;</span>
+
+<span class="c1"># Execute the run.</span>
+<span class="c1"># This will get the sample and then call all archives specified by the &#39;-a&#39; flag.</span>
+<span class="c1"># Defaults will be used for all keyword arguments that are not specified.</span>
+$<span class="w"> </span>bash<span class="w"> </span>code_src/helpers/scale_up.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$run_id</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-j<span class="w"> </span><span class="s1">&#39;{&quot;get_samples&quot;: {&quot;SDSS&quot;: {&quot;num&quot;: 500000}}, &quot;archives&quot;: {&quot;ZTF&quot;: {&quot;nworkers&quot;: 8}}}&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-a<span class="w"> </span><span class="s2">&quot;Gaia HEASARC IceCube WISE ZTF&quot;</span>
+</pre></div>
+</div>
+<p>The script will run the ‘get sample’ job, then launch the archive query jobs in parallel and exit.
+Archive jobs will continue running in the background until they either complete or encounter an error.
+Example 2 shows how to load the data.</p>
+<p>Command output from 2024/03/01 logs:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>cat<span class="w"> </span>output/lightcurves-demo-SDSS-500k/logs/scale_up.sh.log
+<span class="c1"># There is a warning that the SDSS &#39;specObjID&#39; column was converted from an int to a string.</span>
+<span class="c1"># The column is immediately dropped. It is not used in the code.</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>*********************************************************************
+**                          Run starting.                          **
+run_id=SDSS-500k
+base_dir=/home/jovyan/raen/fornax-demo-notebooks/light_curves/output/lightcurves-SDSS-500k
+logs_dir=/home/jovyan/raen/fornax-demo-notebooks/light_curves/output/lightcurves-SDSS-500k/logs
+parquet_dir=/home/jovyan/raen/fornax-demo-notebooks/light_curves/output/lightcurves-SDSS-500k/lightcurves.parquet
+**                                                                 **
+
+Build sample is starting. logfile=get_sample.log
+Build sample is done. Printing the log for convenience:
+
+-- /home/jovyan/raen/fornax-demo-notebooks/light_curves/output/lightcurves-SDSS-500k/logs/get_sample.log:
+2024/03/01 20:31:27 UTC | [pid=3289] Starting build=sample
+Building object sample from: [&#39;sdss&#39;]
+WARNING: OverflowError converting to IntType in column specObjID, reverting to String. [astropy.io.ascii.fastbasic]
+SDSS Quasar: 500000
+Object sample size, after duplicates removal: 498877
+Object sample saved to: /home/jovyan/raen/fornax-demo-notebooks/light_curves/output/lightcurves-SDSS-500k/object_sample.ecsv
+2024/03/01 20:36:59 UTC
+--
+
+Archive calls are starting.
+
+[pid=3968] Gaia started. logfile=gaia.log
+[pid=3972] HEASARC started. logfile=heasarc.log
+[pid=3976] IceCube started. logfile=icecube.log
+[pid=3980] WISE started. logfile=wise.log
+[pid=3984] ZTF started. logfile=ztf.log
+
+**                                                                  **
+**                       Main process exiting.                      **
+**           Jobs may continue running in the background.           **
+**********************************************************************
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="cancel">
+<h3>Cancel<a class="headerlink" href="#cancel" title="Link to this heading">#</a></h3>
+<p>You can cancel jobs at any time.</p>
+<p>If the script is still running, press <code class="docutils literal notranslate"><span class="pre">Control-C</span></code>.</p>
+<p>If the script has exited, there are two options.</p>
+<ol class="arabic simple">
+<li><p>To cancel an individual job, kill the job’s process using:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nv">pid</span><span class="o">=</span><span class="m">0000</span><span class="w">  </span><span class="c1"># get the number from script output</span>
+$<span class="w"> </span><span class="nb">kill</span><span class="w"> </span><span class="nv">$pid</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>To cancel the entire run, use the <code class="docutils literal notranslate"><span class="pre">-k</span></code> (kill) flag:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>bash<span class="w"> </span>code_src/helpers/scale_up.sh<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$run_id</span><span class="s2">&quot;</span><span class="w"> </span>-k
+</pre></div>
+</div>
+</section>
+<section id="restart">
+<h3>Restart<a class="headerlink" href="#restart" title="Link to this heading">#</a></h3>
+<p>If you want to restart and skip step(s) that previously completed, run the first command again and add one or both “overwrite” flags set to false:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># use the same run_id as before</span>
+$<span class="w"> </span>bash<span class="w"> </span>code_src/helpers/scale_up.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$run_id</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-j<span class="w"> </span><span class="s1">&#39;{&quot;get_samples&quot;: {&quot;SDSS&quot;: {&quot;num&quot;: 500000}}, &quot;archives&quot;: {&quot;ZTF&quot;: {&quot;nworkers&quot;: 8}}}&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-a<span class="w"> </span><span class="s2">&quot;Gaia HEASARC IceCube WISE ZTF&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span><span class="s2">&quot;overwrite_existing_sample=false&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span><span class="s2">&quot;overwrite_existing_lightcurves=false&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="monitor">
+<h3>Monitor<a class="headerlink" href="#monitor" title="Link to this heading">#</a></h3>
+<p>There are at least three places to look for information about a run’s status.</p>
+<ul class="simple">
+<li><p>Check the logs for job status or errors. The bash script will redirect stdout and stderr to log files and print out the paths for you.</p></li>
+<li><p>Check for light curve (parquet) data. The script will print out the “parquet_dir”. <code class="docutils literal notranslate"><span class="pre">ls</span></code> this directory. You will see a subdirectory for each archive call that has completed successfully, assuming it retrieved data for the sample.</p></li>
+<li><p>Watch <code class="docutils literal notranslate"><span class="pre">top</span></code>. The script will print the job PIDs. The script can also monitor <code class="docutils literal notranslate"><span class="pre">top</span></code> for you and save the output to a log file.</p></li>
+</ul>
+<section id="logs">
+<h4>Logs<a class="headerlink" href="#logs" title="Link to this heading">#</a></h4>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Gaia log from 2024/03/01 (success)</span>
+<span class="o">!</span>cat<span class="w"> </span>output/lightcurves-demo-SDSS-500k/logs/gaia.log
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2024/03/01 20:37:00 UTC | [pid=3968] Starting build=lightcurves, archive=gaia
+INFO: Query finished. [astroquery.utils.tap.core]
+Light curves saved to:
+	parquet_dir=/home/jovyan/raen/fornax-demo-notebooks/light_curves/output/lightcurves-SDSS-500k/lightcurves.parquet
+	file=archive=gaia/part0.snappy.parquet
+2024/03/01 21:07:38 UTC
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ZTF log from 2024/03/01 (failure)</span>
+<span class="o">!</span>cat<span class="w"> </span>output/lightcurves-demo-SDSS-500k/logs/ztf.log
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2024/03/01 20:37:00 UTC | [pid=3984] Starting build=lightcurves, archive=ztf
+100%|███████████████████████████████████████████████████████████████████████████████| 50/50 [44:40&lt;00:00, 53.61s/it]
+2024/03/01 21:21:48 UTC | [pid=13387] Starting worker
+2024/03/01 21:21:48 UTC | [pid=13388] Starting worker
+2024/03/01 21:21:48 UTC | [pid=13389] Starting worker
+2024/03/01 21:21:48 UTC | [pid=13390] Starting worker
+2024/03/01 21:21:48 UTC | [pid=13391] Starting worker
+2024/03/01 21:21:48 UTC | [pid=13392] Starting worker
+2024/03/01 21:21:48 UTC | [pid=13393] Starting worker
+2024/03/01 21:21:48 UTC | [pid=13394] Starting worker
+100%|███████████████████████████████████████████████████████████████████████| 72397/72397 [1:38:37&lt;00:00, 12.23it/s]
+</pre></div>
+</div>
+</div>
+</div>
+<p>The logs above show that the ZTF job loaded the light curve data successfully (“100%”) but exited without writing the parquet file (no “Light curves saved” message like Gaia).
+The data was lost.
+There is also no indication of an error; the job just ends.
+We can diagnose what happened by looking at the <code class="docutils literal notranslate"><span class="pre">top</span></code> output.</p>
+</section>
+<section id="top">
+<h4><code class="docutils literal notranslate"><span class="pre">top</span></code><a class="headerlink" href="#top" title="Link to this heading">#</a></h4>
+<p>While the jobs are running, you can monitor <code class="docutils literal notranslate"><span class="pre">top</span></code> and save the output to a log file by calling the script again with the <code class="docutils literal notranslate"><span class="pre">-t</span></code> flag.
+This call must be separate from the call that launches the run.
+If you want to capture the sample step as well as the archive queries, open a second terminal and call the script with <code class="docutils literal notranslate"><span class="pre">-t</span></code> right after launching the run in the first terminal.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nv">interval</span><span class="o">=</span>10m<span class="w">  </span><span class="c1"># choose your interval</span>
+$<span class="w"> </span>bash<span class="w"> </span>code_src/helpers/scale_up.sh<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;run_id&quot;</span><span class="w"> </span>-t<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$interval</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p>The script will continue running until after all of run_id’s jobs have completed.
+You can cancel at anytime with <code class="docutils literal notranslate"><span class="pre">Control-C</span></code> and start it again with a new interval.</p>
+<p>Once saved to file, the helper can parse the <code class="docutils literal notranslate"><span class="pre">top</span></code> output into pandas DataFrames and make some figures.</p>
+<p><code class="docutils literal notranslate"><span class="pre">top</span></code> output from 2024/03/01:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">run_id</span> <span class="o">=</span> <span class="s2">&quot;demo-SDSS-500k&quot;</span>
+<span class="n">logs_dir</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">build</span><span class="o">=</span><span class="s2">&quot;logs_dir&quot;</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">)</span>
+
+<span class="n">toplog</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">load_top_output</span><span class="p">(</span><span class="n">toptxt_dir</span><span class="o">=</span><span class="n">logs_dir</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># System summary information from lines 1-5 of `top` output. One row per time step.</span>
+<span class="n">toplog</span><span class="o">.</span><span class="n">summary_df</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>load_avg_per_1min</th>
+      <th>load_avg_per_5min</th>
+      <th>load_avg_per_15min</th>
+      <th>total_GiB</th>
+      <th>free_GiB</th>
+      <th>used_GiB</th>
+      <th>avail_GiB</th>
+      <th>delta_time</th>
+    </tr>
+    <tr>
+      <th>time</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2024-03-01 23:06:44+00:00</th>
+      <td>1.46</td>
+      <td>1.86</td>
+      <td>2.13</td>
+      <td>61.8</td>
+      <td>3.4</td>
+      <td>44.8</td>
+      <td>16.4</td>
+      <td>0 days 02:35:16</td>
+    </tr>
+    <tr>
+      <th>2024-03-01 22:19:53+00:00</th>
+      <td>2.84</td>
+      <td>2.38</td>
+      <td>2.31</td>
+      <td>61.8</td>
+      <td>33.3</td>
+      <td>19.6</td>
+      <td>42.1</td>
+      <td>0 days 01:48:25</td>
+    </tr>
+    <tr>
+      <th>2024-03-01 20:41:15+00:00</th>
+      <td>1.93</td>
+      <td>1.53</td>
+      <td>0.86</td>
+      <td>61.8</td>
+      <td>50.5</td>
+      <td>2.9</td>
+      <td>58.2</td>
+      <td>0 days 00:09:47</td>
+    </tr>
+    <tr>
+      <th>2024-03-01 22:59:01+00:00</th>
+      <td>2.96</td>
+      <td>2.55</td>
+      <td>2.39</td>
+      <td>61.8</td>
+      <td>33.5</td>
+      <td>19.4</td>
+      <td>42.2</td>
+      <td>0 days 02:27:33</td>
+    </tr>
+    <tr>
+      <th>2024-03-01 20:59:40+00:00</th>
+      <td>0.98</td>
+      <td>0.99</td>
+      <td>0.95</td>
+      <td>61.8</td>
+      <td>47.0</td>
+      <td>6.4</td>
+      <td>54.7</td>
+      <td>0 days 00:28:12</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Information about running processes from lines 6+ of `top` output. One row per process, per time step.</span>
+<span class="n">toplog</span><span class="o">.</span><span class="n">pids_df</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>job_name</th>
+      <th>pid_name</th>
+      <th>PID</th>
+      <th>USER</th>
+      <th>PR</th>
+      <th>NI</th>
+      <th>VIRTg</th>
+      <th>RESg</th>
+      <th>SHRg</th>
+      <th>S</th>
+      <th>%CPU</th>
+      <th>%MEM</th>
+      <th>TIME+</th>
+      <th>COMMAND</th>
+      <th>delta_time</th>
+    </tr>
+    <tr>
+      <th>time</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2024-03-01 21:26:38+00:00</th>
+      <td>ztf</td>
+      <td>ztf-worker</td>
+      <td>13387</td>
+      <td>jovyan</td>
+      <td>20</td>
+      <td>0</td>
+      <td>4.9</td>
+      <td>1.4</td>
+      <td>0.0</td>
+      <td>S</td>
+      <td>0.0</td>
+      <td>2.2</td>
+      <td>0:58.61</td>
+      <td>python</td>
+      <td>0 days 00:55:10</td>
+    </tr>
+    <tr>
+      <th>2024-03-01 21:58:49+00:00</th>
+      <td>ztf</td>
+      <td>ztf</td>
+      <td>3984</td>
+      <td>jovyan</td>
+      <td>20</td>
+      <td>0</td>
+      <td>7.6</td>
+      <td>4.6</td>
+      <td>0.1</td>
+      <td>S</td>
+      <td>0.0</td>
+      <td>7.5</td>
+      <td>1:21.53</td>
+      <td>python</td>
+      <td>0 days 01:27:21</td>
+    </tr>
+    <tr>
+      <th>2024-03-01 22:26:54+00:00</th>
+      <td>wise</td>
+      <td>wise</td>
+      <td>3980</td>
+      <td>jovyan</td>
+      <td>20</td>
+      <td>0</td>
+      <td>11.6</td>
+      <td>2.8</td>
+      <td>0.1</td>
+      <td>S</td>
+      <td>20.0</td>
+      <td>4.6</td>
+      <td>59:24.64</td>
+      <td>python</td>
+      <td>0 days 01:55:26</td>
+    </tr>
+    <tr>
+      <th>2024-03-01 22:15:52+00:00</th>
+      <td>ztf</td>
+      <td>ztf-worker</td>
+      <td>13387</td>
+      <td>jovyan</td>
+      <td>20</td>
+      <td>0</td>
+      <td>12.0</td>
+      <td>2.1</td>
+      <td>0.0</td>
+      <td>S</td>
+      <td>0.0</td>
+      <td>3.4</td>
+      <td>11:41.27</td>
+      <td>python</td>
+      <td>0 days 01:44:24</td>
+    </tr>
+    <tr>
+      <th>2024-03-01 23:06:42+00:00</th>
+      <td>ztf</td>
+      <td>ztf</td>
+      <td>3984</td>
+      <td>jovyan</td>
+      <td>20</td>
+      <td>0</td>
+      <td>66.0</td>
+      <td>37.2</td>
+      <td>0.1</td>
+      <td>R</td>
+      <td>100.0</td>
+      <td>60.3</td>
+      <td>7:43.57</td>
+      <td>python</td>
+      <td>0 days 02:35:14</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">toplog</span><span class="o">.</span><span class="n">plot_overview</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/c5147fa2e79392573b103941e7b01313cac054e7190b98baa8cfb8abb8fe1ac9.png" src="../_images/c5147fa2e79392573b103941e7b01313cac054e7190b98baa8cfb8abb8fe1ac9.png" />
+</div>
+</div>
+<p>In the figure, panels 1 and 2 show CPU usage while 3 and 4 show memory usage.
+Panels 1 and 3 show system totals while panels 2 and 4 show usage by individual processes.
+Specifically:</p>
+<ul class="simple">
+<li><p>Panel 1: System CPU load, averaged over the previous one minute. A value of “1” means that all compute tasks could have been completed by one CPU working 100% of the time (in reality, the tasks would have been split between the available CPUs). If this value exceeds the number of CPUs available, some tasks will wait in a queue before being executed.</p></li>
+<li><p>Panel 2: Percentage of time the given process used a CPU. This can be greater than 100% if a process uses multiple threads.</p></li>
+<li><p>Panel 3: Amount of unused memory available to the system. If this nears zero, the system will start killing processes so that the entire machine doesn’t go down.</p></li>
+<li><p>Panel 4: Percentage of total RAM used by the given process.</p></li>
+</ul>
+<p>There are many interesting features in the figure that the reader may want to look at in more detail.
+For example, other than ZTF’s memory spike at the end, we see that the full run collecting multi-wavelength light curves for the SDSS 500k sample could be completed with about 2 CPU and 60G RAM.
+We also see that the IceCube call completes very quickly but requires a significant amount of memory.
+Another observation is that the WISE call’s CPU activity seems to slow down when the ZTF workers are running, indicating that a different number of ZTF workers may be more efficient overall.</p>
+<p>We want to learn why the ZTF job failed.
+Let’s zoom in on that time period:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">toplog</span><span class="o">.</span><span class="n">plot_overview</span><span class="p">(</span><span class="n">between_time</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;22:55&quot;</span><span class="p">,</span> <span class="s2">&quot;23:10&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/645f901da92920caabcb62362d8de1cc96f08c2cb70db592b6e3d15224650f0b.png" src="../_images/645f901da92920caabcb62362d8de1cc96f08c2cb70db592b6e3d15224650f0b.png" />
+</div>
+</div>
+<p>In the second panel above we see the ZTF worker processes (which load the light curve data) ending just after 23:00 and then the ZTF parent process continues by itself.
+Around 23:06 in the fourth panel, we see the ZTF job’s memory usage rise sharply to almost 100% and then drop immediately to zero when the job terminates.
+This coincides with the total available memory dropping to near zero in the third panel.
+This shows that the machine did not have enough memory for the ZTF call to successfully transform the light curve data collected by the workers into a <code class="docutils literal notranslate"><span class="pre">MultiIndexDFObject</span></code> and write it as a parquet file, so the machine killed the job.</p>
+<p>The solution is to rerun the ZTF archive call on a machine with more RAM.</p>
+<p>To learn exactly which step in <code class="docutils literal notranslate"><span class="pre">ztf_get_lightcurves</span></code> was causing this and how much memory it actually needed, additional print statements were inserted into the code similar to the following:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># this was inserted just before &quot;exploding&quot; the dataframe in ztf_functions.py</span>
+<span class="c1"># helpers.scale_up._now() prints the current timestamp</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">_now</span><span class="p">()</span><span class="si">}</span><span class="s2"> | starting explode&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># ztf_df = ztf_df.explode(...  # this is the next line in ztf_functions.py</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2024/10/23 23:00:38 UTC | starting explode
+</pre></div>
+</div>
+</div>
+</div>
+<p>ZTF was then rerun on a large machine and <code class="docutils literal notranslate"><span class="pre">top</span></code> output was saved.
+After the run, we manually compared timestamps between the ZTF log and <code class="docutils literal notranslate"><span class="pre">top</span></code> output and tagged relevant <code class="docutils literal notranslate"><span class="pre">top</span></code> timestamps with corresponding step names by appending the name to the ‘—-’ delineator, like this for the “explode” step:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>cat<span class="w"> </span>output/lightcurves-demo-SDSS-500k/logs/top.tag-ztf.txt<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-A12<span class="w"> </span>explode
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>----explode
+2024/02/25 02:09:32 UTC
+top - 02:09:32 up  1:20,  0 users,  load average: 1.00, 0.68, 0.43
+Tasks:   1 total,   1 running,   0 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  0.6 us,  0.2 sy,  0.0 ni, 99.2 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+GiB Mem :    496.0 total,    454.7 free,     13.6 used,     27.7 buff/cache
+GiB Swap:      0.0 total,      0.0 free,      0.0 used.    479.4 avail Mem 
+
+   PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+  1418 jovyan    20   0   82.5g  11.8g   0.1g R 100.0   2.4   4:20.44 ipython
+----
+2024/02/25 02:09:34 UTC
+top - 02:09:34 up  1:20,  0 users,  load average: 1.08, 0.70, 0.44
+</pre></div>
+</div>
+</div>
+</div>
+<p>The helper can recognize these tags and show them on a figure:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ztf_toplog</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">load_top_output</span><span class="p">(</span><span class="n">toptxt_file</span><span class="o">=</span><span class="s2">&quot;top.tag-ztf.txt&quot;</span><span class="p">,</span> <span class="n">toptxt_dir</span><span class="o">=</span><span class="n">logs_dir</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">)</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">ztf_toplog</span><span class="o">.</span><span class="n">plot_time_tags</span><span class="p">(</span><span class="n">summary_y</span><span class="o">=</span><span class="s2">&quot;used_GiB&quot;</span><span class="p">)</span>
+<span class="c1"># (This run starts by reading a previously cached parquet file containing the raw data returned by workers.)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/cd860d7483384746d303baceb34dab0c42f488b0eac43ae2d418d1dd790399a3.png" src="../_images/cd860d7483384746d303baceb34dab0c42f488b0eac43ae2d418d1dd790399a3.png" />
+</div>
+</div>
+<p>This figure shows that almost 100G RAM is required for the ZTF job to succeed.
+It further shows that the “explode” step requires the most memory, followed by creating the MultiIndexDFObject.
+From here, the user can choose an appropriately sized machine and/or consider whether <code class="docutils literal notranslate"><span class="pre">ztf_get_lightcurves</span></code> could be made to use less memory.</p>
+</section>
+</section>
+</section>
+<section id="example-2-parallelizing-the-light-curve-generator-notebook">
+<h2>Example 2: Parallelizing the light_curve_generator notebook<a class="headerlink" href="#example-2-parallelizing-the-light-curve-generator-notebook" title="Link to this heading">#</a></h2>
+<p>This example shows how to parallelize the example from the light_curve_generator notebook using the helper and python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code>.
+An advantage of the method shown here is that it automatically saves the sample and light curve data to disk after loading them and can automatically skip those steps in subsequent calls and use the files instead.
+This is a small sample (Yang, 30 objects).
+If you want a sample larger than a few hundred, consider using the bash script instead.</p>
+<p>Define the keyword arguments for the run:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">kwargs_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;run_id&quot;</span><span class="p">:</span> <span class="s2">&quot;demo-Yang-sample&quot;</span><span class="p">,</span>
+    <span class="c1"># Paper names to gather the sample from.</span>
+    <span class="s2">&quot;get_samples&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Yang&quot;</span><span class="p">],</span>
+    <span class="c1"># Keyword arguments for *_get_lightcurves archive calls.</span>
+    <span class="s2">&quot;archives&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;Gaia&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;search_radius&quot;</span><span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">,</span> <span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+        <span class="s2">&quot;HEASARC&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;catalog_error_radii&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;FERMIGTRIG&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;SAXGRBMGRB&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">}},</span>
+        <span class="s2">&quot;IceCube&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;icecube_select_topN&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;max_search_radius&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">},</span>
+        <span class="s2">&quot;WISE&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;bandlist&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;W1&quot;</span><span class="p">,</span> <span class="s2">&quot;W2&quot;</span><span class="p">]},</span>
+        <span class="s2">&quot;ZTF&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;match_radius&quot;</span><span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">,</span> <span class="s2">&quot;nworkers&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+<span class="c1"># See Example 3 for a detailed explanation of parameter options.</span>
+<span class="n">kwargs_dict</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;run_id&#39;: &#39;demo-Yang-sample&#39;,
+ &#39;get_samples&#39;: [&#39;Yang&#39;],
+ &#39;archives&#39;: {&#39;Gaia&#39;: {&#39;search_radius&#39;: 0.0002777777777777778, &#39;verbose&#39;: 0},
+  &#39;HEASARC&#39;: {&#39;catalog_error_radii&#39;: {&#39;FERMIGTRIG&#39;: 1.0, &#39;SAXGRBMGRB&#39;: 3.0}},
+  &#39;IceCube&#39;: {&#39;icecube_select_topN&#39;: 3, &#39;max_search_radius&#39;: 2.0},
+  &#39;WISE&#39;: {&#39;radius&#39;: 1.0, &#39;bandlist&#39;: [&#39;W1&#39;, &#39;W2&#39;]},
+  &#39;ZTF&#39;: {&#39;match_radius&#39;: 0.0002777777777777778, &#39;nworkers&#39;: None}}}
+</pre></div>
+</div>
+</div>
+</div>
+<p>Decide which archives to query.
+This is a separate list because the helper can only run one archive call at a time.
+We will iterate over this list and launch each job separately.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># archive_names = [&quot;PanSTARRS&quot;, &quot;WISE&quot;]  # choose your own list</span>
+<span class="n">archive_names</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">ARCHIVE_NAMES</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">]</span>  <span class="c1"># predefined list</span>
+<span class="n">archive_names</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;Gaia&#39;,
+ &#39;HCV&#39;,
+ &#39;HEASARC&#39;,
+ &#39;IceCube&#39;,
+ &#39;PanSTARRS&#39;,
+ &#39;TESS_Kepler&#39;,
+ &#39;WISE&#39;,
+ &#39;ZTF&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<p>In the next cell, we:</p>
+<ul class="simple">
+<li><p>collect the sample and write it as a .ecsv file; then</p></li>
+<li><p>query the archives in parallel using a <code class="docutils literal notranslate"><span class="pre">multiprocessing.Pool</span></code> and write the light curve data as .parquet files.</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
+<span class="n">sample_table</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">build</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_dict</span><span class="p">)</span>
+<span class="c1"># sample_table is returned if you want to look at it but it is not used below</span>
+
+<span class="k">with</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">archive_names</span><span class="p">))</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+    <span class="c1"># submit one job per archive</span>
+    <span class="k">for</span> <span class="n">archive</span> <span class="ow">in</span> <span class="n">archive_names</span><span class="p">:</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">run</span><span class="p">,</span> <span class="n">kwds</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;build&quot;</span><span class="p">:</span> <span class="s2">&quot;lightcurves&quot;</span><span class="p">,</span> <span class="s2">&quot;archive&quot;</span><span class="p">:</span> <span class="n">archive</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_dict</span><span class="p">})</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># signal that no more jobs will be submitted to the pool</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>  <span class="c1"># wait for all jobs to complete</span>
+
+<span class="c1"># Note: The console output from different archive calls gets jumbled together below.</span>
+<span class="c1"># Worse, error messages tend to get lost in the background and never displayed.</span>
+<span class="c1"># If you have trouble, consider running an archive call individually without the Pool</span>
+<span class="c1"># or using the bash script instead.</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2024/10/23 23:00:39 UTC | [pid=2272] Starting build=sample
+Building object sample from: [&#39;yang&#39;]
+Changing Look AGN- Yang et al:  31
+Object sample size, after duplicates removal: 30
+Object sample saved to: /home/runner/work/fornax-demo-notebooks/fornax-demo-notebooks/light_curves/output/lightcurves-demo-Yang-sample/object_sample.ecsv
+2024/10/23 23:00:40 UTC
+2024/10/23 23:00:40 UTC | [pid=2323] Starting build=lightcurves, archive=heasarc
+2024/10/23 23:00:40 UTC | [pid=2325] Starting build=lightcurves, archive=panstarrs
+2024/10/23 23:00:40 UTC | [pid=2321] Starting build=lightcurves, archive=gaia
+2024/10/23 23:00:40 UTC | [pid=2322] Starting build=lightcurves, archive=hcv
+2024/10/23 23:00:40 UTC | [pid=2327] Starting build=lightcurves, archive=wise
+2024/10/23 23:00:40 UTC | [pid=2328] Starting build=lightcurves, archive=ztf
+2024/10/23 23:00:40 UTC | [pid=2324] Starting build=lightcurves, archive=icecube
+2024/10/23 23:00:40 UTC | [pid=2326] Starting build=lightcurves, archive=tess_kepler
+working on mission
+FERMIGTRIG
+INFO
+: Query finished. [astroquery.utils.tap.core]
+working on mission
+SAXGRBMGRB
+Light curves saved to:
+	parquet_dir=/home/runner/work/fornax-demo-notebooks/fornax-demo-notebooks/light_curves/output/lightcurves-demo-Yang-sample/lightcurves.parquet
+	file=archive=gaia/part0.snappy.parquet
+2024/10/23 23:00:45 UTC
+Light curves saved to:
+	parquet_dir=/home/runner/work/fornax-demo-notebooks/fornax-demo-notebooks/light_curves/output/lightcurves-demo-Yang-sample/lightcurves.parquet
+	file=archive=heasarc/part0.snappy.parquet
+2024/10/23 23:00:46 UTC
+Light curves saved to:
+	parquet_dir=/home/runner/work/fornax-demo-notebooks/fornax-demo-notebooks/light_curves/output/lightcurves-demo-Yang-sample/lightcurves.parquet
+	file=archive=icecube/part0.snappy.parquet
+2024/10/23 23:00:55 UTC
+No light curve data was returned from hcv.
+Light curves saved to:
+	parquet_dir=/home/runner/work/fornax-demo-notebooks/fornax-demo-notebooks/light_curves/output/lightcurves-demo-Yang-sample/lightcurves.parquet
+	file=archive=wise/part0.snappy.parquet
+2024/10/23 23:03:15 UTC
+No light curve data was returned from tess_kepler.
+CPU times: user 469 ms, sys: 201 ms, total: 671 ms
+Wall time: 3min 32s
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0%|          | 0/1 [00:00&lt;?, ?it/s]
+100%|██████████| 1/1 [00:04&lt;00:00,  4.04s/it]
+100%|██████████| 1/1 [00:04&lt;00:00,  4.04s/it]
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (0.28136, -0.09792)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (21.70042, -8.66336)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (29.99, 0.55301)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (120.9482, 42.97751)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (127.88438, 36.77141)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (132.49079, 27.79135)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (137.38344, 47.79187)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (144.37634, 26.04227)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (144.39779, 32.54717)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (150.84779, 35.41774)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (152.97079, 54.70177)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (166.09679, 63.71812)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (166.22988, 1.31573)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (167.60604, -0.05948)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (168.90237, 5.74715)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (169.62359, 32.06669)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (173.12143, 3.9581)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (177.66379, 36.54955)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (178.11453, 32.16649)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (194.81977, 55.25198)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (199.87816, 67.89873)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (209.07708, -1.25389)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (209.73261, 49.57057)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (221.97599, 28.55671)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (233.48329, 1.17494)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (236.37346, 25.19108)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (237.57182, 41.65067)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (238.24283, 27.62461)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (238.66777, 36.49777)&gt;&quot;.
+No data found for target &quot;&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (354.01239, 0.29138)&gt;&quot;.
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "518845bac92241959bbfc9a67f94cb5f"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "be6484c49b29492d9aec0e310dd1dcf0"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "f3c34fb492c045cc867efb8368ac444e"}</script></div>
+</div>
+<p>The light curves are saved in the “parquet_dir” directory.
+Each archive call writes data to a parquet file in its own subdirectory.
+These can be loaded together as a single dataset:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># copy/paste the directory path from the output above, or ask the helper for it like this:</span>
+<span class="n">parquet_dir</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">build</span><span class="o">=</span><span class="s2">&quot;parquet_dir&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_dict</span><span class="p">)</span>
+<span class="n">df_lc</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">parquet_dir</span><span class="p">)</span>
+
+<span class="n">df_lc</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th>flux</th>
+      <th>err</th>
+      <th>archive</th>
+    </tr>
+    <tr>
+      <th>objectid</th>
+      <th>label</th>
+      <th>band</th>
+      <th>time</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>19</th>
+      <th>Yang 18</th>
+      <th>RP</th>
+      <th>57047.384139</th>
+      <td>0.095490</td>
+      <td>0.007860</td>
+      <td>gaia</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <th>Yang 18</th>
+      <th>G</th>
+      <th>56918.086141</th>
+      <td>0.084690</td>
+      <td>0.002322</td>
+      <td>gaia</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <th>Yang 18</th>
+      <th>W2</th>
+      <th>57858.156088</th>
+      <td>0.215792</td>
+      <td>0.013028</td>
+      <td>wise</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <th>Yang 18</th>
+      <th>W1</th>
+      <th>56855.740636</th>
+      <td>0.502370</td>
+      <td>0.007313</td>
+      <td>wise</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <th>Yang 18</th>
+      <th>W2</th>
+      <th>55308.289825</th>
+      <td>0.790120</td>
+      <td>0.013936</td>
+      <td>wise</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <th>Yang 18</th>
+      <th>BP</th>
+      <th>57062.692147</th>
+      <td>0.152052</td>
+      <td>0.005361</td>
+      <td>gaia</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <th>Yang 18</th>
+      <th>W2</th>
+      <th>56848.735794</th>
+      <td>0.345788</td>
+      <td>0.015627</td>
+      <td>wise</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <th>Yang 18</th>
+      <th>BP</th>
+      <th>56979.707266</th>
+      <td>0.089015</td>
+      <td>0.004725</td>
+      <td>gaia</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <th>Yang 18</th>
+      <th>BP</th>
+      <th>57587.362909</th>
+      <td>0.096432</td>
+      <td>0.004988</td>
+      <td>gaia</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <th>Yang 18</th>
+      <th>W2</th>
+      <th>58056.160199</th>
+      <td>0.503680</td>
+      <td>0.017135</td>
+      <td>wise</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Now we can make figures:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">_</span> <span class="o">=</span> <span class="n">create_figures</span><span class="p">(</span><span class="n">df_lc</span><span class="o">=</span><span class="n">MultiIndexDFObject</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df_lc</span><span class="p">),</span> <span class="n">show_nbr_figures</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">save_output</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/ac9ee1a6eddfec38ce65553074dea05c2d8ce432f2f927cc6741f2dd1ea8de65.png" src="../_images/ac9ee1a6eddfec38ce65553074dea05c2d8ce432f2f927cc6741f2dd1ea8de65.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Done
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="example-3-keyword-arguments-and-script-flags">
+<h2>Example 3: Keyword arguments and script flags<a class="headerlink" href="#example-3-keyword-arguments-and-script-flags" title="Link to this heading">#</a></h2>
+<p>This example shows the python <code class="docutils literal notranslate"><span class="pre">kwargs_dict</span></code> and bash script flag options in more detail.</p>
+<section id="python-kwargs-dict">
+<h3>Python <code class="docutils literal notranslate"><span class="pre">kwargs_dict</span></code><a class="headerlink" href="#python-kwargs-dict" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">kwargs_dict</span></code> is a dictionary containing all keyword arguments for the run. It can contain:</p>
+<ul class="simple">
+<li><p>names and keyword arguments for any of the <code class="docutils literal notranslate"><span class="pre">get_*_sample</span></code> functions.</p></li>
+<li><p>keyword arguments for any of the <code class="docutils literal notranslate"><span class="pre">*_get_lightcurves</span></code> functions.</p></li>
+<li><p>other keyword arguments used directly by the helper.
+These options and their defaults are shown below, further documented in the helper’s <code class="docutils literal notranslate"><span class="pre">run</span></code> function.</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># show kwargs_dict defaults</span>
+<span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">DEFAULTS</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;run_id&#39;: &#39;my-run&#39;,
+ &#39;get_samples&#39;: [&#39;Yang&#39;],
+ &#39;consolidate_nearby_objects&#39;: True,
+ &#39;overwrite_existing_sample&#39;: True,
+ &#39;archives&#39;: [&#39;Gaia&#39;,
+  &#39;HCV&#39;,
+  &#39;HEASARC&#39;,
+  &#39;IceCube&#39;,
+  &#39;PanSTARRS&#39;,
+  &#39;TESS_Kepler&#39;,
+  &#39;WISE&#39;,
+  &#39;ZTF&#39;],
+ &#39;overwrite_existing_lightcurves&#39;: True,
+ &#39;use_yaml&#39;: False,
+ &#39;yaml_filename&#39;: &#39;kwargs.yml&#39;,
+ &#39;sample_filename&#39;: &#39;object_sample.ecsv&#39;,
+ &#39;parquet_dataset_name&#39;: &#39;lightcurves.parquet&#39;}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># show parameter documentation</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Run the light_curve_generator step indicated by `build`.
+
+    Parameters
+    ==========
+
+    build : str
+        Which step to run. Generally either &quot;sample&quot; or &quot;lightcurves&quot;. Can also be either &quot;kwargs&quot;
+        or any of the `kwargs_dict` keys, and then the full set of kwargs is built from `kwargs_dict`
+        and either the whole dictionary is returned (if &quot;kwargs&quot;) or the value of this key is returned.
+
+    kwargs_dict
+        Key/value pairs for the build function. This can include any key in the dict
+        `helpers.scale_up.DEFAULTS` plus &quot;archive&quot;. These are described below.
+
+        run_id : str
+            ID for this run. This is used to name the output subdirectory (&quot;base_dir&quot;) where the
+            scale_up helper will read/write files.
+
+        get_samples : list or dict[dict]
+            Names of get_&lt;name&gt;_sample functions from which to gather the object sample.
+            To send keyword arguments for any of the named functions, use a dict with key=name
+             value=dict of keyword arguments for the named function). Defaults will be
+            used for any parameter not provided.
+
+        consolidate_nearby_objects : bool
+            Whether to consolidate nearby objects in the sample. Passed to the clean_sample function.
+
+        overwrite_existing_sample : bool
+            Whether to overwrite an existing .ecsv file. If false and the file exists, the sample will simply
+            be loaded from the file and returned.
+
+        archive : str
+            Name of a &lt;name&gt;_get_lightcurves archive function to call when building light curves.
+
+        archives : list or dict[dict]
+            Names of &lt;name&gt;_get_lightcurves functions. Use a dict (key=name, value=dict of kwargs for the named
+            function) to override defaults for the named function. **Note that this does not determine which
+            archives are actually called** (unlike `get_samples` with sample names). This is because the
+            scale_up helper can only run one function at a time, so a single archive name must be passed separately
+            when building light curves.
+
+        overwrite_existing_lightcurves : bool
+            Whether to overwrite an existing .parquet file. If false and the file exists, the light curve
+            data will simply be loaded from the file and returned.
+
+        use_yaml : bool
+            Whether to load additional kwargs from a yaml file.
+
+        yaml_filename : str
+            Name of the yaml to read/write, relative to the base_dir.
+
+        sample_filename: str
+            Name of the `sample_table` .ecsv file to read/write, relative to the base_dir.
+
+        parquet_dataset_name : str
+            Name of the directory to read/write the parquet dataset, relative to the base_dir.
+            The dataset will contain one .parquet file for each archive that returned light curve data.
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="bash-script-flags">
+<h3>Bash script flags<a class="headerlink" href="#bash-script-flags" title="Link to this heading">#</a></h3>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">-h</span></code> (help) flag to view the script’s flag options:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># show flag documentation</span>
+<span class="o">!</span>bash<span class="w"> </span>code_src/helpers/scale_up.sh<span class="w"> </span>-h
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>---- scale_up.sh ----
+
+Use this script to launch and monitor a large-scale &quot;run&quot; to load a sample of target objects
+from the literature and collect their multi-wavelength light curves from various archives.
+For complete usage information, see the scale_up notebook tutorial.
+
+FLAG OPTIONS
+------------
+
+Required flags:
+
+    -r &#39;run_id&#39;
+        ID for the run. No spaces or special characters.
+        Determines the name of the output directory.
+        Can be used in multiple script calls to manage the same run.
+
+Flags used to launch a run (optional):
+
+    -a &#39;archive names&#39;
+        Space-separated list of archive names like &#39;HEASARC PanSTARRS WISE&#39; (case insensitive),
+        or a shortcut, e.g., &#39;all&#39;.
+        The get_&lt;name&gt;_lightcurves function will be called once for each name.
+        If this flag is not supplied, no light-curve data will be retrieved.
+
+    -d &#39;key=value&#39;
+        Any top-level key/value pair in the python kwargs_dict where the
+        value is a basic type (e.g., bool or string, but not list or dict).
+        Repeat the flag to send multiple kwargs.
+        For more flexibility, use the -j flag and/or store the kwargs_dict as a
+        yaml file and use: -d &#39;use_yaml=true&#39;. Order of precedence is dict, json, yaml.
+
+    -j &#39;json string&#39;
+        The python kwargs_dict as a json string. An example usage is:
+        -j &#39;{get_samples: {SDSS: {num: 50}}, archives: {ZTF: {nworkers: 8}}}&#39;
+        The string can be created in python by first constructing the dictionary and then using:
+            &gt;&gt;&gt; import json
+            &gt;&gt;&gt; json.dumps(kwargs_dict)
+        Copy the output, including the surrounding single quotes (&#39;), and paste it as the flag value.
+
+Other flags (optional):
+    These must be used independently and cannot be combined with any other optional flag.
+
+    -t &#39;nsleep&#39;
+        Use this flag to monitor top after launching a run. This will filter for PIDs
+        launched by &#39;run_id&#39; and save the output to a log file once every &#39;nsleep&#39; interval.
+        &#39;nsleep&#39; will be passed to the sleep command, so values like &#39;10s&#39; and &#39;30m&#39; are allowed.
+        The python helper can load the output.
+        This option is only available on Linux machines.
+
+    -k (kill)
+        Use this flag to kill all processes that were started using the given &#39;run_id&#39;.
+        This option is only available on Linux machines.
+
+    -h (help)
+        Print this help message.
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="using-a-yaml-file">
+<h3>Using a yaml file<a class="headerlink" href="#using-a-yaml-file" title="Link to this heading">#</a></h3>
+<p>It can be convenient to save the parameters in a yaml file, especially when using the bash script or in cases where you want to store parameters for later reference or re-use.</p>
+<p>Define an extended set of parameters and save it as a yaml file:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">yaml_run_id</span> <span class="o">=</span> <span class="s2">&quot;demo-kwargs-yaml&quot;</span>
+
+<span class="n">get_samples</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;green&quot;</span><span class="p">:</span> <span class="p">{},</span>
+    <span class="s2">&quot;ruan&quot;</span><span class="p">:</span> <span class="p">{},</span>
+    <span class="s2">&quot;papers_list&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;paper_kwargs&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s2">&quot;paper_link&quot;</span><span class="p">:</span> <span class="s2">&quot;2022ApJ...933...37W&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Galex variable 22&quot;</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;paper_link&quot;</span><span class="p">:</span> <span class="s2">&quot;2020ApJ...896...10B&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Palomar variable 20&quot;</span><span class="p">},</span>
+        <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;SDSS&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;num&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;zmin&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">&quot;zmax&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;randomize_z&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+    <span class="s2">&quot;ZTF_objectid&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;objectids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ZTF18aabtxvd&quot;</span><span class="p">,</span> <span class="s2">&quot;ZTF18aahqkbt&quot;</span><span class="p">,</span> <span class="s2">&quot;ZTF18abxftqm&quot;</span><span class="p">,</span> <span class="s2">&quot;ZTF18acaqdaa&quot;</span><span class="p">]},</span>
+<span class="p">}</span>
+
+<span class="n">archives</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;Gaia&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;search_radius&quot;</span><span class="p">:</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">},</span>
+    <span class="s2">&quot;HEASARC&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;catalog_error_radii&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;FERMIGTRIG&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;SAXGRBMGRB&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">}},</span>
+    <span class="s2">&quot;IceCube&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;icecube_select_topN&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;max_search_radius&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">},</span>
+    <span class="s2">&quot;WISE&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;bandlist&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;W1&quot;</span><span class="p">,</span> <span class="s2">&quot;W2&quot;</span><span class="p">]},</span>
+    <span class="s2">&quot;ZTF&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;nworkers&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s2">&quot;match_radius&quot;</span><span class="p">:</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">},</span>
+<span class="p">}</span>
+
+<span class="n">yaml_kwargs_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;get_samples&quot;</span><span class="p">:</span> <span class="n">get_samples</span><span class="p">,</span>
+    <span class="s2">&quot;consolidate_nearby_objects&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">&quot;archives&quot;</span><span class="p">:</span> <span class="n">archives</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">write_kwargs_to_yaml</span><span class="p">(</span><span class="n">run_id</span><span class="o">=</span><span class="n">yaml_run_id</span><span class="p">,</span> <span class="o">**</span><span class="n">yaml_kwargs_dict</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>kwargs written to /home/runner/work/fornax-demo-notebooks/fornax-demo-notebooks/light_curves/output/lightcurves-demo-kwargs-yaml/kwargs.yml
+</pre></div>
+</div>
+</div>
+</div>
+<p>The path to the yaml file is printed in the output above.
+You can alter the contents of the file as you like.
+To use the file, set the kwarg <code class="docutils literal notranslate"><span class="pre">use_yaml=True</span></code>.</p>
+<p>Python example for the get-sample step:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sample_table</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">scale_up</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">build</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">yaml_run_id</span><span class="p">,</span> <span class="n">use_yaml</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2024/10/23 23:04:12 UTC | [pid=2272] Starting build=sample
+Building object sample from: [&#39;sdss&#39;, &#39;ztf_objectid&#39;, &#39;green&#39;, &#39;papers_list&#39;, &#39;ruan&#39;]
+SDSS Quasar: 10
+number of ztf coords added by Objectname: 4
+Changing Look AGN- Green et al 2022:  19
+number of sources added from Galex variable 22 :48
+number of sources added from Palomar variable 20 :20
+Changing Look AGN- Ruan et al 2016:  3
+Object sample size: 104
+Object sample saved to: /home/runner/work/fornax-demo-notebooks/fornax-demo-notebooks/light_curves/output/lightcurves-demo-kwargs-yaml/object_sample.ecsv
+2024/10/23 23:04:17 UTC
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING: OverflowError converting to IntType in column specObjID, reverting to String. [astropy.io.ascii.fastbasic]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Bash example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nv">yaml_run_id</span><span class="o">=</span>demo-kwargs-yaml
+$<span class="w"> </span>bash<span class="w"> </span>code_src/helpers/scale_up.sh<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$yaml_run_id</span><span class="s2">&quot;</span><span class="w"> </span>-d<span class="w"> </span><span class="s2">&quot;use_yaml=true&quot;</span><span class="w"> </span>-a<span class="w"> </span><span class="s2">&quot;Gaia HEASARC IceCube WISE ZTF&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="appendix-what-to-expect">
+<h2>Appendix: What to expect<a class="headerlink" href="#appendix-what-to-expect" title="Link to this heading">#</a></h2>
+<section id="challenges-of-large-scale-runs">
+<h3>Challenges of large-scale runs<a class="headerlink" href="#challenges-of-large-scale-runs" title="Link to this heading">#</a></h3>
+<p>Scaling up to large sample sizes brings new challenges.
+Even if things go smoothly, each function call may need to use a lot more resources like CPU, RAM, and bandwidth, and may take much longer to complete.
+Also, we’ll want to run some functions in parallel to save time overall, but that will mean they must compete with each other for resources.</p>
+<p>These issues are complicated by the fact that different combinations of samples and archive calls can trigger different problems.
+Inefficiencies in any part of the process – our code, archive backends, etc. – which may have been negligible at small scale can balloon into significant hurdles.</p>
+<p>Problems can manifest in different ways.
+For example, progress may slow to a crawl, or it may run smoothly for several hours and then crash suddenly.
+If the job is running in the background, print statements and error messages may get lost and never be displayed for the user if they are not redirected to a file.</p>
+</section>
+<section id="needs-and-wants-for-large-scale-runs">
+<h3>Needs and wants for large-scale runs<a class="headerlink" href="#needs-and-wants-for-large-scale-runs" title="Link to this heading">#</a></h3>
+<p>The main goal is to reduce the total time it takes to run the full code, so we want to look for opportunities to parallelize.
+We can group the light_curve_generator code into two main steps: (1) gather the target object sample; then (2) generate light curves by querying the archives and standardizing the returned data.
+All of the archive calls have to wait for the sample to be available before starting, but then they can run independently in parallel.
+This is fortunate, since gathering the sample does not take long compared to the archive calls.</p>
+<p>It is useful to be able to monitor the run’s resource usage and capture print statements, error messages, etc. to log files in order to understand if/when something goes wrong.
+Even with parallelization, gathering light curves for a large sample of objects is likely to take a few hours at least.
+So we want to automate the monitoring tasks as much as possible.</p>
+<p>If the run fails, we’d like to be able to restart it without having to redo steps that were previously successful.
+To accomplish this, the inputs and outputs need to be less tightly coupled than they are in the light_curve_generator notebook.
+Specifically, we want to save the sample and light curve data to file as soon as each piece is collected, and we want the archive functions to be able to get the <code class="docutils literal notranslate"><span class="pre">sample_table</span></code> input from file.</p>
+<p>The python helper and bash script were specifically designed to fulfill many of these wants and needs.</p>
+</section>
+<section id="advice-for-the-user">
+<h3>Advice for the user<a class="headerlink" href="#advice-for-the-user" title="Link to this heading">#</a></h3>
+<p>Getting started:</p>
+<ol class="arabic simple">
+<li><p>Skim this notebook to understand the process, available options, and potential sticking points.</p></li>
+<li><p>Try things with a small sample size first, then scale up to your desired full sample.</p></li>
+<li><p>Don’t be surprised if something goes wrong.
+Every new combination of factors can present different challenges and reasons for the code to fail.
+This includes the sample selection, which archives are called and what parameters are used, runtime environment, machine CPU and RAM capabilities, network bandwidth, etc.
+Scaling up any code base comes with challenges, and some of these cannot be fully managed by pre-written code.
+You may need to observe how the code performs, diagnose a problem, and adapt the input parameters, machine size, etc. in order to successfully execute.</p></li>
+</ol>
+<p>To execute a run:</p>
+<ol class="arabic simple">
+<li><p>Define all of the get-sample and get-lightcurve parameters.</p></li>
+<li><p>Launch the run by calling the bash script or some other multi-processing method.
+Capturing stdout, stderr and <code class="docutils literal notranslate"><span class="pre">top</span></code> output to log files is highly recommended.</p></li>
+<li><p>If a get-lightcurve (get-sample) job exits without writing a .parquet (.ecsv) file, inspect the logs and <code class="docutils literal notranslate"><span class="pre">top</span></code> output to try to determine the reason it failed.
+It could be anything from a missing python library (install it), to an archive encountering an internal error (wait a bit and try again), to the job getting killed prematurely because its needs exceeded the available RAM (try a machine with more RAM, a smaller sample size, or running fewer archive calls at a time), to many other things.</p></li>
+</ol>
+</section>
+</section>
+<section id="about-this-notebook">
+<h2>About this notebook<a class="headerlink" href="#about-this-notebook" title="Link to this heading">#</a></h2>
+<p><strong>Authors</strong>: Troy Raen, Jessica Krick, Brigitta Sipőcz, Shoubaneh Hemmati, Andreas Faisst, David Shupe</p>
+<p><strong>Updated On</strong>: 2024-04-05</p>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="light_curve_generator.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Make Multi-Wavelength Light Curves Using Archival Data</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="light_curve_classifier.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Light Curve Classifier</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#learning-goals">Learning Goals</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#overview">Overview</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-processing-methods-bash-script-vs-python-s-multiprocessing">Parallel processing methods: bash script vs. python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-python-helper">The python helper</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-bash-script">The bash script</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interpreting-top">Interpreting <code class="docutils literal notranslate"><span class="pre">top</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fornax-science-console">Fornax Science Console</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-1-multi-wavelength-light-curves-for-500-000-sdss-agn">Example 1: Multi-wavelength light curves for 500,000 SDSS AGN</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#launch-the-run">Launch the run</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cancel">Cancel</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#restart">Restart</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#monitor">Monitor</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#logs">Logs</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#top"><code class="docutils literal notranslate"><span class="pre">top</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-2-parallelizing-the-light-curve-generator-notebook">Example 2: Parallelizing the light_curve_generator notebook</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-3-keyword-arguments-and-script-flags">Example 3: Keyword arguments and script flags</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#python-kwargs-dict">Python <code class="docutils literal notranslate"><span class="pre">kwargs_dict</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bash-script-flags">Bash script flags</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-a-yaml-file">Using a yaml file</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#appendix-what-to-expect">Appendix: What to expect</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#challenges-of-large-scale-runs">Challenges of large-scale runs</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#needs-and-wants-for-large-scale-runs">Needs and wants for large-scale runs</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advice-for-the-user">Advice for the user</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about-this-notebook">About this notebook</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Fornax developers
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2022-2024, Fornax developers.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
