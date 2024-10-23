@@ -5,7 +5,7 @@ numpy
 pandas[parquet]
 matplotlib
 astropy
-sktime
+sktime<0.32
 tqdm
 googledrivedownloader
 scikit-learn
