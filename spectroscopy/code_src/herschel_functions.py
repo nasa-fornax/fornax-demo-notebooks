@@ -1,16 +1,18 @@
 ## Herschel PACS & SPIRE (from ESA TAP)
+import glob
+import os
+import tarfile
+
+import astropy.constants as const
+import pandas as pd
+from astropy import units as u
+from astropy.io import fits
 from astroquery.esa.hsa import HSA
 from astroquery.exceptions import LoginError
 from requests.exceptions import ChunkedEncodingError, ConnectionError
-import tarfile 
-from astropy.io import fits
-import glob
-import pandas as pd
-import astropy.constants as const
-from astropy import units as u
-import os
 
 from data_structures_spec import MultiIndexDFObject
+
 
 def find_max_flux_column(df):
   """

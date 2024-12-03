@@ -1,18 +1,10 @@
-import os
-
-import numpy as np
-
 import astropy.units as u
-from astropy.coordinates import SkyCoord
-from astropy.table import Table
-
+import numpy as np
 import pandas as pd
-
 from astroquery.sdss import SDSS
 
 from data_structures_spec import MultiIndexDFObject
 
-from specutils import Spectrum1D
 
 def SDSS_get_spec(sample_table, search_radius_arcsec, data_release):
     '''

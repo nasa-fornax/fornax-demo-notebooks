@@ -1,19 +1,14 @@
-import os
-
-import numpy as np
-
 import astropy.units as u
+import numpy as np
+import pandas as pd
+from astropy import nddata
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
-from astropy import nddata
-
-import pandas as pd
-
 from sparcl.client import SparclClient
+from specutils import Spectrum1D
 
 from data_structures_spec import MultiIndexDFObject
 
-from specutils import Spectrum1D
 
 def DESIBOSS_get_spec(sample_table, search_radius_arcsec):
     '''

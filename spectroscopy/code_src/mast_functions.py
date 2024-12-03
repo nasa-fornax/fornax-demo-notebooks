@@ -1,22 +1,18 @@
-import os, sys, io
+import io
+import os
 import shutil
-import numpy as np
 from contextlib import redirect_stdout
 
-import astropy.units as u
 import astropy.constants as const
-from astropy.coordinates import SkyCoord
-from astropy.table import Table
-
+import astropy.units as u
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
-
+from astropy.table import Table
 from astroquery.mast import Observations
-
-from data_structures_spec import MultiIndexDFObject
-
 from specutils import Spectrum1D
 
-import matplotlib.pyplot as plt
+from data_structures_spec import MultiIndexDFObject
 
 
 def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose, 

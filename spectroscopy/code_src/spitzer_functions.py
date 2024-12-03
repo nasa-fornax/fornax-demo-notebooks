@@ -1,14 +1,9 @@
-import os
-
-import numpy as np
-
+import astropy.constants as const
 import astropy.units as u
+import numpy as np
+import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
-import astropy.constants as const
-
-import pandas as pd
-
 from astroquery.ipac.irsa import Irsa
 
 from data_structures_spec import MultiIndexDFObject

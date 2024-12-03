@@ -1,7 +1,5 @@
 #setup to store the light curves in a data structure
 import pandas as pd
-from astropy.table import vstack
-from astropy.timeseries import TimeSeries
 
 
 class MultiIndexDFObject:

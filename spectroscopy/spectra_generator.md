@@ -98,28 +98,23 @@ This cell will install them if needed:
 ```
 
 ```{code-cell} ipython3
-import sys
-import numpy as np
 import os
+import sys
 
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-
-
-from astropy.coordinates import SkyCoord
 import astropy.units as u
+from astropy.coordinates import SkyCoord
 from astropy.table import Table
 
 sys.path.append('code_src/')
 from data_structures_spec import MultiIndexDFObject
-from sample_selection import clean_sample
 from desi_functions import DESIBOSS_get_spec
-from spitzer_functions import SpitzerIRS_get_spec
-from sdss_functions import SDSS_get_spec
-from mast_functions import HST_get_spec, JWST_get_spec
-from keck_functions import KeckDEIMOS_get_spec
-from plot_functions import create_figures
 from herschel_functions import Herschel_get_spec
+from keck_functions import KeckDEIMOS_get_spec
+from mast_functions import HST_get_spec, JWST_get_spec
+from plot_functions import create_figures
+from sample_selection import clean_sample
+from sdss_functions import SDSS_get_spec
+from spitzer_functions import SpitzerIRS_get_spec
 ```
 
 ## 1. Define the sample

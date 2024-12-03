@@ -1,17 +1,10 @@
 import os
 
-import numpy as np
-
 import astropy.units as u
-import astropy.constants as const
-from astropy.coordinates import SkyCoord
-from astropy.table import Table
-from astropy.stats import sigma_clip
-
-import matplotlib.pyplot as plt
 import matplotlib as mpl
-
-from data_structures_spec import MultiIndexDFObject
+import matplotlib.pyplot as plt
+import numpy as np
+from astropy.stats import sigma_clip
 
 ## Plotting stuff
 mpl.rcParams['font.size'] = 12
