@@ -125,34 +125,34 @@ Here we will define the sample of galaxies. For now, we just enter some "random"
 coords = []
 labels = []
 
-coords.append(SkyCoord("{} {}".format("09 54 49.40" , "+09 16 15.9"), unit=(u.hourangle, u.deg) ))
+coords.append(SkyCoord("{} {}".format("09 54 49.40", "+09 16 15.9"), unit=(u.hourangle, u.deg)))
 labels.append("NGC3049")
 
-coords.append(SkyCoord("{} {}".format("12 45 17.44 " , "27 07 31.8"), unit=(u.hourangle, u.deg) ))
+coords.append(SkyCoord("{} {}".format("12 45 17.44 ", "27 07 31.8"), unit=(u.hourangle, u.deg)))
 labels.append("NGC4670")
 
-coords.append(SkyCoord("{} {}".format("14 01 19.92" , "−33 04 10.7"), unit=(u.hourangle, u.deg) ))
+coords.append(SkyCoord("{} {}".format("14 01 19.92", "−33 04 10.7"), unit=(u.hourangle, u.deg)))
 labels.append("Tol_89")
 
-coords.append(SkyCoord(233.73856 , 23.50321, unit=u.deg ))
+coords.append(SkyCoord(233.73856, 23.50321, unit=u.deg))
 labels.append("Arp220")
 
-coords.append(SkyCoord( 150.091 , 2.2745833, unit=u.deg ))
+coords.append(SkyCoord(150.091, 2.2745833, unit=u.deg))
 labels.append("COSMOS1")
 
-coords.append(SkyCoord( 150.1024475 , 2.2815559, unit=u.deg ))
+coords.append(SkyCoord(150.1024475, 2.2815559, unit=u.deg))
 labels.append("COSMOS2")
 
-coords.append(SkyCoord("{} {}".format("150.000" , "+2.00"), unit=(u.deg, u.deg) ))
+coords.append(SkyCoord("{} {}".format("150.000", "+2.00"), unit=(u.deg, u.deg)))
 labels.append("COSMOS3")
 
-coords.append(SkyCoord("{} {}".format("+53.15508" , "-27.80178"), unit=(u.deg, u.deg) ))
+coords.append(SkyCoord("{} {}".format("+53.15508", "-27.80178"), unit=(u.deg, u.deg)))
 labels.append("JADESGS-z7-01-QU")
 
-coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg) ))
+coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg)))
 labels.append("TestJWST")
 
-sample_table = clean_sample(coords, labels, precision=2.0* u.arcsecond , verbose=1)
+sample_table = clean_sample(coords, labels, precision=2.0 * u.arcsecond, verbose=1)
 ```
 
 ### 1.2 Write out your sample to disk
@@ -164,7 +164,7 @@ For the format of the save file, we would suggest to choose from various formats
 ```{code-cell} ipython3
 if not os.path.exists("./data"):
     os.mkdir("./data")
-sample_table.write('data/input_sample.ecsv', format='ascii.ecsv', overwrite = True)
+sample_table.write('data/input_sample.ecsv', format='ascii.ecsv', overwrite=True)
 ```
 
 ### 1.3 Load the sample table from disk
@@ -198,15 +198,15 @@ This archive includes spectra taken by
 
 ```{code-cell} ipython3
 %%time
-## Get Keck Spectra (COSMOS only)
-df_spec_DEIMOS = KeckDEIMOS_get_spec(sample_table = sample_table, search_radius_arcsec=1)
+# Get Keck Spectra (COSMOS only)
+df_spec_DEIMOS = KeckDEIMOS_get_spec(sample_table=sample_table, search_radius_arcsec=1)
 df_spec.append(df_spec_DEIMOS)
 ```
 
 ```{code-cell} ipython3
 %%time
-## Get Spitzer IRS Spectra
-df_spec_IRS = SpitzerIRS_get_spec(sample_table, search_radius_arcsec=1 , COMBINESPEC=False)
+# Get Spitzer IRS Spectra
+df_spec_IRS = SpitzerIRS_get_spec(sample_table, search_radius_arcsec=1, COMBINESPEC=False)
 df_spec.append(df_spec_IRS)
 ```
 
@@ -220,12 +220,12 @@ This archive includes spectra taken by
 
 ```{code-cell} ipython3
 %%time
-## Get Spectra for HST
+# Get Spectra for HST
 df_spec_HST = HST_get_spec(
-    sample_table , 
-    search_radius_arcsec=0.5, 
-    datadir="./data/", 
-    verbose=False, 
+    sample_table,
+    search_radius_arcsec=0.5,
+    datadir="./data/",
+    verbose=False,
     delete_downloaded_data=True
 )
 df_spec.append(df_spec_HST)
@@ -233,11 +233,11 @@ df_spec.append(df_spec_HST)
 
 ```{code-cell} ipython3
 %%time
-## Get Spectra for JWST
+# Get Spectra for JWST
 df_jwst = JWST_get_spec(
-    sample_table , 
-    search_radius_arcsec=0.5, 
-    datadir="./data/", 
+    sample_table,
+    search_radius_arcsec=0.5,
+    datadir="./data/",
     verbose=False,
     delete_downloaded_data=True
 )
@@ -248,22 +248,23 @@ df_spec.append(df_jwst)
 
 ```{code-cell} ipython3
 # Herschel PACS & SPIRE from ESA TAP using astroquery
-#This search is fully functional, but is commented out because it takes ~4 hours to run to completion
+# This search is fully functional, but is commented out because it takes
+# ~4 hours to run to completion
 herschel_radius = 1.1
 herschel_download_directory = 'data/herschel'
 
-#if not os.path.exists(herschel_download_directory):
+# if not os.path.exists(herschel_download_directory):
 #    os.makedirs(herschel_download_directory, exist_ok=True)
-#df_spec_herschel =  Herschel_get_spec(sample_table, herschel_radius, herschel_download_directory, delete_downloaded_data=True)
-#df_spec.append(df_spec_herschel)
+# df_spec_herschel =  Herschel_get_spec(sample_table, herschel_radius, herschel_download_directory, delete_downloaded_data=True)
+# df_spec.append(df_spec_herschel)
 ```
 
 ### 2.4 SDSS Archive
 
 ```{code-cell} ipython3
 %%time
-## Get SDSS Spectra
-df_spec_SDSS = SDSS_get_spec(sample_table , search_radius_arcsec=5, data_release=17)
+# Get SDSS Spectra
+df_spec_SDSS = SDSS_get_spec(sample_table, search_radius_arcsec=5, data_release=17)
 df_spec.append(df_spec_SDSS)
 ```
 
@@ -274,7 +275,7 @@ for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is 
 
 ```{code-cell} ipython3
 %%time
-## Get DESI and BOSS spectra with SPARCL
+# Get DESI and BOSS spectra with SPARCL
 df_spec_DESIBOSS = DESIBOSS_get_spec(sample_table, search_radius_arcsec=5)
 df_spec.append(df_spec_DESIBOSS)
 ```
@@ -284,10 +285,9 @@ We show flux in mJy as a function of time for all available bands for each objec
 
 ```{code-cell} ipython3
 ### Plotting ####
-create_figures(df_spec = df_spec,
-             bin_factor=5,
-             show_nbr_figures = 10,
-             save_output = False,
-             )
+create_figures(df_spec=df_spec,
+               bin_factor=5,
+               show_nbr_figures=10,
+               save_output=False,
+               )
 ```
-
