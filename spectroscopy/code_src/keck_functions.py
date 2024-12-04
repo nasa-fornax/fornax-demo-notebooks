@@ -9,22 +9,21 @@ from data_structures_spec import MultiIndexDFObject
 
 
 def KeckDEIMOS_get_spec(sample_table, search_radius_arcsec):
-    '''
-    Retrieves Keck DEIMOS on COSMOS spectra for a list of sources.
+    """
+    Retrieve Keck DEIMOS on COSMOS spectra for a list of sources.
 
     Parameters
     ----------
-    sample_table : `~astropy.table.Table`
-        Table with the coordinates and journal reference labels of the sources
-    search_radius_arcsec : `float`
+    sample_table : astropy.table.Table
+        Table with the coordinates and journal reference labels of the sources.
+    search_radius_arcsec : float
         Search radius in arcseconds.
 
     Returns
     -------
-    df_lc : MultiIndexDFObject
-        The main data structure to store all spectra
-
-    '''
+    MultiIndexDFObject
+        The spectra returned from the archive.
+    """
 
     # Initialize multi-index object:
     df_spec = MultiIndexDFObject()
@@ -84,4 +83,4 @@ def KeckDEIMOS_get_spec(sample_table, search_radius_arcsec):
                                              )).set_index(["objectid", "label", "filter", "mission"])
                 df_spec.append(dfsingle)
 
-    return (df_spec)
+    return df_spec

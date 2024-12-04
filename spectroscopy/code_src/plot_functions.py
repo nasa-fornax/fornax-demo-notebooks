@@ -33,29 +33,27 @@ def_cols = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
 
 def bin_spectra(wave, flux, bin_factor):
-    '''
-    Does a very crude median binning on a spectrum.
+    """
+    Do a very crude median binning on a spectrum.
 
     Parameters
     ----------
-    wave: `astropy.ndarray`
-        Wavelength (can be any units)
-    flux: `astropy.ndarray`
-        Flux (can be any linear units)
-    bin_factor: `float`
-        Binning factor in terms of average wavelength resolution
+    wave : astropy.ndarray
+        Wavelength (can be any units).
+    flux : astropy.ndarray
+        Flux (can be any linear units).
+    bin_factor : float
+        Binning factor in terms of average wavelength resolution.
 
     Returns
     -------
-    A tuple (wave_bin , flux_bin , dwave) where
-    wave_bin: `astropy.ndarray`
+    wave_bin : astropy.ndarray
         Binned wavelength.
-    flux_bin: `astropy.ndarray`
-        Binned flux
-    dwave: `float`
+    flux_bin : astropy.ndarray
+        Binned flux.
+    delta_wave : float
         The wavelength resolution used for the binning.
-
-    '''
+    """
 
     dlam = np.nanmedian(np.diff(wave.value)) * bin_factor
 
@@ -79,29 +77,25 @@ def bin_spectra(wave, flux, bin_factor):
     flux_bins = np.asarray(flux_bins) * flux[0].unit
     dlam = dlam * wave[0].unit
 
-    return (lam_bins, flux_bins, dlam)
+    return lam_bins, flux_bins, dlam
 
 
 def create_figures(df_spec, bin_factor, show_nbr_figures, save_output):
-    '''
-    Plots the spectra of the sources.
+    """
+    Plot the spectra of the sources.
 
     Parameters
     ----------
-    df_spec: MultiIndexDFObject
-        The main data structure to store all spectra
-
-    bin_factor: `float`
-        Binning factor in terms of average wavelength resolution
-
+    df_spec : MultiIndexDFObject
+        The main data structure to store all spectra.
+    bin_factor : float
+        Binning factor in terms of average wavelength resolution.
     show_nbr_figures : int
-        Number of figures to show inline. For example, `show_nbr_figures = 5' would
+        Number of figures to show inline. For example, `show_nbr_figures = 5` would
         show the first 5 figures inline.
-
-    save_output: bool
-        Whether to save the lightcurve figures. If saved, they will be in the "output" directory.
-
-    '''
+    save_output : bool
+        Whether to save the figures. If saved, they will be in the "output" directory.
+    """
 
     for cc, (objectid, singleobj_df) in enumerate(df_spec.data.groupby('objectid')):
 
@@ -166,4 +160,4 @@ def create_figures(df_spec, bin_factor, show_nbr_figures, save_output):
         else:
             plt.close()
 
-    return (True)
+    return
