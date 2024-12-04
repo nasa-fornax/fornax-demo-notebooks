@@ -6,7 +6,8 @@ from astropy.table import Table, join, join_skycoord, unique
 
 
 def clean_sample(coords_list, labels_list, precision, verbose=1):
-    """Makes a unique sample of skycoords and labels with no repeats. Attaches an object ID to the coords.
+    """Makes a unique sample of skycoords and labels with no repeats.
+    Attaches an object ID to the coords.
 
     Parameters
     ----------

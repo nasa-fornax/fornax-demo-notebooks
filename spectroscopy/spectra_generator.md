@@ -29,8 +29,19 @@ By the end of this tutorial, you will be able to:
 ## Introduction:
 
 ### Motivation
-A user has a source (or a sample of sources) for which they want to obtain spectra covering ranges of wavelengths from the UV to the far-IR. The large amount of spectra available enables multi-wavelength spectroscopic studies, which is crucial to understand the physics of stars, galaxies, and AGN. However, gathering and analysing spectra is a difficult endeavor as the spectra are distributed over different archives and in addition they have different formats which complicates their handling. This notebook showcases a tool for the user to conveniently query the spectral archives and collect the spectra for a set of objects in a format that can be read in using common software such as the Python `specutils` package. For simplicity, we limit the tool to query already reduced and calibrated spectra.
-The notebook may focus on the COSMOS field for now, which has a large overlap of spectroscopic surveys such as with SDSS, DESI, Keck, HST, JWST, Spitzer, and Herschel. In addition, the tool enables the capability to search and ingest spectra from Euclid and SPHEREx in the feature. For this to work, the `specutils` functions may have to be update or a wrapper has to be implemented.
+A user has a source (or a sample of sources) for which they want to obtain spectra covering ranges
+of wavelengths from the UV to the far-IR. The large amount of spectra available enables
+multi-wavelength spectroscopic studies, which is crucial to understand the physics of stars,
+galaxies, and AGN. However, gathering and analysing spectra is a difficult endeavor as the spectra
+are distributed over different archives and in addition they have different formats which
+complicates their handling. This notebook showcases a tool for the user to conveniently query the
+spectral archives and collect the spectra for a set of objects in a format that can be read in
+using common software such as the Python `specutils` package. For simplicity, we limit the tool to
+query already reduced and calibrated spectra.
+The notebook may focus on the COSMOS field for now, which has a large overlap of spectroscopic
+surveys such as with SDSS, DESI, Keck, HST, JWST, Spitzer, and Herschel. In addition, the tool
+enables the capability to search and ingest spectra from Euclid and SPHEREx in the feature. For
+this to work, the `specutils` functions may have to be update or a wrapper has to be implemented.
 
 
 ### List of Spectroscopic Archives and Status
@@ -70,7 +81,8 @@ The ones with an asterisk (*) are the challenging ones.
 &bull; ...
 ## Runtime
 
-As of 2024 August, this notebook takes ~330s to run to completion on Fornax using the 'Astrophysics Default Image' and the 'Large' server with 16GB RAM/ 4CPU.
+As of 2024 August, this notebook takes ~330s to run to completion on Fornax using the 'Astrophysics
+Default Image' and the 'Large' server with 16GB RAM/ 4CPU.
 
 ## Authors:
 Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, David Shupe
@@ -82,10 +94,12 @@ Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, D
 
 ### Datasets that were considered but didn't end up being used:
 #### IRTF:
-    - https://irsa.ipac.caltech.edu/Missions/irtf.html \
-    - The IRTF is a 3.2 meter telescope, optimized for infrared observations, and located at the summit of Mauna Kea, Hawaiʻi. \
-    - large library of stellar spectra \
-    - Not included here because the data are not currently available in an easily accessible, searchable format
+- https://irsa.ipac.caltech.edu/Missions/irtf.html
+- The IRTF is a 3.2 meter telescope, optimized for infrared observations, and located at the summit
+  of Mauna Kea, Hawaiʻi.
+- large library of stellar spectra
+- Not included here because the data are not currently available in an easily accessible,
+  searchable format
 
 
 ## Imports
@@ -119,7 +133,8 @@ from spitzer_functions import SpitzerIRS_get_spec
 
 ## 1. Define the sample
 
-Here we will define the sample of galaxies. For now, we just enter some "random" coordinates to test the code.
+Here we will define the sample of galaxies. For now, we just enter some "random" coordinates to
+test the code.
 
 ```{code-cell} ipython3
 coords = []
@@ -157,9 +172,13 @@ sample_table = clean_sample(coords, labels, precision=2.0 * u.arcsecond, verbose
 
 ### 1.2 Write out your sample to disk
 
-At this point you may wish to write out your sample to disk and reuse that in future work sessions, instead of creating it from scratch again. Note that we first check if the `data` directory exists and if not, we will create one.
+At this point you may wish to write out your sample to disk and reuse that in future work sessions,
+instead of creating it from scratch again. Note that we first check if the `data` directory exists
+and if not, we will create one.
 
-For the format of the save file, we would suggest to choose from various formats that fully support astropy objects(eg., SkyCoord).  One example that works is Enhanced Character-Separated Values or ['ecsv'](https://docs.astropy.org/en/stable/io/ascii/ecsv.html)
+For the format of the save file, we would suggest to choose from various formats that fully support
+astropy objects(eg., SkyCoord).  One example that works is Enhanced Character-Separated Values or
+['ecsv'](https://docs.astropy.org/en/stable/io/ascii/ecsv.html)
 
 ```{code-cell} ipython3
 if not os.path.exists("./data"):
@@ -184,7 +203,9 @@ df_spec = MultiIndexDFObject()
 
 ## 2. Find spectra for these targets in NASA and other ancillary catalogs
 
-We search a curated list of NASA astrophysics archives.  Because each archive is different, and in many cases each catalog is different, each function to access a catalog is necesarily specialized to the location and format of that particular catalog.
+We search a curated list of NASA astrophysics archives.  Because each archive is different, and in
+many cases each catalog is different, each function to access a catalog is necesarily specialized
+to the location and format of that particular catalog.
 
 +++
 
@@ -271,7 +292,8 @@ df_spec.append(df_spec_SDSS)
 ### 2.5 DESI Archive
 
 This includes DESI spectra. Here, we use the `SPARCL` query. Note that this can also be used
-for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is included. Therefore, we will not include SDSS DR16 here (this is treated in the SDSS search above).
+for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is included.
+Therefore, we will not include SDSS DR16 here (this is treated in the SDSS search above).
 
 ```{code-cell} ipython3
 %%time
@@ -281,7 +303,10 @@ df_spec.append(df_spec_DESIBOSS)
 ```
 
 ## 3. Make plots of luminosity as a function of time
-We show flux in mJy as a function of time for all available bands for each object. `show_nbr_figures` controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with `save_output`, they will be put in the output directory and labelled by sample number.
+We show flux in mJy as a function of time for all available bands for each object.
+`show_nbr_figures` controls how many plots are actually generated and returned to the screen.
+If you choose to save the plots with `save_output`, they will be put in the output directory and
+labelled by sample number.
 
 ```{code-cell} ipython3
 ### Plotting ####

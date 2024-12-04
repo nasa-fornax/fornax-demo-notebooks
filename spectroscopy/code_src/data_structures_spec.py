@@ -4,7 +4,7 @@ import pandas as pd
 
 class MultiIndexDFObject:
     """
-    Pandas MultiIndex data frame to store & manipulate multiband light curves 
+    Pandas MultiIndex data frame to store & manipulate multiband light curves
 
     Examples
     --------

@@ -138,8 +138,9 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
                     print(trap.getvalue())
 
                 # Create table
-                # NOTE: `download_results` has NOT the same order as `data_products_list_filter`. We therefore
-                # have to "manually" get the product file names here and then use those to open the files.
+                # NOTE: `download_results` has NOT the same order as `data_products_list_filter`.
+                # We therefore have to "manually" get the product file names here and then use
+                # those to open the files.
                 keys = ["filters", "obs_collection", "instrument_name", "calib_level",
                         "t_obs_release", "proposal_id", "obsid", "objID", "distance"]
                 tab = Table(names=keys + ["productFilename"], dtype=[str,
@@ -167,7 +168,7 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
                     # print(filepath)
                     # spec1d = Spectrum1D.read(filepath)
 
-                    dfsingle = pd.DataFrame(dict(  # wave=[spec1d.spectral_axis] , flux=[spec1d.flux], err=[np.repeat(0,len(spec1d.flux))],,
+                    dfsingle = pd.DataFrame(dict(
                         wave=[spec1d["WAVELENGTH"].data * spec1d["WAVELENGTH"].unit],
                         flux=[spec1d["FLUX"].data * spec1d["FLUX"].unit],
                         err=[spec1d["FLUX_ERROR"].data *
@@ -261,7 +262,8 @@ def JWST_group_spectra(df, verbose, quickplot):
                     print("Units of fluxes for each spectrum: {}".format(
                         ",".join([str(tt) for tt in fluxes_units])))
 
-                # Unit conversion to erg/s/cm2/A (note fluxes are nominally in Jy. So have to do the step with dividing by lam^2)
+                # Unit conversion to erg/s/cm2/A
+                # (note fluxes are nominally in Jy. So have to do the step with dividing by lam^2)
                 fluxes_stack_cgs = (fluxes_stack * fluxes_units[0]).to(u.erg / u.second / (
                     u.centimeter**2) / u.hertz) * (const.c.to(u.angstrom/u.second)) / (wave_grid.to(u.angstrom)**2)
                 fluxes_stack_cgs = fluxes_stack_cgs.to(
@@ -362,8 +364,9 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
                     print(trap.getvalue())
 
                 # Create table
-                # NOTE: `download_results` has NOT the same order as `data_products_list_filter`. We therefore
-                # have to "manually" get the product file names here and then use those to open the files.
+                # NOTE: `download_results` has NOT the same order as `data_products_list_filter`.
+                # We therefore have to "manually" get the product file names here and then use
+                # those to open the files.
                 keys = ["filters", "obs_collection", "instrument_name", "calib_level",
                         "t_obs_release", "proposal_id", "obsid", "objID", "distance"]
                 tab = Table(names=keys + ["productFilename"], dtype=[str,
@@ -388,7 +391,7 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
                     spec1d = Spectrum1D.read(filepath)
 
                     # Note: this should be in erg/s/cm2/A and any wavelength unit.
-                    dfsingle = pd.DataFrame(dict(  # wave=[spec1d.spectral_axis] , flux=[spec1d.flux], err=[np.repeat(0,len(spec1d.flux))],
+                    dfsingle = pd.DataFrame(dict(
                         wave=[spec1d.spectral_axis], flux=[spec1d.flux], err=[
                             spec1d.uncertainty.array * spec1d.uncertainty.unit],
                         label=[stab["label"]],

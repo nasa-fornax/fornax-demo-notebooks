@@ -61,7 +61,8 @@ def bin_spectra(wave, flux, bin_factor):
 
     # This is the faster way, however, it outputs warnings because there are empty slices.
     # lam_bin = np.arange(np.nanmin(wave.value)+dlam/2, np.nanmax(wave.value)+dlam/2 + dlam , dlam)
-    # flux_bin = np.asarray( [ np.nanmedian(flux[(wave.value >= (ll-dlam/2)) & (wave.value < (ll+dlam/2) )].value) for ll in lam_bin ] )
+    # flux_bin = np.asarray([np.nanmedian(flux[(wave.value >= (ll-dlam/2)) &
+    #                       (wave.value < (ll+dlam/2))].value) for ll in lam_bin])
 
     # This way is a bit slower but we can avoid empty slices.
     lam_bin = np.arange(np.nanmin(wave.value)+dlam/2, np.nanmax(wave.value)+dlam/2 + dlam, dlam)
@@ -146,7 +147,7 @@ def create_figures(df_spec, bin_factor, show_nbr_figures, save_output):
                 flux_bin = flux_bin[~clip_mask]
 
                 ax1.step(wave_bin.to(u.micrometer), flux_bin.to(u.erg / u.second / (u.centimeter**2) / u.angstrom), "-",
-                         label="{} ({})".format(filt, filt_df.reset_index().mission[ii]), where="mid")  # all in um and..
+                         label="{} ({})".format(filt, filt_df.reset_index().mission[ii]), where="mid")
 
         ax1.set_title(this_label)
         if LOGX:

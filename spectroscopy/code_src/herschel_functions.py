@@ -25,6 +25,7 @@ def find_max_flux_column(df):
         str: The name of the column with the largest sum of values containing "flux".
     """
 
+
     # Filter column names containing "flux"
     flux_cols = [col for col in df.columns if "flux" in col.lower()]
 
@@ -73,7 +74,8 @@ def Herschel_get_spec(sample_table, search_radius_arcsec, datadir,
         print("working on object", stab["label"])
 
         # first find the object ids from herschel then download the data for each observation id
-        # query_hsa_tap doesn't accept an upload_table, so do this so do this as a for loop over each instrument and object..
+        # query_hsa_tap doesn't accept an upload_table, so do this so do this as a for loop over
+        # each instrument and object..
 
         for instrument_name in ['PACS', 'SPIRE']:
             querystring = "select observation_id from hsa.v_active_observation join hsa.instrument using (instrument_oid) where contains(point('ICRS', hsa.v_active_observation.ra, hsa.v_active_observation.dec), circle('ICRS', "+str(
@@ -108,8 +110,9 @@ def Herschel_get_spec(sample_table, search_radius_arcsec, datadir,
 
                                     # convert final spectrum to pandas dataframe
                                     df = pd.DataFrame(hdulist[1].data)
-                                    # There are multiple flux columns; figure out which flux column to use
-                                    # advice from https://www.cosmos.esa.int/documents/12133/996891/Product+decision+trees
+                                    # There are multiple flux columns; figure out which flux
+                                    # column to use advice from
+                                    # https://www.cosmos.esa.int/documents/12133/996891/Product+decision+trees
                                     # is to use the flux coluimn with the most flux
                                     max_flux = find_max_flux_column(df)
                                     # use the corresponding uncertainty column
