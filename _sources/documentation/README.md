@@ -245,6 +245,8 @@ Software is installed in Miniconda environments.  You can use "[conda list](http
 ### How can I contribute to existing Open-Source Fornax notebook tutorials?
   * open issue or PR on Fornax Github [repo](https://github.com/nasa-fornax/fornax-demo-notebooks)
 
+### [Suggestions for accesible color palettes for plotting](https://docs.google.com/presentation/d/1-WEAScXhVPJ6YqM8haf42KRZU5idsrfd8r1N4bfHHNc/edit#slide=id.g24d05895330_0_0)
+
 ## Troubleshooting
 * If my internet connection goes away or is intermittent - what happens to the running notebook?
 * Restart kernel will solve some problems, especially if the cells were run out of order
