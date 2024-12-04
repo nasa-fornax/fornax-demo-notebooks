@@ -29,8 +29,19 @@ By the end of this tutorial, you will be able to:
 ## Introduction:
 
 ### Motivation
-A user has a source (or a sample of sources) for which they want to obtain spectra covering ranges of wavelengths from the UV to the far-IR. The large amount of spectra available enables multi-wavelength spectroscopic studies, which is crucial to understand the physics of stars, galaxies, and AGN. However, gathering and analysing spectra is a difficult endeavor as the spectra are distributed over different archives and in addition they have different formats which complicates their handling. This notebook showcases a tool for the user to conveniently query the spectral archives and collect the spectra for a set of objects in a format that can be read in using common software such as the Python `specutils` package. For simplicity, we limit the tool to query already reduced and calibrated spectra.
-The notebook may focus on the COSMOS field for now, which has a large overlap of spectroscopic surveys such as with SDSS, DESI, Keck, HST, JWST, Spitzer, and Herschel. In addition, the tool enables the capability to search and ingest spectra from Euclid and SPHEREx in the feature. For this to work, the `specutils` functions may have to be update or a wrapper has to be implemented.
+A user has a source (or a sample of sources) for which they want to obtain spectra covering ranges
+of wavelengths from the UV to the far-IR. The large amount of spectra available enables
+multi-wavelength spectroscopic studies, which is crucial to understand the physics of stars,
+galaxies, and AGN. However, gathering and analysing spectra is a difficult endeavor as the spectra
+are distributed over different archives and in addition they have different formats which
+complicates their handling. This notebook showcases a tool for the user to conveniently query the
+spectral archives and collect the spectra for a set of objects in a format that can be read in
+using common software such as the Python `specutils` package. For simplicity, we limit the tool to
+query already reduced and calibrated spectra.
+The notebook may focus on the COSMOS field for now, which has a large overlap of spectroscopic
+surveys such as with SDSS, DESI, Keck, HST, JWST, Spitzer, and Herschel. In addition, the tool
+enables the capability to search and ingest spectra from Euclid and SPHEREx in the feature. For
+this to work, the `specutils` functions may have to be update or a wrapper has to be implemented.
 
 
 ### List of Spectroscopic Archives and Status
@@ -70,7 +81,8 @@ The ones with an asterisk (*) are the challenging ones.
 &bull; ...
 ## Runtime
 
-As of 2024 August, this notebook takes ~330s to run to completion on Fornax using the 'Astrophysics Default Image' and the 'Large' server with 16GB RAM/ 4CPU.
+As of 2024 August, this notebook takes ~330s to run to completion on Fornax using the 'Astrophysics
+Default Image' and the 'Large' server with 16GB RAM/ 4CPU.
 
 ## Authors:
 Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, David Shupe
@@ -82,10 +94,12 @@ Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, D
 
 ### Datasets that were considered but didn't end up being used:
 #### IRTF:
-    - https://irsa.ipac.caltech.edu/Missions/irtf.html \
-    - The IRTF is a 3.2 meter telescope, optimized for infrared observations, and located at the summit of Mauna Kea, Hawaiʻi. \
-    - large library of stellar spectra \
-    - Not included here because the data are not currently available in an easily accessible, searchable format
+- https://irsa.ipac.caltech.edu/Missions/irtf.html
+- The IRTF is a 3.2 meter telescope, optimized for infrared observations, and located at the summit
+  of Mauna Kea, Hawaiʻi.
+- large library of stellar spectra
+- Not included here because the data are not currently available in an easily accessible,
+  searchable format
 
 
 ## Imports
@@ -98,78 +112,78 @@ This cell will install them if needed:
 ```
 
 ```{code-cell} ipython3
-import sys
-import numpy as np
 import os
+import sys
 
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-
-
-from astropy.coordinates import SkyCoord
 import astropy.units as u
+from astropy.coordinates import SkyCoord
 from astropy.table import Table
 
 sys.path.append('code_src/')
 from data_structures_spec import MultiIndexDFObject
-from sample_selection import clean_sample
 from desi_functions import DESIBOSS_get_spec
-from spitzer_functions import SpitzerIRS_get_spec
-from sdss_functions import SDSS_get_spec
-from mast_functions import HST_get_spec, JWST_get_spec
-from keck_functions import KeckDEIMOS_get_spec
-from plot_functions import create_figures
 from herschel_functions import Herschel_get_spec
+from keck_functions import KeckDEIMOS_get_spec
+from mast_functions import HST_get_spec, JWST_get_spec
+from plot_functions import create_figures
+from sample_selection import clean_sample
+from sdss_functions import SDSS_get_spec
+from spitzer_functions import SpitzerIRS_get_spec
 ```
 
 ## 1. Define the sample
 
-Here we will define the sample of galaxies. For now, we just enter some "random" coordinates to test the code.
+Here we will define the sample of galaxies. For now, we just enter some "random" coordinates to
+test the code.
 
 ```{code-cell} ipython3
 coords = []
 labels = []
 
-coords.append(SkyCoord("{} {}".format("09 54 49.40" , "+09 16 15.9"), unit=(u.hourangle, u.deg) ))
+coords.append(SkyCoord("{} {}".format("09 54 49.40", "+09 16 15.9"), unit=(u.hourangle, u.deg)))
 labels.append("NGC3049")
 
-coords.append(SkyCoord("{} {}".format("12 45 17.44 " , "27 07 31.8"), unit=(u.hourangle, u.deg) ))
+coords.append(SkyCoord("{} {}".format("12 45 17.44 ", "27 07 31.8"), unit=(u.hourangle, u.deg)))
 labels.append("NGC4670")
 
-coords.append(SkyCoord("{} {}".format("14 01 19.92" , "−33 04 10.7"), unit=(u.hourangle, u.deg) ))
+coords.append(SkyCoord("{} {}".format("14 01 19.92", "−33 04 10.7"), unit=(u.hourangle, u.deg)))
 labels.append("Tol_89")
 
-coords.append(SkyCoord(233.73856 , 23.50321, unit=u.deg ))
+coords.append(SkyCoord(233.73856, 23.50321, unit=u.deg))
 labels.append("Arp220")
 
-coords.append(SkyCoord( 150.091 , 2.2745833, unit=u.deg ))
+coords.append(SkyCoord(150.091, 2.2745833, unit=u.deg))
 labels.append("COSMOS1")
 
-coords.append(SkyCoord( 150.1024475 , 2.2815559, unit=u.deg ))
+coords.append(SkyCoord(150.1024475, 2.2815559, unit=u.deg))
 labels.append("COSMOS2")
 
-coords.append(SkyCoord("{} {}".format("150.000" , "+2.00"), unit=(u.deg, u.deg) ))
+coords.append(SkyCoord("{} {}".format("150.000", "+2.00"), unit=(u.deg, u.deg)))
 labels.append("COSMOS3")
 
-coords.append(SkyCoord("{} {}".format("+53.15508" , "-27.80178"), unit=(u.deg, u.deg) ))
+coords.append(SkyCoord("{} {}".format("+53.15508", "-27.80178"), unit=(u.deg, u.deg)))
 labels.append("JADESGS-z7-01-QU")
 
-coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg) ))
+coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg)))
 labels.append("TestJWST")
 
-sample_table = clean_sample(coords, labels, precision=2.0* u.arcsecond , verbose=1)
+sample_table = clean_sample(coords, labels, precision=2.0 * u.arcsecond, verbose=1)
 ```
 
 ### 1.2 Write out your sample to disk
 
-At this point you may wish to write out your sample to disk and reuse that in future work sessions, instead of creating it from scratch again. Note that we first check if the `data` directory exists and if not, we will create one.
+At this point you may wish to write out your sample to disk and reuse that in future work sessions,
+instead of creating it from scratch again. Note that we first check if the `data` directory exists
+and if not, we will create one.
 
-For the format of the save file, we would suggest to choose from various formats that fully support astropy objects(eg., SkyCoord).  One example that works is Enhanced Character-Separated Values or ['ecsv'](https://docs.astropy.org/en/stable/io/ascii/ecsv.html)
+For the format of the save file, we would suggest to choose from various formats that fully support
+astropy objects(eg., SkyCoord).  One example that works is Enhanced Character-Separated Values or
+['ecsv'](https://docs.astropy.org/en/stable/io/ascii/ecsv.html)
 
 ```{code-cell} ipython3
 if not os.path.exists("./data"):
     os.mkdir("./data")
-sample_table.write('data/input_sample.ecsv', format='ascii.ecsv', overwrite = True)
+sample_table.write('data/input_sample.ecsv', format='ascii.ecsv', overwrite=True)
 ```
 
 ### 1.3 Load the sample table from disk
@@ -189,7 +203,9 @@ df_spec = MultiIndexDFObject()
 
 ## 2. Find spectra for these targets in NASA and other ancillary catalogs
 
-We search a curated list of NASA astrophysics archives.  Because each archive is different, and in many cases each catalog is different, each function to access a catalog is necesarily specialized to the location and format of that particular catalog.
+We search a curated list of NASA astrophysics archives.  Because each archive is different, and in
+many cases each catalog is different, each function to access a catalog is necesarily specialized
+to the location and format of that particular catalog.
 
 +++
 
@@ -203,15 +219,15 @@ This archive includes spectra taken by
 
 ```{code-cell} ipython3
 %%time
-## Get Keck Spectra (COSMOS only)
-df_spec_DEIMOS = KeckDEIMOS_get_spec(sample_table = sample_table, search_radius_arcsec=1)
+# Get Keck Spectra (COSMOS only)
+df_spec_DEIMOS = KeckDEIMOS_get_spec(sample_table=sample_table, search_radius_arcsec=1)
 df_spec.append(df_spec_DEIMOS)
 ```
 
 ```{code-cell} ipython3
 %%time
-## Get Spitzer IRS Spectra
-df_spec_IRS = SpitzerIRS_get_spec(sample_table, search_radius_arcsec=1 , COMBINESPEC=False)
+# Get Spitzer IRS Spectra
+df_spec_IRS = SpitzerIRS_get_spec(sample_table, search_radius_arcsec=1, COMBINESPEC=False)
 df_spec.append(df_spec_IRS)
 ```
 
@@ -225,12 +241,12 @@ This archive includes spectra taken by
 
 ```{code-cell} ipython3
 %%time
-## Get Spectra for HST
+# Get Spectra for HST
 df_spec_HST = HST_get_spec(
-    sample_table , 
-    search_radius_arcsec=0.5, 
-    datadir="./data/", 
-    verbose=False, 
+    sample_table,
+    search_radius_arcsec=0.5,
+    datadir="./data/",
+    verbose=False,
     delete_downloaded_data=True
 )
 df_spec.append(df_spec_HST)
@@ -238,11 +254,11 @@ df_spec.append(df_spec_HST)
 
 ```{code-cell} ipython3
 %%time
-## Get Spectra for JWST
+# Get Spectra for JWST
 df_jwst = JWST_get_spec(
-    sample_table , 
-    search_radius_arcsec=0.5, 
-    datadir="./data/", 
+    sample_table,
+    search_radius_arcsec=0.5,
+    datadir="./data/",
     verbose=False,
     delete_downloaded_data=True
 )
@@ -253,46 +269,50 @@ df_spec.append(df_jwst)
 
 ```{code-cell} ipython3
 # Herschel PACS & SPIRE from ESA TAP using astroquery
-#This search is fully functional, but is commented out because it takes ~4 hours to run to completion
+# This search is fully functional, but is commented out because it takes
+# ~4 hours to run to completion
 herschel_radius = 1.1
 herschel_download_directory = 'data/herschel'
 
-#if not os.path.exists(herschel_download_directory):
+# if not os.path.exists(herschel_download_directory):
 #    os.makedirs(herschel_download_directory, exist_ok=True)
-#df_spec_herschel =  Herschel_get_spec(sample_table, herschel_radius, herschel_download_directory, delete_downloaded_data=True)
-#df_spec.append(df_spec_herschel)
+# df_spec_herschel =  Herschel_get_spec(sample_table, herschel_radius, herschel_download_directory, delete_downloaded_data=True)
+# df_spec.append(df_spec_herschel)
 ```
 
 ### 2.4 SDSS Archive
 
 ```{code-cell} ipython3
 %%time
-## Get SDSS Spectra
-df_spec_SDSS = SDSS_get_spec(sample_table , search_radius_arcsec=5, data_release=17)
+# Get SDSS Spectra
+df_spec_SDSS = SDSS_get_spec(sample_table, search_radius_arcsec=5, data_release=17)
 df_spec.append(df_spec_SDSS)
 ```
 
 ### 2.5 DESI Archive
 
 This includes DESI spectra. Here, we use the `SPARCL` query. Note that this can also be used
-for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is included. Therefore, we will not include SDSS DR16 here (this is treated in the SDSS search above).
+for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is included.
+Therefore, we will not include SDSS DR16 here (this is treated in the SDSS search above).
 
 ```{code-cell} ipython3
 %%time
-## Get DESI and BOSS spectra with SPARCL
+# Get DESI and BOSS spectra with SPARCL
 df_spec_DESIBOSS = DESIBOSS_get_spec(sample_table, search_radius_arcsec=5)
 df_spec.append(df_spec_DESIBOSS)
 ```
 
 ## 3. Make plots of luminosity as a function of time
-We show flux in mJy as a function of time for all available bands for each object. `show_nbr_figures` controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with `save_output`, they will be put in the output directory and labelled by sample number.
+We show flux in mJy as a function of time for all available bands for each object.
+`show_nbr_figures` controls how many plots are actually generated and returned to the screen.
+If you choose to save the plots with `save_output`, they will be put in the output directory and
+labelled by sample number.
 
 ```{code-cell} ipython3
 ### Plotting ####
-create_figures(df_spec = df_spec,
-             bin_factor=5,
-             show_nbr_figures = 10,
-             save_output = False,
-             )
+create_figures(df_spec=df_spec,
+               bin_factor=5,
+               show_nbr_figures=10,
+               save_output=False,
+               )
 ```
-
