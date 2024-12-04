@@ -16,15 +16,18 @@ from data_structures_spec import MultiIndexDFObject
 
 def find_max_flux_column(df):
     """
-    Analyzes a DataFrame with flux columns and returns the column with the largest sum.
+    Analyze a DataFrame with flux columns and returns the column with the largest sum.
 
-    Args:
-        df (pandas.DataFrame): The DataFrame containing columns with "flux" in the name.
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The DataFrame containing columns with "flux" in the name.
 
-    Returns:
-        str: The name of the column with the largest sum of values containing "flux".
+    Returns
+    -------
+    str
+        The name of the column with the largest sum of values containing "flux".
     """
-
 
     # Filter column names containing "flux"
     flux_cols = [col for col in df.columns if "flux" in col.lower()]
@@ -44,27 +47,26 @@ def find_max_flux_column(df):
 
 def Herschel_get_spec(sample_table, search_radius_arcsec, datadir,
                       delete_downloaded_data=True):
-    '''
-    Retrieves Herschel spectra from a subset of modes for a list of sources.
+    """
+    Retrieve Herschel spectra from a subset of modes for a list of sources.
 
     Parameters
     ----------
-    sample_table : `~astropy.table.Table`
-        Table with the coordinates and journal reference labels of the sources
-    search_radius_arcsec : `float`
+    sample_table : astropy.table.Table
+        Table with the coordinates and journal reference labels of the sources.
+    search_radius_arcsec : float
         Search radius in arcseconds.
-    datadir : `str`
+    datadir : str
         Data directory where to store the data. Each function will create a
         separate data directory (for example "[datadir]/HST/" for HST data).
-    delete_downloaded_data: `bool`, optional
-        Should the tarfiles be deteled after spectra are extracted?
+    delete_downloaded_data : bool, optional
+        Whether the tar files be deleted after spectra are extracted.
 
     Returns
     -------
-    df_spec : MultiIndexDFObject
-        The main data structure to store all spectra
-
-    '''
+    MultiIndexDFObject
+        The spectra returned from the archive.
+    """
 
     # Initialize multi-index object:
     df_spec = MultiIndexDFObject()

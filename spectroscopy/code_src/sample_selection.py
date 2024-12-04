@@ -6,24 +6,25 @@ from astropy.table import Table, join, join_skycoord, unique
 
 
 def clean_sample(coords_list, labels_list, precision, verbose=1):
-    """Makes a unique sample of skycoords and labels with no repeats.
-    Attaches an object ID to the coords.
+    """
+    Make a unique sample of sky coordinates and labels with no repeats.
+    Attaches an object ID to the coordinates.
 
     Parameters
     ----------
     coords_list : list
-        list of Astropy SkyCoords derived from literature sources
+        List of Astropy SkyCoord objects derived from literature sources.
     labels_list : list
-        List of the first author name and publication year for tracking the sources
-    precision : float (astropy units)
-        Precision of matching/removing doubles. For example 0.5*u.arcsecond.
+        List of the first author name and publication year for tracking the sources.
+    precision : float
+        Precision of matching/removing duplicates. For example, 0.5 * u.arcsecond.
     verbose : int, optional
-        Print out the length of the sample after applying this function
+        Print out the length of the sample after applying this function.
 
     Returns
     -------
-    sample_table : `~astropy.table.Table`
-        sample cleaned of duplicates, with an object ID attached.
+    astropy.table.Table
+        Sample cleaned of duplicates, with an object ID attached.
     """
 
     sample_table = Table([coords_list, labels_list], names=['coord', 'label'])

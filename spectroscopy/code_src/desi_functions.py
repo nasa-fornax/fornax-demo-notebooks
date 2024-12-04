@@ -11,24 +11,23 @@ from data_structures_spec import MultiIndexDFObject
 
 
 def DESIBOSS_get_spec(sample_table, search_radius_arcsec):
-    '''
-    Retrieves DESI and BOSS spectra for a list of sources.
+    """
+    Retrieve DESI and BOSS spectra for a list of sources.
     Note, that we can also retrieve SDSS-DR16 spectra here, which
     leads to similar results as SDSS_get_spec().
 
     Parameters
     ----------
-    sample_table : `~astropy.table.Table`
-        Table with the coordinates and journal reference labels of the sources
-    search_radius_arcsec : `float`
+    sample_table : astropy.table.Table
+        Table with the coordinates and journal reference labels of the sources.
+    search_radius_arcsec : float
         Search radius in arcseconds. Here its rather half a box size.
 
     Returns
     -------
-    df_lc : MultiIndexDFObject
-        The main data structure to store all spectra
-
-    '''
+    MultiIndexDFObject
+        The spectra returned from the archive.
+    """
 
     # Set up client
     client = SparclClient()
@@ -98,4 +97,4 @@ def DESIBOSS_get_spec(sample_table, search_radius_arcsec):
                                                  )).set_index(["objectid", "label", "filter", "mission"])
                     df_spec.append(dfsingle)
 
-    return (df_spec)
+    return df_spec

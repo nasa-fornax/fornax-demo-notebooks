@@ -7,25 +7,24 @@ from data_structures_spec import MultiIndexDFObject
 
 
 def SDSS_get_spec(sample_table, search_radius_arcsec, data_release):
-    '''
-    Retrieves SDSS spectra for a list of sources. Note that no data will
+    """
+    Retrieve SDSS spectra for a list of sources. Note that no data will
     be directly downloaded. All will be saved in cache.
 
     Parameters
     ----------
-    sample_table : `~astropy.table.Table`
-        Table with the coordinates and journal reference labels of the sources
-    search_radius_arcsec : `float`
+    sample_table : astropy.table.Table
+        Table with the coordinates and journal reference labels of the sources.
+    search_radius_arcsec : float
         Search radius in arcseconds.
-    data_release : `int`
-        SDSS data release (e.g., 17 or 18)
+    data_release : int
+        SDSS data release (e.g., 17 or 18).
 
     Returns
     -------
-    df_lc : MultiIndexDFObject
-        The main data structure to store all spectra
-
-    '''
+    MultiIndexDFObject
+        The spectra returned from the archive.
+    """
 
     # Initialize multi-index object:
     df_spec = MultiIndexDFObject()
@@ -60,4 +59,4 @@ def SDSS_get_spec(sample_table, search_radius_arcsec, data_release):
         else:
             print("Source {} could not be found".format(stab["label"]))
 
-    return (df_spec)
+    return df_spec

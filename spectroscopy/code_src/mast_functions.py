@@ -17,32 +17,31 @@ from data_structures_spec import MultiIndexDFObject
 
 def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
                   delete_downloaded_data=True):
-    '''
-    Retrieves HST spectra for a list of sources and groups/stacks them.
+    """
+    Retrieve HST spectra for a list of sources and groups/stacks them.
     This main function runs two sub-functions:
-    - JWST_get_spec_helper() which searches, downloads, retrieves the spectra
-    - JWST_group_spectra() which groups and stacks the spectra
+    - `JWST_get_spec_helper()` which searches, downloads, retrieves the spectra.
+    - `JWST_group_spectra()` which groups and stacks the spectra.
 
     Parameters
     ----------
-    sample_table : `~astropy.table.Table`
-        Table with the coordinates and journal reference labels of the sources
-    search_radius_arcsec : `float`
+    sample_table : astropy.table.Table
+        Table with the coordinates and journal reference labels of the sources.
+    search_radius_arcsec : float
         Search radius in arcseconds.
-    datadir : `str`
+    datadir : str
         Data directory where to store the data. Each function will create a
         separate data directory (for example "[datadir]/HST/" for HST data).
-    verbose : `bool`
+    verbose : bool
         Verbosity level. Set to True for extra talking.
-    delete_downloaded_data : `bool`, optional
+    delete_downloaded_data : bool, optional
         If True, delete the downloaded data files. Default is True.
 
     Returns
     -------
-    df_spec : MultiIndexDFObject
-        The main data structure to store all spectra
-
-    '''
+    MultiIndexDFObject
+        The spectra returned from the archive.
+    """
 
     # Get the spectra
     print("Searching and Downloading Spectra... ")
@@ -55,34 +54,33 @@ def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
     df_jwst_group = JWST_group_spectra(df_jwst_all, verbose=verbose, quickplot=False)
     print("done")
 
-    return (df_jwst_group)
+    return df_jwst_group
 
 
 def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
                          delete_downloaded_data=True):
-    '''
-    Retrieves HST spectra for a list of sources.
+    """
+    Retrieve HST spectra for a list of sources.
 
     Parameters
     ----------
-    sample_table : `~astropy.table.Table`
-        Table with the coordinates and journal reference labels of the sources
-    search_radius_arcsec : `float`
+    sample_table : astropy.table.Table
+        Table with the coordinates and journal reference labels of the sources.
+    search_radius_arcsec : float
         Search radius in arcseconds.
-    datadir : `str`
+    datadir : str
         Data directory where to store the data. Each function will create a
         separate data directory (for example "[datadir]/HST/" for HST data).
-    verbose : `bool`
+    verbose : bool
         Verbosity level. Set to True for extra talking.
-    delete_downloaded_data : `bool`, optional
+    delete_downloaded_data : bool, optional
         If True, delete the downloaded data files.
 
     Returns
     -------
-    df_spec : MultiIndexDFObject
-        The main data structure to store all spectra
-
-    '''
+    MultiIndexDFObject
+        The spectra returned from the archive.
+    """
 
     # Create directory
     if not os.path.exists(datadir):
@@ -191,29 +189,28 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
         else:
             print("Source {} could not be found".format(stab["label"]))
 
-    return (df_spec)
+    return df_spec
 
 
 def JWST_group_spectra(df, verbose, quickplot):
-    '''
-    Groups the JWST spectra and removes entries that have no spectra. Stacks
-    spectra that are similar and creates new DF.
+    """
+    Group the JWST spectra and removes entries that have no spectra.
+    Stack spectra that are similar and create a new DataFrame.
 
     Parameters
     ----------
     df : MultiIndexDFObject
-        Raw JWST multi-index object (output from `JWST_get_spec()`).
+        Raw JWST multi-index object (output from JWST_get_spec()).
     verbose : bool
-        Flag for verbosity: `True` or `False`
+        Flag for verbosity: True or False.
     quickplot : bool
-        If `True`, quick plots are made for each spectral group.
+        If True, quick plots are made for each spectral group.
 
     Returns
     -------
-    df_cons : MultiIndexDFObject
+    MultiIndexDFObject
         Consolidated and grouped data structure storing the spectra.
-
-    '''
+    """
 
     # Initialize multi-index object:
     df_spec = MultiIndexDFObject()
@@ -288,35 +285,33 @@ def JWST_group_spectra(df, verbose, quickplot):
                     plt.ylabel(r"Flux [Jy]")
                     plt.show()
 
-    return (df_spec)
+    return df_spec
 
 
 def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
                  delete_downloaded_data=True):
-    '''
-    Retrieves HST spectra for a list of sources.
+    """
+    Retrieve HST spectra for a list of sources.
 
     Parameters
     ----------
-    sample_table : `~astropy.table.Table`
-        Table with the coordinates and journal reference labels of the sources
-    search_radius_arcsec : `float`
+    sample_table : astropy.table.Table
+        Table with the coordinates and journal reference labels of the sources.
+    search_radius_arcsec : float
         Search radius in arcseconds.
-    datadir : `str`
+    datadir : str
         Data directory where to store the data. Each function will create a
         separate data directory (for example "[datadir]/HST/" for HST data).
-    verbose : `bool`
+    verbose : bool
         Verbosity level. Set to True for extra talking.
-    delete_downloaded_data : `bool`, optional
+    delete_downloaded_data : bool, optional
         If True, delete the downloaded data files. Default is True.
-
 
     Returns
     -------
-    df_lc : MultiIndexDFObject
-        The main data structure to store all spectra
-
-    '''
+    MultiIndexDFObject
+        The spectra returned from the archive.
+    """
 
     # Create directory
     if not os.path.exists(datadir):
@@ -412,4 +407,4 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
         else:
             print("Source {} could not be found".format(stab["label"]))
 
-    return (df_spec)
+    return df_spec

@@ -10,25 +10,24 @@ from data_structures_spec import MultiIndexDFObject
 
 
 def SpitzerIRS_get_spec(sample_table, search_radius_arcsec, COMBINESPEC):
-    '''
-    Retrieves HST spectra for a list of sources.
+    """
+    Retrieve HST spectra for a list of sources.
 
     Parameters
     ----------
-    sample_table : `~astropy.table.Table`
-        Table with the coordinates and journal reference labels of the sources
-    search_radius_arcsec : `float`
+    sample_table : astropy.table.Table
+        Table with the coordinates and journal reference labels of the sources.
+    search_radius_arcsec : float
         Search radius in arcseconds.
-    COMBINESPEC : `bool`
-        If set to `True`, then, if multiple spectra are found, the spectra are
-        mean-combined. If `False`, the closest spectrum is chosen and returned.
+    COMBINESPEC : bool
+        If set to True, then, if multiple spectra are found, the spectra are
+        mean-combined. If False, the closest spectrum is chosen and returned.
 
     Returns
     -------
-    df_lc : MultiIndexDFObject
-        The main data structure to store all spectra
-
-    '''
+    MultiIndexDFObject
+        The spectra returned from the archive.
+    """
 
     # Initialize multi-index object:
     df_spec = MultiIndexDFObject()
@@ -104,4 +103,4 @@ def SpitzerIRS_get_spec(sample_table, search_radius_arcsec, COMBINESPEC):
                                          )).set_index(["objectid", "label", "filter", "mission"])
             df_spec.append(dfsingle)
 
-    return (df_spec)
+    return df_spec

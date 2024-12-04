@@ -1,36 +1,39 @@
-# setup to store the light curves in a data structure
+# setup to store the spectra in a data structure
 import pandas as pd
 
 
 class MultiIndexDFObject:
     """
-    Pandas MultiIndex data frame to store & manipulate multiband light curves
+    Pandas MultiIndex data frame to store & manipulate spectra.
 
     Examples
     --------
-    # Initialize Pandas MultiIndex data frame for storing the light curve
-    df_lc = MultiIndexDFObject()
+    # Initialize Pandas MultiIndex data frame for storing the spectra
+    df_spec = MultiIndexDFObject()
 
-    #make a single multiindex dataframe
-    dfsingle = pd.DataFrame(dict(flux=[0.1], err=[0.1], time=[time_mjd], objectid=[ccount + 1], /
-        band=[mission], label=lab)).set_index(["objectid", "label", "band", "time"])
+    # Make a single multiindex dataframe
+    df_single = pd.DataFrame(dict(wave=[0.1], flux=[0.1], err=[0.1], instrument=[instrument_name],
+                                  objectid=[ccount + 1], filter=[filter_name],
+                                  mission=[mission_name], label=[lab]))
+    df_single = df_single.set_index(["objectid", "label", "filter", "mission"])
 
-    # Append to existing MultiIndex light curve object
-    df_lc.append(dfsingle)
+    # Append to existing MultiIndex object
+    df_spec.append(dfsingle)
 
-    #Show the contents
-    df_lc.data
-
+    # Show the contents
+    df_spec.data
     """
 
     def __init__(self, data=None):
-        """Create a MultiIndex DataFrame that is empty if data is None, else contains the data.
+        """
+        Create a MultiIndex DataFrame that is empty if data is None, else contains the data.
 
         Parameters
         ----------
         data : pd.DataFrame, optional
             Dataframe to store in the `data` attribute.
         """
+
         index = ["objectid", "label", "filter", "mission"]
         columns = ["wave", "flux", "err", "instrument"]
         self.data = pd.DataFrame(columns=index + columns).set_index(index)
@@ -38,13 +41,16 @@ class MultiIndexDFObject:
             self.append(data)
 
     def append(self, x):
-        """Add a new band of light curve data to the dataframe
+        """
+        Add a new spectra data to the dataframe.
 
         Parameters
         ----------
         x : Pandas dataframe
-            contains columns [flux, fluxerr] and multi-index [objectid, label, band, time]
+            Contains columns ["wave", "flux", "err", "instrument"]
+            and multi-index ["objectid", "label", "filter", "mission"].
         """
+
         if isinstance(x, self.__class__):
             # x is a MultiIndexDFObject. extract the DataFrame
             new_data = x.data
@@ -65,11 +71,13 @@ class MultiIndexDFObject:
         self.data = pd.concat([self.data, new_data])
 
     def remove(self, x):
-        """ Drop a light curve from the dataframe
+        """
+        Drop a row from the dataframe.
 
         Parameters
         ----------
         x : list of values
-             Index values identifying rows to be dropped.
+            Index values identifying rows to be dropped.
         """
+
         self.data = self.data.drop(x)
