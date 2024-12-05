@@ -137,8 +137,10 @@ def create_figures(df_spec, bin_factor, show_nbr_figures, save_output):
                 wave_bin = wave_bin[~clip_mask]
                 flux_bin = flux_bin[~clip_mask]
 
-                ax1.step(wave_bin.to(u.micrometer), flux_bin.to(u.erg / u.second / (u.centimeter**2) / u.angstrom), "-",
-                         label="{} ({})".format(filt, filt_df.reset_index().mission[ii]), where="mid")
+                ax1.step(wave_bin.to(u.micrometer),
+                         flux_bin.to(u.erg / u.second / (u.centimeter**2) / u.angstrom), "-",
+                         label="{} ({})".format(filt, filt_df.reset_index().mission[ii]),
+                         where="mid")
 
         ax1.set_title(this_label)
         if LOGX:

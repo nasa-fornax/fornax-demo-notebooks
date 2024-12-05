@@ -80,8 +80,12 @@ def Herschel_get_spec(sample_table, search_radius_arcsec, datadir,
         # each instrument and object..
 
         for instrument_name in ['PACS', 'SPIRE']:
-            querystring = "select observation_id from hsa.v_active_observation join hsa.instrument using (instrument_oid) where contains(point('ICRS', hsa.v_active_observation.ra, hsa.v_active_observation.dec), circle('ICRS', "+str(
-                search_coords.ra.deg)+", " + str(search_coords.dec.deg) + ", " + str(search_radius_arcsec) + "))=1 and hsa.instrument.instrument_name='"+str(instrument_name)+"'"
+            querystring = (
+                "select observation_id from hsa.v_active_observation join hsa.instrument using "
+                "(instrument_oid) where contains(point('ICRS', hsa.v_active_observation.ra, "
+                "hsa.v_active_observation.dec), circle('ICRS', " + str(search_coords.ra.deg)
+                + ", " + str(search_coords.dec.deg) + ", " + str(search_radius_arcsec)
+                + "))=1 and hsa.instrument.instrument_name='" + str(instrument_name) + "'")
             objectid_table = HSA.query_hsa_tap(querystring)
 
             # download_data only accepts one observation_id so we need to loop over each observation_id
@@ -89,7 +93,9 @@ def Herschel_get_spec(sample_table, search_radius_arcsec, datadir,
                 observation_id = str(objectid_table[tab_id]['observation_id'])
                 try:
                     HSA.download_data(observation_id=observation_id, retrieval_type='OBSERVATION',
-                                      instrument_name=instrument_name, product_level="LEVEL2, LEVEL_2_5, LEVEL_3", download_dir=datadir)
+                                      instrument_name=instrument_name,
+                                      product_level="LEVEL2, LEVEL_2_5, LEVEL_3",
+                                      download_dir=datadir)
 
                     # ok, now we have the tar files, need to read those into the right data structure
                     # first untar
@@ -146,7 +152,8 @@ def Herschel_get_spec(sample_table, search_radius_arcsec, datadir,
                                                              mission=["Herschel"],
                                                              instrument=[instrument_name],
                                                              filter=[df["band"][0]],
-                                                             )).set_index(["objectid", "label", "filter", "mission"])
+                                                             ))
+                                dfsingle = dfsingle.set_index(["objectid", "label", "filter", "mission"])
 
                                 df_spec.append(dfsingle)
 
