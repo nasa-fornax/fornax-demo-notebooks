@@ -100,53 +100,55 @@ def Herschel_get_spec(sample_table, search_radius_arcsec, datadir,
                     # only grab the files which have the final spectra in them = "HPSSPEC" in directory name
                     # not all modes have a final spectrum (cubes?)
                     for member in object.getmembers():
-                        if "HPSSPEC" in member.name:
-                            path_to_final_dir = f'data/herschel/final_spectrum{observation_id}'
-                            object.extract(member, path=path_to_final_dir)
+                        if "HPSSPEC" not in member.name:
+                            continue
 
-                            for directory_name in os.listdir(path_to_final_dir):
+                        path_to_final_dir = f'data/herschel/final_spectrum{observation_id}'
+                        object.extract(member, path=path_to_final_dir)
 
-                                for fits_file_path in glob.glob(f"{path_to_final_dir}/{directory_name}/{observation_id}/level*/HPSSPEC*/herschel*/*"):
-                                    # open the fits file
-                                    hdulist = fits.open(fits_file_path)
+                        for directory_name in os.listdir(path_to_final_dir):
 
-                                    # convert final spectrum to pandas dataframe
-                                    df = pd.DataFrame(hdulist[1].data)
-                                    # There are multiple flux columns; figure out which flux
-                                    # column to use advice from
-                                    # https://www.cosmos.esa.int/documents/12133/996891/Product+decision+trees
-                                    # is to use the flux coluimn with the most flux
-                                    max_flux = find_max_flux_column(df)
-                                    # use the corresponding uncertainty column
-                                    max_error = max_flux.replace("Flux", "Error")
+                            for fits_file_path in glob.glob(f"{path_to_final_dir}/{directory_name}/{observation_id}/level*/HPSSPEC*/herschel*/*"):
+                                # open the fits file
+                                hdulist = fits.open(fits_file_path)
 
-                                    # convert to cgs units for saving and plotting
-                                    flux_Jy = df[max_flux].to_numpy() * u.Jy
-                                    # single wavelength for conversion to cgs
-                                    wavelength = df.wave[0] * u.micrometer
-                                    flux_cgs = flux_Jy.to(u.erg / u.second / (u.centimeter**2) / u.hertz) * (
-                                        const.c.to(u.angstrom/u.second)) / (wavelength.to(u.angstrom)**2)
-                                    flux_cgs = flux_cgs.to(
-                                        u.erg / u.second / (u.centimeter**2) / u.angstrom)
+                                # convert final spectrum to pandas dataframe
+                                df = pd.DataFrame(hdulist[1].data)
+                                # There are multiple flux columns; figure out which flux
+                                # column to use advice from
+                                # https://www.cosmos.esa.int/documents/12133/996891/Product+decision+trees
+                                # is to use the flux coluimn with the most flux
+                                max_flux = find_max_flux_column(df)
+                                # use the corresponding uncertainty column
+                                max_error = max_flux.replace("Flux", "Error")
 
-                                    flux_err_Jy = df[max_error].to_numpy() * u.Jy
-                                    flux_err_cgs = flux_err_Jy.to(u.erg / u.second / (u.centimeter**2) / u.hertz) * (
-                                        const.c.to(u.angstrom/u.second)) / (wavelength.to(u.angstrom)**2)
-                                    flux_err_cgs = flux_err_cgs.to(
-                                        u.erg / u.second / (u.centimeter**2) / u.angstrom)
+                                # convert to cgs units for saving and plotting
+                                flux_Jy = df[max_flux].to_numpy() * u.Jy
+                                # single wavelength for conversion to cgs
+                                wavelength = df.wave[0] * u.micrometer
+                                flux_cgs = flux_Jy.to(u.erg / u.second / (u.centimeter**2) / u.hertz) * (
+                                    const.c.to(u.angstrom/u.second)) / (wavelength.to(u.angstrom)**2)
+                                flux_cgs = flux_cgs.to(
+                                    u.erg / u.second / (u.centimeter**2) / u.angstrom)
 
-                                    wave = df.wave.to_numpy() * u.micrometer
-                                    wave = wave.to(u.angstrom)
-                                    # build the df with this object's spectrum from this instrument
-                                    dfsingle = pd.DataFrame(dict(wave=[wave], flux=[flux_cgs], err=[flux_err_cgs],
-                                                                 label=[stab["label"]],
-                                                                 objectid=[stab["objectid"]],
-                                                                 mission=["Herschel"],
-                                                                 instrument=[instrument_name],
-                                                                 filter=[df["band"][0]],
-                                                                 )).set_index(["objectid", "label", "filter", "mission"])
+                                flux_err_Jy = df[max_error].to_numpy() * u.Jy
+                                flux_err_cgs = flux_err_Jy.to(u.erg / u.second / (u.centimeter**2) / u.hertz) * (
+                                    const.c.to(u.angstrom/u.second)) / (wavelength.to(u.angstrom)**2)
+                                flux_err_cgs = flux_err_cgs.to(
+                                    u.erg / u.second / (u.centimeter**2) / u.angstrom)
 
-                                    df_spec.append(dfsingle)
+                                wave = df.wave.to_numpy() * u.micrometer
+                                wave = wave.to(u.angstrom)
+                                # build the df with this object's spectrum from this instrument
+                                dfsingle = pd.DataFrame(dict(wave=[wave], flux=[flux_cgs], err=[flux_err_cgs],
+                                                             label=[stab["label"]],
+                                                             objectid=[stab["objectid"]],
+                                                             mission=["Herschel"],
+                                                             instrument=[instrument_name],
+                                                             filter=[df["band"][0]],
+                                                             )).set_index(["objectid", "label", "filter", "mission"])
+
+                                df_spec.append(dfsingle)
 
                 except LoginError:
                     print("This observation is proprietary, which might mean that it is calibration data")
