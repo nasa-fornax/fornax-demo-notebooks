@@ -1,10 +1,12 @@
 import io
 import os
 import shutil
+import warnings
 from contextlib import redirect_stdout
 
 import astropy.constants as const
 import astropy.units as u
+import astroquery.exceptions
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -96,8 +98,11 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
 
         # Query results
         search_coords = stab["coord"]
-        # [FIXME] Next code line raises a warning when stab['label'] == 'NGC3049'.
-        # 'WARNING: NoResultsWarning: Query returned no results. [astroquery.mast.discovery_portal]'
+        # If no results are found, this will raise a warning. We explicitly handle the no-results
+        # case below, so let's suppress the warning to avoid confusing notebook users.
+        warnings.filterwarnings("ignore", message='Query returned no results.',
+                                category=astroquery.exceptions.NoResultsWarning,
+                                module="astroquery.mast.discovery_portal")
         query_results = Observations.query_criteria(
             coordinates=search_coords, radius=search_radius_arcsec * u.arcsec,
             dataproduct_type=["spectrum"], obs_collection=["JWST"], intentType="science",
@@ -313,8 +318,11 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
 
         # Query results
         search_coords = stab["coord"]
-        # [FIXME] Next code line raises a warning when stab['label'] == 'Arp220'.
-        # 'WARNING: NoResultsWarning: Query returned no results. [astroquery.mast.discovery_portal]'
+        # If no results are found, this will raise a warning. We explicitly handle the no-results
+        # case below, so let's suppress the warning to avoid confusing notebook users.
+        warnings.filterwarnings("ignore", message='Query returned no results.',
+                                category=astroquery.exceptions.NoResultsWarning,
+                                module="astroquery.mast.discovery_portal")
         query_results = Observations.query_criteria(
             coordinates=search_coords, radius=search_radius_arcsec * u.arcsec,
             dataproduct_type=["spectrum"], obs_collection=["HST"], intentType="science",
