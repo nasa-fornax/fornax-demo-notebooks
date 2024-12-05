@@ -23,7 +23,6 @@ mpl.rcParams['xtick.minor.size'] = 3
 mpl.rcParams['ytick.minor.size'] = 3
 mpl.rcParams['xtick.direction'] = 'in'
 mpl.rcParams['ytick.direction'] = 'in'
-# mpl.rc('text', usetex=True)
 mpl.rc('font', family='serif')
 mpl.rcParams['xtick.top'] = True
 mpl.rcParams['ytick.right'] = True
@@ -112,9 +111,8 @@ def create_figures(df_spec, bin_factor, show_nbr_figures, save_output):
         else:
             LOGX = False
 
-        for ff, (filt, filt_df) in enumerate(singleobj_df.groupby('filter')):
+        for filt, filt_df in singleobj_df.groupby('filter'):
 
-            # print("{} entries for a object {} and filter {}".format(len(filt_df.flux), objectid , filt))
             for ii in range(len(filt_df.flux)):
 
                 # get data
@@ -128,10 +126,9 @@ def create_figures(df_spec, bin_factor, show_nbr_figures, save_output):
                 flux = flux[mask]
                 err = err[mask]
 
-                # ax1.plot(wave , flux , "-"  , label="{} ({})".format(filt, filt_df.reset_index().mission[ii]) )
                 wave_bin, flux_bin, _ = bin_spectra(wave, flux, bin_factor=bin_factor)
 
-                # do some more clearning (mainly to remove some very low values)
+                # do some more cleaning (mainly to remove some very low values)
                 selnotnan = np.where(~np.isnan(flux_bin))[0]
                 flux_bin = flux_bin[selnotnan]
                 wave_bin = wave_bin[selnotnan]
