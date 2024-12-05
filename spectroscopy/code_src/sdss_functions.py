@@ -47,6 +47,7 @@ def SDSS_get_spec(sample_table, search_radius_arcsec, data_release):
         # only one entry because we only search for one xid at a time. Could change that?
         wave = 10**sp[0]["COADD"].data.loglam * u.angstrom
         flux = sp[0]["COADD"].data.flux*1e-17 * u.erg/u.second/u.centimeter**2/u.angstrom
+        # [FIXME] Next line raises 'RuntimeWarning: divide by zero encountered in divide'
         err = np.sqrt(1/sp[0]["COADD"].data.ivar)*1e-17 * flux.unit
 
         # Add to df_spec.
