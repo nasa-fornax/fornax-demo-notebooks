@@ -1,7 +1,5 @@
-import io
 import os
 import shutil
-from contextlib import redirect_stdout
 
 import astropy.constants as const
 import astropy.units as u
@@ -124,17 +122,12 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
             print("Nothing to download for source {}.".format(stab["label"]))
             continue
 
-        # [FIXME] Why is this trap here? Let's try without it.
-        # Download (suppress output)
-        # trap = io.StringIO()
-        # with redirect_stdout(trap):
         download_results = Observations.download_products(
                 data_products_list_filter, download_dir=this_data_dir)
-        # if verbose:
-        #     print(trap.getvalue())
         # [FIXME] If the download failed, do we just want to skip it?
         download_results = download_results[download_results["Status"] != "ERROR"]
         if len(download_results) == 0:
+            print(f"Download failed for {stab['label']}")
             continue
 
         # Create table
@@ -344,13 +337,8 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
             print("Nothing to download for source {}.".format(stab["label"]))
             continue
 
-        # Download
-        trap = io.StringIO()
-        with redirect_stdout(trap):
-            download_results = Observations.download_products(
+        download_results = Observations.download_products(
                 data_products_list_filter, download_dir=this_data_dir)
-        if verbose:
-            print(trap.getvalue())
 
         # Create table
         # NOTE: `download_results` has NOT the same order as `data_products_list_filter`.
