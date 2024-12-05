@@ -37,26 +37,26 @@ def SDSS_get_spec(sample_table, search_radius_arcsec, data_release):
         xid = SDSS.query_region(search_coords, radius=search_radius_arcsec *
                                 u.arcsec, spectro=True, data_release=data_release)
 
-        if str(type(xid)) != "<class 'NoneType'>":
-            sp = SDSS.get_spectra(matches=xid, show_progress=True, data_release=data_release)
-
-            # Get data
-            # only one entry because we only search for one xid at a time. Could change that?
-            wave = 10**sp[0]["COADD"].data.loglam * u.angstrom
-            flux = sp[0]["COADD"].data.flux*1e-17 * u.erg/u.second/u.centimeter**2/u.angstrom
-            err = np.sqrt(1/sp[0]["COADD"].data.ivar)*1e-17 * flux.unit
-
-            # Add to df_spec.
-            dfsingle = pd.DataFrame(dict(wave=[wave], flux=[flux], err=[err],
-                                         label=[stab["label"]],
-                                         objectid=[stab["objectid"]],
-                                         mission=["SDSS"],
-                                         instrument=["SDSS"],
-                                         filter=["optical"],
-                                         )).set_index(["objectid", "label", "filter", "mission"])
-            df_spec.append(dfsingle)
-
-        else:
+        if str(type(xid)) == "<class 'NoneType'>":
             print("Source {} could not be found".format(stab["label"]))
+            continue
+
+        sp = SDSS.get_spectra(matches=xid, show_progress=True, data_release=data_release)
+
+        # Get data
+        # only one entry because we only search for one xid at a time. Could change that?
+        wave = 10**sp[0]["COADD"].data.loglam * u.angstrom
+        flux = sp[0]["COADD"].data.flux*1e-17 * u.erg/u.second/u.centimeter**2/u.angstrom
+        err = np.sqrt(1/sp[0]["COADD"].data.ivar)*1e-17 * flux.unit
+
+        # Add to df_spec.
+        dfsingle = pd.DataFrame(dict(wave=[wave], flux=[flux], err=[err],
+                                     label=[stab["label"]],
+                                     objectid=[stab["objectid"]],
+                                     mission=["SDSS"],
+                                     instrument=["SDSS"],
+                                     filter=["optical"],
+                                     )).set_index(["objectid", "label", "filter", "mission"])
+        df_spec.append(dfsingle)
 
     return df_spec
