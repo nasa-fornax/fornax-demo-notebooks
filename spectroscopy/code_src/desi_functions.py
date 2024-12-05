@@ -31,7 +31,6 @@ def DESIBOSS_get_spec(sample_table, search_radius_arcsec):
 
     # Set up client
     client = SparclClient()
-    # print(client.all_datasets) # print data sets
 
     # Initialize multi-index object:
     df_spec = MultiIndexDFObject()
@@ -40,7 +39,6 @@ def DESIBOSS_get_spec(sample_table, search_radius_arcsec):
 
         # Search
         data_releases = ['DESI-EDR', 'BOSS-DR16']
-        # data_releases = ['DESI-EDR','BOSS-DR16','SDSS-DR16'] # we want to use DR17 directly using SDSS query
 
         search_coords = stab["coord"]
         dra = (search_radius_arcsec*u.arcsec).to(u.degree)
@@ -48,12 +46,10 @@ def DESIBOSS_get_spec(sample_table, search_radius_arcsec):
         out = ['sparcl_id', 'ra', 'dec', 'redshift', 'spectype', 'data_release', 'redshift_err']
         cons = {'spectype': ['GALAXY', 'STAR', 'QSO'],
                 'data_release': data_releases,
-                # 'redshift': [0.5, 0.9],
                 'ra': [search_coords.ra.deg-dra.value, search_coords.ra.deg+dra.value],
                 'dec': [search_coords.dec.deg-ddec.value, search_coords.dec.deg+ddec.value]
                 }
         found_I = client.find(outfields=out, constraints=cons, limit=20)  # search
-        # print(found_I)
         if len(found_I.records) == 0:
             continue
 

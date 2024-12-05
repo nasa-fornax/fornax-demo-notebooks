@@ -96,13 +96,11 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
 
         # Query results
         search_coords = stab["coord"]
-        query_results = Observations.query_criteria(coordinates=search_coords, radius=search_radius_arcsec * u.arcsec,
-                                                    dataproduct_type=["spectrum"], obs_collection=["JWST"], intentType="science", calib_level=[3, 4],
-                                                    # instrument_name=['NIRSPEC/MSA', 'NIRSPEC/SLIT', 'NIRCAM/GRISM', 'NIRISS/WFSS'],
-                                                    instrument_name=['NIRSPEC/MSA', 'NIRSPEC/SLIT'],
-                                                    # filters=['CLEAR;PRISM','F070LP;G140M'],
-                                                    dataRights=['PUBLIC']
-                                                    )
+        query_results = Observations.query_criteria(
+            coordinates=search_coords, radius=search_radius_arcsec * u.arcsec,
+            dataproduct_type=["spectrum"], obs_collection=["JWST"], intentType="science",
+            calib_level=[3, 4], instrument_name=['NIRSPEC/MSA', 'NIRSPEC/SLIT'],
+            dataRights=['PUBLIC'])
         print("Number of search results: {}".format(len(query_results)))
 
         if len(query_results) == 0:
@@ -113,25 +111,18 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
         data_products_list = Observations.get_product_list(query_results)
 
         # Filter
-        data_products_list_filter = Observations.filter_products(data_products_list,
-                                                                 productType=["SCIENCE"],
-                                                                 # filters=['CLEAR;PRISM','F070LP;G140M'],
-                                                                 # filters=['CLEAR;PRISM'],
-                                                                 extension="fits",
-                                                                 # only fully reduced or contributed
-                                                                 calib_level=[3, 4],
-                                                                 productSubGroupDescription=[
-                                                                     "X1D"],  # only 1D spectra
-                                                                 # only public data
-                                                                 dataRights=['PUBLIC']
-                                                                 )
+        data_products_list_filter = Observations.filter_products(
+            data_products_list, productType=["SCIENCE"], extension="fits",
+            calib_level=[3, 4],  # only fully reduced or contributed
+            productSubGroupDescription=["X1D"],  # only 1D spectra
+            dataRights=['PUBLIC'])  # only public data
         print("Number of files to download: {}".format(len(data_products_list_filter)))
 
         if len(data_products_list_filter) == 0:
             print("Nothing to download for source {}.".format(stab["label"]))
             continue
 
-        # Download (supress output)
+        # Download (suppress output)
         trap = io.StringIO()
         with redirect_stdout(trap):
             download_results = Observations.download_products(
@@ -152,7 +143,6 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
                                  data_products_list_filter["obsID"][jj])[0]
             tmp = query_results[idx_cross][keys]
             tab.add_row(list(tmp[0]) + [data_products_list_filter["productFilename"][jj]])
-        # print("number in table {}".format(len(tab)))
 
         # Create multi-index object
         for jj in range(len(tab)):
@@ -167,9 +157,6 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
             filepath = download_results["Local Path"][file_idx[0]]
             spec1d = Table.read(filepath, hdu=1)
 
-            # print(filepath)
-            # spec1d = Spectrum1D.read(filepath)
-
             dfsingle = pd.DataFrame(dict(
                 wave=[spec1d["WAVELENGTH"].data * spec1d["WAVELENGTH"].unit],
                 flux=[spec1d["FLUX"].data * spec1d["FLUX"].unit],
@@ -177,8 +164,6 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
                      spec1d["FLUX_ERROR"].unit],
                 label=[stab["label"]],
                 objectid=[stab["objectid"]],
-                # objID=[tab["objID"][jj]], # REMOVE
-                # obsid=[tab["obsid"][jj]],
                 mission=[tab["obs_collection"][jj]],
                 instrument=[tab["instrument_name"][jj]],
                 filter=[tab["filters"][jj]],
@@ -233,7 +218,6 @@ def JWST_group_spectra(df, verbose, quickplot):
                 print("Processing {}: ".format(filt), end=" ")
 
             sel = np.where((tab["filter"] == filt) & (tab["label"] == obj))[0]
-            # tab_sel = tab.copy()[sel]
             tab_sel = tab.iloc[sel]
             if verbose:
                 print("Number of items: {}".format(len(sel)), end=" | ")
@@ -268,13 +252,12 @@ def JWST_group_spectra(df, verbose, quickplot):
                 u.erg / u.second / (u.centimeter**2) / u.angstrom)
 
             # Add to data frame
-            dfsingle = pd.DataFrame(dict(wave=[wave_grid.to(u.micrometer)], flux=[fluxes_stack_cgs], err=[np.repeat(0, len(fluxes_stack_cgs))],
-                                         label=[tab_sel["label"].iloc[0]],
-                                         objectid=[tab_sel["objectid"].iloc[0]],
-                                         mission=[tab_sel["mission"].iloc[0]],
-                                         instrument=[tab_sel["instrument"].iloc[0]],
-                                         filter=[tab_sel["filter"].iloc[0]],
-                                         )).set_index(["objectid", "label", "filter", "mission"])
+            dfsingle = pd.DataFrame(dict(
+                wave=[wave_grid.to(u.micrometer)], flux=[fluxes_stack_cgs],
+                err=[np.repeat(0, len(fluxes_stack_cgs))], label=[tab_sel["label"].iloc[0]],
+                objectid=[tab_sel["objectid"].iloc[0]], mission=[tab_sel["mission"].iloc[0]],
+                instrument=[tab_sel["instrument"].iloc[0]], filter=[tab_sel["filter"].iloc[0]]))
+            dfsingle = dfsingle.set_index(["objectid", "label", "filter", "mission"])
             df_spec.append(dfsingle)
 
             # Quick plot
@@ -328,9 +311,10 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
 
         # Query results
         search_coords = stab["coord"]
-        query_results = Observations.query_criteria(coordinates=search_coords, radius=search_radius_arcsec * u.arcsec,
-                                                    dataproduct_type=["spectrum"], obs_collection=["HST"], intentType="science", calib_level=[3, 4],
-                                                    )
+        query_results = Observations.query_criteria(
+            coordinates=search_coords, radius=search_radius_arcsec * u.arcsec,
+            dataproduct_type=["spectrum"], obs_collection=["HST"], intentType="science",
+            calib_level=[3, 4],)
         print("Number of search results: {}".format(len(query_results)))
 
         if len(query_results) == 0:
@@ -341,14 +325,10 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
         data_products_list = Observations.get_product_list(query_results)
 
         # Filter
-        data_products_list_filter = Observations.filter_products(data_products_list,
-                                                                 productType=["SCIENCE"],
-                                                                 extension="fits",
-                                                                 # only fully reduced or contributed
-                                                                 calib_level=[3, 4],
-                                                                 productSubGroupDescription=[
-                                                                     "SX1"]  # only 1D spectra
-                                                                 )
+        data_products_list_filter = Observations.filter_products(
+            data_products_list, productType=["SCIENCE"], extension="fits",
+            calib_level=[3, 4],  # only fully reduced or contributed
+            productSubGroupDescription=["SX1"])  # only 1D spectra
         print("Number of files to download: {}".format(len(data_products_list_filter)))
 
         if len(data_products_list_filter) == 0:
@@ -387,7 +367,6 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
 
             # open spectrum
             filepath = download_results["Local Path"][file_idx[0]]
-            # print(filepath)
             spec1d = Spectrum1D.read(filepath)
 
             # Note: this should be in erg/s/cm2/A and any wavelength unit.
@@ -396,8 +375,6 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
                     spec1d.uncertainty.array * spec1d.uncertainty.unit],
                 label=[stab["label"]],
                 objectid=[stab["objectid"]],
-                # objID=[tab["objID"][jj]],
-                # obsid=[tab["obsid"][jj]],
                 mission=[tab["obs_collection"][jj]],
                 instrument=[tab["instrument_name"][jj]],
                 filter=[tab["filters"][jj]],

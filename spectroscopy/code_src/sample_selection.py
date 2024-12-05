@@ -1,8 +1,4 @@
 from astropy.table import Table, join, join_skycoord, unique
-# from astroquery.ipac.ned import Ned
-# from astroquery.sdss import SDSS
-# from astroquery.simbad import Simbad
-# from astroquery.vizier import Vizier
 
 
 def clean_sample(coords_list, labels_list, precision, verbose=1):
