@@ -96,6 +96,8 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
 
         # Query results
         search_coords = stab["coord"]
+        # [FIXME] Next code line raises a warning when stab['label'] == 'NGC3049'.
+        # 'WARNING: NoResultsWarning: Query returned no results. [astroquery.mast.discovery_portal]'
         query_results = Observations.query_criteria(
             coordinates=search_coords, radius=search_radius_arcsec * u.arcsec,
             dataproduct_type=["spectrum"], obs_collection=["JWST"], intentType="science",
@@ -122,13 +124,18 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
             print("Nothing to download for source {}.".format(stab["label"]))
             continue
 
+        # [FIXME] Why is this trap here? Let's try without it.
         # Download (suppress output)
-        trap = io.StringIO()
-        with redirect_stdout(trap):
-            download_results = Observations.download_products(
+        # trap = io.StringIO()
+        # with redirect_stdout(trap):
+        download_results = Observations.download_products(
                 data_products_list_filter, download_dir=this_data_dir)
-        if verbose:
-            print(trap.getvalue())
+        # if verbose:
+        #     print(trap.getvalue())
+        # [FIXME] If the download failed, do we just want to skip it?
+        download_results = download_results[download_results["Status"] != "ERROR"]
+        if len(download_results) == 0:
+            continue
 
         # Create table
         # NOTE: `download_results` has NOT the same order as `data_products_list_filter`.
@@ -311,6 +318,8 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
 
         # Query results
         search_coords = stab["coord"]
+        # [FIXME] Next code line raises a warning when stab['label'] == 'Arp220'.
+        # 'WARNING: NoResultsWarning: Query returned no results. [astroquery.mast.discovery_portal]'
         query_results = Observations.query_criteria(
             coordinates=search_coords, radius=search_radius_arcsec * u.arcsec,
             dataproduct_type=["spectrum"], obs_collection=["HST"], intentType="science",
