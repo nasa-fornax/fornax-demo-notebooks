@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.16.4
 kernelspec:
-  display_name: science_demo
+  display_name: notebook
   language: python
-  name: conda-env-science_demo-py
+  name: python3
 ---
 
 # Extract Multi-Wavelength Spectroscopy from Archival Data
