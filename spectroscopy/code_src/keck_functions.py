@@ -64,8 +64,10 @@ def KeckDEIMOS_get_spec(sample_table, search_radius_arcsec):
         # Prepare arrays
         wave = spec["LAMBDA"][0] * u.angstrom
         flux_cgs = spec["FLUX"][0] * 1e-17 * u.erg/u.second/u.centimeter**2/u.angstrom
-        # [FIXME] Next line raises 'RuntimeWarning: divide by zero encountered in divide'
-        error_cgs = np.sqrt(1 / spec["IVAR"][0]) * 1e-17 * u.erg/u.second/u.centimeter**2/u.angstrom
+        # Inverse variances may be zero, resulting in infinite error.
+        # We'll leave these in and ignore the "divide by zero" warning.
+        with np.errstate(divide='ignore'):
+            error_cgs = np.sqrt(1 / spec["IVAR"][0]) * flux_cgs.unit
 
         # Create MultiIndex object
         dfsingle = pd.DataFrame(dict(wave=[wave],
