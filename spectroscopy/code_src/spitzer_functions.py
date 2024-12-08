@@ -47,7 +47,7 @@ def SpitzerIRS_get_spec(sample_table, search_radius_arcsec, COMBINESPEC):
 
         # If multiple entries are found, pick the closest.
         # Or should we take the average instead??
-        if len(tab) > 0:
+        if len(tab) > 1:
             print("More than 1 entry found", end="")
             if not COMBINESPEC:
                 print(" - pick the closest")
@@ -63,7 +63,7 @@ def SpitzerIRS_get_spec(sample_table, search_radius_arcsec, COMBINESPEC):
 
         # Now extract spectra and put all in one array
         specs = []
-        for tt in tab:
+        for tt in tab_final:
             url = "https://irsa.ipac.caltech.edu{}".format(tt["xtable"].split("\"")[1])
             spec = Table.read(url, format="ipac")  # flux_density in Jy
             specs.append(spec)
