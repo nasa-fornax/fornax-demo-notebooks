@@ -1,8 +1,6 @@
-import io
 import os
 import shutil
 import warnings
-from contextlib import redirect_stdout
 
 import astropy.constants as const
 import astropy.units as u
@@ -129,13 +127,9 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
             print("Nothing to download for source {}.".format(stab["label"]))
             continue
 
-        # Download (suppress output)
-        trap = io.StringIO()
-        with redirect_stdout(trap):
-            download_results = Observations.download_products(
-                data_products_list_filter, download_dir=this_data_dir)
-        if verbose:
-            print(trap.getvalue())
+        # Download
+        download_results = Observations.download_products(
+            data_products_list_filter, download_dir=this_data_dir, verbose=False)
 
         # Create table
         # NOTE: `download_results` has NOT the same order as `data_products_list_filter`.
@@ -348,15 +342,8 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
             continue
 
         # Download
-        # Observations.download_products prints an info message for every download, like:
-        #   "Downloading URL https://mast... to ./data/... ... [Done]"
-        # Suppress these by redirecting stdout to a trap.
-        trap = io.StringIO()
-        with redirect_stdout(trap):
-            download_results = Observations.download_products(
-                data_products_list_filter, download_dir=this_data_dir)
-        if verbose:
-            print(trap.getvalue())
+        download_results = Observations.download_products(
+            data_products_list_filter, download_dir=this_data_dir, verbose=False)
 
         # Create table
         # NOTE: `download_results` has NOT the same order as `data_products_list_filter`.
