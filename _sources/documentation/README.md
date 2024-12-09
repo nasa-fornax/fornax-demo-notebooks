@@ -258,7 +258,7 @@ Software is installed in Miniconda environments.  You can use "[conda list](http
 * ask your peers: User forum at #fornax-users slack channel
 * ask Fornax Helpdesk
    * email  fornax-helpdesk@lists.nasa.gov
-* If you are reporting a problem or suspected bug, please include as much of the following information as possible. This will help minimize the time it takes for us to diagnose the problem and get you an answer.
+* If you are reporting a problem or suspected bug, please include as much of the following information as possible. This will help minimize the time it takes for us to diagnose the problem and get you an answer.  A template for how to craft these bug reports is [here](https://matthewrocklin.com/minimal-bug-reports) and we highly suggest you check this out before submitting.
 
       - date and time (with timezone) the problem occurred
       - web browser (name and version) you are using to connect to the Fornax Science Console (e.g., Chrome 125.0.64422.142)
