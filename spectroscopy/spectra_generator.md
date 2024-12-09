@@ -109,6 +109,7 @@ This cell will install them if needed:
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
 # !pip install -r requirements_spectra_generator.txt
+# !pip install --upgrade --pre astroquery  # >=0.4.8.dev9474 needed for mast_functions
 ```
 
 ```{code-cell} ipython3

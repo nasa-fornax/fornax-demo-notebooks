@@ -1,10 +1,10 @@
-import io
 import os
 import shutil
-from contextlib import redirect_stdout
+import warnings
 
 import astropy.constants as const
 import astropy.units as u
+import astroquery.exceptions
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -96,6 +96,11 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
 
         # Query results
         search_coords = stab["coord"]
+        # If no results are found, this will raise a warning. We explicitly handle the no-results
+        # case below, so let's suppress the warning to avoid confusing notebook users.
+        warnings.filterwarnings("ignore", message='Query returned no results.',
+                                category=astroquery.exceptions.NoResultsWarning,
+                                module="astroquery.mast.discovery_portal")
         query_results = Observations.query_criteria(
             coordinates=search_coords, radius=search_radius_arcsec * u.arcsec,
             dataproduct_type=["spectrum"], obs_collection=["JWST"], intentType="science",
@@ -122,13 +127,9 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
             print("Nothing to download for source {}.".format(stab["label"]))
             continue
 
-        # Download (suppress output)
-        trap = io.StringIO()
-        with redirect_stdout(trap):
-            download_results = Observations.download_products(
-                data_products_list_filter, download_dir=this_data_dir)
-        if verbose:
-            print(trap.getvalue())
+        # Download
+        download_results = Observations.download_products(
+            data_products_list_filter, download_dir=this_data_dir, verbose=False)
 
         # Create table
         # NOTE: `download_results` has NOT the same order as `data_products_list_filter`.
@@ -311,6 +312,11 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
 
         # Query results
         search_coords = stab["coord"]
+        # If no results are found, this will raise a warning. We explicitly handle the no-results
+        # case below, so let's suppress the warning to avoid confusing notebook users.
+        warnings.filterwarnings("ignore", message='Query returned no results.',
+                                category=astroquery.exceptions.NoResultsWarning,
+                                module="astroquery.mast.discovery_portal")
         query_results = Observations.query_criteria(
             coordinates=search_coords, radius=search_radius_arcsec * u.arcsec,
             dataproduct_type=["spectrum"], obs_collection=["HST"], intentType="science",
@@ -336,12 +342,8 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
             continue
 
         # Download
-        trap = io.StringIO()
-        with redirect_stdout(trap):
-            download_results = Observations.download_products(
-                data_products_list_filter, download_dir=this_data_dir)
-        if verbose:
-            print(trap.getvalue())
+        download_results = Observations.download_products(
+            data_products_list_filter, download_dir=this_data_dir, verbose=False)
 
         # Create table
         # NOTE: `download_results` has NOT the same order as `data_products_list_filter`.
