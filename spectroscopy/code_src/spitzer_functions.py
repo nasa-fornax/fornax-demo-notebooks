@@ -11,7 +11,7 @@ from data_structures_spec import MultiIndexDFObject
 
 def SpitzerIRS_get_spec(sample_table, search_radius_arcsec, COMBINESPEC):
     """
-    Retrieve HST spectra for a list of sources.
+    Retrieve Spitzer spectra for a list of sources.
 
     Parameters
     ----------
@@ -53,7 +53,7 @@ def SpitzerIRS_get_spec(sample_table, search_radius_arcsec, COMBINESPEC):
                 print(" - pick the closest")
                 sep = [search_coords.separation(SkyCoord(tt["ra"], tt["dec"], unit=u.deg, frame='icrs')).to(
                     u.arcsecond).value for tt in tab]
-                id_min = np.where(sep == np.nanmin(sep))[0]
+                id_min = np.nanargmin(sep)
                 tab_final = tab[id_min]
             else:
                 print(" - Combine spectra")

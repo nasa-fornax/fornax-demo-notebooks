@@ -18,7 +18,7 @@ from data_structures_spec import MultiIndexDFObject
 def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
                   delete_downloaded_data=True):
     """
-    Retrieve HST spectra for a list of sources and groups/stacks them.
+    Retrieve JWST spectra for a list of sources and groups/stacks them.
     This main function runs two sub-functions:
     - `JWST_get_spec_helper()` which searches, downloads, retrieves the spectra.
     - `JWST_group_spectra()` which groups and stacks the spectra.
@@ -31,7 +31,7 @@ def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
         Search radius in arcseconds.
     datadir : str
         Data directory where to store the data. Each function will create a
-        separate data directory (for example "[datadir]/HST/" for HST data).
+        separate data directory (for example "[datadir]/JWST/" for JWST data).
     verbose : bool
         Verbosity level. Set to True for extra talking.
     delete_downloaded_data : bool, optional
@@ -60,7 +60,7 @@ def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
 def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
                          delete_downloaded_data=True):
     """
-    Retrieve HST spectra for a list of sources.
+    Retrieve JWST spectra for a list of sources.
 
     Parameters
     ----------
@@ -70,7 +70,7 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
         Search radius in arcseconds.
     datadir : str
         Data directory where to store the data. Each function will create a
-        separate data directory (for example "[datadir]/HST/" for HST data).
+        separate data directory (for example "[datadir]/JWST/" for JWST data).
     verbose : bool
         Verbosity level. Set to True for extra talking.
     delete_downloaded_data : bool, optional
