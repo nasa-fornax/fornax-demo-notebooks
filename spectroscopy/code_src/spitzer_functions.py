@@ -11,7 +11,7 @@ from data_structures_spec import MultiIndexDFObject
 
 def SpitzerIRS_get_spec(sample_table, search_radius_arcsec, COMBINESPEC):
     """
-    Retrieve HST spectra for a list of sources.
+    Retrieve Spitzer spectra for a list of sources.
 
     Parameters
     ----------
@@ -47,14 +47,14 @@ def SpitzerIRS_get_spec(sample_table, search_radius_arcsec, COMBINESPEC):
 
         # If multiple entries are found, pick the closest.
         # Or should we take the average instead??
-        if len(tab) > 0:
+        if len(tab) > 1:
             print("More than 1 entry found", end="")
             if not COMBINESPEC:
                 print(" - pick the closest")
                 sep = [search_coords.separation(SkyCoord(tt["ra"], tt["dec"], unit=u.deg, frame='icrs')).to(
                     u.arcsecond).value for tt in tab]
-                id_min = np.where(sep == np.nanmin(sep))[0]
-                tab_final = tab[id_min]
+                id_min = np.nanargmin(sep)
+                tab_final = tab[[id_min]]  # double brackets to return a Table instead of a Row
             else:
                 print(" - Combine spectra")
                 tab_final = tab.copy()
@@ -63,7 +63,7 @@ def SpitzerIRS_get_spec(sample_table, search_radius_arcsec, COMBINESPEC):
 
         # Now extract spectra and put all in one array
         specs = []
-        for tt in tab:
+        for tt in tab_final:
             url = "https://irsa.ipac.caltech.edu{}".format(tt["xtable"].split("\"")[1])
             spec = Table.read(url, format="ipac")  # flux_density in Jy
             specs.append(spec)
