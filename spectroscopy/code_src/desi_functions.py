@@ -83,17 +83,21 @@ def DESIBOSS_get_spec(sample_table, search_radius_arcsec):
             idx_closest = sel[np.where(result_tab["separation"][sel] == np.nanmin(
                 result_tab["separation"][sel]))[0][0]]
 
+            # Inverse variances may be zero, resulting in infinite error.
+            # We'll leave these in and ignore the "divide by zero" warning.
+            with np.errstate(divide='ignore'):
+                err = np.sqrt(1/specs[idx_closest].uncertainty.quantity)
+
             # create MultiIndex Object
             dfsingle = pd.DataFrame(dict(wave=[specs[idx_closest].spectral_axis],
                                          flux=[specs[idx_closest].flux],
-                                         err=[
-                np.sqrt(1/specs[idx_closest].uncertainty.quantity)],
-                label=[stab["label"]],
-                objectid=[stab["objectid"]],
-                mission=[dr],
-                instrument=[dr],
-                filter=["optical"],
-            )).set_index(["objectid", "label", "filter", "mission"])
+                                         err=[err],
+                                         label=[stab["label"]],
+                                         objectid=[stab["objectid"]],
+                                         mission=[dr],
+                                         instrument=[dr],
+                                         filter=["optical"],
+                                         )).set_index(["objectid", "label", "filter", "mission"])
             df_spec.append(dfsingle)
 
     return df_spec
