@@ -54,7 +54,7 @@ def SpitzerIRS_get_spec(sample_table, search_radius_arcsec, COMBINESPEC):
                 sep = [search_coords.separation(SkyCoord(tt["ra"], tt["dec"], unit=u.deg, frame='icrs')).to(
                     u.arcsecond).value for tt in tab]
                 id_min = np.nanargmin(sep)
-                tab_final = tab[id_min]
+                tab_final = tab[[id_min]]  # double brackets to return a Table instead of a Row
             else:
                 print(" - Combine spectra")
                 tab_final = tab.copy()
