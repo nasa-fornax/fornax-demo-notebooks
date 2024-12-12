@@ -104,7 +104,7 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
         query_results = Observations.query_criteria(
             coordinates=search_coords, radius=search_radius_arcsec * u.arcsec,
             dataproduct_type=["spectrum"], obs_collection=["JWST"], intentType="science",
-            calib_level=[3, 4], instrument_name=['NIRSPEC/MSA', 'NIRSPEC/SLIT'],
+            calib_level=[2, 3, 4], instrument_name=['NIRSPEC/MSA', 'NIRSPEC/SLIT'],
             dataRights=['PUBLIC'])
         print("Number of search results: {}".format(len(query_results)))
 
@@ -118,7 +118,7 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
         # Filter
         data_products_list_filter = Observations.filter_products(
             data_products_list, productType=["SCIENCE"], extension="fits",
-            calib_level=[3, 4],  # only fully reduced or contributed
+            calib_level=[2, 3, 4],  # only calibrated data
             productSubGroupDescription=["X1D"],  # only 1D spectra
             dataRights=['PUBLIC'])  # only public data
         print("Number of files to download: {}".format(len(data_products_list_filter)))
