@@ -96,6 +96,10 @@ def create_figures(df_spec, bin_factor, show_nbr_figures, save_output):
         Whether to save the figures. If saved, they will be in the "output" directory.
     """
 
+    output_dir = 'output'
+    if save_output and not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+
     for cc, (objectid, singleobj_df) in enumerate(df_spec.data.groupby('objectid')):
 
         fig = plt.figure(figsize=(9, 6))
@@ -151,7 +155,7 @@ def create_figures(df_spec, bin_factor, show_nbr_figures, save_output):
         ax1.legend(bbox_to_anchor=(1.27, 1), fontsize=11)
 
         if save_output:
-            savename = os.path.join("output", "spectra_{}.pdf".format(objectid))
+            savename = os.path.join(output_dir, "spectra_{}.pdf".format(objectid))
             plt.savefig(savename, bbox_inches="tight")
 
         if cc < show_nbr_figures:
