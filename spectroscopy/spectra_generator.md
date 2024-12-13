@@ -168,6 +168,9 @@ labels.append("JADESGS-z7-01-QU")
 coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg)))
 labels.append("TestJWST")
 
+coords.append(SkyCoord("{} {}".format("+150.33622", "+55.89878"), unit=(u.deg, u.deg)))
+labels.append("Twin Quasar")
+
 sample_table = clean_sample(coords, labels, precision=2.0 * u.arcsecond, verbose=1)
 ```
 
