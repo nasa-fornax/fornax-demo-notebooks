@@ -140,8 +140,10 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
         tab = Table(names=keys + ["productFilename"], dtype=[str,
                     str, str, int, float, int, int, int, float]+[str])
         for jj in range(len(data_products_list_filter)):
+            # Match query 'obsid' to product 'parent_obsid' (not 'obsID') because products may
+            # belong to a different group than the observation.
             idx_cross = np.where(query_results["obsid"] ==
-                                 data_products_list_filter["obsID"][jj])[0]
+                                 data_products_list_filter["parent_obsid"][jj])[0]
             tmp = query_results[idx_cross][keys]
             tab.add_row(list(tmp[0]) + [data_products_list_filter["productFilename"][jj]])
 
