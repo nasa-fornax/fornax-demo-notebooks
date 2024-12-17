@@ -104,7 +104,7 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
         query_results = Observations.query_criteria(
             coordinates=search_coords, radius=search_radius_arcsec * u.arcsec,
             dataproduct_type=["spectrum"], obs_collection=["JWST"], intentType="science",
-            calib_level=[3, 4], instrument_name=['NIRSPEC/MSA', 'NIRSPEC/SLIT'],
+            calib_level=[2, 3, 4], instrument_name=['NIRSPEC/MSA', 'NIRSPEC/SLIT'],
             dataRights=['PUBLIC'])
         print("Number of search results: {}".format(len(query_results)))
 
@@ -118,7 +118,7 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
         # Filter
         data_products_list_filter = Observations.filter_products(
             data_products_list, productType=["SCIENCE"], extension="fits",
-            calib_level=[3, 4],  # only fully reduced or contributed
+            calib_level=[2, 3, 4],  # only calibrated data
             productSubGroupDescription=["X1D"],  # only 1D spectra
             dataRights=['PUBLIC'])  # only public data
         print("Number of files to download: {}".format(len(data_products_list_filter)))
@@ -140,8 +140,10 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
         tab = Table(names=keys + ["productFilename"], dtype=[str,
                     str, str, int, float, int, int, int, float]+[str])
         for jj in range(len(data_products_list_filter)):
+            # Match query 'obsid' to product 'parent_obsid' (not 'obsID') because products may
+            # belong to a different group than the observation.
             idx_cross = np.where(query_results["obsid"] ==
-                                 data_products_list_filter["obsID"][jj])[0]
+                                 data_products_list_filter["parent_obsid"][jj])[0]
             tmp = query_results[idx_cross][keys]
             tab.add_row(list(tmp[0]) + [data_products_list_filter["productFilename"][jj]])
 
@@ -240,6 +242,9 @@ def JWST_group_spectra(df, verbose, quickplot):
             fluxes_int = np.asarray(
                 [np.interp(wave_grid, tab_sel.iloc[idx]["wave"], tab_sel.iloc[idx]["flux"]) for idx in idx_good])
             fluxes_units = [tab_sel.iloc[idx]["flux"].unit for idx in idx_good]
+
+            # Sometimes fluxes are all NaN. We'll leave these in and ignore the RuntimeWarning.
+            warnings.filterwarnings("ignore", message='All-NaN slice encountered', category=RuntimeWarning)
             fluxes_stack = np.nanmedian(fluxes_int, axis=0)
             if verbose:
                 print("Units of fluxes for each spectrum: {}".format(
