@@ -7,4 +7,6 @@ pandas
 sparclclient
 astropy
 specutils
-astroquery
+# We will need astroquery 0.4.8 for some MAST fixes, installing dev version
+# from github as a workaround for now
+git+https://github.com/astropy/astroquery
