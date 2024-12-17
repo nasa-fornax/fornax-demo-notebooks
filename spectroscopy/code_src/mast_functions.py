@@ -242,6 +242,9 @@ def JWST_group_spectra(df, verbose, quickplot):
             fluxes_int = np.asarray(
                 [np.interp(wave_grid, tab_sel.iloc[idx]["wave"], tab_sel.iloc[idx]["flux"]) for idx in idx_good])
             fluxes_units = [tab_sel.iloc[idx]["flux"].unit for idx in idx_good]
+
+            # Sometimes fluxes are all NaN. We'll leave these in and ignore the RuntimeWarning.
+            warnings.filterwarnings("ignore", message='All-NaN slice encountered', category=RuntimeWarning)
             fluxes_stack = np.nanmedian(fluxes_int, axis=0)
             if verbose:
                 print("Units of fluxes for each spectrum: {}".format(
