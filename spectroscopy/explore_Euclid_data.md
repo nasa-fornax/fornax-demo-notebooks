@@ -136,6 +136,13 @@ def_cols = plt.rcParams['axes.prop_cycle'].by_key()['color']
 ```python
 # Need to do this to upgrade the astroquery version to avoid attribute error.
 #!pip install --upgrade --pre astroquery
+
+# Need to do this to upgrade the firefly-client version to avoid attribute error.
+#!pip install --upgrade --pre firefly-client
+```
+
+```python
+
 ```
 
 ```python
@@ -332,7 +339,7 @@ resimage = psfphot.make_residual_image(data = img-median, psf_shape = (9, 9))
 
 ## Add coordinates to catalog
 wcs1 = WCS(hdr) # VIS
-radec = wcs.all_pix2world(phot["x_fit"],phot["y_fit"],0)
+radec = wcs1.all_pix2world(phot["x_fit"],phot["y_fit"],0)
 phot["ra_fit"] = radec[0]
 phot["dec_fit"] = radec[1]
 
@@ -574,21 +581,18 @@ fc = FireflyClient.make_client('https://irsa.ipac.caltech.edu/irsaviewer')
 
 ```python
 ## Upload image to firefly server
-#fval = fc.upload_file('./data/euclid_images_test.fits')
+fval = fc.upload_file('./data/euclid_images_test.fits')
 
 ## Open the extensions separately to show them side-by-side
 for hh,hdu in enumerate(hdulcutout):
     fc.show_fits(fval, MultiImageIdx=hh, plot_id=hdu.header["EXTNAME"], )
 
-#fc.align_images(lock_match=True)
+## Align images with WCS and lock
+fc.align_images(lock_match=True)
     
 ## Upload table
 tval = fc.upload_file('./data/gaiatable.csv')
 fc.show_table(tval, tbl_id = "gaiatable")
 
 ## Now GO TO THE BROWSER TAB and check out the results.
-```
-
-```python
-
 ```
