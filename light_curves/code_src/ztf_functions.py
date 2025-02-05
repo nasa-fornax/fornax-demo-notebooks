@@ -13,9 +13,11 @@ from data_structures import MultiIndexDFObject
 
 
 # the catalog is stored in an AWS S3 bucket
-DATARELEASE = "dr18"
-BUCKET = "irsa-mast-tike-spitzer-data"
-CATALOG_ROOT = f"{BUCKET}/data/ZTF/lc/lc_{DATARELEASE}/"
+DATARELEASE = "dr23"
+# BUCKET = "irsa-mast-tike-spitzer-data"
+# CATALOG_ROOT = f"{BUCKET}/data/ZTF/lc/lc_{DATARELEASE}/"
+BUCKET = "/stage/irsa-data-dev/ZTF"
+CATALOG_ROOT = f"{BUCKET}/lc/lc_{DATARELEASE}/"
 # We need a list of files in the dataset, but it's fairly large and we may need to send it
 # into multiple background processes. So we'll use a global variable, but lazy-load it
 # to avoid hitting the S3 bucket when this module is imported.
@@ -182,7 +184,8 @@ def load_lightcurves(locations_df, nworkers=6, chunksize=100):
     global CATALOG_FILES
     if CATALOG_FILES is None:
         CATALOG_FILES = (
-            pd.read_table(f"s3://{CATALOG_ROOT}checksum.md5", sep="\s+", names=["md5", "path"], usecols=["path"])
+            # pd.read_table(f"s3://{CATALOG_ROOT}checksum.md5", sep="\s+", names=["md5", "path"], usecols=["path"])
+            pd.read_table(f"{CATALOG_ROOT}checksum.md5", sep="\s+", names=["md5", "path"], usecols=["path"])
             .squeeze()  # there's only 1 column. squeeze it into a Series
             .str.removeprefix("./")
             .to_list()
@@ -245,7 +248,7 @@ def load_lightcurves_one_file(location):
     # "spawning" new processes, which causes leaked semaphores in some cases.
     ztf_df = pyarrow.parquet.read_table(
         file_name(*location_keys),
-        filesystem=pyarrow.fs.S3FileSystem(region="us-east-1"),
+        # filesystem=pyarrow.fs.S3FileSystem(region="us-east-1"),
         columns=["objectid", "hmjd", "mag", "magerr", "catflags"],
         filters=[("objectid", "in", location_df["oid"].to_list())],
     ).to_pandas()
