@@ -93,7 +93,7 @@ from gaia_functions import gaia_get_lightcurves
 from hcv_functions import hcv_get_lightcurves
 from heasarc_functions import heasarc_get_lightcurves
 from icecube_functions import icecube_get_lightcurves
-from panstarrs_functions import panstarrs_get_lightcurves
+# from panstarrs_functions import panstarrs_get_lightcurves
 from plot_functions import create_figures
 from sample_selection import (clean_sample, get_green_sample, get_hon_sample, get_lamassa_sample, get_lopeznavas_sample,
     get_lyu_sample, get_macleod16_sample, get_macleod19_sample, get_ruan_sample, get_sdss_sample, get_sheng_sample, get_yang_sample)
@@ -259,18 +259,18 @@ print('WISE search took:', time.time() - WISEstarttime, 's')
 The function to retrieve lightcurves from Pan-STARRS uses a version of both the object and light curve catalogs that are stored in the cloud and accessed using [lsdb](https://docs.lsdb.io/en/stable/).  This function is efficient at large scale (sample sizes > ~1000).
 
 ```{code-cell} ipython3
-panstarrsstarttime = time.time()
+# panstarrsstarttime = time.time()
 
-panstarrs_search_radius = 1.0 # search radius = 1 arcsec
-# get panstarrs light curves
-df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius=panstarrs_search_radius)
+# panstarrs_search_radius = 1.0 # search radius = 1 arcsec
+# # get panstarrs light curves
+# df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius=panstarrs_search_radius)
 
-# add the resulting dataframe to all other archives
-df_lc.append(df_lc_panstarrs)
+# # add the resulting dataframe to all other archives
+# df_lc.append(df_lc_panstarrs)
 
-print('Panstarrs search took:', time.time() - panstarrsstarttime, 's')
+# print('Panstarrs search took:', time.time() - panstarrsstarttime, 's')
 
-# Warnings from the panstarrs query about both NESTED and margins are known issues
+# # Warnings from the panstarrs query about both NESTED and margins are known issues
 ```
 
 ### 2.5 MAST: TESS, Kepler and K2
@@ -399,8 +399,8 @@ with mp.Pool(processes=n_workers) as pool:
 
 # run panstarrs query outside of multiprocessing since it is using dask distributed under the hood
 # which doesn't work with multiprocessing, and dask is already parallelized
-df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius=panstarrs_search_radius)
-parallel_df_lc.append(df_lc_panstarrs) # add the panstarrs dataframe to all other archives
+# df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius=panstarrs_search_radius)
+# parallel_df_lc.append(df_lc_panstarrs) # add the panstarrs dataframe to all other archives
 
 parallel_endtime = time.time()
 
