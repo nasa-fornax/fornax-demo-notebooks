@@ -89,7 +89,7 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import pandas as pd
 from astropy.table import Table
-from google_drive_downloader import GoogleDriveDownloader as gdd
+import googledrivedownloader as gdd
 from tqdm.auto import tqdm
 import json
 
