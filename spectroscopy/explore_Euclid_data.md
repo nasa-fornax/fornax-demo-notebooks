@@ -79,10 +79,6 @@ Return a data structure of targets with Euclid data
 ```
 
 ```python
-
-```
-
-```python
 #### IMPORTS ###
 !pip install -r requirements_euclid.txt
 
@@ -570,7 +566,8 @@ plt.gca().invert_yaxis()
 
 ## Initialize firefly client
 from firefly_client import FireflyClient
-fc = FireflyClient.make_client('https://irsa.ipac.caltech.edu/irsaviewer')
+#fc = FireflyClient.make_client('https://irsa.ipac.caltech.edu/irsaviewer')
+fc = FireflyClient.make_lab_client() # this opens in jupyter notebook tab
 
 ## Print link to firefly client browser:
 #print( fc.launch_browser() )
@@ -595,4 +592,8 @@ tval = fc.upload_file('./data/gaiatable.csv')
 fc.show_table(tval, tbl_id = "gaiatable")
 
 ## Now GO TO THE BROWSER TAB and check out the results.
+```
+
+```python
+
 ```
