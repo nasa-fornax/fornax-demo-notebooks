@@ -7,7 +7,7 @@ matplotlib
 astropy
 sktime<0.32
 tqdm
-googledrivedownloader
+googledrivedownloader>=1.0
 scikit-learn
 acstools
 ## Optional indirect dependencies required by functionalities used in the notebook
