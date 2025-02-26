@@ -62,7 +62,8 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
         dec_column="dec_deg", 
         margin_threshold=10,
         # Optimize partition size
-        drop_empty_siblings=True
+        #drop_empty_siblings=True
+        #this parameter appears to be deprecated 2/26/25
     )
 
     #plan to cross match panstarrs object with my sample 
