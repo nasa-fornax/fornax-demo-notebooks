@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.16.4
 kernelspec:
-  display_name: science_demo
+  display_name: notebook
   language: python
-  name: conda-env-science_demo-py
+  name: python3
 ---
 
 # Make Multi-Wavelength Light Curves Using Archival Data
@@ -74,7 +74,7 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-# !pip install -r requirements_light_curve_generator.txt
+!pip install -r requirements_light_curve_generator.txt
 ```
 
 ```{code-cell} ipython3
@@ -257,6 +257,8 @@ print('WISE search took:', time.time() - WISEstarttime, 's')
 
 ### 2.4 MAST: Pan-STARRS
 The function to retrieve lightcurves from Pan-STARRS uses a version of both the object and light curve catalogs that are stored in the cloud and accessed using [lsdb](https://docs.lsdb.io/en/stable/).  This function is efficient at large scale (sample sizes > ~1000).
+
+Some warnings are expected.
 
 ```{code-cell} ipython3
 panstarrsstarttime = time.time()
@@ -452,3 +454,7 @@ This work made use of:
 * Lightkurve; Lightkurve Collaboration 2018, 2018ascl.soft12013L
 * acstools; https://zenodo.org/record/7406933#.ZBH1HS-B0eY
 * unWISE light curves; Meisner et al., 2023, 2023AJ....165...36M
+
+```{code-cell} ipython3
+
+```
