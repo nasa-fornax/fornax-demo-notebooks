@@ -16,30 +16,27 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
@@ -55,7 +52,6 @@
     <link rel="prev" title="Make Multi-Wavelength Light Curves for Large Samples" href="scale_up.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -71,8 +67,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -80,6 +87,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search..."
          aria-label="Search..."
          autocomplete="off"
@@ -87,8 +95,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -104,8 +112,7 @@
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -135,7 +142,7 @@
     
     
     <img src="../_static/fornax_logo.png" class="logo__image only-light" alt="Fornax Demo Notebooks - Home"/>
-    <img src="../_static/fornax_logo.png" class="logo__image only-dark pst-js-only" alt="Fornax Demo Notebooks - Home"/>
+    <script>document.write(`<img src="../_static/fornax_logo.png" class="logo__image only-dark" alt="Fornax Demo Notebooks - Home"/>`);</script>
   
   
 </a></div>
@@ -156,11 +163,15 @@
 </ul></div>
         <div class="sidebar-primary-item">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button></div>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         
@@ -359,16 +370,24 @@
 
 
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button>
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
 
 
-<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-</button>
+  </button>
+`);
+</script>
 <button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="fa-solid fa-list"></span>
 </button>
@@ -517,37 +536,37 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">matplotlib.lines</span> <span class="kn">import</span> <span class="n">Line2D</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">astropy.table</span> <span class="kn">import</span> <span class="n">Table</span>
-<span class="kn">from</span> <span class="nn">google_drive_downloader</span> <span class="kn">import</span> <span class="n">GoogleDriveDownloader</span> <span class="k">as</span> <span class="n">gdd</span>
-<span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.lines</span><span class="w"> </span><span class="kn">import</span> <span class="n">Line2D</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.table</span><span class="w"> </span><span class="kn">import</span> <span class="n">Table</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">googledrivedownloader</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gdd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm.auto</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">ConfusionMatrixDisplay</span><span class="p">,</span> <span class="n">accuracy_score</span><span class="p">,</span> <span class="n">confusion_matrix</span>
-<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
-<span class="kn">from</span> <span class="nn">sklearn.gaussian_process</span> <span class="kn">import</span> <span class="n">GaussianProcessRegressor</span>
-<span class="kn">from</span> <span class="nn">sklearn.gaussian_process.kernels</span> <span class="kn">import</span> <span class="n">RBF</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfusionMatrixDisplay</span><span class="p">,</span> <span class="n">accuracy_score</span><span class="p">,</span> <span class="n">confusion_matrix</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.gaussian_process</span><span class="w"> </span><span class="kn">import</span> <span class="n">GaussianProcessRegressor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.gaussian_process.kernels</span><span class="w"> </span><span class="kn">import</span> <span class="n">RBF</span>
 
-<span class="kn">from</span> <span class="nn">sktime.classification.deep_learning</span> <span class="kn">import</span> <span class="n">CNNClassifier</span>
-<span class="kn">from</span> <span class="nn">sktime.classification.dictionary_based</span> <span class="kn">import</span> <span class="n">IndividualTDE</span>
-<span class="kn">from</span> <span class="nn">sktime.classification.distance_based</span> <span class="kn">import</span> <span class="n">KNeighborsTimeSeriesClassifier</span>
-<span class="kn">from</span> <span class="nn">sktime.classification.dummy</span> <span class="kn">import</span> <span class="n">DummyClassifier</span>
-<span class="kn">from</span> <span class="nn">sktime.classification.ensemble</span> <span class="kn">import</span> <span class="n">WeightedEnsembleClassifier</span>
-<span class="kn">from</span> <span class="nn">sktime.classification.feature_based</span> <span class="kn">import</span> <span class="n">Catch22Classifier</span><span class="p">,</span> <span class="n">RandomIntervalClassifier</span>
-<span class="kn">from</span> <span class="nn">sktime.classification.hybrid</span> <span class="kn">import</span> <span class="n">HIVECOTEV2</span>
-<span class="kn">from</span> <span class="nn">sktime.classification.interval_based</span> <span class="kn">import</span> <span class="n">CanonicalIntervalForest</span>
-<span class="kn">from</span> <span class="nn">sktime.classification.kernel_based</span> <span class="kn">import</span> <span class="n">Arsenal</span><span class="p">,</span> <span class="n">RocketClassifier</span>
-<span class="kn">from</span> <span class="nn">sktime.classification.shapelet_based</span> <span class="kn">import</span> <span class="n">ShapeletTransformClassifier</span>
-<span class="kn">from</span> <span class="nn">sktime.registry</span> <span class="kn">import</span> <span class="n">all_estimators</span><span class="p">,</span> <span class="n">all_tags</span>
-<span class="kn">from</span> <span class="nn">sktime.datatypes</span> <span class="kn">import</span> <span class="n">check_is_mtype</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sktime.classification.deep_learning</span><span class="w"> </span><span class="kn">import</span> <span class="n">CNNClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sktime.classification.dictionary_based</span><span class="w"> </span><span class="kn">import</span> <span class="n">IndividualTDE</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sktime.classification.distance_based</span><span class="w"> </span><span class="kn">import</span> <span class="n">KNeighborsTimeSeriesClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sktime.classification.dummy</span><span class="w"> </span><span class="kn">import</span> <span class="n">DummyClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sktime.classification.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">WeightedEnsembleClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sktime.classification.feature_based</span><span class="w"> </span><span class="kn">import</span> <span class="n">Catch22Classifier</span><span class="p">,</span> <span class="n">RandomIntervalClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sktime.classification.hybrid</span><span class="w"> </span><span class="kn">import</span> <span class="n">HIVECOTEV2</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sktime.classification.interval_based</span><span class="w"> </span><span class="kn">import</span> <span class="n">CanonicalIntervalForest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sktime.classification.kernel_based</span><span class="w"> </span><span class="kn">import</span> <span class="n">Arsenal</span><span class="p">,</span> <span class="n">RocketClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sktime.classification.shapelet_based</span><span class="w"> </span><span class="kn">import</span> <span class="n">ShapeletTransformClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sktime.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">all_estimators</span><span class="p">,</span> <span class="n">all_tags</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sktime.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_is_mtype</span>
 
 <span class="c1"># local code imports</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;code_src/&#39;</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">classifier_functions</span> <span class="kn">import</span> <span class="n">sigmaclip_lightcurves</span><span class="p">,</span> <span class="n">remove_objects_without_band</span><span class="p">,</span> \
+<span class="kn">from</span><span class="w"> </span><span class="nn">classifier_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">sigmaclip_lightcurves</span><span class="p">,</span> <span class="n">remove_objects_without_band</span><span class="p">,</span> \
 <span class="n">remove_incomplete_data</span><span class="p">,</span> <span class="n">missingdata_to_zeros</span><span class="p">,</span> <span class="n">missingdata_drop_bands</span><span class="p">,</span> \
 <span class="n">uniform_length_spacing</span><span class="p">,</span> <span class="n">reformat_df</span><span class="p">,</span> <span class="n">local_normalization_max</span><span class="p">,</span> <span class="n">mjd_to_datetime</span>
 
@@ -584,7 +603,7 @@ Done.
 Unzipping...
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/runner/work/fornax-demo-notebooks/fornax-demo-notebooks/.tox/py311-buildhtml/lib/python3.11/site-packages/google_drive_downloader/google_drive_downloader.py:78: UserWarning: Ignoring `unzip` since &quot;1DrB-CWdBBBYuO0WzNnMl5uQnnckL7MWH&quot; does not look like a valid zip file
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/runner/work/fornax-demo-notebooks/fornax-demo-notebooks/.tox/py311-buildhtml/lib/python3.11/site-packages/googledrivedownloader/download.py:88: UserWarning: Ignoring `unzip` since &quot;1DrB-CWdBBBYuO0WzNnMl5uQnnckL7MWH&quot; does not look like a valid zip file
   warnings.warn(&#39;Ignoring `unzip` since &quot;{}&quot; does not look like a valid zip file&#39;.format(file_id))
 </pre></div>
 </div>
@@ -1593,7 +1612,7 @@ fewer data points.</p></li>
 </div>
 <div class="cell_output docutils container">
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(True,
- None,
+ &#39;&#39;,
  {&#39;is_univariate&#39;: False,
   &#39;is_empty&#39;: False,
   &#39;has_nans&#39;: False,
@@ -1679,12 +1698,12 @@ fewer data points.</p></li>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Accuracy of Random Interval Classifier: 0.7555555555555555
-CPU times: user 2.4 s, sys: 1.65 s, total: 4.06 s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Accuracy of Random Interval Classifier: 0.7444444444444445
+CPU times: user 1.35 s, sys: 1.21 s, total: 2.56 s
 Wall time: 1min 16s
 </pre></div>
 </div>
-<img alt="../_images/f4ea39d4c2eca50b84e6b225fb8a36a7b94af4ee3a71301e5638d692a9e220e3.png" src="../_images/f4ea39d4c2eca50b84e6b225fb8a36a7b94af4ee3a71301e5638d692a9e220e3.png" />
+<img alt="../_images/5ba95c8103b65440c1dc919d649c303098e06582e6c08e1312b89b59effa9488.png" src="../_images/5ba95c8103b65440c1dc919d649c303098e06582e6c08e1312b89b59effa9488.png" />
 </div>
 </div>
 </section>
@@ -2016,7 +2035,7 @@ Done.
 Unzipping...
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/runner/work/fornax-demo-notebooks/fornax-demo-notebooks/.tox/py311-buildhtml/lib/python3.11/site-packages/google_drive_downloader/google_drive_downloader.py:78: UserWarning: Ignoring `unzip` since &quot;1pSEKVP4LbrdWQK9ws3CaI90m3Z_2fazL&quot; does not look like a valid zip file
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/runner/work/fornax-demo-notebooks/fornax-demo-notebooks/.tox/py311-buildhtml/lib/python3.11/site-packages/googledrivedownloader/download.py:88: UserWarning: Ignoring `unzip` since &quot;1pSEKVP4LbrdWQK9ws3CaI90m3Z_2fazL&quot; does not look like a valid zip file
   warnings.warn(&#39;Ignoring `unzip` since &quot;{}&quot; does not look like a valid zip file&#39;.format(file_id))
 </pre></div>
 </div>
@@ -2127,7 +2146,15 @@ Unzipping...
       <td>...</td>
     </tr>
     <tr>
-      <th>98</th>
+      <th>95</th>
+      <td>163</td>
+      <td>CLAGN</td>
+      <td>237.571790</td>
+      <td>41.650640</td>
+      <td>Yang 18</td>
+    </tr>
+    <tr>
+      <th>96</th>
       <td>204</td>
       <td>CLAGN</td>
       <td>171.400690</td>
@@ -2135,7 +2162,7 @@ Unzipping...
       <td>SDSS</td>
     </tr>
     <tr>
-      <th>99</th>
+      <th>97</th>
       <td>282</td>
       <td>CLAGN</td>
       <td>161.163170</td>
@@ -2143,15 +2170,7 @@ Unzipping...
       <td>SDSS</td>
     </tr>
     <tr>
-      <th>100</th>
-      <td>314</td>
-      <td>CLAGN</td>
-      <td>259.412720</td>
-      <td>32.704313</td>
-      <td>SDSS</td>
-    </tr>
-    <tr>
-      <th>101</th>
+      <th>98</th>
       <td>380</td>
       <td>CLAGN</td>
       <td>188.156210</td>
@@ -2159,7 +2178,7 @@ Unzipping...
       <td>SDSS</td>
     </tr>
     <tr>
-      <th>102</th>
+      <th>99</th>
       <td>415</td>
       <td>CLAGN</td>
       <td>200.730970</td>
@@ -2168,7 +2187,7 @@ Unzipping...
     </tr>
   </tbody>
 </table>
-<p>103 rows × 5 columns</p>
+<p>100 rows × 5 columns</p>
 </div></div></div>
 </div>
 </section>
@@ -2224,8 +2243,7 @@ Markus Löning, Tony Bagnall, Sajaysurya Ganesh, George Oastler, Jason Lines, Vi
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
-                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
   <div class="sidebar-secondary-item">
@@ -2316,8 +2334,8 @@ By Fornax developers
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
   </footer>
