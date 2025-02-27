@@ -15,10 +15,9 @@ acstools
 lightkurve
 alerce
 lsdb
-# We use distributed in this notebook, but installing any dask would make the [dataframe] extras required by dependencies for other notebooks.
-# It feels to be the cleanest solution to add the dependency here as we don't directly use it elsewhere.
-# dask version limit is due to sktime incompatibility: https://github.com/sktime/sktime/issues/7753
-dask[distributed,dataframe]<=2025.1.0
+# We use distributed in this notebook, but installing any dask would make the [dataframe] extras required by dependencies for other notebooks. 
+# It feels to be the cleanest solution to add the dependency here as we don't directly use it elsewhere. 
+dask[distributed,dataframe]
 # Required by functionality we use from acstools
 scikit-image
 # Required for sensible progress bars
