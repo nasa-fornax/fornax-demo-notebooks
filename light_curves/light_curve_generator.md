@@ -454,7 +454,3 @@ This work made use of:
 * Lightkurve; Lightkurve Collaboration 2018, 2018ascl.soft12013L
 * acstools; https://zenodo.org/record/7406933#.ZBH1HS-B0eY
 * unWISE light curves; Meisner et al., 2023, 2023AJ....165...36M
-
-```{code-cell} ipython3
-
-```
