@@ -26,20 +26,25 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
     #read in the panstarrs object table to lsdb
     #this table will be used for cross matching with our sample's ra and decs
     #but does not have light curve information
-    panstarrs_object = lsdb.read_hats(UPath('s3://stpubdata/panstarrs/ps1/public/hats/otmo', anon=True),    margin_cache=UPath('s3://stpubdata/panstarrs/ps1/public/hats/otmo_10arcs', anon=True),  columns=[ "objID",  # PS1 ID
+    panstarrs_object = lsdb.read_hats(
+        UPath('s3://stpubdata/panstarrs/ps1/public/hats/otmo', anon=True), 
+        margin_cache=UPath('s3://stpubdata/panstarrs/ps1/public/hats/otmo_10arcs', anon=True),
+        columns=[ "objID",  # PS1 ID
                 "raMean", "decMean",  # coordinates to use for cross-matching
                 "nStackDetections",  # some other data to use
                 ]
-                      )
+        )
     #read in the panstarrs light curves to lsdb
     #panstarrs recommendation is not to index into this table with ra and dec
     #but to use object ids from the above object table
-    panstarrs_detect = lsdb.read_hats(UPath('s3://stpubdata/panstarrs/ps1/public/hats/detection', anon=True), margin_cache=UPath('s3://stpubdata/panstarrs/ps1/public/hats/detection_10arcs', anon=True),
-                      columns=[ "objID",  # PS1 object ID
-            "detectID",  # PS1 detection ID
-            # light-curve stuff
-            "obsTime", "filterID", "psfFlux", "psfFluxErr",
-        ]
+    panstarrs_detect = lsdb.read_hats(
+        UPath('s3://stpubdata/panstarrs/ps1/public/hats/detection', anon=True), 
+        margin_cache=UPath('s3://stpubdata/panstarrs/ps1/public/hats/detection_10arcs', anon=True),
+        columns=[ "objID",  # PS1 object ID
+                "detectID",  # PS1 detection ID
+                # light-curve stuff
+                "obsTime", "filterID", "psfFlux", "psfFluxErr",
+                ]
         )
     #convert astropy table to pandas dataframe
     #special care for the SkyCoords in the table
