@@ -149,7 +149,7 @@ def Gaia_retrieve_epoch_photometry(gaia_table):
     # setup to request the epochal photometry
     # See astroquery.gaia.Gaia.load_data docs for options for parameter options as they may change
     retrieval_type = "EPOCH_PHOTOMETRY"
-    data_structure = "COMBINED"
+    data_structure = "RAW"
     data_release = "Gaia DR3"
 
     for chunk in ids_chunks:
