@@ -199,11 +199,11 @@ spitzer = cosmos_results[cosmos_results['dataset'] == 'IRAC']
 
 ```{code-cell} ipython3
 # Temporarily add the cloud_access metadata to the Atlas response.
-# This dataset has limited acces, thus 'region' should be used instead of 'open'.
-# S3 access should be available from the daskhub and those who has their IRSA token set up.
+# This dataset has limited access, thus 'region' should be used instead of 'open'.
+# S3 access should be available from the Fornax Science Console.
 
 fname = spitzer['fname']
-spitzer['cloud_access'] = [(f'{{"aws": {{ "bucket_name": "irsa-mast-tike-spitzer-data",'
+spitzer['cloud_access'] = [(f'{{"aws": {{ "bucket_name": "irsa-fornax-testdata",'
                             f'              "region": "us-east-1",'
                             f'              "access": "restricted",'
                             f'              "key": "data/COSMOS/{fn}" }} }}') for fn in fname]
