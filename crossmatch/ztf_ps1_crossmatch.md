@@ -15,6 +15,17 @@ kernelspec:
 
 +++
 
+# Learning Goals
+
+By the end of this tutorial, you will:
+- understand how to cross-match cloud-based catalogs using `lsdb`.
+- understand how to parallelize `lsdb` cross-matches using `dask`.
+- have a feeling for when `dask` parallelization can be helpful.
+
++++
+
+# Introduction
+
 [LSDB](https://lsdb.io) is a useful package for performing large cross-matches between source catalogs. It's built to run across multiple nodes with Dask parallelization, but even without parallelization it is high-performance. Here we will benchmark the performance of LSDB on the NASA Fornax platform with and without Dask.
 
 We will start small, trying to cross-match 10,000 sources from ZTF with Pan-STARRS. We will then scale up by factors of roughly 10 until either (a) the platform can no longer handle the load, or (b) we do the full cross-match.
@@ -23,15 +34,30 @@ For each level, we want to know the performance with (1) no Dask, (2) minimal Da
 
 +++
 
-## Install LSDB
-
-Fornax has LSDB installed, but this notebook was written for lsdb v0.3.0, and it breaks with other versions. I haven't had time to figure out the specifics, so for now let's stick with v0.3.0.
+# Imports
+We require the following packages:
+- `os` solely for the `cpu_count` function,
+- `upath` to generate Path objects using cloud URIs,
+- `astropy` for coordinates and units,
+- `lsdb` to read the catalogs and perform the cross-match, and
+- `dask` for parallelization.
 
 ```{code-cell} ipython3
-%pip install git+https://github.com/astronomy-commons/lsdb.git@v0.3.0
+# %pip install -r requirements_ztf_ps1_crossmatch.txt
 ```
 
-## Preconfiguring the Run
+```{code-cell} ipython3
+from os import cpu_count
+from upath import UPath
+from astropy.coordinates import SkyCoord
+from astropy import units as u
+
+import lsdb
+from lsdb.core.search import ConeSearch
+from dask.distributed import Client, LocalCluster
+```
+
+## 1. Preconfiguring the Run
 First choose the number of rows we want to cross-match and our `dask` environment. Note that you can also configure `dask` using the `daskhub` options on Fornax. If you go this route, leave `dask_workers = 0` below.
 
 ```{code-cell} ipython3
@@ -40,26 +66,14 @@ Nrows = 10_000
 
 # dask_workers can be 0 (no dask), 1-Ncores, or "scale" for auto-scaling
 dask_workers = 0
-```
 
-## Imports
-We require the use of `astropy` for coordinates and units, and `lsdb` to read the catalogs and perform the cross-match. Optionally, we will set up `dask` parallelization.
-
-```{code-cell} ipython3
-from astropy.coordinates import SkyCoord
-from astropy import units as u
-from lsdb.core.search import ConeSearch
-
-import lsdb
 
 # Set up dask cluster
 if dask_workers != 0:
-    from dask.distributed import Client, LocalCluster
     cluster = LocalCluster()
 
     if dask_workers == "scale":
-        import os
-        cluster.adapt(minimum_cores=1, maximum_cores=os.cpu_count())
+        cluster.adapt(minimum_cores=1, maximum_cores=cpu_count())
     else:
         cluster.scale(dask_workers)
         
@@ -77,7 +91,7 @@ radius = { # Nrows: radius_arcseconds
 }
 ```
 
-## Read in catalogs and downselect ZTF to Nrows
+## 2. Read in catalogs and downselect ZTF to Nrows
 
 ```{code-cell} ipython3
 # Define sky area. Here we're using the Kepler field.
@@ -87,16 +101,18 @@ radius_arcsec = radius[Nrows]
 cone_filter = ConeSearch(cone_ra, cone_dec, radius_arcsec)
 
 # Read ZTF DR20
-ztf_path = ("s3://irsa-mast-tike-spitzer-data/data/ZTF/dr20/objects/hipscat/ztf-dr20-objects-hipscat")
-ztf_piece = lsdb.read_hipscat(ztf_path, columns=["oid", "ra", "dec"], search_filter=cone_filter)
+#ztf_path = ("s3://irsa-mast-tike-spitzer-data/data/ZTF/dr20/objects/hipscat/ztf-dr20-objects-hipscat")
+#ztf_piece = lsdb.read_hats(ztf_path, columns=["oid", "ra", "dec"], search_filter=cone_filter)
 
 # Read Pan-STARRS DR2
-ps1_path = "s3://stpubdata/panstarrs/ps1/public/hipscat/otmo"
-ps1 = lsdb.read_hipscat(ps1_path, storage_options={'anon': True},
+ps1_path = UPath("s3://stpubdata/panstarrs/ps1/public/hats/otmo", anon=True)
+ps1_margin = UPath("s3://stpubdata/panstarrs/ps1/public/hats/otmo_10arcs", anon=True)
+
+ps1 = lsdb.read_hats(ps1_path, margin_cache=ps1_margin,
     columns=["objName","objID","raMean","decMean"])
 ```
 
-## Initialize the crossmatch and compute, measuring the time elapsed.
+## 3. Initialize the crossmatch and compute, measuring the time elapsed.
 
 ```{code-cell} ipython3
 # Setting up the cross-match actually takes very little time
@@ -115,7 +131,7 @@ print(f"Number of rows in:  {len(ztf_piece.compute()):,d}")
 print(f"Number of rows out: {len(xmatch):,d}")
 ```
 
-## Record benchmarks
+## 4. Record benchmarks
 
 +++
 
@@ -141,13 +157,13 @@ Benchmarks on Fornax XLarge instance using
 
 +++
 
-## Summary
+## 5. Summary
 
 Fornax is capable of hosting cross-matches between large catalogs. There is no performance enhancement with `dask` until cross-matching ~10 million sources, at which point you get roughly a factor of two improvement at best. Larger than that hits memory issues with `dask`, and takes hours without `dask` (although I haven't actually finished the 1e8 match). There are ways to configure the maximum memory used by a `dask` worker, which I haven't yet explored. That might help.
 
 +++
 
-## Addendum
+## 6. Addendum
 
 The `dask.distributed.LocalCluster` has an argument `memory_limit` that seems to help on the larger runs. According to the documentation, system memory is divided equally between all workers by default. However, the larger runs end up exceeding the memory budget per worker. When I specify `memory_limit=1/dask_workers` (i.e., manually splitting the memory between workers), it allows the 1e8 run to finish, with up to 8 workers. It is not clear to me why this works, while the automatic memory division does not. The 1e9 run still hits memory errors using any `dask`, and trying a full catalog cross-match did not finish within 24 hours (sorry NASA folks).
 
@@ -156,3 +172,18 @@ The `dask.distributed.LocalCluster` has an argument `memory_limit` that seems to
 | ----- | ----- | ------ | ------ | ------ | ------ | ------ | ------- | ------ |
 | 1e8   | 8.6e7 |  192   |  191   |  119   |   79   |   60   |    -    |    -   |
 | 1e9   | 8.7e8 |  1535  |    -   |    -   |    -   |    -   |    -    |    -   |
+
++++
+
+# About this Notebook
+
+This notebook was authored by [Zach Claytor](mailto:zclaytor@stsci.edu), Astronomical Data Scientist at Space Telescope Science Institute.
+
++++
+
+# Citations
+
+If you use `astropy` for published research, please cite the authors. 
+Follow this link for more information about citing `astropy`:
+
+* [Citing `astropy`](https://www.astropy.org/acknowledging.html)
