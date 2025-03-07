@@ -171,7 +171,8 @@ def Gaia_retrieve_epoch_photometry(gaia_table):
             for votable in list_of_tables:
                 votable = votable.to_table()
                 # Filter out masked cells from the multidim rows, so we can convert them later to a
-                # MultiIndexDFObject. We do it here before heading to pandas land as then there are
+                # MultiIndexDFObject avoiding the ``TypeError: unhashable type: 'MaskedConstant'``.
+                # We do it here before heading to pandas land as then there are
                 # way more complications with dealing with np.ma.MaskedArrays and pandas indexing and
                 # issues about view vs index and size of arrays.
                 # This is knowingly a terrible hack, btw
@@ -244,6 +245,7 @@ def Gaia_clean_dataframe(gaia_df):
     # and only keep those columns that we need for the MultiIndexDFObject
     gaia_df = gaia_df[colmap.keys()].rename(columns=colmap)
 
+    gaia_df = gaia_df.explode(['flux', 'err', 'time'])
     # return the light curves as a MultiIndexDFObject
     indexes, columns = ["objectid", "label", "band", "time"], ["flux", "err"]
     df_lc = MultiIndexDFObject(data=gaia_df.set_index(indexes)[columns])
