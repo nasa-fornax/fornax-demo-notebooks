@@ -158,7 +158,7 @@ def Gaia_retrieve_epoch_photometry(gaia_table):
                                   retrieval_type=retrieval_type,
                                   data_structure=data_structure,
                                   verbose=False,
-                                  output_file=None,
+                                  valid_data=True,
                                   overwrite_output_file=True,
                                   format="votable")
 
