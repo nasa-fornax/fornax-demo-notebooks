@@ -26,18 +26,18 @@ def gaia_get_lightcurves(sample_table, *, search_radius=1/3600, verbose=0):
     MultiIndexDFObject with Gaia light curve photometry
 
     '''
-    # This code is broken into two steps.  The first step, `Gaia_retrieve_catalog` retrieves the
+    # This code is broken into two steps.  The first step, `gaia_retrieve_catalog` retrieves the
     # Gaia source ids for the positions of our sample. These come from the "Gaia DR3 source lite catalog".
     # However, that catalog only has a single photometry point per object.  To get the light curve
     # information, we use the function `gaia_retrieve_epoch_photometry` to use the source ids to
     # access the "EPOCH_PHOTOMETRY" catalog.
 
     # Retrieve Gaia table with Source IDs ==============
-    gaia_table = Gaia_retrieve_catalog(sample_table,
+    gaia_table = gaia_retrieve_catalog(sample_table,
                                        search_radius=search_radius,
                                        verbose=verbose
                                        )
-    # if none of the objects were found, there's nothing to load and the Gaia_retrieve_EPOCH_PHOTOMETRY fnc
+    # if none of the objects were found, there's nothing to load and the gaia_retrieve_epoch_photometry fnc
     # will raise an HTTPError. just return an empty dataframe instead of proceeding
     if len(gaia_table) == 0:
         return MultiIndexDFObject()
@@ -45,19 +45,19 @@ def gaia_get_lightcurves(sample_table, *, search_radius=1/3600, verbose=0):
     # Extract Light curves ===============
     # request the EPOCH_PHOTOMETRY from the Gaia DataLink Service
 
-    gaia_df = Gaia_retrieve_epoch_photometry(gaia_table)
+    gaia_df = gaia_retrieve_epoch_photometry(gaia_table)
 
     # if the epochal photometry is empty, return an empty dataframe
     if len(gaia_df) == 0:
         return MultiIndexDFObject()
 
     # Create light curves =================
-    df_lc = Gaia_clean_dataframe(gaia_df)
+    df_lc = gaia_clean_dataframe(gaia_df)
 
     return df_lc
 
 
-def Gaia_retrieve_catalog(sample_table, search_radius, verbose):
+def gaia_retrieve_catalog(sample_table, search_radius, verbose):
     '''
     Retrieves the photometry table for a list of sources.
 
@@ -107,7 +107,7 @@ def Gaia_retrieve_catalog(sample_table, search_radius, verbose):
     return results
 
 
-def Gaia_chunks(lst, n):
+def gaia_chunks(lst, n):
     """
     "Split an input list into multiple chunks of size =< n"
 
@@ -121,7 +121,7 @@ def Gaia_chunks(lst, n):
         yield lst[i:i + n]
 
 
-def Gaia_retrieve_epoch_photometry(gaia_table):
+def gaia_retrieve_epoch_photometry(gaia_table):
     """
     Function to retrieve EPOCH_PHOTOMETRY catalog product for Gaia
     entries using the DataLink. Note that the IDs need to be DR3 source_id and needs to be a list.
@@ -145,7 +145,7 @@ def Gaia_retrieve_epoch_photometry(gaia_table):
     # and then send each chunk into the datalink server
     ids = list(gaia_table["source_id"])
     dl_threshold = 5000  # Datalink server threshold
-    ids_chunks = list(Gaia_chunks(ids, dl_threshold))
+    ids_chunks = list(gaia_chunks(ids, dl_threshold))
     datalink_all = []
 
     # setup to request the epochal photometry
@@ -207,7 +207,7 @@ def Gaia_retrieve_epoch_photometry(gaia_table):
 
 
 # clean and transform the data
-def Gaia_clean_dataframe(gaia_df):
+def gaia_clean_dataframe(gaia_df):
     """
     Clean and transform the EPOCH_PHOTOMETRY dataframe in preparation to add to other light curves
 
