@@ -1,6 +1,8 @@
 import time
 import numpy as np
 import pandas as pd
+
+from astropy.table import Table
 from astroquery.gaia import Gaia
 from data_structures import MultiIndexDFObject
 
@@ -167,7 +169,27 @@ def Gaia_retrieve_epoch_photometry(gaia_table):
         # we want to extract the VO table, turn it into a pandas dataframe, and add it to the datalink_all list
         for list_of_tables in datalink.values():
             for votable in list_of_tables:
-                datalink_all.append(votable.to_table().to_pandas())
+                votable = votable.to_table()
+                # Filter out masked cells from the multidim rows, so we can convert them later to a
+                # MultiIndexDFObject. We do it here before heading to pandas land as then there are
+                # way more complications with dealing with np.ma.MaskedArrays and pandas indexing and
+                # issues about view vs index and size of arrays.
+                # This is knowingly a terrible hack, btw
+
+                flux = []
+                flux_err = []
+                mag = []
+                obs_time = []
+                for r_flux, r_flux_err, r_mag, r_obs_time in votable.iterrows(
+                        'g_transit_flux', 'g_transit_flux_error', 'g_transit_mag', 'g_transit_time'):
+                    obs_time.append(r_obs_time[~r_flux.mask].data)
+                    mag.append(r_mag[~r_flux.mask].data)
+                    flux_err.append(r_flux_err[~r_flux.mask].data)
+                    flux.append(r_flux[~r_flux.mask].data)
+
+                votable.update(Table({'g_transit_time': obs_time, 'g_transit_mag': mag,
+                                      'g_transit_flux_error': flux_err, 'g_transit_flux': flux}))
+                datalink_all.append(votable.to_pandas())
 
     # if there is no epochal photometry return an empty dataframe
     if len(datalink_all) == 0:
@@ -218,6 +240,7 @@ def Gaia_clean_dataframe(gaia_df):
     # need to rename some columns for the MultiIndexDFObject
     colmap = dict(flux_mJy="flux", fluxerr_mJy="err", time_mjd="time",
                   objectid="objectid", label="label", band="band")
+
     # and only keep those columns that we need for the MultiIndexDFObject
     gaia_df = gaia_df[colmap.keys()].rename(columns=colmap)
 
