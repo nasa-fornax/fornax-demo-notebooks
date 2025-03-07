@@ -198,21 +198,22 @@ def Gaia_clean_dataframe(gaia_df):
     MultiIndexDFObject with all Gaia light curves
 
     """
-    # want to filter out rows where 'rejected_by_photometry' is 'True'
-    gaia_df.drop(gaia_df[gaia_df.rejected_by_photometry is True].index, inplace=True)
 
     # df.flux is in electron/s
     # already have the conversion from mag to mJy so go with that.  Need to convert either way
 
     # generate magerr from fluxerr and flux
-    gaia_df["magerr"] = 2.5 / np.log(10) * gaia_df.flux_error / gaia_df.flux
+    gaia_df["mag"] = gaia_df.g_transit_mag
+    gaia_df["magerr"] = 2.5 / np.log(10) * gaia_df.g_transit_flux_error / gaia_df.g_transit_flux
 
     # compute flux and flux error in mJy
     gaia_df["flux_mJy"] = 10 ** (-0.4 * (gaia_df.mag - 23.9)) / 1e3  # in mJy
     gaia_df["fluxerr_mJy"] = gaia_df.magerr / 2.5 * np.log(10) * gaia_df.flux_mJy  # in mJy
 
     # get time in mjd
-    gaia_df["time_mjd"] = gaia_df.time + 55197.5
+    gaia_df["time_mjd"] = gaia_df.g_transit_time + 55197.5
+
+    gaia_df["band"] = 'gaia_G'
 
     # need to rename some columns for the MultiIndexDFObject
     colmap = dict(flux_mJy="flux", fluxerr_mJy="err", time_mjd="time",
