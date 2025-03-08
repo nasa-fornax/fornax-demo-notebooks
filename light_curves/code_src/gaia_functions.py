@@ -236,7 +236,7 @@ def gaia_clean_dataframe(gaia_df):
     # get time in mjd
     gaia_df["time_mjd"] = gaia_df.g_transit_time + 55197.5
 
-    gaia_df["band"] = 'gaia_G'
+    gaia_df["band"] = 'G'
 
     # need to rename some columns for the MultiIndexDFObject
     colmap = dict(flux_mJy="flux", fluxerr_mJy="err", time_mjd="time",
