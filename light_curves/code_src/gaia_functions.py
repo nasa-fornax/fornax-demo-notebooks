@@ -245,7 +245,12 @@ def gaia_clean_dataframe(gaia_df):
     # and only keep those columns that we need for the MultiIndexDFObject
     gaia_df = gaia_df[colmap.keys()].rename(columns=colmap)
 
+    # We need to flatted out the multidim columns. Also note, the dtype of these columns
+    # are not properly propagated when ``to_pandas()`` was called, we deal with this issue now.
+
     gaia_df = gaia_df.explode(['flux', 'err', 'time'])
+    gaia_df = gaia_df.astype({'flux': float, 'err': float})
+
     # return the light curves as a MultiIndexDFObject
     indexes, columns = ["objectid", "label", "band", "time"], ["flux", "err"]
     df_lc = MultiIndexDFObject(data=gaia_df.set_index(indexes)[columns])
