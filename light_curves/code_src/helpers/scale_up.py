@@ -107,7 +107,28 @@ def run(*, build, **kwargs_dict):
 
 
 def _build_sample(*, get_samples, consolidate_nearby_objects, sample_file, overwrite_existing_sample, **_):
-    """Build an AGN sample using coordinates from different papers."""
+    """
+    Build an AGN (Active Galactic Nuclei) sample using coordinates from different papers.
+
+    This function orchestrates the process of creating an AGN sample by fetching data from various sources,
+    cleaning the samples, and consolidating nearby objects. The resulting sample is saved to a specified file.
+
+    Parameters:
+    - get_samples (dict): A dictionary where keys are sample names and values are dictionaries of 
+    keyword arguments to be passed to the corresponding sample retrieval functions.
+    - consolidate_nearby_objects (bool): If True, nearby objects will be consolidated.
+    - sample_file (pathlib.Path): The file path where the sample will be saved.
+    - overwrite_existing_sample (bool): If True, the existing sample file will be overwritten if it exists.
+
+    Returns:
+    - astropy.table.Table: The resulting sample table containing the AGN objects.
+
+    Notes:
+    - If the sample file already exists and `overwrite_existing_sample` is False, the function will read 
+    and return the existing sample without rebuilding it.
+    - The function prints progress messages to the console to indicate the current state of the sample 
+    building process.
+    """
     _init_worker(job_name="build=sample")
 
     # if a sample file currently exists and the user elected not to overwrite, just return it
@@ -141,7 +162,32 @@ def _build_sample(*, get_samples, consolidate_nearby_objects, sample_file, overw
 
 
 def _build_lightcurves(*, archive, archive_kwargs, sample_file, parquet_dir, overwrite_existing_lightcurves, **_):
-    """Fetch data from the archive and build light curves for objects in sample_filename."""
+    """
+    Fetch data from the specified archive and build light curves for objects in the given sample file.
+
+    This function retrieves light curve data for objects listed in a sample file from a specified archive.
+    The resulting light curves are saved to a Parquet file in a specified directory. If the Parquet file 
+    already exists and overwriting is not requested, the existing file is used.
+
+    Parameters:
+    - archive (str): The name of the archive to fetch data from. This should correspond to a module containing 
+      functions to interact with the archive.
+    - archive_kwargs (dict): A dictionary of keyword arguments to be passed to the archive's light curve 
+    retrieval function.
+    - sample_file (pathlib.Path): The path to the sample file containing the objects for which light curves 
+    are to be retrieved.
+    - parquet_dir (pathlib.Path): The directory where the Parquet file containing the light curves will be saved.
+    - overwrite_existing_lightcurves (bool): If True, the existing Parquet file will be overwritten if it exists.
+
+    Returns:
+    - MultiIndexDFObject: The resulting light curve data, or None if no data was returned from the archive.
+
+    Notes:
+    - If the Parquet file already exists and `overwrite_existing_lightcurves` is False, the function will 
+    read and return the existing data without fetching new data from the archive.
+    - The function prints progress messages to the console to indicate the current state of the light curve 
+    building process.
+    """
     _init_worker(job_name=f"build=lightcurves, archive={archive}")
     parquet_filepath = parquet_dir / f"archive={archive}" / "part0.snappy.parquet"
 
@@ -175,6 +221,31 @@ def _build_lightcurves(*, archive, archive_kwargs, sample_file, parquet_dir, ove
 
 
 def _build_other(keyword, **kwargs_dict):
+    """
+    Process a keyword and return its corresponding value from the provided dictionary or predefined constants.
+
+    This function handles specific keywords and returns their associated values. It also has special handling for 
+    keywords that end with "+" or "+l" to optionally print the values in a specific format.
+
+    Parameters:
+    - keyword (str): The keyword to process. If the keyword ends with "+", the value will be printed. 
+      If it ends with "+l", the value will be printed as a space-separated list.
+    - kwargs_dict (dict): A dictionary containing keyword-value pairs. These values are used if the keyword 
+    does not match predefined constants.
+
+    Returns:
+    - The value associated with the keyword. The exact type depends on the keyword and the value in the 
+    dictionary or predefined constants.
+
+    Notes:
+    - If the keyword is "kwargs", the function will return the entire `kwargs_dict`.
+    - If the keyword ends with "+", the function will print the value before returning it.
+    - If the keyword ends with "+l", the function will print the value as a space-separated list before 
+    returning it.
+    - The predefined constants `ARCHIVE_NAMES` are used for keywords "archive_names_all" and 
+    "archive_names_scaled".
+    """
+
     if keyword == "kwargs":
         return kwargs_dict
 
@@ -201,8 +272,29 @@ def _build_other(keyword, **kwargs_dict):
 
 
 def _construct_kwargs_dict(**kwargs_dict):
-    """Construct a complete kwargs dict by combining defaults, yaml (if requested), and `kwargs_dict`
-    (listed in order of increasing precedence).
+    """
+    Construct a complete kwargs dictionary by combining default values, YAML configuration (if requested), 
+    and provided keyword arguments, with precedence in that order.
+
+    This function merges default values, optional YAML configurations, and user-provided keyword arguments 
+    into a single dictionary. It ensures that all necessary keys are present and sets up paths and directories 
+    for the run.
+
+    Parameters:
+    - kwargs_dict (dict): A dictionary of keyword arguments provided by the user. These values take the highest 
+      precedence and will overwrite defaults and YAML configurations.
+
+    Returns:
+    - dict: A dictionary containing the combined and final keyword arguments for the run, sorted by key.
+
+    Notes:
+    - Default values are defined in the `DEFAULTS` dictionary.
+    - If `use_yaml` is True in `kwargs_dict` or in the defaults, the function will load additional keyword 
+      arguments from a YAML file specified by `yaml_filename`.
+    - Keys "get_samples" and "archives" are deep updated to combine nested dictionaries.
+    - The function sets up various path-related keyword arguments, including `base_dir`, `logs_dir`, 
+      `sample_file`, `parquet_dir`, and `yaml_file`.
+    - The base directory is created if it does not already exist.
     """
     run_id = kwargs_dict.get("run_id", DEFAULTS["run_id"])
     base_dir = HELPERS_DIR.parent.parent / f"output/lightcurves-{run_id}"
@@ -239,6 +331,26 @@ def _construct_kwargs_dict(**kwargs_dict):
 
 
 def _deep_update_kwargs_group(key, group_a, group_b):
+    """
+    Deeply update a group of keyword arguments by combining two groups.
+
+    This function merges two groups of keyword arguments, with `group_b` values taking precedence
+    over `group_a` values. Both groups may be either lists or dictionaries.
+
+    Parameters:
+    - key (str): The key associated with the groups in the `DEFAULTS` dictionary.
+    - group_a (list or dict): The first group of keyword arguments.
+    - group_b (list or dict): The second group of keyword arguments, which takes precedence over `group_a`.
+
+    Returns:
+    - dict: A dictionary with the combined keyword arguments.
+
+    Notes:
+    - If both groups are empty, the function returns the default values for the given key.
+    - The function converts both groups to dictionaries with keys as names and values as dictionaries of 
+    keyword arguments.
+    - It deeply updates the individual name/kwarg pairs.
+    """
     # if both groups are empty, just return defaults
     if len(group_a) == 0 and len(group_b) == 0:
         return _kwargs_list_to_dict(DEFAULTS[key])
@@ -257,6 +369,23 @@ def _deep_update_kwargs_group(key, group_a, group_b):
 
 
 def _kwargs_list_to_dict(list_or_dict):
+    """
+    Convert a list or dictionary of keyword arguments to a dictionary with lowercase keys.
+
+    This function transforms a list of names or a dictionary of name/kwargs pairs into a 
+    dictionary with lowercase keys and corresponding values.
+
+    Parameters:
+    - list_or_dict (list or dict): A list of names or a dictionary of name/kwargs pairs.
+
+    Returns:
+    - dict: A dictionary with lowercase keys and corresponding values.
+
+    Notes:
+    - If the input is a list, the function generates a dictionary with names as keys and empty dictionaries 
+    as values.
+    - If the input is already a dictionary, the function converts the keys to lowercase.
+    """    
     if isinstance(list_or_dict, list):
         return {name.lower(): {} for name in list_or_dict}
     return {name.lower(): kwargs for name, kwargs in list_or_dict.items()}
@@ -266,15 +395,32 @@ def _kwargs_list_to_dict(list_or_dict):
 
 
 def _init_worker(job_name="worker"):
-    """Run generic start-up tasks for a job."""
+    """
+    Run generic start-up tasks for a job.
+
+    This function performs initial setup tasks for a job, including printing the process ID
+    for the current worker.
+
+    Parameters:
+    - job_name (str): The name of the job. Default is "worker".
+
+    Notes:
+    - The function prints the current date and time, process ID, and job name to the console.
+    """
     # print the Process ID for the current worker so it can be killed if needed
     print(f"{_now()} | [pid={os.getpid()}] Starting {job_name}", flush=True)
 
 
 def _now():
-    """Return datetime.now as a string with format '%Y/%m/%d %H:%M:%S %Z'.
+    """
+    Return the current datetime as a string in the format '%Y/%m/%d %H:%M:%S %Z'.
 
-    This can be parsed using:
+    This function returns the current date and time in a specific string format, with the time zone included.
+
+    Returns:
+    - str: The current date and time as a formatted string.
+
+    Example:
     >>> import dateutil
     >>> now = dateutil.parser.parse(_now())
     """
@@ -283,13 +429,41 @@ def _now():
 
 
 def _load_yaml(yaml_file):
+    """
+    Load a YAML file and return its contents as a dictionary.
+
+    This function reads a YAML file and parses its contents into a dictionary.
+
+    Parameters:
+    - yaml_file (pathlib.Path): The path to the YAML file to load.
+
+    Returns:
+    - dict: The contents of the YAML file as a dictionary.
+
+    Notes:
+    - The function uses `yaml.safe_load` to parse the YAML file.
+    """
     with open(yaml_file, "r") as fin:
         yaml_dict = yaml.safe_load(fin)
     return yaml_dict
 
 
 def write_kwargs_to_yaml(**kwargs_dict) -> None:
-    """Write `kwargs_dict` as a yaml file in the run's base_dir."""
+    """
+    Write the provided keyword arguments dictionary to a YAML file.
+
+    This function writes the contents of `kwargs_dict` to a YAML file in the run's base directory.
+
+    Parameters:
+    - kwargs_dict (dict): The dictionary of keyword arguments to write to the YAML file.
+
+    Returns:
+    - None
+
+    Notes:
+    - The YAML file path is determined by the `yaml_file` key in `kwargs_dict`.
+    - The function prints a message indicating the path to the written YAML file.
+    """
     yaml_path = run(build="yaml_file", **kwargs_dict)
     with open(yaml_path, "w") as fout:
         yaml.safe_dump(kwargs_dict, fout)
@@ -300,6 +474,18 @@ def write_kwargs_to_yaml(**kwargs_dict) -> None:
 
 
 def _argparser():
+    """
+    Create and return an argument parser for command-line arguments.
+
+    This function sets up an argument parser with several options for building samples, 
+    light curves, and handling keyword arguments.
+
+    Returns:
+    - argparse.ArgumentParser: The configured argument parser.
+
+    Notes:
+    - The parser includes options for `--build`, `--kwargs_dict`, `--kwargs_json`, and `--archive`.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--build",
@@ -330,6 +516,24 @@ def _argparser():
 
 
 def _parse_args(args_list):
+    """
+    Parse command-line arguments into a build type and keyword arguments dictionary.
+
+    This function processes command-line arguments to determine the build type and 
+    construct a combined dictionary of keyword arguments.
+
+    Parameters:
+    - args_list (list): A list of command-line arguments to parse.
+
+    Returns:
+    - tuple: A tuple containing the build type (str) and the combined keyword arguments dictionary (dict).
+
+    Notes:
+    - The function starts with `kwargs_json` and updates it with `kwargs_dict`.
+    - It converts `key=value` pairs to a dictionary and handles boolean values.
+    - Keys "get_samples" and "archives" are deeply updated.
+    - If an archive is provided, it is added to the keyword arguments dictionary.
+    """
     args = _argparser().parse_args(args_list)
 
     # start with kwargs_json, then update
