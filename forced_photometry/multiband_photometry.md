@@ -4,9 +4,9 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.15.2
+    jupytext_version: 1.16.4
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  display_name: notebook
   language: python
   name: python3
 ---
@@ -210,29 +210,96 @@ spitzer['cloud_access'] = [(f'{{"aws": {{ "bucket_name": "irsa-mast-tike-spitzer
 ```
 
 ```{code-cell} ipython3
-# Adding function to download multiple files using the fornax API.
 # Requires https://github.com/nasa-fornax/fornax-cloud-access-API/pull/4
+import os
+import shutil
+import fornax
+
 def fornax_download(data_table, data_subdirectory, access_url_column='access_url',
                     fname_filter=None, verbose=False):
-    working_dir = os.getcwd()
+    """
+    Downloads data files if they do not already exist in the specified directory.
 
-    data_directory = f"data/{data_subdirectory}"
-    os.chdir(data_directory)
+    Parameters
+    ----------
+    data_table : iterable
+        An iterable containing metadata for files to be downloaded. Each element
+        should be a dictionary-like object with at least a 'fname' key.
+    data_subdirectory : str
+        Name of the subdirectory where the downloaded files will be stored.
+    access_url_column : str, optional
+        Column name containing the access URLs for downloading the files. 
+        Default is 'access_url'.
+    fname_filter : str, optional
+        If provided, only files whose names contain this substring will be downloaded.
+    verbose : bool, optional
+        If True, print status messages. Default is False.
+
+    Raises
+    ------
+    ValueError
+        If neither 'fname' nor 'name' columns are found in `data_table`.
+
+    Notes
+    -----
+    - The function checks if a file already exists before downloading it.
+    - It creates the target directory if it does not exist.
+    - Uses `fornax.get_data_product()` to retrieve the data handler.
+
+    Examples
+    --------
+    >>> data_table = [{'fname': 'file1.fits', 'access_url': 'https://example.com/file1.fits'},
+    ...               {'fname': 'file2.fits', 'access_url': 'https://example.com/file2.fits'}]
+    >>> fornax_download(data_table, 'my_data', verbose=True)
+    Skipping file1.fits: already exists.
+    Downloaded and saved file2.fits to data/my_data
+    Download process complete.
+    """
+    # Define the absolute path of the target directory
+    data_directory = os.path.join("data", data_subdirectory)
+    os.makedirs(data_directory, exist_ok=True)  # Ensure the directory exists
+
+    # Check which filename column exists
+    filename_column = None
+    for col in ['fname', 'name']:
+        if col in data_table.colnames:
+            filename_column = col
+            break  # Use the first found column
+
+    if not filename_column:
+        raise ValueError("Error: Neither 'fname' nor 'name' columns found in the data table.")
+
     for row in data_table:
-        if fname_filter is not None and fname_filter not in row['fname']:
+        filename = os.path.basename(row[filename_column])  # Extract filename
+        file_path = os.path.join(data_directory, filename)  # Full file path
+
+        # Skip download if file already exists
+        if os.path.exists(file_path):
+            if verbose:
+                print(f"Skipping {filename}: already exists.")
             continue
+
+        # Apply filename filter, if provided
+        if fname_filter is not None and fname_filter not in filename:
+            continue
+
+        # Download the file
         handler = fornax.get_data_product(row, 'aws', access_url_column=access_url_column, verbose=verbose)
         temp_file = handler.download()
-        # on-prem download returns temp file path, s3 download downloads file
-        if temp_file:
-            shutil.move(temp_file, os.path.basename(row['fname']))
 
-    os.chdir(working_dir)
+        # Move the downloaded file if a local file path is returned
+        if temp_file:
+            shutil.move(temp_file, file_path)
+            if verbose:
+                print(f"Downloaded and saved {filename} to {data_directory}")
+
+    if verbose:
+        print("Download process complete.")
 ```
 
 ```{code-cell} ipython3
 fornax_download(spitzer, access_url_column='sia_url', fname_filter='go2_sci',
-                data_subdirectory='IRAC', verbose=False)
+                data_subdirectory='IRAC', verbose=True)
 ```
 
 ### Use IVOA image search and Fornax download to obtain Galex from the MAST archive
@@ -285,21 +352,29 @@ access_url_column = query_result.fieldname_with_ucd('VOX:Image_AccessReference')
 
 # Download filtered products from AWS
 download_subdir = 'Galex'
-fornax_download(filtered_products, access_url_column=access_url_column, data_subdirectory=download_subdir)
+fornax_download(
+    filtered_products, 
+    access_url_column=access_url_column, 
+    data_subdirectory=download_subdir,
+    verbose = True)
 ```
 
 ```{code-cell} ipython3
 # Get the GALEX sky background fits files in addition to the mosaics
-skybg_products = []
 skybkg_pattern = re.compile(r"COSMOS_0[1-4]-[fn]d-skybg")
 
-for row in galex_image_products:
-    if skybkg_pattern.search(row['name']):
-        skybg_products.append(row)
+# Apply filtering using list comprehension
+skybg_products = galex_image_products[
+    [bool(skybkg_pattern.search(name)) for name in galex_image_products['name']]
+    ]
 
 # Download skybg products from AWS
 download_subdir = 'Galex'
-fornax_download(skybg_products, access_url_column=access_url_column, data_subdirectory=download_subdir)
+fornax_download(
+    skybg_products, 
+    access_url_column=access_url_column, 
+    data_subdirectory=download_subdir,
+    verbose = True)
 ```
 
 ```{code-cell} ipython3
