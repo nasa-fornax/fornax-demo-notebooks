@@ -14,7 +14,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Fornax Demo Notebooks'
-copyright = '2022-2024, Fornax developers'
+copyright = '2022-2025, Fornax developers'
 author = 'Fornax developers'
 
 
@@ -80,10 +80,8 @@ html_theme_options = {
     "repository_branch": "main",
     "use_repository_button": True,
     "use_issues_button": True,
-    "use_edit_page_button": True,
+    "use_edit_page_button": False,
     "home_page_in_toc": True,
-#    "logo_link_url": "https://astroML.org",
-#    "logo_url": "http://www.astroml.org/_images/plot_moving_objects_1.png"
 }
 
 
