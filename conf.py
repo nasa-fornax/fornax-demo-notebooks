@@ -14,7 +14,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Fornax Demo Notebooks'
-copyright = '2022-2024, Fornax developers'
+copyright = '2022-2025, Fornax developers'
 author = 'Fornax developers'
 
 
