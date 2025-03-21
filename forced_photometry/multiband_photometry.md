@@ -206,7 +206,7 @@ fname = spitzer['fname']
 spitzer['cloud_access'] = [(f'{{"aws": {{ "bucket_name": "irsa-fornax-testdata",'
                             f'              "region": "us-east-1",'
                             f'              "access": "restricted",'
-                            f'              "key": "data/COSMOS/{fn}" }} }}') for fn in fname]
+                            f'              "key": "COSMOS/{fn}" }} }}') for fn in fname]
 ```
 
 ```{code-cell} ipython3
