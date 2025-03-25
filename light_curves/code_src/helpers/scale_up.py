@@ -477,4 +477,132 @@ def _load_yaml(yaml_file):
     The function uses `yaml.safe_load` to parse the YAML file.
     """
     with open(yaml_file, "r") as fin:
-       
+             yaml_dict = yaml.safe_load(fin)
+    return yaml_dict
+
+
+def write_kwargs_to_yaml(**kwargs_dict) -> None:
+    """
+    Write keyword arguments to a YAML file.
+
+    Writes the provided keyword arguments to a YAML file in the run's base directory,
+    using the `run` function to determine the output path.
+
+    Parameters
+    ----------
+    **kwargs_dict : dict
+        Keyword arguments to be written to the YAML file.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    >>> write_kwargs_to_yaml(param1='value1', param2=42)
+    kwargs written to /path/to/yaml_file.yaml
+    """    
+    yaml_path = run(build="yaml_file", **kwargs_dict)
+    with open(yaml_path, "w") as fout:
+        yaml.safe_dump(kwargs_dict, fout)
+    print(f"kwargs written to {yaml_path}")
+
+
+# ---- helpers for __name__ == "__main__" ---- #
+
+
+def _argparser():
+    """
+    Define and return an argument parser for command-line execution.
+
+    This parser includes options for selecting the build type,
+    passing keyword arguments, and setting archive options.
+
+    Returns
+    -------
+    argparse.ArgumentParser
+        Configured argument parser for the script.
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--build",
+        type=str,
+        default="sample",
+        help="Either 'sample', 'lightcurves', or a kwargs key.",
+    )
+    parser.add_argument(
+        "--kwargs_dict",
+        type=str,
+        default=list(),
+        nargs="*",
+        help="Keyword arguments for the run. Input as a list of strings 'key=value'.",
+    )
+    parser.add_argument(
+        "--kwargs_json",
+        type=json.loads,
+        default=r"{}",
+        help="Kwargs as a json string, to be added to kwargs_dict.",
+    )
+    parser.add_argument(
+        "--archive",
+        type=str,
+        default=None,
+        help="Archive name to query for light curves, to be added to kwargs_dict.",
+    )
+    return parser
+
+
+def _parse_args(args_list):
+    """
+    Parse command-line arguments into structured parameters.
+
+    Combines JSON and list-formatted keyword arguments into a unified dictionary.
+    Supports boolean conversion, deep merging of certain dictionary keys,
+    and appending additional archive parameters.
+
+    Parameters
+    ----------
+    args_list : list of str
+        List of command-line arguments, typically from `sys.argv[1:]`.
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+        - build (str): The build target (e.g., 'sample', 'lightcurves').
+        - kwargs_dict (dict): Dictionary of parsed keyword arguments.
+
+    Examples
+    --------
+    >>> _parse_args(['--build', 'sample', '--kwargs_dict', 'verbose=true', 'max_iter=100'])
+    ('sample', {'verbose': True, 'max_iter': '100'})
+    """
+    args = _argparser().parse_args(args_list)
+
+    # start with kwargs_json, then update
+    my_kwargs_dict = args.kwargs_json
+
+    # parse args.kwargs_dict 'key=value' pairs into a proper dict and convert true/false to bool
+    bool_map = {"true": True, "false": False}
+    args_kwargs_dict = {
+        key: bool_map.get(val.lower(), val)
+        for (key, val) in dict(kwarg.split("=") for kwarg in args.kwargs_dict).items()
+        # for (key, val) in {kwarg.split("=")[0]: kwarg.split("=")[1] for kwarg in args.kwargs_dict}.items()
+    }
+
+    # update my_kwargs_dict with args_kwargs_dict
+    # both may contain dict values for the following keys, which need deep updates.
+    for key in list(k for k in ["get_samples", "archives"] if k in my_kwargs_dict):
+        my_kwargs_dict[key] = _deep_update_kwargs_group(key, my_kwargs_dict.pop(key), args_kwargs_dict.pop(key, []))
+    my_kwargs_dict.update(args_kwargs_dict)  # update with any additional keys in args_kwargs_dict
+
+    # add the archive, if provided
+    if args.archive:
+        my_kwargs_dict["archive"] = args.archive
+
+    return args.build, my_kwargs_dict
+
+
+if __name__ == "__main__":
+    build, kwargs_dict = _parse_args(sys.argv[1:])
+    run(build=build, **kwargs_dict)
