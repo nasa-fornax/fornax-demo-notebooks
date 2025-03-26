@@ -100,16 +100,17 @@ cone_ra, cone_dec = c.ra.value, c.dec.value
 radius_arcsec = radius[Nrows]
 cone_filter = ConeSearch(cone_ra, cone_dec, radius_arcsec)
 
-# Read ZTF DR20
-#ztf_path = ("s3://irsa-mast-tike-spitzer-data/data/ZTF/dr20/objects/hipscat/ztf-dr20-objects-hipscat")
-#ztf_piece = lsdb.read_hats(ztf_path, columns=["oid", "ra", "dec"], search_filter=cone_filter)
+# Read ZTF DR23
+ztf_path = UPath("s3://irsa-fornax-testdata/ZTF/dr23/objects/hats/")
+ztf_piece = lsdb.read_hats(ztf_path, columns=["oid", "ra", "dec"], search_filter=cone_filter)
 
 # Read Pan-STARRS DR2
 ps1_path = UPath("s3://stpubdata/panstarrs/ps1/public/hats/otmo", anon=True)
 ps1_margin = UPath("s3://stpubdata/panstarrs/ps1/public/hats/otmo_10arcs", anon=True)
 
 ps1 = lsdb.read_hats(ps1_path, margin_cache=ps1_margin,
-    columns=["objName","objID","raMean","decMean"])
+    columns=["objName","objID","raMean","decMean"],
+    search_filter=cone_filter)
 ```
 
 ## 3. Initialize the crossmatch and compute, measuring the time elapsed.
@@ -117,12 +118,14 @@ ps1 = lsdb.read_hats(ps1_path, margin_cache=ps1_margin,
 ```{code-cell} ipython3
 # Setting up the cross-match actually takes very little time
 ztf_x_ps1 = ztf_piece.crossmatch(ps1, radius_arcsec=1, n_neighbors=1, suffixes=("_ztf", "_ps1"))
+ztf_x_ps1
 ```
 
 ```{code-cell} ipython3
 %%time
 # Executing the cross-match does take time
 xmatch = ztf_x_ps1.compute()
+xmatch
 ```
 
 ```{code-cell} ipython3
@@ -143,15 +146,15 @@ Benchmarks on Fornax XLarge instance using
 - eight (t8)
 - sixteen (t16)
 - autoscaling dask with 1-128 cores (tX)
-  
+
 | Nrows |  Nout | t0 (s) | t1 (s) | t2 (s) | t4 (s) | t8 (s) | t16 (s) | tX (s) |
 | ----- | ----- | ------ | ------ | ------ | ------ | ------ | ------- | ------ |
-| 1e4   |  8593 |  1.46  |  6.37  |  5.80  |  5.88  |  5.53  |   5.59  |  5.43  |
-| 1e5   | 85237 |  2.12  |  6.50  |  5.99  |  6.18  |  5.62  |   5.71  |  5.79  |
-| 1e6   | 8.4e5 |  3.46  |  8.84  |  6.88  |  7.07  |  6.35  |   6.39  |  6.78  |
-| 1e7   | 8.4e6 |  27.8  |  33.0  |  21.0  |  15.0  |  11.8  |  11.4   |  11.4  |
-| 1e8   | 8.6e7 |  192   |    -   |    -   |    -   |    -   |    -    |    -   |
-| 1e9   | 8.7e8 |  1535  |    -   |    -   |    -   |    -   |    -    |    -   |
+| 1e4   |  8590 |  6.54  |  6.77  |  6.48  |  5.49  |  7.07  |   6.69  |  6.00  |
+| 1e5   | 85242 |  5.41  |  6.87  |  5.56  |  5.89  |  5.70  |   5.86  |  11.2  |
+| 1e6   | 8.4e5 |  13.7  |  9.09  |  9.77  |  8.72  |  7.37  |   7.38  |  8.12  |
+| 1e7   | 8.4e6 |  74    |  56.7  |  28.2  |  17.3  |  14.1  |   12.2  |  16.9  |
+| 1e8   | 8.6e7 |  397   |    -   |    -   |    -   |    -   |    -    |    -   |
+| 1e9   | 8.7e8 |  3099  |    -   |    -   |    -   |    -   |    -    |    -   |
 
 ("-" indicates out-of-memory behavior.)
 
@@ -159,7 +162,7 @@ Benchmarks on Fornax XLarge instance using
 
 ## 5. Summary
 
-Fornax is capable of hosting cross-matches between large catalogs. There is no performance enhancement with `dask` until cross-matching ~10 million sources, at which point you get roughly a factor of two improvement at best. Larger than that hits memory issues with `dask`, and takes hours without `dask` (although I haven't actually finished the 1e8 match). There are ways to configure the maximum memory used by a `dask` worker, which I haven't yet explored. That might help.
+Fornax is capable of hosting cross-matches between large catalogs. There is no performance enhancement with `dask` until cross-matching ~1 million sources, and more significant at 10 million, at which point you get up to a factor of 5 improvement. Larger than 10M, `dask` encounters memory issues, and takes a long time without `dask`. There are ways to configure the maximum memory used by a `dask` worker, which I begin to explore in the next section.
 
 +++
 
@@ -170,8 +173,8 @@ The `dask.distributed.LocalCluster` has an argument `memory_limit` that seems to
 
 | Nrows |  Nout | t0 (s) | t1 (s) | t2 (s) | t4 (s) | t8 (s) | t16 (s) | tX (s) |
 | ----- | ----- | ------ | ------ | ------ | ------ | ------ | ------- | ------ |
-| 1e8   | 8.6e7 |  192   |  191   |  119   |   79   |   60   |    -    |    -   |
-| 1e9   | 8.7e8 |  1535  |    -   |    -   |    -   |    -   |    -    |    -   |
+| 1e8   | 8.6e7 |  397   |  376   |  204   |  124   |   81   |    -    |    -   |
+| 1e9   | 8.7e8 |  3099  |    -   |    -   |    -   |    -   |    -    |    -   |
 
 +++
 
@@ -179,7 +182,7 @@ The `dask.distributed.LocalCluster` has an argument `memory_limit` that seems to
 
 This notebook was authored by [Zach Claytor](mailto:zclaytor@stsci.edu), Astronomical Data Scientist at Space Telescope Science Institute.
 
-+++
++++ {"jp-MarkdownHeadingCollapsed": true}
 
 # Citations
 

@@ -1,4 +1,4 @@
 astropy
-lsdb>=0.4.5
+lsdb>=0.5
 dask
 universal_pathlib
