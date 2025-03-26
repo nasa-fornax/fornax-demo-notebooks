@@ -169,13 +169,14 @@ def gaia_retrieve_epoch_photometry(gaia_table):
         # we want to extract the VO table, turn it into a pandas dataframe, and add it to the datalink_all list
         for list_of_tables in datalink.values():
             for votable in list_of_tables:
-                # Move the next three lines outside the for loop.
+                # We need to filter out masked cells from the multidim rows, so we can convert them later to a
+                # MultiIndexDFObject avoiding the ``TypeError: unhashable type: 'MaskedConstant'``.
+
                 import numpy.ma
                 arr_cols = ['g_transit_flux', 'g_transit_flux_error', 'g_transit_mag', 'g_transit_time']
                 keep_cols = arr_cols + ['source_id']
-                
-                # I think the next four lines are equivalent to what was here.
-                datalink_df = votable.to_table().to_pandas()[keep_cols].explode(arr_cols)
+
+                datalink_df = votable.to_table()[keep_cols].to_pandas().explode(arr_cols)
                 mask = np.array([val is numpy.ma.masked for val in datalink_df.g_transit_flux.to_numpy()])
                 datalink_df = datalink_df.loc[~mask].astype({col: float for col in arr_cols})
                 datalink_all.append(datalink_df)
@@ -218,21 +219,13 @@ def gaia_clean_dataframe(gaia_df):
     gaia_df["magerr"] = 2.5 / np.log(10) * gaia_df.g_transit_flux_error / gaia_df.g_transit_flux
 
     # compute flux and flux error in mJy
-    gaia_df["flux_mJy"] = 10 ** (-0.4 * (gaia_df.mag - 23.9)) / 1e3  # in mJy
-    gaia_df["fluxerr_mJy"] = gaia_df.magerr / 2.5 * np.log(10) * gaia_df.flux_mJy  # in mJy
+    gaia_df["flux"] = 10 ** (-0.4 * (gaia_df.mag - 23.9)) / 1e3  # in mJy
+    gaia_df["err"] = gaia_df.magerr / 2.5 * np.log(10) * gaia_df.flux  # in mJy
 
     # get time in mjd
-    gaia_df["time_mjd"] = gaia_df.g_transit_time + 55197.5
+    gaia_df["time"] = gaia_df.g_transit_time + 55197.5
 
     gaia_df["band"] = 'G'
-
-    # need to rename some columns for the MultiIndexDFObject
-    colmap = dict(flux_mJy="flux", fluxerr_mJy="err", time_mjd="time",
-                  objectid="objectid", label="label", band="band")
-
-    # and only keep those columns that we need for the MultiIndexDFObject
-    gaia_df = gaia_df[colmap.keys()].rename(columns=colmap)
-
 
     # return the light curves as a MultiIndexDFObject
     indexes, columns = ["objectid", "label", "band", "time"], ["flux", "err"]
