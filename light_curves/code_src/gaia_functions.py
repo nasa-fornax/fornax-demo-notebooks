@@ -169,28 +169,16 @@ def gaia_retrieve_epoch_photometry(gaia_table):
         # we want to extract the VO table, turn it into a pandas dataframe, and add it to the datalink_all list
         for list_of_tables in datalink.values():
             for votable in list_of_tables:
-                votable = votable.to_table()
-                # Filter out masked cells from the multidim rows, so we can convert them later to a
-                # MultiIndexDFObject avoiding the ``TypeError: unhashable type: 'MaskedConstant'``.
-                # We do it here before heading to pandas land as then there are
-                # way more complications with dealing with np.ma.MaskedArrays and pandas indexing and
-                # issues about view vs index and size of arrays.
-                # This is knowingly a terrible hack, btw
-
-                flux = []
-                flux_err = []
-                mag = []
-                obs_time = []
-                for r_flux, r_flux_err, r_mag, r_obs_time in votable.iterrows(
-                        'g_transit_flux', 'g_transit_flux_error', 'g_transit_mag', 'g_transit_time'):
-                    obs_time.append(r_obs_time[~r_flux.mask].data)
-                    mag.append(r_mag[~r_flux.mask].data)
-                    flux_err.append(r_flux_err[~r_flux.mask].data)
-                    flux.append(r_flux[~r_flux.mask].data)
-
-                votable.update(Table({'g_transit_time': obs_time, 'g_transit_mag': mag,
-                                      'g_transit_flux_error': flux_err, 'g_transit_flux': flux}))
-                datalink_all.append(votable.to_pandas())
+                # Move the next three lines outside the for loop.
+                import numpy.ma
+                arr_cols = ['g_transit_flux', 'g_transit_flux_error', 'g_transit_mag', 'g_transit_time']
+                keep_cols = arr_cols + ['source_id']
+                
+                # I think the next four lines are equivalent to what was here.
+                datalink_df = votable.to_table().to_pandas()[keep_cols].explode(arr_cols)
+                mask = np.array([val is numpy.ma.masked for val in datalink_df.g_transit_flux.to_numpy()])
+                datalink_df = datalink_df.loc[~mask].astype({col: float for col in arr_cols})
+                datalink_all.append(datalink_df)
 
     # if there is no epochal photometry return an empty dataframe
     if len(datalink_all) == 0:
@@ -245,11 +233,6 @@ def gaia_clean_dataframe(gaia_df):
     # and only keep those columns that we need for the MultiIndexDFObject
     gaia_df = gaia_df[colmap.keys()].rename(columns=colmap)
 
-    # We need to flatted out the multidim columns. Also note, the dtype of these columns
-    # are not properly propagated when ``to_pandas()`` was called, we deal with this issue now.
-
-    gaia_df = gaia_df.explode(['flux', 'err', 'time'])
-    gaia_df = gaia_df.astype({'flux': float, 'err': float})
 
     # return the light curves as a MultiIndexDFObject
     indexes, columns = ["objectid", "label", "band", "time"], ["flux", "err"]
