@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.4
+    jupytext_version: 1.16.7
 kernelspec:
   display_name: notebook
   language: python
@@ -299,7 +299,7 @@ def fornax_download(data_table, data_subdirectory, access_url_column='access_url
 
 ```{code-cell} ipython3
 fornax_download(spitzer, access_url_column='sia_url', fname_filter='go2_sci',
-                data_subdirectory='IRAC', verbose=True)
+                data_subdirectory='IRAC', verbose=False)
 ```
 
 ### Use IVOA image search and Fornax download to obtain Galex from the MAST archive
@@ -356,7 +356,7 @@ fornax_download(
     filtered_products, 
     access_url_column=access_url_column, 
     data_subdirectory=download_subdir,
-    verbose = True)
+    verbose=False)
 ```
 
 ```{code-cell} ipython3
@@ -364,9 +364,8 @@ fornax_download(
 skybkg_pattern = re.compile(r"COSMOS_0[1-4]-[fn]d-skybg")
 
 # Apply filtering using list comprehension
-skybg_products = galex_image_products[
-    [bool(skybkg_pattern.search(name)) for name in galex_image_products['name']]
-    ]
+mask = [bool(skybkg_pattern.search(name)) for name in galex_image_products['name']]
+skybg_products = galex_image_products[mask]
 
 # Download skybg products from AWS
 download_subdir = 'Galex'
@@ -374,7 +373,7 @@ fornax_download(
     skybg_products, 
     access_url_column=access_url_column, 
     data_subdirectory=download_subdir,
-    verbose = True)
+    verbose=False)
 ```
 
 ```{code-cell} ipython3
