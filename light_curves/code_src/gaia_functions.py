@@ -96,7 +96,8 @@ def gaia_retrieve_catalog(sample_table, search_radius, verbose):
         """
     # use an asynchronous query of the Gaia database
     # cross match with our uploaded table
-    j = Gaia.launch_job_async(query=querystr, upload_resource=upload_table, upload_table_name="table_test")
+    j = Gaia.launch_job_async(query=querystr, upload_resource=upload_table,
+                              upload_table_name="table_test")
 
     results = j.get_results()
 
@@ -173,11 +174,13 @@ def gaia_retrieve_epoch_photometry(gaia_table):
                 # MultiIndexDFObject avoiding the ``TypeError: unhashable type: 'MaskedConstant'``.
 
                 import numpy.ma
-                arr_cols = ['g_transit_flux', 'g_transit_flux_error', 'g_transit_mag', 'g_transit_time']
+                arr_cols = ['g_transit_flux', 'g_transit_flux_error',
+                            'g_transit_mag', 'g_transit_time']
                 keep_cols = arr_cols + ['source_id']
 
                 datalink_df = votable.to_table()[keep_cols].to_pandas().explode(arr_cols)
-                mask = np.array([val is numpy.ma.masked for val in datalink_df.g_transit_flux.to_numpy()])
+                mask = np.array(
+                    [val is numpy.ma.masked for val in datalink_df.g_transit_flux.to_numpy()])
                 datalink_df = datalink_df.loc[~mask].astype({col: float for col in arr_cols})
                 datalink_all.append(datalink_df)
 

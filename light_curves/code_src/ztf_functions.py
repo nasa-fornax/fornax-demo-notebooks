@@ -143,7 +143,7 @@ def locate_objects(sample_table, match_radius, chunksize=10000):
     # do the tap calls
     locations = []
     for i in tqdm.trange(0, len(upload_table), chunksize):
-        result = tap_service.run_async(query, uploads={"sample": upload_table[i : i + chunksize]})
+        result = tap_service.run_async(query, uploads={"sample": upload_table[i: i + chunksize]})
         locations.append(result.to_table().to_pandas())
 
     # locations may contain more than one ZTF object id per band (e.g., yang sample sample_table[11])
@@ -182,7 +182,8 @@ def load_lightcurves(locations_df, nworkers=6, chunksize=100):
     global CATALOG_FILES
     if CATALOG_FILES is None:
         CATALOG_FILES = (
-            pd.read_table(f"s3://{CATALOG_ROOT}checksum.md5", sep="\s+", names=["md5", "path"], usecols=["path"])
+            pd.read_table(f"s3://{CATALOG_ROOT}checksum.md5", sep="\s+",
+                          names=["md5", "path"], usecols=["path"])
             .squeeze()  # there's only 1 column. squeeze it into a Series
             .str.removeprefix("./")
             .to_list()

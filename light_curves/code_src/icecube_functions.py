@@ -14,7 +14,8 @@ from astropy.table import Table, vstack
 from data_structures import MultiIndexDFObject
 
 
-DATA_PATH = os.path.dirname(os.path.dirname(__file__)) + "/data/"  # absolute path to light_curves/data/
+DATA_PATH = os.path.dirname(os.path.dirname(__file__)) + \
+    "/data/"  # absolute path to light_curves/data/
 
 
 def icecube_get_lightcurves(sample_table, *, icecube_select_topN=3, max_search_radius=2.0):
@@ -32,11 +33,11 @@ def icecube_get_lightcurves(sample_table, *, icecube_select_topN=3, max_search_r
         within the match radius will be returned.
 
     max_search_radius : float
-        Maximum radius (degrees) to look for matches in IceCube. Actual match radius will not exceed the 
+        Maximum radius (degrees) to look for matches in IceCube. Actual match radius will not exceed the
         IceCube error of an individual event. Beware that setting this to a high number can cause
         the code to look through a large number of potential matches for each object, which may
         impact performance.
- 
+
     Returns
     --------
     MultiIndexDFObject: IceCube Neutrino events for all the input sources.
@@ -53,13 +54,15 @@ def icecube_get_lightcurves(sample_table, *, icecube_select_topN=3, max_search_r
     icecube_events, _ = icecube_get_catalog(verbose=False)
 
     # create SkyCoord objects from icecube event coordinates
-    icecube_skycoords = SkyCoord(icecube_events["ra"], icecube_events["dec"], unit="deg", frame='icrs')
+    icecube_skycoords = SkyCoord(
+        icecube_events["ra"], icecube_events["dec"], unit="deg", frame='icrs')
 
     # here are the skycoords from mysample defined above
     mysample_skycoords = sample_table['coord']
 
     # Match
-    idx_mysample, idx_icecube, d2d, d3d = icecube_skycoords.search_around_sky(mysample_skycoords, max_search_radius)
+    idx_mysample, idx_icecube, d2d, d3d = icecube_skycoords.search_around_sky(
+        mysample_skycoords, max_search_radius)
 
     # need to filter reponse based on position error circles
     # really want d2d to be less than the error circle of icecube = icecube_events["AngErr"] in degrees
@@ -71,26 +74,27 @@ def icecube_get_lightcurves(sample_table, *, icecube_select_topN=3, max_search_r
     # keep these matches together with objectid and lebal as new entries in the df.
     obid_match = sample_table['objectid'][filter_idx_mysample]
     label_match = sample_table['label'][filter_idx_mysample]
-    time_icecube= icecube_events['mjd'][filter_idx_icecube]
+    time_icecube = icecube_events['mjd'][filter_idx_icecube]
     flux_icecube = icecube_events['energy_logGeV'][filter_idx_icecube]
 
     # save the icecube info in correct format for the rest of the data
-    icecube_df = pd.DataFrame({'flux': flux_icecube, 
-                               'err': np.zeros(len(obid_match)), 
-                               'time': time_icecube, 
-                               'objectid': obid_match, 
-                               'label': label_match, 
+    icecube_df = pd.DataFrame({'flux': flux_icecube,
+                               'err': np.zeros(len(obid_match)),
+                               'time': time_icecube,
+                               'objectid': obid_match,
+                               'label': label_match,
                                'band': "IceCube"})
 
     # sort by Neutrino energy that way it is easier to get the top N events.
     icecube_df = icecube_df.sort_values(['objectid', 'flux'], ascending=[True, False])
-    
+
     # now can use a groupby to only keep the top N (by GeV flux) icecube matches for each object
-    filter_icecube_df = icecube_df.groupby('objectid').head(icecube_select_topN).reset_index(drop=True)
+    filter_icecube_df = icecube_df.groupby('objectid').head(
+        icecube_select_topN).reset_index(drop=True)
 
     # put the index in to match with df_lc
-    filter_icecube_df.set_index(["objectid", "label", "band", "time"], inplace = True)
-    
+    filter_icecube_df.set_index(["objectid", "label", "band", "time"], inplace=True)
+
     return (MultiIndexDFObject(data=filter_icecube_df))
 
 
