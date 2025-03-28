@@ -33,7 +33,7 @@ def icecube_get_lightcurves(sample_table, *, icecube_select_topN=3, max_search_r
         within the match radius will be returned.
 
     max_search_radius : float
-        Maximum radius (degrees) to look for matches in IceCube. Actual match radius will not exceed the 
+        Maximum radius (degrees) to look for matches in IceCube. Actual match radius will not exceed the
         IceCube error of an individual event. Beware that setting this to a high number can cause
         the code to look through a large number of potential matches for each object, which may
         impact performance.

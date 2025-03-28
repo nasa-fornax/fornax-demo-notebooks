@@ -121,7 +121,7 @@ def _build_sample(*, get_samples, consolidate_nearby_objects, sample_file, overw
     Parameters
     ----------
     get_samples : dict
-        A dictionary where keys are sample names and values are dictionaries of 
+        A dictionary where keys are sample names and values are dictionaries of
         keyword arguments to be passed to the corresponding sample retrieval functions.
     consolidate_nearby_objects : bool
         If True, nearby objects will be consolidated.
@@ -137,9 +137,9 @@ def _build_sample(*, get_samples, consolidate_nearby_objects, sample_file, overw
 
     Notes
     -----
-    If the sample file already exists and `overwrite_existing_sample` is False, the function will read 
+    If the sample file already exists and `overwrite_existing_sample` is False, the function will read
     and return the existing sample without rebuilding it.
-    The function prints progress messages to the console to indicate the current state of the sample 
+    The function prints progress messages to the console to indicate the current state of the sample
     building process.
     """
     _init_worker(job_name="build=sample")
@@ -183,13 +183,13 @@ def _build_lightcurves(*, archive, archive_kwargs, sample_file, parquet_dir, ove
     Parameters
     ----------
     archive : str
-        The name of the archive to fetch data from. This should correspond to a module containing 
+        The name of the archive to fetch data from. This should correspond to a module containing
         functions to interact with the archive.
     archive_kwargs : dict
-        A dictionary of keyword arguments to be passed to the archive's light curve 
+        A dictionary of keyword arguments to be passed to the archive's light curve
         retrieval function.
     sample_file : pathlib.Path
-        The path to the sample file containing the objects for which light curves 
+        The path to the sample file containing the objects for which light curves
         are to be retrieved.
     parquet_dir : pathlib.Path
         The directory where the Parquet file containing the light curves will be saved.
@@ -203,9 +203,9 @@ def _build_lightcurves(*, archive, archive_kwargs, sample_file, parquet_dir, ove
 
     Notes
     -----
-    If the Parquet file already exists and `overwrite_existing_lightcurves` is False, the function will 
+    If the Parquet file already exists and `overwrite_existing_lightcurves` is False, the function will
     read and return the existing data without fetching new data from the archive.
-    The function prints progress messages to the console to indicate the current state of the light curve 
+    The function prints progress messages to the console to indicate the current state of the light curve
     building process.
     """
     _init_worker(job_name=f"build=lightcurves, archive={archive}")
@@ -248,25 +248,25 @@ def _build_other(keyword, **kwargs_dict):
     Parameters
     ----------
     keyword : str
-        The keyword to process. If the keyword ends with "+", the value will be printed. 
+        The keyword to process. If the keyword ends with "+", the value will be printed.
         If it ends with "+l", the value will be printed as a space-separated list.
     kwargs_dict : dict
-        A dictionary containing keyword-value pairs. These values are used if the keyword 
+        A dictionary containing keyword-value pairs. These values are used if the keyword
         does not match predefined constants.
 
     Returns
     -------
     Various
-        The value associated with the keyword. The exact type depends on the keyword and the value in the 
+        The value associated with the keyword. The exact type depends on the keyword and the value in the
         dictionary or predefined constants.
 
     Notes
     -----
     If the keyword is "kwargs", the function will return the entire `kwargs_dict`.
     If the keyword ends with "+", the function will print the value before returning it.
-    If the keyword ends with "+l", the function will print the value as a space-separated list before 
+    If the keyword ends with "+l", the function will print the value as a space-separated list before
     returning it.
-    The predefined constants `ARCHIVE_NAMES` are used for keywords "archive_names_all" and 
+    The predefined constants `ARCHIVE_NAMES` are used for keywords "archive_names_all" and
     "archive_names_scaled".
     """
     if keyword == "kwargs":
@@ -296,13 +296,13 @@ def _build_other(keyword, **kwargs_dict):
 
 def _construct_kwargs_dict(**kwargs_dict):
     """
-    Construct a complete kwargs dictionary by combining default values, YAML configuration (if requested), 
+    Construct a complete kwargs dictionary by combining default values, YAML configuration (if requested),
     and provided keyword arguments, with precedence in that order.
 
     Parameters
     ----------
     kwargs_dict : dict
-        A dictionary of keyword arguments provided by the user. These values take the highest 
+        A dictionary of keyword arguments provided by the user. These values take the highest
         precedence and will overwrite defaults and YAML configurations.
 
     Returns
@@ -313,10 +313,10 @@ def _construct_kwargs_dict(**kwargs_dict):
     Notes
     -----
     Default values are defined in the `DEFAULTS` dictionary.
-    If `use_yaml` is True in `kwargs_dict` or in the defaults, the function will load additional keyword 
+    If `use_yaml` is True in `kwargs_dict` or in the defaults, the function will load additional keyword
     arguments from a YAML file specified by `yaml_filename`.
     Keys "get_samples" and "archives" are deep updated to combine nested dictionaries.
-    The function sets up various path-related keyword arguments, including `base_dir`, `logs_dir`, 
+    The function sets up various path-related keyword arguments, including `base_dir`, `logs_dir`,
     `sample_file`, `parquet_dir`, and `yaml_file`.
     The base directory is created if it does not already exist.
     """
@@ -376,7 +376,7 @@ def _deep_update_kwargs_group(key, group_a, group_b):
     Notes
     -----
     If both groups are empty, the function returns the default values for the given key.
-    The function converts both groups to dictionaries with keys as names and values as dictionaries of 
+    The function converts both groups to dictionaries with keys as names and values as dictionaries of
     keyword arguments.
     It deeply updates the individual name/kwarg pairs.
     """
@@ -413,7 +413,7 @@ def _kwargs_list_to_dict(list_or_dict):
 
     Notes
     -----
-    If the input is a list, the function generates a dictionary with names as keys and empty dictionaries 
+    If the input is a list, the function generates a dictionary with names as keys and empty dictionaries
     as values.
     If the input is already a dictionary, the function converts the keys to lowercase.
     """

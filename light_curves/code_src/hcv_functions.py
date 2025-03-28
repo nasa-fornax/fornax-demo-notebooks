@@ -28,11 +28,11 @@ def hcvcone(ra, dec, radius, table="hcvsummary", release="v3", format="csv", mag
 
     Parameters
     ----------
-    ra: float (degrees) 
+    ra: float (degrees)
         J2000 Right Ascension
-    dec: float (degrees) 
+    dec: float (degrees)
         J2000 Declination
-    radius: float (degrees) 
+    radius: float (degrees)
         Search radius (<= 0.5 degrees)
     table: string
         hcvsummary, hcv, summary, detailed, propermotions, or sourcepositions
@@ -134,7 +134,7 @@ def hcvmetadata(table="hcvsummary", release="v3", magtype="magaper2", baseurl=ge
     ----------
     table: string
         hcvsummary, hcv, summary, detailed, propermotions, or sourcepositions
-    release: string 
+    release: string
         v3 or v2
     magtype: string
         magaper2 or magauto (only applies to summary table)
@@ -164,7 +164,7 @@ def cat2url(table="hcvsummary", release="v3", magtype="magaper2", baseurl=get_hs
         hcvsummary, hcv, summary, detailed, propermotions, or sourcepositions
     release: string
         v3 or v2
-    magtype: string 
+    magtype: string
         magaper2 or magauto (only applies to summary table)
     baseurl: string
         base URL for the request

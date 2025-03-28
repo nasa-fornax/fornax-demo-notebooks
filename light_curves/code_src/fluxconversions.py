@@ -15,12 +15,12 @@ def convert_wise_flux_to_millijansky(flux_nanomaggy, *, band=None):
         Flux in nanomaggy.
     band : str
         WISE band name corresponding to flux_nanomaggy. One of "W1", "W2", "W3", "W4", or None.
-        If None, band will be set to the name attribute of flux_nanomaggy. Useful when applying this 
+        If None, band will be set to the name attribute of flux_nanomaggy. Useful when applying this
         transform to a DataFrame grouped by band.
 
     Returns
     -------
-    flux_mjy : float or iterable of floats 
+    flux_mjy : float or iterable of floats
         flux_nanomaggy converted to millijansky.
     """
     if band is None:
@@ -42,7 +42,7 @@ def convert_wise_flux_to_millijansky(flux_nanomaggy, *, band=None):
 
 
 def convertACSmagtoflux(date, filterstring, mag, magerr):
-    """converts HST ACS magnitudes into flux units of Janskies 
+    """converts HST ACS magnitudes into flux units of Janskies
 
     Parameters
     ----------

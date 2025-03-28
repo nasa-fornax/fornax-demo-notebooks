@@ -10,7 +10,7 @@ from upath import UPath
 
 
 def panstarrs_get_lightcurves(sample_table, *, radius=1):
-    """Searches panstarrs hipscat files for light curves from a list of input coordinates.  
+    """Searches panstarrs hipscat files for light curves from a list of input coordinates.
 
     Parameters
     ----------

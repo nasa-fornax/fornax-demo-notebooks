@@ -65,7 +65,7 @@ def heasarc_get_lightcurves(sample_table, *, catalog_error_radii={"FERMIGTRIG": 
     catalog_error_radii : dict
         Catalogs to query and their corresponding max error radii. Dictionary key must be one of the tables listed
         here: https://astroquery.readthedocs.io/en/latest/heasarc/heasarc.html#getting-list-of-available-missions.
-        Value must be the maximum error radius to include in the returned catalog of objects (ie., we are not 
+        Value must be the maximum error radius to include in the returned catalog of objects (ie., we are not
         interested in GRBs with a 90degree error radius because they will fit all of our objects).
 
     Returns

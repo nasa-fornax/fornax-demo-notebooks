@@ -13,7 +13,7 @@ from fluxconversions import mjd_to_jd
 def sigmaclip_lightcurves(df_lc, sigmaclip_value=10.0, include_plot=False, verbose=False):
     """
     Sigmaclip to remove bad values from the light curves; optionally plots histograms of uncertainties
-        to help determine sigmaclip_value from the data. 
+        to help determine sigmaclip_value from the data.
 
     Parameters
     ----------
@@ -78,7 +78,7 @@ def sigmaclip_lightcurves(df_lc, sigmaclip_value=10.0, include_plot=False, verbo
 def remove_objects_without_band(df_lc, bandname_to_keep="W1", verbose=False):
     # drop objects that do not have data in the band bandname_to_keep
     """
-    Drop objects that do not have data in the band bandname_to_keep.  This is needed for normalization.  
+    Drop objects that do not have data in the band bandname_to_keep.  This is needed for normalization.
 
     Parameters
     ----------
@@ -299,7 +299,7 @@ def uniform_length_spacing(df_lc, final_freq_interpol, include_plot=True):
     ----------
     df_lc: Pandas dataframe with light curve info
 
-    final_freq_interpol: int 
+    final_freq_interpol: int
         timescale of interpolation in units of days
 
     include_plot: bool

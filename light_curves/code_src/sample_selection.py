@@ -462,7 +462,7 @@ def get_csv_sample(coords, labels, *, csv_path, label, ra_colname="ra", dec_coln
     lables : list
         List of the first author name and publication year for tracking the sources, shared amongst functions
     csv_path : str
-        Path to a csv file containing (at least) columns 
+        Path to a csv file containing (at least) columns
     label : str
         The label to apply to these coordinates.
     ra_colname : str
@@ -490,7 +490,7 @@ def clean_sample(coords_list, labels_list, *, consolidate_nearby_objects=True, v
     labels_list : list
         List of the first author name and publication year for tracking the sources
     consolidate_nearby_objects : bool
-        Whether to return only the objects that are unique within a small, on-sky separation (True) 
+        Whether to return only the objects that are unique within a small, on-sky separation (True)
         or all objects in coords_list (False).
     verbose : int, optional
         Print out the length of the sample after applying this function

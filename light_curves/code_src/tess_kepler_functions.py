@@ -9,7 +9,7 @@ def clean_filternames(lightcurve):
     """Simplify mission name from a combined list
 
     Mission names are returned including quarter numbers, remove those to
-    simplify. For this use case, we really only need to know which mission, 
+    simplify. For this use case, we really only need to know which mission,
     not which quarter.
 
     Parameters
