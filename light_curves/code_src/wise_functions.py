@@ -18,7 +18,7 @@ K = 5  # HEALPix order at which the dataset is partitioned
 def wise_get_lightcurves(sample_table, *, radius=1.0, bandlist=["W1", "W2"]):
     """Loads WISE data by searching the unWISE light curve catalog (Meisner et al., 2023AJ....165...36M).
     This is the MAIN function
-    
+
     Parameters
     ----------
     sample_table : `~astropy.table.Table`
@@ -45,7 +45,7 @@ def wise_get_lightcurves(sample_table, *, radius=1.0, bandlist=["W1", "W2"]):
 
     # clean and transform the data into the form needed for a MultiIndexDFObject
     wise_df = transform_lightcurves(wise_df)
-    
+
     # return the light curves as a MultiIndexDFObject
     indexes, columns = ["objectid", "label", "band", "time"], ["flux", "err"]
     return MultiIndexDFObject(data=wise_df.set_index(indexes)[columns].sort_index())
@@ -103,7 +103,8 @@ def load_lightcurves(locations, radius, bandlist):
     fs = pyarrow.fs.S3FileSystem(region="us-west-2")
     bucket = "nasa-irsa-wise"
     catalog_root = f"{bucket}/unwise/neo7/catalogs/time_domain/healpix_k{K}/unwise-neo7-time_domain-healpix_k{K}.parquet"
-    dataset = pyarrow.dataset.parquet_dataset(f"{catalog_root}/_metadata", filesystem=fs, partitioning="hive")
+    dataset = pyarrow.dataset.parquet_dataset(
+        f"{catalog_root}/_metadata", filesystem=fs, partitioning="hive")
 
     # specify which columns will be loaded
     # for a complete list of column names, use: `dataset.schema.names`
@@ -116,10 +117,12 @@ def load_lightcurves(locations, radius, bandlist):
     for pixel, locs_df in tqdm(locations.groupby("pixel")):
         # create a filter to pick out sources that are (1) in this partition; and (2) within the
         # coadd's primary region (to avoid duplicates when an object is near the coadd boundary)
-        filter = (pyarrow.compute.field(f"healpix_k{K}") == pixel) & (pyarrow.compute.field("primary") == 1)
+        filter = (pyarrow.compute.field(f"healpix_k{K}") == pixel) & (
+            pyarrow.compute.field("primary") == 1)
         # add a filter for the bandlist. if all bands are requested, skip this to avoid the overhead
         if len(set(BANDMAP.keys()) - set(bandlist)) > 0:
-            filter = filter & (pyarrow.compute.field("band").isin([BANDMAP[band] for band in bandlist]))
+            filter = filter & (pyarrow.compute.field("band").isin(
+                [BANDMAP[band] for band in bandlist]))
 
         # query the dataset and load the light curve data
         pixel_tbl = dataset.to_table(filter=filter, columns=columns)
@@ -127,7 +130,8 @@ def load_lightcurves(locations, radius, bandlist):
         # do a cone search using astropy to select sources belonging to each object
         pixel_skycoords = SkyCoord(ra=pixel_tbl["ra"] * u.deg, dec=pixel_tbl["dec"] * u.deg)
         objects_skycoords = SkyCoord(locs_df["coord.ra"], locs_df["coord.dec"], unit=u.deg)
-        object_ilocs, pixel_ilocs, _, _ = pixel_skycoords.search_around_sky(objects_skycoords, radius)
+        object_ilocs, pixel_ilocs, _, _ = pixel_skycoords.search_around_sky(
+            objects_skycoords, radius)
 
         # create a dataframe with all matched sources
         match_df = pixel_tbl.take(pixel_ilocs).to_pandas()

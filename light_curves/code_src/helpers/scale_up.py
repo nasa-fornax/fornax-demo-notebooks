@@ -17,7 +17,8 @@ sys.path.append(str(HELPERS_DIR.parent))  # put code_src dir on the path
 
 ARCHIVE_NAMES = {
     "all": ["Gaia", "HCV", "HEASARC", "IceCube", "PanSTARRS", "TESS_Kepler", "WISE", "ZTF"],
-    "scaled": ["Gaia", "HEASARC", "IceCube", "WISE", "ZTF"],  # these are expected to run successfully at scale
+    # these are expected to run successfully at scale
+    "scaled": ["Gaia", "HEASARC", "IceCube", "WISE", "ZTF"],
 }
 DEFAULTS = {
     "run_id": "my-run",
@@ -234,7 +235,8 @@ def _build_lightcurves(*, archive, archive_kwargs, sample_file, parquet_dir, ove
         return
     parquet_filepath.parent.mkdir(parents=True, exist_ok=True)
     lightcurve_df.data.to_parquet(parquet_filepath)
-    print(f"Light curves saved to:\n\tparquet_dir={parquet_dir}\n\tfile={parquet_filepath.relative_to(parquet_dir)}")
+    print(
+        f"Light curves saved to:\n\tparquet_dir={parquet_dir}\n\tfile={parquet_filepath.relative_to(parquet_dir)}")
     print(_now(), flush=True)
     return lightcurve_df
 
@@ -327,7 +329,8 @@ def _construct_kwargs_dict(**kwargs_dict):
 
     # update with kwargs_dict. both may contain dict values for the following keys, which need deep updates.
     for key in ["get_samples", "archives"]:
-        my_kwargs[key] = _deep_update_kwargs_group(key, my_kwargs.pop(key, []), kwargs_dict.pop(key, []))
+        my_kwargs[key] = _deep_update_kwargs_group(
+            key, my_kwargs.pop(key, []), kwargs_dict.pop(key, []))
     my_kwargs.update(kwargs_dict)  # update with any additional keys in kwargs_dict
 
     # add any defaults that are still missing
@@ -477,7 +480,7 @@ def _load_yaml(yaml_file):
     The function uses `yaml.safe_load` to parse the YAML file.
     """
     with open(yaml_file, "r") as fin:
-             yaml_dict = yaml.safe_load(fin)
+        yaml_dict = yaml.safe_load(fin)
     return yaml_dict
 
 
@@ -501,7 +504,7 @@ def write_kwargs_to_yaml(**kwargs_dict) -> None:
     --------
     >>> write_kwargs_to_yaml(param1='value1', param2=42)
     kwargs written to /path/to/yaml_file.yaml
-    """    
+    """
     yaml_path = run(build="yaml_file", **kwargs_dict)
     with open(yaml_path, "w") as fout:
         yaml.safe_dump(kwargs_dict, fout)
@@ -593,7 +596,8 @@ def _parse_args(args_list):
     # update my_kwargs_dict with args_kwargs_dict
     # both may contain dict values for the following keys, which need deep updates.
     for key in list(k for k in ["get_samples", "archives"] if k in my_kwargs_dict):
-        my_kwargs_dict[key] = _deep_update_kwargs_group(key, my_kwargs_dict.pop(key), args_kwargs_dict.pop(key, []))
+        my_kwargs_dict[key] = _deep_update_kwargs_group(
+            key, my_kwargs_dict.pop(key), args_kwargs_dict.pop(key, []))
     my_kwargs_dict.update(args_kwargs_dict)  # update with any additional keys in args_kwargs_dict
 
     # add the archive, if provided
