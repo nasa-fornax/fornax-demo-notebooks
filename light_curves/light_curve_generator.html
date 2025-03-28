@@ -270,23 +270,6 @@
       
       
       
-      <li><a href="https://github.com/nasa-fornax/fornax-demo-notebooks/edit/main/light_curves/light_curve_generator.md" target="_blank"
-   class="btn btn-sm btn-source-edit-button dropdown-item"
-   title="Suggest edit"
-   data-bs-placement="left" data-bs-toggle="tooltip"
->
-  
-
-<span class="btn__icon-container">
-  <i class="fas fa-pencil-alt"></i>
-  </span>
-<span class="btn__text-container">Suggest edit</span>
-</a>
-</li>
-      
-      
-      
-      
       <li><a href="https://github.com/nasa-fornax/fornax-demo-notebooks/issues/new?title=Issue%20on%20page%20%2Flight_curves/light_curve_generator.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
@@ -528,7 +511,7 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Uncomment the next line to install dependencies if needed.</span>
-<span class="c1"># !pip install -r requirements_light_curve_generator.txt</span>
+<span class="c1">#!pip install -r requirements_light_curve_generator.txt</span>
 </pre></div>
 </div>
 </div>
@@ -558,7 +541,7 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">wise_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">wise_get_lightcurves</span>
 <span class="c1"># Note: ZTF data is temporarily located in a non-public AWS S3 bucket. It is automatically available</span>
 <span class="c1"># from the Fornax Science Console, but otherwise will require explicit user credentials.</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ztf_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ztf_get_lightcurves</span>
+<span class="c1"># from ztf_functions import ztf_get_lightcurves</span>
 </pre></div>
 </div>
 </div>
@@ -736,6 +719,7 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 <section id="mast-pan-starrs">
 <h3>2.4 MAST: Pan-STARRS<a class="headerlink" href="#mast-pan-starrs" title="Link to this heading">#</a></h3>
 <p>The function to retrieve lightcurves from Pan-STARRS uses a version of both the object and light curve catalogs that are stored in the cloud and accessed using <a class="reference external" href="https://docs.lsdb.io/en/stable/">lsdb</a>.  This function is efficient at large scale (sample sizes &gt; ~1000).</p>
+<p>Some warnings are expected.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">panstarrsstarttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -1074,7 +1058,7 @@ By Fornax developers
 
   <p class="copyright">
     
-      © Copyright 2022-2024, Fornax developers.
+      © Copyright 2022-2025, Fornax developers.
       <br/>
     
   </p>

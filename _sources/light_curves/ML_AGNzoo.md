@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.16.4
 kernelspec:
-  display_name: science_demo
+  display_name: notebook
   language: python
-  name: conda-env-science_demo-py
+  name: python3
 ---
 
 # AGN Zoo: Comparison of AGN selected with different metrics
@@ -44,7 +44,7 @@ Here are the libraries used in this network. They are also mostly mentioned in t
 - *matplotlib* *pyplot* and *cm* for plotting data
 - *astropy.io fits* for accessing FITS files
 - *astropy.table Table* for creating tidy tables of the data
-- *ML_utils* for reading in and prepreocessing of lightcurve data
+- *AGNzoo_functions* for reading in and prepreocessing of lightcurve data
 - *umap* and *sompy* for manifold learning, dimensionality reduction and visualization
 
 This cell will install them if needed:
@@ -66,7 +66,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 import pandas as pd
 sys.path.append('code_src/')
-from ML_utils import (unify_lc, unify_lc_gp, stat_bands, autopct_format, combine_bands,
+from AGNzoo_functions import (unify_lc, unify_lc_gp, stat_bands, autopct_format, combine_bands,
                       normalize_clipmax_objects, shuffle_datalabel, dtw_distance,
                       stretch_small_values_arctan, translate_bitwise_sum_to_labels, update_bitsums)
 from collections import Counter,OrderedDict

@@ -270,23 +270,6 @@
       
       
       
-      <li><a href="https://github.com/nasa-fornax/fornax-demo-notebooks/edit/main/forced_photometry/multiband_photometry.md" target="_blank"
-   class="btn btn-sm btn-source-edit-button dropdown-item"
-   title="Suggest edit"
-   data-bs-placement="left" data-bs-toggle="tooltip"
->
-  
-
-<span class="btn__icon-container">
-  <i class="fas fa-pencil-alt"></i>
-  </span>
-<span class="btn__text-container">Suggest edit</span>
-</a>
-</li>
-      
-      
-      
-      
       <li><a href="https://github.com/nasa-fornax/fornax-demo-notebooks/issues/new?title=Issue%20on%20page%20%2Fforced_photometry/multiband_photometry.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
@@ -673,38 +656,105 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Temporarily add the cloud_access metadata to the Atlas response.</span>
-<span class="c1"># This dataset has limited acces, thus &#39;region&#39; should be used instead of &#39;open&#39;.</span>
-<span class="c1"># S3 access should be available from the daskhub and those who has their IRSA token set up.</span>
+<span class="c1"># This dataset has limited access, thus &#39;region&#39; should be used instead of &#39;open&#39;.</span>
+<span class="c1"># S3 access should be available from the Fornax Science Console.</span>
 
 <span class="n">fname</span> <span class="o">=</span> <span class="n">spitzer</span><span class="p">[</span><span class="s1">&#39;fname&#39;</span><span class="p">]</span>
-<span class="n">spitzer</span><span class="p">[</span><span class="s1">&#39;cloud_access&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">{{</span><span class="s1">&quot;aws&quot;: </span><span class="se">{{</span><span class="s1"> &quot;bucket_name&quot;: &quot;irsa-mast-tike-spitzer-data&quot;,&#39;</span>
+<span class="n">spitzer</span><span class="p">[</span><span class="s1">&#39;cloud_access&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">{{</span><span class="s1">&quot;aws&quot;: </span><span class="se">{{</span><span class="s1"> &quot;bucket_name&quot;: &quot;irsa-fornax-testdata&quot;,&#39;</span>
                             <span class="sa">f</span><span class="s1">&#39;              &quot;region&quot;: &quot;us-east-1&quot;,&#39;</span>
                             <span class="sa">f</span><span class="s1">&#39;              &quot;access&quot;: &quot;restricted&quot;,&#39;</span>
-                            <span class="sa">f</span><span class="s1">&#39;              &quot;key&quot;: &quot;data/COSMOS/</span><span class="si">{</span><span class="n">fn</span><span class="si">}</span><span class="s1">&quot; </span><span class="se">}}</span><span class="s1"> </span><span class="se">}}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">fname</span><span class="p">]</span>
+                            <span class="sa">f</span><span class="s1">&#39;              &quot;key&quot;: &quot;COSMOS/</span><span class="si">{</span><span class="n">fn</span><span class="si">}</span><span class="s1">&quot; </span><span class="se">}}</span><span class="s1"> </span><span class="se">}}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">fname</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Adding function to download multiple files using the fornax API.</span>
-<span class="c1"># Requires https://github.com/nasa-fornax/fornax-cloud-access-API/pull/4</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Requires https://github.com/nasa-fornax/fornax-cloud-access-API/pull/4</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">fornax</span>
+
 <span class="k">def</span><span class="w"> </span><span class="nf">fornax_download</span><span class="p">(</span><span class="n">data_table</span><span class="p">,</span> <span class="n">data_subdirectory</span><span class="p">,</span> <span class="n">access_url_column</span><span class="o">=</span><span class="s1">&#39;access_url&#39;</span><span class="p">,</span>
                     <span class="n">fname_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="n">working_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Downloads data files if they do not already exist in the specified directory.</span>
 
-    <span class="n">data_directory</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;data/</span><span class="si">{</span><span class="n">data_subdirectory</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">data_directory</span><span class="p">)</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data_table : iterable</span>
+<span class="sd">        An iterable containing metadata for files to be downloaded. Each element</span>
+<span class="sd">        should be a dictionary-like object with at least a &#39;fname&#39; key.</span>
+<span class="sd">    data_subdirectory : str</span>
+<span class="sd">        Name of the subdirectory where the downloaded files will be stored.</span>
+<span class="sd">    access_url_column : str, optional</span>
+<span class="sd">        Column name containing the access URLs for downloading the files. </span>
+<span class="sd">        Default is &#39;access_url&#39;.</span>
+<span class="sd">    fname_filter : str, optional</span>
+<span class="sd">        If provided, only files whose names contain this substring will be downloaded.</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        If True, print status messages. Default is False.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If neither &#39;fname&#39; nor &#39;name&#39; columns are found in `data_table`.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - The function checks if a file already exists before downloading it.</span>
+<span class="sd">    - It creates the target directory if it does not exist.</span>
+<span class="sd">    - Uses `fornax.get_data_product()` to retrieve the data handler.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; data_table = [{&#39;fname&#39;: &#39;file1.fits&#39;, &#39;access_url&#39;: &#39;https://example.com/file1.fits&#39;},</span>
+<span class="sd">    ...               {&#39;fname&#39;: &#39;file2.fits&#39;, &#39;access_url&#39;: &#39;https://example.com/file2.fits&#39;}]</span>
+<span class="sd">    &gt;&gt;&gt; fornax_download(data_table, &#39;my_data&#39;, verbose=True)</span>
+<span class="sd">    Skipping file1.fits: already exists.</span>
+<span class="sd">    Downloaded and saved file2.fits to data/my_data</span>
+<span class="sd">    Download process complete.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Define the absolute path of the target directory</span>
+    <span class="n">data_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">data_subdirectory</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">data_directory</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Ensure the directory exists</span>
+
+    <span class="c1"># Check which filename column exists</span>
+    <span class="n">filename_column</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;fname&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data_table</span><span class="o">.</span><span class="n">colnames</span><span class="p">:</span>
+            <span class="n">filename_column</span> <span class="o">=</span> <span class="n">col</span>
+            <span class="k">break</span>  <span class="c1"># Use the first found column</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">filename_column</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Error: Neither &#39;fname&#39; nor &#39;name&#39; columns found in the data table.&quot;</span><span class="p">)</span>
+
     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data_table</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">fname_filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">fname_filter</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;fname&#39;</span><span class="p">]:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">filename_column</span><span class="p">])</span>  <span class="c1"># Extract filename</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>  <span class="c1"># Full file path</span>
+
+        <span class="c1"># Skip download if file already exists</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Skipping </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">: already exists.&quot;</span><span class="p">)</span>
             <span class="k">continue</span>
+
+        <span class="c1"># Apply filename filter, if provided</span>
+        <span class="k">if</span> <span class="n">fname_filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">fname_filter</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">filename</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Download the file</span>
         <span class="n">handler</span> <span class="o">=</span> <span class="n">fornax</span><span class="o">.</span><span class="n">get_data_product</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;aws&#39;</span><span class="p">,</span> <span class="n">access_url_column</span><span class="o">=</span><span class="n">access_url_column</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
         <span class="n">temp_file</span> <span class="o">=</span> <span class="n">handler</span><span class="o">.</span><span class="n">download</span><span class="p">()</span>
-        <span class="c1"># on-prem download returns temp file path, s3 download downloads file</span>
-        <span class="k">if</span> <span class="n">temp_file</span><span class="p">:</span>
-            <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">temp_file</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;fname&#39;</span><span class="p">]))</span>
 
-    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">working_dir</span><span class="p">)</span>
+        <span class="c1"># Move the downloaded file if a local file path is returned</span>
+        <span class="k">if</span> <span class="n">temp_file</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">temp_file</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Downloaded and saved </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">data_directory</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Download process complete.&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -775,7 +825,11 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 
 <span class="c1"># Download filtered products from AWS</span>
 <span class="n">download_subdir</span> <span class="o">=</span> <span class="s1">&#39;Galex&#39;</span>
-<span class="n">fornax_download</span><span class="p">(</span><span class="n">filtered_products</span><span class="p">,</span> <span class="n">access_url_column</span><span class="o">=</span><span class="n">access_url_column</span><span class="p">,</span> <span class="n">data_subdirectory</span><span class="o">=</span><span class="n">download_subdir</span><span class="p">)</span>
+<span class="n">fornax_download</span><span class="p">(</span>
+    <span class="n">filtered_products</span><span class="p">,</span> 
+    <span class="n">access_url_column</span><span class="o">=</span><span class="n">access_url_column</span><span class="p">,</span> 
+    <span class="n">data_subdirectory</span><span class="o">=</span><span class="n">download_subdir</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -783,16 +837,19 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the GALEX sky background fits files in addition to the mosaics</span>
-<span class="n">skybg_products</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="n">skybkg_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;COSMOS_0[1-4]-[fn]d-skybg&quot;</span><span class="p">)</span>
 
-<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">galex_image_products</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">skybkg_pattern</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]):</span>
-        <span class="n">skybg_products</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+<span class="c1"># Apply filtering using list comprehension</span>
+<span class="n">mask</span> <span class="o">=</span> <span class="p">[</span><span class="nb">bool</span><span class="p">(</span><span class="n">skybkg_pattern</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">name</span><span class="p">))</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">galex_image_products</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span>
+<span class="n">skybg_products</span> <span class="o">=</span> <span class="n">galex_image_products</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
 
 <span class="c1"># Download skybg products from AWS</span>
 <span class="n">download_subdir</span> <span class="o">=</span> <span class="s1">&#39;Galex&#39;</span>
-<span class="n">fornax_download</span><span class="p">(</span><span class="n">skybg_products</span><span class="p">,</span> <span class="n">access_url_column</span><span class="o">=</span><span class="n">access_url_column</span><span class="p">,</span> <span class="n">data_subdirectory</span><span class="o">=</span><span class="n">download_subdir</span><span class="p">)</span>
+<span class="n">fornax_download</span><span class="p">(</span>
+    <span class="n">skybg_products</span><span class="p">,</span> 
+    <span class="n">access_url_column</span><span class="o">=</span><span class="n">access_url_column</span><span class="p">,</span> 
+    <span class="n">data_subdirectory</span><span class="o">=</span><span class="n">download_subdir</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1603,7 +1660,7 @@ By Fornax developers
 
   <p class="copyright">
     
-      © Copyright 2022-2024, Fornax developers.
+      © Copyright 2022-2025, Fornax developers.
       <br/>
     
   </p>

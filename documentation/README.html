@@ -269,23 +269,6 @@
       
       
       
-      <li><a href="https://github.com/nasa-fornax/fornax-demo-notebooks/edit/main/documentation/README.md" target="_blank"
-   class="btn btn-sm btn-source-edit-button dropdown-item"
-   title="Suggest edit"
-   data-bs-placement="left" data-bs-toggle="tooltip"
->
-  
-
-<span class="btn__icon-container">
-  <i class="fas fa-pencil-alt"></i>
-  </span>
-<span class="btn__text-container">Suggest edit</span>
-</a>
-</li>
-      
-      
-      
-      
       <li><a href="https://github.com/nasa-fornax/fornax-demo-notebooks/issues/new?title=Issue%20on%20page%20%2Fdocumentation/README.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
@@ -425,9 +408,11 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#navigating-jupyterlab-in-the-fornax-science-console">Navigating JupyterLab in the Fornax Science Console</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#starting-monitoring-analyses">Starting &amp; Monitoring Analyses</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-can-i-tell-which-computing-resources-are-available-on-the-fornax-science-console">How can I tell which computing resources are available on the Fornax Science Console?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#please-use-md-markdown-files-instead-of-ipynb-for-jupyter-notebooks">Please use .md markdown files instead of .ipynb for Jupyter notebooks</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-can-i-tell-if-i-am-close-to-using-up-my-allocation-of-compute-and-storage-resources">How can I tell if I am close to using up my allocation of compute and storage resources?</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-will-my-analysis-be-affected-by-memory-limitations">How will my analysis be affected by memory limitations?</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-a-kernel-and-how-do-i-choose-one">What is a kernel and how do I choose one?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-the-dask-extension-and-how-do-i-use-it">What is the Dask extension and how do I use it?</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#does-work-persist-between-sessions">Does work persist between sessions?</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#save-your-work">Save your work!</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-can-i-save-my-notebook-as-a-python-script">How can I save my notebook as a Python script?</a></li>
@@ -605,6 +590,33 @@ document.write(`
 </ul>
 <p>Under construction: It appears that sometimes we are allowed to use more CPU than listed for a short amount of time.  Is this true? and what are the parameters of when and for what sizes that will be allowed?</p>
 </section>
+<section id="please-use-md-markdown-files-instead-of-ipynb-for-jupyter-notebooks">
+<h3>Please use .md markdown files instead of .ipynb for Jupyter notebooks<a class="headerlink" href="#please-use-md-markdown-files-instead-of-ipynb-for-jupyter-notebooks" title="Link to this heading">#</a></h3>
+<p>Using .md (Markdown) files for Jupyter notebooks in GitHub repositories offers significant advantages over traditional .ipynb files, particularly for astronomers and researchers collaborating on code-intensive projects. The primary benefit is vastly improved readability during code reviews and version control. Unlike .ipynb files, which store output, metadata, and code in a convoluted JSON format, .md files present code, text, and outputs in a clean, diff-friendly format. This makes it easier to track changes in pull requests, compare versions, and conduct meaningful code reviews, which is essential for maintaining high-quality, reproducible research code. Additionally, Markdown files integrate seamlessly with Jupytext, allowing them to function as fully interactive notebooks within JupyterLab, offering the same user experience without the drawbacks of .ipynb files.</p>
+<p>Furthermore, using .md files promotes best practices for open science and educational resources. Many organizations, including NumPy are using Markdown-based notebooks to enhance accessibility and collaboration. Markdown is a lightweight format that supports rich formatting, code execution, and the inclusion of outputs while remaining easily editable in any text editor. This ensures that research notebooks remain both human-readable and machine-readable, enabling astronomers to share code and results more effectively with collaborators and the wider scientific community.</p>
+<p>Instructions for Using .md Files in JupyterLab</p>
+<ol class="arabic simple">
+<li><p>Starting a New Notebook as a .md File:</p>
+<ul class="simple">
+<li><p>In JupyterLab, when creating a new notebook, choose .md instead of .ipynb to ensure better version control and code reviewability.</p></li>
+</ul>
+</li>
+<li><p>Opening an Existing .md File as a Jupyter Notebook:</p>
+<ul class="simple">
+<li><p>Navigate to the .md file in the JupyterLab file browser.</p></li>
+<li><p>Right-click the file, select <code class="docutils literal notranslate"><span class="pre">Open</span> <span class="pre">With</span></code>, and choose <code class="docutils literal notranslate"><span class="pre">Notebook</span></code> or <code class="docutils literal notranslate"><span class="pre">Jupytext</span> <span class="pre">Notebook</span></code>.</p></li>
+<li><p>This will open the Markdown file in a notebook interface with cells and execution capabilities, just like a traditional .ipynb notebook.</p></li>
+</ul>
+</li>
+<li><p>Converting an Existing .ipynb Notebook to .md:</p>
+<ul class="simple">
+<li><p>If you have an existing .ipynb file that you want to add to the repository, convert it to .md using Jupytext:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">jupytext</span> <span class="pre">--to</span> <span class="pre">md</span> <span class="pre">notebook.ipynb</span></code>
+By following these instructions, you can leverage the benefits of Markdown files while maintaining the full functionality of Jupyter notebooks.</p></li>
+</ul>
+</li>
+</ol>
+</section>
 <section id="how-can-i-tell-if-i-am-close-to-using-up-my-allocation-of-compute-and-storage-resources">
 <h3>How can I tell if I am close to using up my allocation of compute and storage resources?<a class="headerlink" href="#how-can-i-tell-if-i-am-close-to-using-up-my-allocation-of-compute-and-storage-resources" title="Link to this heading">#</a></h3>
 <p>Under construction.</p>
@@ -616,6 +628,25 @@ document.write(`
 <section id="what-is-a-kernel-and-how-do-i-choose-one">
 <h3>What is a kernel and how do I choose one?<a class="headerlink" href="#what-is-a-kernel-and-how-do-i-choose-one" title="Link to this heading">#</a></h3>
 <p>Under Construction: In Jupyter, kernels are the background processes that execute cells and return results for display. To select the kernel on which you want to run your Notebook, go to the Kernel menu and choose Change Kernel. You can also click directly on the name of the active kernel to switch to another one. The bottom of the JupyterLab window lists the github branch as well as the name of the kernel in use. The kernel is listed as either ‘idle’ or ‘busy’, which is useful to know if your kernel is working or has crashed.</p>
+</section>
+<section id="what-is-the-dask-extension-and-how-do-i-use-it">
+<h3>What is the Dask extension and how do I use it?<a class="headerlink" href="#what-is-the-dask-extension-and-how-do-i-use-it" title="Link to this heading">#</a></h3>
+<p><a class="reference external" href="https://www.dask.org/">Dask</a> is a python library for parallel computing, roughly similar to the <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> standard library.
+The Fornax Science Console includes the <a class="reference external" href="https://github.com/dask/dask-labextension">Dask JupyterLab Extension</a> which can be used to manage a Dask cluster and monitor the progress of submitted functions, all from within JupyterLab.
+The charts that make up Dask’s monitoring dashboard are embedded directly in JupyterLab panes which can be moved around into custom arrangements.
+Here are some chart examples:</p>
+<p><img alt=" " src="../_images/dask_chart_examples.png" /></p>
+<p>Quick-start instructions:</p>
+<ul class="simple">
+<li><p>On the left-hand side of the Console, click the Dask icon that looks like this: <img alt=" " src="../_images/dask_extension_button.png" /></p></li>
+<li><p>Scroll down and click “+NEW” next to “CLUSTERS” to start a new cluster.</p></li>
+<li><p>Right above that, once the cluster starts, you’ll see a column of yellow buttons appear with the names of available charts.
+Click on any of them and a new tab will open showing the selected chart.
+You can drag and drop the tab to move it somewhere else on the screen.
+In the screenshot above, several charts are open and arranged next to each other.</p></li>
+<li><p>Start or restart the kernel for the notebook you’re working in so that it will recognize the cluster.</p></li>
+<li><p>Submit functions to Dask as normal (<a class="reference external" href="https://distributed.dask.org/en/latest/quickstart.html">Dask Quickstart</a>) and you will see the charts update as the work progresses.</p></li>
+</ul>
 </section>
 <section id="does-work-persist-between-sessions">
 <h3>Does work persist between sessions?<a class="headerlink" href="#does-work-persist-between-sessions" title="Link to this heading">#</a></h3>
@@ -1027,9 +1058,11 @@ If you want a notebook or script to run for longer than about 60 minutes and you
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#navigating-jupyterlab-in-the-fornax-science-console">Navigating JupyterLab in the Fornax Science Console</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#starting-monitoring-analyses">Starting &amp; Monitoring Analyses</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-can-i-tell-which-computing-resources-are-available-on-the-fornax-science-console">How can I tell which computing resources are available on the Fornax Science Console?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#please-use-md-markdown-files-instead-of-ipynb-for-jupyter-notebooks">Please use .md markdown files instead of .ipynb for Jupyter notebooks</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-can-i-tell-if-i-am-close-to-using-up-my-allocation-of-compute-and-storage-resources">How can I tell if I am close to using up my allocation of compute and storage resources?</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-will-my-analysis-be-affected-by-memory-limitations">How will my analysis be affected by memory limitations?</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-a-kernel-and-how-do-i-choose-one">What is a kernel and how do I choose one?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-the-dask-extension-and-how-do-i-use-it">What is the Dask extension and how do I use it?</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#does-work-persist-between-sessions">Does work persist between sessions?</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#save-your-work">Save your work!</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-can-i-save-my-notebook-as-a-python-script">How can I save my notebook as a Python script?</a></li>
@@ -1105,7 +1138,7 @@ By Fornax developers
 
   <p class="copyright">
     
-      © Copyright 2022-2024, Fornax developers.
+      © Copyright 2022-2025, Fornax developers.
       <br/>
     
   </p>
