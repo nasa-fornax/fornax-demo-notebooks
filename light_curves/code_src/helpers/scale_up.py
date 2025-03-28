@@ -18,7 +18,7 @@ sys.path.append(str(HELPERS_DIR.parent))  # put code_src dir on the path
 ARCHIVE_NAMES = {
     "all": ["Gaia", "HCV", "HEASARC", "IceCube", "PanSTARRS", "TESS_Kepler", "WISE", "ZTF"],
     # these are expected to run successfully at scale
-    "scaled": ["Gaia", "HEASARC", "IceCube", "WISE", "ZTF"],
+    "scaled": ["Gaia", "HEASARC", "IceCube", "PanSTARRS", "WISE", "ZTF"],
 }
 DEFAULTS = {
     "run_id": "my-run",

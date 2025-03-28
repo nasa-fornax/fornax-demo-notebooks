@@ -530,7 +530,7 @@ Bash example:
 
 ```bash
 $ yaml_run_id=demo-kwargs-yaml
-$ bash code_src/helpers/scale_up.sh -r "$yaml_run_id" -d "use_yaml=true" -a "Gaia HEASARC IceCube WISE ZTF"
+$ bash code_src/helpers/scale_up.sh -r "$yaml_run_id" -d "use_yaml=true" -a "Gaia HEASARC IceCube PanSTARRS WISE ZTF"
 ```
 
 +++
