@@ -45,13 +45,13 @@ Here are the libraries used in this network. They are also mostly mentioned in t
 - *astropy.io fits* for accessing FITS files
 - *astropy.table Table* for creating tidy tables of the data
 - *AGNzoo_functions* for reading in and prepreocessing of lightcurve data
-- *umap* and *sompy* for manifold learning, dimensionality reduction and visualization
+- *umap* and *minisom* for manifold learning, dimensionality reduction, and visualization
 
 This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-#!pip install -r requirements_ML_AGNzoo.txt
+# !pip install -r requirements_ML_AGNzoo.txt
 ```
 
 ```{code-cell} ipython3
@@ -71,7 +71,7 @@ sys.path.append('code_src/')
 from AGNzoo_functions import (unify_lc, unify_lc_gp, stat_bands, autopct_format, combine_bands,
                       normalize_clipmax_objects, shuffle_datalabel, dtw_distance,
                       stretch_small_values_arctan, translate_bitwise_sum_to_labels, update_bitsums)
-from collections import Counter,OrderedDict,defaultdict
+from collections import Counter, defaultdict
 
 import umap
 from minisom import MiniSom
@@ -139,7 +139,7 @@ for (objectid, label), singleobj in df_lc.groupby(level=["objectid", "label"]):
 # changing order of labels in dictionary only for text to be readable on the plot
 key_order = ('SDSS_QSO', 'SPIDER_AGN', 'SPIDER_BL', 'SPIDER_QSOBL', 'SPIDER_AGNBL',
              'WISE_Variable', 'Optical_Variable', 'Galex_Variable', 'Turn-on', 'Turn-off', 'TDE')
-new_queue = OrderedDict()
+new_queue = {}
 for k in key_order:
     new_queue[k] = seen[k]
 
@@ -384,7 +384,7 @@ Figure above shows how with ZTF light curves alone we can separate some of these
 
 ```{code-cell} ipython3
 # Initialization and training
-msz0,msz1 = 15, 15
+msz0, msz1 = 15, 15
 som = MiniSom(msz0, msz1, data.shape[1], sigma=1.5, learning_rate=.5, 
               neighborhood_function='gaussian', random_seed=0, topology='rectangular')
 
@@ -394,7 +394,7 @@ som.train(data, 100000, verbose=False)  # random training
 
 ```{code-cell} ipython3
 laborder = ['SDSS_QSO', 'SPIDER_AGN', 'SPIDER_BL', 'SPIDER_QSOBL', 'SPIDER_AGNBL',
-             'WISE_Variable', 'Optical_Variable', 'Galex_Variable', 'Turn-on', 'Turn-off', 'TDE']
+            'WISE_Variable', 'Optical_Variable', 'Galex_Variable', 'Turn-on', 'Turn-off', 'TDE']
 
 
 # Create grid to hold mean fvar per SOM node
@@ -452,7 +452,7 @@ plt.show()
 The above SOMs are colored by the mean fractional variation of the lightcurves in all bands (a measure of AGN variability). The crosses are different samples mapped to the trained SOM to see if they are distinguishable on a normalized lightcurve som.
 
 ```{code-cell} ipython3
-# shuffle data incase the ML routines are sensitive to order
+# shuffle data in case the ML routines are sensitive to order
 data, fzr, p = shuffle_datalabel(dat_notnormal, flabels)
 fvar_arr, maximum_arr, average_arr = fvar[:, p], maxarray[:, p], meanarray[:, p]
 # Initialize labc to hold indices of each unique label
@@ -790,7 +790,8 @@ plt.axis('off')
 This notebook is created by the IPAC science platform team as a usecase of ML for time domain astrophysics. For questions contact: shemmati@caltech.edu
 
 **Author:** Shoubaneh Hemmati, Research scientist
-**Updated On:** 2024-09-02
+
+**Updated On:** 2025-03-31
 
 
 ## Citations
@@ -803,15 +804,3 @@ Datasets:
 Packages:
 * [`minisom`](https://github.com/JustGlowing/minisom)
 * [`umap`](https://github.com/lmcinnes/umap)
-<<<<<<< HEAD
-
-
-
-[Top of Page](#top)
-
-```{code-cell} ipython3
-
-```
-
-=======
->>>>>>> 586a3fa03619ee7c26591eb80d92a94280342103
