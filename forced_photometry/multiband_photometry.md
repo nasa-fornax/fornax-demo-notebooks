@@ -4,20 +4,20 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.15.2
+    jupytext_version: 1.16.7
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  display_name: notebook
   language: python
   name: python3
 ---
 
 # Automated Multiband Forced Photometry on Large Datasets
-***
+
 
 ## Learning Goals:
 By the end of this tutorial, you will be able to:
 - get catalogs and images from NASA archives in the cloud where possible
-- measure fluxes at any location by running forced photometry using "The Tractor" 
+- measure fluxes at any location by running forced photometry using "The Tractor"
 - employ parallel processing to make this as fast as possible
 - cross match large catalogs
 - plot results
@@ -36,13 +36,6 @@ The code will run on 2 different science platforms and makes full use of multipl
 - merged, multiband, science ready pandas dataframe
 - IRAC color color plot for identifying interesting populations
 
-## Non-standard Imports
-- `tractor` code which does the forced photometry from Lang et al., 2016
-- `astroquery` to interface with archives APIs
-- `astropy` to work with coordinates/units and data structures
-- `skimage` to work with the images
-
-
 ## Authors:
 Jessica Krick, David Shupe, Marziye JafariYazani, Brigitta Sipőcz, Vandana Desai, Steve Groom, Troy Raen
 
@@ -51,9 +44,20 @@ Jessica Krick, David Shupe, Marziye JafariYazani, Brigitta Sipőcz, Vandana Desa
 Kristina Nyland for the workflow of the tractor wrapper.\
 MAST, HEASARC, & IRSA Fornax teams
 
+
+## Imports
+
+## Non-standard Dependencies
+- `tractor` code which does the forced photometry from Lang et al., 2016
+- `astroquery` to interface with archives APIs
+- `astropy` to work with coordinates/units and data structures
+- `skimage` to work with the images
+
+This cell will install the Python ones if needed:
+
 ```{code-cell} ipython3
-#ensure all dependencies are installed
-!pip install -r requirements.txt
+# Uncomment the next line to install dependencies if needed.
+# !pip install -r requirements_multiband_photometry.txt
 ```
 
 ```{code-cell} ipython3
@@ -66,6 +70,7 @@ import concurrent.futures
 import sys
 import os
 import re
+import shutil
 from typing import NamedTuple
 
 # Third party imports
@@ -77,7 +82,7 @@ import pandas as pd
 import seaborn as sns
 import statsmodels
 import mpld3
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from astropy.nddata import Cutout2D
 from astropy.io import fits
@@ -103,20 +108,26 @@ from photometry import Band
 from photometry import lookup_img_pair
 #from prepare_prf import prepare_prf
 
-# temporarily let the notebook start without tractor as dependency
+# This code is to parse cloud access information; currently in `code_src`, eventually will be part of pyvo
+import fornax
+
+# temporarily let the notebook start without tractor as a dependency
 try:
     from find_nconfsources import find_nconfsources
 except ImportError:
     print("tractor is missing")
     pass
 
+# Add ~/.local/bin to path so executables installed with pip are available (needed for nway)
+os.environ['PATH'] = f"{os.environ['HOME']}/.local/bin:{os.environ['PATH']}"
+
 
 %matplotlib inline
 ```
 
 ## 1. Retrieve Initial Catalog from IRSA
-- Automatically set up a catalog with ra, dec, photometric redshifts, fiducial band fluxes, & probability that it is a star  
-- Catalog we are using is COSMOS2015 (Laigle et al. 2016)  
+- Automatically set up a catalog with ra, dec, photometric redshifts, fiducial band fluxes, & probability that it is a star
+- Catalog we are using is COSMOS2015 (Laigle et al. 2016)
 - Data exploration
 
 ```{code-cell} ipython3
@@ -129,7 +140,7 @@ coords = SkyCoord('150.01d 2.2d', frame='icrs')  #COSMOS center acording to Simb
 # full area of COSMOS is radius = 48'
 # running this code on the full COSMOS area takes ~24 hours on a 128core server, therefore
 # start with a manageable radius and increase as needed
-radius = 0.5 * u.arcmin  
+radius = 0.5 * u.arcmin
 
 
 #specify only select columns to limit the size of the catalog
@@ -159,7 +170,7 @@ print("Number of objects: ", len(cosmos_table))
 - if desired could filter the initial catalog to only include desired sources
 
 ```{code-cell} ipython3
-#an example of how to filter the catalog to 
+#an example of how to filter the catalog to
 #select those rows with either chandra fluxes or Galex NUV fluxes
 
 #example_table = cosmos_table[(cosmos_table['flux_chandra_05_10']> 0) | (cosmos_table['flux_galex_fuv'] > 0)]
@@ -169,31 +180,13 @@ print("Number of objects: ", len(cosmos_table))
 
 +++
 
-#### Use the fornax cloud access API to obtain the IRAC data from the IRSA S3 bucket. 
+### Use the fornax cloud access API to obtain the IRAC data from the IRSA S3 bucket.
 
 Details here may change as the prototype code is being added to the appropriate libraries, as well as the data holding to the appropriate NGAP storage as opposed to IRSA resources.
 
 ```{code-cell} ipython3
-# Temporary solution, remove when the fornax API is added to the image
-# This relies on the assumption that https://github.com/fornax-navo/fornax-cloud-access-API is being cloned to this environment. 
-# If it's not, then run a ``git clone https://github.com/fornax-navo/fornax-cloud-access-API --depth=1`` from a terminal at the highest directory root.
-# You may need to update the fork if you forked it in the past
-
-import os
-if not os.path.exists('../../fornax-cloud-access-API'):
-    ! git clone https://github.com/fornax-navo/fornax-cloud-access-API --depth=1 ../../fornax-cloud-access-API
-```
-
-```{code-cell} ipython3
-sys.path.append('../../fornax-cloud-access-API')
-
-import pyvo
-import fornax
-```
-
-```{code-cell} ipython3
 # Getting the COSMOS address from the registry to follow PyVO user case approach. We could hardwire it.
-image_services = pyvo.regsearch(servicetype='image')
+image_services = pyvo.regsearch(servicetype='sia')
 irsa_cosmos = [s for s in image_services if 'irsa' in s.ivoid and 'cosmos' in s.ivoid][0]
 
 # The search returns 11191 entries, but unfortunately we cannot really filter efficiently in the query
@@ -205,44 +198,111 @@ spitzer = cosmos_results[cosmos_results['dataset'] == 'IRAC']
 ```
 
 ```{code-cell} ipython3
-# Temporarily add the cloud_access metadata to the Atlas response. 
-# This dataset has limited acces, thus 'region' should be used instead of 'open'.
-# S3 access should be available from the daskhub and those who has their IRSA token set up.
+# Temporarily add the cloud_access metadata to the Atlas response.
+# This dataset has limited access, thus 'region' should be used instead of 'open'.
+# S3 access should be available from the Fornax Science Console.
 
 fname = spitzer['fname']
-spitzer['cloud_access'] = [(f'{{"aws": {{ "bucket_name": "irsa-mast-tike-spitzer-data",'
+spitzer['cloud_access'] = [(f'{{"aws": {{ "bucket_name": "irsa-fornax-testdata",'
                             f'              "region": "us-east-1",'
                             f'              "access": "restricted",'
-                            f'              "key": "data/COSMOS/{fn}" }} }}') for fn in fname]
+                            f'              "key": "COSMOS/{fn}" }} }}') for fn in fname]
 ```
 
 ```{code-cell} ipython3
-# Adding function to download multiple files using the fornax API. 
-# Requires https://github.com/fornax-navo/fornax-cloud-access-API/pull/4
+# Requires https://github.com/nasa-fornax/fornax-cloud-access-API/pull/4
+import os
+import shutil
+import fornax
+
 def fornax_download(data_table, data_subdirectory, access_url_column='access_url',
                     fname_filter=None, verbose=False):
-    working_dir = os.getcwd()
-    
-    data_directory = f"data/{data_subdirectory}"
-    os.chdir(data_directory)
+    """
+    Downloads data files if they do not already exist in the specified directory.
+
+    Parameters
+    ----------
+    data_table : iterable
+        An iterable containing metadata for files to be downloaded. Each element
+        should be a dictionary-like object with at least a 'fname' key.
+    data_subdirectory : str
+        Name of the subdirectory where the downloaded files will be stored.
+    access_url_column : str, optional
+        Column name containing the access URLs for downloading the files. 
+        Default is 'access_url'.
+    fname_filter : str, optional
+        If provided, only files whose names contain this substring will be downloaded.
+    verbose : bool, optional
+        If True, print status messages. Default is False.
+
+    Raises
+    ------
+    ValueError
+        If neither 'fname' nor 'name' columns are found in `data_table`.
+
+    Notes
+    -----
+    - The function checks if a file already exists before downloading it.
+    - It creates the target directory if it does not exist.
+    - Uses `fornax.get_data_product()` to retrieve the data handler.
+
+    Examples
+    --------
+    >>> data_table = [{'fname': 'file1.fits', 'access_url': 'https://example.com/file1.fits'},
+    ...               {'fname': 'file2.fits', 'access_url': 'https://example.com/file2.fits'}]
+    >>> fornax_download(data_table, 'my_data', verbose=True)
+    Skipping file1.fits: already exists.
+    Downloaded and saved file2.fits to data/my_data
+    Download process complete.
+    """
+    # Define the absolute path of the target directory
+    data_directory = os.path.join("data", data_subdirectory)
+    os.makedirs(data_directory, exist_ok=True)  # Ensure the directory exists
+
+    # Check which filename column exists
+    filename_column = None
+    for col in ['fname', 'name']:
+        if col in data_table.colnames:
+            filename_column = col
+            break  # Use the first found column
+
+    if not filename_column:
+        raise ValueError("Error: Neither 'fname' nor 'name' columns found in the data table.")
+
     for row in data_table:
-        if fname_filter is not None and fname_filter not in row['fname']:
+        filename = os.path.basename(row[filename_column])  # Extract filename
+        file_path = os.path.join(data_directory, filename)  # Full file path
+
+        # Skip download if file already exists
+        if os.path.exists(file_path):
+            if verbose:
+                print(f"Skipping {filename}: already exists.")
             continue
+
+        # Apply filename filter, if provided
+        if fname_filter is not None and fname_filter not in filename:
+            continue
+
+        # Download the file
         handler = fornax.get_data_product(row, 'aws', access_url_column=access_url_column, verbose=verbose)
         temp_file = handler.download()
-        # on-prem download returns temp file path, s3 download downloads file
+
+        # Move the downloaded file if a local file path is returned
         if temp_file:
-            os.rename(temp_file, os.path.basename(row['fname']))
-        
-    os.chdir(working_dir)
+            shutil.move(temp_file, file_path)
+            if verbose:
+                print(f"Downloaded and saved {filename} to {data_directory}")
+
+    if verbose:
+        print("Download process complete.")
 ```
 
 ```{code-cell} ipython3
-fornax_download(spitzer, access_url_column='sia_url', fname_filter='go2_sci', 
+fornax_download(spitzer, access_url_column='sia_url', fname_filter='go2_sci',
                 data_subdirectory='IRAC', verbose=False)
 ```
 
-#### Use IVOA image search and Fornax download to obtain Galex from the MAST archive
+### Use IVOA image search and Fornax download to obtain Galex from the MAST archive
 
 ```{code-cell} ipython3
 #the Galex mosaic of COSMOS is broken into 4 seperate images
@@ -292,21 +352,28 @@ access_url_column = query_result.fieldname_with_ucd('VOX:Image_AccessReference')
 
 # Download filtered products from AWS
 download_subdir = 'Galex'
-fornax_download(filtered_products, access_url_column=access_url_column, data_subdirectory=download_subdir)
+fornax_download(
+    filtered_products, 
+    access_url_column=access_url_column, 
+    data_subdirectory=download_subdir,
+    verbose=False)
 ```
 
 ```{code-cell} ipython3
 # Get the GALEX sky background fits files in addition to the mosaics
-skybg_products = []
 skybkg_pattern = re.compile(r"COSMOS_0[1-4]-[fn]d-skybg")
 
-for row in galex_image_products:
-    if skybkg_pattern.search(row['name']):
-        skybg_products.append(row)
+# Apply filtering using list comprehension
+mask = [bool(skybkg_pattern.search(name)) for name in galex_image_products['name']]
+skybg_products = galex_image_products[mask]
 
 # Download skybg products from AWS
 download_subdir = 'Galex'
-fornax_download(skybg_products, access_url_column=access_url_column, data_subdirectory=download_subdir)
+fornax_download(
+    skybg_products, 
+    access_url_column=access_url_column, 
+    data_subdirectory=download_subdir,
+    verbose=False)
 ```
 
 ```{code-cell} ipython3
@@ -445,13 +512,13 @@ sci_bkg_pairs = [
 ```{code-cell} ipython3
 def calc_instrflux(band, ra, dec, stype, ks_flux_aper2, img_pair, df):
     """
-    Calculate single-band instrumental fluxes and uncertainties at the given ra, dec 
+    Calculate single-band instrumental fluxes and uncertainties at the given ra, dec
     using tractor.
 
     Parameters:
     -----------
     band : `Band`
-        Collection of parameters for a single band. 
+        Collection of parameters for a single band.
         A `Band` is a named tuple with the following attributes:
             idx : int
                 Identifier for the band/channel.
@@ -494,7 +561,7 @@ def calc_instrflux(band, ra, dec, stype, ks_flux_aper2, img_pair, df):
     subimage, bkgsubimage, x1, y1, subimage_wcs = cutout.extract_pair(
         ra, dec, img_pair=img_pair, cutout_width=band.cutout_width, mosaic_pix_scale=band.mosaic_pix_scale
     )
-    
+
     # find nearby sources that are possible contaminants
     objsrc, nconfsrcs = find_nconfsources(
         ra, dec, stype, ks_flux_aper2, x1, y1, band.cutout_width, subimage_wcs, df
@@ -597,7 +664,7 @@ else:
     with Pool() as pool:
         results = pool.map(calculate_flux, paramlist)
     dtime = time.time() - t0
-    np.savez(fname, results=results)
+    np.savez(fname, results=np.array(results, dtype=object))
     print(f'Parallel calculation took {dtime} seconds')
 ```
 
@@ -625,7 +692,7 @@ df.rename(columns=cols, inplace = True)
 ```
 
 ```{code-cell} ipython3
-#When doing a large run of a large area, save the dataframe with the forced photometry 
+#When doing a large run of a large area, save the dataframe with the forced photometry
 # so we don't have to do the forced photometry every time
 
 df.to_pickle(f'output/COSMOS_{radius.value}arcmin.pkl')
@@ -637,7 +704,7 @@ df.to_pickle(f'output/COSMOS_{radius.value}arcmin.pkl')
 #df = pd.read_pickle('output/COSMOS_48.0arcmin.pkl')
 ```
 
-### 3f. Plot to Confirm our Photometry Results 
+### 3f. Plot to Confirm our Photometry Results
 - compare to published COSMOS 2015 catalog
 
 ```{code-cell} ipython3
@@ -650,8 +717,8 @@ fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
 fluxmax = 200
 ymax = 100
 xmax = 100
-#ch1 
-#first shrink the dataframe to only those rows where I have tractor photometry 
+#ch1
+#first shrink the dataframe to only those rows where I have tractor photometry
 df_tractor = df[(df.splash_1_flux> 0) & (df.splash_1_flux < fluxmax)] #200
 #sns.regplot(data = df_tractor, x = "splash_1_flux", y = "ch1flux", ax = ax1, robust = True)
 sns.scatterplot(data = df_tractor, x = "splash_1_flux", y = "ch1flux", ax = ax1)
@@ -669,8 +736,8 @@ ax1.set_ylim([0, ymax])
 ax1.set_xlim([0, xmax])
 
 
-#ch2 
-#first shrink the dataframe to only those rows where I have tractor photometry 
+#ch2
+#first shrink the dataframe to only those rows where I have tractor photometry
 df_tractor = df[(df.splash_2_flux> 0) & (df.splash_2_flux < fluxmax)]
 #sns.regplot(data = df_tractor, x = "splash_2_flux", y = "ch2flux", ax = ax2, robust = True)
 sns.scatterplot(data = df_tractor, x = "splash_2_flux", y = "ch2flux", ax = ax2)
@@ -688,7 +755,7 @@ ax2.set_ylim([0, ymax])
 ax2.set_xlim([0, xmax])
 
 
-#ch3 
+#ch3
 #first shrink the dataframe to only those rows where I have tractor photometry
 df_tractor = df[(df.splash_3_flux> 0) & (df.splash_3_flux < fluxmax)]
 
@@ -708,8 +775,8 @@ ax3.set_ylim([0, ymax])
 ax3.set_xlim([0, xmax])
 
 
-#ch4 
-#first shrink the dataframe to only those rows where I have tractor photometry 
+#ch4
+#first shrink the dataframe to only those rows where I have tractor photometry
 df_tractor = df[(df.splash_4_flux> 0) & (df.splash_4_flux < fluxmax)]
 
 #sns.regplot(data = df_tractor, x = "splash_4_flux", y = "ch4flux", ax = ax4, robust = True)
@@ -753,7 +820,7 @@ We are using `nway` as the tool to do the cross match (Salvato et al. 2017).
 heasarc = Heasarc()
 table = heasarc.query_mission_list()
 mask = (table['Mission'] =="CHANDRA")
-chandratable = table[mask]  
+chandratable = table[mask]
 
 #find out which tables exist on Heasarc
 #chandratable.pprint(max_lines = 200, max_width = 130)
@@ -773,7 +840,7 @@ ccosmoscat = heasarc.query_region(coords, mission=mission, radius='1 degree', re
 #astropy doesn't recognize capitalized units
 #so there might be some warnings here on writing out the file, but we can safely ignore those
 
-#need to make the chandra catalog into a fits table 
+#need to make the chandra catalog into a fits table
 #and needs to include area of the survey.
 nway_write_header('data/Chandra/COSMOS_chandra.fits', 'CHANDRA', float(ccosmoscat_rad**2) )
 
@@ -788,10 +855,10 @@ nway_write_header('data/multiband_phot.fits', 'OPT', float((2*rad_in_arcmin/60)*
 ```
 
 ```{code-cell} ipython3
+%%bash
+
 # call nway
-!/home/jovyan/.local/bin/nway.py 'data/Chandra/COSMOS_chandra.fits' :ERROR_RADIUS 'data/multiband_phot.fits' 0.1 --out=data/Chandra/chandra_multiband.fits --radius 15 --prior-completeness 0.9
-    
-#!/opt/conda/bin/nway.py 'data/Chandra/COSMOS_chandra.fits' :ERROR_RADIUS 'data/multiband_phot.fits' 0.1 --out=data/Chandra/chandra_multiband.fits --radius 15 --prior-completeness 0.9
+nway.py 'data/Chandra/COSMOS_chandra.fits' :ERROR_RADIUS 'data/multiband_phot.fits' 0.1 --out=data/Chandra/chandra_multiband.fits --radius 15 --prior-completeness 0.9
 ```
 
 ```{code-cell} ipython3
@@ -812,7 +879,7 @@ merged = pd.merge(df, matched, 'outer',left_on='ID', right_on = 'OPT_ID')
 #remove all the rows which start with "OPT" because they are duplications of the original catalog
 merged = merged.loc[:, ~merged.columns.str.startswith('OPT')]
 
-#somehow the matching is giving negative fluxes in the band where there is no detection 
+#somehow the matching is giving negative fluxes in the band where there is no detection
 #if there is a detection in the other band
 #clean that up to make those negative fluxes = 0
 
@@ -849,8 +916,8 @@ print('number of Galex detections =',np.sum(merged.galex_detect > 0))
 #overplot galex sources
 #overplot xray sources
 
-#first select on 24 micron 
-merged_24 = merged[(merged.flux_24 >= 0) ] 
+#first select on 24 micron
+merged_24 = merged[(merged.flux_24 >= 0)].copy()
 
 #negative Galex fluxes are causing problems, so set those to zero
 merged_24.loc[merged_24.fuvflux < 0, 'fuvflux'] = 0
@@ -931,7 +998,7 @@ ax.set(xlabel = 'NUV - [3.6]', ylabel = 'FUV - NUV')
 #plt.legend([],[], frameon=False)
 
 #fig.savefig("output/color_color.png")
-#mpld3.display(fig)  
+#mpld3.display(fig)
 ```
 
 We extend the works of Bouquin et al. 2015 and Moutard et al. 2020 by showing a GALEX - Spitzer color color diagram over plotted with Chandra detections.  Blue galaxies in these colors are generated by O and B stars and so must currently be forming stars. We find a tight blue cloud in this color space identifying those star forming galaxies.  Galaxies off of the blue cloud have had their star formation quenched, quite possibly by the existence of an AGN through removal of the gas reservoir required for star formation.  Chandra detected galaxies host AGN, and while those are more limited in number, can be shown here to be a hosted by all kinds of galaxies, including quiescent galaxies which would be in the upper right of this plot.  This likely implies that AGN are indeed involved in quenching star formation.  Additionally, we show the Chandra hardness ratio (HR) color coded according to the vertical color bar on the right side of the plot.  Those AGN with higher hardness ratios have their soft x-ray bands heavily obscured and appear to reside preferentially toward the quiescent galaxies.

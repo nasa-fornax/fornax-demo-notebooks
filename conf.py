@@ -14,7 +14,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Fornax Demo Notebooks'
-copyright = '2022-2023, Fornax developers'
+copyright = '2022-2025, Fornax developers'
 author = 'Fornax developers'
 
 
@@ -36,8 +36,34 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'notes', '.tox', '.tmp', '.pytest_cache']
 
-# MyST-NB configuration
+# Top level README file's sole purpose is for the repo. We also don't include
+# the data and output directories that are to be populated while running the notebooks.
+exclude_patterns += ['README.md', '*/data/*', '*/output/*']
+
+# We exclude the documentation index.md as its sole purpose is for their CI.
+exclude_patterns += ['documentation/index.md',]
+
+# Not yet included in the rendering:
+exclude_patterns += ['documentation/notebook_review_process.md', 'spectroscopy/*', '*/code_src/*']
+
+# Myst-NB configuration
+# Override kernelspec.name for rendering for all the notebooks.
+# "python3" kernel is created by ipython.
+nb_kernel_rgx_aliases = {".*": "python3"}
+
+nb_merge_streams = True
+
 nb_execution_timeout = 900
+nb_execution_excludepatterns = []
+
+# Don't execute the forced photometry notebook until we base the CI on
+# the actual fornax image instead of the fresh installs
+# (aka tractor install pain).
+nb_execution_excludepatterns += ['multiband_photometry.md',]
+
+# We use the non-public IRSA bucket for ZTF data, cannot execute the generator
+# notebook until https://github.com/nasa-fornax/fornax-demo-notebooks/issues/311 is addressed
+nb_execution_excludepatterns += ['light_curve_generator.md',]
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -47,17 +73,15 @@ nb_execution_timeout = 900
 html_theme = 'sphinx_book_theme'
 html_title = 'Fornax Demo Notebooks'
 html_logo = '_static/fornax_logo.png'
-#html_favicon = '_static/favicon.ico'
+html_favicon = '_static/fornax_favicon.ico'
 html_theme_options = {
-    "github_url": "https://github.com/fornax-navo/fornax-demo-notebooks",
-    "repository_url": "https://github.com/fornax-navo/fornax-demo-notebooks",
+    "github_url": "https://github.com/nasa-fornax/fornax-demo-notebooks",
+    "repository_url": "https://github.com/nasa-fornax/fornax-demo-notebooks",
     "repository_branch": "main",
     "use_repository_button": True,
     "use_issues_button": True,
-    "use_edit_page_button": True,
+    "use_edit_page_button": False,
     "home_page_in_toc": True,
-#    "logo_link_url": "https://astroML.org",
-#    "logo_url": "http://www.astroml.org/_images/plot_moving_objects_1.png"
 }
 
 

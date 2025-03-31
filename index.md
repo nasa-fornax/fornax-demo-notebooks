@@ -9,6 +9,7 @@ brings together data, software, and computing so that researchers can focus on s
 ```{toctree}
 ---
 maxdepth: 2
+caption: Tutorial Notebooks
 ---
 
 forced_photometry/README
@@ -21,6 +22,7 @@ light_curves/README
 ```{toctree}
 ---
 maxdepth: 2
+caption: User Documentation
 ---
 
 documentation/README

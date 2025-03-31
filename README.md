@@ -1,4 +1,4 @@
-## Executive Summary
+## Fornax Demo Notebooks
 
 The Fornax Initiative is a NASA Astrophysics Archives project to collaboratively among the three archives HEASARC, IRSA, and MAST, create cloud systems, cloud software, and cloud standards for the astronomical community.
 
@@ -9,7 +9,7 @@ This repo houses tutorial notebooks of fully worked science use cases for all us
 
 ## Documentation
 
-The user cases and documentation of the Fornax Initiative are currently available at the https://fornax-navo.github.io/fornax-demo-notebooks/ URL, while the source code for the documentation can be found in the [fornax-documentation](https://github.com/fornax-navo/fornax-documentation) repository.
+The user cases and documentation of the Fornax Initiative are currently available at the https://nasa-fornax.github.io/fornax-demo-notebooks/ URL, while the source code for the documentation can be found in the [fornax-documentation](https://github.com/nasa-fornax/fornax-documentation) repository.
 
 ## Content contributing
 

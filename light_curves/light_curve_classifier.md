@@ -4,15 +4,15 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.15.2
+    jupytext_version: 1.16.0
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  display_name: science_demo
   language: python
-  name: python3
+  name: conda-env-science_demo-py
 ---
 
 # Light Curve Classifier
-***
+
 
 ## Learning Goals
 By the end of this tutorial, you will be able to:
@@ -22,7 +22,7 @@ By the end of this tutorial, you will be able to:
 - use the trained classifier to predict labels on an unlabelled dataset
 
 ## Introduction
-The science goal of this notebook is to find a classifier that can accurately discern changing look active galactic nuclei (CLAGN) from a broad sample of all Sloan Digital Sky Survey (SDSS) identified Quasars (QSOs) based solely on archival photometry in the form of multiwavelength light curves.  
+The science goal of this notebook is to find a classifier that can accurately discern changing look active galactic nuclei (CLAGN) from a broad sample of all Sloan Digital Sky Survey (SDSS) identified Quasars (QSOs) based solely on archival photometry in the form of multiwavelength light curves.
 
 CLAGN are astrophysically interesting objects because they appear to change state.  CLAGN are characterized by the appearance or disappearance of broad emission lines on timescales of order months.  Astronomers would like to understand the physical mechanism behind this apparent change of state.  However, only a few hundered CLAGN are known, and finding CLAGN is observationally expensive, traditionally requiring multiple epochs of spectroscopy.  Being able to identify CLAGN in existing, archival, large, photometric samples would allow us to identify a statisitcally significant sample from which we could better understand the underlying physics.
 
@@ -51,6 +51,16 @@ A useful reference for what sktime expects as input to its ML algorithms: https:
 ## Output
 Trained classifiers as well as estimates of their accuracy and plots of confusion matrices
 
+## Runtime
+As of 2024 August, this notebook takes ~170s to run to completion on Fornax using the 'Astrophysics Default Image' and the 'Large' server with 16GB RAM/ 4CPU.
+
+## Authors
+Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, Andreas Faisst, Vandana Desai, David Shupe
+
+## Acknowledgements
+Stephanie La Massa
+
+
 ## Imports
 - `pandas` to work with light curve data structure
 - `numpy` for numerical calculations
@@ -63,18 +73,13 @@ Trained classifiers as well as estimates of their accuracy and plots of confusio
 - `scipy` for statistical analysis
 - `json` for storing intermediate files
 - `google_drive_downloader` to access files stored in google drive
-  
-## Authors
-Jessica Krick, Shooby Hemmati, Troy Raen, Brigitta Sipocz, Andreas Faisst, Vandana Desai, Dave Shoop
 
-## Acknowledgements
-Stephanie La Massa
+
+This cell will install them if needed:
 
 ```{code-cell} ipython3
-#insure all dependencies are installed
-!pip install -r requirements-lc_classifier.txt
-#need updated version of astropy, so this is here temporarily to make sure we grab that.
-!pip install -U astropy
+# Uncomment the next line to install dependencies if needed.
+# !pip install -r requirements_light_curve_classifier.txt
 ```
 
 ```{code-cell} ipython3
@@ -84,8 +89,8 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import pandas as pd
 from astropy.table import Table
-from google_drive_downloader import GoogleDriveDownloader as gdd
-from tqdm import tqdm
+import googledrivedownloader as gdd
+from tqdm.auto import tqdm
 import json
 
 from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score, confusion_matrix
@@ -117,21 +122,28 @@ pd.options.mode.copy_on_write = True
 ```
 
 ## 1. Read in a dataset of archival light curves
+ We use here a sample of AGN including known CLAGN & random SDSS AGN
+
+ If you want to use your own sample, you can use the code [light_curve_generator.md](https://nasa-fornax.github.io/fornax-demo-notebooks/light_curves/light_curve_generator.html) in this same repo to make the required pandas dataframe which you will need to run this notebook.
 
 ```{code-cell} ipython3
-#access structure of light curves made in the light curve generator notebook
-# has known CLAGN & random SDSS small sample of targets, all bands
+# First we want to load light curves made in the light curve generator notebook
+
+# The data is on google drive, this will download it for you and read it into
+# a pandas dataframe
 savename_df_lc = './data/small_CLAGN_SDSS_df_lc.parquet'
 gdd.download_file_from_google_drive(file_id='1DrB-CWdBBBYuO0WzNnMl5uQnnckL7MWH',
                                     dest_path=savename_df_lc,
                                     unzip=True)
 
+#load the data into a pandas dataframe
 df_lc = pd.read_parquet(savename_df_lc)
 ```
 
 ```{code-cell} ipython3
-#get rid of indices set in the light curve code and reset them as needed before sktime algorithms
-df_lc = df_lc.reset_index()  
+#get rid of indices set in the light curve code and reset them as needed
+#before sktime algorithms
+df_lc = df_lc.reset_index()
 
 #what does the dataset look like at the start?
 df_lc
@@ -144,15 +156,16 @@ The majority of work in all ML projects is preparing and cleaning the data.  As 
 
 ### 2.1 Remove bands with not enough data
 For this use case of CLAGN classification, we don't need to include some of the bands
-that are known to be sparse.  Most ML algorithms cannot handle sparse data so one way to accomodate that 
+that are known to be sparse.  Most ML algorithms cannot handle sparse data so one way to accomodate that
 is to remove the sparsest datasets.
 
 ```{code-cell} ipython3
 ##what are the unique set of bands included in our light curves
 df_lc.band.unique()
 
-# get rid of some of the bands that don't have enough data for all the sources
-#CLAGN are generall fainter targets, and therefore mostly not found in datasets like TESS & K2
+#get rid of some of the bands that don't have enough data for all the sources
+#CLAGN are generall fainter targets, and therefore mostly not found
+#in datasets like TESS & K2
 
 bands_to_drop = ["IceCube", "TESS", "FERMIGTRIG", "K2"]
 df_lc = df_lc[~df_lc["band"].isin(bands_to_drop)]
@@ -246,7 +259,7 @@ ax.set_xlim([1000, 1250])
 - objects with no measurements in WISE W1 band
   - Below we want to normalize all light curves by W1, so we neeed to remove those objects without W1 fluxes because there will be nothing to normalize those light curves with.  We don't want to have un-normalized data.
 - objects with incomplete data
-  - Incomplete is defined here as not enough flux measurements to make a good light curve.  Some bands in some objects have only a few datapoints. Three data points is not large enough for KNN interpolation, so we will consider any array with fewer than 4 photometry points to be incomplete data.  Another way of saying this is that we choose to remove those light curves with 3 or 
+  - Incomplete is defined here as not enough flux measurements to make a good light curve.  Some bands in some objects have only a few datapoints. Three data points is not large enough for KNN interpolation, so we will consider any array with fewer than 4 photometry points to be incomplete data.  Another way of saying this is that we choose to remove those light curves with 3 or
 fewer data points.
 
 ```{code-cell} ipython3
@@ -277,7 +290,7 @@ Some objects do not have light curves in all bands.  Some ML algorithms can hand
 
 There are two options here:
 1) We will add light curves with zero flux and err values for the missing data.  SKtime does not like NaNs, so we choose zeros.  This option has the benefit of including more bands and therefore more information, but the drawback of having some objects have bands with entire arrays of zeros.
-2) Remove bands which have less data from all objects so that there are no objects with missing data.  This has the benefit of less zeros, but the disadvantage of throwing away some information for the few objects which do have light curves in the bands which will be removed.  
+2) Remove bands which have less data from all objects so that there are no objects with missing data.  This has the benefit of less zeros, but the disadvantage of throwing away some information for the few objects which do have light curves in the bands which will be removed.
 
 Functions are inlcuded for both options.
 
@@ -314,7 +327,7 @@ df_lc = df_interpol.explode(["time", "flux","err"], ignore_index=True)
 df_lc = df_lc.astype({col: "float" for col in ["time", "flux", "err"]})
 ```
 
-### 2.7  Restructure dataframe 
+### 2.7  Restructure dataframe
 - Make columns have band names in them and then remove band from the index
 - pivot the dataframe so that SKTIME understands its format
 - this will put it in the format expected by sktime
@@ -331,7 +344,7 @@ singleob = df_lc[df_lc['objectid'] == ob_of_interest]
 singleob
 ```
 
-### 2.8 Normalize 
+### 2.8 Normalize
 Normalizing is required so that the CLAGN and it's comparison SDSS sample don't have different flux levels.  ML algorithms will easily choose to classify based on overall flux levels, so we want to prevent that by normalizing the fluxes. Normalization with a multiband dataset requires extra thought.  The idea here is that we normalize across each object.  We want the algorithms to know, for example, that within one object W1 will be brighter than ZTF bands but from one object to the next, it will not know that one is brighter than the other.
 
 We do the normalization at this point in the code, rather than before interpolating over time, so that the final light curves are normalized since that is the chunk of information which goes into the ML algorithms.
@@ -372,18 +385,18 @@ parquet_savename = 'output/df_lc_ML.parquet'
 
 ```{code-cell} ipython3
 #try dropping the uncertainty columns as variables for sktime
-df_lc.drop(columns = ['err_panstarrs_g',	'err_panstarrs_i',	'err_panstarrs_r',	'err_panstarrs_y',	
+df_lc.drop(columns = ['err_panstarrs_g',	'err_panstarrs_i',	'err_panstarrs_r',	'err_panstarrs_y',
                       'err_panstarrs_z',	'err_W1',	'err_W2',	'err_zg',	'err_zr'], inplace = True)
 
 #drop also the time column because time shouldn't be a feature
 df_lc.drop(columns = ['time'],inplace = True)
 ```
 
-### 3.1 Train test split 
+### 3.1 Train test split
 We use sklearn's train test split to randomly split the data into training and testing datasets.  Because thre are uneven numbers of each type (many more SDSS than CLAGN), we want to make sure to stratify evenly by type.
 
 ```{code-cell} ipython3
-#divide the dataframe into features and labels for ML algorithms 
+#divide the dataframe into features and labels for ML algorithms
 labels = df_lc[["objectid", "label"]].drop_duplicates().set_index("objectid").label
 df_lc = df_lc.drop(columns=["label"]).set_index(["objectid", "datetime"])
 ```
@@ -422,7 +435,7 @@ This test needs to pass in order for sktime to run
 
 ```{code-cell} ipython3
 #ask sktime if it likes the data type of X_train
-#if you change any of the functions or cells above this one, it is a good idea to 
+#if you change any of the functions or cells above this one, it is a good idea to
 # look at the below output to make sure you haven't introduced any NaNs or unequal length series
 check_is_mtype(X_train, mtype="pd-multiindex", scitype="Panel", return_metadata=True)
 ```
@@ -441,12 +454,15 @@ check_is_mtype(X_train, mtype="pd-multiindex", scitype="Panel", return_metadata=
 #this cell takes 35s to run on a sample of 267 light curves
 
 #setup the classifier
-clf = Arsenal(time_limit_in_minutes=1, n_jobs = -1)
+#n_jobs is the number of jobs to run in parallel. some environments have trouble with this.
+#if you encounter an error such as 'BrokenProcessPool' while training or predicting, you may
+#want to either set n_jobs = 1 or use a different compute environment.
+clf = Arsenal(time_limit_in_minutes=1, n_jobs = -1)  # '-1' n_jobs means use all processors
 
 #fit the classifier on the training dataset
 clf.fit(X_train, y_train)
 
-#make predictions on the test dataset using the trained model 
+#make predictions on the test dataset using the trained model
 y_pred = clf.predict(X_test)
 
 print(f"Accuracy of Random Interval Classifier: {accuracy_score(y_test, y_pred)}\n", flush=True)
@@ -455,7 +471,7 @@ print(f"Accuracy of Random Interval Classifier: {accuracy_score(y_test, y_pred)}
 cm = confusion_matrix(y_test, y_pred, labels=clf.classes_)
 disp = ConfusionMatrixDisplay(confusion_matrix=cm,display_labels=clf.classes_)
 disp.plot()
-    
+
 plt.show()
 ```
 
@@ -465,7 +481,7 @@ Our method is to do a cursory check of a bunch of classifiers and then later dri
 
 ```{raw-cell}
 %%time
-#This cell is currently not being run because it takes a long time 
+#This cell is currently not being run because it takes a long time
 
 #which classifiers are we interestd in
 #roughly one from each type of classifier
@@ -487,7 +503,7 @@ names = ["Arsenal",                     #kernel based
 nmins = 3
 
 #these could certainly be more tailored
-classifier_call = [Arsenal(time_limit_in_minutes=nmins, n_jobs = -1), 
+classifier_call = [Arsenal(time_limit_in_minutes=nmins, n_jobs = -1),
                   RocketClassifier(num_kernels=2000),
                   CanonicalIntervalForest(n_jobs = -1),
                   HIVECOTEV2(time_limit_in_minutes=nmins, n_jobs = -1),
@@ -507,7 +523,7 @@ accscore_dict = {}
 for name, clf in tqdm(zip(names, classifier_call)):
     #fit the classifier
     clf.fit(X_train, y_train)
-    
+
     #make predictions on the test dataset
     y_pred = clf.predict(X_test)
 
@@ -515,7 +531,7 @@ for name, clf in tqdm(zip(names, classifier_call)):
     accscore = accuracy_score(y_test, y_pred)
     print(f"Accuracy of {name} classifier: {accscore}\n", flush=True)
     accscore_dict[name] = accscore
-    
+
     #plot confusion matrix
     cm = confusion_matrix(y_test, y_pred, labels=clf.classes_)
     disp = ConfusionMatrixDisplay(confusion_matrix=cm,display_labels=clf.classes_)
@@ -540,7 +556,7 @@ for name, clf in tqdm(zip(names, classifier_call)):
 #accscore_dict = json.load( open( "output/accscore.json") )
 ```
 
-## 5.0 Create a candidate list 
+## 5.0 Create a candidate list
 Lets assume we now have a classifier which can accurately differentiate CLAGN from SDSS QSOs based on their archival light curves.  Next, we would like to use that classifier on our favorite unlabeled sample to identify CLAGN candidates.  To do this, we need to:
 - read in a dataframe of our new sample
 - get that dataset in the same format as what was fed into the classifiers
@@ -559,12 +575,12 @@ my_sample = pd.read_parquet(path_to_sample)
 ```{code-cell} ipython3
 #get dataset in same format as what was run through sktime
 #This is not exactly the same as re-running the whole notebook on a different sample,
-#but it is pretty close.  We don't need to do all of the same cleaning because some of that 
+#but it is pretty close.  We don't need to do all of the same cleaning because some of that
 #was to appease sktime in training the algorithms.
 
 
 #get rid of indices set in the light curve code and reset them as needed before sktime algorithms
-my_sample = my_sample.reset_index()  
+my_sample = my_sample.reset_index()
 
 # get rid of some of the bands that don't have enough data for all the sources
 #CLAGN are generall fainter targets, and therefore mostly not found in datasets like TESS & K2
@@ -606,11 +622,11 @@ my_sample['datetime'] = mjd_to_datetime(my_sample)
 #set index expected by sktime
 my_sample = my_sample.set_index(["objectid", "label", "datetime"])
 
-#drop the uncertainty and time columns 
-my_sample.drop(columns = ['err_panstarrs_g',	'err_panstarrs_i',	'err_panstarrs_r',	'err_panstarrs_y',	
+#drop the uncertainty and time columns
+my_sample.drop(columns = ['err_panstarrs_g',	'err_panstarrs_i',	'err_panstarrs_r',	'err_panstarrs_y',
                           'err_panstarrs_z',	'err_W1',	'err_W2',	'err_zg',	'err_zr','time'], inplace = True)
 
- #make X 
+ #make X
 X_mysample  = my_sample.droplevel('label')
 ```
 
@@ -626,7 +642,7 @@ y_mysample = clf.predict(X_mysample)
 
 ```{code-cell} ipython3
 #access the sample_table made in the light curve generator notebook
-#has information about the sample including ra & dec 
+#has information about the sample including ra & dec
 savename_sample = './data/small_CLAGN_SDSS_sample.ecsv'
 gdd.download_file_from_google_drive(file_id='1pSEKVP4LbrdWQK9ws3CaI90m3Z_2fazL',
                                     dest_path=savename_sample,
@@ -638,7 +654,7 @@ sample_table = Table.read(savename_sample, format='ascii.ecsv')
 #associate these predicted CLAGN with RA & Dec
 
 #need to first associate objectid with each of y_mysample
-#make a new df with a column = objectid which 
+#make a new df with a column = objectid which
 #includes all the unique objectids.
 test = X_mysample.reset_index()
 mysample_CLAGN = pd.DataFrame(test.objectid.unique(), columns = ['objectid'])

@@ -1,4 +1,4 @@
-#setup to store the light curves in a data structure
+# setup to store the light curves in a data structure
 import pandas as pd
 from astropy.table import vstack
 from astropy.timeseries import TimeSeries
@@ -25,6 +25,7 @@ class MultiIndexDFObject:
 
 
     """
+
     def __init__(self, data=None):
         """Create a MultiIndex DataFrame that is empty if data is None, else contains the data.
 
@@ -108,8 +109,10 @@ class MultiIndexDFObject:
         """
         self.data = self.data.drop(x)
 
-## From Brigitta as a possible data structure
-## Not currently in use
+# From Brigitta as a possible data structure
+# Not currently in use
+
+
 class MultibandTimeSeries(TimeSeries):
     def __init__(self, *, data=None, time=None, **kwargs):
         # using kwargs to swallow all other arguments a TimeSeries/QTable can have,

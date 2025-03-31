@@ -2,12 +2,17 @@
 # notebook. Libraries can be removed from the list when they get shipped in
 # the container supporting the science use case in question.
 numpy
-pandas
 matplotlib
+scikit-image
+pandas
+seaborn
+statsmodels
+mpld3
+firefly_client
 astropy
-sktime
+astroquery
+nway
+boto3
 tqdm
-googledrivedownloader
-scikit-learn
-acstools
-requests
+# Required for sensible progress bars
+ipywidgets

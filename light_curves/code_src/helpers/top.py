@@ -10,7 +10,8 @@ from matplotlib import pyplot as plt
 from matplotlib.dates import DateFormatter
 
 COLORS = tuple(
-    mpl.colormaps["tab10"].colors[:5] + mpl.colormaps["tab10"].colors[9:] + mpl.colormaps["tab20b"].colors[::4]
+    mpl.colormaps["tab10"].colors[:5] + mpl.colormaps["tab10"].colors[9:] +
+    mpl.colormaps["tab20b"].colors[::4]
 )
 
 
@@ -119,9 +120,11 @@ class _TopLog:
         toplog.summary_df, toplog.pids_df = toplog._create_dfs(toplog._parse_toptxt())
 
         # pid and job names
-        logs_pid_names = cls._scrape_logs_for_pid_names(toplog.file_path.parent) if scrape_logs_for_pid_names else {}
+        logs_pid_names = cls._scrape_logs_for_pid_names(
+            toplog.file_path.parent) if scrape_logs_for_pid_names else {}
         logs_pid_names.update(**pid_names)
-        logs_pid_names.update({pid: "" for pid in toplog.pids_df.PID.unique() if pid not in logs_pid_names})
+        logs_pid_names.update({pid: "" for pid in toplog.pids_df.PID.unique()
+                              if pid not in logs_pid_names})
         toplog.pid_names = {pid: logs_pid_names[pid] for pid in sorted(logs_pid_names)}
         toplog.pid_jobs = {pid: name.split("-")[0] for pid, name in toplog.pid_names.items()}
         toplog.pids_df.insert(0, "pid_name", toplog.pids_df.PID.map(toplog.pid_names))
@@ -136,12 +139,14 @@ class _TopLog:
 
         # job_colors
         colors = (color for color in COLORS)
-        toplog.job_colors = {job: next(colors) for job in toplog.pids_df.job_name.unique() if job != ""}
+        toplog.job_colors = {job: next(colors)
+                             for job in toplog.pids_df.job_name.unique() if job != ""}
 
         toplog.time_tags = {}
         if "time_tag" in toplog.summary_df.columns:
             time_tags = toplog.summary_df.query("time_tag != ''").time_tag.items()
-            toplog.time_tags = {tag: _TimeTag(name=tag, time=time, color=next(colors)) for time, tag in time_tags}
+            toplog.time_tags = {tag: _TimeTag(
+                name=tag, time=time, color=next(colors)) for time, tag in time_tags}
             del toplog.summary_df["time_tag"]
 
         return toplog
@@ -176,7 +181,8 @@ class _TopLog:
                 continue
             pids_df[c] = pids_df[c].str.strip(units[0]).astype(float)
             pids_df = pids_df.rename(columns={c: c + units[0]})
-        dtype_map = {**{c: int for c in ["PID", "PR", "NI"]}, **{c: float for c in ["%CPU", "%MEM"]}}
+        dtype_map = {**{c: int for c in ["PID", "PR", "NI"]},
+                     **{c: float for c in ["%CPU", "%MEM"]}}
         pids_df = pids_df.astype({c: dtype_map.get(c) for c in pids_df.columns if c in dtype_map})
 
         summary_df = summary_df.sort_values("time").set_index("time")
@@ -239,7 +245,8 @@ class _TopLog:
         ycols_axs = dict(zip(["load_avg_per_1min", "%CPU", f"avail_{ram_units}", "%MEM"], axs))
 
         # plot
-        my_summary = self.summary_df.between_time(*between_time) if between_time else self.summary_df
+        my_summary = self.summary_df.between_time(
+            *between_time) if between_time else self.summary_df
         for y, ax in ycols_axs.items():
             if y in [f"avail_{ram_units}", "load_avg_per_1min"]:
                 self._plot_summary(my_summary, y=y, ax=ax)
@@ -257,7 +264,8 @@ class _TopLog:
 
     def _plot_summary(self, my_summary, *, y, ax):
         color = "tab:gray"
-        kwargs = dict(color=color, label="Total", linestyle="-", linewidth=1, marker="o", markersize=2)
+        kwargs = dict(color=color, label="Total", linestyle="-",
+                      linewidth=1, marker="o", markersize=2)
         ax.plot(my_summary.index, my_summary[y], **kwargs)
 
         time0, ref0 = my_summary.iloc[0], self.summary_df.iloc[0].name
@@ -276,7 +284,8 @@ class _TopLog:
                 if groupby == "PID":
                     group_name, group = pid_name, groups.get_group(pid)
                 elif groupby == "job_name":
-                    group_name, group = job_name, groups.get_group(job_name).groupby(level=0)[[y]].sum()
+                    group_name, group = job_name, groups.get_group(
+                        job_name).groupby(level=0)[[y]].sum()
             except KeyError:
                 continue
             kwargs = dict(color=self.job_colors[job_name], zorder=self.pid_zorders[pid])

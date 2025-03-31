@@ -111,9 +111,11 @@ If you want a notebook or script to run for longer than about 30 minutes and you
 
 ### Imports
 
-```{code-cell}
-# Ensure all dependencies are installed
-!pip install -r requirements.txt
+This cell will install the dependencies, if needed:
+
+```{code-cell} ipython3#
+# Uncomment the next line to install dependencies if needed.
+# !pip install -r requirements_scale_up.txt
 ```
 
 ```{code-cell}
@@ -403,14 +405,23 @@ In the next cell, we:
 - collect the sample and write it as a .ecsv file; then
 - query the archives in parallel using a `multiprocessing.Pool` and write the light curve data as .parquet files.
 
+Note: Since the next cell launches each archive call in a child process (through `multiprocessing.Pool`),
+the archive calls themselves will not be allowed to launch child processes of their own.
+We'll just skip the affected archive calls here and encourage the user towards the bash script since this
+is one of the main reasons that it was developed -- it launches the archive jobs in parallel, but in a
+different way, so that the calls are also allowed to parallelize their own internal code and thus run much faster.
+
 ```{code-cell}
 %%time
+# Skip archive calls that use internal parallelization.
+_archive_names = [name for name in archive_names if name.lower() not in ["panstarrs", "ztf"]]
+
 sample_table = helpers.scale_up.run(build="sample", **kwargs_dict)
 # sample_table is returned if you want to look at it but it is not used below
 
-with multiprocessing.Pool(processes=len(archive_names)) as pool:
+with multiprocessing.Pool(processes=len(_archive_names)) as pool:
     # submit one job per archive
-    for archive in archive_names:
+    for archive in _archive_names:
         pool.apply_async(helpers.scale_up.run, kwds={"build": "lightcurves", "archive": archive, **kwargs_dict})
     pool.close()  # signal that no more jobs will be submitted to the pool
     pool.join()  # wait for all jobs to complete
@@ -528,7 +539,7 @@ Bash example:
 
 ```bash
 $ yaml_run_id=demo-kwargs-yaml
-$ bash code_src/helpers/scale_up.sh -r "$yaml_run_id" -d "use_yaml=true" -a "Gaia HEASARC IceCube WISE ZTF"
+$ bash code_src/helpers/scale_up.sh -r "$yaml_run_id" -d "use_yaml=true" -a "Gaia HEASARC IceCube PanSTARRS WISE ZTF"
 ```
 
 +++
@@ -601,4 +612,4 @@ To execute a run:
 
 **Authors**: Troy Raen, Jessica Krick, Brigitta Sipőcz, Shoubaneh Hemmati, Andreas Faisst, David Shupe
 
-**Updated On**: 2024-04-05
+**Updated On**: 2025-03-27

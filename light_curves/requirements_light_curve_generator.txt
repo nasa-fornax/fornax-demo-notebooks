@@ -1,0 +1,27 @@
+# List explicit python dependencies here. They are also spelt out at the
+# beginning of the notebook, make sure the lists are consistent and only
+# contain dependencies that are actually used in the notebook.
+requests
+tqdm
+numpy
+scipy
+pandas[aws, parquet]
+matplotlib
+hpgeom
+astropy
+pyvo
+astroquery>=0.4.8.dev0
+acstools
+lightkurve
+alerce
+# Upper limit is temporary to avoid the unresolvable dependency requirements
+# until we absolutely require hats 0.5.0 and thus nested-pandas 0.3.8+
+lsdb>=0.4.5,<0.5.0
+universal_pathlib
+# We use distributed in this notebook, but installing any dask would make the [dataframe] extras required by dependencies for other notebooks.
+# It feels to be the cleanest solution to add the dependency here as we don't directly use it elsewhere.
+dask[distributed,dataframe]
+# Required by functionality we use from acstools
+scikit-image
+# Required for sensible progress bars
+ipywidgets

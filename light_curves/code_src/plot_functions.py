@@ -15,54 +15,55 @@ ZTF_BANDS = ["zg", "zr", "zi"]  # will be plotted in "B" zoom-in for better visi
 OTHER_BANDS = ["F814W",  # HCV
                "FERMIGTRIG", "SAXGRBMGRB",  # HEASARC
                "G", "BP", "RP",  # Gaia
-               "panstarrs g", "panstarrs i", "panstarrs r", "panstarrs y", "panstarrs z",  # Pan-STARRS
+               "Pan-STARRS g", "Pan-STARRS i", "Pan-STARRS r", "Pan-STARRS y", "Pan-STARRS z",  # Pan-STARRS
                "W1", "W2"]  # WISE
 
 # Set a color for each band.
 # Create a generator to yield colors (this will be useful if we need to plot bands not listed above).
 COLORS = (color for color in mpl.colormaps["tab20"].colors + mpl.colormaps["tab20b"].colors)
-BAND_COLORS = {band: next(COLORS) for band in [ICECUBE_BAND] + ZTF_BANDS + ELECTRON_BANDS + OTHER_BANDS}
+BAND_COLORS = {band: next(COLORS)
+               for band in [ICECUBE_BAND] + ZTF_BANDS + ELECTRON_BANDS + OTHER_BANDS}
 
 
 def create_figures(df_lc, show_nbr_figures, save_output):
     '''
     Creates figures of the lightcurves for each object in df_lc.
-    
+
     Parameters
     ----------
     df_lc : lightcurve object
         Lightcurve objects from which to create the lightcurve figures.
-        
+
     show_nbr_figures : int
         Number of figures to show inline. For example, `show_nbr_figures = 5' would
         show the first 5 figures inline.
-        
+
     save_output: bool
         Whether to save the lightcurve figures. If saved, they will be in the "output" directory.
-        
-    
+
+
     Returns
     -------
     Saves the figures in the output directory
-    
-    
+
+
     Notes
     -----
     By default, if save_output is True, figures are
     made and saved for *all* sources. If that is too much, the user can create a selection
     from the sample of which sources they like to plot (and save).
-    
+
     '''
-    
+
     if (show_nbr_figures == 0) & (not save_output):
         print("No figures are shown or saved.")
-        return(False)
-    
+        return (False)
+
     # Iterate over objects and create figures
     for cc, (objectid, singleobj_df) in enumerate(df_lc.data.groupby('objectid')):
         # Set up for plotting. We use the "mosaic" method so we can plot
         # the ZTF data in a subplot for better visibility.
-        fig, axes = plt.subplot_mosaic(mosaic=[["A"],["A"],["B"]] , figsize=(10,8))
+        fig, axes = plt.subplot_mosaic(mosaic=[["A"], ["A"], ["B"]], figsize=(10, 8))
 
         # Iterate over bands and plot light curves.
         # IceCube needs to be done last so that we know the y-axis limits.
@@ -79,12 +80,12 @@ def create_figures(df_lc, show_nbr_figures, save_output):
         # Get the ZTF min/max times for the zoom in (will be NaN if there are no ZTF bands).
         ztf_df = band_groups.filter(lambda band_df: band_df.name in ZTF_BANDS)
         _format_axes(axes, ztf_time_min_max=(ztf_df.time.min(), ztf_df.time.max()))
-        plt.subplots_adjust(hspace=0.3 , wspace=0.3)
-        axes["A"].legend(bbox_to_anchor=(1.2,0.95), title=f"objectid: {objectid}")
+        plt.subplots_adjust(hspace=0.3, wspace=0.3)
+        axes["A"].legend(bbox_to_anchor=(1.2, 0.95), title=f"objectid: {objectid}")
 
         # Save, show, and/or close the figure.
         if save_output:
-            savename = os.path.join("output" , "lightcurve_{}.pdf".format(objectid) ) 
+            savename = os.path.join("output", "lightcurve_{}.pdf".format(objectid))
             plt.savefig(savename, bbox_inches="tight")
         if cc < show_nbr_figures:
             plt.show()
@@ -93,9 +94,9 @@ def create_figures(df_lc, show_nbr_figures, save_output):
             # If figures are not saved, we only have to loop over the number of figures shown.
             if not save_output:
                 break
-            
+
     print("Done")
-    return(True)
+    return (True)
 
 
 def _clean_lightcurves(singleobj_df):
@@ -116,11 +117,11 @@ def _clean_lightcurves(singleobj_df):
 
     # Remove rows containing NaN in time, flux, or err
     singleobj = singleobj.dropna(subset=["time", "flux", "err"])
-
     # Do sigma-clipping per band.
     band_groups = singleobj.groupby("band").flux
     zscore = band_groups.transform(lambda fluxes: np.abs(stats.zscore(fluxes)))
     n_points = band_groups.transform("size")  # number of data points in the band
+
     # Keep data points with a zscore < 3 or in a band with less than 10 data points.
     singleobj = singleobj[(zscore < 3.0) | (n_points < 10)]
 
@@ -147,7 +148,8 @@ def _plot_lightcurve(band, band_df, axes, max_fluxes=None):
 
     if band in ELECTRON_BANDS:
         # Fluxes are in electrons/sec. Scale them to the other available fluxes.
-        mean_max_flux = max_fluxes[[b for b in max_fluxes.index if b not in ELECTRON_BANDS + [ICECUBE_BAND]]].mean()
+        mean_max_flux = max_fluxes[[
+            b for b in max_fluxes.index if b not in ELECTRON_BANDS + [ICECUBE_BAND]]].mean()
         max_electrons = band_df.flux.max()
         factor = mean_max_flux / max_electrons
         axes["A"].errorbar(band_df.time, band_df.flux * factor, band_df.err * factor,
@@ -165,7 +167,8 @@ def _plot_lightcurve(band, band_df, axes, max_fluxes=None):
         _plot_ztf_lightcurve(band, band_df, axes)
 
     else:
-        axes["A"].errorbar(band_df.time, band_df.flux, band_df.err, capsize=3.0, label=band, color=color)
+        axes["A"].errorbar(band_df.time, band_df.flux, band_df.err,
+                           capsize=3.0, label=band, color=color)
 
 
 def _plot_ztf_lightcurve(band, band_df, axes):
@@ -184,7 +187,7 @@ def _plot_ztf_lightcurve(band, band_df, axes):
 
     # Plot on "A" axis.
     axes["A"].errorbar(band_df.time, band_df.flux, band_df.err, capsize=1.0, elinewidth=0.5,
-                            marker="o", markersize=2, linestyle="", label=f"ZTF {band}", color=color)
+                       marker="o", markersize=2, linestyle="", label=f"ZTF {band}", color=color)
 
     # Plot "B" zoomin
     axes["B"].errorbar(band_df.time, band_df.flux, band_df.err, capsize=1.0, elinewidth=0.5,
@@ -230,7 +233,7 @@ def _format_axes(axes, ztf_time_min_max):
     else:
         axes["A"].set_xlabel("Time(MJD)")
 
-    ## Set axes ticks and grids
+    # Set axes ticks and grids
     axes["A"].grid(linestyle=":", color="lightgray", linewidth=1)
     axes["A"].minorticks_on()
     axes["A"].tick_params(axis="x", which="minor", bottom=True)
