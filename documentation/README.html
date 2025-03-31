@@ -479,8 +479,17 @@ document.write(`
 <h1>Fornax Science Console<a class="headerlink" href="#fornax-science-console" title="Link to this heading">#</a></h1>
 <section id="what-is-the-fornax-science-console">
 <h2>What is the Fornax Science Console?<a class="headerlink" href="#what-is-the-fornax-science-console" title="Link to this heading">#</a></h2>
-<p>The Fornax Science Console is a NASA-funded web-based application that provides access to a limited amount of cloud computing via JupyterLab, which offers access to Jupyter Notebooks, Jupyter Console, and the terminal (command line). Users will need to register to login to the system, but usage is free. Once logged in, users will have access to data sets curated by repositories around the world, and can upload moderate amounts of private data. To get started quickly, users can choose from a variety of example Jupyter notebooks as well as pre-installed software environments. These can be modified to suit user needs.</p>
-<p>The Fornax Science Console supports many astronomical use cases, but users will find it especially beneficial for analyses</p>
+<p>The Fornax Science Console is a NASA-funded web-based application that provides
+access to a limited amount of cloud computing via JupyterLab, which offers
+access to Jupyter Notebooks, Jupyter Console, and the terminal (command line).
+Users will need to register to login to the system, but usage is free. Once
+logged in, users will have access to data sets curated by repositories around
+the world, and can upload moderate amounts of private data. To get started
+quickly, users can choose from a variety of example Jupyter notebooks as well
+as pre-installed software environments. These can be modified to suit user
+needs.</p>
+<p>The Fornax Science Console supports many astronomical use cases, but users will
+find it especially beneficial for analyses</p>
 <ul class="simple">
 <li><p>on large cloud-hosted data sets that would be cumbersome to download;</p></li>
 <li><p>that require complicated software pre-installed on the platform; or</p></li>
@@ -490,19 +499,22 @@ document.write(`
 <h3>Fornax Science Console basic capabilities and selection guidelines<a class="headerlink" href="#fornax-science-console-basic-capabilities-and-selection-guidelines" title="Link to this heading">#</a></h3>
 <p>After logging in, users will be presented with choices for their working environment.</p>
 <ul class="simple">
-<li><p><b>Compute size</b>:  the amount of compute (CPUs) and memory (RAM) available is configurable.  Options are briefly described below.</p></li>
-<li><p><b>Compute environment</b>: the software environment including the operating system, system library versions, and pre-installed software selections.</p></li>
+<li><p><b>Server type</b>:  the amount of compute (CPUs) and memory (RAM) available is configurable. Options are briefly described below.</p></li>
+<li><p><b>Environment</b>: the software environment including the operating system, system library versions, and pre-installed software selections.</p></li>
 </ul>
-<p>The compute size you select largely determines the costs you will accrue while it is running.  We therefore need our users to be more conscious of the compute you are using than you would be on your own hardware. We ask users to follow these guidelines:</p>
+<p>The compute size you select largely determines the costs you will accrue while
+it is running. We therefore need our users to be more conscious of the compute
+you are using than you would be on your own hardware. We ask users to follow
+these guidelines:</p>
 <ul class="simple">
 <li><p>You will have a choice of server types. Please test your use case on the smallest server that can serve as a test, and run tests with a limited scope (e.g., number of sources, iterations, etc.). Only expand the scope and/or select a larger server when you have successfully tested the smaller case.</p></li>
 <li><p>Please also note that if you start an instance, closing your browser window does not necessarily stop the instance you started.  Especially with the larger instances, <strong>please explicitly use the “Stop My Server” button</strong> (under File-&gt;Hub Control Panel)  when done.</p></li>
 <li><p>Any time you need to use the biggest 128-core compute instance, please reach out to the Help Desk for explicit permission <em>before</em> starting it. This will help us to be aware of resource usage for this development system, which does not yet have fully automated resource usage guardrails. Give us a brief idea of what the science use case is and an estimate for the <em>total</em> run time. Note that if your job (or jobs) runs significantly longer than we expect, we may contact you about terminating it. If you need to stop and restart your instance, you don’t need to get permission every time as long as you are still within the original estimated total run time. If you need more time than expected, please write to the help desk with a brief justification. Our review process is more about visibility than control, so you’ll probably be approved.</p></li>
 </ul>
-<p>The compute options:</p>
+<p>The compute options depend upon <code class="docutils literal notranslate"><span class="pre">Server</span> <span class="pre">type</span></code> selected:</p>
 <ul class="simple">
-<li><p><b>CPUs</b>:  By default, users will have access to 4 CPUs provided by AWS. These are useful for smaller analyses and to test out larger analyses. Once a user has completed testing and is ready to scale up an analysis, they can request up to 128 CPUs.</p></li>
-<li><p><b>RAM</b>: Upon logging in, users will have access to up to 16 GB of RAM. Up to 512 GB of RAM are available upon request.</p></li>
+<li><p><b>CPUs</b>:  Users can choose between 4 - 16 CPUs. These are useful for smaller analyses and to test out larger analyses. Once a user has completed testing and is ready to scale up an analysis, they can request up to 128 CPUs.</p></li>
+<li><p><b>RAM</b>:  Users can choose between 8 - 64 GB of RAM. Up to 512 GB of RAM is available upon request (instructions below).</p></li>
 <li><p><b>User Storage</b>: Upon logging in, users will have access to 10 GB of storage; additional storage is available upon request.</p></li>
 <li><p><b>GPUs</b>:  There are currently no GPUs available.</p></li>
 </ul>
@@ -532,15 +544,15 @@ document.write(`
 <section id="log-into-the-fornax-science-console">
 <h3>2. Log into the Fornax Science Console<a class="headerlink" href="#log-into-the-fornax-science-console" title="Link to this heading">#</a></h3>
 <p>Once you have your login credentials, enter them at:</p>
-<p>https://daskhub.fornaxdev.mysmce.com/</p>
+<p>https://science-console.fornax.smce.nasa.gov/</p>
 <ul class="simple">
-<li><p><b>Choose a software container image</b>: You will be given the option of choosing from a menu of software container images. Currently we offer to two images:</p>
+<li><p><b>Choose the software environment</b>: You will be given the option of choosing from a menu of software container images. Currently we offer to two images:</p>
 <ul>
 <li><p>Astrophysics Default Image (most users should choose this)</p></li>
 <li><p>High Energy Astrophysics Image</p></li>
 </ul>
 </li>
-<li><p><b>Choose a compute instance</b>: You will be offered several options for the size of the compute. Please use <code class="docutils literal notranslate"><span class="pre">mini</span></code> or <code class="docutils literal notranslate"><span class="pre">standard</span></code> size for writing, debugging, or testing code before switching to larger sizes for full runs of code at scale. Some of the options are marked as “Use with approval”. Please contact the person that invited you to the platform to obtain permission to use these instances.</p></li>
+<li><p><b>Choose a compute instance</b>: You will be offered 2 primary options for the size of the compute. Please use the <code class="docutils literal notranslate"><span class="pre">Standard</span></code> size for writing, debugging, or testing code before switching to <code class="docutils literal notranslate"><span class="pre">Large</span></code> size for full runs of code at scale. Some of the options are marked as “Use with approval”. Please contact the person that invited you to the platform to obtain permission to use these instances.</p></li>
 <li><p>Click “Start”. In a few moments, you will find yourself in JupyterLab.</p></li>
 </ul>
 </section>
@@ -554,8 +566,8 @@ document.write(`
 <section id="end-your-jupyterhub-session">
 <h3>4. End your JupyterHub session.<a class="headerlink" href="#end-your-jupyterhub-session" title="Link to this heading">#</a></h3>
 <ul>
-<li><p>Before logging out, please shut down your server.  This is an important step which insures the server you are using doesn’t keep running in the background, thereby wasting resources.</p></li>
-<li><p>Go to the <code class="docutils literal notranslate"><span class="pre">File</span></code> Menu and click on <code class="docutils literal notranslate"><span class="pre">hub</span> <span class="pre">control</span> <span class="pre">panel</span></code> as in the below image, which will bring up the option to <code class="docutils literal notranslate"><span class="pre">stop</span> <span class="pre">my</span> <span class="pre">server</span></code>(in red).  After stopping the server, please <code class="docutils literal notranslate"><span class="pre">logout</span></code> in the upper right of the JupyterHub window.</p>
+<li><p>Before logging out, please shut down your server. This is an important step which insures the server you are using doesn’t keep running in the background, thereby wasting resources.</p></li>
+<li><p>Go to the <code class="docutils literal notranslate"><span class="pre">File</span></code> Menu and click on <code class="docutils literal notranslate"><span class="pre">hub</span> <span class="pre">control</span> <span class="pre">panel</span></code> as in the below image, which will bring up the option to <code class="docutils literal notranslate"><span class="pre">stop</span> <span class="pre">my</span> <span class="pre">server</span></code>(in red). After stopping the server, please <code class="docutils literal notranslate"><span class="pre">logout</span></code> in the upper right of the JupyterHub window.</p>
 <p><img alt=" " src="../_images/hub_control_panel.png" /></p>
 </li>
 </ul>
@@ -577,7 +589,7 @@ document.write(`
 <section id="how-can-i-tell-which-computing-resources-are-available-on-the-fornax-science-console">
 <h3>How can I tell which computing resources are available on the Fornax Science Console?<a class="headerlink" href="#how-can-i-tell-which-computing-resources-are-available-on-the-fornax-science-console" title="Link to this heading">#</a></h3>
 <ul class="simple">
-<li><p>Generally you will have access to the CPU and RAM resources selected upon startup in Fornax.  It is possible to query in a terminal window to find the amount of CPU or RAM, however, beware that these methods can show a larger amount of total RAM than is actually accessible to your server due to resource sharing between users.</p></li>
+<li><p>You will have access to the CPU and RAM resources selected upon startup in Fornax.  It is possible to query in a terminal window to find the amount of CPU or RAM.</p></li>
 <li><p>In JupyterHub, open a terminal window, and use one of the below commands:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">nproc</span></code> will give you the number of processors</p></li>
@@ -588,7 +600,6 @@ document.write(`
 </ul>
 </li>
 </ul>
-<p>Under construction: It appears that sometimes we are allowed to use more CPU than listed for a short amount of time.  Is this true? and what are the parameters of when and for what sizes that will be allowed?</p>
 </section>
 <section id="please-use-md-markdown-files-instead-of-ipynb-for-jupyter-notebooks">
 <h3>Please use .md markdown files instead of .ipynb for Jupyter notebooks<a class="headerlink" href="#please-use-md-markdown-files-instead-of-ipynb-for-jupyter-notebooks" title="Link to this heading">#</a></h3>
@@ -623,17 +634,37 @@ By following these instructions, you can leverage the benefits of Markdown files
 </section>
 <section id="how-will-my-analysis-be-affected-by-memory-limitations">
 <h3>How will my analysis be affected by memory limitations?<a class="headerlink" href="#how-will-my-analysis-be-affected-by-memory-limitations" title="Link to this heading">#</a></h3>
-<p>If your workload exceeds your server size, your server may be allowed to use additional resources temporarily. This can be convenient but should not be relied on. In particular, be aware that your job may be killed automatically and without warning if its RAM needs exceed the alloted memory. This behavior is not specific to Fornax or AWS, but users may encounter it more often on the science console due to the flexible machine sizing options. (Your laptop needs to have the max amount of memory that you will ever use while working on it. On the science console, you can choose a different server size every time you start it up – this is much more efficient, but also requires you to be more aware of how much CPU and RAM your tasks need.)</p>
+<p>If your workload exceeds your server size, your server may be allowed to use
+additional resources temporarily. This can be convenient but should not be
+relied on. In particular, be aware that your job may be killed automatically
+and without warning if its RAM needs exceed the allotted memory. This behavior
+is not specific to Fornax or AWS, but users may encounter it more often on the
+science console due to the flexible machine sizing options. (Your laptop needs
+to have the max amount of memory that you will ever use while working on it.
+On the science console, you can choose a different server size every time you
+start it up – this is much more efficient, but also requires you to be more
+aware of how much CPU and RAM your tasks need.)</p>
 </section>
 <section id="what-is-a-kernel-and-how-do-i-choose-one">
 <h3>What is a kernel and how do I choose one?<a class="headerlink" href="#what-is-a-kernel-and-how-do-i-choose-one" title="Link to this heading">#</a></h3>
-<p>Under Construction: In Jupyter, kernels are the background processes that execute cells and return results for display. To select the kernel on which you want to run your Notebook, go to the Kernel menu and choose Change Kernel. You can also click directly on the name of the active kernel to switch to another one. The bottom of the JupyterLab window lists the github branch as well as the name of the kernel in use. The kernel is listed as either ‘idle’ or ‘busy’, which is useful to know if your kernel is working or has crashed.</p>
+<p>Under Construction: In Jupyter, kernels are the background processes that
+execute cells and return results for display. To select the kernel on which you
+want to run your Notebook, go to the Kernel menu and choose Change Kernel. You
+can also click directly on the name of the active kernel to switch to another
+one. The bottom of the JupyterLab window lists the github branch as well as the
+name of the kernel in use. The kernel is listed as either ‘idle’ or ‘busy’,
+which is useful to know if your kernel is working or has crashed.</p>
 </section>
 <section id="what-is-the-dask-extension-and-how-do-i-use-it">
 <h3>What is the Dask extension and how do I use it?<a class="headerlink" href="#what-is-the-dask-extension-and-how-do-i-use-it" title="Link to this heading">#</a></h3>
-<p><a class="reference external" href="https://www.dask.org/">Dask</a> is a python library for parallel computing, roughly similar to the <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> standard library.
-The Fornax Science Console includes the <a class="reference external" href="https://github.com/dask/dask-labextension">Dask JupyterLab Extension</a> which can be used to manage a Dask cluster and monitor the progress of submitted functions, all from within JupyterLab.
-The charts that make up Dask’s monitoring dashboard are embedded directly in JupyterLab panes which can be moved around into custom arrangements.
+<p><a class="reference external" href="https://www.dask.org/">Dask</a> is a python library for parallel computing,
+roughly similar to the <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> standard library.
+The Fornax Science Console includes the
+<a class="reference external" href="https://github.com/dask/dask-labextension">Dask JupyterLab Extension</a> which
+can be used to manage a Dask cluster and monitor the progress of submitted
+functions, all from within JupyterLab.
+The charts that make up Dask’s monitoring dashboard are embedded directly in
+JupyterLab panes which can be moved around into custom arrangements.
 Here are some chart examples:</p>
 <p><img alt=" " src="../_images/dask_chart_examples.png" /></p>
 <p>Quick-start instructions:</p>
@@ -658,13 +689,21 @@ In the screenshot above, several charts are open and arranged next to each other
 </section>
 <section id="save-your-work">
 <h3>Save your work!<a class="headerlink" href="#save-your-work" title="Link to this heading">#</a></h3>
-<p>The Science Console is primarily intended for interactive use and will cull sessions which appear to be inactive.  Archive calls appear to Fornax as periods of inactivity (we see the irony in this too!), so might lead to your session being dropped from Fornax.
-If you want a notebook or script to run for longer than about 60 minutes and you will not be interacting with the Console, running <code class="docutils literal notranslate"><span class="pre">top</span></code> during that time can help keep the session active.</p>
-<p>Under construction: how long is the period of inactivity that gets culled?</p>
+<p>The Science Console is primarily intended for interactive use and will cull
+sessions which appear to be inactive. Your session will not be culled if there
+is CPU activity. Keeping your computer from sleeping will also keep your
+session active; regardless of any interactivity.
+If you want a notebook or script to run longer than about 15 minutes and
+there is no processing in your notebook or you will not be interacting with the
+Console, running <code class="docutils literal notranslate"><span class="pre">top</span></code> during that time can help keep the session active.</p>
+<p>Under construction: how long is the period of inactivity that gets culled? 15
+minutes.</p>
 </section>
 <section id="how-can-i-save-my-notebook-as-a-python-script">
 <h3>How can I save my notebook as a Python script?<a class="headerlink" href="#how-can-i-save-my-notebook-as-a-python-script" title="Link to this heading">#</a></h3>
-<p>There are multiple ways to convert a notebook to a Python script, the easiest is to use <code class="docutils literal notranslate"><span class="pre">jupytext</span></code> on the command line. It is installed on Fornax, but if you work on your local computer, you may need to pip install it first:</p>
+<p>There are multiple ways to convert a notebook to a Python script, the easiest
+is to use <code class="docutils literal notranslate"><span class="pre">jupytext</span></code> on the command line. It is installed on Fornax, but if you
+work on your local computer, you may need to pip install it first:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">jupytext</span> <span class="pre">--to</span> <span class="pre">script</span> <span class="pre">&lt;your_notebook_file&gt;</span></code></p></li>
 </ul>
@@ -678,7 +717,7 @@ If you want a notebook or script to run for longer than about 60 minutes and you
 <h2>Data Management<a class="headerlink" href="#data-management" title="Link to this heading">#</a></h2>
 <section id="how-can-i-upload-my-own-data-for-use-with-compute-provided-by-the-fornax-science-console">
 <h3>How can I upload my own data for use with compute provided by the Fornax Science Console?<a class="headerlink" href="#how-can-i-upload-my-own-data-for-use-with-compute-provided-by-the-fornax-science-console" title="Link to this heading">#</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">uparrow</span></code> in the upper left allows you to upload data.  If it is a large amount of data, consider creating a zip or tar archive first. From within JupyterLab, you can also use a terminal to transfer data with the usual methods (<code class="docutils literal notranslate"><span class="pre">scp</span></code>, <code class="docutils literal notranslate"><span class="pre">wget</span></code>, <code class="docutils literal notranslate"><span class="pre">curl</span></code> should all work). The current (Feb 2024) default storage limit for uploaded data is 10GB (Feb 2024). When you log into the science console for the first time, the active directory is your <code class="docutils literal notranslate"><span class="pre">$HOME</span></code> directory. It contains preexisting folders like <code class="docutils literal notranslate"><span class="pre">efs/</span></code> with shared data. You may also create your own directories and files here. Your edits outside of the shared folders are not visible to other users.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">uparrow</span></code> in the upper left allows you to upload data. If it is a large amount of data, consider creating a zip or tar archive first. From within JupyterLab, you can also use a terminal to transfer data with the usual methods (<code class="docutils literal notranslate"><span class="pre">scp</span></code>, <code class="docutils literal notranslate"><span class="pre">wget</span></code>, <code class="docutils literal notranslate"><span class="pre">curl</span></code> should all work). The current (Feb 2024) default storage limit for uploaded data is 10GB (Feb 2024). When you log into the science console for the first time, the active directory is your <code class="docutils literal notranslate"><span class="pre">$HOME</span></code> directory. It contains preexisting folders like <code class="docutils literal notranslate"><span class="pre">efs/</span></code> with shared data. You may also create your own directories and files here. Your edits outside of the shared folders are not visible to other users.</p>
 <p><img alt="upload_button" src="../_images/upload_button.png" /></p>
 </section>
 <section id="how-can-i-access-data-that-has-been-hosted-on-the-cloud-by-the-fornax-archives">
@@ -692,11 +731,14 @@ If you want a notebook or script to run for longer than about 60 minutes and you
 </section>
 <section id="is-there-a-way-access-data-in-a-box-account-from-the-fornax-science-console">
 <h3>Is there a way access data in a Box account from the Fornax Science Console?<a class="headerlink" href="#is-there-a-way-access-data-in-a-box-account-from-the-fornax-science-console" title="Link to this heading">#</a></h3>
-<p>Any publicly accessible web service can be reached from Fornax through the HTTPS protocol, e.g., APIs, wget, etc.</p>
+<p>Any publicly accessible web service can be reached from Fornax through the
+HTTPS protocol, e.g., APIs, wget, etc.</p>
 </section>
 <section id="is-there-a-way-to-access-data-from-an-aws-bucket">
 <h3>Is there a way to access data from an AWS bucket?<a class="headerlink" href="#is-there-a-way-to-access-data-from-an-aws-bucket" title="Link to this heading">#</a></h3>
-<p>Any publicly available bucket is visible from Fornax as it would be on your laptop.  If you require an access key to see into the bucket from your laptop, you will also need that on Fornax.</p>
+<p>Any publicly available bucket is visible from Fornax as it would be on your
+laptop. If you require an access key to see into the bucket from your laptop,
+you will also need that on Fornax.</p>
 </section>
 <section id="how-can-i-open-a-plot-e-g-png-pdf-that-i-generated-in-a-notebook-or-uploaded">
 <h3>How can I open a plot (e.g. png, pdf) that I generated in a notebook or uploaded?<a class="headerlink" href="#how-can-i-open-a-plot-e-g-png-pdf-that-i-generated-in-a-notebook-or-uploaded" title="Link to this heading">#</a></h3>

@@ -45,7 +45,7 @@ Here are the libraries used in this network. They are also mostly mentioned in t
 - *astropy.io fits* for accessing FITS files
 - *astropy.table Table* for creating tidy tables of the data
 - *AGNzoo_functions* for reading in and prepreocessing of lightcurve data
-- *umap* and *sompy* for manifold learning, dimensionality reduction and visualization
+- *umap* and *minisom* for manifold learning, dimensionality reduction, and visualization
 
 This cell will install them if needed:
 
@@ -61,6 +61,8 @@ import astropy.units as u
 from astropy.table import Table
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
+import matplotlib.gridspec as gridspec
+
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 import numpy as np
@@ -69,12 +71,10 @@ sys.path.append('code_src/')
 from AGNzoo_functions import (unify_lc, unify_lc_gp, stat_bands, autopct_format, combine_bands,
                       normalize_clipmax_objects, shuffle_datalabel, dtw_distance,
                       stretch_small_values_arctan, translate_bitwise_sum_to_labels, update_bitsums)
-from collections import Counter,OrderedDict
+from collections import Counter, defaultdict
 
 import umap
-
-# using the SOMPY package from https://github.com/sevamoo/SOMPY
-from sompy import *
+from minisom import MiniSom
 
 import logging
 
@@ -139,7 +139,7 @@ for (objectid, label), singleobj in df_lc.groupby(level=["objectid", "label"]):
 # changing order of labels in dictionary only for text to be readable on the plot
 key_order = ('SDSS_QSO', 'SPIDER_AGN', 'SPIDER_BL', 'SPIDER_QSOBL', 'SPIDER_AGNBL',
              'WISE_Variable', 'Optical_Variable', 'Galex_Variable', 'Turn-on', 'Turn-off', 'TDE')
-new_queue = OrderedDict()
+new_queue = {}
 for k in key_order:
     new_queue[k] = seen[k]
 
@@ -383,208 +383,76 @@ Figure above shows how with ZTF light curves alone we can separate some of these
 ### 3.2) Reduced dimensions on a SOM grid
 
 ```{code-cell} ipython3
+# Initialization and training
 msz0, msz1 = 15, 15
-sm = sompy.SOMFactory.build(data, mapsize=[msz0, msz1], mapshape='planar', lattice='rect',
-                            initialization='pca')
-sm.train(n_job=4, shared_memory='no')
+som = MiniSom(msz0, msz1, data.shape[1], sigma=1.5, learning_rate=.5, 
+              neighborhood_function='gaussian', random_seed=0, topology='rectangular')
+
+som.pca_weights_init(data)
+som.train(data, 100000, verbose=False)  # random training
 ```
 
 ```{code-cell} ipython3
-a = sm.bmu_ind_to_xy(sm.project_data(data))
-x, y = np.zeros(len(a)), np.zeros(len(a))
-k = 0
-for i in a:
-    x[k] = i[0]
-    y[k] = i[1]
-    k += 1
-med_r = np.zeros([msz0, msz1])
-fvar_new = stretch_small_values_arctan(np.nansum(fvar_arr, axis=0), factor=1)
-for i in range(msz0):
-    for j in range(msz1):
-        unja = (x == i) & (y == j)
-        med_r[i, j] = (np.nanmedian(fvar_new[unja]))
+laborder = ['SDSS_QSO', 'SPIDER_AGN', 'SPIDER_BL', 'SPIDER_QSOBL', 'SPIDER_AGNBL',
+            'WISE_Variable', 'Optical_Variable', 'Galex_Variable', 'Turn-on', 'Turn-off', 'TDE']
 
 
-plt.figure(figsize=(18, 12))
-plt.subplot(3, 4, 1)
-plt.title('SDSS', fontsize=15)
-cf = plt.imshow(med_r, origin='lower', cmap='viridis')
-plt.axis('off')
+# Create grid to hold mean fvar per SOM node
+mean_fvar_map = np.full((msz0, msz1), np.nan)
 
-def get_indices_by_label(labc, label):
-    return labc.get(label, [])
+# Create helper to accumulate fvar values in each cell
+cell_fvar = defaultdict(list)
 
-# Example usage
-used = labc.get('SDSS_QSO', [])
-dsdss = data[used, :]
-asdss = sm.bmu_ind_to_xy(sm.project_data(dsdss))
-x, y = np.zeros(len(asdss)), np.zeros(len(asdss))
-k = 0
-for i in asdss:
-    x[k] = i[0]
-    y[k] = i[1]
-    k += 1
-plt.plot(y, x, 'rx', alpha=0.8)
+# First, map each data point to its BMU and store its fvar
+propfvar=stretch_small_values_arctan(np.nansum(fvar_arr, axis=0), factor=2)
+for i in range(len(data)):
+    bmu = som.winner(data[i])  # returns (x, y)
+    fvar_value = fvar_arr[i] if np.ndim(fvar_arr) == 1 else np.mean(propfvar[i])
+    cell_fvar[bmu].append(fvar_value)
 
-plt.subplot(3, 4, 2)
-plt.title('WISE_Variable', fontsize=15)
-cf = plt.imshow(med_r, origin='lower', cmap='viridis')
-plt.axis('off')
-used = labc.get('WISE_Variable', [])
-dwise = data[used, :]
-awise = sm.bmu_ind_to_xy(sm.project_data(dwise))
-x, y = np.zeros(len(awise)), np.zeros(len(awise))
-k = 0
-for i in awise:
-    x[k] = i[0]
-    y[k] = i[1]
-    k += 1
-plt.plot(y, x, 'rx', alpha=0.8)
+# Now compute mean per cell
+for (x, y), values in cell_fvar.items():
+    mean_fvar_map[x, y] = np.nanmean(values)
 
-plt.subplot(3, 4, 3)
-plt.title('Optical_Variable', fontsize=15)
-cf = plt.imshow(med_r, origin='lower', cmap='viridis')
-plt.axis('off')
-used = labc.get('Optical_Variable', [])
-dcic = data[used, :]
-acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
-x, y = np.zeros(len(acic)), np.zeros(len(acic))
-k = 0
-for i in acic:
-    x[k] = i[0]
-    y[k] = i[1]
-    k += 1
-plt.plot(y, x, 'rx', alpha=0.8)
+# apply stretching for visualization
+heatmap = stretch_small_values_arctan(mean_fvar_map)
+ncols = 4
+nrows = int(np.ceil(len(laborder) / ncols))
+fig, axs = plt.subplots(nrows, ncols, figsize=(3*ncols, 3*nrows))
+axs = axs.flatten()
 
+for i, label in enumerate(laborder):
+    ax = axs[i]
+    im = ax.imshow(heatmap.T, origin='lower', cmap='plasma')
 
-plt.subplot(3, 4, 4)
-plt.title('Galex_Variable', fontsize=15)
-cf = plt.imshow(med_r, origin='lower', cmap='viridis')
-plt.axis('off')
-used = labc.get('Galex_Variable', [])
-dcic = data[used, :]
-acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
-x, y = np.zeros(len(acic)), np.zeros(len(acic))
-k = 0
-for i in acic:
-    x[k] = i[0]
-    y[k] = i[1]
-    k += 1
-plt.plot(y, x, 'rx', alpha=0.8)
+    if label in labc:
+        for idx in labc[label]:
+            x, y = som.winner(data[idx])
+            ax.plot(x, y, 'x', color='white', markersize=8, markeredgewidth=2)
 
-plt.subplot(3, 4, 5)
-plt.title('SPIDER_AGN', fontsize=15)
-cf = plt.imshow(med_r, origin='lower', cmap='viridis')
-plt.axis('off')
-used = labc.get('SPIDER_AGN', [])
-dcic = data[used, :]
-acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
-x, y = np.zeros(len(acic)), np.zeros(len(acic))
-k = 0
-for i in acic:
-    x[k] = i[0]
-    y[k] = i[1]
-    k += 1
-plt.plot(y, x, 'rx', alpha=0.8)
+    ax.set_title(label)
+    ax.set_xticks([])
+    ax.set_yticks([])
 
-plt.subplot(3, 4, 6)
-plt.title('SPIDER_AGNBL', fontsize=15)
-cf = plt.imshow(med_r, origin='lower', cmap='viridis')
-plt.axis('off')
-used = labc.get('SPIDER_AGNBL', [])
-dcic = data[used, :]
-acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
-x, y = np.zeros(len(acic)), np.zeros(len(acic))
-k = 0
-for i in acic:
-    x[k] = i[0]
-    y[k] = i[1]
-    k += 1
-plt.plot(y, x, 'rx', alpha=0.8)
+# Hide the extra subplot if laborder < nrows * ncols
+if len(laborder) < len(axs):
+    axs[len(laborder)].axis('off')
 
-plt.subplot(3, 4, 7)
-plt.title('SPIDER_QSOBL', fontsize=15)
-cf = plt.imshow(med_r, origin='lower', cmap='viridis')
-plt.axis('off')
-used = labc.get('SPIDER_QSOBL', [])
-dcic = data[used, :]
-acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
-x, y = np.zeros(len(acic)), np.zeros(len(acic))
-k = 0
-for i in acic:
-    x[k] = i[0]
-    y[k] = i[1]
-    k += 1
-plt.plot(y, x, 'rx', alpha=0.8)
+# Colorbar outside the plot grid
+# Adjust position as needed (here it's to the right)
+cbar_ax = fig.add_axes([0.99, 0.05, 0.02, 0.9])  # [left, bottom, width, height]
+cbar = fig.colorbar(im, cax=cbar_ax)
+cbar.set_label('Mean Fractional Variability')
 
-plt.subplot(3, 4, 8)
-plt.title('SPIDER_BL', fontsize=15)
-cf = plt.imshow(med_r, origin='lower', cmap='viridis')
-plt.axis('off')
-used = labc.get('SPIDER_BL', [])
-dcic = data[used, :]
-acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
-x, y = np.zeros(len(acic)), np.zeros(len(acic))
-k = 0
-for i in acic:
-    x[k] = i[0]
-    y[k] = i[1]
-    k += 1
-plt.plot(y, x, 'rx', alpha=0.8)
-
-plt.subplot(3, 4, 9)
-plt.title('Turn-off', fontsize=15)
-cf = plt.imshow(med_r, origin='lower', cmap='viridis')
-plt.axis('off')
-used = labc.get('Turn-off', [])
-dcic = data[used, :]
-acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
-x, y = np.zeros(len(acic)), np.zeros(len(acic))
-k = 0
-for i in acic:
-    x[k] = i[0]
-    y[k] = i[1]
-    k += 1
-plt.plot(y, x, 'rx', alpha=0.8)
-
-
-plt.subplot(3, 4, 10)
-plt.title('Turn-on', fontsize=15)
-cf = plt.imshow(med_r, origin='lower', cmap='viridis')
-plt.axis('off')
-used = labc.get('Turn-on', [])
-dcic = data[used, :]
-acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
-x, y = np.zeros(len(acic)), np.zeros(len(acic))
-k = 0
-for i in acic:
-    x[k] = i[0]
-    y[k] = i[1]
-    k += 1
-plt.plot(y, x, 'rx', alpha=0.8)
-
-plt.subplot(3, 4, 11)
-plt.title('TDE', fontsize=15)
-cf = plt.imshow(med_r, origin='lower', cmap='viridis')
-plt.axis('off')
-used = labc.get('TDE', [])
-dcic = data[used, :]
-acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
-x, y = np.zeros(len(acic)), np.zeros(len(acic))
-k = 0
-for i in acic:
-    x[k] = i[0]
-    y[k] = i[1]
-    k += 1
-plt.plot(y, x, 'rx', alpha=0.8)
-
+plt.subplots_adjust(right=0.9)  # Leave space for colorbar
 plt.tight_layout()
+plt.show()
 ```
 
 The above SOMs are colored by the mean fractional variation of the lightcurves in all bands (a measure of AGN variability). The crosses are different samples mapped to the trained SOM to see if they are distinguishable on a normalized lightcurve som.
 
 ```{code-cell} ipython3
-# shuffle data incase the ML routines are sensitive to order
+# shuffle data in case the ML routines are sensitive to order
 data, fzr, p = shuffle_datalabel(dat_notnormal, flabels)
 fvar_arr, maximum_arr, average_arr = fvar[:, p], maxarray[:, p], meanarray[:, p]
 # Initialize labc to hold indices of each unique label
@@ -598,95 +466,99 @@ for index, f in enumerate(fzr):
         # Append the current index to the list of indices for this label
         labc[label].append(index)
 
-sm = sompy.SOMFactory.build(data, mapsize=[msz0, msz1], mapshape='planar',
-                            lattice='rect', initialization='pca')
-sm.train(n_job=4, shared_memory='no')
+som = MiniSom(msz0, msz1, data.shape[1], sigma=1.5, learning_rate=.5, 
+              neighborhood_function='gaussian', random_seed=0, topology='rectangular')
+
+som.pca_weights_init(data)
+som.train(data, 100000, verbose=False)  # random training
 ```
 
 ```{code-cell} ipython3
-a = sm.bmu_ind_to_xy(sm.project_data(data))
-x, y = np.zeros(len(a)), np.zeros(len(a))
-k = 0
-for i in a:
-    x[k] = i[0]
-    y[k] = i[1]
-    k += 1
-med_r = np.zeros([msz0, msz1])
-fvar_new = stretch_small_values_arctan(np.nansum(fvar_arr, axis=0), factor=1)
-for i in range(msz0):
-    for j in range(msz1):
-        unja = (x == i) & (y == j)
-        med_r[i, j] = (np.nanmedian(fvar_new[unja]))
+# Create grid to hold mean fvar per SOM node
+mean_fvar_map = np.full((msz0, msz1), np.nan)
 
+# Create helper to accumulate fvar values in each cell
+cell_fvar = defaultdict(list)
 
-plt.figure(figsize=(18, 8))
-plt.subplot(1, 4, 1)
-plt.title('SDSS', fontsize=15)
-cf = plt.imshow(med_r, origin='lower', cmap='viridis')
-plt.axis('off')
+# First, map each data point to its BMU and store its fvar
+propfvar=stretch_small_values_arctan(np.nansum(fvar_arr, axis=0), factor=2)
+for i in range(len(data)):
+    bmu = som.winner(data[i])  # returns (x, y)
+    fvar_value = fvar_arr[i] if np.ndim(fvar_arr) == 1 else np.mean(propfvar[i])
+    cell_fvar[bmu].append(fvar_value)
 
-def get_indices_by_label(labc, label):
-    return labc.get(label, [])
+# Now compute mean per cell
+for (x, y), values in cell_fvar.items():
+    mean_fvar_map[x, y] = np.nanmean(values)
 
-# Example usage
-used = labc.get('SDSS_QSO', [])
-dsdss = data[used, :]
-asdss = sm.bmu_ind_to_xy(sm.project_data(dsdss))
-x, y = np.zeros(len(asdss)), np.zeros(len(asdss))
-k = 0
-for i in asdss:
-    x[k] = i[0]
-    y[k] = i[1]
-    k += 1
-plt.plot(y, x, 'rx', alpha=0.5)
+# apply stretching for visualization
+heatmap = stretch_small_values_arctan(mean_fvar_map)
+ncols = 4
+nrows = int(np.ceil(len(laborder) / ncols))
+fig, axs = plt.subplots(nrows, ncols, figsize=(3*ncols, 3*nrows))
+axs = axs.flatten()
 
-plt.subplot(1, 4, 2)
-plt.title('WISE_Variable', fontsize=15)
-cf = plt.imshow(med_r, origin='lower', cmap='viridis')
-plt.axis('off')
-used = labc.get('WISE_Variable', [])
-dwise = data[used, :]
-awise = sm.bmu_ind_to_xy(sm.project_data(dwise))
-x, y = np.zeros(len(awise)), np.zeros(len(awise))
-k = 0
-for i in awise:
-    x[k] = i[0]
-    y[k] = i[1]
-    k += 1
-plt.plot(y, x, 'rx', alpha=0.5)
+for i, label in enumerate(laborder):
+    ax = axs[i]
+    im = ax.imshow(heatmap.T, origin='lower', cmap='plasma')
 
-plt.subplot(1, 4, 3)
-plt.title('Turn-on', fontsize=15)
-cf = plt.imshow(med_r, origin='lower', cmap='viridis')
-plt.axis('off')
-used = labc.get('Turn-on', [])
-dcic = data[used, :]
-acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
-x, y = np.zeros(len(acic)), np.zeros(len(acic))
-k = 0
-for i in acic:
-    x[k] = i[0]
-    y[k] = i[1]
-    k += 1
-plt.plot(y, x, 'rx', alpha=0.5)
+    if label in labc:
+        for idx in labc[label]:
+            x, y = som.winner(data[idx])
+            ax.plot(x, y, 'x', color='white', markersize=8, markeredgewidth=2)
 
+    ax.set_title(label)
+    ax.set_xticks([])
+    ax.set_yticks([])
 
-plt.subplot(1, 4, 4)
-plt.title('Turn-off', fontsize=15)
-cf = plt.imshow(med_r, origin='lower', cmap='viridis')
-plt.axis('off')
-used = labc.get('Turn-off', [])
-dcic = data[used, :]
-acic = sm.bmu_ind_to_xy(sm.project_data(dcic))
-x, y = np.zeros(len(acic)), np.zeros(len(acic))
-k = 0
-for i in acic:
-    x[k] = i[0]
-    y[k] = i[1]
-    k += 1
-plt.plot(y, x, 'rx', alpha=0.5)
+# Hide the extra subplot if laborder < nrows * ncols
+if len(laborder) < len(axs):
+    axs[len(laborder)].axis('off')
 
+# Colorbar outside the plot grid
+# Adjust position as needed (here it's to the right)
+cbar_ax = fig.add_axes([0.99, 0.05, 0.02, 0.9])  # [left, bottom, width, height]
+cbar = fig.colorbar(im, cax=cbar_ax)
+cbar.set_label('Mean Fractional Variability')
+
+plt.subplots_adjust(right=0.9)  # Leave space for colorbar
 plt.tight_layout()
+plt.show()
+```
+
+```{code-cell} ipython3
+labels = [None] * len(data)
+for label in laborder:
+    if label in labc:
+        for idx in labc[label]:
+            labels[idx] = label
+            
+labels_map = defaultdict(Counter)
+
+for x, label in zip(data, labels):
+    if label is not None:
+        w = som.winner(x)
+        labels_map[w][label] += 1
+
+fig = plt.figure(figsize=(12, 12))
+the_grid = gridspec.GridSpec(msz0, msz1, fig)
+
+for position in labels_map.keys():
+    label_counts = labels_map[position]
+    total = sum(label_counts.values())
+    
+    # Use consistent order from laborder
+    fracs = [label_counts.get(label, 0) / total for label in laborder]
+    
+    ax = plt.subplot(the_grid[msz1 - 1 - position[1], position[0]], aspect=1)
+    patches, _ = ax.pie(fracs)
+    #ax.set_title(f"{position}", fontsize=6)
+    ax.axis('equal')
+
+# Legend outside
+plt.legend(patches, laborder, bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=8)
+plt.tight_layout()
+plt.show()
 ```
 
 skipping the normalization of lightcurves, further separates turn on/off CLAGNs when looking at ZTF lightcurves only.
@@ -918,7 +790,8 @@ plt.axis('off')
 This notebook is created by the IPAC science platform team as a usecase of ML for time domain astrophysics. For questions contact: shemmati@caltech.edu
 
 **Author:** Shoubaneh Hemmati, Research scientist
-**Updated On:** 2024-09-02
+
+**Updated On:** 2025-03-31
 
 
 ## Citations
@@ -929,5 +802,5 @@ Datasets:
 * TBD
 
 Packages:
-* [`SOMPY`](https://github.com/sevamoo/SOMPY)
+* [`minisom`](https://github.com/JustGlowing/minisom)
 * [`umap`](https://github.com/lmcinnes/umap)

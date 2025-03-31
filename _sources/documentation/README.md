@@ -2,9 +2,18 @@
 
 ## What is the Fornax Science Console?
 
-The Fornax Science Console is a NASA-funded web-based application that provides access to a limited amount of cloud computing via JupyterLab, which offers access to Jupyter Notebooks, Jupyter Console, and the terminal (command line). Users will need to register to login to the system, but usage is free. Once logged in, users will have access to data sets curated by repositories around the world, and can upload moderate amounts of private data. To get started quickly, users can choose from a variety of example Jupyter notebooks as well as pre-installed software environments. These can be modified to suit user needs.
+The Fornax Science Console is a NASA-funded web-based application that provides 
+access to a limited amount of cloud computing via JupyterLab, which offers 
+access to Jupyter Notebooks, Jupyter Console, and the terminal (command line). 
+Users will need to register to login to the system, but usage is free. Once 
+logged in, users will have access to data sets curated by repositories around 
+the world, and can upload moderate amounts of private data. To get started 
+quickly, users can choose from a variety of example Jupyter notebooks as well 
+as pre-installed software environments. These can be modified to suit user 
+needs.
 
-The Fornax Science Console supports many astronomical use cases, but users will find it especially beneficial for analyses
+The Fornax Science Console supports many astronomical use cases, but users will 
+find it especially beneficial for analyses
  * on large cloud-hosted data sets that would be cumbersome to download;
  * that require complicated software pre-installed on the platform; or
  * that are parallelizable and require more compute than they currently have access to.
@@ -13,19 +22,22 @@ The Fornax Science Console supports many astronomical use cases, but users will 
 
 After logging in, users will be presented with choices for their working environment.
 
-* <b>Compute size</b>:  the amount of compute (CPUs) and memory (RAM) available is configurable.  Options are briefly described below.
-* <b>Compute environment</b>: the software environment including the operating system, system library versions, and pre-installed software selections.
+* <b>Server type</b>:  the amount of compute (CPUs) and memory (RAM) available is configurable. Options are briefly described below.
+* <b>Environment</b>: the software environment including the operating system, system library versions, and pre-installed software selections.
 
-The compute size you select largely determines the costs you will accrue while it is running.  We therefore need our users to be more conscious of the compute you are using than you would be on your own hardware. We ask users to follow these guidelines:
+The compute size you select largely determines the costs you will accrue while 
+it is running. We therefore need our users to be more conscious of the compute 
+you are using than you would be on your own hardware. We ask users to follow 
+these guidelines:
 
 * You will have a choice of server types. Please test your use case on the smallest server that can serve as a test, and run tests with a limited scope (e.g., number of sources, iterations, etc.). Only expand the scope and/or select a larger server when you have successfully tested the smaller case.
 * Please also note that if you start an instance, closing your browser window does not necessarily stop the instance you started.  Especially with the larger instances, **please explicitly use the “Stop My Server” button** (under File->Hub Control Panel)  when done.
 * Any time you need to use the biggest 128-core compute instance, please reach out to the Help Desk for explicit permission _before_ starting it. This will help us to be aware of resource usage for this development system, which does not yet have fully automated resource usage guardrails. Give us a brief idea of what the science use case is and an estimate for the _total_ run time. Note that if your job (or jobs) runs significantly longer than we expect, we may contact you about terminating it. If you need to stop and restart your instance, you don’t need to get permission every time as long as you are still within the original estimated total run time. If you need more time than expected, please write to the help desk with a brief justification. Our review process is more about visibility than control, so you’ll probably be approved.
 
-The compute options:
+The compute options depend upon `Server type` selected:
 
-  * <b>CPUs</b>:  By default, users will have access to 4 CPUs provided by AWS. These are useful for smaller analyses and to test out larger analyses. Once a user has completed testing and is ready to scale up an analysis, they can request up to 128 CPUs.
-  * <b>RAM</b>: Upon logging in, users will have access to up to 16 GB of RAM. Up to 512 GB of RAM are available upon request.
+  * <b>CPUs</b>:  Users can choose between 4 - 16 CPUs. These are useful for smaller analyses and to test out larger analyses. Once a user has completed testing and is ready to scale up an analysis, they can request up to 128 CPUs.
+  * <b>RAM</b>:  Users can choose between 8 - 64 GB of RAM. Up to 512 GB of RAM is available upon request (instructions below).
   * <b>User Storage</b>: Upon logging in, users will have access to 10 GB of storage; additional storage is available upon request.
   * <b>GPUs</b>:  There are currently no GPUs available.
 
@@ -52,13 +64,13 @@ The platform is currently available by invitation only.
 
 Once you have your login credentials, enter them at:
 
-https://daskhub.fornaxdev.mysmce.com/
+https://science-console.fornax.smce.nasa.gov/
 
-* <b>Choose a software container image</b>: You will be given the option of choosing from a menu of software container images. Currently we offer to two images:
+* <b>Choose the software environment</b>: You will be given the option of choosing from a menu of software container images. Currently we offer to two images:
    * Astrophysics Default Image (most users should choose this)
    * High Energy Astrophysics Image
 
-* <b>Choose a compute instance</b>: You will be offered several options for the size of the compute. Please use `mini` or `standard` size for writing, debugging, or testing code before switching to larger sizes for full runs of code at scale. Some of the options are marked as "Use with approval". Please contact the person that invited you to the platform to obtain permission to use these instances.
+* <b>Choose a compute instance</b>: You will be offered 2 primary options for the size of the compute. Please use the `Standard` size for writing, debugging, or testing code before switching to `Large` size for full runs of code at scale. Some of the options are marked as "Use with approval". Please contact the person that invited you to the platform to obtain permission to use these instances.
 
 * Click "Start". In a few moments, you will find yourself in JupyterLab.
 
@@ -68,8 +80,8 @@ https://daskhub.fornaxdev.mysmce.com/
  ![new launcher](./static/images/new_launcher.png)
 
 ### 4. End your JupyterHub session.
-  *  Before logging out, please shut down your server.  This is an important step which insures the server you are using doesn't keep running in the background, thereby wasting resources.
-  *  Go to the `File` Menu and click on `hub control panel` as in the below image, which will bring up the option to `stop my server`(in red).  After stopping the server, please `logout` in the upper right of the JupyterHub window.
+  *  Before logging out, please shut down your server. This is an important step which insures the server you are using doesn't keep running in the background, thereby wasting resources.
+  *  Go to the `File` Menu and click on `hub control panel` as in the below image, which will bring up the option to `stop my server`(in red). After stopping the server, please `logout` in the upper right of the JupyterHub window.
 
      ![ ](./static/images/hub_control_panel.png)
 
@@ -84,15 +96,13 @@ The Fornax Science Platform additionally contains a JupyterLab extension called 
 ## Starting & Monitoring Analyses
 
 ### How can I tell which computing resources are available on the Fornax Science Console?
-  * Generally you will have access to the CPU and RAM resources selected upon startup in Fornax.  It is possible to query in a terminal window to find the amount of CPU or RAM, however, beware that these methods can show a larger amount of total RAM than is actually accessible to your server due to resource sharing between users.
+  * You will have access to the CPU and RAM resources selected upon startup in Fornax.  It is possible to query in a terminal window to find the amount of CPU or RAM.
   * In JupyterHub, open a terminal window, and use one of the below commands:
     * `nproc` will give you the number of processors
     * `cat /proc/cpuinfo` will give you more detailed info on the processors
     * `free -h` will give the amount of RAM available/used
     * `cat /proc/meminfo` will give  more detailed info on the amount of RAM available/used
     * `top` gives info on both CPU and RAM usage. Some numerical packages (e.g. numpy) use multithreading, so you may see that the CPU usage is more 100%. That means more than one CPU is used. You can see the individual CPU usage by pressing 1 while the `top` command is running.
-
-Under construction: It appears that sometimes we are allowed to use more CPU than listed for a short amount of time.  Is this true? and what are the parameters of when and for what sizes that will be allowed?
 
 ### Please use .md markdown files instead of .ipynb for Jupyter notebooks 
 Using .md (Markdown) files for Jupyter notebooks in GitHub repositories offers significant advantages over traditional .ipynb files, particularly for astronomers and researchers collaborating on code-intensive projects. The primary benefit is vastly improved readability during code reviews and version control. Unlike .ipynb files, which store output, metadata, and code in a convoluted JSON format, .md files present code, text, and outputs in a clean, diff-friendly format. This makes it easier to track changes in pull requests, compare versions, and conduct meaningful code reviews, which is essential for maintaining high-quality, reproducible research code. Additionally, Markdown files integrate seamlessly with Jupytext, allowing them to function as fully interactive notebooks within JupyterLab, offering the same user experience without the drawbacks of .ipynb files.
@@ -117,17 +127,37 @@ Under construction.
 
 ### How will my analysis be affected by memory limitations?
 
-If your workload exceeds your server size, your server may be allowed to use additional resources temporarily. This can be convenient but should not be relied on. In particular, be aware that your job may be killed automatically and without warning if its RAM needs exceed the alloted memory. This behavior is not specific to Fornax or AWS, but users may encounter it more often on the science console due to the flexible machine sizing options. (Your laptop needs to have the max amount of memory that you will ever use while working on it. On the science console, you can choose a different server size every time you start it up -- this is much more efficient, but also requires you to be more aware of how much CPU and RAM your tasks need.)
+If your workload exceeds your server size, your server may be allowed to use 
+additional resources temporarily. This can be convenient but should not be 
+relied on. In particular, be aware that your job may be killed automatically 
+and without warning if its RAM needs exceed the allotted memory. This behavior 
+is not specific to Fornax or AWS, but users may encounter it more often on the 
+science console due to the flexible machine sizing options. (Your laptop needs 
+to have the max amount of memory that you will ever use while working on it. 
+On the science console, you can choose a different server size every time you 
+start it up -- this is much more efficient, but also requires you to be more 
+aware of how much CPU and RAM your tasks need.)
 
 ### What is a kernel and how do I choose one?
 
-Under Construction: In Jupyter, kernels are the background processes that execute cells and return results for display. To select the kernel on which you want to run your Notebook, go to the Kernel menu and choose Change Kernel. You can also click directly on the name of the active kernel to switch to another one. The bottom of the JupyterLab window lists the github branch as well as the name of the kernel in use. The kernel is listed as either 'idle' or 'busy', which is useful to know if your kernel is working or has crashed.
+Under Construction: In Jupyter, kernels are the background processes that 
+execute cells and return results for display. To select the kernel on which you 
+want to run your Notebook, go to the Kernel menu and choose Change Kernel. You 
+can also click directly on the name of the active kernel to switch to another 
+one. The bottom of the JupyterLab window lists the github branch as well as the 
+name of the kernel in use. The kernel is listed as either 'idle' or 'busy', 
+which is useful to know if your kernel is working or has crashed.
 
 ### What is the Dask extension and how do I use it?
 
-[Dask](https://www.dask.org/) is a python library for parallel computing, roughly similar to the `multiprocessing` standard library.
-The Fornax Science Console includes the [Dask JupyterLab Extension](https://github.com/dask/dask-labextension) which can be used to manage a Dask cluster and monitor the progress of submitted functions, all from within JupyterLab.
-The charts that make up Dask's monitoring dashboard are embedded directly in JupyterLab panes which can be moved around into custom arrangements.
+[Dask](https://www.dask.org/) is a python library for parallel computing, 
+roughly similar to the `multiprocessing` standard library.
+The Fornax Science Console includes the 
+[Dask JupyterLab Extension](https://github.com/dask/dask-labextension) which 
+can be used to manage a Dask cluster and monitor the progress of submitted 
+functions, all from within JupyterLab.
+The charts that make up Dask's monitoring dashboard are embedded directly in 
+JupyterLab panes which can be moved around into custom arrangements.
 Here are some chart examples:
 
 ![ ](./static/images/dask_chart_examples.png)
@@ -149,13 +179,21 @@ Quick-start instructions:
   * If you want software installs to be persistent, consider setting up an environment: See below under "Making a conda environment that persists across sessions"
 
 ### Save your work!
-The Science Console is primarily intended for interactive use and will cull sessions which appear to be inactive.  Archive calls appear to Fornax as periods of inactivity (we see the irony in this too!), so might lead to your session being dropped from Fornax.
-If you want a notebook or script to run for longer than about 60 minutes and you will not be interacting with the Console, running `top` during that time can help keep the session active.
+The Science Console is primarily intended for interactive use and will cull 
+sessions which appear to be inactive. Your session will not be culled if there 
+is CPU activity. Keeping your computer from sleeping will also keep your 
+session active; regardless of any interactivity.
+If you want a notebook or script to run longer than about 15 minutes and 
+there is no processing in your notebook or you will not be interacting with the 
+Console, running `top` during that time can help keep the session active.
 
-Under construction: how long is the period of inactivity that gets culled?
+Under construction: how long is the period of inactivity that gets culled? 15 
+minutes.
 
 ### How can I save my notebook as a Python script?
-There are multiple ways to convert a notebook to a Python script, the easiest is to use `jupytext` on the command line. It is installed on Fornax, but if you work on your local computer, you may need to pip install it first:
+There are multiple ways to convert a notebook to a Python script, the easiest 
+is to use `jupytext` on the command line. It is installed on Fornax, but if you 
+work on your local computer, you may need to pip install it first:
 
   * `jupytext --to script <your_notebook_file>`
 
@@ -166,7 +204,7 @@ Under Construction.
 
 ### How can I upload my own data for use with compute provided by the Fornax Science Console?
 
-The `uparrow` in the upper left allows you to upload data.  If it is a large amount of data, consider creating a zip or tar archive first. From within JupyterLab, you can also use a terminal to transfer data with the usual methods (`scp`, `wget`, `curl` should all work). The current (Feb 2024) default storage limit for uploaded data is 10GB (Feb 2024). When you log into the science console for the first time, the active directory is your `$HOME` directory. It contains preexisting folders like `efs/` with shared data. You may also create your own directories and files here. Your edits outside of the shared folders are not visible to other users.
+The `uparrow` in the upper left allows you to upload data. If it is a large amount of data, consider creating a zip or tar archive first. From within JupyterLab, you can also use a terminal to transfer data with the usual methods (`scp`, `wget`, `curl` should all work). The current (Feb 2024) default storage limit for uploaded data is 10GB (Feb 2024). When you log into the science console for the first time, the active directory is your `$HOME` directory. It contains preexisting folders like `efs/` with shared data. You may also create your own directories and files here. Your edits outside of the shared folders are not visible to other users.
 
    ![upload_button](./static/images/upload_button.png)
 
@@ -178,11 +216,14 @@ The `uparrow` in the upper left allows you to upload data.  If it is a large amo
 
 ### Is there a way access data in a Box account from the Fornax Science Console?
 
-Any publicly accessible web service can be reached from Fornax through the HTTPS protocol, e.g., APIs, wget, etc.
+Any publicly accessible web service can be reached from Fornax through the 
+HTTPS protocol, e.g., APIs, wget, etc.
 
 ### Is there a way to access data from an AWS bucket?
 
-Any publicly available bucket is visible from Fornax as it would be on your laptop.  If you require an access key to see into the bucket from your laptop, you will also need that on Fornax.
+Any publicly available bucket is visible from Fornax as it would be on your 
+laptop. If you require an access key to see into the bucket from your laptop, 
+you will also need that on Fornax.
 
 ### How can I open a plot (e.g. png, pdf) that I generated in a notebook or uploaded?
 
