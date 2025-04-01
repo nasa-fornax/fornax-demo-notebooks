@@ -14,9 +14,7 @@ astroquery>=0.4.8.dev0
 acstools
 lightkurve
 alerce
-# Upper limit is temporary to avoid the unresolvable dependency requirements
-# until we absolutely require hats 0.5.0 and thus nested-pandas 0.3.8+
-lsdb>=0.4.5,<0.5.0
+lsdb>=0.4.5
 universal_pathlib
 # We use distributed in this notebook, but installing any dask would make the [dataframe] extras required by dependencies for other notebooks.
 # It feels to be the cleanest solution to add the dependency here as we don't directly use it elsewhere.
