@@ -44,7 +44,7 @@ exclude_patterns += ['README.md', '*/data/*', '*/output/*']
 exclude_patterns += ['documentation/index.md',]
 
 # Not yet included in the rendering:
-exclude_patterns += ['documentation/notebook_review_process.md', 'spectroscopy/*', '*/code_src/*']
+exclude_patterns += ['documentation/notebook_review_process.md', 'spectroscopy/explore*', '*/code_src/*']
 
 # Myst-NB configuration
 # Override kernelspec.name for rendering for all the notebooks.
