@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from astropy.table import Table
+from astropy.table import vstack
 from astroquery.mast import Observations
 from specutils import Spectrum1D
 
@@ -113,8 +114,9 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
             continue
 
         # Retrieve spectra
-        data_products_list = Observations.get_product_list(query_results)
-
+        data_products = [Observations.get_product_list(obs) for obs in query_results]
+        data_products_list = vstack(data_products)
+        
         # Filter
         data_products_list_filter = Observations.filter_products(
             data_products_list, productType=["SCIENCE"], extension="fits",
