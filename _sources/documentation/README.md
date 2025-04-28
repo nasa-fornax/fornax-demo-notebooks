@@ -200,6 +200,11 @@ work on your local computer, you may need to pip install it first:
 ### How can I run a notebook non-interactively?
 Under Construction.
 
+### Can I use VS code on Fornax?
+Yes!
+To open VS code on Fornax, first start up a compute session from the science console.  To do this, from the dashboard, on the left hand side menu, click on JupyterHub under Compute. 
+Once jupyterhub loads, click on the blue plus sign in the upper left corner.  In case you are in some other tab, make sure you are in the File browser tab which is shown by the file symbol in the furthest left column.  The blue plus sign takes you to the launcher where you will see "VS Code" in the top row under "Notebook".  Clicking on this link will automatically open another window where you can use VS Code for the web.  
+
 ## Data Management
 
 ### How can I upload my own data for use with compute provided by the Fornax Science Console?
