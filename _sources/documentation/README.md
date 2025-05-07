@@ -2,17 +2,17 @@
 
 ## What is the Fornax Science Console?
 
-The Fornax Science Console is a NASA-funded web-based application that provides 
-access to a limited amount of cloud computing via JupyterLab, which offers 
-access to Jupyter Notebooks, Jupyter Console, and the terminal (command line). 
-Users will need to register to login to the system, but usage is free. Once 
-logged in, users will have access to data sets curated by repositories around 
-the world, and can upload moderate amounts of private data. To get started 
-quickly, users can choose from a variety of example Jupyter notebooks as well 
-as pre-installed software environments. These can be modified to suit user 
+The Fornax Science Console is a NASA-funded web-based application that provides
+access to a limited amount of cloud computing via JupyterLab, which offers
+access to Jupyter Notebooks, Jupyter Console, and the terminal (command line).
+Users will need to register to login to the system, but usage is free. Once
+logged in, users will have access to data sets curated by repositories around
+the world, and can upload moderate amounts of private data. To get started
+quickly, users can choose from a variety of example Jupyter notebooks as well
+as pre-installed software environments. These can be modified to suit user
 needs.
 
-The Fornax Science Console supports many astronomical use cases, but users will 
+The Fornax Science Console supports many astronomical use cases, but users will
 find it especially beneficial for analyses
  * on large cloud-hosted data sets that would be cumbersome to download;
  * that require complicated software pre-installed on the platform; or
@@ -25,9 +25,9 @@ After logging in, users will be presented with choices for their working environ
 * <b>Server type</b>:  the amount of compute (CPUs) and memory (RAM) available is configurable. Options are briefly described below.
 * <b>Environment</b>: the software environment including the operating system, system library versions, and pre-installed software selections.
 
-The compute size you select largely determines the costs you will accrue while 
-it is running. We therefore need our users to be more conscious of the compute 
-you are using than you would be on your own hardware. We ask users to follow 
+The compute size you select largely determines the costs you will accrue while
+it is running. We therefore need our users to be more conscious of the compute
+you are using than you would be on your own hardware. We ask users to follow
 these guidelines:
 
 * You will have a choice of server types. Please test your use case on the smallest server that can serve as a test, and run tests with a limited scope (e.g., number of sources, iterations, etc.). Only expand the scope and/or select a larger server when you have successfully tested the smaller case.
@@ -104,21 +104,26 @@ The Fornax Science Platform additionally contains a JupyterLab extension called 
     * `cat /proc/meminfo` will give  more detailed info on the amount of RAM available/used
     * `top` gives info on both CPU and RAM usage. Some numerical packages (e.g. numpy) use multithreading, so you may see that the CPU usage is more 100%. That means more than one CPU is used. You can see the individual CPU usage by pressing 1 while the `top` command is running.
 
-### Please use .md markdown files instead of .ipynb for Jupyter notebooks 
-Using .md (Markdown) files for Jupyter notebooks in GitHub repositories offers significant advantages over traditional .ipynb files, particularly for astronomers and researchers collaborating on code-intensive projects. The primary benefit is vastly improved readability during code reviews and version control. Unlike .ipynb files, which store output, metadata, and code in a convoluted JSON format, .md files present code, text, and outputs in a clean, diff-friendly format. This makes it easier to track changes in pull requests, compare versions, and conduct meaningful code reviews, which is essential for maintaining high-quality, reproducible research code. Additionally, Markdown files integrate seamlessly with Jupytext, allowing them to function as fully interactive notebooks within JupyterLab, offering the same user experience without the drawbacks of .ipynb files.
 
-Furthermore, using .md files promotes best practices for open science and educational resources. Many organizations, including NumPy are using Markdown-based notebooks to enhance accessibility and collaboration. Markdown is a lightweight format that supports rich formatting, code execution, and the inclusion of outputs while remaining easily editable in any text editor. This ensures that research notebooks remain both human-readable and machine-readable, enabling astronomers to share code and results more effectively with collaborators and the wider scientific community.
+### Please use MyST Markdown `.md` files instead of `.ipynb` for Jupyter notebooks
 
-Instructions for Using .md Files in JupyterLab
-1. Starting a New Notebook as a .md File:
-   * In JupyterLab, when creating a new notebook, choose .md instead of .ipynb to ensure better version control and code reviewability.
-2. Opening an Existing .md File as a Jupyter Notebook:
-   * Navigate to the .md file in the JupyterLab file browser.
+Using `.md` (specifically MyST Markdown) files for Jupyter notebooks in GitHub repositories offers significant advantages over traditional .ipynb files, particularly for astronomers and researchers collaborating on code-intensive projects. The primary benefit is vastly improved readability during code reviews and version control. Unlike .ipynb files, which store output, metadata, and code in a convoluted JSON format, `.md` files present code and text in a clean, diff-friendly format. This makes it easier to track changes in pull requests, compare versions, and conduct meaningful code reviews, which is essential for maintaining high-quality, reproducible research code. Additionally, Markdown files integrate seamlessly with Jupytext, allowing them to function as fully interactive notebooks within JupyterLab, offering the same user experience without the drawbacks of .ipynb files. To read more about the differences, we refer to the [JupyterBook Ecosystem documentation](https://mystmd.org/guide/md-vs-ipynb).
+
+Furthermore, using markdown files promotes best practices for open science and educational resources. Many organizations, including NumPy are using Markdown-based notebooks to enhance accessibility and collaboration. Markdown is a lightweight format that supports rich formatting, code execution, and the inclusion of outputs while remaining easily editable in any text editor. This ensures that research notebooks remain both human-readable and machine-readable, enabling astronomers to share code and results more effectively with collaborators and the wider scientific community.
+
+On the Fornax Science Console all required dependencies are pre-installed. If you wish to work with MyST Markdown notebooks on your local JupyterLab and to have the same user experience as with the older file format, the following two dependencies are required to be installed: the [jupytext Python library](https://pypi.org/project/jupytext/), and the [jupyterlab-myst JupyterLab extension](https://pypi.org/project/jupyterlab-myst/).
+
+#### Instructions for Using `.md` Files in JupyterLab
+
+1. Starting a New Notebook as a `.md` File:
+   * In JupyterLab, when creating a new notebook, choose `.md` instead of `.ipynb` to ensure better version control and code reviewability.
+2. Opening an Existing `.md` File as a Jupyter Notebook:
+   * Navigate to the `.md` file in the JupyterLab file browser.
    * Right-click the file, select `Open With`, and choose `Notebook` or `Jupytext Notebook`.
    * This will open the Markdown file in a notebook interface with cells and execution capabilities, just like a traditional .ipynb notebook.
-3. Converting an Existing .ipynb Notebook to .md:
-   * If you have an existing .ipynb file that you want to add to the repository, convert it to .md using Jupytext:
-   * `jupytext --to md notebook.ipynb`
+3. Converting an Existing .ipynb Notebook to MyST Markdown:
+   * If you have an existing .ipynb file that you want to add to the repository, convert it to markdown using Jupytext:
+   * `jupytext --to md:myst notebook.ipynb`
 By following these instructions, you can leverage the benefits of Markdown files while maintaining the full functionality of Jupyter notebooks.
 
 ### How can I tell if I am close to using up my allocation of compute and storage resources?
@@ -127,36 +132,36 @@ Under construction.
 
 ### How will my analysis be affected by memory limitations?
 
-If your workload exceeds your server size, your server may be allowed to use 
-additional resources temporarily. This can be convenient but should not be 
-relied on. In particular, be aware that your job may be killed automatically 
-and without warning if its RAM needs exceed the allotted memory. This behavior 
-is not specific to Fornax or AWS, but users may encounter it more often on the 
-science console due to the flexible machine sizing options. (Your laptop needs 
-to have the max amount of memory that you will ever use while working on it. 
-On the science console, you can choose a different server size every time you 
-start it up -- this is much more efficient, but also requires you to be more 
+If your workload exceeds your server size, your server may be allowed to use
+additional resources temporarily. This can be convenient but should not be
+relied on. In particular, be aware that your job may be killed automatically
+and without warning if its RAM needs exceed the allotted memory. This behavior
+is not specific to Fornax or AWS, but users may encounter it more often on the
+science console due to the flexible machine sizing options. (Your laptop needs
+to have the max amount of memory that you will ever use while working on it.
+On the science console, you can choose a different server size every time you
+start it up -- this is much more efficient, but also requires you to be more
 aware of how much CPU and RAM your tasks need.)
 
 ### What is a kernel and how do I choose one?
 
-Under Construction: In Jupyter, kernels are the background processes that 
-execute cells and return results for display. To select the kernel on which you 
-want to run your Notebook, go to the Kernel menu and choose Change Kernel. You 
-can also click directly on the name of the active kernel to switch to another 
-one. The bottom of the JupyterLab window lists the github branch as well as the 
-name of the kernel in use. The kernel is listed as either 'idle' or 'busy', 
+Under Construction: In Jupyter, kernels are the background processes that
+execute cells and return results for display. To select the kernel on which you
+want to run your Notebook, go to the Kernel menu and choose Change Kernel. You
+can also click directly on the name of the active kernel to switch to another
+one. The bottom of the JupyterLab window lists the github branch as well as the
+name of the kernel in use. The kernel is listed as either 'idle' or 'busy',
 which is useful to know if your kernel is working or has crashed.
 
 ### What is the Dask extension and how do I use it?
 
-[Dask](https://www.dask.org/) is a python library for parallel computing, 
+[Dask](https://www.dask.org/) is a python library for parallel computing,
 roughly similar to the `multiprocessing` standard library.
-The Fornax Science Console includes the 
-[Dask JupyterLab Extension](https://github.com/dask/dask-labextension) which 
-can be used to manage a Dask cluster and monitor the progress of submitted 
+The Fornax Science Console includes the
+[Dask JupyterLab Extension](https://github.com/dask/dask-labextension) which
+can be used to manage a Dask cluster and monitor the progress of submitted
 functions, all from within JupyterLab.
-The charts that make up Dask's monitoring dashboard are embedded directly in 
+The charts that make up Dask's monitoring dashboard are embedded directly in
 JupyterLab panes which can be moved around into custom arrangements.
 Here are some chart examples:
 
@@ -179,20 +184,20 @@ Quick-start instructions:
   * If you want software installs to be persistent, consider setting up an environment: See below under "Making a conda environment that persists across sessions"
 
 ### Save your work!
-The Science Console is primarily intended for interactive use and will cull 
-sessions which appear to be inactive. Your session will not be culled if there 
-is CPU activity. Keeping your computer from sleeping will also keep your 
+The Science Console is primarily intended for interactive use and will cull
+sessions which appear to be inactive. Your session will not be culled if there
+is CPU activity. Keeping your computer from sleeping will also keep your
 session active; regardless of any interactivity.
-If you want a notebook or script to run longer than about 15 minutes and 
-there is no processing in your notebook or you will not be interacting with the 
+If you want a notebook or script to run longer than about 15 minutes and
+there is no processing in your notebook or you will not be interacting with the
 Console, running `top` during that time can help keep the session active.
 
-Under construction: how long is the period of inactivity that gets culled? 15 
+Under construction: how long is the period of inactivity that gets culled? 15
 minutes.
 
 ### How can I save my notebook as a Python script?
-There are multiple ways to convert a notebook to a Python script, the easiest 
-is to use `jupytext` on the command line. It is installed on Fornax, but if you 
+There are multiple ways to convert a notebook to a Python script, the easiest
+is to use `jupytext` on the command line. It is installed on Fornax, but if you
 work on your local computer, you may need to pip install it first:
 
   * `jupytext --to script <your_notebook_file>`
@@ -202,8 +207,8 @@ Under Construction.
 
 ### Can I use VS code on Fornax?
 Yes!
-To open VS code on Fornax, first start up a compute session from the science console.  To do this, from the dashboard, on the left hand side menu, click on JupyterHub under Compute. 
-Once jupyterhub loads, click on the blue plus sign in the upper left corner.  In case you are in some other tab, make sure you are in the File browser tab which is shown by the file symbol in the furthest left column.  The blue plus sign takes you to the launcher where you will see "VS Code" in the top row under "Notebook".  Clicking on this link will automatically open another window where you can use VS Code for the web.  
+To open VS code on Fornax, first start up a compute session from the science console.  To do this, from the dashboard, on the left hand side menu, click on JupyterHub under Compute.
+Once jupyterhub loads, click on the blue plus sign in the upper left corner.  In case you are in some other tab, make sure you are in the File browser tab which is shown by the file symbol in the furthest left column.  The blue plus sign takes you to the launcher where you will see "VS Code" in the top row under "Notebook".  Clicking on this link will automatically open another window where you can use VS Code for the web.
 
 ## Data Management
 
@@ -221,13 +226,13 @@ The `uparrow` in the upper left allows you to upload data. If it is a large amou
 
 ### Is there a way access data in a Box account from the Fornax Science Console?
 
-Any publicly accessible web service can be reached from Fornax through the 
+Any publicly accessible web service can be reached from Fornax through the
 HTTPS protocol, e.g., APIs, wget, etc.
 
 ### Is there a way to access data from an AWS bucket?
 
-Any publicly available bucket is visible from Fornax as it would be on your 
-laptop. If you require an access key to see into the bucket from your laptop, 
+Any publicly available bucket is visible from Fornax as it would be on your
+laptop. If you require an access key to see into the bucket from your laptop,
 you will also need that on Fornax.
 
 ### How can I open a plot (e.g. png, pdf) that I generated in a notebook or uploaded?

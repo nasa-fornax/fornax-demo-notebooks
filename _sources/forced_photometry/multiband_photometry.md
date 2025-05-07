@@ -731,7 +731,7 @@ lims = [
 
 # now plot both limits against eachother
 ax1.plot(lims, lims, 'k-', alpha=0.75, zorder=0)
-ax1.set(xlabel = 'COSMOS 2015 flux ($\mu$Jy)', ylabel = 'tractor flux ($\mu$Jy)', title = 'IRAC 3.6')
+ax1.set(xlabel = r'COSMOS 2015 flux ($\mu$Jy)', ylabel = r'tractor flux ($\mu$Jy)', title = 'IRAC 3.6')
 ax1.set_ylim([0, ymax])
 ax1.set_xlim([0, xmax])
 
@@ -750,7 +750,7 @@ lims = [
 
 # now plot both limits against eachother
 ax2.plot(lims, lims, 'k-', alpha=0.75, zorder=0)
-ax2.set(xlabel = 'COSMOS 2015 flux ($\mu$Jy)', ylabel = 'tractor flux ($\mu$Jy)', title = 'IRAC 4.5')
+ax2.set(xlabel = r'COSMOS 2015 flux ($\mu$Jy)', ylabel = r'tractor flux ($\mu$Jy)', title = 'IRAC 4.5')
 ax2.set_ylim([0, ymax])
 ax2.set_xlim([0, xmax])
 
@@ -770,7 +770,7 @@ lims = [
 
 # now plot both limits against eachother
 ax3.plot(lims, lims, 'k-', alpha=0.75, zorder=0)
-ax3.set(xlabel = 'COSMOS 2015 flux ($\mu$Jy)', ylabel = 'tractor flux ($\mu$Jy)', title = 'IRAC 5.8')
+ax3.set(xlabel = r'COSMOS 2015 flux ($\mu$Jy)', ylabel = r'tractor flux ($\mu$Jy)', title = 'IRAC 5.8')
 ax3.set_ylim([0, ymax])
 ax3.set_xlim([0, xmax])
 
@@ -790,7 +790,7 @@ lims = [
 
 # now plot both limits against eachother
 ax4.plot(lims, lims, 'k-', alpha=0.75, zorder=0)
-ax4.set(xlabel = 'COSMOS 2015 flux ($\mu$Jy)', ylabel = 'tractor flux ($\mu$Jy)', title = 'IRAC 8.0')
+ax4.set(xlabel = r'COSMOS 2015 flux ($\mu$Jy)', ylabel = r'tractor flux ($\mu$Jy)', title = 'IRAC 8.0')
 ax4.set_ylim([0, ymax])
 ax4.set_xlim([0, xmax])
 
