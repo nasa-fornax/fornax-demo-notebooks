@@ -519,7 +519,7 @@ class AWSDataHandler(DataHandler):
 
             log.info('--- Downloading data from S3 ---')
             # proceed to actual download
-            self._download_file_s3(data_info, **kwargs)
+            return self._download_file_s3(data_info, **kwargs)
         else:
             log.info('--- Downloading data from On-prem ---')
 
@@ -619,6 +619,7 @@ class AWSDataHandler(DataHandler):
                     pb.update(bytes_read)
 
             bkt.download_file(key, local_path, Callback=progress_callback)
+            return local_path
 
     def user_on_aws(self):
         """Check if the user is in on aws
