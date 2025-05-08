@@ -619,7 +619,7 @@ class AWSDataHandler(DataHandler):
                     pb.update(bytes_read)
 
             bkt.download_file(key, local_path, Callback=progress_callback)
-          return local_path
+            return local_path
 
     def user_on_aws(self):
         """Check if the user is in on aws
