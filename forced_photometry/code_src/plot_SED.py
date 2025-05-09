@@ -20,7 +20,7 @@ def plot_SED(obj, df):
     ax.errorbar(wavelength, flux, yerr = fluxerr)
 
     #set up labels
-    ax.set(xlabel = 'Wavelength (microns)', ylabel = "Flux ($\mu$Jy)", title = 'SED')
+    ax.set(xlabel = 'Wavelength (microns)', ylabel = r"Flux ($\mu$Jy)", title = 'SED')
     plt.show()
     
     return
