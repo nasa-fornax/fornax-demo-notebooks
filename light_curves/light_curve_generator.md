@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.4
+    jupytext_version: 1.16.7
 kernelspec:
   display_name: notebook
   language: python
@@ -74,7 +74,7 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-#!pip install -r requirements_light_curve_generator.txt
+# !pip install -r requirements_light_curve_generator.txt
 ```
 
 ```{code-cell} ipython3
@@ -93,7 +93,7 @@ from gaia_functions import gaia_get_lightcurves
 from hcv_functions import hcv_get_lightcurves
 from heasarc_functions import heasarc_get_lightcurves
 from icecube_functions import icecube_get_lightcurves
-from panstarrs_functions import panstarrs_get_lightcurves
+from panstarrs_functions import panstarrs_hats_get_lightcurves
 from plot_functions import create_figures
 from sample_selection import (clean_sample, get_green_sample, get_hon_sample, get_lamassa_sample, get_lopeznavas_sample,
     get_lyu_sample, get_macleod16_sample, get_macleod19_sample, get_ruan_sample, get_sdss_sample, get_sheng_sample, get_yang_sample)
@@ -101,7 +101,7 @@ from tess_kepler_functions import tess_kepler_get_lightcurves
 from wise_functions import wise_get_lightcurves
 # Note: ZTF data is temporarily located in a non-public AWS S3 bucket. It is automatically available
 # from the Fornax Science Console, but otherwise will require explicit user credentials.
-# from ztf_functions import ztf_get_lightcurves
+from ztf_functions import ztf_hats_get_lightcurves
 ```
 
 ## 1. Define the sample
@@ -168,6 +168,7 @@ At this point you may wish to write out your sample to disk and reuse that in fu
 For the format of the save file, we would suggest to choose from various formats that fully support astropy objects(eg., SkyCoord).  One example that works is Enhanced Character-Separated Values or ['ecsv'](https://docs.astropy.org/en/stable/io/ascii/ecsv.html)
 
 ```{code-cell} ipython3
+sample_name = "yang_CLAGN"
 savename_sample = f"output/{sample_name}_sample.ecsv"
 sample_table.write(savename_sample, format='ascii.ecsv', overwrite = True)
 ```
@@ -177,7 +178,7 @@ sample_table.write(savename_sample, format='ascii.ecsv', overwrite = True)
 Do only this step from this section when you have a previously generated sample table
 
 ```{code-cell} ipython3
-#sample_table = Table.read(savename_sample, format='ascii.ecsv')
+sample_table = Table.read(savename_sample, format='ascii.ecsv')
 ```
 
 ### 1.4 Initialize data structure to hold the light curves
@@ -226,8 +227,9 @@ The function to retrieve ZTF light curves accesses a parquet version of the ZTF 
 ZTFstarttime = time.time()
 
 # get ZTF lightcurves
+ztf_search_radius = 1.0
 # use the nworkers arg to control the amount of parallelization in the data loading step
-df_lc_ZTF = ztf_get_lightcurves(sample_table, nworkers=6)
+df_lc_ZTF = ztf_hats_get_lightcurves(sample_table, radius= ztf_search_radius)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_ZTF)
@@ -264,8 +266,9 @@ Some warnings are expected.
 panstarrsstarttime = time.time()
 
 panstarrs_search_radius = 1.0 # search radius = 1 arcsec
+
 # get panstarrs light curves
-df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius=panstarrs_search_radius)
+df_lc_panstarrs = panstarrs_hats_get_lightcurves(sample_table, radius=panstarrs_search_radius)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_panstarrs)
@@ -389,7 +392,6 @@ with mp.Pool(processes=n_workers) as pool:
 
     # start the processes that call the archives
     pool.apply_async(heasarc_get_lightcurves, args=(sample_table,), kwds=heasarc_kwargs, callback=callback)
-    pool.apply_async(ztf_get_lightcurves, args=(sample_table,), kwds=ztf_kwargs, callback=callback)
     pool.apply_async(wise_get_lightcurves, args=(sample_table,), kwds=wise_kwargs, callback=callback)
     pool.apply_async(tess_kepler_get_lightcurves, args=(sample_table,), kwds=tess_kepler_kwargs, callback=callback)
     pool.apply_async(hcv_get_lightcurves, args=(sample_table,), kwds=hcv_kwargs, callback=callback)
@@ -399,10 +401,13 @@ with mp.Pool(processes=n_workers) as pool:
     pool.close()  # signal that no more jobs will be submitted to the pool
     pool.join()  # wait for all jobs to complete, including the callback
 
-# run panstarrs query outside of multiprocessing since it is using dask distributed under the hood
+# run panstarrs & ZTF queries outside of multiprocessing since it is using dask distributed under the hood
 # which doesn't work with multiprocessing, and dask is already parallelized
 df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius=panstarrs_search_radius)
 parallel_df_lc.append(df_lc_panstarrs) # add the panstarrs dataframe to all other archives
+
+df_lc_ZTF = ztf_hats_get_lightcurves(sample_table, radius= ztf_search_radius)
+parallel_df_lc.append(df_lc_ZTF) # add the ztf dataframe to all other archives
 
 parallel_endtime = time.time()
 
