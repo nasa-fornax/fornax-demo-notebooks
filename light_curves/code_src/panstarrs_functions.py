@@ -6,7 +6,7 @@ from dask.distributed import Client
 from data_structures import MultiIndexDFObject
 from upath import UPath
 
-# panstarrs light curves from hipscat catalog in S3 using lsdb
+# panstarrs light curves from hats catalog in S3 using lsdb
 
 
 def panstarrs_get_lightcurves(sample_table, *, radius=1):

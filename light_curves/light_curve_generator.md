@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.4
+    jupytext_version: 1.17.1
 kernelspec:
   display_name: notebook
   language: python
@@ -74,7 +74,7 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-#!pip install -r requirements_light_curve_generator.txt
+!pip install -r requirements_light_curve_generator.txt
 ```
 
 ```{code-cell} ipython3
@@ -101,7 +101,7 @@ from tess_kepler_functions import tess_kepler_get_lightcurves
 from wise_functions import wise_get_lightcurves
 # Note: ZTF data is temporarily located in a non-public AWS S3 bucket. It is automatically available
 # from the Fornax Science Console, but otherwise will require explicit user credentials.
-# from ztf_functions import ztf_get_lightcurves
+from ztf_functions import ztf_get_lightcurves
 ```
 
 ## 1. Define the sample
@@ -226,13 +226,26 @@ The function to retrieve ZTF light curves accesses a parquet version of the ZTF 
 ZTFstarttime = time.time()
 
 # get ZTF lightcurves
-# use the nworkers arg to control the amount of parallelization in the data loading step
-df_lc_ZTF = ztf_get_lightcurves(sample_table, nworkers=6)
+ztf_search_radius = 1.0 #  arcsec
+df_lc_ZTF = ztf_get_lightcurves(sample_table, radius = ztf_search_radius)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_ZTF)
 
 print('ZTF search took:', time.time() - ZTFstarttime, 's')
+```
+
+```{code-cell} ipython3
+df_lc.data
+```
+
+```{code-cell} ipython3
+import lsdb
+from upath import UPath
+
+ztf_lc = lsdb.read_hats(
+        UPath('s3://irsa-fornax-testdata/ZTF/dr23/lc/hats')).compute()
+ztf_lc['filterid'].head
 ```
 
 ### 2.3 IRSA: WISE

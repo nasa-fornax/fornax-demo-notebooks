@@ -11,6 +11,114 @@ import tqdm
 import helpers.scale_up
 from data_structures import MultiIndexDFObject
 
+import numpy as np
+import pandas as pd
+from astropy.table import Table
+import lsdb
+from dask.distributed import Client
+from data_structures import MultiIndexDFObject
+from upath import UPath
+
+# panstarrs light curves from hipscat catalog in S3 using lsdb
+
+
+def ztf_get_lightcurves(sample_table, *, radius=1):
+    """Searches ZTF hats files for light curves from a list of input coordinates.
+
+    Parameters
+    ----------
+    sample_table : `~astropy.table.Table`
+        Table with the coordinates and journal reference labels of the sources
+    radius : float
+        search radius, how far from the source should the archives return results
+
+    Returns
+    -------
+    df_lc : MultiIndexDFObject
+        the main data structure to store all light curves
+
+    note that other light curves in this notebook will have "time" as MJD instead of HMJD.
+    if your science depends on precise times, this will need to be corrected.
+
+    """
+
+    # read in the ZTF light curves to lsdb
+    ztf_lc = lsdb.read_hats(
+        UPath('s3://irsa-fornax-testdata/ZTF/dr23/lc/hats'),
+        #margin_cache=UPath('s3://stpubdata/panstarrs/ps1/public/hats/detection_10arcs', anon=True),
+        columns=["objectid","objra", "objdec", "hmjd", "filterid", "mag", "magerr", "catflags"]
+    )
+    # convert astropy table to pandas dataframe
+    # special care for the SkyCoords in the table
+    sample_df = pd.DataFrame({'objectid': sample_table['objectid'],
+                              'ra_deg': sample_table['coord'].ra.deg,
+                              'dec_deg': sample_table['coord'].dec.deg,
+                              'label': sample_table['label']})
+
+    client = Client()  #start a dask client for lsdb to use
+    
+    # convert dataframe to hipscat
+    sample_lsdb = lsdb.from_dataframe(
+        sample_df,
+        ra_column="ra_deg",
+        dec_column="dec_deg",
+        margin_threshold=10,
+        # Optimize partition size
+        drop_empty_siblings=True
+    )
+
+    # plan to cross match ZTF object with my sample
+    # only keep the best match
+    matched_lc = ztf_lc.crossmatch(
+        sample_lsdb,
+        radius_arcsec=radius,
+        n_neighbors=1,
+    )
+
+    # here is where the actual work gets done
+    # compute the cross match with object table
+    df = matched_lc.compute()
+
+    client.close() #done with dask
+    print("df columnsafter compute:", df.columns)
+    # explode each array column into individual rows
+    df = df.explode(["hmjd_ztf_lc_dr23", 
+                     "mag_ztf_lc_dr23", 
+                     "magerr_ztf_lc_dr23",
+                    "catflags_ztf_lc_dr23"], ignore_index=True)
+    df = df.astype({
+        "hmjd_ztf_lc_dr23":   "float",
+        "mag_ztf_lc_dr23":    "float",
+        "magerr_ztf_lc_dr23": "float",
+        "catflags_ztf_lc_dr23": "int"
+    })
+    
+    # drop any epochs flagged as bad
+    df = df.loc[df["catflags_ztf_lc_dr23"] < 32768]
+
+    # convert mag/magerr → flux/err (mJy)
+    mag    = df["mag_ztf_lc_dr23"].to_numpy()
+    magerr = df["magerr_ztf_lc_dr23"].to_numpy()
+    flux_up  = ((mag - magerr) * u.ABmag).to_value('mJy')
+    flux_low = ((mag + magerr) * u.ABmag).to_value('mJy')
+    df["flux"] = (mag * u.ABmag).to_value('mJy')
+    df["err"]  = (flux_up - flux_low) / 2
+
+    # make the dataframe of light curves
+
+    df_lc = pd.DataFrame({
+        'flux': df["flux"],
+        'err': df["err"],
+        'time': df["hmjd_ztf_lc_dr23"],
+        'objectid': df['objectid_from_lsdb_dataframe'],
+        'band': df['filterid_ztf_lc_dr23'],
+        'label': df['label_from_lsdb_dataframe']
+    }).set_index(["objectid", "label", "band", "time"])
+
+    return MultiIndexDFObject(data=df_lc)
+
+
+
 
 # the catalog is stored in an AWS S3 bucket
 DATARELEASE = "dr18"
@@ -22,7 +130,7 @@ CATALOG_ROOT = f"{BUCKET}/data/ZTF/lc/lc_{DATARELEASE}/"
 CATALOG_FILES = None
 
 
-def ztf_get_lightcurves(sample_table, *, nworkers=6, match_radius=1/3600):
+def ztf_get_lightcurves_old(sample_table, *, nworkers=6, match_radius=1/3600):
     """Function to add the ZTF lightcurves in all three bands to a multiframe data structure.  This is the MAIN function.
 
     Parameters
