@@ -43,7 +43,7 @@ By the end of this tutorial, you will be able to:
  * an archival optical + IR + neutrino light curve
 
 ## Runtime:
-- As of 2024 October, this notebook takes ~800s to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 16GB RAM/ 4CPU.
+- As of 2025 May, this notebook takes ~1100s (18 min.)to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 16GB RAM/ 4CPU.
 
 ## Authors:
 Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, David Shupe
@@ -74,7 +74,7 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-!pip install -r requirements_light_curve_generator.txt
+#!pip install -r requirements_light_curve_generator.txt
 ```
 
 ```{code-cell} ipython3
@@ -235,19 +235,6 @@ df_lc.append(df_lc_ZTF)
 print('ZTF search took:', time.time() - ZTFstarttime, 's')
 ```
 
-```{code-cell} ipython3
-df_lc.data
-```
-
-```{code-cell} ipython3
-import lsdb
-from upath import UPath
-
-ztf_lc = lsdb.read_hats(
-        UPath('s3://irsa-fornax-testdata/ZTF/dr23/lc/hats')).compute()
-ztf_lc['filterid'].head
-```
-
 ### 2.3 IRSA: WISE
 
 We use the unWISE light curves catalog ([Meisner et al., 2023](https://ui.adsabs.harvard.edu/abs/2023AJ....165...36M/abstract)) which ties together all WISE & NEOWISE 2010 - 2020 epochs.  Specifically it combines all observations at a single epoch to achieve deeper mag limits than individual observations alone.
@@ -383,7 +370,7 @@ n_workers = 8
 
 # keyword arguments for the archive calls
 heasarc_kwargs = dict(catalog_error_radii={"FERMIGTRIG": "1.0", "SAXGRBMGRB": "3.0"})
-ztf_kwargs = dict(nworkers=None)  # the internal parallelization is incompatible with Pool
+ztf_search_radius = 1.0 #  arcsec
 wise_kwargs = dict(radius=1.0, bandlist=['W1', 'W2'])
 panstarrs_search_radius = 1.0 # arcsec
 tess_kepler_kwargs = dict(radius=1.0)
@@ -402,7 +389,6 @@ with mp.Pool(processes=n_workers) as pool:
 
     # start the processes that call the archives
     pool.apply_async(heasarc_get_lightcurves, args=(sample_table,), kwds=heasarc_kwargs, callback=callback)
-    pool.apply_async(ztf_get_lightcurves, args=(sample_table,), kwds=ztf_kwargs, callback=callback)
     pool.apply_async(wise_get_lightcurves, args=(sample_table,), kwds=wise_kwargs, callback=callback)
     pool.apply_async(tess_kepler_get_lightcurves, args=(sample_table,), kwds=tess_kepler_kwargs, callback=callback)
     pool.apply_async(hcv_get_lightcurves, args=(sample_table,), kwds=hcv_kwargs, callback=callback)
@@ -412,8 +398,13 @@ with mp.Pool(processes=n_workers) as pool:
     pool.close()  # signal that no more jobs will be submitted to the pool
     pool.join()  # wait for all jobs to complete, including the callback
 
-# run panstarrs query outside of multiprocessing since it is using dask distributed under the hood
+# run ZTF and panstarrs queries outside of multiprocessing since they
+# are using dask distributed under the hood,
 # which doesn't work with multiprocessing, and dask is already parallelized
+
+df_lc_ZTF = ztf_get_lightcurves(sample_table, radius = ztf_search_radius)
+parallel_df_lc.append(df_lc_ZTF)# add the resulting dataframe to all other archives
+
 df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius=panstarrs_search_radius)
 parallel_df_lc.append(df_lc_panstarrs) # add the panstarrs dataframe to all other archives
 
