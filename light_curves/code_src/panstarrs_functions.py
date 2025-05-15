@@ -67,8 +67,8 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
 
     # plan to cross match panstarrs object with my sample
     # only keep the best match
-    matched_objects = panstarrs_object.crossmatch(
-        sample_lsdb,
+    matched_objects = sample_lsdb.crossmatch(
+        panstarrs_object,
         radius_arcsec=radius,
         n_neighbors=1,
         suffixes=("", "")
