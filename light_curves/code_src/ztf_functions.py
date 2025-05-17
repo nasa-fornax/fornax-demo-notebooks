@@ -34,7 +34,7 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
         ]
     )
 
-    # 2) Convert Astropy table → pandas → LSDB catalog, then persist sample only
+    # 2) Convert Astropy table → pandas → LSDB catalog
     sample_df = pd.DataFrame({
         'objectid': sample_table['objectid'],
         'ra_deg':   sample_table['coord'].ra.deg,
