@@ -74,7 +74,7 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-# !pip install -r requirements_light_curve_generator.txt
+# %pip install -r requirements_light_curve_generator.txt
 ```
 
 ```{code-cell} ipython3
