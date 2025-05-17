@@ -43,7 +43,7 @@ By the end of this tutorial, you will be able to:
  * an archival optical + IR + neutrino light curve
 
 ## Runtime:
-- As of 2025 May, this notebook takes ~1100s (18 min.)to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 16GB RAM/ 4CPU.
+- As of 2025 May, this notebook takes ~1540s (25 min.) to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 16GB RAM/ 4CPU.
 
 ## Authors:
 Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, David Shupe
@@ -74,7 +74,7 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-#!pip install -r requirements_light_curve_generator.txt
+# !pip install -r requirements_light_curve_generator.txt
 ```
 
 ```{code-cell} ipython3
@@ -220,13 +220,15 @@ print('heasarc search took:', time.time() - heasarcstarttime, 's')
 ```
 
 ### 2.2 IRSA: ZTF
-The function to retrieve ZTF light curves accesses a parquet version of the ZTF catalog stored in the cloud using pyarrow.  This is the fastest way to access the ZTF catalog at scale.  The ZTF [API](https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html) is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself.
+The function to retrieve ZTF light curves accesses a [HATS](https://hats.readthedocs.io/en/stable/) parquet version of the ZTF catalog stored in the cloud using [LSDB](https://docs.lsdb.io/en/stable/).  This is the simplest way to access this dataset at scale.  The ZTF [API](https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html) is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself because lsdb uses dask under the hood.
+
+Traceback CommClosedErrors are expected and are just a dask houskeeping issue, the function is still running to completion and returning light curves.
 
 ```{code-cell} ipython3
 ZTFstarttime = time.time()
 
 # get ZTF lightcurves
-ztf_search_radius = 1.0 #  arcsec
+ztf_search_radius = 1.0 #  arcsec  (Graham et al., 2024 use 1" with good results)
 df_lc_ZTF = ztf_get_lightcurves(sample_table, radius = ztf_search_radius)
 
 # add the resulting dataframe to all other archives
@@ -256,7 +258,7 @@ print('WISE search took:', time.time() - WISEstarttime, 's')
 ```
 
 ### 2.4 MAST: Pan-STARRS
-The function to retrieve lightcurves from Pan-STARRS uses a version of both the object and light curve catalogs that are stored in the cloud and accessed using [lsdb](https://docs.lsdb.io/en/stable/).  This function is efficient at large scale (sample sizes > ~1000).
+The function to retrieve lightcurves from Pan-STARRS uses a version of both the object and light curve catalogs that are stored in the cloud and accessed using [LSDB](https://docs.lsdb.io/en/stable/).  This function is efficient at large scale (sample sizes > ~1000).
 
 Some warnings are expected.
 
@@ -366,7 +368,7 @@ For sample sizes >~500 and/or improved logging and monitoring options, consider 
 ```{code-cell} ipython3
 # number of workers to use in the parallel processing pool
 # this should equal the total number of archives called
-n_workers = 8
+n_workers = 6
 
 # keyword arguments for the archive calls
 heasarc_kwargs = dict(catalog_error_radii={"FERMIGTRIG": "1.0", "SAXGRBMGRB": "3.0"})
