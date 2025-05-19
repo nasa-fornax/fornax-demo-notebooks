@@ -1,9 +1,9 @@
 import os
-import getpass
+import textwrap
+from pathlib import Path
 import pyvo
 from astropy.table import Table, vstack, join
 import pandas as pd
-import textwrap
 from data_structures import MultiIndexDFObject
 
 
@@ -15,15 +15,22 @@ def rubin_authenticate():
     -------
     rsp_tap : pyvo.dal.TAPService
         An authenticated TAPService instance pointing to DP0 data, assigned to variable `rsp_tap`.
+        
+    Raises
+    ------
+    FileNotFoundError
+        If the token file does not exist or is empty.
+    RuntimeError
+        If the TAP session cannot be created or the returned baseurl mismatches the expected URL.
     """
     # Read token from home directory
-    token_file = os.path.join(os.getenv('HOME'), '.rsp-tap.token')
+    token_file = Path.home() / '.rsp-tap.token'    
     if not os.path.exists(token_file):
         raise FileNotFoundError(f"Token file not found: {token_file}")
     with open(token_file, 'r') as f:
         token = f.readline().strip()
-     if not token:
-        raise FileNotFoundError("No token found in token file.")
+        if not token:
+            raise FileNotFoundError("No token found in token file.")
 
     # Build credential and authenticated session
     cred = pyvo.auth.CredentialStore()
@@ -35,7 +42,11 @@ def rubin_authenticate():
     # Instantiate TAPService
     rsp_tap_url = 'https://data.lsst.cloud/api/tap'
     rsp_tap = pyvo.dal.TAPService(rsp_tap_url, session=session)
-    assert rsp_tap.baseurl == rsp_tap_url
+    if rsp_tap.baseurl != rsp_tap_url:
+        raise RuntimeError(
+            f"rubin_authenticate: unexpected TAPService.baseurl "
+            f"'{rsp_tap.baseurl}', expected '{rsp_tap_url}'"
+        )
     return rsp_tap
 
 
@@ -49,7 +60,7 @@ def rubin_get_objectids(sample_table, rsp_tap, search_radius=0.001):
     sample_table : astropy.table.Table
         Table with columns ['coord', 'objectid', 'label'], where 'coord' is a SkyCoord.
     rsp_tap : pyvo.dal.TAPService
-        Authenticated TAP service instance returned by `rubin_get_token()`.
+        Authenticated TAP service instance returned by `rubin_authenticate()`.
     search_radius : float, deg
         Radius of the cone search in degrees (default: 0.001).
 
@@ -84,6 +95,14 @@ def rubin_get_objectids(sample_table, rsp_tap, search_radius=0.001):
         tbl['in_label'] = in_label
         all_tables.append(tbl)
 
+    #in the case of an empty table, return an empty table
+    if not all_tables:
+        cols = ['coord_ra','coord_dec','objectId','in_objid','in_label']
+        # build a dict mapping each name to an empty list
+        empty_dict = {col: [] for col in cols}
+        return Table(empty_dict)
+
+    #otherwise, stack all the tables together
     combined = vstack(all_tables)
     return combined
 
@@ -97,20 +116,31 @@ def rubin_access_lc_catalog(object_table, rsp_tap):
     object_table : astropy.table.Table
         Table with ['objectId', 'in_objid', 'in_label'] from get_objectids().
     rsp_tap : pyvo.dal.TAPService
-        Authenticated TAP service from rubin_get_token().
+        Authenticated TAP service from rubin_authenticate().
 
     Returns
     -------
     MultiIndexDFObject
         Indexed by ['objectid', 'label', 'band', 'time'] with flux data.
     """
+    #Pull out a unique, sorted list of integer IDs:
     objids = sorted(set(object_table['objectId']))
 
+    #If there are no IDs, we don't need to search the light curve catalot
+    # and can just return an empty MultiIndexDFObject
+    if not objids:
+        # Create an empty MultiIndex 
+        mi = pd.MultiIndex.from_arrays(
+            [[], [], [], []],
+            names=['objectid', 'label', 'band', 'time']
+        )
+        empty_df = pd.DataFrame(index=mi)
+        return MultiIndexDFObject(empty_df)
+ 
+    #build the string for the query below
     #will probably need to break this into chunks when working with large samples (> 50)
-    if len(objids) == 1:
-        id_tuple_str = f"({objids[0]},)"
-    else:
-        id_tuple_str = "(" + ",".join(str(i) for i in objids) + ")"
+    id_tuple_str = f"({','.join(map(str, objids))})"
+    
     query_lc = textwrap.dedent(f"""
     SELECT src.band, src.ccdVisitId, src.coord_ra, src.coord_dec,
            src.objectId, src.psfFlux, src.psfFluxErr,
@@ -122,11 +152,18 @@ def rubin_access_lc_catalog(object_table, rsp_tap):
       ON vis.ccdVisitId=src.ccdVisitId
     WHERE src.objectId IN {id_tuple_str} AND src.detect_isPrimary=1
     """).strip()
+    #run the query on the tap server
     srcs = rsp_tap.run_sync(query_lc).to_table()
-     
-    df_src = srcs.to_pandas() # Convert the result to pandas 
+    
+    # Convert the result to pandas 
+    df_src = srcs.to_pandas() 
 
-    # Convert your object_table (Astropy) to pandas, keep only the three cols, and drop duplicates
+    # Prefix every band value with "rubin_"
+    df_src['band'] = 'rubin_' + df_src['band'].astype(str)
+    #  drop the redundant visitBand column
+    df_src = df_src.drop(columns=['visitBand'])
+
+# Convert object_table (Astropy) to pandas, keep only the three cols, and drop duplicates
     df_obj = (
         object_table[['objectId', 'in_objid', 'in_label']]
         .to_pandas()
@@ -138,13 +175,15 @@ def rubin_access_lc_catalog(object_table, rsp_tap):
         on='objectId',
         how='left'
     )
+    # Drop the raw objectId column; otherwise there are two in returned df
+    df_merged = df_merged.drop(columns=['objectId'])
 
     # Rename columns and set a MultiIndex
     df_merged = (
         df_merged
         .rename(columns={'in_objid':'objectid', 'in_label':'label', 'expMidptMJD':'time'})
-        .set_index(['objectid', 'label', 'band', 'time'])
-    )
+        .set_index(['objectid', 'label', 'band', 'time'], drop=True)
+    )        # explicitly drop=True (default) so the renamed 'objectid' column
 
     # 6. Wrap in your MultiIndexDFObject
     df_lc = MultiIndexDFObject(df_merged)    
@@ -165,9 +204,16 @@ def rubin_get_lightcurves(sample_table, search_radius=0.001):
     -------
     MultiIndexDFObject
         Light curves indexed by ['objectid', 'label', 'band', 'time'].
+
+    Raises
+    ------
+    FileNotFoundError
+        If the RSP token file is missing or contains no token.
+    RuntimeError
+        If authentication fails or any of the TAP queries encounters an error.
     """
     #authenticate and set up TAP service
-    rsp_tap = rubin_get_token()
+    rsp_tap = rubin_authenticate()
 
     #get the Rubin objectids which correspond to our coordinates
     obj_table = rubin_get_objectids(sample_table, rsp_tap, search_radius)

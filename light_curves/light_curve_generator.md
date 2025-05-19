@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.4
+    jupytext_version: 1.17.1
 kernelspec:
   display_name: notebook
   language: python
@@ -74,7 +74,7 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-#!pip install -r requirements_light_curve_generator.txt
+!pip install -r requirements_light_curve_generator.txt
 ```
 
 ```{code-cell} ipython3
@@ -99,6 +99,7 @@ from sample_selection import (clean_sample, get_green_sample, get_hon_sample, ge
     get_lyu_sample, get_macleod16_sample, get_macleod19_sample, get_ruan_sample, get_sdss_sample, get_sheng_sample, get_yang_sample)
 from tess_kepler_functions import tess_kepler_get_lightcurves
 from wise_functions import wise_get_lightcurves
+from rubin_functions import rubin_get_lightcurves
 # Note: ZTF data is temporarily located in a non-public AWS S3 bucket. It is automatically available
 # from the Fornax Science Console, but otherwise will require explicit user credentials.
 # from ztf_functions import ztf_get_lightcurves
@@ -329,7 +330,7 @@ df_lc.append(df_lc_gaia)
 print('gaia search took:', time.time() - gaiastarttime, 's')
 ```
 
-### 3.3 IceCube neutrinos
+### 3.2 IceCube neutrinos
 
 There are several [catalogs](https://icecube.wisc.edu/data-releases/2021/01/all-sky-point-source-icecube-data-years-2008-2018) (basically one for each year of IceCube data from 2008 - 2018). The following code creates a large catalog by combining
 all the yearly catalogs.
@@ -347,7 +348,71 @@ df_lc_icecube = icecube_get_lightcurves(sample_table, icecube_select_topN=3)
 df_lc.append(df_lc_icecube)
 
 print('icecube search took:', time.time() - icecubestarttime, 's')
+```
+
+### 3.3 Rubin Data 
+Before running this section, you need to have both 1) a login to the Rubin Science Platform (RSP) and 2) an authenticating token setup in your Fornax home directory. 
+
+1) To see if you have Rubin data rights, and if you do, to get that login setup, follow these [instructions](https://rsp.lsst.io/guides/getting-started/get-an-account.html) 
+
+2) After loggin in, follow these [instructions](code_src/rsp_token_instructions.txt) to get a token and store it in your home directory.
+
+
+This code will not work without the above information. 
+
+Once that setup is complete, this code access Rubin data from the Rubin Science Platform which is hosting their catalogs in the google cloud.  Specifically, the code uses `pyvo` and `adql` to access a TAP server.
+
+```{code-cell} ipython3
+rspstarttime = time.time()
+
+# get RSP data
+df_lc_rsp = rubin_get_lightcurves(sample_table, search_radius=0.001)
+
+# add the resulting dataframe to all other archives
+df_lc.append(df_lc_rsp)
+
+print('RSP search took:', time.time() - rspstarttime, 's')
 end_serial = time.time()
+```
+
+```{code-cell} ipython3
+#now find a sample which does have sources to test the code:
+from astropy.table import Table
+from astropy.coordinates import SkyCoord
+import astropy.units as u
+from rubin_functions import rubin_get_lightcurves, rubin_authenticate
+
+# 1) Authenticate to DP0
+rsp_tap = rubin_authenticate()
+
+# 2) Grab a handful of known objects from the DP0 Object table
+#    ADQL uses “TOP” rather than “LIMIT”
+query = """
+SELECT TOP 5 coord_ra, coord_dec, objectId
+FROM dp02_dc2_catalogs.Object
+WHERE detect_isPrimary = 1
+"""
+tbl = rsp_tap.run_sync(query).to_table()
+
+# 3) Build  sample_table with the three required columns
+coords = SkyCoord(
+    ra=tbl['coord_ra'],
+    dec=tbl['coord_dec'],
+    unit=(u.deg, u.deg),   # only applied if your columns are plain floats
+    frame='icrs'
+)
+sample_table = Table()
+sample_table['coord']    = coords
+sample_table['objectid'] = tbl['objectId']
+sample_table['label']    = [f"obj{i}" for i in range(len(tbl))]
+
+# 4) Now test  light-curve fetcher
+lc = rubin_get_lightcurves(sample_table, search_radius=0.001)
+print(lc)  # should be non‐empty if DP0 has data for these objects
+```
+
+```{code-cell} ipython3
+lc.data
 ```
 
 ```{code-cell} ipython3
