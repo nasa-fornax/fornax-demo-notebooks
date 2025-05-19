@@ -366,53 +366,14 @@ Once that setup is complete, this code access Rubin data from the Rubin Science 
 rspstarttime = time.time()
 
 # get RSP data
-df_lc_rsp = rubin_get_lightcurves(sample_table, search_radius=0.001)
+rsp_search_radius = 0.001
+df_lc_rsp = rubin_get_lightcurves(sample_table, rsp_search_radius)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_rsp)
 
 print('RSP search took:', time.time() - rspstarttime, 's')
 end_serial = time.time()
-```
-
-```{code-cell} ipython3
-#now find a sample which does have sources to test the code:
-from astropy.table import Table
-from astropy.coordinates import SkyCoord
-import astropy.units as u
-from rubin_functions import rubin_get_lightcurves, rubin_authenticate
-
-# 1) Authenticate to DP0
-rsp_tap = rubin_authenticate()
-
-# 2) Grab a handful of known objects from the DP0 Object table
-#    ADQL uses “TOP” rather than “LIMIT”
-query = """
-SELECT TOP 5 coord_ra, coord_dec, objectId
-FROM dp02_dc2_catalogs.Object
-WHERE detect_isPrimary = 1
-"""
-tbl = rsp_tap.run_sync(query).to_table()
-
-# 3) Build  sample_table with the three required columns
-coords = SkyCoord(
-    ra=tbl['coord_ra'],
-    dec=tbl['coord_dec'],
-    unit=(u.deg, u.deg),   # only applied if your columns are plain floats
-    frame='icrs'
-)
-sample_table = Table()
-sample_table['coord']    = coords
-sample_table['objectid'] = tbl['objectId']
-sample_table['label']    = [f"obj{i}" for i in range(len(tbl))]
-
-# 4) Now test  light-curve fetcher
-lc = rubin_get_lightcurves(sample_table, search_radius=0.001)
-print(lc)  # should be non‐empty if DP0 has data for these objects
-```
-
-```{code-cell} ipython3
-lc.data
 ```
 
 ```{code-cell} ipython3
@@ -431,7 +392,7 @@ For sample sizes >~500 and/or improved logging and monitoring options, consider 
 ```{code-cell} ipython3
 # number of workers to use in the parallel processing pool
 # this should equal the total number of archives called
-n_workers = 8
+n_workers = 7
 
 # keyword arguments for the archive calls
 heasarc_kwargs = dict(catalog_error_radii={"FERMIGTRIG": "1.0", "SAXGRBMGRB": "3.0"})
@@ -442,6 +403,8 @@ tess_kepler_kwargs = dict(radius=1.0)
 hcv_kwargs = dict(radius=1.0/3600.0)
 gaia_kwargs = dict(search_radius=1/3600, verbose=0)
 icecube_kwargs = dict(icecube_select_topN=3)
+rsp_search_radius = 0.001
+rsp_kwargs = dict(search_radius=rsp_search_radius)
 ```
 
 ```{code-cell} ipython3
@@ -454,12 +417,13 @@ with mp.Pool(processes=n_workers) as pool:
 
     # start the processes that call the archives
     pool.apply_async(heasarc_get_lightcurves, args=(sample_table,), kwds=heasarc_kwargs, callback=callback)
-    pool.apply_async(ztf_get_lightcurves, args=(sample_table,), kwds=ztf_kwargs, callback=callback)
+    #pool.apply_async(ztf_get_lightcurves, args=(sample_table,), kwds=ztf_kwargs, callback=callback)
     pool.apply_async(wise_get_lightcurves, args=(sample_table,), kwds=wise_kwargs, callback=callback)
     pool.apply_async(tess_kepler_get_lightcurves, args=(sample_table,), kwds=tess_kepler_kwargs, callback=callback)
     pool.apply_async(hcv_get_lightcurves, args=(sample_table,), kwds=hcv_kwargs, callback=callback)
     pool.apply_async(gaia_get_lightcurves, args=(sample_table,), kwds=gaia_kwargs, callback=callback)
     pool.apply_async(icecube_get_lightcurves, args=(sample_table,), kwds=icecube_kwargs, callback=callback)
+    pool.apply_async(rubin_get_lightcurves, args=(sample_table,), kwds=rsp_kwargs, callback=callback)
 
     pool.close()  # signal that no more jobs will be submitted to the pool
     pool.join()  # wait for all jobs to complete, including the callback
