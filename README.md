@@ -14,7 +14,14 @@ The user cases and documentation of the Fornax Initiative are currently availabl
 ## Content contributing
 
 In this repository, we follow the standard practice of the Scientific Python ecosystem and use Jupytext and MyST Markdown Notebooks.
-You will need ``jupytext`` installed for your browser to recognise the markdown files as notebooks (see more about the motivation and technicalities e.g. here: https://numpy.org/numpy-tutorials/content/pairing.html).
+
+Please visit [the upstream documentation](https://mystmd.org/guide/md-vs-ipynb) to learn more about the reasoning behind the choice.
+In summary, we chose MyST Markdown because we need a clear and human-readable format that makes version control, diffs, and collaborative reviews of code and narrative straightforward.
+It is also ideal for tutorials and CI-backed projects where reproducible, build-time execution of code ensures continued functionality.
+
+We also highlight that you can easily have the same user experience in JupyterLab if these two dependencies are installed:
+ - [jupytext library](https://pypi.org/project/jupytext/)
+ - [jupyterlab-myst JupyterLab extension](https://pypi.org/project/jupyterlab-myst/)
 
 If you already have an ``ipynb`` file, convert it to Markdown using the following command, and commit
 only the markdown file to the repo:
