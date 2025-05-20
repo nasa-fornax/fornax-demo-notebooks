@@ -24,7 +24,7 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
     MultiIndexDFObject
      """
     # 1) Start Dask client & read full ZTF light-curve catalog
-    client = Client()
+    client = Client(threads_per_worker=2, memory_limit=None)
     suffix = 'ztf_lc_dr23'
     ztf_lc = lsdb.read_hats(
         UPath('s3://irsa-fornax-testdata/ZTF/dr23/lc/'),
@@ -49,11 +49,7 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
         drop_empty_siblings=True
     )
     
-    # 2b) grab the HEALPix tiles that actually cover your sample
-    sample_tiles = sample_lsdb.get_healpix_pixels()
-
-    
-    # 3) Cross-match per band, pre-filtering by tile_ids
+    # 3) Cross-match per band
     band_map = {1: "ztf_g", 2: "ztf_r", 3: "ztf_i"}
     per_band_dfs = []
 

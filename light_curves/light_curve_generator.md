@@ -43,7 +43,7 @@ By the end of this tutorial, you will be able to:
  * an archival optical + IR + neutrino light curve
 
 ## Runtime:
-- As of 2025 May, this notebook takes ~1540s (25 min.) to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 16GB RAM/ 4CPU.
+- As of 2025 May, this notebook takes ~1000s (17 min.) to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 64GB RAM/ 16CPU.
 
 ## Authors:
 Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, David Shupe
@@ -220,7 +220,7 @@ print('heasarc search took:', time.time() - heasarcstarttime, 's')
 ```
 
 ### 2.2 IRSA: ZTF
-The function to retrieve ZTF light curves accesses a [HATS](https://hats.readthedocs.io/en/stable/) parquet version of the ZTF catalog stored in the cloud using [LSDB](https://docs.lsdb.io/en/stable/).  This is the simplest way to access this dataset at scale.  The ZTF [API](https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html) is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself because lsdb uses dask under the hood.
+The function to retrieve ZTF light curves accesses a [HATS](https://hats.readthedocs.io/en/stable/) parquet version of the ZTF catalog stored in the cloud using [LSDB](https://docs.lsdb.io/en/stable/). This is the simplest way to access this dataset at scale.  The ZTF [API](https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html) is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself because lsdb uses dask under the hood.
 
 Traceback CommClosedErrors are expected and are just a dask houskeeping issue, the function is still running to completion and returning light curves.
 
@@ -258,7 +258,7 @@ print('WISE search took:', time.time() - WISEstarttime, 's')
 ```
 
 ### 2.4 MAST: Pan-STARRS
-The function to retrieve lightcurves from Pan-STARRS uses a version of both the object and light curve catalogs that are stored in the cloud and accessed using [LSDB](https://docs.lsdb.io/en/stable/).  This function is efficient at large scale (sample sizes > ~1000).
+The function to retrieve lightcurves from Pan-STARRS uses [LSDB](https://docs.lsdb.io/) to access versions of the object and light curve catalogs that are stored in the cloud.  This function is efficient at large scale (sample sizes > ~1000).
 
 Some warnings are expected.
 

@@ -14,7 +14,7 @@ astroquery>=0.4.8.dev0
 acstools
 lightkurve
 alerce
-lsdb>=0.5.1
+lsdb>=0.5.2
 universal_pathlib
 # We use distributed in this notebook, but installing any dask would make the [dataframe] extras required by dependencies for other notebooks.
 # It feels to be the cleanest solution to add the dependency here as we don't directly use it elsewhere.
