@@ -100,7 +100,7 @@ def load_lightcurves(locations, radius, bandlist):
     """
     # load the catalog's metadata as a pyarrow dataset. this will be used to query the catalog.
     # the catalog is stored in an AWS S3 bucket
-    fs = pyarrow.fs.S3FileSystem(region="us-west-2")
+    fs = pyarrow.fs.S3FileSystem(region="us-west-2",anonymous=True )
     bucket = "nasa-irsa-wise"
     catalog_root = f"{bucket}/unwise/neo7/catalogs/time_domain/healpix_k{K}/unwise-neo7-time_domain-healpix_k{K}.parquet"
     dataset = pyarrow.dataset.parquet_dataset(
