@@ -476,7 +476,7 @@ OR -</p></li>
 <section id="runtime">
 <h2>Runtime:<a class="headerlink" href="#runtime" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>As of 2024 October, this notebook takes ~800s to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 16GB RAM/ 4CPU.</p></li>
+<li><p>As of 2025 May, this notebook takes ~1000s (17 min.) to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 64GB RAM/ 16CPU.</p></li>
 </ul>
 </section>
 <section id="authors">
@@ -511,7 +511,7 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Uncomment the next line to install dependencies if needed.</span>
-<span class="c1">#!pip install -r requirements_light_curve_generator.txt</span>
+<span class="c1"># %pip install -r requirements_light_curve_generator.txt</span>
 </pre></div>
 </div>
 </div>
@@ -541,7 +541,7 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">wise_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">wise_get_lightcurves</span>
 <span class="c1"># Note: ZTF data is temporarily located in a non-public AWS S3 bucket. It is automatically available</span>
 <span class="c1"># from the Fornax Science Console, but otherwise will require explicit user credentials.</span>
-<span class="c1"># from ztf_functions import ztf_get_lightcurves</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ztf_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ztf_get_lightcurves</span>
 </pre></div>
 </div>
 </div>
@@ -676,14 +676,15 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 </section>
 <section id="irsa-ztf">
 <h3>2.2 IRSA: ZTF<a class="headerlink" href="#irsa-ztf" title="Link to this heading">#</a></h3>
-<p>The function to retrieve ZTF light curves accesses a parquet version of the ZTF catalog stored in the cloud using pyarrow.  This is the fastest way to access the ZTF catalog at scale.  The ZTF <a class="reference external" href="https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html">API</a> is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself.</p>
+<p>The function to retrieve ZTF light curves accesses a <a class="reference external" href="https://hats.readthedocs.io/en/stable/">HATS</a> parquet version of the ZTF catalog stored in the cloud using <a class="reference external" href="https://docs.lsdb.io/en/stable/">LSDB</a>. This is the simplest way to access this dataset at scale.  The ZTF <a class="reference external" href="https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html">API</a> is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself because lsdb uses dask under the hood.</p>
+<p>Traceback CommClosedErrors are expected and are just a dask houskeeping issue, the function is still running to completion and returning light curves.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ZTFstarttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
 <span class="c1"># get ZTF lightcurves</span>
-<span class="c1"># use the nworkers arg to control the amount of parallelization in the data loading step</span>
-<span class="n">df_lc_ZTF</span> <span class="o">=</span> <span class="n">ztf_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">nworkers</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">ztf_search_radius</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="c1">#  arcsec  (Graham et al., 2024 use 1&quot; with good results)</span>
+<span class="n">df_lc_ZTF</span> <span class="o">=</span> <span class="n">ztf_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">radius</span> <span class="o">=</span> <span class="n">ztf_search_radius</span><span class="p">)</span>
 
 <span class="c1"># add the resulting dataframe to all other archives</span>
 <span class="n">df_lc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lc_ZTF</span><span class="p">)</span>
@@ -718,7 +719,7 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 </section>
 <section id="mast-pan-starrs">
 <h3>2.4 MAST: Pan-STARRS<a class="headerlink" href="#mast-pan-starrs" title="Link to this heading">#</a></h3>
-<p>The function to retrieve lightcurves from Pan-STARRS uses a version of both the object and light curve catalogs that are stored in the cloud and accessed using <a class="reference external" href="https://docs.lsdb.io/en/stable/">lsdb</a>.  This function is efficient at large scale (sample sizes &gt; ~1000).</p>
+<p>The function to retrieve lightcurves from Pan-STARRS uses <a class="reference external" href="https://docs.lsdb.io/">LSDB</a> to access versions of the object and light curve catalogs that are stored in the cloud.  This function is efficient at large scale (sample sizes &gt; ~1000).</p>
 <p>Some warnings are expected.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -846,12 +847,12 @@ For sample sizes &gt;~500 and/or improved logging and monitoring options, consid
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># number of workers to use in the parallel processing pool</span>
-<span class="c1"># this should equal the total number of archives called</span>
-<span class="n">n_workers</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="c1"># this should equal the total number of archives called in the `pool` context below.</span>
+<span class="n">n_workers</span> <span class="o">=</span> <span class="mi">6</span>
 
 <span class="c1"># keyword arguments for the archive calls</span>
 <span class="n">heasarc_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">catalog_error_radii</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;FERMIGTRIG&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0&quot;</span><span class="p">,</span> <span class="s2">&quot;SAXGRBMGRB&quot;</span><span class="p">:</span> <span class="s2">&quot;3.0&quot;</span><span class="p">})</span>
-<span class="n">ztf_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">nworkers</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>  <span class="c1"># the internal parallelization is incompatible with Pool</span>
+<span class="n">ztf_search_radius</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="c1">#  arcsec</span>
 <span class="n">wise_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">bandlist</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;W1&#39;</span><span class="p">,</span> <span class="s1">&#39;W2&#39;</span><span class="p">])</span>
 <span class="n">panstarrs_search_radius</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="c1"># arcsec</span>
 <span class="n">tess_kepler_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
@@ -873,7 +874,6 @@ For sample sizes &gt;~500 and/or improved logging and monitoring options, consid
 
     <span class="c1"># start the processes that call the archives</span>
     <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">heasarc_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">kwds</span><span class="o">=</span><span class="n">heasarc_kwargs</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
-    <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">ztf_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">kwds</span><span class="o">=</span><span class="n">ztf_kwargs</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
     <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">wise_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">kwds</span><span class="o">=</span><span class="n">wise_kwargs</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
     <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">tess_kepler_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">kwds</span><span class="o">=</span><span class="n">tess_kepler_kwargs</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
     <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">hcv_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">kwds</span><span class="o">=</span><span class="n">hcv_kwargs</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
@@ -883,8 +883,13 @@ For sample sizes &gt;~500 and/or improved logging and monitoring options, consid
     <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># signal that no more jobs will be submitted to the pool</span>
     <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>  <span class="c1"># wait for all jobs to complete, including the callback</span>
 
-<span class="c1"># run panstarrs query outside of multiprocessing since it is using dask distributed under the hood</span>
+<span class="c1"># run ZTF and panstarrs queries outside of multiprocessing since they</span>
+<span class="c1"># are using dask distributed under the hood,</span>
 <span class="c1"># which doesn&#39;t work with multiprocessing, and dask is already parallelized</span>
+
+<span class="n">df_lc_ZTF</span> <span class="o">=</span> <span class="n">ztf_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">radius</span> <span class="o">=</span> <span class="n">ztf_search_radius</span><span class="p">)</span>
+<span class="n">parallel_df_lc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lc_ZTF</span><span class="p">)</span><span class="c1"># add the resulting dataframe to all other archives</span>
+
 <span class="n">df_lc_panstarrs</span> <span class="o">=</span> <span class="n">panstarrs_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">panstarrs_search_radius</span><span class="p">)</span>
 <span class="n">parallel_df_lc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lc_panstarrs</span><span class="p">)</span> <span class="c1"># add the panstarrs dataframe to all other archives</span>
 
