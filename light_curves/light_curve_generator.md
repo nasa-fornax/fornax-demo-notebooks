@@ -367,7 +367,7 @@ For sample sizes >~500 and/or improved logging and monitoring options, consider 
 
 ```{code-cell} ipython3
 # number of workers to use in the parallel processing pool
-# this should equal the total number of archives called
+# this should equal the total number of archives called in the `pool` context below.
 n_workers = 6
 
 # keyword arguments for the archive calls
