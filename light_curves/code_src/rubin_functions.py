@@ -1,5 +1,3 @@
-import os
-import textwrap
 from pathlib import Path
 import pyvo
 from astropy.table import Table, vstack, join
@@ -78,7 +76,7 @@ def rubin_get_objectids(sample_table, rsp_tap, search_radius=0.001):
         in_objid = row['objectid']
         in_label = row['label']
         
-        query = textwrap.dedent(f"""
+        query = (f"""
         SELECT coord_ra, coord_dec, objectId
         FROM dp02_dc2_catalogs.Object
         WHERE CONTAINS(
@@ -122,27 +120,23 @@ def rubin_access_lc_catalog(object_table, rsp_tap):
     """
     #Pull out a unique, sorted list of integer IDs:
     objids = sorted(set(object_table['objectId']))
-
-    #If there are no IDs, we don't need to search the light curve catalot
-    # and can just return an empty MultiIndexDFObject
-    if not objids:
-        return MultiIndexDFObject()
  
     #build the string for the query below
     #will probably need to break this into chunks when working with large samples (> 50)
     id_tuple_str = f"({','.join(map(str, objids))})"
-    
-    query_lc = textwrap.dedent(f"""
+
+    query_lc = (f"""
     SELECT src.band, src.ccdVisitId, src.coord_ra, src.coord_dec,
            src.objectId, src.psfFlux, src.psfFluxErr,
            scisql_nanojanskyToAbMag(src.psfFlux) AS psfMag,
-           vis.ccdVisitId AS visitId, vis.band AS visitBand,
+           vis.ccdVisitId AS visitId, 
            vis.expMidptMJD, vis.zeroPoint
     FROM dp02_dc2_catalogs.ForcedSource AS src
     JOIN dp02_dc2_catalogs.CcdVisit AS vis
       ON vis.ccdVisitId=src.ccdVisitId
     WHERE src.objectId IN {id_tuple_str} AND src.detect_isPrimary=1
     """).strip()
+    
     #run the query on the tap server
     srcs = rsp_tap.run_sync(query_lc).to_table()
     
@@ -151,14 +145,11 @@ def rubin_access_lc_catalog(object_table, rsp_tap):
 
     # Prefix every band value with "rubin_"
     df_src['band'] = 'rubin_' + df_src['band'].astype(str)
-    #  drop the redundant visitBand column
-    df_src = df_src.drop(columns=['visitBand'])
-
-# Convert object_table (Astropy) to pandas, keep only the three cols, and drop duplicates
+                                                     
+    # Convert object_table (Astropy) to pandas, keep only the three cols
     df_obj = (
         object_table[['objectId', 'in_objid', 'in_label']]
         .to_pandas()
-        .drop_duplicates(subset='objectId')
     )
     # Merge on the Rubin objectId to bring in your sample metadata
     df_merged = df_src.merge(
@@ -209,6 +200,9 @@ def rubin_get_lightcurves(sample_table, search_radius=0.001):
     #get the Rubin objectids which correspond to our coordinates
     obj_table = rubin_get_objectids(sample_table, rsp_tap, search_radius)
 
+    if not obj_table:
+        return MultiIndexDFObject()
+    
     #use those objectids to get the time domain info
     lc = rubin_access_lc_catalog(obj_table, rsp_tap)
     
