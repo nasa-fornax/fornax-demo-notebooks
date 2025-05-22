@@ -355,18 +355,18 @@ Before running this section, you need to have both 1) a login to the Rubin Scien
 
 1) To see if you have Rubin data rights, and if you do, to get that login setup, follow these [instructions](https://rsp.lsst.io/guides/getting-started/get-an-account.html) 
 
-2) After loggin in, follow these [instructions](code_src/rsp_token_instructions.txt) to get a token and store it in your home directory.
+2) After logging in to RSP, follow these [instructions](code_src/rsp_token_instructions.txt) to get a token and store it in your home directory.
 
 
 This code will not work without the above information. 
 
-Once that setup is complete, this code access Rubin data from the Rubin Science Platform which is hosting their catalogs in the google cloud.  Specifically, the code uses `pyvo` and `adql` to access a TAP server.
+Once that setup is complete, this code access Rubin data from the Rubin Science Platform which is hosting their catalogs in Google Cloud.  Specifically, the code uses `pyvo` and `adql` to access a TAP server.
 
 ```{code-cell} ipython3
 rspstarttime = time.time()
 
 # get RSP data
-rsp_search_radius = 0.001
+rsp_search_radius = 0.001  # degrees
 df_lc_rsp = rubin_get_lightcurves(sample_table, rsp_search_radius)
 
 # add the resulting dataframe to all other archives

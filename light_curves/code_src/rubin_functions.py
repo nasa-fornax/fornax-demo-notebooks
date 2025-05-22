@@ -25,12 +25,12 @@ def rubin_authenticate():
     """
     # Read token from home directory
     token_file = Path.home() / '.rsp-tap.token'    
-    if not os.path.exists(token_file):
+    if not token_file.exists():
         raise FileNotFoundError(f"Token file not found: {token_file}")
     with open(token_file, 'r') as f:
         token = f.readline().strip()
-        if not token:
-            raise FileNotFoundError("No token found in token file.")
+    if not token:
+        raise ValueError(f"No token found in token file: {token_file}")
 
     # Build credential and authenticated session
     cred = pyvo.auth.CredentialStore()
@@ -97,10 +97,7 @@ def rubin_get_objectids(sample_table, rsp_tap, search_radius=0.001):
 
     #in the case of an empty table, return an empty table
     if not all_tables:
-        cols = ['coord_ra','coord_dec','objectId','in_objid','in_label']
-        # build a dict mapping each name to an empty list
-        empty_dict = {col: [] for col in cols}
-        return Table(empty_dict)
+        return
 
     #otherwise, stack all the tables together
     combined = vstack(all_tables)
@@ -129,13 +126,7 @@ def rubin_access_lc_catalog(object_table, rsp_tap):
     #If there are no IDs, we don't need to search the light curve catalot
     # and can just return an empty MultiIndexDFObject
     if not objids:
-        # Create an empty MultiIndex 
-        mi = pd.MultiIndex.from_arrays(
-            [[], [], [], []],
-            names=['objectid', 'label', 'band', 'time']
-        )
-        empty_df = pd.DataFrame(index=mi)
-        return MultiIndexDFObject(empty_df)
+        return MultiIndexDFObject()
  
     #build the string for the query below
     #will probably need to break this into chunks when working with large samples (> 50)
