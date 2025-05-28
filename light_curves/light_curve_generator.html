@@ -420,7 +420,8 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#find-light-curves-for-these-targets-in-relevant-non-nasa-catalogs">3. Find light curves for these targets in relevant, non-NASA catalogs</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gaia">3.1 Gaia</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#icecube-neutrinos">3.3 IceCube neutrinos</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#icecube-neutrinos">3.2 IceCube neutrinos</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rubin-data">3.3 Rubin Data</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-processing-the-archive-calls">4. Parallel processing the archive calls</a></li>
@@ -539,6 +540,7 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
     <span class="n">get_lyu_sample</span><span class="p">,</span> <span class="n">get_macleod16_sample</span><span class="p">,</span> <span class="n">get_macleod19_sample</span><span class="p">,</span> <span class="n">get_ruan_sample</span><span class="p">,</span> <span class="n">get_sdss_sample</span><span class="p">,</span> <span class="n">get_sheng_sample</span><span class="p">,</span> <span class="n">get_yang_sample</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tess_kepler_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">tess_kepler_get_lightcurves</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">wise_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">wise_get_lightcurves</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rubin_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">rubin_get_lightcurves</span>
 <span class="c1"># Note: ZTF data is temporarily located in a non-public AWS S3 bucket. It is automatically available</span>
 <span class="c1"># from the Fornax Science Console, but otherwise will require explicit user credentials.</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ztf_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ztf_get_lightcurves</span>
@@ -806,7 +808,7 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 </div>
 </section>
 <section id="icecube-neutrinos">
-<h3>3.3 IceCube neutrinos<a class="headerlink" href="#icecube-neutrinos" title="Link to this heading">#</a></h3>
+<h3>3.2 IceCube neutrinos<a class="headerlink" href="#icecube-neutrinos" title="Link to this heading">#</a></h3>
 <p>There are several <a class="reference external" href="https://icecube.wisc.edu/data-releases/2021/01/all-sky-point-source-icecube-data-years-2008-2018">catalogs</a> (basically one for each year of IceCube data from 2008 - 2018). The following code creates a large catalog by combining
 all the yearly catalogs.
 The IceCube catalog contains Neutrino detections with associated energy and time and approximate direction (which is uncertain by half-degree scales….). Usually, for active events only one or two Neutrinos are detected, which makes matching quite different compared to “photons”. For our purpose, we will list the top 3 events in energy that are within a given distance to the target.</p>
@@ -822,7 +824,31 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 <span class="n">df_lc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lc_icecube</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;icecube search took:&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">icecubestarttime</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
-<span class="n">end_serial</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="rubin-data">
+<h3>3.3 Rubin Data<a class="headerlink" href="#rubin-data" title="Link to this heading">#</a></h3>
+<p>Before running this section, you need to have both 1) a login to the Rubin Science Platform (RSP) and 2) an authenticating token setup in your Fornax home directory.</p>
+<ol class="arabic simple">
+<li><p>To see if you have Rubin data rights, and if you do, to get that login setup, follow these <a class="reference external" href="https://rsp.lsst.io/guides/getting-started/get-an-account.html">instructions</a></p></li>
+<li><p>After logging in to RSP, follow these <a class="reference download internal" download="" href="../_downloads/ff9d626b670c445f25e8707d7a5803f3/rsp_token_instructions.txt"><span class="xref download myst">instructions</span></a> to get a token and store it in your home directory.</p></li>
+</ol>
+<p>This code will not work without the above information, so we have commented it out for now.  Uncomment when you are ready to proceed.</p>
+<p>Once that setup is complete, this code access Rubin data from the Rubin Science Platform which is hosting their catalogs in Google Cloud.  Specifically, the code uses <code class="docutils literal notranslate"><span class="pre">pyvo</span></code> and <code class="docutils literal notranslate"><span class="pre">adql</span></code> to access a TAP server.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#uncomment the next 5 lines if you have RSP login and authentication setup</span>
+
+<span class="c1">#rspstarttime = time.time()</span>
+<span class="c1">#rsp_search_radius = 0.001  # degrees</span>
+
+<span class="c1">#df_lc_rsp = rubin_get_lightcurves(sample_table, rsp_search_radius)</span>
+<span class="c1">#df_lc.append(df_lc_rsp) # add the resulting dataframe to all other archives</span>
+
+<span class="c1">#print(&#39;RSP search took:&#39;, time.time() - rspstarttime, &#39;s&#39;)</span>
 </pre></div>
 </div>
 </div>
@@ -830,6 +856,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># benchmarking</span>
+<span class="n">end_serial</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;total time for serial archive calls is &#39;</span><span class="p">,</span> <span class="n">end_serial</span> <span class="o">-</span> <span class="n">start_serial</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -847,7 +874,7 @@ For sample sizes &gt;~500 and/or improved logging and monitoring options, consid
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># number of workers to use in the parallel processing pool</span>
-<span class="c1"># this should equal the total number of archives called in the `pool` context below.</span>
+<span class="c1"># this should equal the total number of archives called</span>
 <span class="n">n_workers</span> <span class="o">=</span> <span class="mi">6</span>
 
 <span class="c1"># keyword arguments for the archive calls</span>
@@ -859,6 +886,8 @@ For sample sizes &gt;~500 and/or improved logging and monitoring options, consid
 <span class="n">hcv_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">3600.0</span><span class="p">)</span>
 <span class="n">gaia_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">search_radius</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="mi">3600</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">icecube_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">icecube_select_topN</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">rsp_search_radius</span> <span class="o">=</span> <span class="mf">0.001</span>
+<span class="n">rsp_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">search_radius</span><span class="o">=</span><span class="n">rsp_search_radius</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -879,6 +908,7 @@ For sample sizes &gt;~500 and/or improved logging and monitoring options, consid
     <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">hcv_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">kwds</span><span class="o">=</span><span class="n">hcv_kwargs</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
     <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">gaia_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">kwds</span><span class="o">=</span><span class="n">gaia_kwargs</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
     <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">icecube_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">kwds</span><span class="o">=</span><span class="n">icecube_kwargs</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
+<span class="c1">#    pool.apply_async(rubin_get_lightcurves, args=(sample_table,), kwds=rsp_kwargs, callback=callback)</span>
 
     <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># signal that no more jobs will be submitted to the pool</span>
     <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>  <span class="c1"># wait for all jobs to complete, including the callback</span>
@@ -1033,7 +1063,8 @@ For sample sizes &gt;~500 and/or improved logging and monitoring options, consid
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#find-light-curves-for-these-targets-in-relevant-non-nasa-catalogs">3. Find light curves for these targets in relevant, non-NASA catalogs</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gaia">3.1 Gaia</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#icecube-neutrinos">3.3 IceCube neutrinos</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#icecube-neutrinos">3.2 IceCube neutrinos</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rubin-data">3.3 Rubin Data</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-processing-the-archive-calls">4. Parallel processing the archive calls</a></li>
