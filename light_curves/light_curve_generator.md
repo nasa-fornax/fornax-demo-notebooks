@@ -365,21 +365,21 @@ This code will not work without the above information, so we have commented it o
 Once that setup is complete, this code access Rubin data from the Rubin Science Platform which is hosting their catalogs in Google Cloud.  Specifically, the code uses `pyvo` and `adql` to access a TAP server.
 
 ```{code-cell} ipython3
-rspstarttime = time.time()
 
-# get RSP data
-rsp_search_radius = 0.001  # degrees
+#uncomment the next 5 lines if you have RSP login and authentication setup
+
+#rspstarttime = time.time()
+#rsp_search_radius = 0.001  # degrees
+
 #df_lc_rsp = rubin_get_lightcurves(sample_table, rsp_search_radius)
+#df_lc.append(df_lc_rsp) # add the resulting dataframe to all other archives
 
-# add the resulting dataframe to all other archives
-#df_lc.append(df_lc_rsp)
-
-print('RSP search took:', time.time() - rspstarttime, 's')
-end_serial = time.time()
+#print('RSP search took:', time.time() - rspstarttime, 's')
 ```
 
 ```{code-cell} ipython3
 # benchmarking
+end_serial = time.time()
 print('total time for serial archive calls is ', end_serial - start_serial, 's')
 ```
 

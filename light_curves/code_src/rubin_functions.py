@@ -81,7 +81,7 @@ def rubin_get_objectids(sample_table, rsp_tap, search_radius=0.001):
         FROM dp02_dc2_catalogs.Object
         WHERE CONTAINS(
             POINT('ICRS', coord_ra, coord_dec),
-            CIRCLE('ICRS', {ra:.6f}, {dec:.6f}, {search_radius})
+            CIRCLE('ICRS', {ra}, {dec}, {search_radius})
         ) = 1
         AND detect_isPrimary = 1
         """).strip()
