@@ -21,6 +21,7 @@ cache/
 *.parquet
 *.pdf
 *.png
+*.gz
 
 # Tests and reports
 htmlcov/

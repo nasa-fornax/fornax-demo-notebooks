@@ -99,6 +99,7 @@ from sample_selection import (clean_sample, get_green_sample, get_hon_sample, ge
     get_lyu_sample, get_macleod16_sample, get_macleod19_sample, get_ruan_sample, get_sdss_sample, get_sheng_sample, get_yang_sample)
 from tess_kepler_functions import tess_kepler_get_lightcurves
 from wise_functions import wise_get_lightcurves
+from rubin_functions import rubin_get_lightcurves
 # Note: ZTF data is temporarily located in a non-public AWS S3 bucket. It is automatically available
 # from the Fornax Science Console, but otherwise will require explicit user credentials.
 from ztf_functions import ztf_get_lightcurves
@@ -331,7 +332,7 @@ df_lc.append(df_lc_gaia)
 print('gaia search took:', time.time() - gaiastarttime, 's')
 ```
 
-### 3.3 IceCube neutrinos
+### 3.2 IceCube neutrinos
 
 There are several [catalogs](https://icecube.wisc.edu/data-releases/2021/01/all-sky-point-source-icecube-data-years-2008-2018) (basically one for each year of IceCube data from 2008 - 2018). The following code creates a large catalog by combining
 all the yearly catalogs.
@@ -349,11 +350,36 @@ df_lc_icecube = icecube_get_lightcurves(sample_table, icecube_select_topN=3)
 df_lc.append(df_lc_icecube)
 
 print('icecube search took:', time.time() - icecubestarttime, 's')
-end_serial = time.time()
+```
+
+### 3.3 Rubin Data 
+Before running this section, you need to have both 1) a login to the Rubin Science Platform (RSP) and 2) an authenticating token setup in your Fornax home directory. 
+
+1) To see if you have Rubin data rights, and if you do, to get that login setup, follow these [instructions](https://rsp.lsst.io/guides/getting-started/get-an-account.html) 
+
+2) After logging in to RSP, follow these [instructions](code_src/rsp_token_instructions.txt) to get a token and store it in your home directory.
+
+
+This code will not work without the above information, so we have commented it out for now.  Uncomment when you are ready to proceed.
+
+Once that setup is complete, this code access Rubin data from the Rubin Science Platform which is hosting their catalogs in Google Cloud.  Specifically, the code uses `pyvo` and `adql` to access a TAP server.
+
+```{code-cell} ipython3
+
+#uncomment the next 5 lines if you have RSP login and authentication setup
+
+#rspstarttime = time.time()
+#rsp_search_radius = 0.001  # degrees
+
+#df_lc_rsp = rubin_get_lightcurves(sample_table, rsp_search_radius)
+#df_lc.append(df_lc_rsp) # add the resulting dataframe to all other archives
+
+#print('RSP search took:', time.time() - rspstarttime, 's')
 ```
 
 ```{code-cell} ipython3
 # benchmarking
+end_serial = time.time()
 print('total time for serial archive calls is ', end_serial - start_serial, 's')
 ```
 
@@ -367,7 +393,7 @@ For sample sizes >~500 and/or improved logging and monitoring options, consider 
 
 ```{code-cell} ipython3
 # number of workers to use in the parallel processing pool
-# this should equal the total number of archives called in the `pool` context below.
+# this should equal the total number of archives called
 n_workers = 6
 
 # keyword arguments for the archive calls
@@ -379,6 +405,8 @@ tess_kepler_kwargs = dict(radius=1.0)
 hcv_kwargs = dict(radius=1.0/3600.0)
 gaia_kwargs = dict(search_radius=1/3600, verbose=0)
 icecube_kwargs = dict(icecube_select_topN=3)
+rsp_search_radius = 0.001
+rsp_kwargs = dict(search_radius=rsp_search_radius)
 ```
 
 ```{code-cell} ipython3
@@ -396,6 +424,7 @@ with mp.Pool(processes=n_workers) as pool:
     pool.apply_async(hcv_get_lightcurves, args=(sample_table,), kwds=hcv_kwargs, callback=callback)
     pool.apply_async(gaia_get_lightcurves, args=(sample_table,), kwds=gaia_kwargs, callback=callback)
     pool.apply_async(icecube_get_lightcurves, args=(sample_table,), kwds=icecube_kwargs, callback=callback)
+#    pool.apply_async(rubin_get_lightcurves, args=(sample_table,), kwds=rsp_kwargs, callback=callback)
 
     pool.close()  # signal that no more jobs will be submitted to the pool
     pool.join()  # wait for all jobs to complete, including the callback
