@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.7
+    jupytext_version: 1.17.1
 kernelspec:
   display_name: notebook
   language: python
@@ -108,8 +108,8 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-# !pip install -r requirements_spectra_generator.txt
-# !pip install --upgrade --pre astroquery  # >=0.4.8.dev9474 needed for mast_functions
+!pip install -r requirements_spectra_generator.txt
+!pip install --upgrade --pre astroquery  # >=0.4.8.dev9474 needed for mast_functions
 ```
 
 ```{code-cell} ipython3
@@ -150,8 +150,8 @@ labels.append("NGC4670")
 coords.append(SkyCoord("{} {}".format("14 01 19.92", "−33 04 10.7"), unit=(u.hourangle, u.deg)))
 labels.append("Tol_89")
 
-coords.append(SkyCoord(233.73856, 23.50321, unit=u.deg))
-labels.append("Arp220")
+#coords.append(SkyCoord(233.73856, 23.50321, unit=u.deg))
+#labels.append("Arp220")
 
 coords.append(SkyCoord(150.091, 2.2745833, unit=u.deg))
 labels.append("COSMOS1")
@@ -263,7 +263,7 @@ df_jwst = JWST_get_spec(
     sample_table,
     search_radius_arcsec=0.5,
     datadir="./data/",
-    verbose=False,
+    verbose=True,
     delete_downloaded_data=True
 )
 df_spec.append(df_jwst)

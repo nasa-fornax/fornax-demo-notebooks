@@ -13,6 +13,10 @@ kernelspec:
 ---
 
 ```{code-cell} ipython3
+%pip install -U astroquery
+```
+
+```{code-cell} ipython3
 from astroquery.mast import MastMissions, Observations
 from astropy.coordinates import SkyCoord
 import astropy.units as u
@@ -23,6 +27,10 @@ import shutil
 import matplotlib.pyplot as plt
 import astropy.coordinates as coord
 from astropy.table import Table
+```
+
+```{code-cell} ipython3
+
 ```
 
 ```{code-cell} ipython3
@@ -120,7 +128,6 @@ class MultiIndexDFObject:
 ```
 
 ```{code-cell} ipython3
-
 
 def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose=False, delete_downloaded_data=True):
     """
@@ -366,6 +373,34 @@ df_spec.data
 
 ```{code-cell} ipython3
 SPICY_skycoords
+```
+
+```{code-cell} ipython3
+missions = MastMissions(mission='jwst')
+```
+
+```{code-cell} ipython3
+# Create coordinate object
+coords = SkyCoord(269.31, 66.47, unit=('deg'), 
+                  exp_type='MIR_LRS-FIXEDSLIT,MIR_LRS-SLITLESS,MIR_MRS,NRC_GRISM,NRC_WFSS,NIS_SOSS,NIS_WFSS,NRS_FIXEDSLIT,NRS_MSASPEC',  # Spectroscopy data
+            instrume='!FGS',  # Any instrument except FGS
+                 )
+
+# Query for results within 10 arcminutes of coords
+results = missions.query_region(coords, radius=0.5*u.deg)
+
+# Display results
+print(f'Total number of results: {len(results)}')
+results[:5]
+```
+
+```{code-cell} ipython3
+col_table = missions.get_column_list()
+```
+
+```{code-cell} ipython3
+nlines = len(col_table) + 2
+col_table.pprint(nlines) 
 ```
 
 ```{code-cell} ipython3

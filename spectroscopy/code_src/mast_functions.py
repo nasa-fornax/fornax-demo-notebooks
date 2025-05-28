@@ -10,10 +10,118 @@ import numpy as np
 import pandas as pd
 from astropy.table import Table
 from astropy.table import vstack
-from astroquery.mast import Observations
+from astroquery.mast import Observations, MastMissions
 from specutils import Spectrum1D
 
 from data_structures_spec import MultiIndexDFObject
+
+def JWST_get_spec_helper(sample_table, radius_arcsec, download_dir, verbose=False, delete_downloaded_data=True):
+    """
+    Use MastMissions to query, filter, and download JWST spectra for each target.
+
+    Parameters
+    ----------
+    sample_table : astropy.table.Table
+        Table with 'coord', 'label', 'objectid' columns.
+    radius_arcsec : float
+        Search radius (arcseconds).
+    download_dir : str
+        Directory to store downloaded FITS files.
+    verbose : bool, optional
+        If True, print progress messages.
+
+    Returns
+    -------
+    df_spec : MultiIndexDFObject
+        Raw JWST spectra appended for all targets.
+    """
+    # MAST missions interface
+    m = MastMissions(mission='jwst')
+    df_spec = MultiIndexDFObject()
+
+    # ensure download directory exists
+    os.makedirs(download_dir, exist_ok=True)
+
+    # loop over targets
+    for row in sample_table:
+        coord = row['coord']            # SkyCoord
+        label = row['label']           # string label
+        objid = row['objectid']        # unique ID
+        if verbose:
+            print(f"MM Querying JWST around {label} ({coord.to_string('hmsdms')})")
+
+        # cone search for JWST datasets
+        datasets = m.query_region(
+            coord,
+            radius=(radius_arcsec * u.arcsec).to(u.deg).value, 
+            exp_type='MIR_LRS-FIXEDSLIT,MIR_LRS-SLITLESS,MIR_MRS,NRC_GRISM,NRC_WFSS,NIS_SOSS,NIS_WFSS,NRS_FIXEDSLIT,NRS_MSASPEC',  # Spectroscopy data
+            instrume='!FGS',  # Any instrument except FGS
+        )
+        if len(datasets) == 0:
+            if verbose:
+                print(f"  No datasets found for {label}")
+            continue
+
+        # get all products for these datasets
+        products = m.get_product_list(datasets)
+
+        # filter down to calibrated 1D science spectra
+        filtered = m.filter_products(
+            products,
+            type='science',         # only science products
+            extension='fits',                # FITS files
+            #calib_level=[2, 3, 4],           # calibrated data
+            #productSubGroupDescription=['X1D'],  # 1D spectra
+            #dataRights=['PUBLIC']            # public data
+        )
+        if len(filtered) == 0:
+            if verbose:
+                print(f"  No filtered products for {label}")
+            continue
+
+        # download the filtered products
+       # download_results = m.download_products(
+       #     filtered,
+       #     download_dir=download_dir,
+       #     verbose=verbose
+       # )
+        # download_results is an Astropy Table with 'Local Path'
+       # paths = download_results['Local Path'].tolist()
+
+        # read each file and append to MultiIndexDFObject
+       # for prod, path in zip(filtered, paths):
+       #     # read the 1D spectrum (HDU 1)
+       #     tbl = Table.read(path, hdu=1)
+       #     wave = tbl['WAVELENGTH'].data * tbl['WAVELENGTH'].unit
+       #     flux = tbl['FLUX'].data       * tbl['FLUX'].unit
+       #     err  = tbl['FLUX_ERROR'].data * tbl['FLUX_ERROR'].unit
+
+       #     # product metadata
+       #     inst = prod['instrument_name']
+       #     filt = prod['filters']
+
+        #    # build a single-entry DataFrame
+       #     df = pd.DataFrame({
+       #         'wave':       [wave],
+       #         'flux':       [flux],
+        #        'err':        [err],
+       #         'instrument': [inst],
+       #         'objectid':   [objid],
+       #         'label':      [label],
+       #         'filter':     [filt],
+       #         'mission':    ['JWST']
+       #     }).set_index(['objectid','label','filter','mission'])
+
+            # append to container
+       #     df_spec.append(df)
+      
+        # optionally clean up downloaded files
+        if delete_downloaded_data:
+            shutil.rmtree(download_dir)
+            os.makedirs(download_dir, exist_ok=True)
+
+
+    #return df_spec
 
 
 def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
@@ -58,7 +166,7 @@ def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
     return df_jwst_group
 
 
-def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
+def JWST_get_spec_helper_old(sample_table, search_radius_arcsec, datadir, verbose,
                          delete_downloaded_data=True):
     """
     Retrieve JWST spectra for a list of sources.
