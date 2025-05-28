@@ -360,7 +360,7 @@ Before running this section, you need to have both 1) a login to the Rubin Scien
 2) After logging in to RSP, follow these [instructions](code_src/rsp_token_instructions.txt) to get a token and store it in your home directory.
 
 
-This code will not work without the above information. 
+This code will not work without the above information, so we have commented it out for now.  Uncomment when you are ready to proceed.
 
 Once that setup is complete, this code access Rubin data from the Rubin Science Platform which is hosting their catalogs in Google Cloud.  Specifically, the code uses `pyvo` and `adql` to access a TAP server.
 
@@ -369,10 +369,10 @@ rspstarttime = time.time()
 
 # get RSP data
 rsp_search_radius = 0.001  # degrees
-df_lc_rsp = rubin_get_lightcurves(sample_table, rsp_search_radius)
+#df_lc_rsp = rubin_get_lightcurves(sample_table, rsp_search_radius)
 
 # add the resulting dataframe to all other archives
-df_lc.append(df_lc_rsp)
+#df_lc.append(df_lc_rsp)
 
 print('RSP search took:', time.time() - rspstarttime, 's')
 end_serial = time.time()
@@ -394,8 +394,7 @@ For sample sizes >~500 and/or improved logging and monitoring options, consider 
 ```{code-cell} ipython3
 # number of workers to use in the parallel processing pool
 # this should equal the total number of archives called
-n_workers = 7
-
+n_workers = 6
 
 # keyword arguments for the archive calls
 heasarc_kwargs = dict(catalog_error_radii={"FERMIGTRIG": "1.0", "SAXGRBMGRB": "3.0"})
@@ -425,7 +424,7 @@ with mp.Pool(processes=n_workers) as pool:
     pool.apply_async(hcv_get_lightcurves, args=(sample_table,), kwds=hcv_kwargs, callback=callback)
     pool.apply_async(gaia_get_lightcurves, args=(sample_table,), kwds=gaia_kwargs, callback=callback)
     pool.apply_async(icecube_get_lightcurves, args=(sample_table,), kwds=icecube_kwargs, callback=callback)
-    pool.apply_async(rubin_get_lightcurves, args=(sample_table,), kwds=rsp_kwargs, callback=callback)
+#    pool.apply_async(rubin_get_lightcurves, args=(sample_table,), kwds=rsp_kwargs, callback=callback)
 
     pool.close()  # signal that no more jobs will be submitted to the pool
     pool.join()  # wait for all jobs to complete, including the callback
