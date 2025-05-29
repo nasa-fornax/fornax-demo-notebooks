@@ -128,7 +128,6 @@ class MultiIndexDFObject:
 ```
 
 ```{code-cell} ipython3
-
 def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose=False, delete_downloaded_data=True):
     """
     Retrieve JWST spectra for sources in sample_table, returning a MultiIndexDFObject.
@@ -401,6 +400,59 @@ col_table = missions.get_column_list()
 ```{code-cell} ipython3
 nlines = len(col_table) + 2
 col_table.pprint(nlines) 
+```
+
+```{code-cell} ipython3
+from astroquery.mast import MastMissions, Observations
+from astropy.coordinates import SkyCoord
+import astropy.units as u
+import numpy as np
+
+
+targets = [
+    (SkyCoord("09h54m49.40s +09d16m15.9s", frame='icrs'), "NGC3049"),
+    (SkyCoord("12h45m17.44s +27d07m31.8s", frame='icrs'), "NGC4670"),
+    (SkyCoord("14h01m19.92s -33d04m10.7s", frame='icrs'), "Tol_89"),
+    (SkyCoord(150.091 * u.deg,  2.2745833 * u.deg),         "COSMOS1"),
+]
+
+radius_arcsec = 10
+
+# MAST missions interface
+m = MastMissions(mission='jwst')
+
+# loop over targets
+for coord, label in targets:
+    print(f"MM Querying JWST around {label} ({coord.to_string('hmsdms')})")
+
+    # cone search for JWST datasets
+    datasets = m.query_region(
+        coord,
+        radius=(radius_arcsec * u.arcsec).to(u.deg).value, 
+        exp_type='MIR_LRS-FIXEDSLIT,MIR_LRS-SLITLESS,MIR_MRS,NRC_GRISM,NRC_WFSS,NIS_SOSS,NIS_WFSS,NRS_FIXEDSLIT,NRS_MSASPEC',  # Spectroscopy data
+        instrume='!FGS',  # Any instrument except FGS
+    )
+    if len(datasets) == 0:
+        print(f"  No datasets found for {label}")
+        continue
+
+    
+    # get all products for these datasets
+    print("getting product list")
+    products = m.get_product_list(datasets)
+
+    # filter down to calibrated 1D science spectra
+    print("filtering products")
+    filtered = m.filter_products(
+        products,
+        type='science',         # only science products
+        extension='fits',                # FITS files
+        #calib_level=[2, 3, 4],           # calibrated data
+        #productSubGroupDescription=['X1D'],  # 1D spectra
+        #dataRights=['PUBLIC']            # public data
+    )
+
+    #then I would go on to downloading, but timeout happens above for COSMOS1
 ```
 
 ```{code-cell} ipython3
