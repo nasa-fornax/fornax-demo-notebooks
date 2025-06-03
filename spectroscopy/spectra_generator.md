@@ -7,7 +7,7 @@ jupytext:
     jupytext_version: 1.17.1
 kernelspec:
   name: python3
-  display_name: Python 3 (ipykernel)
+  display_name: notebook
   language: python
 ---
 
@@ -108,14 +108,14 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-!pip install -r requirements_spectra_generator.txt
-!pip install --upgrade --pre astroquery  # >=0.4.8.dev9474 needed for mast_functions
+#!pip install -r requirements_spectra_generator.txt
+#!pip install --upgrade --pre astroquery  # >=0.4.8.dev9474 needed for mast_functions
 ```
 
 ```{code-cell} ipython3
 import os
 import sys
-
+import time
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
@@ -130,6 +130,10 @@ from plot_functions import create_figures
 from sample_selection import clean_sample
 from sdss_functions import SDSS_get_spec
 from spitzer_functions import SpitzerIRS_get_spec
+```
+
+```{code-cell} ipython3
+starttime = time.time()
 ```
 
 ## 1. Define the sample
@@ -156,20 +160,20 @@ labels.append("Tol_89")
 coords.append(SkyCoord(150.091, 2.2745833, unit=u.deg))
 labels.append("COSMOS1")
 
-#coords.append(SkyCoord(150.1024475, 2.2815559, unit=u.deg))
-#labels.append("COSMOS2")
+coords.append(SkyCoord(150.1024475, 2.2815559, unit=u.deg))
+labels.append("COSMOS2")
 
-#coords.append(SkyCoord("{} {}".format("150.000", "+2.00"), unit=(u.deg, u.deg)))
-#labels.append("COSMOS3")
+coords.append(SkyCoord("{} {}".format("150.000", "+2.00"), unit=(u.deg, u.deg)))
+labels.append("COSMOS3")
 
-#coords.append(SkyCoord("{} {}".format("+53.15508", "-27.80178"), unit=(u.deg, u.deg)))
-#labels.append("JADESGS-z7-01-QU")
+coords.append(SkyCoord("{} {}".format("+53.15508", "-27.80178"), unit=(u.deg, u.deg)))
+labels.append("JADESGS-z7-01-QU")
 
-#coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg)))
-#labels.append("TestJWST")
+coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg)))
+labels.append("TestJWST")
 
-#coords.append(SkyCoord("{} {}".format("+150.33622", "+55.89878"), unit=(u.deg, u.deg)))
-#labels.append("Twin Quasar")
+coords.append(SkyCoord("{} {}".format("+150.33622", "+55.89878"), unit=(u.deg, u.deg)))
+labels.append("Twin Quasar")
 
 sample_table = clean_sample(coords, labels, precision=2.0 * u.arcsecond, verbose=1)
 ```
@@ -319,6 +323,10 @@ create_figures(df_spec=df_spec,
                show_nbr_figures=10,
                save_output=False,
                )
+```
+
+```{code-cell} ipython3
+print(f"total time is {time.time() - starttime}s")
 ```
 
 ```{code-cell} ipython3
