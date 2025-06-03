@@ -56,6 +56,7 @@ def JWST_get_spec_helper(sample_table, radius_arcsec, download_dir, verbose=Fals
             radius=(radius_arcsec * u.arcsec).to(u.deg).value, 
             exp_type='MIR_LRS-FIXEDSLIT,MIR_LRS-SLITLESS,MIR_MRS,NRC_GRISM,NRC_WFSS,NIS_SOSS,NIS_WFSS,NRS_FIXEDSLIT,NRS_MSASPEC',  # Spectroscopy data
             instrume='!FGS',  # Any instrument except FGS
+            access='PUBLIC'            # public data
         )
         if len(datasets) == 0:
             if verbose:
@@ -63,16 +64,27 @@ def JWST_get_spec_helper(sample_table, radius_arcsec, download_dir, verbose=Fals
             continue
 
         # get all products for these datasets
-        products = m.get_product_list(datasets)
+        # products = m.get_product_list(datasets)  #this currently has timeout issues, but should work in future
+        batch_size = 250
+        batches = [datasets[i:i + batch_size] for i in range(0, len(datasets), batch_size)]
+ 
+        products = Table()
+        for batch in batches:
+            # Get the products for each batch
+            print(f"Getting products for batch of {len(batch)} products")
+            batch_prods = m.get_product_list(batch)
+ 
+            # Append the results to the products table
+            products = vstack([products, batch_prods])
+
 
         # filter down to calibrated 1D science spectra
         filtered = m.filter_products(
             products,
             type='science',         # only science products
             extension='fits',                # FITS files
-            #calib_level=[2, 3, 4],           # calibrated data
-            #productSubGroupDescription=['X1D'],  # 1D spectra
-            #dataRights=['PUBLIC']            # public data
+            file_suffix=['_c1d','x1d'],  # calibrated 1D spectra
+            access=['PUBLIC']            # public data
         )
         if len(filtered) == 0:
             if verbose:
@@ -80,48 +92,47 @@ def JWST_get_spec_helper(sample_table, radius_arcsec, download_dir, verbose=Fals
             continue
 
         # download the filtered products
-       # download_results = m.download_products(
-       #     filtered,
-       #     download_dir=download_dir,
-       #     verbose=verbose
-       # )
-        # download_results is an Astropy Table with 'Local Path'
-       # paths = download_results['Local Path'].tolist()
+        download_results = m.download_products(
+            filtered,
+            download_dir=download_dir,
+            verbose=verbose
+        )
+        # download_results is an Astropy Table 
+        paths = download_results['Local Path'].tolist()
 
         # read each file and append to MultiIndexDFObject
-       # for prod, path in zip(filtered, paths):
-       #     # read the 1D spectrum (HDU 1)
-       #     tbl = Table.read(path, hdu=1)
-       #     wave = tbl['WAVELENGTH'].data * tbl['WAVELENGTH'].unit
-       #     flux = tbl['FLUX'].data       * tbl['FLUX'].unit
-       #     err  = tbl['FLUX_ERROR'].data * tbl['FLUX_ERROR'].unit
+        for prod, path in zip(filtered, paths):
+            # read the 1D spectrum (HDU 1)
+            tbl = Table.read(path, hdu=1)
+            wave = tbl['WAVELENGTH'].data * tbl['WAVELENGTH'].unit
+            flux = tbl['FLUX'].data       * tbl['FLUX'].unit
+            err  = tbl['ERROR'].data * tbl['ERROR'].unit
 
-       #     # product metadata
-       #     inst = prod['instrument_name']
-       #     filt = prod['filters']
+            # product metadata
+            inst = prod['instrument_name']
+            filt = prod['filters']
 
-        #    # build a single-entry DataFrame
-       #     df = pd.DataFrame({
-       #         'wave':       [wave],
-       #         'flux':       [flux],
-        #        'err':        [err],
-       #         'instrument': [inst],
-       #         'objectid':   [objid],
-       #         'label':      [label],
-       #         'filter':     [filt],
-       #         'mission':    ['JWST']
-       #     }).set_index(['objectid','label','filter','mission'])
+            # build a single-entry DataFrame
+            df = pd.DataFrame({
+                'wave':       [wave],
+                'flux':       [flux],
+                'err':        [err],
+                'instrument': [inst],
+                'objectid':   [objid],
+                'label':      [label],
+                'filter':     [filt],
+                'mission':    ['JWST']
+            }).set_index(['objectid','label','filter','mission'])
 
             # append to container
-       #     df_spec.append(df)
+            df_spec.append(df)
       
         # optionally clean up downloaded files
         if delete_downloaded_data:
             shutil.rmtree(download_dir)
             os.makedirs(download_dir, exist_ok=True)
 
-
-    #return df_spec
+    return df_spec
 
 
 def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,

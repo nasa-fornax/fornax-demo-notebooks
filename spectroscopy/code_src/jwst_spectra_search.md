@@ -406,6 +406,7 @@ col_table.pprint(nlines)
 from astroquery.mast import MastMissions, Observations
 from astropy.coordinates import SkyCoord
 import astropy.units as u
+from astropy.table import Table, vstack
 import numpy as np
 
 
@@ -431,7 +432,11 @@ for coord, label in targets:
         radius=(radius_arcsec * u.arcsec).to(u.deg).value, 
         exp_type='MIR_LRS-FIXEDSLIT,MIR_LRS-SLITLESS,MIR_MRS,NRC_GRISM,NRC_WFSS,NIS_SOSS,NIS_WFSS,NRS_FIXEDSLIT,NRS_MSASPEC',  # Spectroscopy data
         instrume='!FGS',  # Any instrument except FGS
+        access='PUBLIC'            # public data
     )
+
+    print(len(datasets), "length(datasets)")
+    
     if len(datasets) == 0:
         print(f"  No datasets found for {label}")
         continue
@@ -439,7 +444,20 @@ for coord, label in targets:
     
     # get all products for these datasets
     print("getting product list")
-    products = m.get_product_list(datasets)
+    #products = m.get_product_list(datasets)  #timeout problem
+    #Get products in groups of 250
+    batch_size = 250
+    batches = [datasets[i:i + batch_size] for i in range(0, len(datasets), batch_size)]
+ 
+    products = Table()
+    for batch in batches:
+        # Get the products for each batch
+        print(f"Getting products for batch of {len(batch)} products")
+        batch_prods = m.get_product_list(batch)
+ 
+        # Append the results to the products table
+        products = vstack([products, batch_prods])
+
 
     # filter down to calibrated 1D science spectra
     print("filtering products")
@@ -449,10 +467,42 @@ for coord, label in targets:
         extension='fits',                # FITS files
         #calib_level=[2, 3, 4],           # calibrated data
         #productSubGroupDescription=['X1D'],  # 1D spectra
-        #dataRights=['PUBLIC']            # public data
     )
 
     #then I would go on to downloading, but timeout happens above for COSMOS1
+```
+
+```{code-cell} ipython3
+filtered = m.filter_products(
+    products,
+    type='science',         # only science products
+    extension='fits',                # FITS files
+    file_suffix=['_c1d','x1d'],  # calibrated 1D spectra
+    access=['PUBLIC']            # public data
+)
+
+len(filtered)
+```
+
+```{code-cell} ipython3
+tab = products.get_column_list()
+```
+
+```{code-cell} ipython3
+filtered
+```
+
+```{code-cell} ipython3
+col_tab = m.get_column_list()
+```
+
+```{code-cell} ipython3
+len(col_tab)
+```
+
+```{code-cell} ipython3
+for row in col_tab:
+    print(row)
 ```
 
 ```{code-cell} ipython3

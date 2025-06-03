@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.17.1
 kernelspec:
-  display_name: notebook
-  language: python
   name: python3
+  display_name: Python 3 (ipykernel)
+  language: python
 ---
 
 # Extract Multi-Wavelength Spectroscopy from Archival Data
@@ -156,20 +156,20 @@ labels.append("Tol_89")
 coords.append(SkyCoord(150.091, 2.2745833, unit=u.deg))
 labels.append("COSMOS1")
 
-coords.append(SkyCoord(150.1024475, 2.2815559, unit=u.deg))
-labels.append("COSMOS2")
+#coords.append(SkyCoord(150.1024475, 2.2815559, unit=u.deg))
+#labels.append("COSMOS2")
 
-coords.append(SkyCoord("{} {}".format("150.000", "+2.00"), unit=(u.deg, u.deg)))
-labels.append("COSMOS3")
+#coords.append(SkyCoord("{} {}".format("150.000", "+2.00"), unit=(u.deg, u.deg)))
+#labels.append("COSMOS3")
 
-coords.append(SkyCoord("{} {}".format("+53.15508", "-27.80178"), unit=(u.deg, u.deg)))
-labels.append("JADESGS-z7-01-QU")
+#coords.append(SkyCoord("{} {}".format("+53.15508", "-27.80178"), unit=(u.deg, u.deg)))
+#labels.append("JADESGS-z7-01-QU")
 
-coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg)))
-labels.append("TestJWST")
+#coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg)))
+#labels.append("TestJWST")
 
-coords.append(SkyCoord("{} {}".format("+150.33622", "+55.89878"), unit=(u.deg, u.deg)))
-labels.append("Twin Quasar")
+#coords.append(SkyCoord("{} {}".format("+150.33622", "+55.89878"), unit=(u.deg, u.deg)))
+#labels.append("Twin Quasar")
 
 sample_table = clean_sample(coords, labels, precision=2.0 * u.arcsecond, verbose=1)
 ```
@@ -319,4 +319,8 @@ create_figures(df_spec=df_spec,
                show_nbr_figures=10,
                save_output=False,
                )
+```
+
+```{code-cell} ipython3
+
 ```
