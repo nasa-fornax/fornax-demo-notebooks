@@ -65,7 +65,7 @@ def JWST_get_spec_helper(sample_table, radius_arcsec, download_dir, verbose=Fals
 
         # get all products for these datasets
         # products = m.get_product_list(datasets)  #this currently has timeout issues, but should work in future
-        batch_size = 250
+        batch_size = 200
         batches = [datasets[i:i + batch_size] for i in range(0, len(datasets), batch_size)]
  
         products = Table()
@@ -218,32 +218,36 @@ def JWST_group_spectra(df, verbose, quickplot):
         for filt in filters_unique:
             if verbose:
                 print("Processing {}: ".format(filt), end=" ")
-
+                
+            #select all rows with both filter filt and current obj label
             sel = np.where((tab["filter"] == filt) & (tab["label"] == obj))[0]
             tab_sel = tab.iloc[sel]
             if verbose:
                 print("Number of items: {}".format(len(sel)), end=" | ")
 
-            # get good ones
+            # identify spectra with non-zero total flux to use
             sum_flux = np.asarray(
                 [np.nansum(tab_sel.iloc[iii]["flux"]).value for iii in range(len(tab_sel))])
             idx_good = np.where(sum_flux > 0)[0]
             if verbose:
                 print("Number of good spectra: {}".format(len(idx_good)))
-
+                
+            #If no good spectra remain, skip this object/filter
             if len(idx_good) == 0:
                 continue
 
-            # Create wavelength grid
+            # Create wavelength grid which is the first spectrum's wavelength array
             wave_grid = tab_sel.iloc[idx_good[0]]["wave"]  # NEED TO BE MADE BETTER LATER
 
-            # Interpolate fluxes
+            # Interpolate fluxes onto the chosen wavelength grid
             fluxes_int = np.asarray(
                 [np.interp(wave_grid, tab_sel.iloc[idx]["wave"], tab_sel.iloc[idx]["flux"]) for idx in idx_good])
             fluxes_units = [tab_sel.iloc[idx]["flux"].unit for idx in idx_good]
 
             # Sometimes fluxes are all NaN. We'll leave these in and ignore the RuntimeWarning.
             warnings.filterwarnings("ignore", message='All-NaN slice encountered', category=RuntimeWarning)
+
+            #compute the median stacked spectrum
             fluxes_stack = np.nanmedian(fluxes_int, axis=0)
             if verbose:
                 print("Units of fluxes for each spectrum: {}".format(
