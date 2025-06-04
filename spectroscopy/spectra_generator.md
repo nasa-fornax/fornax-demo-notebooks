@@ -4,10 +4,10 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.17.1
+    jupytext_version: 1.17.2
 kernelspec:
   name: python3
-  display_name: notebook
+  display_name: Python 3 (ipykernel)
   language: python
 ---
 
@@ -108,8 +108,8 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-#!pip install -r requirements_spectra_generator.txt
-#!pip install --upgrade --pre astroquery  # >=0.4.8.dev9474 needed for mast_functions
+#%pip install -r requirements_spectra_generator.txt
+#%pip install --upgrade --pre astroquery  # >=0.4.8.dev9474 needed for mast_functions
 ```
 
 ```{code-cell} ipython3
@@ -130,10 +130,6 @@ from plot_functions import create_figures
 from sample_selection import clean_sample
 from sdss_functions import SDSS_get_spec
 from spitzer_functions import SpitzerIRS_get_spec
-```
-
-```{code-cell} ipython3
-starttime = time.time()
 ```
 
 ## 1. Define the sample
@@ -323,22 +319,6 @@ create_figures(df_spec=df_spec,
                show_nbr_figures=10,
                save_output=False,
                )
-```
-
-```{code-cell} ipython3
-print(f"total time is {time.time() - starttime}s")
-```
-
-```{code-cell} ipython3
-df_spec.data.index.get_level_values("mission").unique()
-```
-
-```{code-cell} ipython3
-df_jwst.data
-```
-
-```{code-cell} ipython3
-df_jwst.data
 ```
 
 ```{code-cell} ipython3
