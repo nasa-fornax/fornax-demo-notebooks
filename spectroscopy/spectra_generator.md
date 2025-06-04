@@ -160,20 +160,20 @@ labels.append("Tol_89")
 coords.append(SkyCoord(150.091, 2.2745833, unit=u.deg))
 labels.append("COSMOS1")
 
-coords.append(SkyCoord(150.1024475, 2.2815559, unit=u.deg))
-labels.append("COSMOS2")
+#coords.append(SkyCoord(150.1024475, 2.2815559, unit=u.deg))
+#labels.append("COSMOS2")
 
-coords.append(SkyCoord("{} {}".format("150.000", "+2.00"), unit=(u.deg, u.deg)))
-labels.append("COSMOS3")
+#coords.append(SkyCoord("{} {}".format("150.000", "+2.00"), unit=(u.deg, u.deg)))
+#labels.append("COSMOS3")
 
-coords.append(SkyCoord("{} {}".format("+53.15508", "-27.80178"), unit=(u.deg, u.deg)))
-labels.append("JADESGS-z7-01-QU")
+#coords.append(SkyCoord("{} {}".format("+53.15508", "-27.80178"), unit=(u.deg, u.deg)))
+#labels.append("JADESGS-z7-01-QU")
 
-coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg)))
-labels.append("TestJWST")
+#coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg)))
+#labels.append("TestJWST")
 
-coords.append(SkyCoord("{} {}".format("+150.33622", "+55.89878"), unit=(u.deg, u.deg)))
-labels.append("Twin Quasar")
+#coords.append(SkyCoord("{} {}".format("+150.33622", "+55.89878"), unit=(u.deg, u.deg)))
+#labels.append("Twin Quasar")
 
 sample_table = clean_sample(coords, labels, precision=2.0 * u.arcsecond, verbose=1)
 ```
@@ -268,7 +268,7 @@ df_jwst = JWST_get_spec(
     search_radius_arcsec=0.5,
     datadir="./data/",
     verbose=True,
-    delete_downloaded_data=True
+    delete_downloaded_data=False
 )
 df_spec.append(df_jwst)
 ```
@@ -304,10 +304,10 @@ for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is 
 Therefore, we will not include SDSS DR16 here (this is treated in the SDSS search above).
 
 ```{code-cell} ipython3
-%%time
-# Get DESI and BOSS spectra with SPARCL
-df_spec_DESIBOSS = DESIBOSS_get_spec(sample_table, search_radius_arcsec=5)
-df_spec.append(df_spec_DESIBOSS)
+#%%time
+## Get DESI and BOSS spectra with SPARCL
+#df_spec_DESIBOSS = DESIBOSS_get_spec(sample_table, search_radius_arcsec=5)
+#df_spec.append(df_spec_DESIBOSS)
 ```
 
 ## 3. Make plots of luminosity as a function of time
@@ -327,6 +327,18 @@ create_figures(df_spec=df_spec,
 
 ```{code-cell} ipython3
 print(f"total time is {time.time() - starttime}s")
+```
+
+```{code-cell} ipython3
+df_spec.data.index.get_level_values("mission").unique()
+```
+
+```{code-cell} ipython3
+df_jwst.data
+```
+
+```{code-cell} ipython3
+df_jwst.data
 ```
 
 ```{code-cell} ipython3
