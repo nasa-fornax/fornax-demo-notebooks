@@ -108,8 +108,8 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-#%pip install -r requirements_spectra_generator.txt
-#%pip install --upgrade --pre astroquery  # >=0.4.8.dev9474 needed for mast_functions
+# %pip install -r requirements_spectra_generator.txt
+# %pip install --upgrade --pre astroquery  # >=0.4.8.dev9474 needed for mast_functions
 ```
 
 ```{code-cell} ipython3
@@ -132,6 +132,10 @@ from sdss_functions import SDSS_get_spec
 from spitzer_functions import SpitzerIRS_get_spec
 ```
 
+```{code-cell} ipython3
+starttime = time.time()
+```
+
 ## 1. Define the sample
 
 Here we will define the sample of galaxies. For now, we just enter some "random" coordinates to
@@ -150,26 +154,26 @@ labels.append("NGC4670")
 coords.append(SkyCoord("{} {}".format("14 01 19.92", "−33 04 10.7"), unit=(u.hourangle, u.deg)))
 labels.append("Tol_89")
 
-#coords.append(SkyCoord(233.73856, 23.50321, unit=u.deg))
-#labels.append("Arp220")
+coords.append(SkyCoord(233.73856, 23.50321, unit=u.deg))
+labels.append("Arp220")
 
 coords.append(SkyCoord(150.091, 2.2745833, unit=u.deg))
 labels.append("COSMOS1")
 
-#coords.append(SkyCoord(150.1024475, 2.2815559, unit=u.deg))
-#labels.append("COSMOS2")
+coords.append(SkyCoord(150.1024475, 2.2815559, unit=u.deg))
+labels.append("COSMOS2")
 
-#coords.append(SkyCoord("{} {}".format("150.000", "+2.00"), unit=(u.deg, u.deg)))
-#labels.append("COSMOS3")
+coords.append(SkyCoord("{} {}".format("150.000", "+2.00"), unit=(u.deg, u.deg)))
+labels.append("COSMOS3")
 
-#coords.append(SkyCoord("{} {}".format("+53.15508", "-27.80178"), unit=(u.deg, u.deg)))
-#labels.append("JADESGS-z7-01-QU")
+coords.append(SkyCoord("{} {}".format("+53.15508", "-27.80178"), unit=(u.deg, u.deg)))
+labels.append("JADESGS-z7-01-QU")
 
-#coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg)))
-#labels.append("TestJWST")
+coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg)))
+labels.append("TestJWST")
 
-#coords.append(SkyCoord("{} {}".format("+150.33622", "+55.89878"), unit=(u.deg, u.deg)))
-#labels.append("Twin Quasar")
+coords.append(SkyCoord("{} {}".format("+150.33622", "+55.89878"), unit=(u.deg, u.deg)))
+labels.append("Twin Quasar")
 
 sample_table = clean_sample(coords, labels, precision=2.0 * u.arcsecond, verbose=1)
 ```
@@ -261,7 +265,7 @@ df_spec.append(df_spec_HST)
 # Get Spectra for JWST
 df_jwst = JWST_get_spec(
     sample_table,
-    search_radius_arcsec=0.5,
+    search_radius_arcsec=5,
     datadir="./data/",
     verbose=True,
     delete_downloaded_data=False
@@ -319,6 +323,10 @@ create_figures(df_spec=df_spec,
                show_nbr_figures=10,
                save_output=False,
                )
+```
+
+```{code-cell} ipython3
+print("total duration", time.time() - starttime)
 ```
 
 ```{code-cell} ipython3

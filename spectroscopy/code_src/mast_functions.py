@@ -1,6 +1,7 @@
 import os
 import shutil
 import warnings
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import astropy.constants as const
 import astropy.units as u
@@ -15,6 +16,31 @@ from specutils import Spectrum1D
 
 from data_structures_spec import MultiIndexDFObject
 
+def fetch_mast_products(batch):
+    """
+    Fetch JWST product metadata for a given batch of dataset identifiers.
+
+    Parameters
+    ----------
+    batch : sequence or `astropy.table.Table`
+        A collection of JWST dataset identifiers (e.g., an Astropy Table or list of dataset IDs)
+        for which to retrieve product metadata from the MAST JWST mission service.
+
+    Returns
+    -------
+    `astropy.table.Table`
+        An Astropy Table containing the product list for all datasets in the input batch.
+        If an exception occurs during the retrieval, an empty Table is returned.
+
+    """
+    m = MastMissions(mission='jwst')
+    print(f"Fetching products for batch of {len(batch)} products")
+    try:
+        return m.get_product_list(batch)
+    except Exception as e:
+        print(f"Error fetching products for batch: {e}")
+        return Table()
+        
 def JWST_get_spec_helper(sample_table, radius_arcsec, download_dir, verbose=False, delete_downloaded_data=True):
     """
     Use MastMissions to query, filter, and download JWST spectra for each target.
@@ -53,7 +79,7 @@ def JWST_get_spec_helper(sample_table, radius_arcsec, download_dir, verbose=Fals
         # cone search for JWST datasets
         datasets = m.query_region(
             coord,
-            radius=(radius_arcsec * u.arcsec).to(u.deg).value, 
+            radius=radius_arcsec * u.arcsec, 
             exp_type='MIR_LRS-FIXEDSLIT,MIR_LRS-SLITLESS,MIR_MRS,NRC_GRISM,NRC_WFSS,NIS_SOSS,NIS_WFSS,NRS_FIXEDSLIT,NRS_MSASPEC',  # Spectroscopy data
             instrume='!FGS',  # Any instrument except FGS
             access='PUBLIC'            # public data
@@ -65,19 +91,24 @@ def JWST_get_spec_helper(sample_table, radius_arcsec, download_dir, verbose=Fals
 
         # get all products for these datasets
         # products = m.get_product_list(datasets)  #this currently has timeout issues, but should work in future
-        batch_size = 200
+        batch_size = 100
         batches = [datasets[i:i + batch_size] for i in range(0, len(datasets), batch_size)]
- 
-        products = Table()
-        for batch in batches:
-            # Get the products for each batch
-            print(f"Getting products for batch of {len(batch)} products")
-            batch_prods = m.get_product_list(batch)
- 
-            # Append the results to the products table
-            products = vstack([products, batch_prods])
 
+        #parallelize the call to get_product_list
+        with ThreadPoolExecutor(max_workers=None) as executor:
+            #each batch will be fetched concurrently
+            futures = [executor.submit(fetch_mast_products, batch) for batch in batches]
+            
+            #as each batch finishes, collate the results
+            batch_tables = []
+            for future in as_completed(futures):
+                result = future.result()
+                if len(result) > 0:
+                    batch_tables.append(result)
 
+        #concatenate the list of tables or return an empty table
+        products = vstack(batch_tables) if batch_tables else Table()
+        
         # filter down to calibrated 1D science spectra
         filtered = m.filter_products(
             products,
