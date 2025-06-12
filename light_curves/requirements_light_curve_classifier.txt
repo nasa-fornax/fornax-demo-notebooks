@@ -2,10 +2,10 @@
 # beginning of the notebook, make sure the lists are consistent and only
 # contain dependencies that are actually used in the notebook.
 #
-# We need to manully add the upper pin as the resolver is somehow doesn't
+# We need to manully add the upper pin both numpy and pandas as the resolver is somehow doesn't
 # pick it up properly from sktime. Remove once sktime removes the upper limit.
 numpy<2.3
-pandas[parquet]
+pandas[parquet]<2.3
 matplotlib
 astropy
 sktime
