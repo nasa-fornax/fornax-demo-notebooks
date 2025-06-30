@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.16.7
 kernelspec:
-  display_name: notebook
+  display_name: py-multiband_photometry
   language: python
-  name: python3
+  name: py-multiband_photometry
 ---
 
 # Automated Multiband Forced Photometry on Large Datasets

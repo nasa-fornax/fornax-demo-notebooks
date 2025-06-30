@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.16.0
 kernelspec:
-  display_name: science_demo
+  display_name: py-light_curve_classifier
   language: python
-  name: conda-env-science_demo-py
+  name: py-light_curve_classifier
 ---
 
 # Light Curve Classifier
