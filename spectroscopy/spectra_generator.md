@@ -262,12 +262,13 @@ df_spec.append(df_spec_HST)
 df_jwst = JWST_get_spec(
     sample_table,
     search_radius_arcsec=0.5,
-    datadir="./data/",
-    verbose=False,
-    delete_downloaded_data=True
+    verbose=False
 )
 df_spec.append(df_jwst)
 ```
+
+JWST spectra are now read directly from cloud storage, so no download
+directory is required.
 
 ### 2.3 ESA Archive
 

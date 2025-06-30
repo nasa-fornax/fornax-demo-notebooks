@@ -16,12 +16,13 @@ from specutils import Spectrum1D
 from data_structures_spec import MultiIndexDFObject
 
 
-def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
+def JWST_get_spec(sample_table, search_radius_arcsec, verbose,
                   delete_downloaded_data=True):
     """
     Retrieve JWST spectra for a list of sources and groups/stacks them.
     This main function runs two sub-functions:
-    - `JWST_get_spec_helper()` which searches, downloads, retrieves the spectra.
+    - `JWST_get_spec_helper()` which searches and retrieves the spectra from
+      the cloud.
     - `JWST_group_spectra()` which groups and stacks the spectra.
 
     Parameters
@@ -30,13 +31,11 @@ def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
         Table with the coordinates and journal reference labels of the sources.
     search_radius_arcsec : float
         Search radius in arcseconds.
-    datadir : str
-        Data directory where to store the data. Each function will create a
-        separate data directory (for example "[datadir]/JWST/" for JWST data).
     verbose : bool
         Verbosity level. Set to True for extra talking.
     delete_downloaded_data : bool, optional
-        If True, delete the downloaded data files. Default is True.
+        Parameter retained for API compatibility. Has no effect when
+        spectra are read from cloud storage.
 
     Returns
     -------
@@ -45,9 +44,9 @@ def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
     """
 
     # Get the spectra
-    print("Searching and Downloading Spectra... ")
+    print("Searching Spectra in the cloud... ")
     df_jwst_all = JWST_get_spec_helper(
-        sample_table, search_radius_arcsec, datadir, verbose, delete_downloaded_data)
+        sample_table, search_radius_arcsec, verbose)
     print("done")
 
     # Group
@@ -58,8 +57,7 @@ def JWST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
     return df_jwst_group
 
 
-def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
-                         delete_downloaded_data=True):
+def JWST_get_spec_helper(sample_table, search_radius_arcsec, verbose):
     """
     Retrieve JWST spectra for a list of sources.
 
@@ -69,13 +67,8 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
         Table with the coordinates and journal reference labels of the sources.
     search_radius_arcsec : float
         Search radius in arcseconds.
-    datadir : str
-        Data directory where to store the data. Each function will create a
-        separate data directory (for example "[datadir]/JWST/" for JWST data).
     verbose : bool
         Verbosity level. Set to True for extra talking.
-    delete_downloaded_data : bool, optional
-        If True, delete the downloaded data files.
 
     Returns
     -------
@@ -83,10 +76,7 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
         The spectra returned from the archive.
     """
 
-    # Create directory
-    if not os.path.exists(datadir):
-        os.mkdir(datadir)
-    this_data_dir = os.path.join(datadir, "JWST/")
+    # No local directory is needed when reading directly from the cloud.
 
     # Initialize multi-index object:
     df_spec = MultiIndexDFObject()
@@ -123,43 +113,33 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
             calib_level=[2, 3, 4],  # only calibrated data
             productSubGroupDescription=["X1D"],  # only 1D spectra
             dataRights=['PUBLIC'])  # only public data
-        print("Number of files to download: {}".format(len(data_products_list_filter)))
+        print("Number of files found: {}".format(len(data_products_list_filter)))
 
         if len(data_products_list_filter) == 0:
-            print("Nothing to download for source {}.".format(stab["label"]))
+            print("No spectra found for source {}.".format(stab["label"]))
             continue
 
-        # Download
-        download_results = Observations.download_products(
-            data_products_list_filter, download_dir=this_data_dir, verbose=False)
+        # Get cloud access URIs
+        cloud_results = Observations.get_cloud_uris(data_products_list_filter)
 
-        # Create table
-        # NOTE: `download_results` has NOT the same order as `data_products_list_filter`.
-        # We therefore have to "manually" get the product file names here and then use
-        # those to open the files.
+        # Create table with metadata and cloud URI
         keys = ["filters", "obs_collection", "instrument_name", "calib_level",
                 "t_obs_release", "proposal_id", "obsid", "objID", "distance"]
-        tab = Table(names=keys + ["productFilename"], dtype=[str,
-                    str, str, int, float, int, int, int, float]+[str])
+        uri_col = [c for c in cloud_results.colnames if 'uri' in c.lower()][0]
+        tab = Table(names=keys + ["productFilename", "clouduri"],
+                    dtype=[str, str, str, int, float, int, int, int, float, str, str])
         for jj in range(len(data_products_list_filter)):
-            # Match query 'obsid' to product 'parent_obsid' (not 'obsID') because products may
-            # belong to a different group than the observation.
             idx_cross = np.where(query_results["obsid"] ==
                                  data_products_list_filter["parent_obsid"][jj])[0]
             tmp = query_results[idx_cross][keys]
-            tab.add_row(list(tmp[0]) + [data_products_list_filter["productFilename"][jj]])
+            tab.add_row(list(tmp[0]) + [data_products_list_filter["productFilename"][jj],
+                                        cloud_results[uri_col][jj]])
 
         # Create multi-index object
         for jj in range(len(tab)):
 
-            # find correct path name:
-            # Note that `download_results` does NOT have same order as `tab`!!
-            file_idx = np.where([tab["productFilename"][jj] in download_results["Local Path"][iii]
-                                for iii in range(len(download_results))])[0]
-
-            # open spectrum
-            # Note that specutils returns the wrong units. Use Table.read() instead.
-            filepath = download_results["Local Path"][file_idx[0]]
+            # open spectrum directly from the cloud
+            filepath = tab["clouduri"][jj]
             spec1d = Table.read(filepath, hdu=1)
 
             dfsingle = pd.DataFrame(dict(
@@ -175,8 +155,7 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, datadir, verbose,
             )).set_index(["objectid", "label", "filter", "mission"])
             df_spec.append(dfsingle)
 
-        if delete_downloaded_data:
-            shutil.rmtree(this_data_dir)
+        # nothing to clean up when using cloud URIs
 
     return df_spec
 
