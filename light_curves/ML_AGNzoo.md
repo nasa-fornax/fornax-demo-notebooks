@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.16.4
 kernelspec:
-  display_name: notebook
+  display_name: py-ml_agnzoo
   language: python
-  name: python3
+  name: py-ml_agnzoo
 ---
 
 # AGN Zoo: Comparison of AGN selected with different metrics

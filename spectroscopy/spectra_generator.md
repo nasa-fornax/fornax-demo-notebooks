@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.17.1
 kernelspec:
-  display_name: notebook
+  display_name: py-spectra_generator
   language: python
-  name: python3
+  name: py-spectra_generator
 ---
 
 # Extract Multi-Wavelength Spectroscopy from Archival Data
