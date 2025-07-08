@@ -82,7 +82,7 @@ The ones with an asterisk (*) are the challenging ones.
 ## Runtime
 
 As of 2025 July, this notebook takes about 8 minutes to run to completion on Fornax using
-a server with 8GB RAM/4 CPU' and Environment: 'Default Astrophysics' (image).
+a server with 16GB RAM/4 CPU' and Environment: 'Default Astrophysics' (image).
 
 ## Authors:
 Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, David Shupe
