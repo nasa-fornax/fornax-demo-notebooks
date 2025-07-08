@@ -4,11 +4,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.4
+    jupytext_version: 1.17.1
 kernelspec:
-  display_name: notebook
+  display_name: py-light_curve_generator
   language: python
-  name: python3
+  name: py-light_curve_generator
 ---
 
 # Make Multi-Wavelength Light Curves Using Archival Data
@@ -43,7 +43,7 @@ By the end of this tutorial, you will be able to:
  * an archival optical + IR + neutrino light curve
 
 ## Runtime:
-- As of 2024 October, this notebook takes ~800s to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 16GB RAM/ 4CPU.
+- As of 2025 May, this notebook takes ~1000s (17 min.) to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 64GB RAM/ 16CPU.
 
 ## Authors:
 Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, David Shupe
@@ -74,7 +74,7 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-#!pip install -r requirements_light_curve_generator.txt
+# %pip install -r requirements_light_curve_generator.txt
 ```
 
 ```{code-cell} ipython3
@@ -99,9 +99,10 @@ from sample_selection import (clean_sample, get_green_sample, get_hon_sample, ge
     get_lyu_sample, get_macleod16_sample, get_macleod19_sample, get_ruan_sample, get_sdss_sample, get_sheng_sample, get_yang_sample)
 from tess_kepler_functions import tess_kepler_get_lightcurves
 from wise_functions import wise_get_lightcurves
+from rubin_functions import rubin_get_lightcurves
 # Note: ZTF data is temporarily located in a non-public AWS S3 bucket. It is automatically available
 # from the Fornax Science Console, but otherwise will require explicit user credentials.
-# from ztf_functions import ztf_get_lightcurves
+from ztf_functions import ztf_get_lightcurves
 ```
 
 ## 1. Define the sample
@@ -220,14 +221,16 @@ print('heasarc search took:', time.time() - heasarcstarttime, 's')
 ```
 
 ### 2.2 IRSA: ZTF
-The function to retrieve ZTF light curves accesses a parquet version of the ZTF catalog stored in the cloud using pyarrow.  This is the fastest way to access the ZTF catalog at scale.  The ZTF [API](https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html) is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself.
+The function to retrieve ZTF light curves accesses a [HATS](https://hats.readthedocs.io/en/stable/) parquet version of the ZTF catalog stored in the cloud using [LSDB](https://docs.lsdb.io/en/stable/). This is the simplest way to access this dataset at scale.  The ZTF [API](https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html) is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself because lsdb uses dask under the hood.
+
+Traceback CommClosedErrors are expected and are just a dask houskeeping issue, the function is still running to completion and returning light curves.
 
 ```{code-cell} ipython3
 ZTFstarttime = time.time()
 
 # get ZTF lightcurves
-# use the nworkers arg to control the amount of parallelization in the data loading step
-df_lc_ZTF = ztf_get_lightcurves(sample_table, nworkers=6)
+ztf_search_radius = 1.0 #  arcsec  (Graham et al., 2024 use 1" with good results)
+df_lc_ZTF = ztf_get_lightcurves(sample_table, radius = ztf_search_radius)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_ZTF)
@@ -256,7 +259,7 @@ print('WISE search took:', time.time() - WISEstarttime, 's')
 ```
 
 ### 2.4 MAST: Pan-STARRS
-The function to retrieve lightcurves from Pan-STARRS uses a version of both the object and light curve catalogs that are stored in the cloud and accessed using [lsdb](https://docs.lsdb.io/en/stable/).  This function is efficient at large scale (sample sizes > ~1000).
+The function to retrieve lightcurves from Pan-STARRS uses [LSDB](https://docs.lsdb.io/) to access versions of the object and light curve catalogs that are stored in the cloud.  This function is efficient at large scale (sample sizes > ~1000).
 
 Some warnings are expected.
 
@@ -329,7 +332,7 @@ df_lc.append(df_lc_gaia)
 print('gaia search took:', time.time() - gaiastarttime, 's')
 ```
 
-### 3.3 IceCube neutrinos
+### 3.2 IceCube neutrinos
 
 There are several [catalogs](https://icecube.wisc.edu/data-releases/2021/01/all-sky-point-source-icecube-data-years-2008-2018) (basically one for each year of IceCube data from 2008 - 2018). The following code creates a large catalog by combining
 all the yearly catalogs.
@@ -347,11 +350,36 @@ df_lc_icecube = icecube_get_lightcurves(sample_table, icecube_select_topN=3)
 df_lc.append(df_lc_icecube)
 
 print('icecube search took:', time.time() - icecubestarttime, 's')
-end_serial = time.time()
+```
+
+### 3.3 Rubin Data 
+Before running this section, you need to have both 1) a login to the Rubin Science Platform (RSP) and 2) an authenticating token setup in your Fornax home directory. 
+
+1) To see if you have Rubin data rights, and if you do, to get that login setup, follow these [instructions](https://rsp.lsst.io/guides/getting-started/get-an-account.html) 
+
+2) After logging in to RSP, follow these [instructions](code_src/rsp_token_instructions.txt) to get a token and store it in your home directory.
+
+
+This code will not work without the above information, so we have commented it out for now.  Uncomment when you are ready to proceed.
+
+Once that setup is complete, this code access Rubin data from the Rubin Science Platform which is hosting their catalogs in Google Cloud.  Specifically, the code uses `pyvo` and `adql` to access a TAP server.
+
+```{code-cell} ipython3
+
+#uncomment the next 5 lines if you have RSP login and authentication setup
+
+#rspstarttime = time.time()
+#rsp_search_radius = 0.001  # degrees
+
+#df_lc_rsp = rubin_get_lightcurves(sample_table, rsp_search_radius)
+#df_lc.append(df_lc_rsp) # add the resulting dataframe to all other archives
+
+#print('RSP search took:', time.time() - rspstarttime, 's')
 ```
 
 ```{code-cell} ipython3
 # benchmarking
+end_serial = time.time()
 print('total time for serial archive calls is ', end_serial - start_serial, 's')
 ```
 
@@ -366,17 +394,19 @@ For sample sizes >~500 and/or improved logging and monitoring options, consider 
 ```{code-cell} ipython3
 # number of workers to use in the parallel processing pool
 # this should equal the total number of archives called
-n_workers = 8
+n_workers = 6
 
 # keyword arguments for the archive calls
 heasarc_kwargs = dict(catalog_error_radii={"FERMIGTRIG": "1.0", "SAXGRBMGRB": "3.0"})
-ztf_kwargs = dict(nworkers=None)  # the internal parallelization is incompatible with Pool
+ztf_search_radius = 1.0 #  arcsec
 wise_kwargs = dict(radius=1.0, bandlist=['W1', 'W2'])
 panstarrs_search_radius = 1.0 # arcsec
 tess_kepler_kwargs = dict(radius=1.0)
 hcv_kwargs = dict(radius=1.0/3600.0)
 gaia_kwargs = dict(search_radius=1/3600, verbose=0)
 icecube_kwargs = dict(icecube_select_topN=3)
+rsp_search_radius = 0.001
+rsp_kwargs = dict(search_radius=rsp_search_radius)
 ```
 
 ```{code-cell} ipython3
@@ -389,18 +419,23 @@ with mp.Pool(processes=n_workers) as pool:
 
     # start the processes that call the archives
     pool.apply_async(heasarc_get_lightcurves, args=(sample_table,), kwds=heasarc_kwargs, callback=callback)
-    pool.apply_async(ztf_get_lightcurves, args=(sample_table,), kwds=ztf_kwargs, callback=callback)
     pool.apply_async(wise_get_lightcurves, args=(sample_table,), kwds=wise_kwargs, callback=callback)
     pool.apply_async(tess_kepler_get_lightcurves, args=(sample_table,), kwds=tess_kepler_kwargs, callback=callback)
     pool.apply_async(hcv_get_lightcurves, args=(sample_table,), kwds=hcv_kwargs, callback=callback)
     pool.apply_async(gaia_get_lightcurves, args=(sample_table,), kwds=gaia_kwargs, callback=callback)
     pool.apply_async(icecube_get_lightcurves, args=(sample_table,), kwds=icecube_kwargs, callback=callback)
+#    pool.apply_async(rubin_get_lightcurves, args=(sample_table,), kwds=rsp_kwargs, callback=callback)
 
     pool.close()  # signal that no more jobs will be submitted to the pool
     pool.join()  # wait for all jobs to complete, including the callback
 
-# run panstarrs query outside of multiprocessing since it is using dask distributed under the hood
+# run ZTF and panstarrs queries outside of multiprocessing since they
+# are using dask distributed under the hood,
 # which doesn't work with multiprocessing, and dask is already parallelized
+
+df_lc_ZTF = ztf_get_lightcurves(sample_table, radius = ztf_search_radius)
+parallel_df_lc.append(df_lc_ZTF)# add the resulting dataframe to all other archives
+
 df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius=panstarrs_search_radius)
 parallel_df_lc.append(df_lc_panstarrs) # add the panstarrs dataframe to all other archives
 

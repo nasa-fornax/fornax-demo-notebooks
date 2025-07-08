@@ -9,6 +9,7 @@ kernelspec:
   name: py-spectra_generator
   display_name: py-spectra_generator
   language: python
+
 ---
 
 # Extract Multi-Wavelength Spectroscopy from Archival Data
@@ -58,7 +59,7 @@ this to work, the `specutils` functions may have to be update or a wrapper has t
 | MAST    | HST*         | Slitless spectra would need reduction and extraction. There are some reduced slit spectra from COS in the Hubble Archive | `astroquery.mast` | Implemented using `astroquery.mast` |
 | MAST    | JWST*        | Reduced slit MSA and Slit spectra that can be queried | `astroquery.mast` | Implemented using `astroquery.mast` |
 | SDSS    | SDSS optical| Optical spectra that are reduced | [Sky Server](https://skyserver.sdss.org/dr18/SearchTools) or `astroquery.sdss` (preferred) | Implemented using `astroquery.sdss`. |
-| DESI    | DESI*        | Optical spectra | [DESI public data release](https://data.desi.lbl.gov/public/) | Implemented with `SPARCL` library |
+| DESI    | DESI*        | Optical spectra | [DESI public data release](https://data.desi.lbl.gov/public/) | Implemented with `SPARCL` library.  Currently commented out because `SPARCL` library is incompatible with numpy > 2 which we need for other modules|
 | BOSS    | BOSS*        | Optical spectra | [BOSS webpage (part of SDSS)](https://www.sdss4.org/surveys/boss/) | Implemented with `SPARCL` library together with DESI |
 | HEASARC | None        | Could link to Chandra observations to check AGN occurrence. | `astroquery.heasarc` | More thoughts on how to include scientifically.   |
 
@@ -298,11 +299,13 @@ This includes DESI spectra. Here, we use the `SPARCL` query. Note that this can 
 for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is included.
 Therefore, we will not include SDSS DR16 here (this is treated in the SDSS search above).
 
+The DESI search is currently commented out because `SPARCL` is not compatible with numpy > 2 which we require for the other modules to run.  
+
 ```{code-cell} ipython3
-%%time
-# Get DESI and BOSS spectra with SPARCL
-df_spec_DESIBOSS = DESIBOSS_get_spec(sample_table, search_radius_arcsec=5)
-df_spec.append(df_spec_DESIBOSS)
+#%%time
+## Get DESI and BOSS spectra with SPARCL
+#df_spec_DESIBOSS = DESIBOSS_get_spec(sample_table, search_radius_arcsec=5)
+#df_spec.append(df_spec_DESIBOSS)
 ```
 
 ## 3. Make plots of luminosity as a function of time
