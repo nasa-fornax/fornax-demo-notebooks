@@ -126,14 +126,12 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, verbose, max_spectr
         #This code takes a long time if you let it get all spectra, this
         # next part filters out some of the results if not all spectra are needed.
         # change max_spectra_per_source to None if you want all of them
-        if max_spectra_per_source is not None:
+        if max_spectra_per_source is not None and len(data_products_list_filter) > max_spectra_per_source:
             data_products_list_filter = data_products_list_filter[:max_spectra_per_source]
-            #let user know if more data exist but aren't used
-            if len(data_products_list_filter) > max_spectra_per_source:
-                print(f"Limiting to first {max_spectra_per_source} spectra for source {stab['label']}.")
-        
+            print(f"Limiting to first {max_spectra_per_source} spectra for source {stab['label']}.")
+            
         # Get cloud access URIs (returns a list of strings)
-        cloud_uris_map = Observations.get_cloud_uris(data_products_list_filter, return_uri_map=True)
+        cloud_uris_dict = Observations.get_cloud_uris(data_products_list_filter, return_uri_map=True)
 
         # Create table with metadata from data_priducts_list_filter and cloud URIs
         keys = ["filters", "obs_collection", "instrument_name", "calib_level",
@@ -144,7 +142,7 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, verbose, max_spectr
         for row in data_products_list_filter:
             filename = str(row["productFilename"])
             lookup_key = f"mast:JWST/product/{filename}"
-            uri = cloud_uris_map.get(lookup_key)
+            uri = cloud_uris_dict.get(lookup_key)
             if uri is None:
                 print(f"Skipping {filename}: not available in cloud.")
                 continue
