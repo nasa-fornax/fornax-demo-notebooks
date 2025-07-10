@@ -7,4 +7,7 @@ pandas
 sparclclient
 astropy
 specutils
-astroquery>=0.4.8
+astroquery>=0.4.11.dev0
+fsspec 
+boto3 
+s3fs
