@@ -7,25 +7,30 @@ from astropy.io import fits
 from astroquery.ipac.irsa import Irsa
 
 from data_structures_spec import MultiIndexDFObject
+import warnings
+from astropy.utils.exceptions import AstropyWarning
+
+warnings.simplefilter('ignore', category=AstropyWarning)
+
+
+def get_coord_from_objectid(object_id, table_mer="euclid_q1_mer_catalogue"):
+    adql_query = f"""
+    SELECT ra, dec FROM {table_mer}
+    WHERE object_id = {object_id}
+    """
+    try:
+        result = Irsa.query_tap(adql_query).to_table()
+        if len(result) == 0:
+            print(f"No match found for object_id {object_id}")
+            return None
+        ra, dec = result[0]["ra"], result[0]["dec"]
+        return SkyCoord(ra=ra * u.deg, dec=dec * u.deg)
+    except Exception as e:
+        print(f"Query failed for object_id {object_id}: {e}")
+        return None
 
 
 def Euclid_get_spec(sample_table, search_radius_arcsec):
-    """
-    Retrieve Euclid NISP 1D spectra from IRSA using the Q1 MER catalog and TAP access.
-
-    Parameters
-    ----------
-    sample_table : astropy.table.Table
-        Table with coordinates, labels, and object IDs of the sources.
-    search_radius_arcsec : float
-        Search radius in arcseconds.
-
-    Returns
-    -------
-    MultiIndexDFObject
-        The spectra returned from the archive.
-    """
-
     df_spec = MultiIndexDFObject()
     table_mer = "euclid_q1_mer_catalogue"
     table_1dspectra = "euclid.objectid_spectrafile_association_q1"
@@ -51,14 +56,8 @@ def Euclid_get_spec(sample_table, search_radius_arcsec):
             continue
 
         # Pick the closest match
-        if len(tab) > 1:
-            sep = [coord.separation(SkyCoord(ra=tt["ra"] * u.deg, dec=tt["dec"] * u.deg)).arcsec for tt in tab]
-            closest_idx = np.argmin(sep)
-            tab_final = tab[[closest_idx]]
-        else:
-            tab_final = tab.copy()
-
-        object_id = tab_final[0]["object_id"]
+        closest_idx = np.argmin([coord.separation(SkyCoord(ra=t["ra"] * u.deg, dec=t["dec"] * u.deg)).arcsec for t in tab])
+        object_id = tab[closest_idx]["object_id"]
         print(f"Found Euclid object_id: {object_id}")
 
         # Step 2: Query spectrum association TAP table
@@ -66,7 +65,6 @@ def Euclid_get_spec(sample_table, search_radius_arcsec):
         SELECT * FROM {table_1dspectra}
         WHERE objectid = {object_id}
         """
-
         try:
             result = Irsa.query_tap(adql_query).to_table()
             if len(result) == 0:
@@ -77,46 +75,48 @@ def Euclid_get_spec(sample_table, search_radius_arcsec):
             hdu_index = result[0]["hdu"]
             file_uri = f"https://irsa.ipac.caltech.edu/{uri}"
 
-            # Step 3: Open FITS and read spectrum from correct HDU
             with fits.open(file_uri, ignore_missing_simple=True) as hdul:
                 spec = QTable.read(hdul[hdu_index], format="fits")
-                spec_header = hdul[hdu_index].header
+                header = hdul[hdu_index].header
 
         except Exception as e:
             print(f"Failed to retrieve/read spectrum for object_id {object_id}: {e}")
             continue
 
-        # Step 4: Extract and clean spectrum
-        # Step 4: Extract and convert data
+        # Step 3: Extract and scale spectrum
         try:
-            wave = spec["WAVELENGTH"] * u.angstrom  # already angstrom, do not convert again
-            fscale = spec_header.get("FSCALE", 1.0)
-            flux = spec["SIGNAL"] * fscale * u.erg / u.second / (u.centimeter**2) / u.angstrom
-            error = np.sqrt(spec["VAR"]) * fscale * flux.unit
+            fscale = header.get("FSCALE", 1.0)
 
-            # Mask filtering (optional)
-            mask = np.array(spec["MASK"])  # extract as plain int array
+            wave = np.asarray(spec["WAVELENGTH"]) * u.angstrom
+            signal = np.asarray(spec["SIGNAL"])
+            var = np.asarray(spec["VAR"])
+            mask = np.asarray(spec["MASK"])
+
+            if not (len(wave) == len(signal) == len(var) == len(mask)):
+                raise ValueError("Spectrum array length mismatch")
+
+            # Good data mask: even values and <64
             valid = (mask % 2 == 0) & (mask < 64)
 
             wave = wave[valid]
-            flux = flux[valid]
-            error = error[valid]
+            flux = signal[valid] * fscale * u.erg / u.s / u.cm**2 / u.angstrom
+            error = np.sqrt(var[valid]) * fscale * flux.unit
 
         except Exception as e:
             print(f"Could not parse spectrum for object_id {object_id}: {e}")
             continue
 
-        # Step 5: Wrap into MultiIndexDFObject
-        dfsingle = pd.DataFrame(dict(
-            wave=[wave],
-            flux=[flux],
-            err=[err],
-            label=[stab["label"]],
-            objectid=[stab["objectid"]],
-            mission=["Euclid"],
-            instrument=["NISP"],
-            filter=["YJH"]
-        )).set_index(["objectid", "label", "filter", "mission"])
+        # Step 4: Package into MultiIndexDFObject
+        dfsingle = pd.DataFrame([{
+            "wave": wave,
+            "flux": flux,
+            "err": error,
+            "label": str(stab["label"]),
+            "objectid": int(stab["objectid"]),
+            "mission": "Euclid",
+            "instrument": "NISP",
+            "filter": "RGS"
+        }]).set_index(["objectid", "label", "filter", "mission"])
 
         df_spec.append(dfsingle)
 

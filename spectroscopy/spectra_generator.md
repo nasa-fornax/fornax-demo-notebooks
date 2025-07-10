@@ -130,6 +130,7 @@ from plot_functions import create_figures
 from sample_selection import clean_sample
 from sdss_functions import SDSS_get_spec
 from spitzer_functions import SpitzerIRS_get_spec
+from Euclid_functions import Euclid_get_spec
 ```
 
 ## 1. Define the sample
@@ -167,6 +168,9 @@ labels.append("JADESGS-z7-01-QU")
 
 coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg)))
 labels.append("TestJWST")
+
+coords.append(SkyCoord("{} {}".format("268.48058743", "64.78064676"), unit=(u.deg, u.deg)))
+labels.append("TestEuclid")
 
 coords.append(SkyCoord("{} {}".format("+150.33622", "+55.89878"), unit=(u.deg, u.deg)))
 labels.append("Twin Quasar")
@@ -233,6 +237,13 @@ df_spec.append(df_spec_DEIMOS)
 # Get Spitzer IRS Spectra
 df_spec_IRS = SpitzerIRS_get_spec(sample_table, search_radius_arcsec=1, COMBINESPEC=False)
 df_spec.append(df_spec_IRS)
+```
+
+```{code-cell} ipython3
+%%time
+# Get Euclid Spectra
+df_spec_Euclid = Euclid_get_spec(sample_table=sample_table, search_radius_arcsec=1)
+df_spec.append(df_spec_Euclid)
 ```
 
 ### 2.2 MAST Archive
@@ -317,7 +328,7 @@ labelled by sample number.
 ```{code-cell} ipython3
 ### Plotting ####
 create_figures(df_spec=df_spec,
-               bin_factor=5,
+               bin_factor=1,
                show_nbr_figures=10,
                save_output=False,
                )
