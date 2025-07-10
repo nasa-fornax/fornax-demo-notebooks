@@ -4,11 +4,12 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.17.1
+    jupytext_version: 1.17.2
 kernelspec:
+  name: py-spectra_generator
   display_name: py-spectra_generator
   language: python
-  name: py-spectra_generator
+
 ---
 
 # Extract Multi-Wavelength Spectroscopy from Archival Data
@@ -81,14 +82,15 @@ The ones with an asterisk (*) are the challenging ones.
 &bull; ...
 ## Runtime
 
-As of 2024 December, this notebook takes about 17 minutes to run to completion on Fornax using
-Server Type: 'Standard - 8GB RAM/4 CPU' and Environment: 'Default Astrophysics' (image).
+As of 2025 July, this notebook takes about 8 minutes to run to completion on Fornax using
+a server with 16GB RAM/4 CPU' and Environment: 'Default Astrophysics' (image).
 
 ## Authors:
 Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, David Shupe
 
 ## Acknowledgements:
-...
+
+AI: This notebook was created with assistance from OpenAI’s ChatGPT o4-mini-high model.
 
 +++
 
@@ -108,8 +110,7 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-# !pip install -r requirements_spectra_generator.txt
-# !pip install --upgrade --pre astroquery  # >=0.4.8.dev9474 needed for mast_functions
+# %pip install -r requirements_spectra_generator.txt
 ```
 
 ```{code-cell} ipython3
@@ -262,9 +263,8 @@ df_spec.append(df_spec_HST)
 df_jwst = JWST_get_spec(
     sample_table,
     search_radius_arcsec=0.5,
-    datadir="./data/",
     verbose=False,
-    delete_downloaded_data=True
+    max_spectra_per_source = 5
 )
 df_spec.append(df_jwst)
 ```
