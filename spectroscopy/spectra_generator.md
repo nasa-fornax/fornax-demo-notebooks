@@ -4,11 +4,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.17.1
+    jupytext_version: 1.16.7
 kernelspec:
-  display_name: py-spectra_generator
+  display_name: Python 3 (ipykernel)
   language: python
-  name: py-spectra_generator
+  name: python3
 ---
 
 # Extract Multi-Wavelength Spectroscopy from Archival Data
@@ -299,7 +299,7 @@ This includes DESI spectra. Here, we use the `SPARCL` query. Note that this can 
 for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is included.
 Therefore, we will not include SDSS DR16 here (this is treated in the SDSS search above).
 
-The DESI search is currently commented out because `SPARCL` is not compatible with numpy > 2 which we require for the other modules to run.  
+The DESI search is currently commented out because `SPARCL` is not compatible with numpy > 2 which we require for the other modules to run.
 
 ```{code-cell} ipython3
 #%%time
@@ -321,4 +321,8 @@ create_figures(df_spec=df_spec,
                show_nbr_figures=10,
                save_output=False,
                )
+```
+
+```{code-cell} ipython3
+
 ```
