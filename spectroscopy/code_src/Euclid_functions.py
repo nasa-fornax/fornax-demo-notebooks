@@ -14,9 +14,36 @@ warnings.simplefilter('ignore', category=AstropyWarning)
 
 
 def get_coord_from_objectid(object_id, table_mer="euclid_q1_mer_catalogue"):
+    """
+    Query IRSA's cloud-based TAP service to retrieve the sky coordinates of a Euclid object.
+    This function performs an ADQL query against the specified MER catalog hosted at IRSA
+    and returns the right ascension and declination of the object as a SkyCoord instance.
+
+    Parameters
+    ----------
+    object_id : int or str
+        The Euclid object ID to look up.
+
+    table_mer : str, optional
+        The name of the IRSA TAP-accessible MER catalog table to query.
+        Defaults to "euclid_q1_mer_catalogue".
+
+    Returns
+    -------
+    coord : astropy.coordinates.SkyCoord or None
+        The sky coordinates (RA, Dec) of the object, if found.
+        Returns None if the query fails or if no match is found.
+
+    Notes
+    -----
+    - This function queries a remote (cloud-based) TAP service and requires internet access.
+    - If no result is found or if the query fails, a warning is printed and None is returned.
+    """
+    
     adql_query = f"""
     SELECT ra, dec FROM {table_mer}
     WHERE object_id = {object_id}
+    
     """
     try:
         result = Irsa.query_tap(adql_query).to_table()
@@ -31,6 +58,41 @@ def get_coord_from_objectid(object_id, table_mer="euclid_q1_mer_catalogue"):
 
 
 def Euclid_get_spec(sample_table, search_radius_arcsec):
+    """
+    Retrieve Euclid 1D spectra for sources in a sample table using IRSA TAP cloud services.
+
+    This function performs a cone search on the Euclid MER catalog via IRSA (a cloud-based service),
+    retrieves associated 1D spectral file URIs from a TAP-accessible association table,
+    downloads the spectra FITS files, extracts flux and error, and packages them
+    into a MultiIndexDFObject.
+
+    Parameters
+    ----------
+    sample_table : list of dict
+        A list of source dictionaries, each containing:
+        - 'label' : str
+            A unique identifier for the source (used for indexing).
+        - 'coord' : astropy.coordinates.SkyCoord
+            The sky coordinates of the source.
+
+    search_radius_arcsec : float
+        Search radius (in arcseconds) for the initial cone search around each coordinate.
+
+    Returns
+    -------
+    df_spec : MultiIndexDFObject
+        A structured multi-indexed DataFrame containing:
+        - wave : Quantity array
+        - flux : Quantity array
+        - err : Quantity array
+        along with metadata fields ('label', 'objectid', 'mission', 'instrument', 'filter').
+
+    Notes
+    -----
+    - This function accesses IRSA services and downloads FITS files from the cloud.
+    - It assumes valid internet connectivity and may fail or be slow under network issues.
+    - The function suppresses Astropy warnings during parsing.
+    """
     df_spec = MultiIndexDFObject()
     table_mer = "euclid_q1_mer_catalogue"
     table_1dspectra = "euclid.objectid_spectrafile_association_q1"
