@@ -225,6 +225,8 @@ This archive includes spectra taken by
 
  &bull; Spitzer/IRS
 
+ &bull; Euclid/NISP
+
 ```{code-cell} ipython3
 %%time
 # Get Keck Spectra (COSMOS only)
