@@ -13,7 +13,7 @@ import pandas as pd
 from astropy.table import Table
 from astropy.table import vstack
 from astroquery.mast import Observations
-from specutils import Spectrum1D
+from specutils import Spectrum
 
 from data_structures_spec import MultiIndexDFObject
 
@@ -379,7 +379,7 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
 
             # open spectrum
             filepath = download_results["Local Path"][file_idx[0]]
-            spec1d = Spectrum1D.read(filepath)
+            spec1d = Spectrum.read(filepath)
 
             # Note: this should be in erg/s/cm2/A and any wavelength unit.
             dfsingle = pd.DataFrame(dict(

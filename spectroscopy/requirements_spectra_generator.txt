@@ -6,8 +6,10 @@ matplotlib
 pandas
 sparclclient
 astropy
-specutils
+# due to Spectrum1D rename to Spectrum
+specutils>=1.20
+# due to astroquery.mast fixes
 astroquery>=0.4.11.dev0
-fsspec 
-boto3 
+fsspec
+boto3
 s3fs
