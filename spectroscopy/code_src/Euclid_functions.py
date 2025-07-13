@@ -57,7 +57,7 @@ def get_coord_from_objectid(object_id, table_mer="euclid_q1_mer_catalogue"):
         return None
 
 
-def Euclid_get_spec(sample_table, search_radius_arcsec):
+def euclid_get_spec(sample_table, search_radius_arcsec):
     """
     Retrieve Euclid 1D spectra for sources in a sample table using IRSA TAP cloud services.
 
