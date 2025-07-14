@@ -4,11 +4,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.7
+    jupytext_version: 1.17.2
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  name: py-spectra_collector
+  display_name: py-spectra_collector
   language: python
-  name: python3
 ---
 
 # Extract Multi-Wavelength Spectroscopy from Archival Data
@@ -53,7 +53,7 @@ this to work, the `specutils` functions may have to be update or a wrapper has t
 | IRSA    | Spitzer IRS | ~17,000 merged low-resolution IRS spectra | [IRS Enhanced Product](https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-dd?catalog=irs_enhv211) | Implemented with `astroquery.ipac.irsa`. (Table gives URLs to spectrum IPAC tables.) |
 | IRSA    | IRTF*        | Large library of stellar spectra | | does `astroquery.ipac.irsa` work?? |
 | ESA    | Herschel*    | Some spectra | astroquery.esa.hsa | implemented with [astroquery](https://astroquery.readthedocs.io/en/latest/esa/hsa/hsa.html) |
-| IRSA    | Euclid      | Spectra hosted at IRSA in FY25 -> preparation for ingestion | | Will use mock spectra with correct format for testing |
+| IRSA    | Euclid      | Spectra hosted at IRSA in FY25 | | Using Q1 Spectra in the red grism (RGS) ingested in FY25, to be updated to DR1|
 | IRSA    | SPHEREx     | Spectra/cubes will be hosted at IRSA, first release in FY25 -> preparation for ingestion | | Will use mock spectra with correct format for testing |
 | MAST    | HST*         | Slitless spectra would need reduction and extraction. There are some reduced slit spectra from COS in the Hubble Archive | `astroquery.mast` | Implemented using `astroquery.mast` |
 | MAST    | JWST*        | Reduced slit MSA and Slit spectra that can be queried | `astroquery.mast` | Implemented using `astroquery.mast` |
@@ -333,8 +333,4 @@ create_figures(df_spec=df_spec,
                show_nbr_figures=10,
                save_output=False,
                )
-```
-
-```{code-cell} ipython3
-
 ```
