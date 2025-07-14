@@ -28,6 +28,7 @@ htmlcov/
 .tox/
 .pytest_cache/
 .cache
+.virtual_documents
 
 # Jupyter Notebook and sphinx renderings
 .ipynb_checkpoints
