@@ -4,11 +4,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.17.2
+    jupytext_version: 1.16.7
 kernelspec:
-  name: py-spectra_generator
-  display_name: py-spectra_generator
+  display_name: Python 3 (ipykernel)
   language: python
+  name: python3
 ---
 
 # Extract Multi-Wavelength Spectroscopy from Archival Data
@@ -130,7 +130,7 @@ from plot_functions import create_figures
 from sample_selection import clean_sample
 from sdss_functions import SDSS_get_spec
 from spitzer_functions import SpitzerIRS_get_spec
-from Euclid_functions import Euclid_get_spec
+from euclid_functions import euclid_get_spec
 ```
 
 ## 1. Define the sample
@@ -244,7 +244,7 @@ df_spec.append(df_spec_IRS)
 ```{code-cell} ipython3
 %%time
 # Get Euclid Spectra
-df_spec_Euclid = Euclid_get_spec(sample_table=sample_table, search_radius_arcsec=1)
+df_spec_Euclid = euclid_get_spec(sample_table=sample_table, search_radius_arcsec=1)
 df_spec.append(df_spec_Euclid)
 ```
 
@@ -333,8 +333,4 @@ create_figures(df_spec=df_spec,
                show_nbr_figures=10,
                save_output=False,
                )
-```
-
-```{code-cell} ipython3
-
 ```
