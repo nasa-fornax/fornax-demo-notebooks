@@ -88,7 +88,8 @@ def euclid_get_spec(sample_table, search_radius_arcsec):
                 radius=search_radius_arcsec * u.arcsec
             )
         except (DALQueryError, requests.exceptions.RequestException) as e:
-            raise RuntimeError(f"IRSA cone search failed for {stab['label']}: {e}")
+            print(f"IRSA cone search failed for {stab['label']}: {e}")
+            continue
 
         if len(tab) == 0:
             print(f"No match found in Euclid MER catalog for {stab['label']}.")
@@ -108,7 +109,8 @@ def euclid_get_spec(sample_table, search_radius_arcsec):
         try:
             result = Irsa.query_tap(adql_query).to_table()
         except (DALQueryError, requests.exceptions.RequestException) as e:
-            raise RuntimeError(f"IRSA spectrum query failed for object_id {object_id}: {e}")
+            print(f"IRSA spectrum query failed for object_id {object_id}: {e}")
+            continue
 
         if len(result) == 0:
             print(f"No 1D spectrum found for object_id {object_id}")
@@ -123,11 +125,11 @@ def euclid_get_spec(sample_table, search_radius_arcsec):
                 spec = QTable.read(hdul[hdu_index], format="fits")
                 header = hdul[hdu_index].header
         except (OSError, IndexError) as e:
-            raise RuntimeError(f"Failed to read spectrum FITS file for object_id {object_id}: {e}")
+            print(f"Failed to read spectrum FITS file for object_id {object_id}: {e}")
+            continue
 
         try:
             fscale = header.get("FSCALE", 1.0)
-
             wave = np.asarray(spec["WAVELENGTH"]) * u.angstrom
             signal = np.asarray(spec["SIGNAL"])
             var = np.asarray(spec["VAR"])
@@ -137,12 +139,12 @@ def euclid_get_spec(sample_table, search_radius_arcsec):
                 raise ValueError(f"Spectrum array length mismatch for object_id {object_id}")
 
             valid = (mask % 2 == 0) & (mask < 64)
-
             wave = wave[valid]
             flux = signal[valid] * fscale * u.erg / u.s / u.cm**2 / u.angstrom
             error = np.sqrt(var[valid]) * fscale * flux.unit
         except (KeyError, ValueError) as e:
-            raise RuntimeError(f"Could not parse spectrum for object_id {object_id}: {e}")
+            print(f"[ERROR] Could not parse spectrum for object_id {object_id}: {e}")
+            continue
 
         dfsingle = pd.DataFrame([{
             "wave": wave,
