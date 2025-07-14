@@ -8,6 +8,13 @@ from astroquery.ipac.irsa import Irsa
 from data_structures_spec import MultiIndexDFObject
 from pyvo.dal import DALQueryError
 import requests
+import warnings
+
+# We filter these specific warnings out as the end user can do nothing to about them, they have to be fixed at the data providers level. 
+# Remove the filters once they are not used in a newer data release
+warnings.filterwarnings("ignore", "'Number' did not parse as fits unit", u.UnitsWarning)
+warnings.filterwarnings("ignore", "'erg/s/cm2/Angstrom' contains multiple slashes", u.UnitsWarning)
+warnings.filterwarnings("ignore", "'erg2/s2/cm4/Angstrom2' contains multiple slashes", u.UnitsWarning)
 
 def get_coord_from_objectid(object_id, table_mer="euclid_q1_mer_catalogue"):
     """
