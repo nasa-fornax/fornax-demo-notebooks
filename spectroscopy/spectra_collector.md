@@ -6,10 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.17.2
 kernelspec:
-  name: py-spectra_generator
-  display_name: py-spectra_generator
+  name: py-spectra_collector
+  display_name: py-spectra_collector
   language: python
-
 ---
 
 # Extract Multi-Wavelength Spectroscopy from Archival Data
@@ -54,7 +53,7 @@ this to work, the `specutils` functions may have to be update or a wrapper has t
 | IRSA    | Spitzer IRS | ~17,000 merged low-resolution IRS spectra | [IRS Enhanced Product](https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-dd?catalog=irs_enhv211) | Implemented with `astroquery.ipac.irsa`. (Table gives URLs to spectrum IPAC tables.) |
 | IRSA    | IRTF*        | Large library of stellar spectra | | does `astroquery.ipac.irsa` work?? |
 | ESA    | Herschel*    | Some spectra | astroquery.esa.hsa | implemented with [astroquery](https://astroquery.readthedocs.io/en/latest/esa/hsa/hsa.html) |
-| IRSA    | Euclid      | Spectra hosted at IRSA in FY25 -> preparation for ingestion | | Will use mock spectra with correct format for testing |
+| IRSA    | Euclid      | Spectra hosted at IRSA in FY25 | | Using Q1 Spectra in the red grism (RGS) ingested in FY25, to be updated to DR1|
 | IRSA    | SPHEREx     | Spectra/cubes will be hosted at IRSA, first release in FY25 -> preparation for ingestion | | Will use mock spectra with correct format for testing |
 | MAST    | HST*         | Slitless spectra would need reduction and extraction. There are some reduced slit spectra from COS in the Hubble Archive | `astroquery.mast` | Implemented using `astroquery.mast` |
 | MAST    | JWST*        | Reduced slit MSA and Slit spectra that can be queried | `astroquery.mast` | Implemented using `astroquery.mast` |
@@ -82,7 +81,7 @@ The ones with an asterisk (*) are the challenging ones.
 &bull; ...
 ## Runtime
 
-As of 2025 July, this notebook takes about 8 minutes to run to completion on Fornax using
+As of 2025 July, this notebook takes about 18 minutes to run to completion on Fornax using
 a server with 16GB RAM/4 CPU' and Environment: 'Default Astrophysics' (image).
 
 ## Authors:
@@ -131,6 +130,7 @@ from plot_functions import create_figures
 from sample_selection import clean_sample
 from sdss_functions import SDSS_get_spec
 from spitzer_functions import SpitzerIRS_get_spec
+from euclid_functions import euclid_get_spec
 ```
 
 ## 1. Define the sample
@@ -168,6 +168,9 @@ labels.append("JADESGS-z7-01-QU")
 
 coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg)))
 labels.append("TestJWST")
+
+coords.append(SkyCoord("{} {}".format("268.48058743", "64.78064676"), unit=(u.deg, u.deg)))
+labels.append("TestEuclid")
 
 coords.append(SkyCoord("{} {}".format("+150.33622", "+55.89878"), unit=(u.deg, u.deg)))
 labels.append("Twin Quasar")
@@ -222,6 +225,8 @@ This archive includes spectra taken by
 
  &bull; Spitzer/IRS
 
+ &bull; Euclid/NISP
+
 ```{code-cell} ipython3
 %%time
 # Get Keck Spectra (COSMOS only)
@@ -234,6 +239,13 @@ df_spec.append(df_spec_DEIMOS)
 # Get Spitzer IRS Spectra
 df_spec_IRS = SpitzerIRS_get_spec(sample_table, search_radius_arcsec=1, COMBINESPEC=False)
 df_spec.append(df_spec_IRS)
+```
+
+```{code-cell} ipython3
+%%time
+# Get Euclid Spectra
+df_spec_Euclid = euclid_get_spec(sample_table=sample_table, search_radius_arcsec=1)
+df_spec.append(df_spec_Euclid)
 ```
 
 ### 2.2 MAST Archive
@@ -299,7 +311,7 @@ This includes DESI spectra. Here, we use the `SPARCL` query. Note that this can 
 for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is included.
 Therefore, we will not include SDSS DR16 here (this is treated in the SDSS search above).
 
-The DESI search is currently commented out because `SPARCL` is not compatible with numpy > 2 which we require for the other modules to run.  
+The DESI search is currently commented out because `SPARCL` is not compatible with numpy > 2 which we require for the other modules to run.
 
 ```{code-cell} ipython3
 #%%time
@@ -317,7 +329,7 @@ labelled by sample number.
 ```{code-cell} ipython3
 ### Plotting ####
 create_figures(df_spec=df_spec,
-               bin_factor=5,
+               bin_factor=1,
                show_nbr_figures=10,
                save_output=False,
                )
