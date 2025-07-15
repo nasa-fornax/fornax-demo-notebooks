@@ -5,12 +5,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from astropy.table import Table
 from scipy import stats
+from itertools import cycle
 
 
 # List bands that need special treatment
 ELECTRON_BANDS = ["K2", "Kepler", "TESS"]  # flux in electrons/sec
 ICECUBE_BAND = "IceCube"  # "fluxes" are just events (= limits on plot)
-ZTF_BANDS = ["zg", "zr", "zi"]  # will be plotted in "B" zoom-in for better visibility
+ZTF_BANDS = ["ztf_g", "ztf_r", "ztf_i"]  # will be plotted in "B" zoom-in for better visibility
 # List all other bands
 OTHER_BANDS = ["F814W",  # HCV
                "FERMIGTRIG", "SAXGRBMGRB",  # HEASARC
@@ -20,7 +21,7 @@ OTHER_BANDS = ["F814W",  # HCV
 
 # Set a color for each band.
 # Create a generator to yield colors (this will be useful if we need to plot bands not listed above).
-COLORS = (color for color in mpl.colormaps["tab20"].colors + mpl.colormaps["tab20b"].colors)
+COLORS = cycle(mpl.colormaps["tab20"].colors + mpl.colormaps["tab20b"].colors)
 BAND_COLORS = {band: next(COLORS)
                for band in [ICECUBE_BAND] + ZTF_BANDS + ELECTRON_BANDS + OTHER_BANDS}
 
@@ -67,12 +68,17 @@ def create_figures(df_lc, show_nbr_figures, save_output):
 
         # Iterate over bands and plot light curves.
         # IceCube needs to be done last so that we know the y-axis limits.
-        band_groups = _clean_lightcurves(singleobj_df).groupby('band')
+        cleaned = _clean_lightcurves(singleobj_df)
+        band_groups = cleaned.groupby(["objectid", "band"])
+
+        # Now filter to just the ZTF bands
+        ztf_df = cleaned[cleaned["band"].isin(ZTF_BANDS)]
+
         max_fluxes = band_groups.flux.max()  # max flux per band
-        for band, band_df in band_groups:
-            if band == ICECUBE_BAND:
+        for (objectid_val, band_name), band_df in band_groups:
+            if band_name == ICECUBE_BAND:
                 continue
-            _plot_lightcurve(band, band_df, axes, max_fluxes)
+            _plot_lightcurve(band_name, band_df, axes, max_fluxes)
         if ICECUBE_BAND in band_groups.groups:
             _plot_lightcurve(ICECUBE_BAND, band_groups.get_group(ICECUBE_BAND), axes)
 
@@ -144,7 +150,7 @@ def _plot_lightcurve(band, band_df, axes, max_fluxes=None):
     """
     # Plot the light curve. Some bands need special treatment.
     # Get the band color, or the next color in the generator if the band isn't listed above.
-    color = BAND_COLORS.get(band) or next(COLORS)
+    color = BAND_COLORS.get(band, next(COLORS))
 
     if band in ELECTRON_BANDS:
         # Fluxes are in electrons/sec. Scale them to the other available fluxes.
