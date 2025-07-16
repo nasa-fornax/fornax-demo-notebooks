@@ -122,11 +122,12 @@ except ImportError:
     print("tractor is missing")
     pass
 
-# Add ~/.local/bin to path so executables installed with pip are available (needed for nway)
-os.environ['PATH'] = f"{os.environ['HOME']}/.local/bin:{os.environ['PATH']}"
-
 
 %matplotlib inline
+```
+
+```{code-cell} ipython3
+starttime = time.time()
 ```
 
 ## 1. Retrieve Initial Catalog from IRSA
@@ -306,7 +307,7 @@ fornax_download(spitzer, access_url_column='sia_url', fname_filter='go2_sci',
                 data_subdirectory='IRAC', verbose=False)
 ```
 
-### Use IVOA image search and Fornax download to obtain Galex from the MAST archive
+### Obtain Galex from the MAST archive using astroquery.mast
 
 ```{code-cell} ipython3
 #the Galex mosaic of COSMOS is broken into 4 seperate images
@@ -339,7 +340,7 @@ df['galex_image'] = df[['COSMOS_01','COSMOS_02','COSMOS_03','COSMOS_04']].idxmin
 df.describe()
 ```
 
-```{code-cell} ipython3
+```{raw-cell}
 # Assign the endpoint for the MAST Galex Simple Image Access service.
 galex_sia_url = 'https://mast.stsci.edu/portal_vo/Mashup/VoQuery.asmx/SiaV1?MISSION=GALEX&'
 
@@ -356,14 +357,166 @@ access_url_column = query_result.fieldname_with_ucd('VOX:Image_AccessReference')
 
 # Download filtered products from AWS
 download_subdir = 'Galex'
-fornax_download(
-    filtered_products, 
-    access_url_column=access_url_column, 
-    data_subdirectory=download_subdir,
-    verbose=False)
+Galex_download(filtered_products, "Galex",
+               access_url_column=access_url_column)
+
+# Get the GALEX sky background fits files in addition to the mosaics
+skybkg_pattern = re.compile(r"COSMOS_0[1-4]-[fn]d-skybg")
+
+# Apply filtering using list comprehension
+mask = [bool(skybkg_pattern.search(name)) for name in galex_image_products['name']]
+skybg_products = galex_image_products[mask]
+
+# Download skybg products from AWS
+Galex_download(filtered_products, "Galex",
+               access_url_column=access_url_column)
+
+
+expected_files = [
+    'data/Galex/COSMOS_04-nd-int.fits.gz',
+    'data/Galex/COSMOS_04-nd-skybg.fits.gz',
+]
+
+for f in expected_files:
+    abs_path = os.path.abspath(f)
+    for _ in range(10):
+        if os.path.exists(abs_path):
+            break
+        print(f"Waiting for {abs_path} to appear...")
+        time.sleep(1)
+    else:
+        raise FileNotFoundError(f"{abs_path} still missing after wait.")
 ```
 
 ```{code-cell} ipython3
+from astroquery.mast import Observations
+from astropy.coordinates import SkyCoord
+import astropy.units as u
+from astropy.table import vstack
+import os
+import shutil
+import numpy as np
+
+def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000, 
+                     output_dir="data/Galex", max_products_per_source=None, verbose=True):
+    """
+    Download GALEX science and sky background images for a given coordinate using astroquery.
+
+    Parameters
+    ----------
+    coords : astropy.coordinates.SkyCoord
+        Sky coordinates of the target region.
+    search_radius_arcsec : float, optional
+        Search radius in arcseconds. Default is 60.
+    min_exptime : float, optional
+        Minimum exposure time in seconds. Default is 40000.
+    output_dir : str, optional
+        Directory to store downloaded files. Default is "data/Galex".
+    max_products_per_source : int or None, optional
+        Maximum number of products to download. If None, download all. Default is None.
+    verbose : bool, optional
+        Whether to print status messages. Default is True.
+
+    Returns
+    -------
+    downloaded_files : list of str
+        List of paths to the downloaded files.
+    """
+
+    if verbose:
+        print(f"Querying GALEX around RA={coords.ra.deg:.5f}, Dec={coords.dec.deg:.5f}...")
+
+    Observations.enable_cloud_dataset()
+    obs_table = Observations.query_criteria(
+        coordinates=coords,
+        radius=search_radius_arcsec * u.arcsec,
+        obs_collection="GALEX"
+    )
+
+    if len(obs_table) == 0:
+        print("No GALEX observations found for the target.")
+        return []
+
+    if verbose:
+        print(f"Found {len(obs_table)} observations. Getting product lists...")
+
+    product_tables = [Observations.get_product_list(obs) for obs in obs_table]
+    all_products = vstack(product_tables)
+
+    # Filter for SCIENCE + skybg files
+    is_sci = (all_products['productType'] == 'SCIENCE') & (all_products['dataproduct_type'] == 'image')
+    desc_col = all_products['description']
+    desc_filled = np.array([str(x) if x is not np.ma.masked else "" for x in desc_col])
+    is_bkg = np.char.find(desc_filled, 'skybg') >= 0
+    product_subset = all_products[is_sci | is_bkg]
+
+    # Filter by exposure time
+    obs_ids_good = set(obs_table[obs_table['t_exptime'] > min_exptime]['obs_id'])
+    is_good_obs = np.array([obs_id in obs_ids_good for obs_id in product_subset['obs_id']])
+
+    final_products = product_subset[is_good_obs]
+
+    # Filter out unwanted file types like -cat.fits.gz or -xd-mcat.fits.gz
+    unwanted_substrings = ["-cat.fits", "-xd-mcat.fits"]
+    final_products = final_products[
+        [not any(substr in name for substr in unwanted_substrings)
+         for name in final_products['productFilename']]
+    ]
+
+   
+    # Download and move files
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    manifest = Observations.download_products(final_products, mrp_only=False, download_dir=output_dir)
+
+    downloaded_files = []
+    for observation in manifest:
+        local_path = observation['Local Path']
+        #obs_id = observation['obs_id']
+
+        #if not local_path or not os.path.exists(local_path):
+        #    continue
+
+        #match = final_products[final_products['obs_id'] == obs_id]
+        if not local_path or not os.path.exists(local_path):
+            continue
+
+        fname = os.path.basename(local_path)
+        match = final_products[final_products['productFilename'] == fname]
+
+        if len(match) == 0:
+            continue
+
+        fname = match[0]['productFilename']
+        base_name = os.path.basename(fname)
+        parts = base_name.split('-')
+        if len(parts) >= 3:
+            field = parts[0][-2:]  # assumes ends in 01, 02, etc.
+            det = parts[1]         # fd or nd
+            new_name = f"COSMOS_{field}-{det}-int.fits.gz"
+        else:
+            new_name = base_name
+
+        final_path = os.path.join(output_dir, new_name)
+        shutil.move(local_path, final_path)
+        downloaded_files.append(final_path)
+
+    if verbose:
+        print("Download complete.")
+
+    return downloaded_files
+```
+
+```{raw-cell}
+print(filtered_products.colnames)
+```
+
+```{code-cell} ipython3
+galex_products = galex_get_images(coords)
+```
+
+```{raw-cell}
 # Get the GALEX sky background fits files in addition to the mosaics
 skybkg_pattern = re.compile(r"COSMOS_0[1-4]-[fn]d-skybg")
 
@@ -373,11 +526,14 @@ skybg_products = galex_image_products[mask]
 
 # Download skybg products from AWS
 download_subdir = 'Galex'
-fornax_download(
-    skybg_products, 
-    access_url_column=access_url_column, 
-    data_subdirectory=download_subdir,
-    verbose=False)
+#fornax_download(
+#    skybg_products, 
+#    access_url_column=access_url_column, 
+#    data_subdirectory=download_subdir,
+#    verbose=False)
+
+Galex_download(filtered_products, "Galex",
+               access_url_column=access_url_column)
 ```
 
 ```{code-cell} ipython3
@@ -561,6 +717,18 @@ def calc_instrflux(band, ra, dec, stype, ks_flux_aper2, img_pair, df):
         Flux uncertainty in microJansky, calculated from the tractor results.
         NaN if the forced photometery failed or if tractor didn't report a flux variance.
     """
+    # Check what the img_pair looks like
+    print("DEBUG: img_pair =", img_pair)
+
+    # If it's a path, show the resolved path and existence
+    for i, part in enumerate(img_pair):
+        if isinstance(part, str):
+            abs_path = os.path.abspath(part)
+            exists = os.path.exists(abs_path)
+            print(f"DEBUG: img_pair[{i}] is file: {part}")
+            print(f"       => Absolute path: {abs_path}")
+            print(f"       => Exists? {exists}")
+    
     # cutout a small region around the object of interest
     subimage, bkgsubimage, x1, y1, subimage_wcs = cutout.extract_pair(
         ra, dec, img_pair=img_pair, cutout_width=band.cutout_width, mosaic_pix_scale=band.mosaic_pix_scale
@@ -660,12 +828,12 @@ fname = f'output/results_{radius.value}.npz'
 
 if os.path.exists(fname):
     results = np.load(fname, allow_pickle=True)['results']
-
 else:
     from  multiprocessing import Pool
     t0 = time.time()
     with open('output/output.log', 'w') as fp: fp.write('')
     with Pool() as pool:
+        print("running inside with poo;")
         results = pool.map(calculate_flux, paramlist)
     dtime = time.time() - t0
     np.savez(fname, results=np.array(results, dtype=object))
@@ -853,6 +1021,7 @@ ccosmoscat = heasarc.query_region(
 
 #need to make the chandra catalog into a fits table
 #and needs to include area of the survey.
+ccosmoscat_rad = 1 #radius of chandra cosmos catalog
 nway_write_header('data/Chandra/COSMOS_chandra.fits', 'CHANDRA', float(ccosmoscat_rad**2) )
 
 
@@ -865,7 +1034,7 @@ rad_in_arcmin = radius.value  #units attached to this are confusing nway down th
 nway_write_header('data/multiband_phot.fits', 'OPT', float((2*rad_in_arcmin/60)**2) )
 ```
 
-```{code-cell} ipython3
+```{raw-cell}
 #fix the first line of the nway code which calls python
 path = "/home/jovyan/.local/bin/nway.py"
 
@@ -1018,8 +1187,11 @@ sm = plt.cm.ScalarMappable(cmap="flare", norm=norm)
 sm.set_array([])
 
 # Remove the legend and add a colorbar
-ax.get_legend().remove()
-ax.figure.colorbar(sm)
+legend = ax.get_legend()
+if legend is not None:
+    legend.remove()
+
+ax.figure.colorbar(sm, ax=ax, label='Chandra Hardness Ratio')
 
 #ax.set(xscale="log", yscale="log")
 ax.set_ylim([-0.5, 3.5])
@@ -1030,6 +1202,10 @@ ax.set(xlabel = 'NUV - [3.6]', ylabel = 'FUV - NUV')
 
 #fig.savefig("output/color_color.png")
 #mpld3.display(fig)
+```
+
+```{code-cell} ipython3
+print(chandra_detect['chandra_HR'].describe())
 ```
 
 We extend the works of Bouquin et al. 2015 and Moutard et al. 2020 by showing a GALEX - Spitzer color color diagram over plotted with Chandra detections.  Blue galaxies in these colors are generated by O and B stars and so must currently be forming stars. We find a tight blue cloud in this color space identifying those star forming galaxies.  Galaxies off of the blue cloud have had their star formation quenched, quite possibly by the existence of an AGN through removal of the gas reservoir required for star formation.  Chandra detected galaxies host AGN, and while those are more limited in number, can be shown here to be a hosted by all kinds of galaxies, including quiescent galaxies which would be in the upper right of this plot.  This likely implies that AGN are indeed involved in quenching star formation.  Additionally, we show the Chandra hardness ratio (HR) color coded according to the vertical color bar on the right side of the plot.  Those AGN with higher hardness ratios have their soft x-ray bands heavily obscured and appear to reside preferentially toward the quiescent galaxies.
