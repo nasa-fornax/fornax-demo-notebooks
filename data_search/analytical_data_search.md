@@ -14,7 +14,7 @@ kernelspec:
 # Beyond metadata: analytical data search in the cloud with JWST spectral cubes
 
 +++
-
+## Runtime
 For this notebook, we recommend using the [Fornax science platform](https://nasa-fornax.github.io/fornax-demo-notebooks/documentation/README.html) with Server Type = "Large - 64GB RAM/16 CPU" and Environment = "Default Astrophysics". As of June 2025, running this notebook once on that server will take about 10 minutes.
 
 We assume that you are running this notebook in Fornax, but it will also still work (in order of preference) in another AWS-based cloud science platform, a non-AWS cloud science platform, and even on your local computer — perhaps at slower speeds, depending on your computing resources and internet connection.
