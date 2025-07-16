@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.7
+    jupytext_version: 1.17.2
 kernelspec:
   display_name: py-multiband_photometry
   language: python
@@ -36,6 +36,10 @@ The code will run on 2 different science platforms and makes full use of multipl
 - merged, multiband, science ready pandas dataframe
 - IRAC color color plot for identifying interesting populations
 
+## Runtime:
+
+As of 2025 July, this notebook takes about 1 minute to run to completion on Fornax using a server with 16GB RAM/4 CPU' and Environment: 'Default Astrophysics' (image).
+
 ## Authors:
 Jessica Krick, David Shupe, Marziye JafariYazani, Brigitta Sipőcz, Vandana Desai, Steve Groom, Troy Raen
 
@@ -57,7 +61,7 @@ This cell will install the Python ones if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-# !pip install -r requirements_multiband_photometry.txt
+# %pip install -r requirements_multiband_photometry.txt
 ```
 
 ```{code-cell} ipython3
@@ -715,8 +719,8 @@ df.to_pickle(f'output/COSMOS_{radius.value}arcmin.pkl')
 #setup to plot
 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
 fluxmax = 200
-ymax = 100
-xmax = 100
+ymax = 80
+xmax = 80
 #ch1
 #first shrink the dataframe to only those rows where I have tractor photometry
 df_tractor = df[(df.splash_1_flux> 0) & (df.splash_1_flux < fluxmax)] #200
@@ -734,7 +738,6 @@ ax1.plot(lims, lims, 'k-', alpha=0.75, zorder=0)
 ax1.set(xlabel = r'COSMOS 2015 flux ($\mu$Jy)', ylabel = r'tractor flux ($\mu$Jy)', title = 'IRAC 3.6')
 ax1.set_ylim([0, ymax])
 ax1.set_xlim([0, xmax])
-
 
 #ch2
 #first shrink the dataframe to only those rows where I have tractor photometry
@@ -816,20 +819,28 @@ We are using `nway` as the tool to do the cross match (Salvato et al. 2017).
 ### 4a. Retrieve the HEASARC Catalog
 
 ```{code-cell} ipython3
-#first get an X-ray catalog from Heasarc
+# Instantiate Heasarc
 heasarc = Heasarc()
-table = heasarc.query_mission_list()
-mask = (table['Mission'] =="CHANDRA")
-chandratable = table[mask]
 
-#find out which tables exist on Heasarc
-#chandratable.pprint(max_lines = 200, max_width = 130)
+# List all available catalogs 
+catalog_list = heasarc.list_catalogs()
 
-#want ccosmoscat
-mission = 'ccosmoscat'
-#coords already defined above where I pull the original COSMOS catalog
-ccosmoscat_rad = 1 #radius of chandra cosmos catalog
-ccosmoscat = heasarc.query_region(coords, mission=mission, radius='1 degree', resultmax = 5000, fields = "ALL")
+# Print names of catalogs that include "ccosmoscat"
+# we already know it is there, but just in case we want to be sure, or if you
+# want to search for a different catalog and confirm its presence
+catalog_names = catalog_list['name']
+for name in catalog_names:
+    if "ccosmoscat" in name.lower():
+        print(name)
+        
+# Query the ccosmoscat catalog around our position
+ccosmoscat = heasarc.query_region(
+    position=coords,
+    catalog='ccosmoscat',
+    radius=1.0 * u.deg,
+    maxrec=5000,
+    columns='*'  # Use '*' for all columns instead of "ALL"
+)
 ```
 
 ### 4b. Run `nway` to do the Cross-Match
@@ -852,6 +863,26 @@ df['ID'] = range(1, len(df) + 1)
 #need this to be a fits table and needs to include area of the survey.
 rad_in_arcmin = radius.value  #units attached to this are confusing nway down the line
 nway_write_header('data/multiband_phot.fits', 'OPT', float((2*rad_in_arcmin/60)**2) )
+```
+
+```{code-cell} ipython3
+#fix the first line of the nway code which calls python
+path = "/home/jovyan/.local/bin/nway.py"
+
+# Read the file, replace first line, and write it back
+with open(path, 'r') as f:
+    lines = f.readlines()
+
+if not lines[0].startswith('#!'):
+    lines.insert(0, '#!/usr/bin/env python3\n')
+else:
+    lines[0] = '#!/usr/bin/env python3\n'
+
+with open(path, 'w') as f:
+    f.writelines(lines)
+
+# Make sure it's still executable
+!chmod +x /home/jovyan/.local/bin/nway.py
 ```
 
 ```{code-cell} ipython3
@@ -1020,6 +1051,10 @@ This work made use of:
 - Salvato et al. 2018, 2018MNRAS.473.4937S
 
 - Laigle et al. 2016, 2016ApJS..224...24L
+
+```{code-cell} ipython3
+print("total duration", time.time() - starttime)
+```
 
 ```{code-cell} ipython3
 
