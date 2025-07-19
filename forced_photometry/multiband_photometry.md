@@ -113,7 +113,7 @@ from plot_SED import plot_SED
 from nway_write_header import nway_write_header
 from photometry import Band
 from photometry import lookup_img_pair
-#from prepare_prf import prepare_prf
+from galex_functions import galex_get_images, galex_get_skybg
 
 # This code is to parse cloud access information; currently in `code_src`, eventually will be part of pyvo
 import fornax
@@ -170,7 +170,7 @@ cosmos_table = result.to_table()
 print("Number of objects: ", len(cosmos_table))
 ```
 
-### 1a. Filter Catalog
+### 1.1 Filter Catalog
 - if desired could filter the initial catalog to only include desired sources
 
 ```{code-cell} ipython3
@@ -184,7 +184,7 @@ print("Number of objects: ", len(cosmos_table))
 
 +++
 
-### Use the fornax cloud access API to obtain the IRAC data from the IRSA S3 bucket.
+### 2.1 Use the fornax cloud access API to obtain the IRAC data from the IRSA S3 bucket.
 
 Details here may change as the prototype code is being added to the appropriate libraries, as well as the data holding to the appropriate NGAP storage as opposed to IRSA resources.
 
@@ -303,7 +303,7 @@ fornax_download(spitzer, access_url_column='sia_url', fname_filter='go2_sci',
                 data_subdirectory='IRAC', verbose=False)
 ```
 
-### Obtain Galex from the MAST archive using astroquery.mast
+### 2.2 Obtain Galex from the MAST archive 
 
 ```{code-cell} ipython3
 #the Galex mosaic of COSMOS is broken into 4 seperate images
@@ -337,180 +337,12 @@ df.describe()
 ```
 
 ```{code-cell} ipython3
-def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000, 
-                     output_dir="data/Galex", max_products_per_source=None, verbose=True):
-    """
-    Download GALEX science and sky background images for a given coordinate using astroquery.
+#download both the images and the skybg files
 
-    Parameters
-    ----------
-    coords : astropy.coordinates.SkyCoord
-        Sky coordinates of the target region.
-    search_radius_arcsec : float, optional
-        Search radius in arcseconds. Default is 60.
-    min_exptime : float, optional
-        Minimum exposure time in seconds. Default is 40000.
-    output_dir : str, optional
-        Directory to store downloaded files. Default is "data/Galex".
-    max_products_per_source : int or None, optional
-        Maximum number of products to download. If None, download all. Default is None.
-    verbose : bool, optional
-        Whether to print status messages. Default is True.
+#We use astroquery for the images, but the galex skybg files are not available on
+#astroquery so we use pyvo for those.
 
-    Returns
-    -------
-    downloaded_files : list of str
-        List of paths to the downloaded files.
-    """
-
-    if verbose:
-        print(f"Querying GALEX around RA={coords.ra.deg:.5f}, Dec={coords.dec.deg:.5f}...")
-
-    Observations.enable_cloud_dataset()
-    obs_table = Observations.query_criteria(
-        coordinates=coords,
-        radius=search_radius_arcsec * u.arcsec,
-        obs_collection="GALEX"
-    )
-
-    if len(obs_table) == 0:
-        print("No GALEX observations found for the target.")
-        return []
-
-    if verbose:
-        print(f"Found {len(obs_table)} observations. Getting product lists...")
-
-    product_tables = [Observations.get_product_list(obs) for obs in obs_table]
-    all_products = vstack(product_tables)
-
-
-    # Filter for SCIENCE + skybg files
-    is_sci = (all_products['productType'] == 'SCIENCE') & (all_products['dataproduct_type'] == 'image')
-    desc_col = all_products['description']
-    desc_filled = np.array([str(x) if x is not np.ma.masked else "" for x in desc_col])
-    is_bkg = np.char.find(desc_filled, 'skybg') >= 0
-    product_subset = all_products[is_sci | is_bkg]
-
-        # Count and list how many match
-    print(f"Found {np.sum(is_bkg)} files with 'skybg' in the filename")
-
-    
-    # Filter by exposure time
-    obs_ids_good = set(obs_table[obs_table['t_exptime'] > min_exptime]['obs_id'])
-    is_good_obs = np.array([obs_id in obs_ids_good for obs_id in product_subset['obs_id']])
-
-    final_products = product_subset[is_good_obs]
-
-    # Filter out unwanted file types like -cat.fits.gz or -xd-mcat.fits.gz
-    unwanted_substrings = ["-cat.fits", "-xd-mcat.fits"]
-    final_products = final_products[
-        [not any(substr in name for substr in unwanted_substrings)
-         for name in final_products['productFilename']]
-    ]
-
-   
-    # Download files
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
-    manifest = Observations.download_products(final_products, 
-                                              mrp_only=False, 
-                                              download_dir=output_dir)
-    print(manifest.colnames)
-    downloaded_files = []
-    for observation in manifest:
-
-        #get the path to the downloaded file
-        local_path = observation['Local Path']
-        fname = os.path.basename(local_path)
-
-        #put these files in the output directory
-        #not the 'mastDownloads' directory structure
-        final_path = os.path.join(output_dir,fname)
-        shutil.move(local_path, final_path)
-        downloaded_files.append(final_path)
-
-    if verbose:
-        print("Download complete.")
-
-    return downloaded_files
-```
-
-```{code-cell} ipython3
 galex_images = galex_get_images(coords)
-```
-
-```{code-cell} ipython3
-def galex_get_skybg(coords: SkyCoord,
-                    output_dir: str = "data/Galex",
-                    verbose: bool = True) -> list[str]:
-    """
-    Download GALEX sky background images using the SIA (Simple Image Access) VO service.
-
-    Parameters
-    ----------
-    coords : SkyCoord
-        Sky position to search.
-    output_dir : str, optional
-        Destination folder for sky background FITS files. Default is "data/Galex".
-    verbose : bool, optional
-        Whether to print status messages.
-
-    Returns
-    -------
-    downloaded_files : list of str
-        List of paths to the downloaded sky background files.
-    """
-    galex_sia_url = 'https://mast.stsci.edu/portal_vo/Mashup/VoQuery.asmx/SiaV1?MISSION=GALEX&'
-
-    if verbose:
-        print(f"Querying GALEX SIA service for background images at {coords.to_string('hmsdms')}")
-
-    # Query the service (cone search with size=0 returns all overlaps at that exact point)
-    query_result = pyvo.dal.sia.search(galex_sia_url, pos=coords, size=0.0)
-    result_table: Table = query_result.to_table()
-
-    if verbose:
-        print(f"Found {len(result_table)} total products")
-        print(query_result.to_table().colnames)
-
-    # Look for filenames matching the COSMOS_*skybg.fits.gz pattern
-    skybkg_pattern = re.compile(r"COSMOS_0[1-4]-[fn]d-skybg.*\.fits\.gz")
-
-    # The 'name' field contains the full URL path or file basename
-    mask = [bool(skybkg_pattern.search(name)) for name in result_table['name']]
-    skybg_products = result_table[mask]
-
-    if verbose:
-        print(f"Found {len(skybg_products)} sky background files")
-
-    # Download each file via HTTP
-    downloaded_files = []
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
-
-    for row in skybg_products:
-        file_url = row["accessURL"]
-        fname = os.path.basename(file_url)
-        dest_path = os.path.join(output_dir, fname)
-
-        if os.path.exists(dest_path):
-            if verbose:
-                print(f"Skipping existing file: {fname}")
-            downloaded_files.append(dest_path)
-            continue
-
-        try:
-            if verbose:
-                print(f"Downloading {fname} ...")
-            urllib.request.urlretrieve(file_url, dest_path)
-            downloaded_files.append(dest_path)
-        except Exception as e:
-            print(f"Failed to download {file_url}: {e}")
-
-    return downloaded_files
-```
-
-```{code-cell} ipython3
 galex_skybg = galex_get_skybg(coords, verbose=True)
 ```
 
@@ -534,7 +366,7 @@ df.type.value_counts()
 
 +++
 
-### 3a. Setup
+### 3.1 Setup
 - initialize data frame columns to hold the results
 - collect the parameters for each band/channel
 - collect the input images
@@ -645,7 +477,7 @@ sci_bkg_pairs = [
 ]
 ```
 
-### 3b. Main Function to do the Forced Photometry
+### 3.2 Main Function to do the Forced Photometry
 
 ```{code-cell} ipython3
 def calc_instrflux(band, ra, dec, stype, ks_flux_aper2, img_pair, df):
@@ -732,7 +564,7 @@ def calc_instrflux(band, ra, dec, stype, ks_flux_aper2, img_pair, df):
     return (band.idx, microJy_flux, microJy_unc)
 ```
 
-### 3c. Calculate Forced Photometry with Straightforward but Slow Method
+### 3.3 Calculate Forced Photometry with Straightforward but Slow Method
 - no longer in use but keeping to demonstrate this capability\
 as well as the increase in speed when going to parallelization
 
@@ -761,7 +593,7 @@ t1 = time.time()
 #10,000 sources took 1.5 hours with this code on the IPAC SP
 ```
 
-### 3d. Calculate Forced Photometry - Parallelization
+### 3.4 Calculate Forced Photometry - Parallelization
 - Parallelization: we can either interate over the rows of the dataframe and run the four bands in parallel; or we could zip together the row index, band, ra, dec,
 
 ```{code-cell} ipython3
@@ -827,7 +659,7 @@ print('Parallel calculation: number of ch1 fluxes filled in =',
       np.sum(df.ch1flux > 0))
 ```
 
-### 3e. Cleanup
+### 3.5 Cleanup
 
 ```{code-cell} ipython3
 #had to call the galex flux columns ch5 and ch6
@@ -849,7 +681,7 @@ df.to_pickle(f'output/COSMOS_{radius.value}arcmin.pkl')
 #df = pd.read_pickle('output/COSMOS_48.0arcmin.pkl')
 ```
 
-### 3f. Plot to Confirm our Photometry Results
+### 3.6 Plot to Confirm our Photometry Results
 - compare to published COSMOS 2015 catalog
 
 ```{code-cell} ipython3
@@ -957,7 +789,7 @@ We are using `nway` as the tool to do the cross match (Salvato et al. 2017).
 
 +++
 
-### 4a. Retrieve the HEASARC Catalog
+### 4.1 Retrieve the HEASARC Catalog
 
 ```{code-cell} ipython3
 # Instantiate Heasarc
@@ -984,7 +816,7 @@ ccosmoscat = heasarc.query_region(
 )
 ```
 
-### 4b. Run `nway` to do the Cross-Match
+### 4.2 Run `nway` to do the Cross-Match
 
 ```{code-cell} ipython3
 #setup:
