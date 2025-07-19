@@ -25,6 +25,8 @@ By the end of this tutorial, you will be able to:
 ## Introduction:
 This code performs photometry in an automated fashion at all locations in an input catalog on 4 bands of IRAC data from IRSA and 2 bands of Galex data from MAST.  The resulting catalog is then cross-matched with a Chandra catalog from HEASARC to generate a multiband catalog to facilitate galaxy evolution studies.
 
+If you run this code as is, it will only look at a small region of the COSMOS survey, and as a result, the plots near the end will not be so very informative.  We do this for faster runtimes and to show proof of concept as to how to do this work.  Please change the radius in section 1. to be something larger if you want to work with more data, but expect longer runtimes associated with larger areas.
+
 The code will run on 2 different science platforms and makes full use of multiple processors to optimize run time on large datasets.
 
 ## Input:
@@ -38,7 +40,7 @@ The code will run on 2 different science platforms and makes full use of multipl
 
 ## Runtime:
 
-As of 2025 July, this notebook takes about 1 minute to run to completion on Fornax using a server with 16GB RAM/4 CPU' and Environment: 'Default Astrophysics' (image).
+As of 2025 July, this notebook takes about 2 minutes to run to completion on Fornax using a server with 16GB RAM/4 CPU' and Environment: 'Default Astrophysics' (image).
 
 ## Authors:
 Jessica Krick, David Shupe, Marziye JafariYazani, Brigitta Sipőcz, Vandana Desai, Steve Groom, Troy Raen
@@ -66,7 +68,6 @@ This cell will install the Python ones if needed:
 
 ```{code-cell} ipython3
 # standard lib imports
-
 import math
 import time
 import warnings
@@ -76,9 +77,10 @@ import os
 import re
 import shutil
 from typing import NamedTuple
+import urllib.request
+from pathlib import Path
 
 # Third party imports
-
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage.transform import rotate
@@ -93,6 +95,7 @@ from astropy.io import fits
 from astropy.table import Table
 from astropy.coordinates import SkyCoord
 import astropy.units as u
+from astropy.table import vstack
 
 from astroquery.ipac.irsa import Irsa
 from astroquery.heasarc import Heasarc
@@ -124,10 +127,6 @@ except ImportError:
 
 
 %matplotlib inline
-```
-
-```{code-cell} ipython3
-starttime = time.time()
 ```
 
 ## 1. Retrieve Initial Catalog from IRSA
@@ -216,9 +215,6 @@ spitzer['cloud_access'] = [(f'{{"aws": {{ "bucket_name": "irsa-fornax-testdata",
 
 ```{code-cell} ipython3
 # Requires https://github.com/nasa-fornax/fornax-cloud-access-API/pull/4
-import os
-import shutil
-import fornax
 
 def fornax_download(data_table, data_subdirectory, access_url_column='access_url',
                     fname_filter=None, verbose=False):
@@ -340,63 +336,7 @@ df['galex_image'] = df[['COSMOS_01','COSMOS_02','COSMOS_03','COSMOS_04']].idxmin
 df.describe()
 ```
 
-```{raw-cell}
-# Assign the endpoint for the MAST Galex Simple Image Access service.
-galex_sia_url = 'https://mast.stsci.edu/portal_vo/Mashup/VoQuery.asmx/SiaV1?MISSION=GALEX&'
-
-# Query the Galex SIA service using the COSMOS coordinates defined above.
-query_result = pyvo.dal.sia.search(galex_sia_url, pos=coords, size=0.0)
-galex_image_products = query_result.to_table()
-
-# Filter the products so we only download SCIENCE products with exposure time > 40000
-filtered_products = galex_image_products[(galex_image_products['timExposure'] > 40000.0)]
-filtered_products = filtered_products[(filtered_products['productType'] == "SCIENCE")]
-
-# The column containing the on-prem access to fall back on if cloud is unavailable
-access_url_column = query_result.fieldname_with_ucd('VOX:Image_AccessReference')
-
-# Download filtered products from AWS
-download_subdir = 'Galex'
-Galex_download(filtered_products, "Galex",
-               access_url_column=access_url_column)
-
-# Get the GALEX sky background fits files in addition to the mosaics
-skybkg_pattern = re.compile(r"COSMOS_0[1-4]-[fn]d-skybg")
-
-# Apply filtering using list comprehension
-mask = [bool(skybkg_pattern.search(name)) for name in galex_image_products['name']]
-skybg_products = galex_image_products[mask]
-
-# Download skybg products from AWS
-Galex_download(filtered_products, "Galex",
-               access_url_column=access_url_column)
-
-
-expected_files = [
-    'data/Galex/COSMOS_04-nd-int.fits.gz',
-    'data/Galex/COSMOS_04-nd-skybg.fits.gz',
-]
-
-for f in expected_files:
-    abs_path = os.path.abspath(f)
-    for _ in range(10):
-        if os.path.exists(abs_path):
-            break
-        print(f"Waiting for {abs_path} to appear...")
-        time.sleep(1)
-    else:
-        raise FileNotFoundError(f"{abs_path} still missing after wait.")
-```
-
 ```{code-cell} ipython3
-from astroquery.mast import Observations
-from astropy.coordinates import SkyCoord
-import astropy.units as u
-from astropy.table import vstack
-import os
-import shutil
-import numpy as np
-
 def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000, 
                      output_dir="data/Galex", max_products_per_source=None, verbose=True):
     """
@@ -443,6 +383,7 @@ def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000,
     product_tables = [Observations.get_product_list(obs) for obs in obs_table]
     all_products = vstack(product_tables)
 
+
     # Filter for SCIENCE + skybg files
     is_sci = (all_products['productType'] == 'SCIENCE') & (all_products['dataproduct_type'] == 'image')
     desc_col = all_products['description']
@@ -450,6 +391,10 @@ def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000,
     is_bkg = np.char.find(desc_filled, 'skybg') >= 0
     product_subset = all_products[is_sci | is_bkg]
 
+        # Count and list how many match
+    print(f"Found {np.sum(is_bkg)} files with 'skybg' in the filename")
+
+    
     # Filter by exposure time
     obs_ids_good = set(obs_table[obs_table['t_exptime'] > min_exptime]['obs_id'])
     is_good_obs = np.array([obs_id in obs_ids_good for obs_id in product_subset['obs_id']])
@@ -464,41 +409,24 @@ def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000,
     ]
 
    
-    # Download and move files
+    # Download files
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    manifest = Observations.download_products(final_products, mrp_only=False, download_dir=output_dir)
-
+    manifest = Observations.download_products(final_products, 
+                                              mrp_only=False, 
+                                              download_dir=output_dir)
+    print(manifest.colnames)
     downloaded_files = []
     for observation in manifest:
+
+        #get the path to the downloaded file
         local_path = observation['Local Path']
-        #obs_id = observation['obs_id']
-
-        #if not local_path or not os.path.exists(local_path):
-        #    continue
-
-        #match = final_products[final_products['obs_id'] == obs_id]
-        if not local_path or not os.path.exists(local_path):
-            continue
-
         fname = os.path.basename(local_path)
-        match = final_products[final_products['productFilename'] == fname]
 
-        if len(match) == 0:
-            continue
-
-        fname = match[0]['productFilename']
-        base_name = os.path.basename(fname)
-        parts = base_name.split('-')
-        if len(parts) >= 3:
-            field = parts[0][-2:]  # assumes ends in 01, 02, etc.
-            det = parts[1]         # fd or nd
-            new_name = f"COSMOS_{field}-{det}-int.fits.gz"
-        else:
-            new_name = base_name
-
-        final_path = os.path.join(output_dir, new_name)
+        #put these files in the output directory
+        #not the 'mastDownloads' directory structure
+        final_path = os.path.join(output_dir,fname)
         shutil.move(local_path, final_path)
         downloaded_files.append(final_path)
 
@@ -508,32 +436,82 @@ def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000,
     return downloaded_files
 ```
 
-```{raw-cell}
-print(filtered_products.colnames)
+```{code-cell} ipython3
+galex_images = galex_get_images(coords)
 ```
 
 ```{code-cell} ipython3
-galex_products = galex_get_images(coords)
+def galex_get_skybg(coords: SkyCoord,
+                    output_dir: str = "data/Galex",
+                    verbose: bool = True) -> list[str]:
+    """
+    Download GALEX sky background images using the SIA (Simple Image Access) VO service.
+
+    Parameters
+    ----------
+    coords : SkyCoord
+        Sky position to search.
+    output_dir : str, optional
+        Destination folder for sky background FITS files. Default is "data/Galex".
+    verbose : bool, optional
+        Whether to print status messages.
+
+    Returns
+    -------
+    downloaded_files : list of str
+        List of paths to the downloaded sky background files.
+    """
+    galex_sia_url = 'https://mast.stsci.edu/portal_vo/Mashup/VoQuery.asmx/SiaV1?MISSION=GALEX&'
+
+    if verbose:
+        print(f"Querying GALEX SIA service for background images at {coords.to_string('hmsdms')}")
+
+    # Query the service (cone search with size=0 returns all overlaps at that exact point)
+    query_result = pyvo.dal.sia.search(galex_sia_url, pos=coords, size=0.0)
+    result_table: Table = query_result.to_table()
+
+    if verbose:
+        print(f"Found {len(result_table)} total products")
+        print(query_result.to_table().colnames)
+
+    # Look for filenames matching the COSMOS_*skybg.fits.gz pattern
+    skybkg_pattern = re.compile(r"COSMOS_0[1-4]-[fn]d-skybg.*\.fits\.gz")
+
+    # The 'name' field contains the full URL path or file basename
+    mask = [bool(skybkg_pattern.search(name)) for name in result_table['name']]
+    skybg_products = result_table[mask]
+
+    if verbose:
+        print(f"Found {len(skybg_products)} sky background files")
+
+    # Download each file via HTTP
+    downloaded_files = []
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+
+    for row in skybg_products:
+        file_url = row["accessURL"]
+        fname = os.path.basename(file_url)
+        dest_path = os.path.join(output_dir, fname)
+
+        if os.path.exists(dest_path):
+            if verbose:
+                print(f"Skipping existing file: {fname}")
+            downloaded_files.append(dest_path)
+            continue
+
+        try:
+            if verbose:
+                print(f"Downloading {fname} ...")
+            urllib.request.urlretrieve(file_url, dest_path)
+            downloaded_files.append(dest_path)
+        except Exception as e:
+            print(f"Failed to download {file_url}: {e}")
+
+    return downloaded_files
 ```
 
-```{raw-cell}
-# Get the GALEX sky background fits files in addition to the mosaics
-skybkg_pattern = re.compile(r"COSMOS_0[1-4]-[fn]d-skybg")
-
-# Apply filtering using list comprehension
-mask = [bool(skybkg_pattern.search(name)) for name in galex_image_products['name']]
-skybg_products = galex_image_products[mask]
-
-# Download skybg products from AWS
-download_subdir = 'Galex'
-#fornax_download(
-#    skybg_products, 
-#    access_url_column=access_url_column, 
-#    data_subdirectory=download_subdir,
-#    verbose=False)
-
-Galex_download(filtered_products, "Galex",
-               access_url_column=access_url_column)
+```{code-cell} ipython3
+galex_skybg = galex_get_skybg(coords, verbose=True)
 ```
 
 ```{code-cell} ipython3
@@ -717,17 +695,12 @@ def calc_instrflux(band, ra, dec, stype, ks_flux_aper2, img_pair, df):
         Flux uncertainty in microJansky, calculated from the tractor results.
         NaN if the forced photometery failed or if tractor didn't report a flux variance.
     """
-    # Check what the img_pair looks like
-    print("DEBUG: img_pair =", img_pair)
 
     # If it's a path, show the resolved path and existence
     for i, part in enumerate(img_pair):
         if isinstance(part, str):
             abs_path = os.path.abspath(part)
             exists = os.path.exists(abs_path)
-            print(f"DEBUG: img_pair[{i}] is file: {part}")
-            print(f"       => Absolute path: {abs_path}")
-            print(f"       => Exists? {exists}")
     
     # cutout a small region around the object of interest
     subimage, bkgsubimage, x1, y1, subimage_wcs = cutout.extract_pair(
@@ -1227,11 +1200,3 @@ This work made use of:
 - Salvato et al. 2018, 2018MNRAS.473.4937S
 
 - Laigle et al. 2016, 2016ApJS..224...24L
-
-```{code-cell} ipython3
-print("total duration", time.time() - starttime)
-```
-
-```{code-cell} ipython3
-
-```
