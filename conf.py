@@ -40,11 +40,8 @@ exclude_patterns = ['_build', 'notes', '.tox', '.tmp', '.pytest_cache']
 # the data and output directories that are to be populated while running the notebooks.
 exclude_patterns += ['README.md', '*/data/*', '*/output/*']
 
-# We exclude the documentation index.md as its sole purpose is for their CI.
-exclude_patterns += ['documentation/index.md',]
-
 # Not yet included in the rendering:
-exclude_patterns += ['documentation/notebook_review_process.md', 'spectroscopy/*', '*/code_src/*']
+exclude_patterns += ['spectroscopy/*', '*/code_src/*']
 
 # Myst-NB configuration
 # Override kernelspec.name for rendering for all the notebooks.
