@@ -77,8 +77,6 @@ import os
 import re
 import shutil
 from typing import NamedTuple
-import urllib.request
-from pathlib import Path
 
 # Third party imports
 import numpy as np
@@ -638,7 +636,6 @@ else:
     t0 = time.time()
     with open('output/output.log', 'w') as fp: fp.write('')
     with Pool() as pool:
-        print("running inside with poo;")
         results = pool.map(calculate_flux, paramlist)
     dtime = time.time() - t0
     np.savez(fname, results=np.array(results, dtype=object))
@@ -837,26 +834,6 @@ df['ID'] = range(1, len(df) + 1)
 #need this to be a fits table and needs to include area of the survey.
 rad_in_arcmin = radius.value  #units attached to this are confusing nway down the line
 nway_write_header('data/multiband_phot.fits', 'OPT', float((2*rad_in_arcmin/60)**2) )
-```
-
-```{raw-cell}
-#fix the first line of the nway code which calls python
-path = "/home/jovyan/.local/bin/nway.py"
-
-# Read the file, replace first line, and write it back
-with open(path, 'r') as f:
-    lines = f.readlines()
-
-if not lines[0].startswith('#!'):
-    lines.insert(0, '#!/usr/bin/env python3\n')
-else:
-    lines[0] = '#!/usr/bin/env python3\n'
-
-with open(path, 'w') as f:
-    f.writelines(lines)
-
-# Make sure it's still executable
-!chmod +x /home/jovyan/.local/bin/nway.py
 ```
 
 ```{code-cell} ipython3

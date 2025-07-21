@@ -65,8 +65,9 @@ def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000,
     is_bkg = np.char.find(desc_filled, 'skybg') >= 0
     product_subset = all_products[is_sci | is_bkg]
 
-        # Count and list how many match
-    print(f"Found {np.sum(is_bkg)} files with 'skybg' in the filename")
+    # Count and list how many match
+    if verbose:
+        print(f"Found {np.sum(is_bkg)} files with 'skybg' in the filename")
 
     
     # Filter by exposure time
@@ -110,8 +111,8 @@ def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000,
     return downloaded_files
 
 def galex_get_skybg(coords: SkyCoord,
-                    output_dir: str = "data/Galex",
-                    verbose: bool = True) -> list[str]:
+                    output_dir = "data/Galex",
+                    verbose = False):
     """
     Download GALEX sky background images using the SIA (Simple Image Access) VO service.
 
