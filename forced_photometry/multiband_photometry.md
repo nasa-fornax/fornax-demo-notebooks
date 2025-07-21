@@ -303,7 +303,7 @@ fornax_download(spitzer, access_url_column='sia_url', fname_filter='go2_sci',
                 data_subdirectory='IRAC', verbose=False)
 ```
 
-### 2.2 Obtain Galex from the MAST archive 
+### 2.2 Obtain Galex from the MAST archive
 
 ```{code-cell} ipython3
 #the Galex mosaic of COSMOS is broken into 4 seperate images
@@ -1032,3 +1032,10 @@ This work made use of:
 - Salvato et al. 2018, 2018MNRAS.473.4937S
 
 - Laigle et al. 2016, 2016ApJS..224...24L
+
+
+Some content in this notebook was created with the assistance of ChatGPT by OpenAI.  All content has been reviewed and validated by the authors to ensure accuracy.
+
+```{code-cell} ipython3
+
+```
