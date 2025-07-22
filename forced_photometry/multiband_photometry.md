@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.7
+    jupytext_version: 1.17.2
 kernelspec:
   display_name: py-multiband_photometry
   language: python
@@ -25,6 +25,8 @@ By the end of this tutorial, you will be able to:
 ## Introduction:
 This code performs photometry in an automated fashion at all locations in an input catalog on 4 bands of IRAC data from IRSA and 2 bands of Galex data from MAST.  The resulting catalog is then cross-matched with a Chandra catalog from HEASARC to generate a multiband catalog to facilitate galaxy evolution studies.
 
+If you run this code as is, it will only look at a small region of the COSMOS survey, and as a result, the plots near the end will not be so very informative.  We do this for faster runtimes and to show proof of concept as to how to do this work.  Please change the radius in section 1. to be something larger if you want to work with more data, but expect longer runtimes associated with larger areas.
+
 The code will run on 2 different science platforms and makes full use of multiple processors to optimize run time on large datasets.
 
 ## Input:
@@ -35,6 +37,10 @@ The code will run on 2 different science platforms and makes full use of multipl
 ## Output:
 - merged, multiband, science ready pandas dataframe
 - IRAC color color plot for identifying interesting populations
+
+## Runtime:
+
+As of 2025 July, this notebook takes about 2 minutes to run to completion on Fornax using a server with 16GB RAM/4 CPU' and Environment: 'Default Astrophysics' (image).
 
 ## Authors:
 Jessica Krick, David Shupe, Marziye JafariYazani, Brigitta Sipőcz, Vandana Desai, Steve Groom, Troy Raen
@@ -57,56 +63,39 @@ This cell will install the Python ones if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-# !pip install -r requirements_multiband_photometry.txt
+# %pip install -r requirements_multiband_photometry.txt
 ```
 
 ```{code-cell} ipython3
 # standard lib imports
-
-import math
 import time
-import warnings
-import concurrent.futures
 import sys
 import os
-import re
 import shutil
-from typing import NamedTuple
 
 # Third party imports
-
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage.transform import rotate
 import pandas as pd
 import seaborn as sns
-import statsmodels
-import mpld3
-from tqdm.auto import tqdm
 
-from astropy.nddata import Cutout2D
 from astropy.io import fits
 from astropy.table import Table
 from astropy.coordinates import SkyCoord
 import astropy.units as u
-
-from astroquery.ipac.irsa import Irsa
 from astroquery.heasarc import Heasarc
-from astroquery.mast import Observations
 import pyvo
 
 # Local code imports
 sys.path.append('code_src/')
 
-from display_images import display_images
 import cutout
 from exceptions import TractorError
 import photometry
-from plot_SED import plot_SED
 from nway_write_header import nway_write_header
 from photometry import Band
 from photometry import lookup_img_pair
-#from prepare_prf import prepare_prf
+from galex_functions import galex_get_images
 
 # This code is to parse cloud access information; currently in `code_src`, eventually will be part of pyvo
 import fornax
@@ -117,9 +106,6 @@ try:
 except ImportError:
     print("tractor is missing")
     pass
-
-# Add ~/.local/bin to path so executables installed with pip are available (needed for nway)
-os.environ['PATH'] = f"{os.environ['HOME']}/.local/bin:{os.environ['PATH']}"
 
 
 %matplotlib inline
@@ -166,7 +152,7 @@ cosmos_table = result.to_table()
 print("Number of objects: ", len(cosmos_table))
 ```
 
-### 1a. Filter Catalog
+### 1.1 Filter Catalog
 - if desired could filter the initial catalog to only include desired sources
 
 ```{code-cell} ipython3
@@ -180,7 +166,7 @@ print("Number of objects: ", len(cosmos_table))
 
 +++
 
-### Use the fornax cloud access API to obtain the IRAC data from the IRSA S3 bucket.
+### 2.1 Use the fornax cloud access API to obtain the IRAC data from the IRSA S3 bucket.
 
 Details here may change as the prototype code is being added to the appropriate libraries, as well as the data holding to the appropriate NGAP storage as opposed to IRSA resources.
 
@@ -211,9 +197,6 @@ spitzer['cloud_access'] = [(f'{{"aws": {{ "bucket_name": "irsa-fornax-testdata",
 
 ```{code-cell} ipython3
 # Requires https://github.com/nasa-fornax/fornax-cloud-access-API/pull/4
-import os
-import shutil
-import fornax
 
 def fornax_download(data_table, data_subdirectory, access_url_column='access_url',
                     fname_filter=None, verbose=False):
@@ -302,7 +285,7 @@ fornax_download(spitzer, access_url_column='sia_url', fname_filter='go2_sci',
                 data_subdirectory='IRAC', verbose=False)
 ```
 
-### Use IVOA image search and Fornax download to obtain Galex from the MAST archive
+### 2.2 Obtain Galex from the MAST archive
 
 ```{code-cell} ipython3
 #the Galex mosaic of COSMOS is broken into 4 seperate images
@@ -336,44 +319,8 @@ df.describe()
 ```
 
 ```{code-cell} ipython3
-# Assign the endpoint for the MAST Galex Simple Image Access service.
-galex_sia_url = 'https://mast.stsci.edu/portal_vo/Mashup/VoQuery.asmx/SiaV1?MISSION=GALEX&'
-
-# Query the Galex SIA service using the COSMOS coordinates defined above.
-query_result = pyvo.dal.sia.search(galex_sia_url, pos=coords, size=0.0)
-galex_image_products = query_result.to_table()
-
-# Filter the products so we only download SCIENCE products with exposure time > 40000
-filtered_products = galex_image_products[(galex_image_products['timExposure'] > 40000.0)]
-filtered_products = filtered_products[(filtered_products['productType'] == "SCIENCE")]
-
-# The column containing the on-prem access to fall back on if cloud is unavailable
-access_url_column = query_result.fieldname_with_ucd('VOX:Image_AccessReference')
-
-# Download filtered products from AWS
-download_subdir = 'Galex'
-fornax_download(
-    filtered_products, 
-    access_url_column=access_url_column, 
-    data_subdirectory=download_subdir,
-    verbose=False)
-```
-
-```{code-cell} ipython3
-# Get the GALEX sky background fits files in addition to the mosaics
-skybkg_pattern = re.compile(r"COSMOS_0[1-4]-[fn]d-skybg")
-
-# Apply filtering using list comprehension
-mask = [bool(skybkg_pattern.search(name)) for name in galex_image_products['name']]
-skybg_products = galex_image_products[mask]
-
-# Download skybg products from AWS
-download_subdir = 'Galex'
-fornax_download(
-    skybg_products, 
-    access_url_column=access_url_column, 
-    data_subdirectory=download_subdir,
-    verbose=False)
+#download both the images and the skybg files using astroquery.mast
+galex_images = galex_get_images(coords, verbose=True)
 ```
 
 ```{code-cell} ipython3
@@ -396,7 +343,7 @@ df.type.value_counts()
 
 +++
 
-### 3a. Setup
+### 3.1 Setup
 - initialize data frame columns to hold the results
 - collect the parameters for each band/channel
 - collect the input images
@@ -507,7 +454,7 @@ sci_bkg_pairs = [
 ]
 ```
 
-### 3b. Main Function to do the Forced Photometry
+### 3.2 Main Function to do the Forced Photometry
 
 ```{code-cell} ipython3
 def calc_instrflux(band, ra, dec, stype, ks_flux_aper2, img_pair, df):
@@ -557,6 +504,13 @@ def calc_instrflux(band, ra, dec, stype, ks_flux_aper2, img_pair, df):
         Flux uncertainty in microJansky, calculated from the tractor results.
         NaN if the forced photometery failed or if tractor didn't report a flux variance.
     """
+
+    # If it's a path, show the resolved path and existence
+    #for i, part in enumerate(img_pair):
+    #    if isinstance(part, str):
+    #        abs_path = os.path.abspath(part)
+    #        exists = os.path.exists(abs_path)
+    
     # cutout a small region around the object of interest
     subimage, bkgsubimage, x1, y1, subimage_wcs = cutout.extract_pair(
         ra, dec, img_pair=img_pair, cutout_width=band.cutout_width, mosaic_pix_scale=band.mosaic_pix_scale
@@ -587,7 +541,7 @@ def calc_instrflux(band, ra, dec, stype, ks_flux_aper2, img_pair, df):
     return (band.idx, microJy_flux, microJy_unc)
 ```
 
-### 3c. Calculate Forced Photometry with Straightforward but Slow Method
+### 3.3 Calculate Forced Photometry with Straightforward but Slow Method
 - no longer in use but keeping to demonstrate this capability\
 as well as the increase in speed when going to parallelization
 
@@ -616,7 +570,7 @@ t1 = time.time()
 #10,000 sources took 1.5 hours with this code on the IPAC SP
 ```
 
-### 3d. Calculate Forced Photometry - Parallelization
+### 3.4 Calculate Forced Photometry - Parallelization
 - Parallelization: we can either interate over the rows of the dataframe and run the four bands in parallel; or we could zip together the row index, band, ra, dec,
 
 ```{code-cell} ipython3
@@ -656,7 +610,6 @@ fname = f'output/results_{radius.value}.npz'
 
 if os.path.exists(fname):
     results = np.load(fname, allow_pickle=True)['results']
-
 else:
     from  multiprocessing import Pool
     t0 = time.time()
@@ -682,7 +635,7 @@ print('Parallel calculation: number of ch1 fluxes filled in =',
       np.sum(df.ch1flux > 0))
 ```
 
-### 3e. Cleanup
+### 3.5 Cleanup
 
 ```{code-cell} ipython3
 #had to call the galex flux columns ch5 and ch6
@@ -704,7 +657,7 @@ df.to_pickle(f'output/COSMOS_{radius.value}arcmin.pkl')
 #df = pd.read_pickle('output/COSMOS_48.0arcmin.pkl')
 ```
 
-### 3f. Plot to Confirm our Photometry Results
+### 3.6 Plot to Confirm our Photometry Results
 - compare to published COSMOS 2015 catalog
 
 ```{code-cell} ipython3
@@ -715,8 +668,8 @@ df.to_pickle(f'output/COSMOS_{radius.value}arcmin.pkl')
 #setup to plot
 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
 fluxmax = 200
-ymax = 100
-xmax = 100
+ymax = 80
+xmax = 80
 #ch1
 #first shrink the dataframe to only those rows where I have tractor photometry
 df_tractor = df[(df.splash_1_flux> 0) & (df.splash_1_flux < fluxmax)] #200
@@ -734,7 +687,6 @@ ax1.plot(lims, lims, 'k-', alpha=0.75, zorder=0)
 ax1.set(xlabel = r'COSMOS 2015 flux ($\mu$Jy)', ylabel = r'tractor flux ($\mu$Jy)', title = 'IRAC 3.6')
 ax1.set_ylim([0, ymax])
 ax1.set_xlim([0, xmax])
-
 
 #ch2
 #first shrink the dataframe to only those rows where I have tractor photometry
@@ -813,26 +765,34 @@ We are using `nway` as the tool to do the cross match (Salvato et al. 2017).
 
 +++
 
-### 4a. Retrieve the HEASARC Catalog
+### 4.1 Retrieve the HEASARC Catalog
 
 ```{code-cell} ipython3
-#first get an X-ray catalog from Heasarc
+# Instantiate Heasarc
 heasarc = Heasarc()
-table = heasarc.query_mission_list()
-mask = (table['Mission'] =="CHANDRA")
-chandratable = table[mask]
 
-#find out which tables exist on Heasarc
-#chandratable.pprint(max_lines = 200, max_width = 130)
+# List all available catalogs 
+catalog_list = heasarc.list_catalogs()
 
-#want ccosmoscat
-mission = 'ccosmoscat'
-#coords already defined above where I pull the original COSMOS catalog
-ccosmoscat_rad = 1 #radius of chandra cosmos catalog
-ccosmoscat = heasarc.query_region(coords, mission=mission, radius='1 degree', resultmax = 5000, fields = "ALL")
+# Print names of catalogs that include "ccosmoscat"
+# we already know it is there, but just in case we want to be sure, or if you
+# want to search for a different catalog and confirm its presence
+catalog_names = catalog_list['name']
+for name in catalog_names:
+    if "ccosmoscat" in name.lower():
+        print(name)
+        
+# Query the ccosmoscat catalog around our position
+ccosmoscat = heasarc.query_region(
+    position=coords,
+    catalog='ccosmoscat',
+    radius=1.0 * u.deg,
+    maxrec=5000,
+    columns='*'  # Use '*' for all columns instead of "ALL"
+)
 ```
 
-### 4b. Run `nway` to do the Cross-Match
+### 4.2 Run `nway` to do the Cross-Match
 
 ```{code-cell} ipython3
 #setup:
@@ -842,6 +802,7 @@ ccosmoscat = heasarc.query_region(coords, mission=mission, radius='1 degree', re
 
 #need to make the chandra catalog into a fits table
 #and needs to include area of the survey.
+ccosmoscat_rad = 1 #radius of chandra cosmos catalog
 nway_write_header('data/Chandra/COSMOS_chandra.fits', 'CHANDRA', float(ccosmoscat_rad**2) )
 
 
@@ -987,8 +948,11 @@ sm = plt.cm.ScalarMappable(cmap="flare", norm=norm)
 sm.set_array([])
 
 # Remove the legend and add a colorbar
-ax.get_legend().remove()
-ax.figure.colorbar(sm)
+legend = ax.get_legend()
+if legend is not None:
+    legend.remove()
+
+ax.figure.colorbar(sm, ax=ax, label='Chandra Hardness Ratio')
 
 #ax.set(xscale="log", yscale="log")
 ax.set_ylim([-0.5, 3.5])
@@ -999,6 +963,10 @@ ax.set(xlabel = 'NUV - [3.6]', ylabel = 'FUV - NUV')
 
 #fig.savefig("output/color_color.png")
 #mpld3.display(fig)
+```
+
+```{code-cell} ipython3
+print(chandra_detect['chandra_HR'].describe())
 ```
 
 We extend the works of Bouquin et al. 2015 and Moutard et al. 2020 by showing a GALEX - Spitzer color color diagram over plotted with Chandra detections.  Blue galaxies in these colors are generated by O and B stars and so must currently be forming stars. We find a tight blue cloud in this color space identifying those star forming galaxies.  Galaxies off of the blue cloud have had their star formation quenched, quite possibly by the existence of an AGN through removal of the gas reservoir required for star formation.  Chandra detected galaxies host AGN, and while those are more limited in number, can be shown here to be a hosted by all kinds of galaxies, including quiescent galaxies which would be in the upper right of this plot.  This likely implies that AGN are indeed involved in quenching star formation.  Additionally, we show the Chandra hardness ratio (HR) color coded according to the vertical color bar on the right side of the plot.  Those AGN with higher hardness ratios have their soft x-ray bands heavily obscured and appear to reside preferentially toward the quiescent galaxies.
@@ -1021,6 +989,5 @@ This work made use of:
 
 - Laigle et al. 2016, 2016ApJS..224...24L
 
-```{code-cell} ipython3
 
-```
+Some content in this notebook was created with the assistance of ChatGPT by OpenAI.  All content has been reviewed and validated by the authors to ensure accuracy.
