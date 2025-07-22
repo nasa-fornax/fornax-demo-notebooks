@@ -91,7 +91,6 @@ def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000,
     manifest = Observations.download_products(final_products, 
                                               mrp_only=False, 
                                               download_dir=output_dir)
-    print(manifest.colnames)
     downloaded_files = []
     for observation in manifest:
 

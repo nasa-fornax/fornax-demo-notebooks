@@ -68,46 +68,30 @@ This cell will install the Python ones if needed:
 
 ```{code-cell} ipython3
 # standard lib imports
-import math
 import time
-import warnings
-import concurrent.futures
 import sys
 import os
-import re
 import shutil
-from typing import NamedTuple
 
 # Third party imports
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage.transform import rotate
 import pandas as pd
 import seaborn as sns
-import statsmodels
-import mpld3
-from tqdm.auto import tqdm
 
-from astropy.nddata import Cutout2D
 from astropy.io import fits
 from astropy.table import Table
 from astropy.coordinates import SkyCoord
 import astropy.units as u
-from astropy.table import vstack
-
-from astroquery.ipac.irsa import Irsa
 from astroquery.heasarc import Heasarc
-from astroquery.mast import Observations
 import pyvo
 
 # Local code imports
 sys.path.append('code_src/')
 
-from display_images import display_images
 import cutout
 from exceptions import TractorError
 import photometry
-from plot_SED import plot_SED
 from nway_write_header import nway_write_header
 from photometry import Band
 from photometry import lookup_img_pair
@@ -527,10 +511,10 @@ def calc_instrflux(band, ra, dec, stype, ks_flux_aper2, img_pair, df):
     """
 
     # If it's a path, show the resolved path and existence
-    for i, part in enumerate(img_pair):
-        if isinstance(part, str):
-            abs_path = os.path.abspath(part)
-            exists = os.path.exists(abs_path)
+    #for i, part in enumerate(img_pair):
+    #    if isinstance(part, str):
+    #        abs_path = os.path.abspath(part)
+    #        exists = os.path.exists(abs_path)
     
     # cutout a small region around the object of interest
     subimage, bkgsubimage, x1, y1, subimage_wcs = cutout.extract_pair(
@@ -1012,7 +996,3 @@ This work made use of:
 
 
 Some content in this notebook was created with the assistance of ChatGPT by OpenAI.  All content has been reviewed and validated by the authors to ensure accuracy.
-
-```{code-cell} ipython3
-
-```
