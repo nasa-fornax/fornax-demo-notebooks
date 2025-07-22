@@ -1,69 +1,74 @@
 import os
-from langchain.vectorstores import FAISS
-from langchain.chains import RetrievalQA
-from langchain.chains.combine_documents.stuff import StuffDocumentsChain
-from langchain.chains.llm import LLMChain
-from langchain.prompts import PromptTemplate
-
-from langchain_huggingface import HuggingFaceEmbeddings  # updated import
+from langchain_community.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings, HuggingFacePipeline
+from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import RunnableSequence
+from langchain_core.output_parsers import StrOutputParser
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains import create_retrieval_chain
 
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
-from langchain_community.llms import HuggingFacePipeline
+import torch
+torch.cuda.empty_cache()
 
-# Load embedding model
-embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-
-# Load FAISS vector store
-doc_store_path = "data/vector_store"
+# === 1. Load FAISS vector store ===
 print("🔄 Loading vector store...")
-vectorstore = FAISS.load_local(doc_store_path, embeddings, allow_dangerous_deserialization=True)
-
-# Set up retriever
+VECTOR_DIR = "data/vector_store"
+embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/multi-qa-MiniLM-L6-cos-v1")
+vectorstore = FAISS.load_local(VECTOR_DIR, embeddings, allow_dangerous_deserialization=True)
 retriever = vectorstore.as_retriever()
 
-# Load local FLAN-T5 model via transformers
-print("🧠 Loading local FLAN-T5 model...")
-tokenizer = AutoTokenizer.from_pretrained("google/flan-t5-base")
-model = AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-base")
+# === 2. Load FLAN-T5 model ===
+print("🧠 Loading FLAN-ul2 model...")
+
+tokenizer = AutoTokenizer.from_pretrained("google/flan-ul2")
+model = AutoModelForSeq2SeqLM.from_pretrained("google/flan-ul2")
 
 hf_pipeline = pipeline(
     "text2text-generation",
     model=model,
     tokenizer=tokenizer,
     max_new_tokens=256,
+    truncation=True  # Important to prevent token overflow
 )
 
 llm = HuggingFacePipeline(pipeline=hf_pipeline)
 
-# Define prompt template
-prompt_template = PromptTemplate.from_template(
-    "Answer the following question using the provided context.\n\nContext:\n{context}\n\nQuestion:\n{question}"
+# === 3. Build retrieval QA chain ===
+prompt = PromptTemplate.from_template(
+    "Answer the following question using the provided context.\n\nContext:\n{context}\n\nQuestion:\n{input}"
 )
 
-# Assemble the chain manually to support LangChain >=0.1.0
-combine_docs_chain = StuffDocumentsChain(
-    llm_chain=LLMChain(llm=llm, prompt=prompt_template),
-    document_variable_name="context",
+document_chain = create_stuff_documents_chain(
+    llm=llm,
+    prompt=prompt
 )
 
-qa_chain = RetrievalQA(
+qa_chain = create_retrieval_chain(
     retriever=retriever,
-    combine_documents_chain=combine_docs_chain,
-    return_source_documents=False,
+    combine_docs_chain=document_chain
 )
 
-# Function to ask a question
+# === 4. Ask Function ===
 def ask_irsa(question):
-    result = qa_chain.invoke({"query": question})
-    return result["result"]
+    result = qa_chain.invoke({"input": question})
+    answer = result["answer"]
+    sources = [doc.metadata.get("source") for doc in result["context"] if "source" in doc.metadata]
+    return answer, sources
 
-# CLI loop
+# === 5. CLI Loop ===
 if __name__ == "__main__":
     while True:
         try:
             q = input("❓ Ask IRSA something: ")
             if q.lower() in {"exit", "quit"}:
                 break
-            print("🤖", ask_irsa(q))
+            answer, sources = ask_irsa(q)
+            print("🤖", answer)
+            if sources:
+                print("\n📚 Sources:")
+                for src in set(sources):
+                    print("  -", src)
         except KeyboardInterrupt:
+            print("\n👋 Goodbye!")
             break
