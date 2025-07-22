@@ -15,16 +15,3 @@ caption: Tutorial Notebooks
 forced_photometry/README
 light_curves/README
 ```
-
-
-## User Documentation
-
-```{toctree}
----
-maxdepth: 2
-caption: User Documentation
----
-
-documentation/README
-
-```
