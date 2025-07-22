@@ -95,7 +95,7 @@ import photometry
 from nway_write_header import nway_write_header
 from photometry import Band
 from photometry import lookup_img_pair
-from galex_functions import galex_get_images, galex_get_skybg
+from galex_functions import galex_get_images
 
 # This code is to parse cloud access information; currently in `code_src`, eventually will be part of pyvo
 import fornax
@@ -319,13 +319,8 @@ df.describe()
 ```
 
 ```{code-cell} ipython3
-#download both the images and the skybg files
-
-#We use astroquery for the images, but the galex skybg files are not available on
-#astroquery so we use pyvo for those.
-
-galex_images = galex_get_images(coords)
-galex_skybg = galex_get_skybg(coords, verbose=True)
+#download both the images and the skybg files using astroquery.mast
+galex_images = galex_get_images(coords, verbose=True)
 ```
 
 ```{code-cell} ipython3

@@ -1,14 +1,8 @@
 import os
-import re
 import shutil
-import urllib.request
-from pathlib import Path
-
 import numpy as np
-from astropy.coordinates import SkyCoord
-from astropy.table import Table, vstack
+from astropy.table import vstack
 import astropy.units as u
-import pyvo
 from astroquery.mast import Observations
 
 def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000, 
@@ -54,27 +48,33 @@ def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000,
     if verbose:
         print(f"Found {len(obs_table)} observations. Getting product lists...")
 
-    product_tables = [Observations.get_product_list(obs) for obs in obs_table]
-    all_products = vstack(product_tables)
+    #product_tables = [Observations.get_product_list(obs) for obs in obs_table]
+    all_products = Observations.get_product_list(obs_table)
 
+    # Filter for SCIENCE images
+    sci_products = Observations.filter_products(
+        all_products,
+        dataproduct_type="image",
+        productType="SCIENCE"
+    )
 
-    # Filter for SCIENCE + skybg files
-    is_sci = (all_products['productType'] == 'SCIENCE') & (all_products['dataproduct_type'] == 'image')
-    desc_col = all_products['description']
-    desc_filled = np.array([str(x) if x is not np.ma.masked else "" for x in desc_col])
-    is_bkg = np.char.find(desc_filled, 'skybg') >= 0
-    product_subset = all_products[is_sci | is_bkg]
+    # Filter for sky background images based on description
+    skybg_products = Observations.filter_products(
+        all_products, 
+        dataproduct_type='image', 
+        description='Sky background image (J2000)')
 
-    # Count and list how many match
     if verbose:
-        print(f"Found {np.sum(is_bkg)} files with 'skybg' in the filename")
+        print(f"Found {len(skybg_products)} sky background image(s)")
 
+    #get science and sky bg products:
+    combined_products = vstack([sci_products, skybg_products])
     
-    # Filter by exposure time
+     # Filter by exposure time
     obs_ids_good = set(obs_table[obs_table['t_exptime'] > min_exptime]['obs_id'])
-    is_good_obs = np.array([obs_id in obs_ids_good for obs_id in product_subset['obs_id']])
+    is_good_obs = np.array([obs_id in obs_ids_good for obs_id in combined_products['obs_id']])
 
-    final_products = product_subset[is_good_obs]
+    final_products = combined_products[is_good_obs]
 
     # Filter out unwanted file types like -cat.fits.gz or -xd-mcat.fits.gz
     unwanted_substrings = ["-cat.fits", "-xd-mcat.fits"]
@@ -105,74 +105,8 @@ def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000,
         downloaded_files.append(final_path)
 
     if verbose:
-        print("Download complete.")
+        print("Downloaded ", len(downloaded_files), " total files")
 
     return downloaded_files
 
-def galex_get_skybg(coords: SkyCoord,
-                    output_dir = "data/Galex",
-                    verbose = False):
-    """
-    Download GALEX sky background images using the SIA (Simple Image Access) VO service.
 
-    Parameters
-    ----------
-    coords : SkyCoord
-        Sky position to search.
-    output_dir : str, optional
-        Destination folder for sky background FITS files. Default is "data/Galex".
-    verbose : bool, optional
-        Whether to print status messages.
-
-    Returns
-    -------
-    downloaded_files : list of str
-        List of paths to the downloaded sky background files.
-    """
-    galex_sia_url = 'https://mast.stsci.edu/portal_vo/Mashup/VoQuery.asmx/SiaV1?MISSION=GALEX&'
-
-    if verbose:
-        print(f"Querying GALEX SIA service for background images at {coords.to_string('hmsdms')}")
-
-    # Query the service (cone search with size=0 returns all overlaps at that exact point)
-    query_result = pyvo.dal.sia.search(galex_sia_url, pos=coords, size=0.0)
-    result_table: Table = query_result.to_table()
-
-    if verbose:
-        print(f"Found {len(result_table)} total products")
-        print(query_result.to_table().colnames)
-
-    # Look for filenames matching the COSMOS_*skybg.fits.gz pattern
-    skybkg_pattern = re.compile(r"COSMOS_0[1-4]-[fn]d-skybg.*\.fits\.gz")
-
-    # The 'name' field contains the full URL path or file basename
-    mask = [bool(skybkg_pattern.search(name)) for name in result_table['name']]
-    skybg_products = result_table[mask]
-
-    if verbose:
-        print(f"Found {len(skybg_products)} sky background files")
-
-    # Download each file via HTTP
-    downloaded_files = []
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
-
-    for row in skybg_products:
-        file_url = row["accessURL"]
-        fname = os.path.basename(file_url)
-        dest_path = os.path.join(output_dir, fname)
-
-        if os.path.exists(dest_path):
-            if verbose:
-                print(f"Skipping existing file: {fname}")
-            downloaded_files.append(dest_path)
-            continue
-
-        try:
-            if verbose:
-                print(f"Downloading {fname} ...")
-            urllib.request.urlretrieve(file_url, dest_path)
-            downloaded_files.append(dest_path)
-        except Exception as e:
-            print(f"Failed to download {file_url}: {e}")
-
-    return downloaded_files
