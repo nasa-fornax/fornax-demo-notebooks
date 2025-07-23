@@ -1,0 +1,4 @@
+astropy
+lsdb>=0.5
+dask
+universal_pathlib
