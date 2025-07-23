@@ -7,6 +7,14 @@ This folder contains a prototype agent that uses a Large Language Model (LLM) to
 - Point users to the right tools or documentation
 - Suggest science projects based on available data
 
-You can run the assistant via ( I will fix it)
+### How to Run
 
-More setup instructions coming soon.
+You can run the assistant via the following two terminal commands:
+
+Open 2 terminals, Terminal 1 – Start the API backend and Terminal 2 – Launch the Gradio interface:
+
+
+```bash
+uvicorn app:app --reload
+
+python gradio_ui.py
