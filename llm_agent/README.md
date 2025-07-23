@@ -7,8 +7,6 @@ This folder contains a prototype agent that uses a Large Language Model (LLM) to
 - Point users to the right tools or documentation
 - Suggest science projects based on available data
 
-You can run the assistant via:
-- `llm_agent_demo.ipynb` — interactive notebook
-- `main.py` — command-line script
+You can run the assistant via ( I will fix it)
 
 More setup instructions coming soon.
