@@ -5,7 +5,7 @@ This folder contains a prototype agent that uses a Large Language Model (LLM) to
 ### Goals:
 - Answer questions about IRSA missions and services
 - Point users to the right tools or documentation
-- Suggest science projects based on available data
+- Suggest science projects based on available data (https://github.com/xoubish/project_idea_agent) to be transferred and connected somehow
 
 ### How to Run
 
