@@ -1,0 +1,10 @@
+astropy>=7.0.1
+astroquery>=0.4.11.dev10199
+dask>=2025.4.1
+matplotlib>=3.10.3
+numpy>=2.3.0
+pandas>=2.3.0
+scipy>=1.15.3
+pyarrow>=20.0.0
+s3fs>=2025.3.2
+boto3>=1.37.1
