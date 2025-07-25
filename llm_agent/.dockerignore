@@ -1,0 +1,10 @@
+# Avoid copying unnecessary files into the image
+__pycache__/
+*.pyc
+*.pkl
+*.ipynb
+.env
+data/
+logs/
+.DS_Store
+
