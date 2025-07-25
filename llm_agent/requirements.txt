@@ -1,5 +1,6 @@
 langchain
 langchain-community
+langchain_huggingface
 sentence-transformers
 faiss-cpu
 chromadb
