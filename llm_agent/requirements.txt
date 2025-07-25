@@ -1,3 +1,4 @@
+# Core packages
 langchain
 langchain-community
 langchain_huggingface
@@ -7,5 +8,22 @@ chromadb
 tqdm
 python-dotenv
 pandas
+
+# Frontend
+gradio
+
+# Backend
+fastapi
+uvicorn
+
+# Model & inference
+transformers
+torch
+
+# Utilities
+beautifulsoup4
+requests
+
+# Optional / dev tools
 jupyter
 streamlit
