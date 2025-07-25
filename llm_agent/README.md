@@ -4,7 +4,7 @@ This repository contains a prototype agent that uses a Large Language Model (LLM
 
 ---
 
-### Goals
+## Goals
 - Answer questions about IRSA missions and services
 - Point users to relevant tools or documentation
 - Suggest science projects based on available data  
@@ -12,7 +12,7 @@ This repository contains a prototype agent that uses a Large Language Model (LLM
 
 ---
 
-### How It Works
+## How It Works
 
 The ideal training approach would use curated IRSA documentation files. However, for this MVP, we crawl the IRSA website starting from key entry points. The crawler recursively follows links (up to 5 levels deep) and collects all `.html` pages (~4526 in total).  
 
@@ -25,7 +25,7 @@ You can modify the embedding model by changing the `model_name` in `retriever/in
 
 ---
 
-### System Flow
+## System Flow
 
 ```text
 [User] → (Gradio UI) → [chat_interface()] → POST → (FastAPI /chat endpoint)
@@ -36,18 +36,25 @@ You can modify the embedding model by changing the `model_name` in `retriever/in
                           ↑
              Displayed in Gradio chat bubble
 
+```
 
+## How to Run
 
-### How to Run
-
-#### Step 1: Ingest the IRSA documentation
+### Step 1: Ingest the IRSA documentation
 
 python retriever/ingest.py
 
-#### Step 2: Start the backend API (Terminal 1)
+### Step 2: Start the backend API (Terminal 1)
 
 uvicorn app:app --reload
 
-#### Step 3: Launch the Gradio UI (Terminal 2)
+### Step 3: Launch the Gradio UI (Terminal 2)
 
 python gradio_ui.py
+
+## Docker option:
+### Build the Docker image
+docker build -t irsa-llm-agent .
+
+### Run the container
+docker run -p 8000:8000 -p 7860:7860 irsa-llm-agent
