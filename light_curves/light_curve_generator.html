@@ -407,17 +407,17 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#find-light-curves-for-these-targets-in-nasa-catalogs">2. Find light curves for these targets in NASA catalogs</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#heasarc-fermi-beppo-sax">2.1 HEASARC: FERMI &amp; Beppo SAX</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#irsa-ztf">2.2 IRSA: ZTF</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#irsa-wise">2.3 IRSA: WISE</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-pan-starrs">2.4 MAST: Pan-STARRS</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-tess-kepler-and-k2">2.5 MAST: TESS, Kepler and K2</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-hubble-catalog-of-variables-hcv">2.6 MAST: Hubble Catalog of Variables (HCV)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#irsa-wise">2.2 IRSA: WISE</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-pan-starrs">2.3 MAST: Pan-STARRS</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-tess-kepler-and-k2">2.4 MAST: TESS, Kepler and K2</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-hubble-catalog-of-variables-hcv">2.5 MAST: Hubble Catalog of Variables (HCV)</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#find-light-curves-for-these-targets-in-relevant-non-nasa-catalogs">3. Find light curves for these targets in relevant, non-NASA catalogs</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gaia">3.1 Gaia</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#icecube-neutrinos">3.2 IceCube neutrinos</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rubin-data">3.3 Rubin Data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#irsa-ztf">3.1 IRSA: ZTF</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gaia">3.2 Gaia</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#icecube-neutrinos">3.3 IceCube neutrinos</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rubin-data">3.4 Rubin Data</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-processing-the-archive-calls">4. Parallel processing the archive calls</a></li>
@@ -672,29 +672,8 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 </div>
 </div>
 </section>
-<section id="irsa-ztf">
-<h3>2.2 IRSA: ZTF<a class="headerlink" href="#irsa-ztf" title="Link to this heading">#</a></h3>
-<p>The function to retrieve ZTF light curves accesses a <a class="reference external" href="https://hats.readthedocs.io/en/stable/">HATS</a> parquet version of the ZTF catalog stored in the cloud using <a class="reference external" href="https://docs.lsdb.io/en/stable/">LSDB</a>. This is the simplest way to access this dataset at scale.  The ZTF <a class="reference external" href="https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html">API</a> is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself because lsdb uses dask under the hood.</p>
-<p>Traceback CommClosedErrors are expected and are just a dask houskeeping issue, the function is still running to completion and returning light curves.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ZTFstarttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-
-<span class="c1"># get ZTF lightcurves</span>
-<span class="n">ztf_search_radius</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="c1">#  arcsec  (Graham et al., 2024 use 1&quot; with good results)</span>
-<span class="n">df_lc_ZTF</span> <span class="o">=</span> <span class="n">ztf_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">radius</span> <span class="o">=</span> <span class="n">ztf_search_radius</span><span class="p">)</span>
-
-<span class="c1"># add the resulting dataframe to all other archives</span>
-<span class="n">df_lc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lc_ZTF</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ZTF search took:&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">ZTFstarttime</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</section>
 <section id="irsa-wise">
-<h3>2.3 IRSA: WISE<a class="headerlink" href="#irsa-wise" title="Link to this heading">#</a></h3>
+<h3>2.2 IRSA: WISE<a class="headerlink" href="#irsa-wise" title="Link to this heading">#</a></h3>
 <p>We use the unWISE light curves catalog (<a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2023AJ....165...36M/abstract">Meisner et al., 2023</a>) which ties together all WISE &amp; NEOWISE 2010 - 2020 epochs.  Specifically it combines all observations at a single epoch to achieve deeper mag limits than individual observations alone.</p>
 <p>The function to retrieve WISE light curves accesses an IRSA generated version of the catalog in parquet format being stored in the AWS cloud <a class="reference external" href="https://registry.opendata.aws/collab/nasa/">Open Data Repository</a></p>
 <div class="cell docutils container">
@@ -716,7 +695,7 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 </div>
 </section>
 <section id="mast-pan-starrs">
-<h3>2.4 MAST: Pan-STARRS<a class="headerlink" href="#mast-pan-starrs" title="Link to this heading">#</a></h3>
+<h3>2.3 MAST: Pan-STARRS<a class="headerlink" href="#mast-pan-starrs" title="Link to this heading">#</a></h3>
 <p>The function to retrieve lightcurves from Pan-STARRS uses <a class="reference external" href="https://docs.lsdb.io/">LSDB</a> to access versions of the object and light curve catalogs that are stored in the cloud.  This function is efficient at large scale (sample sizes &gt; ~1000).</p>
 <p>Some warnings are expected.</p>
 <div class="cell docutils container">
@@ -739,7 +718,7 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 </div>
 </section>
 <section id="mast-tess-kepler-and-k2">
-<h3>2.5 MAST: TESS, Kepler and K2<a class="headerlink" href="#mast-tess-kepler-and-k2" title="Link to this heading">#</a></h3>
+<h3>2.4 MAST: TESS, Kepler and K2<a class="headerlink" href="#mast-tess-kepler-and-k2" title="Link to this heading">#</a></h3>
 <p>The function to retrieve lightcurves from these three missions currently uses the open source package <a class="reference external" href="https://docs.lightkurve.org/index.html"><code class="docutils literal notranslate"><span class="pre">lightKurve</span></code></a>.  This search is not efficient at scale and we expect it to be replaced in the future.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -762,7 +741,7 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 </div>
 </section>
 <section id="mast-hubble-catalog-of-variables-hcv">
-<h3>2.6 MAST: Hubble Catalog of Variables (<a class="reference external" href="https://archive.stsci.edu/hlsp/hcv">HCV</a>)<a class="headerlink" href="#mast-hubble-catalog-of-variables-hcv" title="Link to this heading">#</a></h3>
+<h3>2.5 MAST: Hubble Catalog of Variables (<a class="reference external" href="https://archive.stsci.edu/hlsp/hcv">HCV</a>)<a class="headerlink" href="#mast-hubble-catalog-of-variables-hcv" title="Link to this heading">#</a></h3>
 <p>The function to retrieve lightcurves from HCV currently uses their API; based on this <a class="reference external" href="https://archive.stsci.edu/hst/hsc/help/HCV/HCV_API_demo.html">example</a>. This search is not efficient at scale and we expect it to be replaced in the future.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -784,8 +763,29 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 </section>
 <section id="find-light-curves-for-these-targets-in-relevant-non-nasa-catalogs">
 <h2>3. Find light curves for these targets in relevant, non-NASA catalogs<a class="headerlink" href="#find-light-curves-for-these-targets-in-relevant-non-nasa-catalogs" title="Link to this heading">#</a></h2>
+<section id="irsa-ztf">
+<h3>3.1 IRSA: ZTF<a class="headerlink" href="#irsa-ztf" title="Link to this heading">#</a></h3>
+<p>The function to retrieve ZTF light curves accesses a <a class="reference external" href="https://hats.readthedocs.io/en/stable/">HATS</a> parquet version of the ZTF catalog stored in the cloud using <a class="reference external" href="https://docs.lsdb.io/en/stable/">LSDB</a>. This is the simplest way to access this dataset at scale.  The ZTF <a class="reference external" href="https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html">API</a> is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself because lsdb uses dask under the hood.</p>
+<p>Traceback CommClosedErrors are expected and are just a dask houskeeping issue, the function is still running to completion and returning light curves.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ZTFstarttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="c1"># get ZTF lightcurves</span>
+<span class="n">ztf_search_radius</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="c1">#  arcsec  (Graham et al., 2024 use 1&quot; with good results)</span>
+<span class="n">df_lc_ZTF</span> <span class="o">=</span> <span class="n">ztf_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">radius</span> <span class="o">=</span> <span class="n">ztf_search_radius</span><span class="p">)</span>
+
+<span class="c1"># add the resulting dataframe to all other archives</span>
+<span class="n">df_lc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lc_ZTF</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ZTF search took:&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">ZTFstarttime</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 <section id="gaia">
-<h3>3.1 Gaia<a class="headerlink" href="#gaia" title="Link to this heading">#</a></h3>
+<h3>3.2 Gaia<a class="headerlink" href="#gaia" title="Link to this heading">#</a></h3>
 <p>The function to retrieve Gaia light curves accesses the Gaia DR3 “source lite” catalog using an astroquery search with a table upload to do the join with the Gaia photometry. This is currently the fastest way to access light curves from Gaia at scale.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -804,7 +804,7 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 </div>
 </section>
 <section id="icecube-neutrinos">
-<h3>3.2 IceCube neutrinos<a class="headerlink" href="#icecube-neutrinos" title="Link to this heading">#</a></h3>
+<h3>3.3 IceCube neutrinos<a class="headerlink" href="#icecube-neutrinos" title="Link to this heading">#</a></h3>
 <p>There are several <a class="reference external" href="https://icecube.wisc.edu/data-releases/2021/01/all-sky-point-source-icecube-data-years-2008-2018">catalogs</a> (basically one for each year of IceCube data from 2008 - 2018). The following code creates a large catalog by combining
 all the yearly catalogs.
 The IceCube catalog contains Neutrino detections with associated energy and time and approximate direction (which is uncertain by half-degree scales….). Usually, for active events only one or two Neutrinos are detected, which makes matching quite different compared to “photons”. For our purpose, we will list the top 3 events in energy that are within a given distance to the target.</p>
@@ -826,7 +826,7 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 </div>
 </section>
 <section id="rubin-data">
-<h3>3.3 Rubin Data<a class="headerlink" href="#rubin-data" title="Link to this heading">#</a></h3>
+<h3>3.4 Rubin Data<a class="headerlink" href="#rubin-data" title="Link to this heading">#</a></h3>
 <p>Before running this section, you need to have both 1) a login to the Rubin Science Platform (RSP) and 2) an authenticating token setup in your Fornax home directory.</p>
 <ol class="arabic simple">
 <li><p>To see if you have Rubin data rights, and if you do, to get that login setup, follow these <a class="reference external" href="https://rsp.lsst.io/guides/getting-started/get-an-account.html">instructions</a></p></li>
@@ -1050,17 +1050,17 @@ For sample sizes &gt;~500 and/or improved logging and monitoring options, consid
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#find-light-curves-for-these-targets-in-nasa-catalogs">2. Find light curves for these targets in NASA catalogs</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#heasarc-fermi-beppo-sax">2.1 HEASARC: FERMI &amp; Beppo SAX</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#irsa-ztf">2.2 IRSA: ZTF</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#irsa-wise">2.3 IRSA: WISE</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-pan-starrs">2.4 MAST: Pan-STARRS</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-tess-kepler-and-k2">2.5 MAST: TESS, Kepler and K2</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-hubble-catalog-of-variables-hcv">2.6 MAST: Hubble Catalog of Variables (HCV)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#irsa-wise">2.2 IRSA: WISE</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-pan-starrs">2.3 MAST: Pan-STARRS</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-tess-kepler-and-k2">2.4 MAST: TESS, Kepler and K2</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-hubble-catalog-of-variables-hcv">2.5 MAST: Hubble Catalog of Variables (HCV)</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#find-light-curves-for-these-targets-in-relevant-non-nasa-catalogs">3. Find light curves for these targets in relevant, non-NASA catalogs</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gaia">3.1 Gaia</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#icecube-neutrinos">3.2 IceCube neutrinos</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rubin-data">3.3 Rubin Data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#irsa-ztf">3.1 IRSA: ZTF</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gaia">3.2 Gaia</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#icecube-neutrinos">3.3 IceCube neutrinos</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rubin-data">3.4 Rubin Data</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-processing-the-archive-calls">4. Parallel processing the archive calls</a></li>

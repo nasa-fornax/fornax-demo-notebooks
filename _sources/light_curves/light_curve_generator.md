@@ -220,25 +220,7 @@ df_lc.append(df_lc_HEASARC)
 print('heasarc search took:', time.time() - heasarcstarttime, 's')
 ```
 
-### 2.2 IRSA: ZTF
-The function to retrieve ZTF light curves accesses a [HATS](https://hats.readthedocs.io/en/stable/) parquet version of the ZTF catalog stored in the cloud using [LSDB](https://docs.lsdb.io/en/stable/). This is the simplest way to access this dataset at scale.  The ZTF [API](https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html) is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself because lsdb uses dask under the hood.
-
-Traceback CommClosedErrors are expected and are just a dask houskeeping issue, the function is still running to completion and returning light curves.
-
-```{code-cell} ipython3
-ZTFstarttime = time.time()
-
-# get ZTF lightcurves
-ztf_search_radius = 1.0 #  arcsec  (Graham et al., 2024 use 1" with good results)
-df_lc_ZTF = ztf_get_lightcurves(sample_table, radius = ztf_search_radius)
-
-# add the resulting dataframe to all other archives
-df_lc.append(df_lc_ZTF)
-
-print('ZTF search took:', time.time() - ZTFstarttime, 's')
-```
-
-### 2.3 IRSA: WISE
+### 2.2 IRSA: WISE
 
 We use the unWISE light curves catalog ([Meisner et al., 2023](https://ui.adsabs.harvard.edu/abs/2023AJ....165...36M/abstract)) which ties together all WISE & NEOWISE 2010 - 2020 epochs.  Specifically it combines all observations at a single epoch to achieve deeper mag limits than individual observations alone.
 
@@ -258,7 +240,7 @@ df_lc.append(df_lc_WISE)
 print('WISE search took:', time.time() - WISEstarttime, 's')
 ```
 
-### 2.4 MAST: Pan-STARRS
+### 2.3 MAST: Pan-STARRS
 The function to retrieve lightcurves from Pan-STARRS uses [LSDB](https://docs.lsdb.io/) to access versions of the object and light curve catalogs that are stored in the cloud.  This function is efficient at large scale (sample sizes > ~1000).
 
 Some warnings are expected.
@@ -278,7 +260,7 @@ print('Panstarrs search took:', time.time() - panstarrsstarttime, 's')
 # Warnings from the panstarrs query about both NESTED and margins are known issues
 ```
 
-### 2.5 MAST: TESS, Kepler and K2
+### 2.4 MAST: TESS, Kepler and K2
 The function to retrieve lightcurves from these three missions currently uses the open source package [`lightKurve`](https://docs.lightkurve.org/index.html).  This search is not efficient at scale and we expect it to be replaced in the future.
 
 ```{code-cell} ipython3
@@ -297,7 +279,7 @@ print('TESS/Kepler/K2 search took:', time.time() - lightkurvestarttime, 's')
 # These are not real errors and can be safely ignored.
 ```
 
-### 2.6 MAST: Hubble Catalog of Variables ([HCV](https://archive.stsci.edu/hlsp/hcv))
+### 2.5 MAST: Hubble Catalog of Variables ([HCV](https://archive.stsci.edu/hlsp/hcv))
 The function to retrieve lightcurves from HCV currently uses their API; based on this [example](https://archive.stsci.edu/hst/hsc/help/HCV/HCV_API_demo.html). This search is not efficient at scale and we expect it to be replaced in the future.
 
 ```{code-cell} ipython3
@@ -317,7 +299,25 @@ print('HCV search took:', time.time() - HCVstarttime, 's')
 
 +++
 
-### 3.1 Gaia
+### 3.1 IRSA: ZTF
+The function to retrieve ZTF light curves accesses a [HATS](https://hats.readthedocs.io/en/stable/) parquet version of the ZTF catalog stored in the cloud using [LSDB](https://docs.lsdb.io/en/stable/). This is the simplest way to access this dataset at scale.  The ZTF [API](https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html) is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself because lsdb uses dask under the hood.
+
+Traceback CommClosedErrors are expected and are just a dask houskeeping issue, the function is still running to completion and returning light curves.
+
+```{code-cell} ipython3
+ZTFstarttime = time.time()
+
+# get ZTF lightcurves
+ztf_search_radius = 1.0 #  arcsec  (Graham et al., 2024 use 1" with good results)
+df_lc_ZTF = ztf_get_lightcurves(sample_table, radius = ztf_search_radius)
+
+# add the resulting dataframe to all other archives
+df_lc.append(df_lc_ZTF)
+
+print('ZTF search took:', time.time() - ZTFstarttime, 's')
+```
+
+### 3.2 Gaia
 The function to retrieve Gaia light curves accesses the Gaia DR3 "source lite" catalog using an astroquery search with a table upload to do the join with the Gaia photometry. This is currently the fastest way to access light curves from Gaia at scale.
 
 ```{code-cell} ipython3
@@ -332,7 +332,7 @@ df_lc.append(df_lc_gaia)
 print('gaia search took:', time.time() - gaiastarttime, 's')
 ```
 
-### 3.2 IceCube neutrinos
+### 3.3 IceCube neutrinos
 
 There are several [catalogs](https://icecube.wisc.edu/data-releases/2021/01/all-sky-point-source-icecube-data-years-2008-2018) (basically one for each year of IceCube data from 2008 - 2018). The following code creates a large catalog by combining
 all the yearly catalogs.
@@ -352,10 +352,10 @@ df_lc.append(df_lc_icecube)
 print('icecube search took:', time.time() - icecubestarttime, 's')
 ```
 
-### 3.3 Rubin Data 
-Before running this section, you need to have both 1) a login to the Rubin Science Platform (RSP) and 2) an authenticating token setup in your Fornax home directory. 
+### 3.4 Rubin Data
+Before running this section, you need to have both 1) a login to the Rubin Science Platform (RSP) and 2) an authenticating token setup in your Fornax home directory.
 
-1) To see if you have Rubin data rights, and if you do, to get that login setup, follow these [instructions](https://rsp.lsst.io/guides/getting-started/get-an-account.html) 
+1) To see if you have Rubin data rights, and if you do, to get that login setup, follow these [instructions](https://rsp.lsst.io/guides/getting-started/get-an-account.html)
 
 2) After logging in to RSP, follow these [instructions](code_src/rsp_token_instructions.txt) to get a token and store it in your home directory.
 
