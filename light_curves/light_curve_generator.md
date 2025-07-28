@@ -300,7 +300,8 @@ print('HCV search took:', time.time() - HCVstarttime, 's')
 ### 3.1 IRSA: ZTF
 The function to retrieve ZTF light curves accesses a [HATS](https://hats.readthedocs.io/en/stable/) parquet version of the ZTF catalog stored in the cloud using [LSDB](https://docs.lsdb.io/en/stable/). This is the simplest way to access this dataset at scale.  The ZTF [API](https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html) is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself because lsdb uses dask under the hood.
 
-Traceback CommClosedErrors are expected and are just a dask housekeeping issue, the function is still running to completion and returning light curves.
+Expect to see many `INFO` messages from dask. These are normal.
+The traceback for `CommClosedErrors` is also expected and is just a dask housekeeping issue, the function is still running to completion and returning light curves.
 
 ```{code-cell} ipython3
 ZTFstarttime = time.time()
