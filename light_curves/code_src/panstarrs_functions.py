@@ -4,7 +4,6 @@ from astropy.table import Table
 import lsdb
 from dask.distributed import Client
 from data_structures import MultiIndexDFObject
-from upath import UPath
 
 # panstarrs light curves from hats catalog in S3 using lsdb
 
@@ -29,8 +28,8 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
     # this table will be used for cross matching with our sample's ra and decs
     # but does not have light curve information
     panstarrs_object = lsdb.read_hats(
-        UPath('s3://stpubdata/panstarrs/ps1/public/hats/otmo', anon=True),
-        margin_cache=UPath('s3://stpubdata/panstarrs/ps1/public/hats/otmo_10arcs', anon=True),
+        's3://stpubdata/panstarrs/ps1/public/hats/otmo',
+        margin_cache='s3://stpubdata/panstarrs/ps1/public/hats/otmo_10arcs',
         columns=["objID",  # PS1 ID
                  "raMean", "decMean",  # coordinates to use for cross-matching
                  "nStackDetections",  # some other data to use
@@ -40,8 +39,8 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
     # panstarrs recommendation is not to index into this table with ra and dec
     # but to use object ids from the above object table
     panstarrs_detect = lsdb.read_hats(
-        UPath('s3://stpubdata/panstarrs/ps1/public/hats/detection', anon=True),
-        margin_cache=UPath('s3://stpubdata/panstarrs/ps1/public/hats/detection_10arcs', anon=True),
+        's3://stpubdata/panstarrs/ps1/public/hats/detection',
+        margin_cache='s3://stpubdata/panstarrs/ps1/public/hats/detection_10arcs',
         columns=["objID",  # PS1 object ID
                  "detectID",  # PS1 detection ID
                  # light-curve stuff
