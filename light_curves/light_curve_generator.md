@@ -100,8 +100,6 @@ from sample_selection import (clean_sample, get_green_sample, get_hon_sample, ge
 from tess_kepler_functions import tess_kepler_get_lightcurves
 from wise_functions import wise_get_lightcurves
 from rubin_functions import rubin_get_lightcurves
-# Note: ZTF data is temporarily located in a non-public AWS S3 bucket. It is automatically available
-# from the Fornax Science Console, but otherwise will require explicit user credentials.
 from ztf_functions import ztf_get_lightcurves
 ```
 
@@ -302,7 +300,7 @@ print('HCV search took:', time.time() - HCVstarttime, 's')
 ### 3.1 IRSA: ZTF
 The function to retrieve ZTF light curves accesses a [HATS](https://hats.readthedocs.io/en/stable/) parquet version of the ZTF catalog stored in the cloud using [LSDB](https://docs.lsdb.io/en/stable/). This is the simplest way to access this dataset at scale.  The ZTF [API](https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html) is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself because lsdb uses dask under the hood.
 
-Traceback CommClosedErrors are expected and are just a dask houskeeping issue, the function is still running to completion and returning light curves.
+Traceback CommClosedErrors are expected and are just a dask housekeeping issue, the function is still running to completion and returning light curves.
 
 ```{code-cell} ipython3
 ZTFstarttime = time.time()
