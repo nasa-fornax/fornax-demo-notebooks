@@ -4,4 +4,4 @@ Not all archival search queries can be answered with metadata alone. In this use
 
 Although this tutorial focuses on JWST spectral cubes, it is intended to teach general strategies that will be useful for answering other data-intensive search queries unrelated to spectral cubes, in any of the Fornax archives. We design some simple algorithms to search for extended emission in spectral cubes, but these algorithms are designed to be replaceable by more sophisticated tools tailored to your science case.
 
-Note: the notebook (analytical_data_search.md) required the files in the code_src/ directory in order to run.
+Note: the notebook (emission_search_cubes.md) requires the files in the code_src/ directory in order to run.
