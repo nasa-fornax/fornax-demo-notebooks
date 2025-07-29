@@ -14,6 +14,7 @@ kernelspec:
 # Beyond metadata: analytical data search in the cloud with JWST spectral cubes
 
 +++
+
 ## Runtime
 For this notebook, we recommend using the [Fornax science platform](https://nasa-fornax.github.io/fornax-demo-notebooks/documentation/README.html) with Server Type = "Large - 64GB RAM/16 CPU" and Environment = "Default Astrophysics". As of June 2025, running this notebook once on that server will take about 10 minutes.
 
@@ -61,22 +62,17 @@ More granularly, this notebook is comprised of the following sections:
 
 +++
 
-<span style="color: purple;">Temporary note: pending incorporation of a recent `astroquery` development version into the default Fornax kernel, we need to install the latest development version of astroquery. We can suppress the voluminous output here with `%%capture`, which will store the cell's output in a variable `captured` (accessed through `captured.stdout` and `captured.stderr`). Uncomment and run this cell:</span>
+All dependencies will be included in the Fornax "Default Astrophysics" environment. If you are not working in Fornax, you can uncomment and run the following cell to install these dependencies into your environment. You may need to restart your kernel after pip-installing new packages, before running the imports.
 
-```{code-cell} ipython3
-# %%capture captured
-# %pip install git+https://github.com/astropy/astroquery.git
-```
-
-**You may need to restart your kernel now for that to take effect.**
-
-+++
-
-Otherwise, all dependencies are included in the Fornax "Default Astrophysics" environment. If you are not working in Fornax, you can uncomment and run the following cell to install these dependencies into your environment. You may need to restart your kernel after pip-installing new packages, before running the imports.
+:::{warning} Temporary Note
+We need to install a recent development version of `astroquery`, pending its incorporation into the default Fornax kernel. To do so, uncomment and run the following cell, then restart your kernel. This will allow us to set `return_uri_map=True` when retrieving MAST cloud URIs, so that we can map data product cloud URIs to their observational metadata.
+:::
 
 ```{code-cell} ipython3
 # !pip install -r requirements_analytical_data_search.txt
 ```
+
+**You may need to restart your kernel now for that to take effect.**
 
 ```{code-cell} ipython3
 # Query databases
