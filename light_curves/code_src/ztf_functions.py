@@ -2,13 +2,12 @@ from dask.distributed import Client
 import pandas as pd
 import lsdb
 from astropy import units as u
-from upath import UPath
 from data_structures import MultiIndexDFObject
 
 def ztf_get_lightcurves(sample_table, *, radius=1.0):
     """
     Search ZTF HATS files for light curves around a list of target coordinates
-    
+
     Parameters
     ----------
     sample_table : astropy.table.Table
@@ -25,12 +24,11 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
      """
     # 1) Start Dask client & read full ZTF light-curve catalog
     client = Client(threads_per_worker=2, memory_limit=None)
-    suffix = 'ztf_lc_dr23'
     ztf_lc = lsdb.read_hats(
-        UPath('s3://irsa-fornax-testdata/ZTF/dr23/lc/'),
+        's3://ipac-irsa-ztf/contributed/dr23/lc/hats/',
         columns=[
-            "objectid", "objra", "objdec",
-            "hmjd", "filterid", "mag", "magerr", "catflags"
+            "objectid", "objra", "objdec", "filterid",
+            "lightcurve.hmjd", "lightcurve.mag", "lightcurve.magerr", "lightcurve.catflags"
         ]
     )
 
@@ -48,7 +46,8 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
         margin_threshold=10,
         drop_empty_siblings=True
     )
-    
+    del sample_df
+
     # 3) Cross-match per band
     band_map = {1: "ztf_g", 2: "ztf_r", 3: "ztf_i"}
     per_band_dfs = []
@@ -61,46 +60,34 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
         matched = sample_lsdb.crossmatch(
             ztf_band,
             radius_arcsec=radius,
-            n_neighbors=1
+            n_neighbors=1,
+            require_right_margin=True,
+            suffixes=("_sample", ""),
         )
         df = matched.compute()
 
-        # 3c) explode any length-1 arrays
-        array_cols = [c for c in df.columns if isinstance(df.iloc[0][c], (list, tuple))]
-        if array_cols:
-            df = df.explode(array_cols, ignore_index=True)
-
-        # 3d) cast, drop bad flags, assign band
-        df = df.astype({
-            f"hmjd_{suffix}":   float,
-            f"mag_{suffix}":    float,
-            f"magerr_{suffix}": float,
-            f"catflags_{suffix}": int
-        })
-        df = df[df[f"catflags_{suffix}"] < 32768]
-        df["band"] = band_name
+        # 3c) explode to one row per data point, add band name, and drop points with bad flags
+        df["lightcurve.objectid"] = df["objectid_sample"]
+        df["lightcurve.label"] = df["label_sample"]
+        df["lightcurve.band"] = band_name
+        df = df["lightcurve"].nest.to_flat()
+        df = df.query("catflags < 32768")
+        del df["catflags"]
 
         per_band_dfs.append(df)
+        del df
 
     client.close()
 
     # 4) Concatenate, convert mags → fluxes, and build final MultiIndex
-    df_all = pd.concat(per_band_dfs, ignore_index=True)
-    mag    = df_all[f"mag_{suffix}"].to_numpy()
-    magerr = df_all[f"magerr_{suffix}"].to_numpy()
+    df_all = pd.concat(per_band_dfs, ignore_index=True).rename(columns={"hmjd": "time"})
+    del per_band_dfs
+    mag    = df_all["mag"].to_numpy()
+    magerr = df_all["magerr"].to_numpy()
     flux_up  = ((mag - magerr) * u.ABmag).to_value('mJy')
     flux_low = ((mag + magerr) * u.ABmag).to_value('mJy')
     df_all["flux"] = (mag * u.ABmag).to_value('mJy')
     df_all["err"]  = (flux_up - flux_low) / 2
 
-    df_lc = pd.DataFrame({
-        'flux':     df_all["flux"],
-        'err':      df_all["err"],
-        'time':     df_all[f"hmjd_{suffix}"],
-        'objectid': df_all['objectid_from_lsdb_dataframe'],
-        'label':    df_all['label_from_lsdb_dataframe'],
-        'band':     df_all['band']
-    }).set_index(["objectid", "label", "band", "time"])
-
-    return MultiIndexDFObject(data=df_lc)
-
+    index_cols = ["objectid", "label", "band", "time"]
+    return MultiIndexDFObject(data=df_all.set_index(index_cols)[["flux", "err"]])
