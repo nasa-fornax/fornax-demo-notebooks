@@ -405,7 +405,7 @@ def get_sdss_sample(coords, labels, *, num=10, zmin=0, zmax=10, randomize_z=Fals
         labels.extend(SDSS_labels)
 
     if verbose:
-        print('SDSS Quasar: '+str(num))
+        print('SDSS Quasar: ' + str(num))
 
 
 def get_paper_sample(coords, labels, *, paper_link="2019A&A...627A..33D", label="Cicco19", verbose=1):
@@ -432,7 +432,7 @@ def get_paper_sample(coords, labels, *, paper_link="2019A&A...627A..33D", label=
     coords.extend(paper_coords)
     labels.extend(paper_labels)
     if verbose:
-        print("number of sources added from "+str(label)+" :"+str(len(paper_coords)))
+        print("number of sources added from " + str(label) + " :" + str(len(paper_coords)))
 
 
 def get_papers_list_sample(coords, labels, *, paper_kwargs=[dict(),]):

@@ -10,11 +10,12 @@ from pyvo.dal import DALQueryError
 import requests
 import warnings
 
-# We filter these specific warnings out as the end user can do nothing to about them, they have to be fixed at the data providers level. 
+# We filter these specific warnings out as the end user can do nothing to about them, they have to be fixed at the data providers level.
 # Remove the filters once they are not used in a newer data release
 warnings.filterwarnings("ignore", "'Number' did not parse as fits unit", u.UnitsWarning)
 warnings.filterwarnings("ignore", "'erg/s/cm2/Angstrom' contains multiple slashes", u.UnitsWarning)
 warnings.filterwarnings("ignore", "'erg2/s2/cm4/Angstrom2' contains multiple slashes", u.UnitsWarning)
+
 
 def get_coord_from_objectid(object_id, table_mer="euclid_q1_mer_catalogue"):
     """
@@ -50,6 +51,7 @@ def get_coord_from_objectid(object_id, table_mer="euclid_q1_mer_catalogue"):
     ra, dec = result[0]["ra"], result[0]["dec"]
     return SkyCoord(ra=ra * u.deg, dec=dec * u.deg)
 
+
 def euclid_get_spec(sample_table, search_radius_arcsec):
     """
     Retrieve Euclid 1D spectra for sources in a sample table using IRSA TAP cloud services.
@@ -62,7 +64,7 @@ def euclid_get_spec(sample_table, search_radius_arcsec):
     ----------
     sample_table : astropy.table.Table
         Table with the coordinates and journal reference labels of the sources.
-        
+
     search_radius_arcsec : float
         Search radius in arcseconds.
 
@@ -70,7 +72,7 @@ def euclid_get_spec(sample_table, search_radius_arcsec):
     -------
     MultiIndexDFObject
         The spectra returned from the archive.
-        
+
     """
     df_spec = MultiIndexDFObject()
     table_mer = "euclid_q1_mer_catalogue"

@@ -56,7 +56,7 @@ def sigmaclip_lightcurves(df_lc, sigmaclip_value=10.0, include_plot=False, verbo
         if include_plot:
             # plot distributions and print stddev
             singleband.err.plot(kind='hist', bins=30, subplots=True,
-                                ax=axe[count], label=bandname+' '+str(upper), legend=True)
+                                ax=axe[count], label=bandname + ' ' + str(upper), legend=True)
 
     # remove data that are outside the sigmaclip_value
     # make one large querystring joined by "or" for all bands in df_lc

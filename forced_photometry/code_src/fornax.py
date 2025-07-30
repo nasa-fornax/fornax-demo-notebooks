@@ -177,7 +177,7 @@ class AWSDataHandler(DataHandler):
         # present
         required_keys = ['region', 'bucket_name', 'key']
         for req_key in required_keys:
-            if not req_key in meta_keys:
+            if req_key not in meta_keys:
                 msg = f'{req_key} value is missing from the cloud_acess column.'
                 raise AWSDataHandlerError(msg0 + msg)
 
@@ -188,8 +188,8 @@ class AWSDataHandler(DataHandler):
             info['access'] = 'open'
         else:
             access = info['access']
-            if not access in accepted_access:
-                msg  = f'Unknown access value {access}. Expected one of '
+            if access not in accepted_access:
+                msg = f'Unknown access value {access}. Expected one of '
                 msg += ', '.join(accepted_access)
                 raise AWSDataHandlerError(msg0 + msg)
 
@@ -238,12 +238,11 @@ class AWSDataHandler(DataHandler):
         if data_bucket in self.bucket_access.keys():
             aws_access_info = self.bucket_access[data_bucket].copy()
             aws_access_info['s3_key'] = data_key
-            aws_access_info['message'] += f', re-using access.'
+            aws_access_info['message'] += ', re-using access.'
             aws_access_info['data_region'] = data_region
             aws_access_info['data_access'] = data_access
             log.info(f'Reusing access information for {data_bucket}')
             return aws_access_info
-
 
         # data on aws not accessible for some reason
         if data_access == 'none':
@@ -374,7 +373,7 @@ class AWSDataHandler(DataHandler):
                 # otherwise, look for the cloud_access column
                 if len(source_elems) != 0:
                     # we have a source parameters, process it
-                    source_elem  = source_elems[0]
+                    source_elem = source_elems[0]
 
                     # list the available options in the `source` element:
                     access_options = source_elem.values.options
@@ -386,9 +385,9 @@ class AWSDataHandler(DataHandler):
                             # do a datalink call:
                             log.info(f'doing a datalink request for {opt[1]}')
                             query = pyvo.dal.adhoc.DatalinkQuery.from_resource(
-                                    self.product, dlink_resource, self.product._results._session,
-                                    source=opt[1]
-                                )
+                                self.product, dlink_resource, self.product._results._session,
+                                source=opt[1]
+                            )
                             dl_result = query.execute()
                             url = dl_result[0].access_url.split('/')
                             bucket_name = url[2]
@@ -424,7 +423,6 @@ class AWSDataHandler(DataHandler):
 
                 # we have info about data in aws; validate it first #
                 aws_info = cloud_access['aws']
-
 
             if isinstance(aws_info, list) and len(aws_info) == 1:
                 aws_info = aws_info[0]

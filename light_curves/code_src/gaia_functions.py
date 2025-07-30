@@ -7,7 +7,7 @@ from astroquery.gaia import Gaia
 from data_structures import MultiIndexDFObject
 
 
-def gaia_get_lightcurves(sample_table, *, search_radius=1/3600, verbose=0):
+def gaia_get_lightcurves(sample_table, *, search_radius=1 / 3600, verbose=0):
     '''
     Creates a lightcurve Pandas MultiIndex object from Gaia data for a list of coordinates.
     This is the MAIN function.

@@ -17,6 +17,7 @@ from specutils import Spectrum
 
 from data_structures_spec import MultiIndexDFObject
 
+
 def JWST_get_spec(sample_table, search_radius_arcsec, verbose, max_spectra_per_source=None):
     """
     Retrieve JWST spectra for a list of sources and groups/stacks them.
@@ -45,7 +46,7 @@ def JWST_get_spec(sample_table, search_radius_arcsec, verbose, max_spectra_per_s
     # Get the spectra
     print("Searching Spectra in the cloud... ")
     df_jwst_all = JWST_get_spec_helper(
-        sample_table, search_radius_arcsec, verbose, max_spectra_per_source = max_spectra_per_source)
+        sample_table, search_radius_arcsec, verbose, max_spectra_per_source=max_spectra_per_source)
     print("done")
 
     # Group
@@ -80,7 +81,6 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, verbose, max_spectr
     # Enable cloud data access for MAST once
     Observations.enable_cloud_dataset()
 
-
     # Initialize multi-index object:
     df_spec = MultiIndexDFObject()
 
@@ -109,7 +109,7 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, verbose, max_spectr
         # Retrieve spectra
         data_products = [Observations.get_product_list(obs) for obs in query_results]
         data_products_list = vstack(data_products)
-        
+
         # Filter
         data_products_list_filter = Observations.filter_products(
             data_products_list, productType=["SCIENCE"], extension="fits",
@@ -118,18 +118,18 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, verbose, max_spectr
             dataRights=['PUBLIC'])  # only public data
         print("Number of files found: {}".format(len(data_products_list_filter)))
 
-        #no need to continue if there aren't any spectra
+        # no need to continue if there aren't any spectra
         if len(data_products_list_filter) == 0:
             print("No spectra found for source {}.".format(stab["label"]))
             continue
-            
-        #This code takes a long time if you let it get all spectra, this
+
+        # This code takes a long time if you let it get all spectra, this
         # next part filters out some of the results if not all spectra are needed.
         # change max_spectra_per_source to None if you want all of them
         if max_spectra_per_source is not None and len(data_products_list_filter) > max_spectra_per_source:
             data_products_list_filter = data_products_list_filter[:max_spectra_per_source]
             print(f"Limiting to first {max_spectra_per_source} spectra for source {stab['label']}.")
-            
+
         # Get cloud access URIs (returns a list of strings)
         cloud_uris_dict = Observations.get_cloud_uris(data_products_list_filter, return_uri_map=True)
 
@@ -153,13 +153,12 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, verbose, max_spectr
             tmp = query_results[idx_cross][keys]
             tab.add_row(list(tmp[0]) + [filename, uri])
 
-            
         # Create multi-index object
         for jj in range(len(tab)):
 
             # open spectrum directly from the cloud
             filepath = tab["clouduri"][jj]
-            
+
             with fsspec.open(filepath, mode='rb', anon=True) as f:  # Open the file from S3
                 with fits.open(f) as hdul:  # Open the FITS file
                     spec1d = Table(hdul[1].data)
@@ -181,8 +180,8 @@ def JWST_get_spec_helper(sample_table, search_radius_arcsec, verbose, max_spectr
             )).set_index(["objectid", "label", "filter", "mission"])
             df_spec.append(dfsingle)
 
-
     return df_spec
+
 
 def JWST_group_spectra(df, verbose, quickplot):
     """
@@ -258,7 +257,7 @@ def JWST_group_spectra(df, verbose, quickplot):
             # Unit conversion to erg/s/cm2/A
             # (note fluxes are nominally in Jy. So have to do the step with dividing by lam^2)
             fluxes_stack_cgs = (fluxes_stack * fluxes_units[0]).to(u.erg / u.second / (
-                u.centimeter**2) / u.hertz) * (const.c.to(u.angstrom/u.second)) / (wave_grid.to(u.angstrom)**2)
+                u.centimeter**2) / u.hertz) * (const.c.to(u.angstrom / u.second)) / (wave_grid.to(u.angstrom)**2)
             fluxes_stack_cgs = fluxes_stack_cgs.to(
                 u.erg / u.second / (u.centimeter**2) / u.angstrom)
 
@@ -362,10 +361,10 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
         keys = ["filters", "obs_collection", "instrument_name", "calib_level",
                 "t_obs_release", "proposal_id", "obsid", "objID", "distance"]
         tab = Table(names=keys + ["productFilename"], dtype=[str,
-                    str, str, int, float, int, int, int, float]+[str])
+                    str, str, int, float, int, int, int, float] + [str])
         for jj in range(len(data_products_list_filter)):
-            idx_cross = np.where(query_results["obsid"] ==
-                                 data_products_list_filter["obsID"][jj])[0]
+            idx_cross = np.where(query_results["obsid"]
+                                 == data_products_list_filter["obsID"][jj])[0]
             tmp = query_results[idx_cross][keys]
             tab.add_row(list(tmp[0]) + [data_products_list_filter["productFilename"][jj]])
 

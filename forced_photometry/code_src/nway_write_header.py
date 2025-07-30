@@ -1,7 +1,7 @@
 import astropy.io.fits as fits
 
 
-#nway-write-header.py adapted from github
+# nway-write-header.py adapted from github
 
 def nway_write_header(catalog_fits, cat_name, skyarea):
     f = fits.open(catalog_fits)
@@ -10,5 +10,4 @@ def nway_write_header(catalog_fits, cat_name, skyarea):
     f[1].header['SKYAREA'] = float(skyarea)
     print('new    ', f[1].name, 'SKYAREA:', f[1].header.get('SKYAREA', None))
 
-    f.writeto(catalog_fits, overwrite = "True")
-    
+    f.writeto(catalog_fits, overwrite="True")

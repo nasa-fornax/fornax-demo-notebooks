@@ -62,11 +62,11 @@ def bin_spectra(wave, flux, bin_factor):
     #                       (wave.value < (ll+dlam/2))].value) for ll in lam_bin])
 
     # This way is a bit slower but we can avoid empty slices.
-    lam_bin = np.arange(np.nanmin(wave.value)+dlam/2, np.nanmax(wave.value)+dlam/2 + dlam, dlam)
+    lam_bin = np.arange(np.nanmin(wave.value) + dlam / 2, np.nanmax(wave.value) + dlam / 2 + dlam, dlam)
     lam_bins = []
     flux_bins = []
     for ll in lam_bin:
-        sel_tmp = np.where((wave.value >= (ll-dlam/2)) & (wave.value < (ll+dlam/2)))[0]
+        sel_tmp = np.where((wave.value >= (ll - dlam / 2)) & (wave.value < (ll + dlam / 2)))[0]
         if len(sel_tmp) > 0:
             flux_bins.append(np.nanmedian(flux[sel_tmp].value))
             lam_bins.append(ll)

@@ -73,7 +73,7 @@ def autopct_format(values):
 
     def my_format(pct):
         total = sum(values)
-        val = int(round(pct*total/100.0))
+        val = int(round(pct * total / 100.0))
         return '{:.1f}%)'.format(pct)
 
     return my_format
@@ -168,7 +168,7 @@ def unify_lc(df_lc, bands_inlc=['zr', 'zi', 'zg'], xres=160, numplots=1, low_lim
                     keepobj = 0
 
             if printcounter < numplots:
-                plt.title('Object '+str(obj))  # +' from '+label[0]+' et al.')
+                plt.title('Object ' + str(obj))  # +' from '+label[0]+' et al.')
                 plt.xlabel('Time(MJD)')
                 plt.ylabel('Flux(mJy)')
                 plt.legend()
@@ -218,7 +218,7 @@ def unify_lc_gp(df_lc, bands_inlc=['zr', 'zi', 'zg'], xres=160, numplots=1, low_
                 band_lc = singleobj.loc[label[0], band, :]
                 band_lc_clean = band_lc[band_lc.index.get_level_values('time') < 65000]
                 x, y, dy = np.array(band_lc_clean.index.get_level_values(
-                    'time')-band_lc_clean.index.get_level_values('time')[0]), np.array(band_lc_clean.flux), np.array(band_lc_clean.err)
+                    'time') - band_lc_clean.index.get_level_values('time')[0]), np.array(band_lc_clean.flux), np.array(band_lc_clean.err)
 
                 x2, y2, dy2 = x[np.argsort(x)], y[np.argsort(x)], dy[np.argsort(x)]
                 if len(x2) > low_limit_size:
@@ -226,7 +226,7 @@ def unify_lc_gp(df_lc, bands_inlc=['zr', 'zi', 'zg'], xres=160, numplots=1, low_
                     n = np.sum(x2 == 0)
                     # this is a hack of shifting time of different lightcurves by a bit so I can interpolate!
                     for b in range(1, n):
-                        x2[::b+1] = x2[::b+1]+1*0.001
+                        x2[::b + 1] = x2[::b + 1] + 1 * 0.001
                     X = x2.reshape(-1, 1)
                     if band == 'W1' or band == 'W2':
                         kernel = 1.0 * RBF(length_scale=200)
@@ -234,29 +234,29 @@ def unify_lc_gp(df_lc, bands_inlc=['zr', 'zi', 'zg'], xres=160, numplots=1, low_
                         gpw.fit(X, y2)
                         obj_newy[l], obj_newdy[l] = gpw.predict(x_wise, return_std=True)
                     else:
-                        kernel = 1.0 * RBF(length_scale=len(x_ztf)/len(x2))
+                        kernel = 1.0 * RBF(length_scale=len(x_ztf) / len(x2))
                         gp = GaussianProcessRegressor(kernel=kernel, alpha=dy2**2)
                         gp.fit(X, y2)
                         obj_newy[l], obj_newdy[l] = gp.predict(x_ztf, return_std=True)
 
                     if printcounter < numplots:
                         plt.errorbar(x2, y2, dy2, capsize=1.0, marker='.',
-                                     linestyle='', label=label[0]+band)
+                                     linestyle='', label=label[0] + band)
                         if band == 'W1' or band == 'W2':
                             y_pred, sigma = gpw.predict(x_wise, return_std=True)
-                            plt.plot(x_wise, y_pred, '--', label='Gaussian Process Reg.'+str(band))
+                            plt.plot(x_wise, y_pred, '--', label='Gaussian Process Reg.' + str(band))
                             plt.fill_between(x_wise.flatten(), y_pred - 1.96 * sigma,
                                              y_pred + 1.96 * sigma, alpha=0.2, color='r')
                         else:
-                            kernel = 1.0 * RBF(length_scale=len(x_ztf)/len(x2))
+                            kernel = 1.0 * RBF(length_scale=len(x_ztf) / len(x2))
                             y_pred, sigma = gp.predict(x_ztf, return_std=True)
-                            plt.plot(x_ztf, y_pred, '--', label='Gaussian Process Reg.'+str(band))
+                            plt.plot(x_ztf, y_pred, '--', label='Gaussian Process Reg.' + str(band))
                             plt.fill_between(x_ztf.flatten(), y_pred - 1.96 * sigma,
                                              y_pred + 1.96 * sigma, alpha=0.2, color='r')
                 else:
                     keepobj = 0
             if (printcounter < numplots):
-                plt.title('Object '+str(obj))  # +' from '+label[0]+' et al.')
+                plt.title('Object ' + str(obj))  # +' from '+label[0]+' et al.')
                 plt.xlabel('Time(MJD)')
                 plt.ylabel('Flux(mJy)')
                 plt.legend()
@@ -291,7 +291,7 @@ def mean_fractional_variation(lc, dlc):
     deltaf = np.mean(dlc)**2
     if meanf <= 0:
         meanf = 0.0001
-    fvar = (np.sqrt(varf-deltaf))/meanf
+    fvar = (np.sqrt(varf - deltaf)) / meanf
     return fvar
 
 
@@ -336,9 +336,9 @@ def normalize_clipmax_objects(data, maxarr, band=1):
     d2 = np.zeros_like(data)
     for i, d in enumerate(data):
         if band <= np.shape(maxarr)[0]:
-            d2[i] = (d/maxarr[band, i])
+            d2[i] = (d / maxarr[band, i])
         else:
-            d2[i] = (d/maxarr[0, i])
+            d2[i] = (d / maxarr[0, i])
     return d2
 
 # Shuffle before feeding to umap

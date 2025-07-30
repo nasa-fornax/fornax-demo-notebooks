@@ -13,7 +13,7 @@ def rubin_authenticate():
     -------
     rsp_tap : pyvo.dal.TAPService
         An authenticated TAPService instance pointing to DP0 data, assigned to variable `rsp_tap`.
-        
+
     Raises
     ------
     FileNotFoundError
@@ -22,7 +22,7 @@ def rubin_authenticate():
         If the TAP session cannot be created or the returned baseurl mismatches the expected URL.
     """
     # Read token from home directory
-    token_file = Path.home() / '.rsp-tap.token'    
+    token_file = Path.home() / '.rsp-tap.token'
     if not token_file.exists():
         raise FileNotFoundError(f"Token file not found: {token_file}")
     with open(token_file, 'r') as f:
@@ -48,7 +48,6 @@ def rubin_authenticate():
     return rsp_tap
 
 
-    
 def rubin_get_objectids(sample_table, rsp_tap, search_radius=0.001):
     """
     Perform cone searches for each row in sample_table to retrieve matching DP0 object IDs.
@@ -68,14 +67,14 @@ def rubin_get_objectids(sample_table, rsp_tap, search_radius=0.001):
         Combined table with columns ['coord_ra', 'coord_dec', 'objectId',
         'in_objid', 'in_label'] tagging each DP0 Object match with the input sample info.
     """
-    #could consider parallelizing this but for now we wait for TAP table upload and real data
+    # could consider parallelizing this but for now we wait for TAP table upload and real data
     all_tables = []
     for row in sample_table:
         ra = row['coord'].ra.deg
         dec = row['coord'].dec.deg
         in_objid = row['objectid']
         in_label = row['label']
-        
+
         query = (f"""
         SELECT coord_ra, coord_dec, objectId
         FROM dp02_dc2_catalogs.Object
@@ -93,11 +92,11 @@ def rubin_get_objectids(sample_table, rsp_tap, search_radius=0.001):
         tbl['in_label'] = in_label
         all_tables.append(tbl)
 
-    #in the case of an empty table, return an empty table
+    # in the case of an empty table, return an empty table
     if not all_tables:
         return
 
-    #otherwise, stack all the tables together
+    # otherwise, stack all the tables together
     combined = vstack(all_tables)
     return combined
 
@@ -118,34 +117,34 @@ def rubin_access_lc_catalog(object_table, rsp_tap):
     MultiIndexDFObject
         Indexed by ['objectid', 'label', 'band', 'time'] with flux data.
     """
-    #Pull out a unique, sorted list of integer IDs:
+    # Pull out a unique, sorted list of integer IDs:
     objids = sorted(set(object_table['objectId']))
- 
-    #build the string for the query below
-    #will probably need to break this into chunks when working with large samples (> 50)
+
+    # build the string for the query below
+    # will probably need to break this into chunks when working with large samples (> 50)
     id_tuple_str = f"({','.join(map(str, objids))})"
 
     query_lc = (f"""
     SELECT src.band, src.ccdVisitId, src.coord_ra, src.coord_dec,
            src.objectId, src.psfFlux, src.psfFluxErr,
            scisql_nanojanskyToAbMag(src.psfFlux) AS psfMag,
-           vis.ccdVisitId AS visitId, 
+           vis.ccdVisitId AS visitId,
            vis.expMidptMJD, vis.zeroPoint
     FROM dp02_dc2_catalogs.ForcedSource AS src
     JOIN dp02_dc2_catalogs.CcdVisit AS vis
       ON vis.ccdVisitId=src.ccdVisitId
     WHERE src.objectId IN {id_tuple_str} AND src.detect_isPrimary=1
     """).strip()
-    
-    #run the query on the tap server
+
+    # run the query on the tap server
     srcs = rsp_tap.run_sync(query_lc).to_table()
-    
-    # Convert the result to pandas 
-    df_src = srcs.to_pandas() 
+
+    # Convert the result to pandas
+    df_src = srcs.to_pandas()
 
     # Prefix every band value with "rubin_"
     df_src['band'] = 'rubin_' + df_src['band'].astype(str)
-                                                     
+
     # Convert object_table (Astropy) to pandas, keep only the three cols
     df_obj = (
         object_table[['objectId', 'in_objid', 'in_label']]
@@ -163,14 +162,15 @@ def rubin_access_lc_catalog(object_table, rsp_tap):
     # Rename columns and set a MultiIndex
     df_merged = (
         df_merged
-        .rename(columns={'in_objid':'objectid', 'in_label':'label', 'expMidptMJD':'time'})
+        .rename(columns={'in_objid': 'objectid', 'in_label': 'label', 'expMidptMJD': 'time'})
         .set_index(['objectid', 'label', 'band', 'time'], drop=True)
     )        # explicitly drop=True (default) so the renamed 'objectid' column
 
     # 6. Wrap in your MultiIndexDFObject
-    df_lc = MultiIndexDFObject(df_merged)    
+    df_lc = MultiIndexDFObject(df_merged)
     return df_lc
-    
+
+
 def rubin_get_lightcurves(sample_table, search_radius=0.001):
     """
     Main entry point: authenticate, get object IDs, and fetch light curves.
@@ -194,17 +194,16 @@ def rubin_get_lightcurves(sample_table, search_radius=0.001):
     RuntimeError
         If authentication fails or any of the TAP queries encounters an error.
     """
-    #authenticate and set up TAP service
+    # authenticate and set up TAP service
     rsp_tap = rubin_authenticate()
 
-    #get the Rubin objectids which correspond to our coordinates
+    # get the Rubin objectids which correspond to our coordinates
     obj_table = rubin_get_objectids(sample_table, rsp_tap, search_radius)
 
     if not obj_table:
         return MultiIndexDFObject()
-    
-    #use those objectids to get the time domain info
-    lc = rubin_access_lc_catalog(obj_table, rsp_tap)
-    
-    return lc
 
+    # use those objectids to get the time domain info
+    lc = rubin_access_lc_catalog(obj_table, rsp_tap)
+
+    return lc

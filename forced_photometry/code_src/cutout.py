@@ -99,6 +99,6 @@ def extract(ra, dec, *, hdu, cutout_width, mosaic_pix_scale):
 
     # now need to set the values of x1, y1 at the location of the target *in the cutout*
     x1, y1 = subimage_wcs.all_world2pix(ra, dec, 1)
-    #print('x1, y1', x1, y1)
+    # print('x1, y1', x1, y1)
 
     return subimage.data, x1, y1, subimage_wcs

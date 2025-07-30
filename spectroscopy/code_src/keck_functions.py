@@ -63,7 +63,7 @@ def KeckDEIMOS_get_spec(sample_table, search_radius_arcsec):
 
         # Prepare arrays
         wave = spec["LAMBDA"][0] * u.angstrom
-        flux_cgs = spec["FLUX"][0] * 1e-17 * u.erg/u.second/u.centimeter**2/u.angstrom
+        flux_cgs = spec["FLUX"][0] * 1e-17 * u.erg / u.second / u.centimeter**2 / u.angstrom
         # Inverse variances may be zero, resulting in infinite error.
         # We'll leave these in and ignore the "divide by zero" warning.
         with np.errstate(divide='ignore'):

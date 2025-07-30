@@ -216,7 +216,7 @@ def checklegal_hcv(table, release, magtype):
                 ", ".join(magtypelist)))
 
 
-def hcv_get_lightcurves(sample_table, *, radius=1/3600):
+def hcv_get_lightcurves(sample_table, *, radius=1 / 3600):
     """Searches Hubble Catalog of variables for light curves from a list of input coordinates
 
     Parameters
@@ -273,7 +273,7 @@ def hcv_get_lightcurves(sample_table, *, radius=1/3600):
         # https://www.stsci.edu/hst/instrumentation/acs/data-analysis/zeropoints
         flux, fluxerr = convertACSmagtoflux(time_814[0], filterstring, mag_814, magerr_814)
         flux = flux * 1E3  # convert to mJy
-        fluxerr = fluxerr*1E3  # convert to mJy
+        fluxerr = fluxerr * 1E3  # convert to mJy
 
         # put this single object light curves into a pandas multiindex dataframe
         dfsingle_814 = pd.DataFrame(dict(flux=flux, err=fluxerr, time=time_814, objectid=objectid,

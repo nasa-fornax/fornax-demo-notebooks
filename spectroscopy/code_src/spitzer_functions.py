@@ -86,11 +86,11 @@ def SpitzerIRS_get_spec(sample_table, search_radius_arcsec, COMBINESPEC):
             [np.sqrt(np.nansum(errors[:, ii]**2)) for ii in range(errors.shape[1])])
 
         # Change units
-        wave_orig_A = (wave_orig*u.micrometer).to(u.angstrom)
-        flux_cgs_mean = (flux_jy_mean*u.jansky).to(u.erg/u.second/u.centimeter **
-                                                   2/u.hertz) * const.c.to(u.angstrom/u.second) / (wave_orig_A**2)
-        errors_cgs_combined = (errors_jy_combined*u.jansky).to(u.erg/u.second /
-                                                               u.centimeter**2/u.hertz) * const.c.to(u.angstrom/u.second) / (wave_orig_A**2)
+        wave_orig_A = (wave_orig * u.micrometer).to(u.angstrom)
+        flux_cgs_mean = (flux_jy_mean * u.jansky).to(u.erg / u.second / u.centimeter
+                                                     ** 2 / u.hertz) * const.c.to(u.angstrom / u.second) / (wave_orig_A**2)
+        errors_cgs_combined = (errors_jy_combined * u.jansky).to(u.erg / u.second
+                                                                 / u.centimeter**2 / u.hertz) * const.c.to(u.angstrom / u.second) / (wave_orig_A**2)
 
         # Create MultiIndex object
         dfsingle = pd.DataFrame(dict(wave=[wave_orig_A],
