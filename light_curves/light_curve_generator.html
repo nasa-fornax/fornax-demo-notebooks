@@ -537,8 +537,6 @@ MAST, HEASARC, &amp; IRSA Fornax teams</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tess_kepler_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">tess_kepler_get_lightcurves</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">wise_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">wise_get_lightcurves</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">rubin_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">rubin_get_lightcurves</span>
-<span class="c1"># Note: ZTF data is temporarily located in a non-public AWS S3 bucket. It is automatically available</span>
-<span class="c1"># from the Fornax Science Console, but otherwise will require explicit user credentials.</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ztf_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ztf_get_lightcurves</span>
 </pre></div>
 </div>
@@ -766,7 +764,8 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 <section id="irsa-ztf">
 <h3>3.1 IRSA: ZTF<a class="headerlink" href="#irsa-ztf" title="Link to this heading">#</a></h3>
 <p>The function to retrieve ZTF light curves accesses a <a class="reference external" href="https://hats.readthedocs.io/en/stable/">HATS</a> parquet version of the ZTF catalog stored in the cloud using <a class="reference external" href="https://docs.lsdb.io/en/stable/">LSDB</a>. This is the simplest way to access this dataset at scale.  The ZTF <a class="reference external" href="https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html">API</a> is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself because lsdb uses dask under the hood.</p>
-<p>Traceback CommClosedErrors are expected and are just a dask houskeeping issue, the function is still running to completion and returning light curves.</p>
+<p>Expect to see many <code class="docutils literal notranslate"><span class="pre">INFO</span></code> messages from dask. These are normal.
+The traceback for <code class="docutils literal notranslate"><span class="pre">CommClosedErrors</span></code> is also expected and is just a dask housekeeping issue, the function is still running to completion and returning light curves.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ZTFstarttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
