@@ -1,8 +1,8 @@
 import astropy.units as u
 import numpy as np
 import pandas as pd
-from astroquery.sdss import SDSS
 from astropy.table import Table
+from astroquery.sdss import SDSS
 
 from data_structures_spec import MultiIndexDFObject
 
@@ -35,15 +35,15 @@ def SDSS_get_spec(sample_table, search_radius_arcsec, data_release):
         # Get Spectra for SDSS
         search_coords = stab["coord"]
 
-        xid = SDSS.query_region(search_coords, radius=search_radius_arcsec *
-                                u.arcsec, spectro=True, data_release=data_release)
+        xid = SDSS.query_region(search_coords, radius=search_radius_arcsec
+                                * u.arcsec, spectro=True, data_release=data_release)
 
-        #empty result means no match
+        # empty result means no match
         if not isinstance(xid, Table) or len(xid) == 0:
             print(f"Source {stab['label']} returned no results.")
             continue
-            
-        #sometimes the query returns an unexpected result of an astropy table with no real columns
+
+        # sometimes the query returns an unexpected result of an astropy table with no real columns
         # and HTTP errors, make sure to catch this by checking if the colnames that we require exist.
         if {"plate", "mjd", "fiberID"}.difference(xid.colnames):
             print(f"Source {stab['label']} missing required SDSS columns: {xid.colnames}")
@@ -54,11 +54,11 @@ def SDSS_get_spec(sample_table, search_radius_arcsec, data_release):
         # Get data
         # only one entry because we only search for one xid at a time. Could change that?
         wave = 10**sp[0]["COADD"].data.loglam * u.angstrom
-        flux = sp[0]["COADD"].data.flux*1e-17 * u.erg/u.second/u.centimeter**2/u.angstrom
+        flux = sp[0]["COADD"].data.flux * 1e-17 * u.erg / u.second / u.centimeter**2 / u.angstrom
         # Inverse variances may be zero, resulting in infinite error.
         # We'll leave these in and ignore the "divide by zero" warning.
         with np.errstate(divide='ignore'):
-            err = np.sqrt(1/sp[0]["COADD"].data.ivar)*1e-17 * flux.unit
+            err = np.sqrt(1 / sp[0]["COADD"].data.ivar) * 1e-17 * flux.unit
 
         # Add to df_spec.
         dfsingle = pd.DataFrame(dict(wave=[wave], flux=[flux], err=[err],

@@ -13,7 +13,6 @@ from astropy.table import Table, vstack
 
 from data_structures import MultiIndexDFObject
 
-
 DATA_PATH = os.path.dirname(os.path.dirname(__file__)) + \
     "/data/"  # absolute path to light_curves/data/
 

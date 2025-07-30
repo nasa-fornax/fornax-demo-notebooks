@@ -1,8 +1,8 @@
+import lsdb
 import numpy as np
 import pandas as pd
-from astropy.table import Table
-import lsdb
 from dask.distributed import Client
+
 from data_structures import MultiIndexDFObject
 
 # panstarrs light curves from hats catalog in S3 using lsdb

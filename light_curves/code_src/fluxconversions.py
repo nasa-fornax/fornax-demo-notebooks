@@ -30,13 +30,13 @@ def convert_wise_flux_to_millijansky(flux_nanomaggy, *, band=None):
     vega_to_ab_conv = {"W1": 2.699, "W2": 3.339, "W3": 5.174, "W4": 6.620}
 
     # get Vega magnitude from nanomaggy flux as described in Meisner et al. (2023)
-    mag_vega = 22.5 - 2.5*np.log10(flux_nanomaggy)
+    mag_vega = 22.5 - 2.5 * np.log10(flux_nanomaggy)
 
     # convert Vega magnitude to AB magnitude
     mag_ab = mag_vega + vega_to_ab_conv[band]
 
     # convert AB magnitude to mJy
-    flux_mjy = 10**(-0.4*(mag_ab - 23.9)) / 1e3
+    flux_mjy = 10**(-0.4 * (mag_ab - 23.9)) / 1e3
 
     return flux_mjy
 
@@ -76,12 +76,12 @@ def convertACSmagtoflux(date, filterstring, mag, magerr):
     zpt = zpt_table['VEGAmag'].value
 
     # ACS provides conversion to erg/s/cm^2/angstrom
-    flux = 10**((mag - zpt)/(-2.5))  # now in erg/s/cm^2/angstrom
+    flux = 10**((mag - zpt) / (-2.5))  # now in erg/s/cm^2/angstrom
     # calculate the error
     magupper = mag + magerr
     maglower = mag - magerr
-    flux_upper = abs(flux - (10**((magupper - zpt)/(-2.5))))
-    flux_lower = abs(flux - (10**((maglower - zpt)/(-2.5))))
+    flux_upper = abs(flux - (10**((magupper - zpt) / (-2.5))))
+    flux_lower = abs(flux - (10**((maglower - zpt) / (-2.5))))
 
     fluxerr = (flux_upper + flux_lower) / 2.0
 

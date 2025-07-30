@@ -133,13 +133,13 @@ def Herschel_get_spec(sample_table, search_radius_arcsec, datadir,
                                 # single wavelength for conversion to cgs
                                 wavelength = df.wave[0] * u.micrometer
                                 flux_cgs = flux_Jy.to(u.erg / u.second / (u.centimeter**2) / u.hertz) * (
-                                    const.c.to(u.angstrom/u.second)) / (wavelength.to(u.angstrom)**2)
+                                    const.c.to(u.angstrom / u.second)) / (wavelength.to(u.angstrom)**2)
                                 flux_cgs = flux_cgs.to(
                                     u.erg / u.second / (u.centimeter**2) / u.angstrom)
 
                                 flux_err_Jy = df[max_error].to_numpy() * u.Jy
                                 flux_err_cgs = flux_err_Jy.to(u.erg / u.second / (u.centimeter**2) / u.hertz) * (
-                                    const.c.to(u.angstrom/u.second)) / (wavelength.to(u.angstrom)**2)
+                                    const.c.to(u.angstrom / u.second)) / (wavelength.to(u.angstrom)**2)
                                 flux_err_cgs = flux_err_cgs.to(
                                     u.erg / u.second / (u.centimeter**2) / u.angstrom)
 

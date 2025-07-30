@@ -10,8 +10,8 @@ from matplotlib import pyplot as plt
 from matplotlib.dates import DateFormatter
 
 COLORS = tuple(
-    mpl.colormaps["tab10"].colors[:5] + mpl.colormaps["tab10"].colors[9:] +
-    mpl.colormaps["tab20b"].colors[::4]
+    mpl.colormaps["tab10"].colors[:5] + mpl.colormaps["tab10"].colors[9:]
+    + mpl.colormaps["tab20b"].colors[::4]
 )
 
 

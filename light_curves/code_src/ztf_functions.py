@@ -1,8 +1,10 @@
-from dask.distributed import Client
-import pandas as pd
 import lsdb
+import pandas as pd
 from astropy import units as u
+from dask.distributed import Client
+
 from data_structures import MultiIndexDFObject
+
 
 def ztf_get_lightcurves(sample_table, *, radius=1.0):
     """
@@ -35,9 +37,9 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
     # 2) Convert Astropy table → pandas → LSDB catalog
     sample_df = pd.DataFrame({
         'objectid': sample_table['objectid'],
-        'ra_deg':   sample_table['coord'].ra.deg,
-        'dec_deg':  sample_table['coord'].dec.deg,
-        'label':    sample_table['label'],
+        'ra_deg': sample_table['coord'].ra.deg,
+        'dec_deg': sample_table['coord'].dec.deg,
+        'label': sample_table['label'],
     })
     sample_lsdb = lsdb.from_dataframe(
         sample_df,
@@ -82,12 +84,12 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
     # 4) Concatenate, convert mags → fluxes, and build final MultiIndex
     df_all = pd.concat(per_band_dfs, ignore_index=True).rename(columns={"hmjd": "time"})
     del per_band_dfs
-    mag    = df_all["mag"].to_numpy()
+    mag = df_all["mag"].to_numpy()
     magerr = df_all["magerr"].to_numpy()
-    flux_up  = ((mag - magerr) * u.ABmag).to_value('mJy')
+    flux_up = ((mag - magerr) * u.ABmag).to_value('mJy')
     flux_low = ((mag + magerr) * u.ABmag).to_value('mJy')
     df_all["flux"] = (mag * u.ABmag).to_value('mJy')
-    df_all["err"]  = (flux_up - flux_low) / 2
+    df_all["err"] = (flux_up - flux_low) / 2
 
     index_cols = ["objectid", "label", "band", "time"]
     return MultiIndexDFObject(data=df_all.set_index(index_cols)[["flux", "err"]])

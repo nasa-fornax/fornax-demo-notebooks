@@ -1,11 +1,13 @@
 import os
 import shutil
+
+import astropy.units as u
 import numpy as np
 from astropy.table import vstack
-import astropy.units as u
 from astroquery.mast import Observations
 
-def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000, 
+
+def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000,
                      output_dir="data/Galex", max_products_per_source=None, verbose=True):
     """
     Download GALEX science and sky background images for a given coordinate using astroquery.
@@ -48,7 +50,7 @@ def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000,
     if verbose:
         print(f"Found {len(obs_table)} observations. Getting product lists...")
 
-    #product_tables = [Observations.get_product_list(obs) for obs in obs_table]
+    # product_tables = [Observations.get_product_list(obs) for obs in obs_table]
     all_products = Observations.get_product_list(obs_table)
 
     # Filter for SCIENCE images
@@ -60,17 +62,17 @@ def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000,
 
     # Filter for sky background images based on description
     skybg_products = Observations.filter_products(
-        all_products, 
-        dataproduct_type='image', 
+        all_products,
+        dataproduct_type='image',
         description='Sky background image (J2000)')
 
     if verbose:
         print(f"Found {len(skybg_products)} sky background image(s)")
 
-    #get science and sky bg products:
+    # get science and sky bg products:
     combined_products = vstack([sci_products, skybg_products])
-    
-     # Filter by exposure time
+
+    # Filter by exposure time
     obs_ids_good = set(obs_table[obs_table['t_exptime'] > min_exptime]['obs_id'])
     is_good_obs = np.array([obs_id in obs_ids_good for obs_id in combined_products['obs_id']])
 
@@ -83,24 +85,23 @@ def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000,
          for name in final_products['productFilename']]
     ]
 
-   
     # Download files
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    manifest = Observations.download_products(final_products, 
-                                              mrp_only=False, 
+    manifest = Observations.download_products(final_products,
+                                              mrp_only=False,
                                               download_dir=output_dir)
     downloaded_files = []
     for observation in manifest:
 
-        #get the path to the downloaded file
+        # get the path to the downloaded file
         local_path = observation['Local Path']
         fname = os.path.basename(local_path)
 
-        #put these files in the output directory
-        #not the 'mastDownloads' directory structure
-        final_path = os.path.join(output_dir,fname)
+        # put these files in the output directory
+        # not the 'mastDownloads' directory structure
+        final_path = os.path.join(output_dir, fname)
         shutil.move(local_path, final_path)
         downloaded_files.append(final_path)
 
@@ -108,5 +109,3 @@ def galex_get_images(coords, search_radius_arcsec=60, min_exptime=40000,
         print("Downloaded ", len(downloaded_files), " total files")
 
     return downloaded_files
-
-

@@ -1,12 +1,11 @@
 import os
+from itertools import cycle
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from astropy.table import Table
 from scipy import stats
-from itertools import cycle
-
 
 # List bands that need special treatment
 ELECTRON_BANDS = ["K2", "Kepler", "TESS"]  # flux in electrons/sec

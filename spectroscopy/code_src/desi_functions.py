@@ -41,13 +41,13 @@ def DESIBOSS_get_spec(sample_table, search_radius_arcsec):
         data_releases = ['DESI-EDR', 'BOSS-DR16']
 
         search_coords = stab["coord"]
-        dra = (search_radius_arcsec*u.arcsec).to(u.degree)
-        ddec = (search_radius_arcsec*u.arcsec).to(u.degree)
+        dra = (search_radius_arcsec * u.arcsec).to(u.degree)
+        ddec = (search_radius_arcsec * u.arcsec).to(u.degree)
         out = ['sparcl_id', 'ra', 'dec', 'redshift', 'spectype', 'data_release', 'redshift_err']
         cons = {'spectype': ['GALAXY', 'STAR', 'QSO'],
                 'data_release': data_releases,
-                'ra': [search_coords.ra.deg-dra.value, search_coords.ra.deg+dra.value],
-                'dec': [search_coords.dec.deg-ddec.value, search_coords.dec.deg+ddec.value]
+                'ra': [search_coords.ra.deg - dra.value, search_coords.ra.deg + dra.value],
+                'dec': [search_coords.dec.deg - ddec.value, search_coords.dec.deg + ddec.value]
                 }
         found_I = client.find(outfields=out, constraints=cons, limit=20)  # search
         if len(found_I.records) == 0:
@@ -66,7 +66,7 @@ def DESIBOSS_get_spec(sample_table, search_radius_arcsec):
         inc = ['sparcl_id', 'specid', 'data_release', 'redshift', 'flux',
                'wavelength', 'model', 'ivar', 'mask', 'spectype', 'ra', 'dec']
         results_I = client.retrieve(uuid_list=found_I.ids, include=inc)
-        specs = [Spectrum1D(spectral_axis=r.wavelength*u.AA,
+        specs = [Spectrum1D(spectral_axis=r.wavelength * u.AA,
                             flux=np.array(r.flux) * 10**-17 * u.Unit('erg cm-2 s-1 AA-1'),
                             uncertainty=nddata.InverseVariance(np.array(r.ivar)),
                             redshift=r.redshift,
@@ -86,7 +86,7 @@ def DESIBOSS_get_spec(sample_table, search_radius_arcsec):
             # Inverse variances may be zero, resulting in infinite error.
             # We'll leave these in and ignore the "divide by zero" warning.
             with np.errstate(divide='ignore'):
-                err = np.sqrt(1/specs[idx_closest].uncertainty.quantity)
+                err = np.sqrt(1 / specs[idx_closest].uncertainty.quantity)
 
             # create MultiIndex Object
             dfsingle = pd.DataFrame(dict(wave=[specs[idx_closest].spectral_axis],
