@@ -1,7 +1,8 @@
 # function to extract cutout image
 import math
-from astropy.nddata import Cutout2D
+
 import astropy.io.fits as fits
+from astropy.nddata import Cutout2D
 from astropy.wcs import WCS
 
 

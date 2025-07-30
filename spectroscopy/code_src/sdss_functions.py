@@ -1,8 +1,8 @@
 import astropy.units as u
 import numpy as np
 import pandas as pd
-from astroquery.sdss import SDSS
 from astropy.table import Table
+from astroquery.sdss import SDSS
 
 from data_structures_spec import MultiIndexDFObject
 

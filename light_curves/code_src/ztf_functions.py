@@ -1,7 +1,8 @@
-from dask.distributed import Client
-import pandas as pd
 import lsdb
+import pandas as pd
 from astropy import units as u
+from dask.distributed import Client
+
 from data_structures import MultiIndexDFObject
 
 

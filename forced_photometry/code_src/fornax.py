@@ -1,19 +1,15 @@
-import os
-import requests
 import json
 import logging
+import os
 import threading
 from pathlib import Path
 
-import numpy as np
-
-from astropy.utils.data import download_file
-from astropy.utils.console import ProgressBarOrSpinner
-import pyvo
-
 import boto3
 import botocore
-
+import pyvo
+import requests
+from astropy.utils.console import ProgressBarOrSpinner
+from astropy.utils.data import download_file
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(name)s | %(message)s")
 log = logging.getLogger('fornax')

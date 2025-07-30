@@ -1,9 +1,9 @@
 import time
+
 import numpy as np
 import pandas as pd
-
-from astropy.table import Table
 from astroquery.gaia import Gaia
+
 from data_structures import MultiIndexDFObject
 
 

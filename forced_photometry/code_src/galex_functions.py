@@ -1,8 +1,9 @@
 import os
 import shutil
+
+import astropy.units as u
 import numpy as np
 from astropy.table import vstack
-import astropy.units as u
 from astroquery.mast import Observations
 
 

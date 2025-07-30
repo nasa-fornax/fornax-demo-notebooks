@@ -1,18 +1,16 @@
-from contextlib import contextmanager
 import os
 import sys
 import warnings
-
-from astropy.stats import sigma_clipped_stats
-import numpy as np
+from contextlib import contextmanager
 from typing import NamedTuple
 
+import numpy as np
+from astropy.stats import sigma_clipped_stats
 from exceptions import TractorError
 
 # temporarily let the notebook start without tractor as dependency
 try:
-    from tractor import (Tractor, PixelizedPSF, NullWCS,
-                         NullPhotoCal, ConstantSky, Image)
+    from tractor import ConstantSky, Image, NullPhotoCal, NullWCS, PixelizedPSF, Tractor
 
 except ImportError:
     print("tractor is missing")

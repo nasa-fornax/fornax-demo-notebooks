@@ -1,7 +1,8 @@
 from pathlib import Path
+
 import pyvo
-from astropy.table import Table, vstack, join
-import pandas as pd
+from astropy.table import vstack
+
 from data_structures import MultiIndexDFObject
 
 

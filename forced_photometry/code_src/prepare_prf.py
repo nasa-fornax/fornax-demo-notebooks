@@ -1,10 +1,7 @@
 # function to make the PRF the same pixel scale as the mosaic images and normalized
 # tractor expects this, and will give bad results if the pixel scale or normalization is anything else
-from astropy.nddata import Cutout2D
 import astropy.io.fits as fits
-import sys
-
-
+from astropy.nddata import Cutout2D
 from reproject import reproject_interp
 
 

@@ -10,7 +10,6 @@ from tqdm.auto import tqdm
 from data_structures import MultiIndexDFObject
 from fluxconversions import convert_wise_flux_to_millijansky
 
-
 BANDMAP = {"W1": 1, "W2": 2}  # map the common names to the values actually stored in the catalog
 K = 5  # HEALPix order at which the dataset is partitioned
 

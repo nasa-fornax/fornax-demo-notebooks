@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from astropy.table import vstack
 import pyvo
+from astropy.table import vstack
 from tqdm.auto import tqdm
 
 from data_structures import MultiIndexDFObject

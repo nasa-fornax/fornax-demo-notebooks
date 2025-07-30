@@ -1,10 +1,12 @@
+import itertools
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.stats import sigmaclip
-import itertools
-from sklearn.neighbors import KNeighborsRegressor
 from astropy.time import Time
+
+from scipy.stats import sigmaclip
+from sklearn.neighbors import KNeighborsRegressor
 
 # local code imports
 from fluxconversions import mjd_to_jd

@@ -1,5 +1,3 @@
-from requests.exceptions import ConnectionError
-
 import astropy.units as u
 from alerce.core import Alerce
 from astropy.coordinates import SkyCoord
@@ -8,6 +6,7 @@ from astroquery.ipac.ned import Ned
 from astroquery.sdss import SDSS
 from astroquery.simbad import Simbad
 from astroquery.vizier import Vizier
+from requests.exceptions import ConnectionError
 
 
 # lamassa et al., 2015  1 source

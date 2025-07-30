@@ -1,14 +1,16 @@
+import warnings
+
 import astropy.units as u
 import numpy as np
 import pandas as pd
-from astropy.coordinates import SkyCoord
-from astropy.table import QTable
-from astropy.io import fits
-from astroquery.ipac.irsa import Irsa
-from data_structures_spec import MultiIndexDFObject
-from pyvo.dal import DALQueryError
 import requests
-import warnings
+from astropy.coordinates import SkyCoord
+from astropy.io import fits
+from astropy.table import QTable
+from astroquery.ipac.irsa import Irsa
+from pyvo.dal import DALQueryError
+
+from data_structures_spec import MultiIndexDFObject
 
 # We filter these specific warnings out as the end user can do nothing to about them, they have to be fixed at the data providers level.
 # Remove the filters once they are not used in a newer data release

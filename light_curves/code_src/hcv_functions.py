@@ -1,6 +1,7 @@
 import pandas as pd
 import requests
 from astropy.table import Table
+
 from data_structures import MultiIndexDFObject
 from fluxconversions import convertACSmagtoflux
 

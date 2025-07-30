@@ -1,17 +1,16 @@
 import os
 import shutil
 import warnings
-import fsspec
 
 import astropy.constants as const
 import astropy.units as u
-from astropy.io import fits
 import astroquery.exceptions
+import fsspec
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from astropy.table import Table
-from astropy.table import vstack
+from astropy.io import fits
+from astropy.table import Table, vstack
 from astroquery.mast import Observations
 from specutils import Spectrum
 
