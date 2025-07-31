@@ -1,7 +1,7 @@
-# Spectra Generator
+# Spectra Collector
 
 In this User Case Scenario we work towards creating a spectroscopic library
-from multiple archival and publication resources and classifying and analysing
+from multiple archival and publication resources and classifying and analyzing
 them.
 
 
@@ -10,6 +10,6 @@ them.
 ---
 maxdepth: 1
 ---
-spectra_generator
+spectra_collector
 
 ```

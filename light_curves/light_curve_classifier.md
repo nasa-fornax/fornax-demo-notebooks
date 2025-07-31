@@ -37,7 +37,7 @@ The challenges of this time-domain dataset for ML work are:
 
 
 ## Input
-Light curve parquet file of multiwavelength light curves from the light_curve_generator.md demo notebook in this same repo.  The format of the light curves is a Pandas multiindex data frame.
+Light curve parquet file of multiwavelength light curves from the light_curve_collector.md demo notebook in this same repo.  The format of the light curves is a Pandas multiindex data frame.
 
 We choose to use a Pandas multiindex dataframe to store and work with the data because it fulfills these requirements:
 1. It can handle the above challenges of a dataset = multi-variate, unqueal length with missing data.
@@ -124,10 +124,10 @@ pd.options.mode.copy_on_write = True
 ## 1. Read in a dataset of archival light curves
  We use here a sample of AGN including known CLAGN & random SDSS AGN
 
- If you want to use your own sample, you can use the code [light_curve_generator.md](https://nasa-fornax.github.io/fornax-demo-notebooks/light_curves/light_curve_generator.html) in this same repo to make the required pandas dataframe which you will need to run this notebook.
+ If you want to use your own sample, you can use the code [light_curve_collector.md](https://nasa-fornax.github.io/fornax-demo-notebooks/light_curves/light_curve_collector.html) in this same repo to make the required pandas dataframe which you will need to run this notebook.
 
 ```{code-cell} ipython3
-# First we want to load light curves made in the light curve generator notebook
+# First we want to load light curves made in the light_curve_collector notebook
 
 # The data is on google drive, this will download it for you and read it into
 # a pandas dataframe
@@ -567,7 +567,7 @@ Lets assume we now have a classifier which can accurately differentiate CLAGN fr
 ```{code-cell} ipython3
 #read in a dataframe of our new sample:
 # we are going to cheat here and use the same file as we used for input to the above, but you should
-# replace this with your favorite sample run through the light_curve_generator in this same repo.
+# replace this with your favorite sample run through the light_curve_collector in this same repo.
 path_to_sample = './data/small_CLAGN_SDSS_df_lc.parquet'
 my_sample = pd.read_parquet(path_to_sample)
 ```
@@ -641,7 +641,7 @@ y_mysample = clf.predict(X_mysample)
 ```
 
 ```{code-cell} ipython3
-#access the sample_table made in the light curve generator notebook
+#access the sample_table made in the light_curve_collector notebook
 #has information about the sample including ra & dec
 savename_sample = './data/small_CLAGN_SDSS_sample.ecsv'
 gdd.download_file_from_google_drive(file_id='1pSEKVP4LbrdWQK9ws3CaI90m3Z_2fazL',
