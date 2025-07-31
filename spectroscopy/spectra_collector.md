@@ -109,7 +109,7 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-# %pip install -r requirements_spectra_generator.txt
+# %pip install -r requirements_spectra_collector.txt
 ```
 
 ```{code-cell} ipython3

@@ -36,7 +36,7 @@ DEFAULTS = {
 
 def run(*, build, **kwargs_dict):
     """
-    Run the light_curve_generator step indicated by `build`.
+    Run the light_curve_collector step indicated by `build`.
 
     Parameters
     ----------

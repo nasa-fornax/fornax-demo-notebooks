@@ -20,7 +20,7 @@ kernelspec:
 
 By the end of this tutorial, you will be able to:
 
-- Parallelize the code demonstrated in the [light_curve_generator](light_curve_generator.md) notebook to get multi-wavelength light curves.
+- Parallelize the code demonstrated in the [light_curve_collector](light_curve_collector.md) notebook to get multi-wavelength light curves.
 - Launch a run using a large sample of objects, monitor the run's progress automatically, and understand its resource usage (CPU and RAM).
 - Understand some general challenges and requirements when scaling up code.
 
@@ -31,13 +31,13 @@ By the end of this tutorial, you will be able to:
 +++
 
 This notebook shows how to collect multi-wavelength light curves for a large sample of target objects.
-This is a scaling-up of the [light_curve_generator](light_curve_generator.md) and assumes you are familiar with the content of that notebook.
+This is a scaling-up of the [light_curve_collector](light_curve_collector.md) and assumes you are familiar with the content of that notebook.
 
 Notebook sections are:
 
 - Overview: Describes functionality of the included bash script and python helper functions. Compares some parallel processing options. Introduces `top` and what be aware of.
 - Example 1: Shows how to launch a large-scale run using the bash script, monitor its progress automatically, and diagnose a problem (out of RAM). This method is recommended for sample sizes greater than a few hundred.
-- Example 2: Shows how to parallelize the example from the light_curve_generator notebook using the helper and python's `multiprocessing` library.
+- Example 2: Shows how to parallelize the example from the light_curve_collector notebook using the helper and python's `multiprocessing` library.
 - Example 3: Details the helper parameter options and how to use them in python and bash.
 - Appendix: Contains background information including a discussion of the challenges, needs, and wants encountered when scaling up this code, and general advice for the user which can be applied to other use cases.
 
@@ -57,13 +57,13 @@ Also be aware that the script path shown in the commands below assumes you are i
 ### Parallel processing methods: bash script vs. python's `multiprocessing`
 
 - Bash script: Recommended for most runs with medium to large sample sizes (>~500). Allows ZTF to use additional parallelization internally, and so is often faster (ZTF often takes the longest and returns the most data for AGN-like samples). Writes stdout and stderr to log files, useful for monitoring jobs and resource usage. Can save `top` output to a file to help identify CPU and RAM usage/needs.
-- Python's `multiprocessing` library: Can be convenient for runs with small to medium sample sizes, up to ~500. Has drawbacks that may be significant including the inability to use ZTF's internal parallelization and that it does not save the log output (stdout and stderr) to file. An advantage of the `multiprocessing` example in this notebook over the light_curve_generator is that it automatically saves the sample and light curve data to disk after loading them and can automatically skip those functions in subsequent calls and use the files instead.
+- Python's `multiprocessing` library: Can be convenient for runs with small to medium sample sizes, up to ~500. Has drawbacks that may be significant including the inability to use ZTF's internal parallelization and that it does not save the log output (stdout and stderr) to file. An advantage of the `multiprocessing` example in this notebook over the light_curve_collector is that it automatically saves the sample and light curve data to disk after loading them and can automatically skip those functions in subsequent calls and use the files instead.
 
 +++
 
 ### The python helper
 
-The python "helper" is a set of wrapper functions around the same 'code_src/' functions used in the light_curve_generator notebook.
+The python "helper" is a set of wrapper functions around the same 'code_src/' functions used in the light_curve_collector notebook.
 
 - The wrappers facilitate parallelization and large-scale runs by automating tasks like saving the function outputs to files.
 - The helper does not actually implement parallelization and can only run one function per call.
@@ -361,11 +361,11 @@ From here, the user can choose an appropriately sized machine and/or consider wh
 
 +++
 
-## Example 2: Parallelizing the light_curve_generator notebook
+## Example 2: Parallelizing the light_curve_collector notebook
 
 +++
 
-This example shows how to parallelize the example from the light_curve_generator notebook using the helper and python's `multiprocessing`.
+This example shows how to parallelize the example from the light_curve_collector notebook using the helper and python's `multiprocessing`.
 An advantage of the method shown here is that it automatically saves the sample and light curve data to disk after loading them and can automatically skip those steps in subsequent calls and use the files instead.
 This is a small sample (Yang, 30 objects).
 If you want a sample larger than a few hundred, consider using the bash script instead.
@@ -570,7 +570,7 @@ If the job is running in the background, print statements and error messages may
 +++
 
 The main goal is to reduce the total time it takes to run the full code, so we want to look for opportunities to parallelize.
-We can group the light_curve_generator code into two main steps: (1) gather the target object sample; then (2) generate light curves by querying the archives and standardizing the returned data.
+We can group the light_curve_collector code into two main steps: (1) gather the target object sample; then (2) generate light curves by querying the archives and standardizing the returned data.
 All of the archive calls have to wait for the sample to be available before starting, but then they can run independently in parallel.
 This is fortunate, since gathering the sample does not take long compared to the archive calls.
 
@@ -579,7 +579,7 @@ Even with parallelization, gathering light curves for a large sample of objects 
 So we want to automate the monitoring tasks as much as possible.
 
 If the run fails, we'd like to be able to restart it without having to redo steps that were previously successful.
-To accomplish this, the inputs and outputs need to be less tightly coupled than they are in the light_curve_generator notebook.
+To accomplish this, the inputs and outputs need to be less tightly coupled than they are in the light_curve_collector notebook.
 Specifically, we want to save the sample and light curve data to file as soon as each piece is collected, and we want the archive functions to be able to get the `sample_table` input from file.
 
 The python helper and bash script were specifically designed to fulfill many of these wants and needs.
