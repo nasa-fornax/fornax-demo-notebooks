@@ -129,7 +129,7 @@ The working part of the notebook. Lay out the step-by-step analysis workflow.  E
 
 Notebooks go through a two step process: first step is getting into the repo, and the second step gets it into the [published tutorials](https://nasa-fornax.github.io/fornax-demo-notebooks/). 
 
-To complete the review for the first step, both a science and technical reviewer will be looking at this checklist to see if the new tutorial notebook meets all of the requirements, or has a reasonable excuse not to. Please consider these checklist requirements as you are writing your code.
+To complete the review for the first step, both a science and technical reviewer will be looking at [this checklist](https://github.com/nasa-fornax/fornax-demo-notebooks/blob/main/notebook_review_checklists.md) to see if the new tutorial notebook meets all of the requirements, or has a reasonable excuse not to. Please consider these checklist requirements as you are writing your code.
 
 +++
 
@@ -138,13 +138,13 @@ To complete the review for the first step, both a science and technical reviewer
 This work made use of:
 
 * STScI style guide: https://github.com/spacetelescope/style-guides/blob/master/guides/jupyter-notebooks.md
-* Fornax tech and science review guidelines:
+* Fornax tech and science review guidelines: https://github.com/nasa-fornax/fornax-demo-notebooks/blob/main/notebook_review_checklists.md
 
 +++
 
 ## About this notebook:
 
-Last Updated: 2025-08-14
+Last Updated: 2025-08-15
 
 Contact: [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov) with questions or problems.
 
