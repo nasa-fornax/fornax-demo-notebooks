@@ -41,7 +41,8 @@ exclude_patterns = ['_build', 'notes', '.tox', '.tmp', '.pytest_cache']
 exclude_patterns += ['README.md', '*/data/*', '*/output/*']
 
 # Not yet included in the rendering:
-exclude_patterns += ['spectroscopy/*', '*/code_src/*']
+
+exclude_patterns += ['spectroscopy/explore*', '*/code_src/*']
 
 # Myst-NB configuration
 # Override kernelspec.name for rendering for all the notebooks.
