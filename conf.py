@@ -6,9 +6,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
 
 
 # -- Project information -----------------------------------------------------
@@ -61,6 +59,13 @@ nb_execution_excludepatterns += ['multiband_photometry.md',]
 # We use the non-public IRSA bucket for ZTF data, cannot execute the generator
 # notebook until https://github.com/nasa-fornax/fornax-demo-notebooks/issues/311 is addressed
 nb_execution_excludepatterns += ['light_curve_generator.md',]
+
+
+if 'CIRCLECI' in os.environ:
+    # Workaround for e.g. https://github.com/nasa-fornax/fornax-demo-notebooks/issues/475
+    # Some of the notebooks run into a DeadKernelError (hitting the memory limit) on CircleCI,
+    # but do execute and render on GHA. Ignore them here.
+    nb_execution_excludepatterns += ['light_curve_classifier.md']
 
 # -- Options for HTML output -------------------------------------------------
 
