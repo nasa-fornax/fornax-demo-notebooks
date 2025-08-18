@@ -38,7 +38,7 @@ exclude_patterns = ['_build', 'notes', '.tox', '.tmp', '.pytest_cache']
 
 # Top level README file's sole purpose is for the repo. We also don't include
 # the data and output directories that are to be populated while running the notebooks.
-exclude_patterns += ['README.md', '*/data/*', '*/output/*']
+exclude_patterns += ['README.md', 'notebook_review_checklists.md', '*/data/*', '*/output/*']
 
 # Not yet included in the rendering:
 exclude_patterns += ['spectroscopy/*', '*/code_src/*']
