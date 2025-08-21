@@ -6,8 +6,8 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.17.2
 kernelspec:
-  name: py-spectra_collector
-  display_name: py-spectra_collector
+  name: py-spectra_generator
+  display_name: py-spectra_generator
   language: python
 ---
 
