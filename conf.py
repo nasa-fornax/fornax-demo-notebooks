@@ -56,9 +56,9 @@ nb_execution_excludepatterns = []
 # (aka tractor install pain).
 nb_execution_excludepatterns += ['multiband_photometry.md',]
 
-# We use the non-public IRSA bucket for ZTF data, cannot execute the generator
+# We use the non-public IRSA bucket for ZTF data, cannot execute the collector
 # notebook until https://github.com/nasa-fornax/fornax-demo-notebooks/issues/311 is addressed
-nb_execution_excludepatterns += ['light_curve_generator.md',]
+nb_execution_excludepatterns += ['light_curve_collector.md',]
 
 
 if 'CIRCLECI' in os.environ:
