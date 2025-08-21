@@ -9,7 +9,7 @@ This repo houses tutorial notebooks of fully worked science use cases for all us
 
 ## Documentation
 
-The user cases and documentation of the Fornax Initiative are currently available at the https://nasa-fornax.github.io/fornax-documentation/ URL, while the source code for the documentation can be found in the [fornax-documentation](https://github.com/nasa-fornax/fornax-documentation) repository.
+The documentation of the Fornax Initiative are currently available at the https://nasa-fornax.github.io/fornax-documentation/ URL, while the source code for the documentation can be found in the [fornax-documentation](https://github.com/nasa-fornax/fornax-documentation) repository.
 
 ## Content contributing
 
