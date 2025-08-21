@@ -48,7 +48,7 @@
     <link rel="icon" href="../_static/fornax_favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Make Multi-Wavelength Light Curves Using Archival Data" href="light_curve_generator.html" />
+    <link rel="next" title="Make Multi-Wavelength Light Curves Using Archival Data" href="light_curve_collector.html" />
     <link rel="prev" title="Automated Multiband Forced Photometry on Large Datasets" href="../forced_photometry/multiband_photometry.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -189,7 +189,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Time Domain</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="light_curve_generator.html">Make Multi-Wavelength Light Curves Using Archival Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="light_curve_collector.html">Make Multi-Wavelength Light Curves Using Archival Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="scale_up.html">Make Multi-Wavelength Light Curves for Large Samples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="light_curve_classifier.html">Light Curve Classifier</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ML_AGNzoo.html">AGN Zoo: Comparison of AGN selected with different metrics</a></li>
@@ -396,14 +396,14 @@ document.write(`
 <h1>Time Domain<a class="headerlink" href="#time-domain" title="Link to this heading">#</a></h1>
 <p>In this set of Use Case Scenario we work towards creating multi-band light curves from multiple archival and publication resources at scale and classifying and analyzing them with machine learning tools. Tutorials included in this folder are:</p>
 <ol class="arabic simple">
-<li><p><a class="reference internal" href="light_curve_generator.html"><span class="std std-doc">light_curve_generator</span></a>: This notebook automatically retrieves target positions from the literature and then queries multiple data archives for light curves of those targets.</p></li>
-<li><p><a class="reference internal" href="scale_up.html"><span class="std std-doc">scale_up</span></a>: This notebook builds on the code demonstrated in light_curve_generator and is recommended for &gt;~500 targets. It is able to generate light curves for a large number of targets (500,000+) and provides additional monitoring options.</p></li>
-<li><p><a class="reference internal" href="light_curve_classifier.html"><span class="std std-doc">light_curve_classifier</span></a>: This notebook takes output from light_curve generator and trains a ML classifier to be able to differentiate amongst the targets based on their light curves.</p></li>
-<li><p><a class="reference internal" href="ML_AGNzoo.html"><span class="std std-doc">ML_AGNzoo</span></a>: This notebook takes output from the light_curve_generator and visualizes/compares different labelled targets on a reduced dimension grid.</p></li>
+<li><p><a class="reference internal" href="light_curve_collector.html"><span class="std std-doc">light_curve_collector</span></a>: This notebook automatically retrieves target positions from the literature and then queries multiple data archives for light curves of those targets.</p></li>
+<li><p><a class="reference internal" href="scale_up.html"><span class="std std-doc">scale_up</span></a>: This notebook builds on the code demonstrated in light_curve_collector and is recommended for &gt;~500 targets. It is able to generate light curves for a large number of targets (500,000+) and provides additional monitoring options.</p></li>
+<li><p><a class="reference internal" href="light_curve_classifier.html"><span class="std std-doc">light_curve_classifier</span></a>: This notebook takes output from light_curve_collector and trains a ML classifier to be able to differentiate amongst the targets based on their light curves.</p></li>
+<li><p><a class="reference internal" href="ML_AGNzoo.html"><span class="std std-doc">ML_AGNzoo</span></a>: This notebook takes output from the light_curve_collector and visualizes/compares different labelled targets on a reduced dimension grid.</p></li>
 </ol>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="light_curve_generator.html">Make Multi-Wavelength Light Curves Using Archival Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="light_curve_collector.html">Make Multi-Wavelength Light Curves Using Archival Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scale_up.html">Make Multi-Wavelength Light Curves for Large Samples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="light_curve_classifier.html">Light Curve Classifier</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ML_AGNzoo.html">AGN Zoo: Comparison of AGN selected with different metrics</a></li>
@@ -432,7 +432,7 @@ document.write(`
       </div>
     </a>
     <a class="right-next"
-       href="light_curve_generator.html"
+       href="light_curve_collector.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>

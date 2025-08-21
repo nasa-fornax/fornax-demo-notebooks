@@ -189,7 +189,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="README.html">Time Domain</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="light_curve_generator.html">Make Multi-Wavelength Light Curves Using Archival Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="light_curve_collector.html">Make Multi-Wavelength Light Curves Using Archival Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="scale_up.html">Make Multi-Wavelength Light Curves for Large Samples</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Light Curve Classifier</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ML_AGNzoo.html">AGN Zoo: Comparison of AGN selected with different metrics</a></li>
@@ -462,7 +462,7 @@ document.write(`
 </section>
 <section id="input">
 <h2>Input<a class="headerlink" href="#input" title="Link to this heading">#</a></h2>
-<p>Light curve parquet file of multiwavelength light curves from the light_curve_generator.md demo notebook in this same repo.  The format of the light curves is a Pandas multiindex data frame.</p>
+<p>Light curve parquet file of multiwavelength light curves from the light_curve_collector.md demo notebook in this same repo.  The format of the light curves is a Pandas multiindex data frame.</p>
 <p>We choose to use a Pandas multiindex dataframe to store and work with the data because it fulfills these requirements:</p>
 <ol class="arabic simple">
 <li><p>It can handle the above challenges of a dataset = multi-variate, unqueal length with missing data.</p></li>
@@ -559,10 +559,10 @@ document.write(`
 <section id="read-in-a-dataset-of-archival-light-curves">
 <h2>1. Read in a dataset of archival light curves<a class="headerlink" href="#read-in-a-dataset-of-archival-light-curves" title="Link to this heading">#</a></h2>
 <p>We use here a sample of AGN including known CLAGN &amp; random SDSS AGN</p>
-<p>If you want to use your own sample, you can use the code <a class="reference external" href="https://nasa-fornax.github.io/fornax-demo-notebooks/light_curves/light_curve_generator.html">light_curve_generator.md</a> in this same repo to make the required pandas dataframe which you will need to run this notebook.</p>
+<p>If you want to use your own sample, you can use the code <a class="reference external" href="https://nasa-fornax.github.io/fornax-demo-notebooks/light_curves/light_curve_collector.html">light_curve_collector.md</a> in this same repo to make the required pandas dataframe which you will need to run this notebook.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># First we want to load light curves made in the light curve generator notebook</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># First we want to load light curves made in the light_curve_collector notebook</span>
 
 <span class="c1"># The data is on google drive, this will download it for you and read it into</span>
 <span class="c1"># a pandas dataframe</span>
@@ -1677,12 +1677,12 @@ fewer data points.</p></li>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Accuracy of Random Interval Classifier: 0.7333333333333333
-CPU times: user 1.25 s, sys: 879 ms, total: 2.13 s
-Wall time: 1min 13s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Accuracy of Random Interval Classifier: 0.7555555555555555
+CPU times: user 1.24 s, sys: 837 ms, total: 2.07 s
+Wall time: 1min 12s
 </pre></div>
 </div>
-<img alt="../_images/0160af5646e9b3c64900b5ec4cbcd279bf57c121c2a053a4e2e67aedf8c7337c.png" src="../_images/0160af5646e9b3c64900b5ec4cbcd279bf57c121c2a053a4e2e67aedf8c7337c.png" />
+<img alt="../_images/3eba6708d9c77c5a83427425dfcdaaad8720bb504e53f07294a8b55f87b2dd1c.png" src="../_images/3eba6708d9c77c5a83427425dfcdaaad8720bb504e53f07294a8b55f87b2dd1c.png" />
 </div>
 </div>
 </section>
@@ -1728,7 +1728,7 @@ Wall time: 1min 13s
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#read in a dataframe of our new sample:</span>
 <span class="c1"># we are going to cheat here and use the same file as we used for input to the above, but you should</span>
-<span class="c1"># replace this with your favorite sample run through the light_curve_generator in this same repo.</span>
+<span class="c1"># replace this with your favorite sample run through the light_curve_collector in this same repo.</span>
 <span class="n">path_to_sample</span> <span class="o">=</span> <span class="s1">&#39;./data/small_CLAGN_SDSS_df_lc.parquet&#39;</span>
 <span class="n">my_sample</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">path_to_sample</span><span class="p">)</span>
 </pre></div>
@@ -1998,7 +1998,7 @@ Wall time: 1min 13s
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#access the sample_table made in the light curve generator notebook</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#access the sample_table made in the light_curve_collector notebook</span>
 <span class="c1">#has information about the sample including ra &amp; dec</span>
 <span class="n">savename_sample</span> <span class="o">=</span> <span class="s1">&#39;./data/small_CLAGN_SDSS_sample.ecsv&#39;</span>
 <span class="n">gdd</span><span class="o">.</span><span class="n">download_file_from_google_drive</span><span class="p">(</span><span class="n">file_id</span><span class="o">=</span><span class="s1">&#39;1pSEKVP4LbrdWQK9ws3CaI90m3Z_2fazL&#39;</span><span class="p">,</span>
@@ -2126,6 +2126,14 @@ Unzipping...
     </tr>
     <tr>
       <th>96</th>
+      <td>163</td>
+      <td>CLAGN</td>
+      <td>237.571790</td>
+      <td>41.650640</td>
+      <td>Yang 18</td>
+    </tr>
+    <tr>
+      <th>97</th>
       <td>204</td>
       <td>CLAGN</td>
       <td>171.400690</td>
@@ -2133,19 +2141,11 @@ Unzipping...
       <td>SDSS</td>
     </tr>
     <tr>
-      <th>97</th>
+      <th>98</th>
       <td>282</td>
       <td>CLAGN</td>
       <td>161.163170</td>
       <td>38.759552</td>
-      <td>SDSS</td>
-    </tr>
-    <tr>
-      <th>98</th>
-      <td>314</td>
-      <td>CLAGN</td>
-      <td>259.412720</td>
-      <td>32.704313</td>
       <td>SDSS</td>
     </tr>
     <tr>
