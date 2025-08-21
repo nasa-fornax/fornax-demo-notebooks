@@ -647,24 +647,27 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 <p>While these aren’t strictly light curves, we would like to track if there are gamma rays detected in advance of any change in the CLAGN light curves. We store these gamma ray detections as single data points.  Because gamma ray detections typically have very large error radii, our current technique is to keep matches in the catalogs within some manually selected error radius, currently defaulting to 1 degree for Fermi and 3 degrees for Beppo SAX.  These values are chosen based on a histogram of all values for those catalogs.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">start_serial</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>  <span class="c1">#keep track of all serial archive calls to compare later with parallel archive call time</span>
-<span class="n">heasarcstarttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># This data is temporarily unavailable.</span>
+<span class="c1"># This cell will be uncommented once the data is available again.</span>
 
-<span class="c1"># What is the size of error_radius for the catalogs that we will accept for our cross-matching?</span>
-<span class="c1"># in degrees; chosen based on histogram of all values for these catalogs</span>
-<span class="n">max_fermi_error_radius</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
-<span class="n">max_sax_error_radius</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
-
-<span class="c1"># catalogs to query and their corresponding max error radii</span>
-<span class="n">heasarc_catalogs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;FERMIGTRIG&quot;</span><span class="p">:</span> <span class="n">max_fermi_error_radius</span><span class="p">,</span> <span class="s2">&quot;SAXGRBMGRB&quot;</span><span class="p">:</span> <span class="n">max_sax_error_radius</span><span class="p">}</span>
-
-<span class="c1"># get heasarc light curves in the above curated list of catalogs</span>
-<span class="n">df_lc_HEASARC</span> <span class="o">=</span> <span class="n">heasarc_get_lightcurves</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,</span> <span class="n">catalog_error_radii</span><span class="o">=</span><span class="n">heasarc_catalogs</span><span class="p">)</span>
-
-<span class="c1"># add the resulting dataframe to all other archives</span>
-<span class="n">df_lc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lc_HEASARC</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;heasarc search took:&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">heasarcstarttime</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
+<span class="c1"># start_serial = time.time()  #keep track of all serial archive calls to compare later with parallel archive call time</span>
+<span class="c1"># heasarcstarttime = time.time()</span>
+<span class="c1">#</span>
+<span class="c1"># # What is the size of error_radius for the catalogs that we will accept for our cross-matching?</span>
+<span class="c1"># # in degrees; chosen based on histogram of all values for these catalogs</span>
+<span class="c1"># max_fermi_error_radius = str(1.0)</span>
+<span class="c1"># max_sax_error_radius = str(3.0)</span>
+<span class="c1">#</span>
+<span class="c1"># # catalogs to query and their corresponding max error radii</span>
+<span class="c1"># heasarc_catalogs = {&quot;FERMIGTRIG&quot;: max_fermi_error_radius, &quot;SAXGRBMGRB&quot;: max_sax_error_radius}</span>
+<span class="c1">#</span>
+<span class="c1"># # get heasarc light curves in the above curated list of catalogs</span>
+<span class="c1"># df_lc_HEASARC = heasarc_get_lightcurves(sample_table, catalog_error_radii=heasarc_catalogs)</span>
+<span class="c1">#</span>
+<span class="c1"># # add the resulting dataframe to all other archives</span>
+<span class="c1"># df_lc.append(df_lc_HEASARC)</span>
+<span class="c1">#</span>
+<span class="c1"># print(&#39;heasarc search took:&#39;, time.time() - heasarcstarttime, &#39;s&#39;)</span>
 </pre></div>
 </div>
 </div>
@@ -897,7 +900,7 @@ For sample sizes &gt;~500 and/or improved logging and monitoring options, consid
 <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">n_workers</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
 
     <span class="c1"># start the processes that call the archives</span>
-    <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">heasarc_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">kwds</span><span class="o">=</span><span class="n">heasarc_kwargs</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
+    <span class="c1"># pool.apply_async(heasarc_get_lightcurves, args=(sample_table,), kwds=heasarc_kwargs, callback=callback)</span>
     <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">wise_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">kwds</span><span class="o">=</span><span class="n">wise_kwargs</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
     <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">tess_kepler_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">kwds</span><span class="o">=</span><span class="n">tess_kepler_kwargs</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
     <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">hcv_get_lightcurves</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">sample_table</span><span class="p">,),</span> <span class="n">kwds</span><span class="o">=</span><span class="n">hcv_kwargs</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
