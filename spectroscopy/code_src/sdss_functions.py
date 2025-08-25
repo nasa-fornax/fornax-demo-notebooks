@@ -1,7 +1,6 @@
 import astropy.units as u
 import numpy as np
 import pandas as pd
-from astropy.table import Table
 from astroquery.sdss import SDSS
 
 from data_structures_spec import MultiIndexDFObject
@@ -38,15 +37,8 @@ def SDSS_get_spec(sample_table, search_radius_arcsec, data_release):
         xid = SDSS.query_region(search_coords, radius=search_radius_arcsec
                                 * u.arcsec, spectro=True, data_release=data_release)
 
-        # empty result means no match
-        if not isinstance(xid, Table) or len(xid) == 0:
-            print(f"Source {stab['label']} returned no results.")
-            continue
-
-        # sometimes the query returns an unexpected result of an astropy table with no real columns
-        # and HTTP errors, make sure to catch this by checking if the colnames that we require exist.
-        if {"plate", "mjd", "fiberID"}.difference(xid.colnames):
-            print(f"Source {stab['label']} missing required SDSS columns: {xid.colnames}")
+        if xid is None:
+            print("Source {} could not be found".format(stab["label"]))
             continue
 
         sp = SDSS.get_spectra(matches=xid, show_progress=True, data_release=data_release)
