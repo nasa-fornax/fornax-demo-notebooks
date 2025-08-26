@@ -54,6 +54,7 @@ We require the following packages:
 - `dask` for parallelization.
 
 ```{code-cell} ipython3
+# Uncomment the next line to install dependencies if needed.
 # %pip install -r requirements_ztf_ps1_crossmatch.txt
 ```
 
