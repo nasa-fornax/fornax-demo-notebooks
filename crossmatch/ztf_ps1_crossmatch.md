@@ -115,7 +115,10 @@ elif dask_workers == "default":
 else:
     raise ValueError("`dask_workers` must be one of 'default', 'scale' or an int.")
 
-# Select the search radius to give us the right number of rows.
+# We must pass a radius to lsdb. Here is the mapping between radius and desired number of rows for ZTF.
+# The values in this dictionary were determined experimentally, by 
+# incrementing/decrementing the radius until the desired number of 
+# catalog rows was returned.
 radius = { # Nrows: radius_arcseconds
            10_000:     331,
           100_000:    1047,
@@ -124,9 +127,6 @@ radius = { # Nrows: radius_arcseconds
       100_000_000:  33_743,
     1_000_000_000: 102_000,
 }
-# The values in the above dictionary were determined experimentally, by 
-# incrementing/decrementing the radius until the desired number of 
-# catalog rows was returned.
 ```
 
 ## 2. Read in catalogs and downselect ZTF to Nrows
