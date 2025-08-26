@@ -215,7 +215,7 @@ benchmarks.loc[
     ] = t1.total_seconds(), int(rows_out), datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 benchmarks = benchmarks.sort_index()
-benchmarks.to_csv(filename) # Uncomment this to write the new benchmarks to file
+# benchmarks.to_csv(filename) # Uncomment this to write the new benchmarks to file
 benchmarks
 ```
 
