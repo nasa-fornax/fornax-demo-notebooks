@@ -21,7 +21,7 @@ By the end of this tutorial, you will:
 - understand how to cross-match cloud-based catalogs using `lsdb`.
 - understand how to parallelize `lsdb` cross-matches using `dask`.
 - have a feeling for when `dask` parallelization can be helpful.
-- understand the limitations of each of the available environments on Fornax.
+- have a rough idea of the maximum number of objects that can be cross matched on each Fornax Science Console server type.
 
 +++
 
