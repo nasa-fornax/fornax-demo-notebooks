@@ -2,6 +2,6 @@ astropy
 numpy<=2.2
 pandas
 matplotlib
-lsdb>=0.5
+lsdb>=0.6.0
 dask
 s3fs
