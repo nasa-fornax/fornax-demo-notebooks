@@ -39,7 +39,7 @@ For each level, we want to know the performance with (1) default `dask` configur
 
 # Runtime
 
-As of August 12, 2025, as written (10,000 rows with the "default" `dask` settings), this notebook takes about 45 seconds to run on the "small" Fornax environment (4 GB RAM and 2 CPUs). Users can modify the configuration for larger cross-matches, which will take more time. E.g., cross-matching 10 million rows on the "large" environment (64 GB RAM and 16 CPUs) can take ~5 minutes.
+As of August 12, 2025, as written (10,000 rows with the "default" `dask` settings), this notebook takes about 45 seconds to run on the "small" Fornax Science Console server type (4 GB RAM and 2 CPUs). Users can modify the configuration for larger cross-matches, which will take more time. E.g., cross-matching 10 million rows on the "large" server type (64 GB RAM and 16 CPUs) can take ~5 minutes.
 
 +++
 
