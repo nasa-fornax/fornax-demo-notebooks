@@ -42,3 +42,22 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_build/html/
           commit_message: ${{ github.event.head_commit.message }}
+
+
+  deploy_notebooks:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    name: Deploy deployed_notebook branch
+    runs-on: ubuntu-latest
+    needs: build_docs
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to deployed_notebooks branch
+        run: |
+          gith=$(git rev-parse HEAD)
+          git branch -D deployed_notebooks
+          git checkout --orphan deployed_notebooks
+          git rm --cached -r .
+          git add --pathspec-from-file=deployed_notebooks_manifest.in --force
+          git commit -m "Deploy notebooks for commit ${gith}"
+          git push origin deployed_notebooks --force
