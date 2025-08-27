@@ -55,7 +55,6 @@ jobs:
       - name: Deploy to deployed_notebooks branch
         run: |
           gith=$(git rev-parse HEAD)
-          git branch -D deployed_notebooks
           git checkout --orphan deployed_notebooks
           git rm --cached -r .
           git add --pathspec-from-file=deployed_notebooks_manifest.in --force
