@@ -48,12 +48,14 @@ jobs:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     name: Deploy deployed_notebook branch
     runs-on: ubuntu-latest
-    needs: build_docs
+    #needs: build_docs
     steps:
       - uses: actions/checkout@v4
 
       - name: Deploy to deployed_notebooks branch
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           gith=$(git rev-parse HEAD)
           git checkout --orphan deployed_notebooks
           git rm --cached -r .
