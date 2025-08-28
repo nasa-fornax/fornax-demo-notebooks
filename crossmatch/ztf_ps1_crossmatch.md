@@ -337,7 +337,6 @@ The example science case used here is an investigation to collect time-series ph
 - combine Gaia's exquisite astrometry with your favorite star survey to obtain 6D kinematic solutions for your sample stars,
 - combine stellar spectroscopic catalogs with light curve rotation period measurements to estimate stellar ages using gyrochronology.
 
-For a complete list of catalogs are pre-formatted for use with `lsdb`, see [data.lsdb.io](https://data.lsdb.io).
 
 +++
 
