@@ -315,7 +315,7 @@ On all Fornax server sizes, when using `dask_workers='scale'` and scaling up the
 
 ## 5. Summary
 
-Fornax is capable of hosting cross-matches between large catalogs using the `lsdb` package. `lsdb` leverages `dask` to efficiently plan cross-match jobs using multiple workers, which results in large performance gains, especially as jobs scale up to millions or tens of millions of catalog rows.
+The Fornax Science Console is capable of hosting cross-matches between large catalogs using the `lsdb` package. `lsdb` leverages `dask` to efficiently plan cross-match jobs using multiple workers, which results in large performance gains, especially as jobs scale up to millions or tens of millions of catalog rows.
 
 **Recommendations**
 
