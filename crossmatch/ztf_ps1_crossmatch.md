@@ -289,7 +289,7 @@ For the largest jobs (`Nrows` >= 10 million) on the Large and XLarge environment
 
 Given the amount of time it takes to perform the largest cross-matches (`Nrows` >= 1 billion), these were run only on the XLarge server using the default `dask` configuration. The full cross-match of over 7 billion rows took just over 4 hours.
 
-These graphs also illustrate the limitations of each of the Fornax server sizes. Trying to cross-match more rows or use worker configurations that aren't shown in the plots can lead to one of the following behaviors:
+These graphs also illustrate the approximate maximum number of rows that can be cross matched with a given amount of RAM and CPU. Trying to cross-match more rows or use worker configurations that aren't shown in the plots can lead to one of the following behaviors:
 
 **Small (4GB RAM, 2 CPU)**
 
