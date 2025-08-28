@@ -1,0 +1,7 @@
+astropy
+numpy
+pandas
+matplotlib
+lsdb>=0.6.0
+dask
+s3fs
