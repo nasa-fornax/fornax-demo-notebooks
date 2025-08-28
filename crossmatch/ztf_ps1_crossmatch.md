@@ -350,7 +350,7 @@ This notebook was authored by [Zach Claytor](mailto:zclaytor@stsci.edu), Astrono
 # References
 
 * This work uses [`astropy`](https://www.astropy.org/acknowledging.html).
-* This work uses [`lsdb`](https://lsdb.io). See the documentation at [docs.lsdb.io](https://docs.lsdb.io), and explore catalogs with `lsdb` by going to [data.lsdb.io](https://data.lsdb.io).
+* This work uses [`lsdb`](https://docs.lsdb.io/).
 
 ```{code-cell} ipython3
 
