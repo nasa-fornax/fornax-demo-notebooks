@@ -1,0 +1,2 @@
+# Include *all* libraries that are direct dependencies of the notebook.
+numpy
