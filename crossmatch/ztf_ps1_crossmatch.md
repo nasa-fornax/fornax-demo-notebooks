@@ -41,7 +41,7 @@ As of August 2025, the Fornax Science Console server types were:
 
 For generality, we will refer to the server type by the number of CPUs. For each server and each number of cross-match rows, we want to know the performance with (1) default `dask` configuration, (2) minimal `dask` - 1 worker, (3) bigger `dask` - as many workers as we can use, and (4) auto-scaling `dask`. 
 
-**Note** that in this notebook, only one configuration (combination of CPU count, number of cross-match rows, and `dask` configuration) is run at a time. It must be reconfigured and rerun to benchmark each configuration. 
+**Note** that in this notebook, only one configuration (combination of CPU count, number of cross-match rows, and `dask` configuration) is run at a time. It must be reconfigured and rerun to benchmark each configuration.
 
 +++
 
@@ -206,11 +206,9 @@ if dask_workers != "default":
 Write the recorded benchmark to an output file, then make plots to analyze the benchmarks.
 
 ```{code-cell} ipython3
-filename = f"xmatch_benchmarks.csv"
-
 try:
     # read in file if it exists
-    benchmarks = pd.read_csv(filename, index_col=["Ncpus", "Nrows", "Nworkers"])
+    benchmarks = pd.read_csv("output/xmatch_benchmarks.csv", index_col=["Ncpus", "Nrows", "Nworkers"])
 except FileNotFoundError:
     # otherwise create an empty DataFrame
     multi_index = pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=["Ncpus", "Nrows", "Nworkers"])
@@ -223,12 +221,12 @@ benchmarks.loc[
     ] = t1.total_seconds(), int(rows_out), datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 benchmarks = benchmarks.sort_index()
-# benchmarks.to_csv(filename) # Uncomment this to write the new benchmarks to file
+# benchmarks.to_csv("output/xmatch_benchmarks.csv") # Uncomment this to write the new benchmarks to file
 benchmarks
 ```
 
 ```{code-cell} ipython3
-benchmarks = pd.read_csv("xmatch_benchmarks.csv", index_col=["Ncpus", "Nrows", "Nworkers"])
+benchmarks = pd.read_csv("output/xmatch_benchmarks.csv", index_col=["Ncpus", "Nrows", "Nworkers"])
 
 nworkers = [1, 2, 4, 8, 16, 32, 64, 128, 256, "default", "scale"]
 
