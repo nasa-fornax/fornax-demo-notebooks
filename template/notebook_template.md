@@ -118,13 +118,6 @@ Please consider these checklist requirements as you are writing your code.
 -   Contact: [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov) with questions or problems.
 -   Last Updated: 2025-08-28
 
-## References
-
-This work made use of:
-
--   STScI style guide: https://github.com/spacetelescope/style-guides/blob/master/guides/jupyter-notebooks.md
--   Fornax tech and science review guidelines: https://github.com/nasa-fornax/fornax-demo-notebooks/blob/main/template/notebook_review_checklists.md
-
 +++
 
 ### Acknowledgements
@@ -134,3 +127,10 @@ Probably these teams did, so include them: MAST, HEASARC, & IRSA Fornax teams.
 
 Did you use AI for any part of this tutorial, if so please include a statement such as:
 "AI: This notebook was created with assistance from OpenAI’s ChatGPT 5 model."
+
+### References
+
+This work made use of:
+
+-   STScI style guide: https://github.com/spacetelescope/style-guides/blob/master/guides/jupyter-notebooks.md
+-   Fornax tech and science review guidelines: https://github.com/nasa-fornax/fornax-demo-notebooks/blob/main/template/notebook_review_checklists.md
