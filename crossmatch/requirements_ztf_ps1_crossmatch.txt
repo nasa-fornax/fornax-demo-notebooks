@@ -1,5 +1,5 @@
 astropy
-numpy<=2.2
+numpy
 pandas
 matplotlib
 lsdb>=0.6.0
