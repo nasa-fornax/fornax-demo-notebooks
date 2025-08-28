@@ -186,7 +186,7 @@ print(f"Number of rows out: {rows_out:,d}")
 ```
 
 ```{code-cell} ipython3
-# It's good practice to explicitly close the Dask cluster/client when finished
+# Close the Dask cluster/client when finished
 if dask_workers != "default":
     if dask_workers == "scale":
         cluster.close()
