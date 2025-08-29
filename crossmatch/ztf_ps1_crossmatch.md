@@ -248,7 +248,7 @@ def plot_by_nworkers(num_cpus, ax):
             # only plot if there is more than 1 data point
             if len(b_N) > 1:
                 ax.plot("Nworkers", "time", marker="s", linestyle="-", data=b_N, label=f"{n} rows")
-        except:
+        except KeyError:
             pass
 
     ax.set(yscale="log", xlabel="Nworkers", ylabel="Execution Time (s)",
