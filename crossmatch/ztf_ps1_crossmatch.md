@@ -238,18 +238,18 @@ def plot_by_nworkers(num_cpus, ax):
         try:
             # get the relevant benchmarks
             b_N = b.xs(n, level="Nrows").reset_index()
-
-            # convert Nworkers to categorical with desired order
-            b_N["Nworkers"] = pd.Categorical(b_N["Nworkers"],
-                                             categories=[str(x) for x in nworkers],
-                                             ordered=True)
-            b_N = b_N.sort_values("Nworkers")
-
-            # only plot if there is more than 1 data point
-            if len(b_N) > 1:
-                ax.plot("Nworkers", "time", marker="s", linestyle="-", data=b_N, label=f"{n} rows")
         except KeyError:
             pass
+
+        # convert Nworkers to categorical with desired order
+        b_N["Nworkers"] = pd.Categorical(b_N["Nworkers"],
+                                            categories=[str(x) for x in nworkers],
+                                            ordered=True)
+        b_N = b_N.sort_values("Nworkers")
+
+        # only plot if there is more than 1 data point
+        if len(b_N) > 1:
+            ax.plot("Nworkers", "time", marker="s", linestyle="-", data=b_N, label=f"{n} rows")
 
     ax.set(yscale="log", xlabel="Nworkers", ylabel="Execution Time (s)",
            title=f"{num_cpus} CPUs")
