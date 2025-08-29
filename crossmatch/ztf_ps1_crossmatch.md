@@ -15,7 +15,7 @@ kernelspec:
 
 +++
 
-# Learning Goals
+## Learning Goals
 
 By the end of this tutorial, you will:
 - understand how to cross-match cloud-based catalogs using `lsdb`.
@@ -25,7 +25,7 @@ By the end of this tutorial, you will:
 
 +++
 
-# Introduction
+## Introduction
 
 In the era of increasingly large astronomical survey missions like TESS, Gaia, ZTF, Pan-STARRS, Roman, and Rubin, catalog operations are becoming less and less practical to complete on a personal computer. Operations such as source cross-matching can require many GB of memory and take many hours to complete using a single CPU. Recognizing these looming obstacles, many catalogs are becoming accessible to cloud computing platforms like the Fornax Science Console, and increasingly high-performance tools are being developed that leverage cloud computing resources to simplify and speed up catalog operations.
 
@@ -45,13 +45,13 @@ For generality, we will refer to the server type by the number of CPUs. For each
 
 +++
 
-# Runtime
+## Runtime
 
 As of August 2025, as written (10,000 rows with the "default" `dask` settings), this notebook takes about 45 seconds to run on the "small" Fornax Science Console server type (4 GB RAM and 2 CPUs). Users can modify the configuration for larger cross-matches, which will take more time. E.g., cross-matching 10 million rows on the "large" server type (64 GB RAM and 16 CPUs) can take ~5 minutes.
 
 +++
 
-# Imports
+## Imports
 We require the following packages:
 - `os` solely for the `cpu_count` function,
 - `datetime` for measuring the crossmatch time,
@@ -319,17 +319,13 @@ The example science case used here is an investigation to collect time-series ph
 
 +++
 
-# About this Notebook
+## About this Notebook
 
 This notebook was authored by [Zach Claytor](mailto:zclaytor@stsci.edu), Astronomical Data Scientist at Space Telescope Science Institute.
 
 +++
 
-# References
+## References
 
 * This work uses [`astropy`](https://www.astropy.org/acknowledging.html).
 * This work uses [`lsdb`](https://docs.lsdb.io/).
-
-```{code-cell} ipython3
-
-```
