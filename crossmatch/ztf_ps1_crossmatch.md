@@ -11,7 +11,7 @@ kernelspec:
   language: python
 ---
 
-# Cross-Matching ZTF and Pan-STARRS using LSDB
+# Cross-Match ZTF and Pan-STARRS using LSDB
 
 +++
 
@@ -45,13 +45,14 @@ For generality, we will refer to the server type by the number of CPUs. For each
 
 +++
 
-## Runtime
+### Runtime
 
 As of August 2025, as written (10,000 rows with the "default" `dask` settings), this notebook takes about 45 seconds to run on the "small" Fornax Science Console server type (4 GB RAM and 2 CPUs). Users can modify the configuration for larger cross-matches, which will take more time. E.g., cross-matching 10 million rows on the "large" server type (64 GB RAM and 16 CPUs) can take ~5 minutes.
 
 +++
 
 ## Imports
+
 We require the following packages:
 - `os` solely for the `cpu_count` function,
 - `datetime` for measuring the crossmatch time,
@@ -81,6 +82,7 @@ from dask.distributed import Client, LocalCluster
 ```
 
 ## 1. Preconfiguring the Run
+
 First choose the number of rows we want to cross-match and our `dask` environment. For tips on using `dask` with `lsdb`, see [`lsdb`'s Dask Cluster Tips](https://docs.lsdb.io/en/stable/tutorials/dask-cluster-tips.html).
 
 ```{code-cell} ipython3
@@ -321,11 +323,12 @@ The example science case used here is an investigation to collect time-series ph
 
 ## About this Notebook
 
-This notebook was authored by [Zach Claytor](mailto:zclaytor@stsci.edu), Astronomical Data Scientist at Space Telescope Science Institute.
+- **Authors:** Zach Claytor (Astronomical Data Scientist at Space Telescope Science Institute) and the Fornax team
+- **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
 
 +++
 
-## References
+### References
 
-* This work uses [`astropy`](https://www.astropy.org/acknowledging.html).
-* This work uses [`lsdb`](https://docs.lsdb.io/).
+- This work uses [`astropy`](https://www.astropy.org/acknowledging.html).
+- This work uses [`lsdb`](https://docs.lsdb.io/).
