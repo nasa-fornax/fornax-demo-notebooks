@@ -1,3 +1,7 @@
+crossmatch/output/xmatch_benchmarks.csv
+crossmatch/README.md
+crossmatch/requirements_ztf_ps1_crossmatch.txt
+crossmatch/ztf_ps1_crossmatch.md
 forced_photometry/README.md
 forced_photometry/code_src/README.md
 forced_photometry/code_src/calc_irac_uncertainty.py

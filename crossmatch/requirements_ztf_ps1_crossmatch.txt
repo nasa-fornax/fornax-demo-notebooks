@@ -1,7 +1,5 @@
 astropy
-numpy
 pandas
 matplotlib
-lsdb>=0.6.0
+lsdb[full]>=0.6.0  # [full] needed for s3fs
 dask
-s3fs

@@ -11,11 +11,11 @@ kernelspec:
   language: python
 ---
 
-# Cross-Matching ZTF and Pan-STARRS using LSDB
+# Cross-Match ZTF and Pan-STARRS using LSDB
 
 +++
 
-# Learning Goals
+## Learning Goals
 
 By the end of this tutorial, you will:
 - understand how to cross-match cloud-based catalogs using `lsdb`.
@@ -25,11 +25,11 @@ By the end of this tutorial, you will:
 
 +++
 
-# Introduction
+## Introduction
 
 In the era of increasingly large astronomical survey missions like TESS, Gaia, ZTF, Pan-STARRS, Roman, and Rubin, catalog operations are becoming less and less practical to complete on a personal computer. Operations such as source cross-matching can require many GB of memory and take many hours to complete using a single CPU. Recognizing these looming obstacles, many catalogs are becoming accessible to cloud computing platforms like the Fornax Science Console, and increasingly high-performance tools are being developed that leverage cloud computing resources to simplify and speed up catalog operations.
 
-[LSDB](https://lsdb.io) is a useful package for performing large cross-matches between HATS catalogs. It can leverage the [Dask](https://www.dask.org/) library to work with larger-than-memory data sets and distribute computation tasks across multiple cores. Users perform large cross-matches without ever having to download a file. 
+[LSDB](https://lsdb.io) is a useful package for performing large cross-matches between HATS catalogs. It can leverage the [Dask](https://www.dask.org/) library to work with larger-than-memory data sets and distribute computation tasks across multiple cores. Users perform large cross-matches without ever having to download a file.
 
 In this tutorial, we will use `lsdb` with `dask` to perform a cross-match between ZTF and Pan-STARRS HATS catalogs to benchmark the performance. These HATS catalogs are stored on AWS S3 cloud storage. An application might be to collect time-series photometry for 10,000 or more stars in the Kepler field from ZTF and Pan-STARRS. With this in mind, we will begin by cross-matching 10,000 sources from ZTF with the Pan-STARRS mean-object catalog. The user can choose to scale up to a larger number of rows to test the performance. The CSV file provided with this notebook contains the runtime results of tests run on various Fornax Science Console server types for comparison.
 
@@ -39,19 +39,20 @@ As of August 2025, the Fornax Science Console server types were:
 - "Large" -  64 GB RAM, 16 CPU
 - "XLarge" -  512 GB RAM, 128 CPU
 
-For generality, we will refer to the server type by the number of CPUs. For each server and each number of cross-match rows, we want to know the performance with (1) default `dask` configuration, (2) minimal `dask` - 1 worker, (3) bigger `dask` - as many workers as we can use, and (4) auto-scaling `dask`. 
+For generality, we will refer to the server type by the number of CPUs. For each server and each number of cross-match rows, we want to know the performance with (1) default `dask` configuration, (2) minimal `dask` - 1 worker, (3) bigger `dask` - as many workers as we can use, and (4) auto-scaling `dask`.
 
 **Note** that in this notebook, only one configuration (combination of CPU count, number of cross-match rows, and `dask` configuration) is run at a time. It must be reconfigured and rerun to benchmark each configuration.
 
 +++
 
-# Runtime
+### Runtime
 
 As of August 2025, as written (10,000 rows with the "default" `dask` settings), this notebook takes about 45 seconds to run on the "small" Fornax Science Console server type (4 GB RAM and 2 CPUs). Users can modify the configuration for larger cross-matches, which will take more time. E.g., cross-matching 10 million rows on the "large" server type (64 GB RAM and 16 CPUs) can take ~5 minutes.
 
 +++
 
-# Imports
+## Imports
+
 We require the following packages:
 - `os` solely for the `cpu_count` function,
 - `datetime` for measuring the crossmatch time,
@@ -81,11 +82,12 @@ from dask.distributed import Client, LocalCluster
 ```
 
 ## 1. Preconfiguring the Run
+
 First choose the number of rows we want to cross-match and our `dask` environment. For tips on using `dask` with `lsdb`, see [`lsdb`'s Dask Cluster Tips](https://docs.lsdb.io/en/stable/tutorials/dask-cluster-tips.html).
 
 ```{code-cell} ipython3
 # The left table will have about this many rows. The cross-matched product will have slightly fewer.
-# Set Nrows = -1 to cross-match the entire catalog. The full catalog cross-match is 
+# Set Nrows = -1 to cross-match the entire catalog. The full catalog cross-match is
 # recommended ONLY on XLarge instance with at least 32 workers.
 Nrows = 10_000
 
@@ -100,8 +102,8 @@ dask_workers = "default"
 # The code in this cell is automatic setup based on the configuration in the previous cell, so it can be left alone.
 
 # We must pass a radius to lsdb. Here is the mapping between radius and desired number of rows for ZTF.
-# The values in this dictionary were determined experimentally, by 
-# incrementing/decrementing the radius until the desired number of 
+# The values in this dictionary were determined experimentally, by
+# incrementing/decrementing the radius until the desired number of
 # catalog rows was returned.
 radius = { # Nrows: radius_arcseconds
            10_000:     331,
@@ -117,7 +119,7 @@ if dask_workers == "scale":
     cluster = LocalCluster()
     cluster.adapt(minimum_cores=1, maximum_cores=cpu_count())
     client = Client(cluster)
-elif isinstance(dask_workers, int):        
+elif isinstance(dask_workers, int):
     client = Client(
         # Number of Dask workers - Python processes to run
         n_workers=dask_workers,
@@ -155,8 +157,8 @@ else:
 # Read ZTF DR23
 ztf_path = "s3://ipac-irsa-ztf/contributed/dr23/objects/hats"
 ztf_piece = lsdb.open_catalog(
-    ztf_path, 
-    columns=["oid", "ra", "dec"], 
+    ztf_path,
+    columns=["oid", "ra", "dec"],
     search_filter=search_filter
 )
 
@@ -164,7 +166,7 @@ ztf_piece = lsdb.open_catalog(
 ps1_path = "s3://stpubdata/panstarrs/ps1/public/hats/otmo"
 ps1_margin = "s3://stpubdata/panstarrs/ps1/public/hats/otmo_10arcs"
 ps1 = lsdb.open_catalog(
-    ps1_path, 
+    ps1_path,
     margin_cache=ps1_margin,
     columns=["objName","objID","raMean","decMean"],
 )
@@ -233,23 +235,23 @@ nworkers = [1, 2, 4, 8, 16, 32, 64, 128, 256, "default", "scale"]
 def plot_by_nworkers(num_cpus, ax):
     # Plot execution time vs. number of dask workers for each scale job
     b = benchmarks.loc[num_cpus]
-    
+
     for n in b.index.levels[0]:
         try:
             # get the relevant benchmarks
             b_N = b.xs(n, level="Nrows").reset_index()
-
-            # convert Nworkers to categorical with desired order
-            b_N["Nworkers"] = pd.Categorical(b_N["Nworkers"], 
-                                             categories=[str(x) for x in nworkers], 
-                                             ordered=True)
-            b_N = b_N.sort_values("Nworkers")
-
-            # only plot if there is more than 1 data point
-            if len(b_N) > 1:
-                ax.plot("Nworkers", "time", marker="s", linestyle="-", data=b_N, label=f"{n} rows")
-        except:
+        except KeyError:
             pass
+
+        # convert Nworkers to categorical with desired order
+        b_N["Nworkers"] = pd.Categorical(b_N["Nworkers"],
+                                            categories=[str(x) for x in nworkers],
+                                            ordered=True)
+        b_N = b_N.sort_values("Nworkers")
+
+        # only plot if there is more than 1 data point
+        if len(b_N) > 1:
+            ax.plot("Nworkers", "time", marker="s", linestyle="-", data=b_N, label=f"{n} rows")
 
     ax.set(yscale="log", xlabel="Nworkers", ylabel="Execution Time (s)",
            title=f"{num_cpus} CPUs")
@@ -263,7 +265,7 @@ for i, ncpu in enumerate(cpu_counts):
 fig.tight_layout()
 ```
 
-These plots show how the cross-match execution time depends on the number of workers used. Broadly, increasing the number of workers up to the number of available CPUs improves the performance. The exception is for smaller cross-matches ($\le$ 1 million rows) spread across many ($\ge$ 16) CPUs, when the overhead of managing many workers is significant compared to the cross-match time. Increasing the number of workers past the number of CPUs results in somewhat worse performance. Interestingly, the agnostic approach---not manually specifying any `dask` parameters, but instead letting `lsdb` use the default `dask` behavior---results in the best performance for smaller cross-matches. This indicates that the `lsdb` cross-match functions are well-optimized and well-configured for use with `dask` without much user oversight, at least on cross-matches with $\le$ 1 million rows. 
+These plots show how the cross-match execution time depends on the number of workers used. Broadly, increasing the number of workers up to the number of available CPUs improves the performance. The exception is for smaller cross-matches ($\le$ 1 million rows) spread across many ($\ge$ 16) CPUs, when the overhead of managing many workers is significant compared to the cross-match time. Increasing the number of workers past the number of CPUs results in somewhat worse performance. Interestingly, the agnostic approach---not manually specifying any `dask` parameters, but instead letting `lsdb` use the default `dask` behavior---results in the best performance for smaller cross-matches. This indicates that the `lsdb` cross-match functions are well-optimized and well-configured for use with `dask` without much user oversight, at least on cross-matches with $\le$ 1 million rows.
 
 For the largest jobs (`Nrows` $\ge$ 10 million), the default `dask` configuration performs worse than fixing the number of `dask_workers` to be the number of available CPUs. Interestingly, on the XLarge server with 128 CPUs, the 64-worker run performed the best on the large cross-matches. For larger cross-matches, we recommend manually setting the number of workers to be $\frac{1}{2} N_\mathrm{CPU} \leq N_\mathrm{workers} \leq N_\mathrm{CPU}$.
 
@@ -301,11 +303,11 @@ The Fornax Science Console is capable of hosting cross-matches between large cat
 
 - For small cross-matches (1 million rows or less) it is acceptable and often optimal to use `lsdb`'s default `dask` settings to parallelize jobs. In other words, for these jobs you don't need to configure or even import `dask` at all to leverage its parallelization power.
 - For large cross-matches (millions of rows or more), we recommend running in an environment with at least tens of CPUs, and setting the number of `dask` workers to at least half the number of available CPUs, and up to the number of CPUs. E.g., 128 CPUs with 64 `dask` workers.
-- Cross-matches of 10 million rows or less can, at the time of writing, be completed on the Small Fornax Console using the default `dask` configuration. However, given the performance, we recommend the following use scaling:  
-  - `Nrows` $\le 10^6$: Small  
-  - $10^6 <$ `Nrows` $< 10^7$: Medium  
-  - $10^7 <$ `Nrows` $< 10^8$: Large  
-  - `Nrows` $> 10^8$: XLarge  
+- Cross-matches of 10 million rows or less can, at the time of writing, be completed on the Small Fornax Console using the default `dask` configuration. However, given the performance, we recommend the following use scaling:
+  - `Nrows` $\le 10^6$: Small
+  - $10^6 <$ `Nrows` $< 10^7$: Medium
+  - $10^7 <$ `Nrows` $< 10^8$: Large
+  - `Nrows` $> 10^8$: XLarge
 
 In this tutorial we have cross-matched sections of catalogs in a particular region of sky, where most of the stars likely fall in the same or neighboring sky cells. It would be useful in the future to try this using generic samples of stars from across the entire sky. How different is performance when the catalog rows come from many sky cells instead of just a few? We have also generated the cross-match using `compute`, which loads the full result into memory, but `lsdb` supports larger-than-memory cross-matches by writing them directly to disk using `to_hats`. It would also be illustrative to run these benchmarks, and benchmarking a full cross-match between ZTF and Pan-STARRS, by writing the result to disk.
 
@@ -319,17 +321,14 @@ The example science case used here is an investigation to collect time-series ph
 
 +++
 
-# About this Notebook
+## About this Notebook
 
-This notebook was authored by [Zach Claytor](mailto:zclaytor@stsci.edu), Astronomical Data Scientist at Space Telescope Science Institute.
+- **Authors:** Zach Claytor (Astronomical Data Scientist at Space Telescope Science Institute) and the Fornax team
+- **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
 
 +++
 
-# References
+### References
 
-* This work uses [`astropy`](https://www.astropy.org/acknowledging.html).
-* This work uses [`lsdb`](https://docs.lsdb.io/).
-
-```{code-cell} ipython3
-
-```
+- This work uses [`astropy`](https://www.astropy.org/acknowledging.html).
+- This work uses [`lsdb`](https://docs.lsdb.io/).
