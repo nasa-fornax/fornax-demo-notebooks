@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.17.1
 kernelspec:
-  display_name: py-light_curve_generator
+  display_name: py-light_curve_collector
   language: python
-  name: py-light_curve_generator
+  name: py-light_curve_collector
 ---
 
 # Make Multi-Wavelength Light Curves Using Archival Data
@@ -198,27 +198,24 @@ The function to retrieve HEASARC data accesses the HEASARC archive using a pyvo 
 While these aren't strictly light curves, we would like to track if there are gamma rays detected in advance of any change in the CLAGN light curves. We store these gamma ray detections as single data points.  Because gamma ray detections typically have very large error radii, our current technique is to keep matches in the catalogs within some manually selected error radius, currently defaulting to 1 degree for Fermi and 3 degrees for Beppo SAX.  These values are chosen based on a histogram of all values for those catalogs.
 
 ```{code-cell} ipython3
-# This data is temporarily unavailable.
-# This cell will be uncommented once the data is available again.
+start_serial = time.time()  #keep track of all serial archive calls to compare later with parallel archive call time
+heasarcstarttime = time.time()
 
-# start_serial = time.time()  #keep track of all serial archive calls to compare later with parallel archive call time
-# heasarcstarttime = time.time()
-#
-# # What is the size of error_radius for the catalogs that we will accept for our cross-matching?
-# # in degrees; chosen based on histogram of all values for these catalogs
-# max_fermi_error_radius = str(1.0)
-# max_sax_error_radius = str(3.0)
-#
-# # catalogs to query and their corresponding max error radii
-# heasarc_catalogs = {"FERMIGTRIG": max_fermi_error_radius, "SAXGRBMGRB": max_sax_error_radius}
-#
-# # get heasarc light curves in the above curated list of catalogs
-# df_lc_HEASARC = heasarc_get_lightcurves(sample_table, catalog_error_radii=heasarc_catalogs)
-#
-# # add the resulting dataframe to all other archives
-# df_lc.append(df_lc_HEASARC)
-#
-# print('heasarc search took:', time.time() - heasarcstarttime, 's')
+# What is the size of error_radius for the catalogs that we will accept for our cross-matching?
+# in degrees; chosen based on histogram of all values for these catalogs
+max_fermi_error_radius = str(1.0)
+max_sax_error_radius = str(3.0)
+
+# catalogs to query and their corresponding max error radii
+heasarc_catalogs = {"FERMIGTRIG": max_fermi_error_radius, "SAXGRBMGRB": max_sax_error_radius}
+
+# get heasarc light curves in the above curated list of catalogs
+df_lc_HEASARC = heasarc_get_lightcurves(sample_table, catalog_error_radii=heasarc_catalogs)
+
+# add the resulting dataframe to all other archives
+df_lc.append(df_lc_HEASARC)
+
+print('heasarc search took:', time.time() - heasarcstarttime, 's')
 ```
 
 ### 2.2 IRSA: WISE
@@ -420,7 +417,7 @@ callback = parallel_df_lc.append  # will be called once on the result returned b
 with mp.Pool(processes=n_workers) as pool:
 
     # start the processes that call the archives
-    # pool.apply_async(heasarc_get_lightcurves, args=(sample_table,), kwds=heasarc_kwargs, callback=callback)
+    pool.apply_async(heasarc_get_lightcurves, args=(sample_table,), kwds=heasarc_kwargs, callback=callback)
     pool.apply_async(wise_get_lightcurves, args=(sample_table,), kwds=wise_kwargs, callback=callback)
     pool.apply_async(tess_kepler_get_lightcurves, args=(sample_table,), kwds=tess_kepler_kwargs, callback=callback)
     pool.apply_async(hcv_get_lightcurves, args=(sample_table,), kwds=hcv_kwargs, callback=callback)
