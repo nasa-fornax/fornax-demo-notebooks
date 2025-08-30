@@ -13,8 +13,8 @@ kernelspec:
 
 # Light Curve Classifier
 
-
 ## Learning Goals
+
 By the end of this tutorial, you will be able to:
 - prepare data for ML algorithms by cleaning and filtering the dataset
 - work with Pandas dataframes as a way of storing and manipulating time domain datasets
@@ -22,6 +22,7 @@ By the end of this tutorial, you will be able to:
 - use the trained classifier to predict labels on an unlabelled dataset
 
 ## Introduction
+
 The science goal of this notebook is to find a classifier that can accurately discern changing look active galactic nuclei (CLAGN) from a broad sample of all Sloan Digital Sky Survey (SDSS) identified Quasars (QSOs) based solely on archival photometry in the form of multiwavelength light curves.
 
 CLAGN are astrophysically interesting objects because they appear to change state.  CLAGN are characterized by the appearance or disappearance of broad emission lines on timescales of order months.  Astronomers would like to understand the physical mechanism behind this apparent change of state.  However, only a few hundered CLAGN are known, and finding CLAGN is observationally expensive, traditionally requiring multiple epochs of spectroscopy.  Being able to identify CLAGN in existing, archival, large, photometric samples would allow us to identify a statisitcally significant sample from which we could better understand the underlying physics.
@@ -35,8 +36,8 @@ The challenges of this time-domain dataset for ML work are:
 2. Unequal length = Each band has a light curve with different sampling than other bands
 3. Missing data = Not each object has all observations in all bands
 
+### Input
 
-## Input
 Light curve parquet file of multiwavelength light curves from the light_curve_collector.md demo notebook in this same repo.  The format of the light curves is a Pandas multiindex data frame.
 
 We choose to use a Pandas multiindex dataframe to store and work with the data because it fulfills these requirements:
@@ -48,20 +49,16 @@ We choose to use a Pandas multiindex dataframe to store and work with the data b
 
 A useful reference for what sktime expects as input to its ML algorithms: https://github.com/sktime/sktime/blob/main/examples/AA_datatypes_and_datasets.ipynb
 
-## Output
+### Output
+
 Trained classifiers as well as estimates of their accuracy and plots of confusion matrices
 
-## Runtime
+### Runtime
+
 As of 2024 August, this notebook takes ~170s to run to completion on Fornax using the 'Astrophysics Default Image' and the 'Large' server with 16GB RAM/ 4CPU.
 
-## Authors
-Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, Andreas Faisst, Vandana Desai, David Shupe
-
-## Acknowledgements
-Stephanie La Massa
-
-
 ## Imports
+
 - `pandas` to work with light curve data structure
 - `numpy` for numerical calculations
 - `matplotlib` for plotting
@@ -122,6 +119,7 @@ pd.options.mode.copy_on_write = True
 ```
 
 ## 1. Read in a dataset of archival light curves
+
  We use here a sample of AGN including known CLAGN & random SDSS AGN
 
  If you want to use your own sample, you can use the code [light_curve_collector.md](https://nasa-fornax.github.io/fornax-demo-notebooks/light_curves/light_curve_collector.html) in this same repo to make the required pandas dataframe which you will need to run this notebook.
@@ -150,11 +148,13 @@ df_lc
 ```
 
 ## 2. Data Prep
+
 The majority of work in all ML projects is preparing and cleaning the data.  As most do, this dataset needs significant work before it can be fed into a ML algorithm.  Data preparation includes everything from removing statistical outliers to putting it in the correct data format for the algorithms.
 
 +++
 
 ### 2.1 Remove bands with not enough data
+
 For this use case of CLAGN classification, we don't need to include some of the bands
 that are known to be sparse.  Most ML algorithms cannot handle sparse data so one way to accomodate that
 is to remove the sparsest datasets.
@@ -172,6 +172,7 @@ df_lc = df_lc[~df_lc["band"].isin(bands_to_drop)]
 ```
 
 ### 2.2 Combine Labels for a Simpler Classification
+
 All CLAGN start in the dataset as having labels based on their discovery paper.  Because we want one sample with all known CLAGN, we change those discovery names to be simply "CLAGN" for all CLAGN, regardless of origin.
 
 ```{code-cell} ipython3
@@ -191,6 +192,7 @@ print(df_lc.groupby(["objectid"]).ngroups, "n objects before removing missing ba
 ```
 
 ### 2.3 Data Visualization
+
 - can we see any trends by examining plots of a subset of the data?
 
 ```{code-cell} ipython3
@@ -249,6 +251,7 @@ ax.set_xlim([1000, 1250])
 ```
 
 ### 2.4 Clean the dataset of unwanted data
+
 "unwanted" includes:
 - NaNs
   - SKtime does not work with NaNs
@@ -286,6 +289,7 @@ print(df_lc.groupby(["objectid"]).ngroups, "n objects after cleaning the data")
 ```
 
 ### 2.5 Missing Data
+
 Some objects do not have light curves in all bands.  Some ML algorithms can handle mising data, but not all, so we try to do something intentional and sensible to handle this missing data up front.
 
 There are two options here:
@@ -328,6 +332,7 @@ df_lc = df_lc.astype({col: "float" for col in ["time", "flux", "err"]})
 ```
 
 ### 2.7  Restructure dataframe
+
 - Make columns have band names in them and then remove band from the index
 - pivot the dataframe so that SKTIME understands its format
 - this will put it in the format expected by sktime
@@ -345,6 +350,7 @@ singleob
 ```
 
 ### 2.8 Normalize
+
 Normalizing is required so that the CLAGN and it's comparison SDSS sample don't have different flux levels.  ML algorithms will easily choose to classify based on overall flux levels, so we want to prevent that by normalizing the fluxes. Normalization with a multiband dataset requires extra thought.  The idea here is that we normalize across each object.  We want the algorithms to know, for example, that within one object W1 will be brighter than ZTF bands but from one object to the next, it will not know that one is brighter than the other.
 
 We do the normalization at this point in the code, rather than before interpolating over time, so that the final light curves are normalized since that is the chunk of information which goes into the ML algorithms.
@@ -357,6 +363,7 @@ df_lc = local_normalization_max(df_lc, norm_column = "flux_W1")
 ```
 
 ### 2.9 Cleanup
+
 - Make [datetime](https://docs.python.org/3/library/datetime.html#module-datetime) column
     - SKTime wants a datetime column
 - Save dataframe
@@ -393,6 +400,7 @@ df_lc.drop(columns = ['time'],inplace = True)
 ```
 
 ### 3.1 Train test split
+
 We use sklearn's train test split to randomly split the data into training and testing datasets.  Because thre are uneven numbers of each type (many more SDSS than CLAGN), we want to make sure to stratify evenly by type.
 
 ```{code-cell} ipython3
@@ -431,6 +439,7 @@ This notebook will first show you an example of a single algorithm classifier. T
 +++
 
 ### 4.1 Check that the data types are ok for sktime
+
 This test needs to pass in order for sktime to run
 
 ```{code-cell} ipython3
@@ -447,7 +456,7 @@ check_is_mtype(X_train, mtype="pd-multiindex", scitype="Panel", return_metadata=
 #classifiers
 ```
 
-### 4.1 A single Classifier
+### 4.2 A single Classifier
 
 ```{code-cell} ipython3
 %%time
@@ -475,7 +484,7 @@ disp.plot()
 plt.show()
 ```
 
-### 4.2 Loop over a bunch of classifiers
+### 4.3 Loop over a bunch of classifiers
 
 Our method is to do a cursory check of a bunch of classifiers and then later drill down deeper on anything with good initial results.  We choose to run a loop over ~10 classifiers that seem promising and check the accuracy scores for each one.  Any classifier with a promising accuracy score could then be followed up with detailed hyperparameter tuning, or potentially with considering other classifiers in that same type.
 
@@ -556,7 +565,8 @@ for name, clf in tqdm(zip(names, classifier_call)):
 #accscore_dict = json.load( open( "output/accscore.json") )
 ```
 
-## 5.0 Create a candidate list
+## 5. Create a candidate list
+
 Lets assume we now have a classifier which can accurately differentiate CLAGN from SDSS QSOs based on their archival light curves.  Next, we would like to use that classifier on our favorite unlabeled sample to identify CLAGN candidates.  To do this, we need to:
 - read in a dataframe of our new sample
 - get that dataset in the same format as what was fed into the classifiers
@@ -675,17 +685,24 @@ candidate_CLAGN
 ```
 
 ## Conclusions
+
 Depending on your comfort level with the accuracy of the classifier you have trained, you could now write an observing proposal to confirm those targets prediced to be CLAGN based on their multiwavelength light curves.
 
 +++
 
-## References:
+## About this notebook
+
+- **Authors:** Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, Andreas Faisst, Vandana Desai, David Shupe, and the Fornax team
+- **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
+
+### Acknowledgements
+
+- Stephanie La Massa
+
+### References
+
 - “sktime: A Unified Interface for Machine Learning with Time Series”
 Markus Löning, Tony Bagnall, Sajaysurya Ganesh, George Oastler, Jason Lines, ViktorKaz, …, Aadesh Deshmukh (2020). sktime/sktime. Zenodo. http://doi.org/10.5281/zenodo.3749000
 - "Scikit-learn: Machine Learning in Python", Pedregosa et al., JMLR 12, pp. 2825-2830, 2011.
 - "pandas-dev/pandas: Pandas" The pandas development team, 2020. Zenodo. https://doi.org/10.5281/zenodo.3509134
 - This work made use of [Astropy](http://www.astropy.org) a community-developed core Python package and an ecosystem of tools and resources for astronomy (astropy:2013, astropy:2018, astropy:2022).
-
-```{code-cell} ipython3
-
-```
