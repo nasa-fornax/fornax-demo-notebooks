@@ -13,8 +13,8 @@ kernelspec:
 
 # Extract Multi-Wavelength Spectroscopy from Archival Data
 
-
 ## Learning Goals
+
 By the end of this tutorial, you will be able to:
 
  &bull; automatically load a catalog of sources
@@ -25,10 +25,10 @@ By the end of this tutorial, you will be able to:
 
  &bull; plot all the spectra of a given source
 
-
-## Introduction:
+## Introduction
 
 ### Motivation
+
 A user has a source (or a sample of sources) for which they want to obtain spectra covering ranges
 of wavelengths from the UV to the far-IR. The large amount of spectra available enables
 multi-wavelength spectroscopic studies, which is crucial to understand the physics of stars,
@@ -43,9 +43,7 @@ surveys such as with SDSS, DESI, Keck, HST, JWST, Spitzer, and Herschel. In addi
 enables the capability to search and ingest spectra from Euclid and SPHEREx in the feature. For
 this to work, the `specutils` functions may have to be update or a wrapper has to be implemented.
 
-
 ### List of Spectroscopic Archives and Status
-
 
 | Archive | Spectra | Description | Access point | Status |
 | ------- | ------- | ----------- | ------------ | ------ |
@@ -64,44 +62,32 @@ this to work, the `specutils` functions may have to be update or a wrapper has t
 
 The ones with an asterisk (*) are the challenging ones.
 
-## Input:
+### Input
 
  &bull; Coordinates for a single source or a sample on the COSMOS field
 
-
-
-## Output:
+### Output
 
  &bull; A Pandas data frame including the spectra from different facilities
 
  &bull; A plot comparing the different spectra extracted for each source
 
-## Non-standard Imports:
-
-&bull; ...
-## Runtime
+### Runtime
 
 As of 2025 July, this notebook takes about 18 minutes to run to completion on Fornax using
 a server with 16GB RAM/4 CPU' and Environment: 'Default Astrophysics' (image).
 
-## Authors:
-Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, David Shupe
-
-## Acknowledgements:
-
-AI: This notebook was created with assistance from OpenAI’s ChatGPT o4-mini-high model.
-
 +++
 
-### Datasets that were considered but didn't end up being used:
-#### IRTF:
+### Datasets that were considered but didn't end up being used
+
+IRTF:
 - https://irsa.ipac.caltech.edu/Missions/irtf.html
 - The IRTF is a 3.2 meter telescope, optimized for infrared observations, and located at the summit
   of Mauna Kea, Hawaiʻi.
 - large library of stellar spectra
 - Not included here because the data are not currently available in an easily accessible,
   searchable format
-
 
 ## Imports
 
@@ -203,6 +189,7 @@ sample_table = Table.read('data/input_sample.ecsv', format='ascii.ecsv')
 ```
 
 ### 1.4 Initialize data structure to hold the spectra
+
 Here, we initialize the MultiIndex data structure that will hold the spectra.
 
 ```{code-cell} ipython3
@@ -321,6 +308,7 @@ The DESI search is currently commented out because `SPARCL` is not compatible wi
 ```
 
 ## 3. Make plots of luminosity as a function of time
+
 We show flux in mJy as a function of time for all available bands for each object.
 `show_nbr_figures` controls how many plots are actually generated and returned to the screen.
 If you choose to save the plots with `save_output`, they will be put in the output directory and
@@ -334,3 +322,12 @@ create_figures(df_spec=df_spec,
                save_output=False,
                )
 ```
+
+## About this notebook
+
+- **Authors:** Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, David Shupe, and the Fornax team
+- **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
+
+### Acknowledgements
+
+- AI: This notebook was created with assistance from OpenAI’s ChatGPT o4-mini-high model.
