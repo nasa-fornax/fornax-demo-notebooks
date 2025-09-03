@@ -13,8 +13,8 @@ kernelspec:
 
 # Automated Multiband Forced Photometry on Large Datasets
 
+## Learning Goals
 
-## Learning Goals:
 By the end of this tutorial, you will be able to:
 - get catalogs and images from NASA archives in the cloud where possible
 - measure fluxes at any location by running forced photometry using "The Tractor"
@@ -22,38 +22,32 @@ By the end of this tutorial, you will be able to:
 - cross match large catalogs
 - plot results
 
-## Introduction:
+## Introduction
+
 This code performs photometry in an automated fashion at all locations in an input catalog on 4 bands of IRAC data from IRSA and 2 bands of Galex data from MAST.  The resulting catalog is then cross-matched with a Chandra catalog from HEASARC to generate a multiband catalog to facilitate galaxy evolution studies.
 
 If you run this code as is, it will only look at a small region of the COSMOS survey, and as a result, the plots near the end will not be so very informative.  We do this for faster runtimes and to show proof of concept as to how to do this work.  Please change the radius in section 1. to be something larger if you want to work with more data, but expect longer runtimes associated with larger areas.
 
 The code will run on 2 different science platforms and makes full use of multiple processors to optimize run time on large datasets.
 
-## Input:
+### Input
+
 - RA and DEC within COSMOS catalog
 - desired catalog radius in arcminutes
 - mosaics of that region for IRAC and Galex
 
-## Output:
+### Output
+
 - merged, multiband, science ready pandas dataframe
 - IRAC color color plot for identifying interesting populations
 
-## Runtime:
+### Runtime
 
 As of 2025 July, this notebook takes about 2 minutes to run to completion on Fornax using a server with 16GB RAM/4 CPU' and Environment: 'Default Astrophysics' (image).
 
-## Authors:
-Jessica Krick, David Shupe, Marziye JafariYazani, Brigitta Sipőcz, Vandana Desai, Steve Groom, Troy Raen
-
-
-## Acknowledgements:
-Kristina Nyland for the workflow of the tractor wrapper.\
-MAST, HEASARC, & IRSA Fornax teams
-
-
 ## Imports
 
-## Non-standard Dependencies
+Non-standard Dependencies:
 - `tractor` code which does the forced photometry from Lang et al., 2016
 - `astroquery` to interface with archives APIs
 - `astropy` to work with coordinates/units and data structures
@@ -112,6 +106,7 @@ except ImportError:
 ```
 
 ## 1. Retrieve Initial Catalog from IRSA
+
 - Automatically set up a catalog with ra, dec, photometric redshifts, fiducial band fluxes, & probability that it is a star
 - Catalog we are using is COSMOS2015 (Laigle et al. 2016)
 - Data exploration
@@ -153,6 +148,7 @@ print("Number of objects: ", len(cosmos_table))
 ```
 
 ### 1.1 Filter Catalog
+
 - if desired could filter the initial catalog to only include desired sources
 
 ```{code-cell} ipython3
@@ -166,7 +162,7 @@ print("Number of objects: ", len(cosmos_table))
 
 +++
 
-### 2.1 Use the fornax cloud access API to obtain the IRAC data from the IRSA S3 bucket.
+### 2.1 Use the fornax cloud access API to obtain the IRAC data from the IRSA S3 bucket
 
 Details here may change as the prototype code is being added to the appropriate libraries, as well as the data holding to the appropriate NGAP storage as opposed to IRSA resources.
 
@@ -211,7 +207,7 @@ def fornax_download(data_table, data_subdirectory, access_url_column='access_url
     data_subdirectory : str
         Name of the subdirectory where the downloaded files will be stored.
     access_url_column : str, optional
-        Column name containing the access URLs for downloading the files. 
+        Column name containing the access URLs for downloading the files.
         Default is 'access_url'.
     fname_filter : str, optional
         If provided, only files whose names contain this substring will be downloaded.
@@ -338,12 +334,14 @@ df.isna().sum()
 df.type.value_counts()
 ```
 
-## 3.  Run Forced Photometry
+## 3. Run Forced Photometry
+
 - Calculate a flux at a given position in 2 IRAC and 2 Galex bands
 
 +++
 
 ### 3.1 Setup
+
 - initialize data frame columns to hold the results
 - collect the parameters for each band/channel
 - collect the input images
@@ -510,7 +508,7 @@ def calc_instrflux(band, ra, dec, stype, ks_flux_aper2, img_pair, df):
     #    if isinstance(part, str):
     #        abs_path = os.path.abspath(part)
     #        exists = os.path.exists(abs_path)
-    
+
     # cutout a small region around the object of interest
     subimage, bkgsubimage, x1, y1, subimage_wcs = cutout.extract_pair(
         ra, dec, img_pair=img_pair, cutout_width=band.cutout_width, mosaic_pix_scale=band.mosaic_pix_scale
@@ -542,6 +540,7 @@ def calc_instrflux(band, ra, dec, stype, ks_flux_aper2, img_pair, df):
 ```
 
 ### 3.3 Calculate Forced Photometry with Straightforward but Slow Method
+
 - no longer in use but keeping to demonstrate this capability\
 as well as the increase in speed when going to parallelization
 
@@ -571,6 +570,7 @@ t1 = time.time()
 ```
 
 ### 3.4 Calculate Forced Photometry - Parallelization
+
 - Parallelization: we can either interate over the rows of the dataframe and run the four bands in parallel; or we could zip together the row index, band, ra, dec,
 
 ```{code-cell} ipython3
@@ -658,6 +658,7 @@ df.to_pickle(f'output/COSMOS_{radius.value}arcmin.pkl')
 ```
 
 ### 3.6 Plot to Confirm our Photometry Results
+
 - compare to published COSMOS 2015 catalog
 
 ```{code-cell} ipython3
@@ -760,6 +761,7 @@ Tractor is working for IRAC; Comparison of tractor derived fluxes with COSMOS 20
 +++
 
 ## 4. Cross Match our New Photometry Catalog with an X-ray archival Catalog
+
 We are using `nway` as the tool to do the cross match (Salvato et al. 2017).
 `nway` expects input as two fits table files and outputs a third table file with all the possible matches and their probabilities of being the correct match.  We then sort that catalog and take only the best matches to be the true matches.
 
@@ -771,7 +773,7 @@ We are using `nway` as the tool to do the cross match (Salvato et al. 2017).
 # Instantiate Heasarc
 heasarc = Heasarc()
 
-# List all available catalogs 
+# List all available catalogs
 catalog_list = heasarc.list_catalogs()
 
 # Print names of catalogs that include "ccosmoscat"
@@ -781,7 +783,7 @@ catalog_names = catalog_list['name']
 for name in catalog_names:
     if "ccosmoscat" in name.lower():
         print(name)
-        
+
 # Query the ccosmoscat catalog around our position
 ccosmoscat = heasarc.query_region(
     position=coords,
@@ -870,6 +872,7 @@ print('number of Galex detections =',np.sum(merged.galex_detect > 0))
 ```
 
 ## 5. Plot Final Results
+
 - We want to understand something about populations based on their colors
 
 ```{code-cell} ipython3
@@ -973,21 +976,24 @@ We extend the works of Bouquin et al. 2015 and Moutard et al. 2020 by showing a 
 
 +++
 
-## References
+## About this notebook
+
+- **Authors:** Jessica Krick, David Shupe, Marziye JafariYazani, Brigitta Sipőcz, Vandana Desai, Steve Groom, Troy Raen, and the Fornax team
+- **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
+
+### Acknowledgements
+
+- Kristina Nyland for the workflow of the tractor wrapper.
+- MAST, HEASARC, & IRSA Fornax teams
+- Some content in this notebook was created with the assistance of ChatGPT by OpenAI.  All content has been reviewed and validated by the authors to ensure accuracy.
+
+### References
 
 This work made use of:
 
 - Astroquery; Ginsburg et al., 2019, 2019AJ....157...98G
-
 - Astropy; Astropy Collaboration 2022, Astropy Collaboration 2018, Astropy Collaboration 2013, 2022ApJ...935..167A, 2018AJ....156..123A, 2013A&A...558A..33A
-
 - The Tractor; Lang et al. 2016, 2016AJ....151...36L
-
 - Nyland et al. 2017 , 2017ApJS..230....9N
-
 - Salvato et al. 2018, 2018MNRAS.473.4937S
-
 - Laigle et al. 2016, 2016ApJS..224...24L
-
-
-Some content in this notebook was created with the assistance of ChatGPT by OpenAI.  All content has been reviewed and validated by the authors to ensure accuracy.

@@ -50,10 +50,6 @@ Also be aware that the script path shown in the commands below assumes you are i
 
 +++
 
-## Overview
-
-+++
-
 ### Parallel processing methods: bash script vs. python's `multiprocessing`
 
 - Bash script: Recommended for most runs with medium to large sample sizes (>~500). Allows ZTF to use additional parallelization internally, and so is often faster (ZTF often takes the longest and returns the most data for AGN-like samples). Writes stdout and stderr to log files, useful for monitoring jobs and resource usage. Can save `top` output to a file to help identify CPU and RAM usage/needs.
@@ -109,7 +105,7 @@ If you want a notebook or script to run for longer than about 30 minutes and you
 
 +++
 
-### Imports
+## Imports
 
 This cell will install the dependencies, if needed:
 
@@ -130,7 +126,7 @@ from data_structures import MultiIndexDFObject  # load light curve data as a Mul
 from plot_functions import create_figures  # make light curve figures
 ```
 
-## Example 1: Multi-wavelength light curves for 500,000 SDSS AGN
+## 1. Multi-wavelength light curves for 500,000 SDSS AGN
 
 +++
 
@@ -141,7 +137,7 @@ If executed, the run is expected to require at least 2 CPUs and 100G RAM.
 
 +++
 
-### Launch the run
+### 1.1 Launch the run
 
 +++
 
@@ -177,7 +173,7 @@ Command output from 2024/03/01 logs:
 # The column is immediately dropped. It is not used in the code.
 ```
 
-### Cancel
+### 1.2 Cancel
 
 +++
 
@@ -208,7 +204,7 @@ $ bash code_src/helpers/scale_up.sh -r "$run_id" -k
 
 +++
 
-### Restart
+### 1.3 Restart
 
 +++
 
@@ -228,7 +224,7 @@ $ bash code_src/helpers/scale_up.sh \
 
 +++
 
-### Monitor
+### 1.4 Monitor
 
 +++
 
@@ -240,7 +236,7 @@ There are at least three places to look for information about a run's status.
 
 +++
 
-#### Logs
+#### 1.4.1 Logs
 
 ```{code-cell}
 # Gaia log from 2024/03/01 (success)
@@ -259,7 +255,7 @@ We can diagnose what happened by looking at the `top` output.
 
 +++
 
-#### `top`
+#### 1.4.2 `top`
 
 While the jobs are running, you can monitor `top` and save the output to a log file by calling the script again with the `-t` flag.
 This call must be separate from the call that launches the run.
@@ -361,7 +357,7 @@ From here, the user can choose an appropriately sized machine and/or consider wh
 
 +++
 
-## Example 2: Parallelizing the light_curve_collector notebook
+## 2. Parallelizing the light_curve_collector notebook
 
 +++
 
@@ -450,13 +446,13 @@ Now we can make figures:
 _ = create_figures(df_lc=MultiIndexDFObject(data=df_lc), show_nbr_figures=1, save_output=False)
 ```
 
-## Example 3: Keyword arguments and script flags
+## 3. Keyword arguments and script flags
 
 +++
 
 This example shows the python `kwargs_dict` and bash script flag options in more detail.
 
-### Python `kwargs_dict`
+### 3.1 Python `kwargs_dict`
 
 `kwargs_dict` is a dictionary containing all keyword arguments for the run. It can contain:
 
@@ -475,7 +471,7 @@ helpers.scale_up.DEFAULTS
 print(helpers.scale_up.run.__doc__)
 ```
 
-### Bash script flags
+### 3.2 Bash script flags
 
 Use the `-h` (help) flag to view the script's flag options:
 
@@ -484,7 +480,7 @@ Use the `-h` (help) flag to view the script's flag options:
 !bash code_src/helpers/scale_up.sh -h
 ```
 
-### Using a yaml file
+### 3.3 Using a yaml file
 
 It can be convenient to save the parameters in a yaml file, especially when using the bash script or in cases where you want to store parameters for later reference or re-use.
 
@@ -610,6 +606,5 @@ To execute a run:
 
 ## About this notebook
 
-**Authors**: Troy Raen, Jessica Krick, Brigitta Sipőcz, Shoubaneh Hemmati, Andreas Faisst, David Shupe
-
-**Updated On**: 2025-03-27
+- **Authors**: Troy Raen, Jessica Krick, Brigitta Sipőcz, Shoubaneh Hemmati, Andreas Faisst, David Shupe, and the Fornax team
+- **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
