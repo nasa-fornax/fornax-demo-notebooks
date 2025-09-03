@@ -115,7 +115,7 @@ This cell will install the dependencies, if needed:
 
 ```{code-cell} ipython3#
 # Uncomment the next line to install dependencies if needed.
-# !pip install -r requirements_scale_up.txt
+# %pip install -r requirements_scale_up.txt
 ```
 
 ```{code-cell}
