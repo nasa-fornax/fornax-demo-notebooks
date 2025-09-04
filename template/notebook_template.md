@@ -25,7 +25,7 @@ By the end of this tutorial, you will be able to (list 2 - 5 high level goals):
 Alter this file according to your use case but retain the basic structure and try to use the same syntax for things like section headings, numbering schemes, and bullet points.
 Specifically the headings in this Intro section should not be edited to maintain consistency between notebooks.
 
-All contributed notebooks should be in [MyST markdown](https://mystmd.org) format.  
+All contributed notebooks should be in [MyST markdown](https://mystmd.org) format.  See the [Fornax documentation](https://docs.fornax.sciencecloud.nasa.gov/markdown-and-code-dev) for more info about this.
 
 The Introduction should provide context and motivation.
 Why should someone use this notebook?
@@ -92,10 +92,13 @@ data = np.random.randint(0, 100, size=100)
 
 Describe what the data look like. Add summary statistics, initial plots, sanity checks.
 
+For cuts or other data filtering and cleaning steps, explain the scientific reasoning behind them. 
+This helps people understand both the notebook and the data so that they're more equipped to use the data appropriately in other contexts.
+
 +++
 
 :::{tip}
-Please include narrative along with all your code cells to help the reader figure out what you are doing and why you chose that path.
+Please include narrative along with *all* your code cells to help the reader figure out what you are doing and why you chose that path.
 
 Using [MyST admonitions](https://mystmd.org/guide/admonitions) such as this `tip` are encouraged 
 :::
@@ -104,6 +107,10 @@ Using [MyST admonitions](https://mystmd.org/guide/admonitions) such as this `tip
 hist, bin_edges = np.histogram(data, bins=10)
 hist
 ```
+
+For any Figures, please add a few sentences about what the users should be noticing.
+
++++
 
 ## 3. Analysis
 
