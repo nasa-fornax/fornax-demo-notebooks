@@ -22,7 +22,8 @@ By the end of this tutorial, you will be able to (list 2 - 5 high level goals):
 
 ## Introduction
 
-Alter this file according to your use case but retain the basic structure and try to use the same syntax for section headings, bullet points, etc.  Specifically the headings in this Intro section should not be edited to maintain consistency between notebooks.
+Alter this file according to your use case but retain the basic structure and try to use the same syntax for things like section headings, numbering schemes, and bullet points.
+Specifically the headings in this Intro section should not be edited to maintain consistency between notebooks.
 
 All contributed notebooks should be in [MyST markdown](https://mystmd.org) format.  
 
@@ -33,12 +34,17 @@ Point out the parts that are particularly challenging and what solutions we chos
 
 ### Input
 
--   List the data, catalogs, or files needed, and where they come from.  If there are data that get downloaded to Fornax as part of this notebook, place those in a `data` directory.  Please do not change the name of this directory for consistency with other notebooks.  Do not add the contents of `data` to the repo, just the empty directory.
+-   List the data, catalogs, or files needed, and where they come from.
+    If there are data that get downloaded to Fornax as part of this notebook, place those in a `data` directory.
+    Please do not change the name of this directory for consistency with other notebooks.
+    Do not add the contents of `data` to the repo, just the empty directory.
 
 ### Output
 
 -   List the products the notebook generates (plots, tables, derived data, etc.)
--   If there are intermediate products produced by your notebook, generate an `output` directory for those data.  Please do not change the name of this directory for consistency with other notebooks.  Do not add the contents of `output` to the repo, just the empty directory.
+-   If there are intermediate products produced by your notebook, generate an `output` directory for those data.
+    Please do not change the name of this directory for consistency with other notebooks.
+    Do not add the contents of `output` to the repo, just the empty directory.
 
 ### Runtime
 
@@ -73,9 +79,9 @@ If you have written functions, please take those out of this notebook and put th
 +++
 
 ## 1. Data Access
-The name of this, and all future sections can change.  
-In general, it probably is a good idea to start with something like "Data Access".  
-Pleae note, and stick to, the existing numbering scheme
+The name of this, and all future sections can change.
+In general, it probably is a good idea to start with something like "Data Access".
+Pleae note, and stick to, the existing numbering scheme.
 
 ```{code-cell} ipython3
 # Create some example data.
@@ -150,6 +156,7 @@ This work made use of:
 
 -   STScI style guide: https://github.com/spacetelescope/style-guides/blob/master/guides/jupyter-notebooks.md
 -   Fornax tech and science review guidelines: https://github.com/nasa-fornax/fornax-demo-notebooks/blob/main/template/notebook_review_checklists.md
+-   The Turing Way Style Guide: https://book.the-turing-way.org/community-handbook/style
 
 ```{code-cell} ipython3
 
