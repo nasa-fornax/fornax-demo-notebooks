@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.17.2
+    jupytext_version: 1.17.3
 kernelspec:
   display_name: python3
   language: python
@@ -22,7 +22,7 @@ By the end of this tutorial, you will be able to (list 2 - 5 high level goals):
 
 ## Introduction
 
-Alter this file according to your use case but retain the basic structure and try to use the same syntax for section headings, bullet points, etc.
+Alter this file according to your use case but retain the basic structure and try to use the same syntax for section headings, bullet points, etc.  Specifically the headings in this Intro section should not be edited to maintain consistency between notebooks.
 
 The Introduction should provide context and motivation.
 Why should someone use this notebook?
@@ -54,10 +54,13 @@ Importantly, even those that are already installed in Fornax should be listed he
 This cell will install them if needed:
 
 ```{code-cell} ipython3
+# Make sure that you have built a requirements_notebook_name.txt file with these modules to be imported.
+# Remove these first few lines, but the rest of this cell should not be edited, 
+# except for the name of the requirements_notebook_name.txt
+
 # Uncomment the next line to install dependencies if needed.
 # %pip install -r requirements_template.txt
 
-# Make sure that you have built a requirements_notebook_name.txt file with these modules to be imported.
 ```
 
 ```{code-cell} ipython3
@@ -69,6 +72,9 @@ If you have written functions, please take those out of this notebook and put th
 +++
 
 ## 1. Data Access
+The name of this, and all future sections can change.  
+In general, it probably is a good idea to start with something like "Data Access".  
+Pleae note, and stick to, the existing numbering scheme
 
 ```{code-cell} ipython3
 # Create some example data.
@@ -116,7 +122,8 @@ Please consider these checklist requirements as you are writing your code.
 
 -   Authors: Only Author names, or even teams is required here
 -   Contact: [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov) with questions or problems.
--   Last Updated: 2025-08-28
+-   Last Updated: 2025-09-04
+-   Please edit and keep the above 3 bullet points, and remove this last line.
 
 +++
 
@@ -126,7 +133,7 @@ Did anyone help you?
 Probably these teams did, so include them: MAST, HEASARC, & IRSA Fornax teams.
 
 Did you use AI for any part of this tutorial, if so please include a statement such as:
-"AI: This notebook was created with assistance from OpenAI’s ChatGPT 5 model."
+"AI: This notebook was created with assistance from OpenAI’s ChatGPT 5 model.", which is a good time to mention that this template notebook was created with assistance from OpenAI’s ChatGPT 5 model.
 
 ### References
 
@@ -134,3 +141,7 @@ This work made use of:
 
 -   STScI style guide: https://github.com/spacetelescope/style-guides/blob/master/guides/jupyter-notebooks.md
 -   Fornax tech and science review guidelines: https://github.com/nasa-fornax/fornax-demo-notebooks/blob/main/template/notebook_review_checklists.md
+
+```{code-cell} ipython3
+
+```
