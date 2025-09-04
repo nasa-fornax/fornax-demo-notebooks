@@ -158,8 +158,7 @@ Please consider these checklist requirements as you are writing your code.
 
 -   Authors: Only Author names, or even teams is required here
 -   Contact: [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov) with questions or problems.
--   Last Updated: 2025-09-04
--   Please edit and keep the above 3 bullet points, and remove this last line.
+-   Please edit and keep the above 2 bullet points, and remove this last line.
 
 +++
 
