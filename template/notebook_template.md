@@ -124,6 +124,20 @@ These can be sections or subsections.
 
 +++
 
+### 3.2 Style Principles
+
+-   Follow suggestions of The Turing Way community [markdown style](https://book.the-turing-way.org/community-handbook/style)
+-   Write each sentence in a new line (line breaks) to make changes easier to read in PRs.
+-   Avoid latin abbreviation to avoid failing CI.
+-   Section titles should not end with ":".
+-   List items should start at the beginning of the line, no spaces first. Exception is nested lists.
+-   One empty line between section header and text.
+-   One empty line before a list and after.
+-   No more than one empty line between any two non-empty lines.
+  
+
++++
+
 ## 4. PR Review
 
 Notebooks go through a two step process: first step is getting into the repo, and the second step gets it into the [published tutorials](https://nasa-fornax.github.io/fornax-demo-notebooks/).
