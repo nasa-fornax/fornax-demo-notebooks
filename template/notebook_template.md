@@ -17,12 +17,14 @@ kernelspec:
 
 By the end of this tutorial, you will be able to (list 2 - 5 high level goals):
 
--   Write a python tutorial.
+-   Write a python tutorial using [MyST markdown](https://mystmd.org) format.
 -   Meet all of the checklist requirements to submit your code for code review.
 
 ## Introduction
 
 Alter this file according to your use case but retain the basic structure and try to use the same syntax for section headings, bullet points, etc.  Specifically the headings in this Intro section should not be edited to maintain consistency between notebooks.
+
+All contributed notebooks should be in [MyST markdown](https://mystmd.org) format.  
 
 The Introduction should provide context and motivation.
 Why should someone use this notebook?
@@ -31,11 +33,12 @@ Point out the parts that are particularly challenging and what solutions we chos
 
 ### Input
 
--   List the data, catalogs, or files needed, and where they come from.
+-   List the data, catalogs, or files needed, and where they come from.  If there are data that get downloaded to Fornax as part of this notebook, place those in a `data` directory.  Please do not change the name of this directory for consistency with other notebooks.  Do not add the contents of `data` to the repo, just the empty directory.
 
 ### Output
 
 -   List the products the notebook generates (plots, tables, derived data, etc.)
+-   If there are intermediate products produced by your notebook, generate an `output` directory for those data.  Please do not change the name of this directory for consistency with other notebooks.  Do not add the contents of `output` to the repo, just the empty directory.
 
 ### Runtime
 
@@ -51,16 +54,14 @@ As of {Date}, this notebook takes ~{N}s to run to completion on Fornax using the
 This should be a list of the modules that are required to run this code.
 Importantly, even those that are already installed in Fornax should be listed here so users wanting to run this locally on their own machines have the information they need to do this.
 
-This cell will install them if needed:
+Make sure that you have built a requirements_notebook_name.txt file with the modules to be imported.  
+The name of the notebook should be present in the name of the requirements file, as in our example "requirements_template.txt"
 
 ```{code-cell} ipython3
-# Make sure that you have built a requirements_notebook_name.txt file with these modules to be imported.
-# Remove these first few lines, but the rest of this cell should not be edited, 
-# except for the name of the requirements_notebook_name.txt
+# This cell should not be edited below this line except for the name of the requirements_notebook_name.txt
 
 # Uncomment the next line to install dependencies if needed.
 # %pip install -r requirements_template.txt
-
 ```
 
 ```{code-cell} ipython3
@@ -84,6 +85,14 @@ data = np.random.randint(0, 100, size=100)
 ## 2. Data Exploration
 
 Describe what the data look like. Add summary statistics, initial plots, sanity checks.
+
++++
+
+:::{tip}
+Please include narrative along with all your code cells to help the reader figure out what you are doing and why you chose that path.
+
+Using [MyST admonitions](https://mystmd.org/guide/admonitions) such as this `tip` are encouraged 
+:::
 
 ```{code-cell} ipython3
 hist, bin_edges = np.histogram(data, bins=10)
