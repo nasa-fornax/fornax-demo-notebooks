@@ -10,8 +10,7 @@ For authors: consider these checklists requirements for your code.
 
 ## Who should participate in these reviews?
 
--   JK's suggestion is that if everyone on Fornax helps to write the below checklists, then the whole team does not need to be involved in code reviews.
-    One developer per tech review, one scientist per science review, from any team.
+-  From the pool of people who have successfully compelted a PR in the fornax-demo-notebooks, choose one developer for a tech review and one scientist for the science review, from any team.  This might become more fluid in the future as lines between developers and scientists blur, but at any rate, 2 reviews are appropriate for any new notebook.  Updates do not require 2 approvals.
 
 ## Science Review Checklist
 
@@ -19,18 +18,17 @@ For authors: consider these checklists requirements for your code.
 -   Does the code do what the intro says it is going to do?
 -   Is it scientifically accurate?
 -   Does it include all three archives HEASARC, MAST, IRSA?\
-    -   if not, is that justified
+    -   if not, is that justified?
 -   Does it include work linked to a buzzword:
     -   big data, spectroscopy, time domain, forced photometry, cloud
 -   Has each NASA archive been given the option to comment on modules for their relevant data access?\
-    -   TODO: a preferred contact method for each archive should be listed here, ie., archive helpdesk, NN slack channel #fornaxdev-daskhub? ???
-    -   Is archival data accessed in the most efficient way according to that archive?
+    -   Discourse `staff` channel is one method of contacting people to check for this
+-   Is archival data accessed in the most efficient way according to that archive?
 
 ## Tech Review Checklist
 
 -   Documentation:
 	-   Is every function documented?
-	-   Does it follow the style guide? https://github.com/spacetelescope/style-guides/blob/master/guides/jupyter-notebooks.md
    	-   Do all code cells have corresponding narratives/comments?
    	-   Include information about which server type and environment to choose when logging in to Fornax and the notebook's expected runtime given that setup. For example:
         -   "As of 2024 August, this notebook takes about 3 minutes to run to completion on Fornax using Server Type: 'Standard - 8GB RAM/4 CPU' and Environment: 'Default Astrophysics' (image)."
@@ -50,6 +48,10 @@ For authors: consider these checklists requirements for your code.
 	-   Is the code parallelized where possible?
 	-   If the notebook is intended to be scaled up, does it do that efficiently?
 	-   Is memory usage optimized where possible?
+-   Style:
+    - Follow suggestions of The Turing Way community on [markdown style](https://book.the-turing-way.org/community-handbook/style) including but not limited to:
+        - Write each sentence in a new line (line breaks) to make changes easier to read in PRs
+        - Avoid latin abbreviation to avoid failing CI 
 -   Cleanup:
 	-   Have blocks of code that need to be re-used been turned into functions (rather than being duplicated)?
 	-   Have unused libraries been removed from the requirements.txt file and the `import` statements?
@@ -57,3 +59,7 @@ For authors: consider these checklists requirements for your code.
    	-   Are code comment lines wrapped so all fit within a max of 90 - 100 characters per line?
    	-   Are code lines reasonably short where possible? some code lines can't easily be wrapped and that is ok
    	-   Do plots use color-blind friendly palettes for plotting? try this [simulator](https://www.color-blindness.com/coblis-color-blindness-simulator/#google_vignette) for visual check
+
+```python
+
+```
