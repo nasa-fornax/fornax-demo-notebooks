@@ -61,7 +61,7 @@ As of {Date}, this notebook takes ~{N}s to run to completion on Fornax using the
 This should be a list of the modules that are required to run this code.
 Importantly, even those that are already installed in Fornax should be listed here so users wanting to run this locally on their own machines have the information they need to do this.
 
-Make sure that you have built a requirements_notebook_name.txt file with the modules to be imported.  
+Make sure that you have built a "requirements_notebook_name.txt" file with the modules to be imported.  
 The name of the notebook should be present in the name of the requirements file, as in our example "requirements_notebook_template.txt"
 
 ```{code-cell} ipython3
@@ -139,21 +139,32 @@ These can be sections or subsections.
 -   Follow suggestions of The Turing Way community [markdown style](https://book.the-turing-way.org/community-handbook/style)
 -   Write each sentence in a new line (line breaks) to make changes easier to read in PRs.
 -   Avoid latin abbreviation to avoid failing CI.
+
+#### 3.2.1 Best Practice Guidelines
+It would be nice if all contributed codes did the following, but these guidelines will not be checked in a code review
+
 -   Section titles should not end with ":".
 -   List items should start at the beginning of the line, no spaces first. Exception is nested lists.
 -   One empty line between section header and text.
 -   One empty line before a list and after.
 -   No more than one empty line between any two non-empty lines.
-  
 
-+++
+```{code-cell} ipython3
+
+```
 
 ## 4. PR Review
 
 Notebooks go through a two step process: first step is getting into the repo, and the second step gets it into the [published tutorials](https://nasa-fornax.github.io/fornax-demo-notebooks/).
-
-To complete the review for the first step, both a science and technical reviewer will be looking at [this checklist](https://github.com/nasa-fornax/fornax-demo-notebooks/blob/main/template/notebook_review_checklists.md) to see if the new tutorial notebook meets all of the requirements, or has a reasonable excuse not to.
+Final notebooks are expected to go through both a science and tech review checklist.
+Checklists are [here](https://github.com/nasa-fornax/fornax-demo-notebooks/tree/main/template/notebook_review_checklists.md).
 Please consider these checklist requirements as you are writing your code.
+
+The first PR of a notebook does not need to have everything from the checklists completed, but should have all the pieces there, and the authors should be aware of the requirements.
+
+To complete the second step of this process and be both rendered and included in users Fornax home directories, both a science and technical reviewer will be looking at [this checklist](https://github.com/nasa-fornax/fornax-demo-notebooks/tree/main/template/notebook_review_checklists.md) to see if the new tutorial notebook meets all of the requirements, or has a reasonable excuse not to.
+
+Any PRs can be opened as drafts, which is in fact preferred, if authors are still working on them.
 
 +++
 
