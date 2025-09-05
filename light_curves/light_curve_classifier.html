@@ -399,12 +399,12 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#learning-goals">Learning Goals</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#runtime">Runtime</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#runtime">Runtime</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#read-in-a-dataset-of-archival-light-curves">1. Read in a dataset of archival light curves</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-prep">2. Data Prep</a><ul class="nav section-nav flex-column">
@@ -425,13 +425,17 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-sktime-algorithms-on-the-light-curves">4. Run sktime algorithms on the light curves</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#check-that-the-data-types-are-ok-for-sktime">4.1 Check that the data types are ok for sktime</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-single-classifier">4.1 A single Classifier</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#loop-over-a-bunch-of-classifiers">4.2 Loop over a bunch of classifiers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-single-classifier">4.2 A single Classifier</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#loop-over-a-bunch-of-classifiers">4.3 Loop over a bunch of classifiers</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#create-a-candidate-list">5.0 Create a candidate list</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#create-a-candidate-list">5. Create a candidate list</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conclusions">Conclusions</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about-this-notebook">About this notebook</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -467,9 +471,8 @@ document.write(`
 <li><p>Unequal length = Each band has a light curve with different sampling than other bands</p></li>
 <li><p>Missing data = Not each object has all observations in all bands</p></li>
 </ol>
-</section>
 <section id="input">
-<h2>Input<a class="headerlink" href="#input" title="Link to this heading">#</a></h2>
+<h3>Input<a class="headerlink" href="#input" title="Link to this heading">#</a></h3>
 <p>Light curve parquet file of multiwavelength light curves from the light_curve_collector.md demo notebook in this same repo.  The format of the light curves is a Pandas multiindex data frame.</p>
 <p>We choose to use a Pandas multiindex dataframe to store and work with the data because it fulfills these requirements:</p>
 <ol class="arabic simple">
@@ -482,20 +485,13 @@ document.write(`
 <p>A useful reference for what sktime expects as input to its ML algorithms: https://github.com/sktime/sktime/blob/main/examples/AA_datatypes_and_datasets.ipynb</p>
 </section>
 <section id="output">
-<h2>Output<a class="headerlink" href="#output" title="Link to this heading">#</a></h2>
+<h3>Output<a class="headerlink" href="#output" title="Link to this heading">#</a></h3>
 <p>Trained classifiers as well as estimates of their accuracy and plots of confusion matrices</p>
 </section>
 <section id="runtime">
-<h2>Runtime<a class="headerlink" href="#runtime" title="Link to this heading">#</a></h2>
+<h3>Runtime<a class="headerlink" href="#runtime" title="Link to this heading">#</a></h3>
 <p>As of 2024 August, this notebook takes ~170s to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 16GB RAM/ 4CPU.</p>
 </section>
-<section id="authors">
-<h2>Authors<a class="headerlink" href="#authors" title="Link to this heading">#</a></h2>
-<p>Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, Andreas Faisst, Vandana Desai, David Shupe</p>
-</section>
-<section id="acknowledgements">
-<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading">#</a></h2>
-<p>Stephanie La Massa</p>
 </section>
 <section id="imports">
 <h2>Imports<a class="headerlink" href="#imports" title="Link to this heading">#</a></h2>
@@ -1655,7 +1651,7 @@ fewer data points.</p></li>
 </div>
 </section>
 <section id="a-single-classifier">
-<h3>4.1 A single Classifier<a class="headerlink" href="#a-single-classifier" title="Link to this heading">#</a></h3>
+<h3>4.2 A single Classifier<a class="headerlink" href="#a-single-classifier" title="Link to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
@@ -1686,16 +1682,16 @@ fewer data points.</p></li>
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Accuracy of Random Interval Classifier: 0.7333333333333333
-CPU times: user 1.29 s, sys: 904 ms, total: 2.2 s
-Wall time: 1min 13s
+CPU times: user 1.28 s, sys: 796 ms, total: 2.07 s
+Wall time: 1min 12s
 </pre></div>
 </div>
-<img alt="../_images/2a99da5ad7883dab3b9758e475b00131180bcf35b4efd099001f9590131710e0.png" src="../_images/2a99da5ad7883dab3b9758e475b00131180bcf35b4efd099001f9590131710e0.png" />
+<img alt="../_images/1bc68160a8cb8ee4ec9dc64b23806acce151dbba71d4ba1d53011eddc61c7ea9.png" src="../_images/1bc68160a8cb8ee4ec9dc64b23806acce151dbba71d4ba1d53011eddc61c7ea9.png" />
 </div>
 </div>
 </section>
 <section id="loop-over-a-bunch-of-classifiers">
-<h3>4.2 Loop over a bunch of classifiers<a class="headerlink" href="#loop-over-a-bunch-of-classifiers" title="Link to this heading">#</a></h3>
+<h3>4.3 Loop over a bunch of classifiers<a class="headerlink" href="#loop-over-a-bunch-of-classifiers" title="Link to this heading">#</a></h3>
 <p>Our method is to do a cursory check of a bunch of classifiers and then later drill down deeper on anything with good initial results.  We choose to run a loop over ~10 classifiers that seem promising and check the accuracy scores for each one.  Any classifier with a promising accuracy score could then be followed up with detailed hyperparameter tuning, or potentially with considering other classifiers in that same type.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -1723,7 +1719,7 @@ Wall time: 1min 13s
 </section>
 </section>
 <section id="create-a-candidate-list">
-<h2>5.0 Create a candidate list<a class="headerlink" href="#create-a-candidate-list" title="Link to this heading">#</a></h2>
+<h2>5. Create a candidate list<a class="headerlink" href="#create-a-candidate-list" title="Link to this heading">#</a></h2>
 <p>Lets assume we now have a classifier which can accurately differentiate CLAGN from SDSS QSOs based on their archival light curves.  Next, we would like to use that classifier on our favorite unlabeled sample to identify CLAGN candidates.  To do this, we need to:</p>
 <ul class="simple">
 <li><p>read in a dataframe of our new sample</p></li>
@@ -2133,7 +2129,15 @@ Unzipping...
       <td>...</td>
     </tr>
     <tr>
-      <th>96</th>
+      <th>94</th>
+      <td>163</td>
+      <td>CLAGN</td>
+      <td>237.571790</td>
+      <td>41.650640</td>
+      <td>Yang 18</td>
+    </tr>
+    <tr>
+      <th>95</th>
       <td>204</td>
       <td>CLAGN</td>
       <td>171.400690</td>
@@ -2141,7 +2145,7 @@ Unzipping...
       <td>SDSS</td>
     </tr>
     <tr>
-      <th>97</th>
+      <th>96</th>
       <td>282</td>
       <td>CLAGN</td>
       <td>161.163170</td>
@@ -2149,7 +2153,7 @@ Unzipping...
       <td>SDSS</td>
     </tr>
     <tr>
-      <th>98</th>
+      <th>97</th>
       <td>380</td>
       <td>CLAGN</td>
       <td>188.156210</td>
@@ -2157,15 +2161,7 @@ Unzipping...
       <td>SDSS</td>
     </tr>
     <tr>
-      <th>99</th>
-      <td>392</td>
-      <td>CLAGN</td>
-      <td>246.670540</td>
-      <td>14.378788</td>
-      <td>SDSS</td>
-    </tr>
-    <tr>
-      <th>100</th>
+      <th>98</th>
       <td>415</td>
       <td>CLAGN</td>
       <td>200.730970</td>
@@ -2174,7 +2170,7 @@ Unzipping...
     </tr>
   </tbody>
 </table>
-<p>101 rows × 5 columns</p>
+<p>99 rows × 5 columns</p>
 </div></div></div>
 </div>
 </section>
@@ -2182,8 +2178,20 @@ Unzipping...
 <h2>Conclusions<a class="headerlink" href="#conclusions" title="Link to this heading">#</a></h2>
 <p>Depending on your comfort level with the accuracy of the classifier you have trained, you could now write an observing proposal to confirm those targets prediced to be CLAGN based on their multiwavelength light curves.</p>
 </section>
+<section id="about-this-notebook">
+<h2>About this notebook<a class="headerlink" href="#about-this-notebook" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Authors:</strong> Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, Andreas Faisst, Vandana Desai, David Shupe, and the Fornax team</p></li>
+<li><p><strong>Contact:</strong> For help with this notebook, please open a topic in the <a class="reference external" href="https://discourse.fornax.sciencecloud.nasa.gov/">Fornax Community Forum</a> “Support” category.</p></li>
+</ul>
+<section id="acknowledgements">
+<h3>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Stephanie La Massa</p></li>
+</ul>
+</section>
 <section id="references">
-<h2>References:<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
+<h3>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>“sktime: A Unified Interface for Machine Learning with Time Series”
 Markus Löning, Tony Bagnall, Sajaysurya Ganesh, George Oastler, Jason Lines, ViktorKaz, …, Aadesh Deshmukh (2020). sktime/sktime. Zenodo. http://doi.org/10.5281/zenodo.3749000</p></li>
@@ -2191,6 +2199,7 @@ Markus Löning, Tony Bagnall, Sajaysurya Ganesh, George Oastler, Jason Lines, Vi
 <li><p>“pandas-dev/pandas: Pandas” The pandas development team, 2020. Zenodo. https://doi.org/10.5281/zenodo.3509134</p></li>
 <li><p>This work made use of <a class="reference external" href="http://www.astropy.org">Astropy</a> a community-developed core Python package and an ecosystem of tools and resources for astronomy (astropy:2013, astropy:2018, astropy:2022).</p></li>
 </ul>
+</section>
 </section>
 </section>
 
@@ -2240,12 +2249,12 @@ Markus Löning, Tony Bagnall, Sajaysurya Ganesh, George Oastler, Jason Lines, Vi
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#learning-goals">Learning Goals</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#runtime">Runtime</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#runtime">Runtime</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#read-in-a-dataset-of-archival-light-curves">1. Read in a dataset of archival light curves</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-prep">2. Data Prep</a><ul class="nav section-nav flex-column">
@@ -2266,13 +2275,17 @@ Markus Löning, Tony Bagnall, Sajaysurya Ganesh, George Oastler, Jason Lines, Vi
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-sktime-algorithms-on-the-light-curves">4. Run sktime algorithms on the light curves</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#check-that-the-data-types-are-ok-for-sktime">4.1 Check that the data types are ok for sktime</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-single-classifier">4.1 A single Classifier</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#loop-over-a-bunch-of-classifiers">4.2 Loop over a bunch of classifiers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-single-classifier">4.2 A single Classifier</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#loop-over-a-bunch-of-classifiers">4.3 Loop over a bunch of classifiers</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#create-a-candidate-list">5.0 Create a candidate list</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#create-a-candidate-list">5. Create a candidate list</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conclusions">Conclusions</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about-this-notebook">About this notebook</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

@@ -6,8 +6,8 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.17.2
 kernelspec:
-  name: python3
-  display_name: python3
+  name: py-ztf_ps1_crossmatch
+  display_name: py-ztf_ps1_crossmatch
   language: python
 ---
 

@@ -399,13 +399,13 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#learning-goals">Learning Goals</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#runtime">Runtime:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#runtime">Runtime</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#define-the-sample">1. Define the sample</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#build-your-own-sample">1.1 Build your own sample</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#write-out-your-sample-to-disk">1.2 Write out your sample to disk</a></li>
@@ -418,19 +418,23 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#irsa-wise">2.2 IRSA: WISE</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-pan-starrs">2.3 MAST: Pan-STARRS</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-tess-kepler-and-k2">2.4 MAST: TESS, Kepler and K2</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-hubble-catalog-of-variables-hcv">2.5 MAST: Hubble Catalog of Variables (HCV)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-hubble-catalog-of-variables">2.5 MAST: Hubble Catalog of Variables</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#find-light-curves-for-these-targets-in-relevant-non-nasa-catalogs">3. Find light curves for these targets in relevant, non-NASA catalogs</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#irsa-ztf">3.1 IRSA: ZTF</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gaia">3.2 Gaia</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#icecube-neutrinos">3.3 IceCube neutrinos</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rubin-data">3.4 Rubin Data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rubin">3.4 Rubin</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-processing-the-archive-calls">4. Parallel processing the archive calls</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#make-plots-of-luminosity-as-a-function-of-time">5. Make plots of luminosity as a function of time</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about-this-notebook">About this notebook</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -455,7 +459,7 @@ document.write(`
 </ul>
 </section>
 <section id="introduction">
-<h2>Introduction:<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p>A user has a sample of interesting targets for which they would like to see a plot of available archival light curves.  We start with a small set of changing look AGN from Yang et al., 2018, which are automatically downloaded. Changing look AGN are cases where the broad emission lines appear or disappear (and not just that the flux is variable).</p></li>
 <li><p>We model light curve plots after van Velzen et al. 2021.  We search through a curated list of time-domain NASA holdings as well as non-NASA sources.  HEASARC catalogs used are Fermi and Beppo-Sax, IRSA catalogs used are ZTF and WISE, and MAST catalogs used are Pan-STARRS, TESS, Kepler, and K2.  Non-NASA sources are Gaia and IceCube. This list is generalized enough to include many types of targets to make this notebook interesting for many types of science.  All of these time-domain archives are searched in an automated and efficient fashion using astroquery, pyvo, pyarrow or APIs.</p></li>
@@ -463,9 +467,8 @@ document.write(`
 <li><p>This notebook walks through the individual steps required to collect the targets and their light curves and create figures. It also shows how to speed up the collection of light curves using python’s <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code>. This is expected to be sufficient for up to ~500 targets. For a larger number of targets, consider using the bash script demonstrated in the neighboring notebook <a class="reference internal" href="scale_up.html"><span class="std std-doc">scale_up</span></a>.</p></li>
 <li><p>ML work using these time-series light curves is in two neighboring notebooks: <a class="reference internal" href="ML_AGNzoo.html"><span class="std std-doc">ML_AGNzoo</span></a> and <a class="reference internal" href="light_curve_classifier.html"><span class="std std-doc">light_curve_classifier</span></a>.</p></li>
 </ul>
-</section>
 <section id="input">
-<h2>Input:<a class="headerlink" href="#input" title="Link to this heading">#</a></h2>
+<h3>Input<a class="headerlink" href="#input" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>choose from a list of known changing look AGN from the literature
 OR -</p></li>
@@ -473,28 +476,20 @@ OR -</p></li>
 </ul>
 </section>
 <section id="output">
-<h2>Output:<a class="headerlink" href="#output" title="Link to this heading">#</a></h2>
+<h3>Output<a class="headerlink" href="#output" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>an archival optical + IR + neutrino light curve</p></li>
 </ul>
 </section>
 <section id="runtime">
-<h2>Runtime:<a class="headerlink" href="#runtime" title="Link to this heading">#</a></h2>
+<h3>Runtime<a class="headerlink" href="#runtime" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>As of 2025 May, this notebook takes ~1000s (17 min.) to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 64GB RAM/ 16CPU.</p></li>
 </ul>
 </section>
-<section id="authors">
-<h2>Authors:<a class="headerlink" href="#authors" title="Link to this heading">#</a></h2>
-<p>Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, David Shupe</p>
-</section>
-<section id="acknowledgements">
-<h2>Acknowledgements:<a class="headerlink" href="#acknowledgements" title="Link to this heading">#</a></h2>
-<p>Suvi Gezari, Antara Basu-zych, Stephanie LaMassa
-MAST, HEASARC, &amp; IRSA Fornax teams</p>
 </section>
 <section id="imports">
-<h2>Imports:<a class="headerlink" href="#imports" title="Link to this heading">#</a></h2>
+<h2>Imports<a class="headerlink" href="#imports" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">acstools</span></code> to work with HST magnitude to flux conversion</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">astropy</span></code> to work with coordinates/units and data structures</p></li>
@@ -746,9 +741,9 @@ to an <a class="reference external" href="https://docs.astropy.org/en/stable/tab
 </div>
 </div>
 </section>
-<section id="mast-hubble-catalog-of-variables-hcv">
-<h3>2.5 MAST: Hubble Catalog of Variables (<a class="reference external" href="https://archive.stsci.edu/hlsp/hcv">HCV</a>)<a class="headerlink" href="#mast-hubble-catalog-of-variables-hcv" title="Link to this heading">#</a></h3>
-<p>The function to retrieve lightcurves from HCV currently uses their API; based on this <a class="reference external" href="https://archive.stsci.edu/hst/hsc/help/HCV/HCV_API_demo.html">example</a>. This search is not efficient at scale and we expect it to be replaced in the future.</p>
+<section id="mast-hubble-catalog-of-variables">
+<h3>2.5 MAST: Hubble Catalog of Variables<a class="headerlink" href="#mast-hubble-catalog-of-variables" title="Link to this heading">#</a></h3>
+<p>The function to retrieve lightcurves from <a class="reference external" href="https://archive.stsci.edu/hlsp/hcv">HCV</a> currently uses their API; based on this <a class="reference external" href="https://archive.stsci.edu/hst/hsc/help/HCV/HCV_API_demo.html">example</a>. This search is not efficient at scale and we expect it to be replaced in the future.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">HCVstarttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -832,8 +827,8 @@ The IceCube catalog contains Neutrino detections with associated energy and time
 </div>
 </div>
 </section>
-<section id="rubin-data">
-<h3>3.4 Rubin Data<a class="headerlink" href="#rubin-data" title="Link to this heading">#</a></h3>
+<section id="rubin">
+<h3>3.4 Rubin<a class="headerlink" href="#rubin" title="Link to this heading">#</a></h3>
 <p>Before running this section, you need to have both 1) a login to the Rubin Science Platform (RSP) and 2) an authenticating token setup in your Fornax home directory.</p>
 <ol class="arabic simple">
 <li><p>To see if you have Rubin data rights, and if you do, to get that login setup, follow these <a class="reference external" href="https://rsp.lsst.io/guides/getting-started/get-an-account.html">instructions</a></p></li>
@@ -982,8 +977,21 @@ For sample sizes &gt;~500 and/or improved logging and monitoring options, consid
 </div>
 </div>
 </section>
+<section id="about-this-notebook">
+<h2>About this notebook<a class="headerlink" href="#about-this-notebook" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Authors:</strong> Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, David Shupe, and the Fornax team</p></li>
+<li><p><strong>Contact:</strong> For help with this notebook, please open a topic in the <a class="reference external" href="https://discourse.fornax.sciencecloud.nasa.gov/">Fornax Community Forum</a> “Support” category.</p></li>
+</ul>
+<section id="acknowledgements">
+<h3>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Suvi Gezari, Antara Basu-zych, Stephanie LaMassa</p></li>
+<li><p>MAST, HEASARC, &amp; IRSA Fornax teams</p></li>
+</ul>
+</section>
 <section id="references">
-<h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
+<h3>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h3>
 <p>This work made use of:</p>
 <ul class="simple">
 <li><p>Astroquery; Ginsburg et al., 2019, 2019AJ….157…98G</p></li>
@@ -992,6 +1000,7 @@ For sample sizes &gt;~500 and/or improved logging and monitoring options, consid
 <li><p>acstools; https://zenodo.org/record/7406933#.ZBH1HS-B0eY</p></li>
 <li><p>unWISE light curves; Meisner et al., 2023, 2023AJ….165…36M</p></li>
 </ul>
+</section>
 </section>
 </section>
 
@@ -1041,13 +1050,13 @@ For sample sizes &gt;~500 and/or improved logging and monitoring options, consid
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#learning-goals">Learning Goals</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#runtime">Runtime:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#runtime">Runtime</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#define-the-sample">1. Define the sample</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#build-your-own-sample">1.1 Build your own sample</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#write-out-your-sample-to-disk">1.2 Write out your sample to disk</a></li>
@@ -1060,19 +1069,23 @@ For sample sizes &gt;~500 and/or improved logging and monitoring options, consid
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#irsa-wise">2.2 IRSA: WISE</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-pan-starrs">2.3 MAST: Pan-STARRS</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-tess-kepler-and-k2">2.4 MAST: TESS, Kepler and K2</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-hubble-catalog-of-variables-hcv">2.5 MAST: Hubble Catalog of Variables (HCV)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mast-hubble-catalog-of-variables">2.5 MAST: Hubble Catalog of Variables</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#find-light-curves-for-these-targets-in-relevant-non-nasa-catalogs">3. Find light curves for these targets in relevant, non-NASA catalogs</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#irsa-ztf">3.1 IRSA: ZTF</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gaia">3.2 Gaia</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#icecube-neutrinos">3.3 IceCube neutrinos</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rubin-data">3.4 Rubin Data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rubin">3.4 Rubin</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-processing-the-archive-calls">4. Parallel processing the archive calls</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#make-plots-of-luminosity-as-a-function-of-time">5. Make plots of luminosity as a function of time</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about-this-notebook">About this notebook</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

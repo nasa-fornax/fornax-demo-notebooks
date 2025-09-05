@@ -399,21 +399,13 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#learning-goals">Learning Goals</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction:</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#motivation">Motivation</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#list-of-spectroscopic-archives-and-status">List of Spectroscopic Archives and Status</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-standard-imports">Non-standard Imports:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#runtime">Runtime</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements:</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#datasets-that-were-considered-but-didn-t-end-up-being-used">Datasets that were considered but didn’t end up being used:</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#irtf">IRTF:</a></li>
-</ul>
-</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#runtime">Runtime</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#datasets-that-were-considered-but-didn-t-end-up-being-used">Datasets that were considered but didn’t end up being used</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
@@ -432,6 +424,10 @@ document.write(`
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#make-plots-of-luminosity-as-a-function-of-time">3. Make plots of luminosity as a function of time</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about-this-notebook">About this notebook</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements</a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -454,7 +450,7 @@ document.write(`
 <p>• plot all the spectra of a given source</p>
 </section>
 <section id="introduction">
-<h2>Introduction:<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
 <section id="motivation">
 <h3>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">#</a></h3>
 <p>A user has a source (or a sample of sources) for which they want to obtain spectra covering ranges
@@ -560,36 +556,23 @@ this to work, the <code class="docutils literal notranslate"><span class="pre">s
 </div>
 <p>The ones with an asterisk (*) are the challenging ones.</p>
 </section>
-</section>
 <section id="input">
-<h2>Input:<a class="headerlink" href="#input" title="Link to this heading">#</a></h2>
+<h3>Input<a class="headerlink" href="#input" title="Link to this heading">#</a></h3>
 <p>• Coordinates for a single source or a sample on the COSMOS field</p>
 </section>
 <section id="output">
-<h2>Output:<a class="headerlink" href="#output" title="Link to this heading">#</a></h2>
+<h3>Output<a class="headerlink" href="#output" title="Link to this heading">#</a></h3>
 <p>• A Pandas data frame including the spectra from different facilities</p>
 <p>• A plot comparing the different spectra extracted for each source</p>
 </section>
-<section id="non-standard-imports">
-<h2>Non-standard Imports:<a class="headerlink" href="#non-standard-imports" title="Link to this heading">#</a></h2>
-<p>• …</p>
-</section>
 <section id="runtime">
-<h2>Runtime<a class="headerlink" href="#runtime" title="Link to this heading">#</a></h2>
+<h3>Runtime<a class="headerlink" href="#runtime" title="Link to this heading">#</a></h3>
 <p>As of 2025 July, this notebook takes about 18 minutes to run to completion on Fornax using
 a server with 16GB RAM/4 CPU’ and Environment: ‘Default Astrophysics’ (image).</p>
 </section>
-<section id="authors">
-<h2>Authors:<a class="headerlink" href="#authors" title="Link to this heading">#</a></h2>
-<p>Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, David Shupe</p>
-</section>
-<section id="acknowledgements">
-<h2>Acknowledgements:<a class="headerlink" href="#acknowledgements" title="Link to this heading">#</a></h2>
-<p>AI: This notebook was created with assistance from OpenAI’s ChatGPT o4-mini-high model.</p>
 <section id="datasets-that-were-considered-but-didn-t-end-up-being-used">
-<h3>Datasets that were considered but didn’t end up being used:<a class="headerlink" href="#datasets-that-were-considered-but-didn-t-end-up-being-used" title="Link to this heading">#</a></h3>
-<section id="irtf">
-<h4>IRTF:<a class="headerlink" href="#irtf" title="Link to this heading">#</a></h4>
+<h3>Datasets that were considered but didn’t end up being used<a class="headerlink" href="#datasets-that-were-considered-but-didn-t-end-up-being-used" title="Link to this heading">#</a></h3>
+<p>IRTF:</p>
 <ul class="simple">
 <li><p>https://irsa.ipac.caltech.edu/Missions/irtf.html</p></li>
 <li><p>The IRTF is a 3.2 meter telescope, optimized for infrared observations, and located at the summit
@@ -598,7 +581,6 @@ of Mauna Kea, Hawaiʻi.</p></li>
 <li><p>Not included here because the data are not currently available in an easily accessible,
 searchable format</p></li>
 </ul>
-</section>
 </section>
 </section>
 <section id="imports">
@@ -763,8 +745,8 @@ Number of entries found: 0
 Number of entries found: 0
 Number of entries found: 0
 Number of entries found: 0
-CPU times: user 290 ms, sys: 11.4 ms, total: 302 ms
-Wall time: 33.8 s
+CPU times: user 294 ms, sys: 12.5 ms, total: 306 ms
+Wall time: 28.6 s
 </pre></div>
 </div>
 </div>
@@ -802,8 +784,8 @@ Processing source TestEuclid
 Number of entries found: 0
 Processing source Twin Quasar
 Number of entries found: 0
-CPU times: user 227 ms, sys: 9.2 ms, total: 236 ms
-Wall time: 32.5 s
+CPU times: user 228 ms, sys: 6.75 ms, total: 235 ms
+Wall time: 34.8 s
 </pre></div>
 </div>
 </div>
@@ -840,8 +822,8 @@ Processing source TestEuclid
 Found Euclid object_id: 2684805874647806467
 Processing source Twin Quasar
 No match found in Euclid MER catalog for Twin Quasar.
-CPU times: user 4.12 s, sys: 364 ms, total: 4.48 s
-Wall time: 39.9 s
+CPU times: user 4.1 s, sys: 349 ms, total: 4.44 s
+Wall time: 47.8 s
 </pre></div>
 </div>
 </div>
@@ -906,8 +888,8 @@ Source TestEuclid could not be found
 Processing source Twin Quasar
 Number of search results: 5
 Number of files to download: 2
-CPU times: user 1.66 s, sys: 51.2 ms, total: 1.71 s
-Wall time: 2min 55s
+CPU times: user 1.62 s, sys: 67.6 ms, total: 1.69 s
+Wall time: 4min 53s
 </pre></div>
 </div>
 </div>
@@ -973,8 +955,8 @@ Grouping object COSMOS2
 Grouping object JADESGS-z7-01-QU
 Grouping object TestJWST
 done
-CPU times: user 27.6 s, sys: 2.08 s, total: 29.6 s
-Wall time: 6min 30s
+CPU times: user 26.7 s, sys: 1.95 s, total: 28.7 s
+Wall time: 8min 25s
 </pre></div>
 </div>
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING: NoResultsWarning: Unable to locate file jwst/public/jw02565/jw02565001001/jw02565001001_03101_00003_nrs1_x1d.fits. [astroquery.mast.cloud]
@@ -1022,8 +1004,8 @@ Source COSMOS3 returned no results.
 Source JADESGS-z7-01-QU returned no results.
 Source TestJWST returned no results.
 Source TestEuclid returned no results.
-CPU times: user 148 ms, sys: 16.3 ms, total: 164 ms
-Wall time: 5.04 s
+CPU times: user 136 ms, sys: 19 ms, total: 155 ms
+Wall time: 7.45 s
 </pre></div>
 </div>
 </div>
@@ -1077,6 +1059,19 @@ labelled by sample number.</p>
 </div>
 </div>
 </section>
+<section id="about-this-notebook">
+<h2>About this notebook<a class="headerlink" href="#about-this-notebook" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Authors:</strong> Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, David Shupe, and the Fornax team</p></li>
+<li><p><strong>Contact:</strong> For help with this notebook, please open a topic in the <a class="reference external" href="https://discourse.fornax.sciencecloud.nasa.gov/">Fornax Community Forum</a> “Support” category.</p></li>
+</ul>
+<section id="acknowledgements">
+<h3>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>AI: This notebook was created with assistance from OpenAI’s ChatGPT o4-mini-high model.</p></li>
+</ul>
+</section>
+</section>
 </section>
 
 
@@ -1125,21 +1120,13 @@ labelled by sample number.</p>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#learning-goals">Learning Goals</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction:</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#motivation">Motivation</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#list-of-spectroscopic-archives-and-status">List of Spectroscopic Archives and Status</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-standard-imports">Non-standard Imports:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#runtime">Runtime</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements:</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#datasets-that-were-considered-but-didn-t-end-up-being-used">Datasets that were considered but didn’t end up being used:</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#irtf">IRTF:</a></li>
-</ul>
-</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#input">Input</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#runtime">Runtime</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#datasets-that-were-considered-but-didn-t-end-up-being-used">Datasets that were considered but didn’t end up being used</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
@@ -1158,6 +1145,10 @@ labelled by sample number.</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#make-plots-of-luminosity-as-a-function-of-time">3. Make plots of luminosity as a function of time</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about-this-notebook">About this notebook</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
