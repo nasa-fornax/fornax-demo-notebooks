@@ -25,7 +25,8 @@ By the end of this tutorial, you will be able to (list 2 - 5 high level goals):
 Alter this file according to your use case but retain the basic structure and try to use the same syntax for things like section headings, numbering schemes, and bullet points.
 Specifically the headings in this Intro section should not be edited to maintain consistency between notebooks.
 
-All contributed notebooks should be in [MyST markdown](https://mystmd.org) format.  See the [Fornax documentation](https://docs.fornax.sciencecloud.nasa.gov/markdown-and-code-dev) for more info about this.
+All contributed notebooks should be in [MyST markdown](https://mystmd.org) format.
+See the [Fornax documentation](https://docs.fornax.sciencecloud.nasa.gov/markdown-and-code-dev) for more info about this.
 
 The Introduction should provide context and motivation.
 Why should someone use this notebook?
@@ -48,12 +49,12 @@ Point out the parts that are particularly challenging and what solutions we chos
 
 ### Runtime
 
-Please report actual numbers and machine details for your notebook if it is expected to run longer or requires specific machines, e.g., on Fornax.
+Please report actual numbers and machine details for your notebook if it is expected to run longer or requires specific machines, for example, on Fornax.
 Also, if querying archives, please include a statement like:
 "This runtime is heavily dependent on archive servers which means runtime will vary for users".
 
 Here is a template runtime statement:
-As of {Date}, this notebook takes ~{N}s to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘{name: size}’ server with NGB RAM/ NCPU.
+As of {Date}, this notebook takes ~{N}s to run to completion on Fornax using the ‘Default Astrophysics' image and the ‘{name: size}’ server with NGB RAM/ NCPU.
 
 ## Imports
 
@@ -61,27 +62,28 @@ This should be a list of the modules that are required to run this code.
 Importantly, even those that are already installed in Fornax should be listed here so users wanting to run this locally on their own machines have the information they need to do this.
 
 Make sure that you have built a requirements_notebook_name.txt file with the modules to be imported.  
-The name of the notebook should be present in the name of the requirements file, as in our example "requirements_template.txt"
+The name of the notebook should be present in the name of the requirements file, as in our example "requirements_notebook_template.txt"
 
 ```{code-cell} ipython3
 # This cell should not be edited below this line except for the name of the requirements_notebook_name.txt
 
 # Uncomment the next line to install dependencies if needed.
-# %pip install -r requirements_template.txt
+# %pip install -r requirements_notebook_name.txt
 ```
 
 ```{code-cell} ipython3
 import numpy  # Create example data and make a histogram
 ```
 
-If you have written functions, please take those out of this notebook and put them into a code_src directory in a .py file with some useful name, eg., data_structures.py or heasarc_functions.py
+If you have written functions, please take those out of this notebook and put them into a code_src directory in a .py file with some useful name, for example, data_structures.py or heasarc_functions.py
 
 +++
 
 ## 1. Data Access
+
 The name of this, and all future sections can change.
 In general, it probably is a good idea to start with something like "Data Access".
-Pleae note, and stick to, the existing numbering scheme.
+Please note, and stick to, the existing numbering scheme.
 
 ```{code-cell} ipython3
 # Create some example data.
@@ -90,7 +92,8 @@ data = np.random.randint(0, 100, size=100)
 
 ## 2. Data Exploration
 
-Describe what the data look like. Add summary statistics, initial plots, sanity checks.
+Describe what the data look like.
+Add summary statistics, initial plots, sanity checks.
 
 For cuts or other data filtering and cleaning steps, explain the scientific reasoning behind them. 
 This helps people understand both the notebook and the data so that they're more equipped to use the data appropriately in other contexts.
@@ -156,8 +159,8 @@ Please consider these checklist requirements as you are writing your code.
 
 ## About this notebook
 
--   Authors: Only Author names, or even teams is required here
--   Contact: [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov) with questions or problems.
+-   **Authors:** Specific author and/or team names, plus "and the Fornax team".
+-   **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
 -   Please edit and keep the above 2 bullet points, and remove this last line.
 
 +++
@@ -177,7 +180,3 @@ This work made use of:
 -   STScI style guide: https://github.com/spacetelescope/style-guides/blob/master/guides/jupyter-notebooks.md
 -   Fornax tech and science review guidelines: https://github.com/nasa-fornax/fornax-demo-notebooks/blob/main/template/notebook_review_checklists.md
 -   The Turing Way Style Guide: https://book.the-turing-way.org/community-handbook/style
-
-```{code-cell} ipython3
-
-```
