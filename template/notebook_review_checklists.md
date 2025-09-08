@@ -1,16 +1,16 @@
-# How Does Fornax Review Notebooks?
+<!-- #region -->
+# Notebook Review Process
 
-This is a sort of requirements document for notebooks contributed to Fornax by Fornax team members.
+This is a requirements document for notebooks contributed to the fornax-demo-notebooks repo by Fornax team members.
 When a notebook is deemed "finished" by its authors, it should go through a two part review; a science review and a tech review.
-Suggested checklists for those reviews are below.
-These should be applied within reason to notebooks, and especially lightly to contributed notebooks.
+Checklists for those reviews are below.
 Checklists have been written and maintained by the distributed Fornax team.
+Checklists should be applied within reason to notebooks, as occaisionally there will be reasons for a notebook to not check all the boxes, and that is ok.
 
-For authors: consider these checklists requirements for your code.
 
-## Who should participate in these reviews?
+Notebooks in this repo have the extra burden of being tutorials for the general public, so they should be easy to follow, well documented, well maintained, and as fool-proof as possible.  This is different from the average working notebook that we all have written in the past, which may be more of a "scratchpad" for our own use, and not intended for public consumption.
 
--  From the pool of people who have successfully compelted a PR in the fornax-demo-notebooks, choose one developer for a tech review and one scientist for the science review, from any team.  This might become more fluid in the future as lines between developers and scientists blur, but at any rate, 2 reviews are appropriate for any new notebook.  Updates do not require 2 approvals.
+
 
 ## Science Review Checklist
 
@@ -59,6 +59,13 @@ For authors: consider these checklists requirements for your code.
    	-   Are code comment lines wrapped so all fit within a max of 90 - 100 characters per line?
    	-   Are code lines reasonably short where possible? some code lines can't easily be wrapped and that is ok
    	-   Do plots use color-blind friendly palettes for plotting? try this [simulator](https://www.color-blindness.com/coblis-color-blindness-simulator/#google_vignette) for visual check
+    -   It is fine to use AI to generate code snippets or surrounding text.  AI generated content should be clearly marked as such, and not used in the notebook unless it is well tested.  
+
+## How to choose reviewers?
+
+-  From the pool of people who have successfully compelted a PR in the fornax-demo-notebooks, choose one developer for a tech review and one scientist for the science review, from any team.  Updates and maintenance to notebooks do not require 2 approvals.
+
+<!-- #endregion -->
 
 ```python
 
