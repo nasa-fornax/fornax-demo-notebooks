@@ -1,4 +1,3 @@
-<!-- #region -->
 # Notebook Review Process
 
 This is a requirements document for notebooks contributed to the fornax-demo-notebooks repo by Fornax team members.
@@ -65,7 +64,6 @@ Notebooks in this repo have the extra burden of being tutorials for the general 
 
 -  From the pool of people who have successfully compelted a PR in the fornax-demo-notebooks, choose one developer for a tech review and one scientist for the science review, from any team.  Updates and maintenance to notebooks do not require 2 approvals.
 
-<!-- #endregion -->
 
 ```python
 
