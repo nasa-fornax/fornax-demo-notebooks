@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.17.2
+    jupytext_version: 1.17.3
 kernelspec:
   display_name: py-multiband_photometry
   language: python
@@ -43,7 +43,7 @@ The code will run on 2 different science platforms and makes full use of multipl
 
 ### Runtime
 
-As of 2025 July, this notebook takes about 2 minutes to run to completion on Fornax using a server with 16GB RAM/4 CPU' and Environment: 'Default Astrophysics' (image).
+As of 2025 September, this notebook takes about 13 minutes to run to completion on Fornax using a server with 8GB RAM/2 CPU' and Environment: 'Default Astrophysics' (image).
 
 ## Imports
 
