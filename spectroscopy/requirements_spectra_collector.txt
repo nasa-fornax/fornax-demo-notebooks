@@ -4,12 +4,17 @@
 numpy
 matplotlib
 pandas
-sparclclient
+# Right now we don't include DESI by default as sparclclient is not numpy2
+# compatible yet
+# sparclclient
 astropy
 # due to Spectrum1D rename to Spectrum
 specutils>=1.20
 # due to astroquery.mast fixes
 astroquery>=0.4.11.dev0
 fsspec
-boto3
-s3fs
+# Avoid the poor performance and timeouts described here:
+# https://github.com/dask/dask/issues/10276
+s3fs[boto3]>0.6.0
+requests
+pyvo

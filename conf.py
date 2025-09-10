@@ -34,12 +34,13 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'notes', '.tox', '.tmp', '.pytest_cache']
 
-# Top level README file's sole purpose is for the repo. We also don't include
+# Top level README file's sole purpose is for the repo. We also don't include the template or
 # the data and output directories that are to be populated while running the notebooks.
-exclude_patterns += ['README.md', 'notebook_review_checklists.md', '*/data/*', '*/output/*']
+exclude_patterns += ['README.md', 'template/*', '*/data/*', '*/output/*']
 
 # Not yet included in the rendering:
-exclude_patterns += ['spectroscopy/*', '*/code_src/*']
+
+exclude_patterns += ['spectroscopy/explore*', '*/code_src/*']
 
 # Myst-NB configuration
 # Override kernelspec.name for rendering for all the notebooks.
@@ -56,8 +57,8 @@ nb_execution_excludepatterns = []
 # (aka tractor install pain).
 nb_execution_excludepatterns += ['multiband_photometry.md',]
 
-# We use the non-public IRSA bucket for ZTF data, cannot execute the collector
-# notebook until https://github.com/nasa-fornax/fornax-demo-notebooks/issues/311 is addressed
+# light_curve_collector fails with a dead kernel.
+# https://github.com/nasa-fornax/fornax-demo-notebooks/issues/459
 nb_execution_excludepatterns += ['light_curve_collector.md',]
 
 

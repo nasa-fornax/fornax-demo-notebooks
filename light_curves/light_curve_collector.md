@@ -6,23 +6,23 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.17.1
 kernelspec:
-  display_name: py-light_curve_generator
+  display_name: py-light_curve_collector
   language: python
-  name: py-light_curve_generator
+  name: py-light_curve_collector
 ---
 
 # Make Multi-Wavelength Light Curves Using Archival Data
 
-
 ## Learning Goals
+
 By the end of this tutorial, you will be able to:
   * Automatically load a catalog of target sources
   * Automatically & efficiently search NASA and non-NASA resources for the light curves of up to ~500 targets
   * Store & manipulate light curves in a Pandas MultiIndex dataframe
   * Plot all light curves on the same plot
 
+## Introduction
 
-## Introduction:
  * A user has a sample of interesting targets for which they would like to see a plot of available archival light curves.  We start with a small set of changing look AGN from Yang et al., 2018, which are automatically downloaded. Changing look AGN are cases where the broad emission lines appear or disappear (and not just that the flux is variable).
 
  * We model light curve plots after van Velzen et al. 2021.  We search through a curated list of time-domain NASA holdings as well as non-NASA sources.  HEASARC catalogs used are Fermi and Beppo-Sax, IRSA catalogs used are ZTF and WISE, and MAST catalogs used are Pan-STARRS, TESS, Kepler, and K2.  Non-NASA sources are Gaia and IceCube. This list is generalized enough to include many types of targets to make this notebook interesting for many types of science.  All of these time-domain archives are searched in an automated and efficient fashion using astroquery, pyvo, pyarrow or APIs.
@@ -33,26 +33,22 @@ By the end of this tutorial, you will be able to:
 
  * ML work using these time-series light curves is in two neighboring notebooks: [ML_AGNzoo](ML_AGNzoo.md) and [light_curve_classifier](light_curve_classifier.md).
 
+### Input
 
-## Input:
  * choose from a list of known changing look AGN from the literature
   OR -
  * input your own sample
 
-## Output:
+### Output
+
  * an archival optical + IR + neutrino light curve
 
-## Runtime:
+### Runtime
+
 - As of 2025 May, this notebook takes ~1000s (17 min.) to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 64GB RAM/ 16CPU.
 
-## Authors:
-Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, David Shupe
+## Imports
 
-## Acknowledgements:
-Suvi Gezari, Antara Basu-zych, Stephanie LaMassa
-MAST, HEASARC, & IRSA Fornax teams
-
-## Imports:
  * `acstools` to work with HST magnitude to flux conversion
  * `astropy` to work with coordinates/units and data structures
  * `astroquery` to interface with archives APIs
@@ -104,6 +100,7 @@ from ztf_functions import ztf_get_lightcurves
 ```
 
 ## 1. Define the sample
+
 We define here a "gold" sample of spectroscopically confirmed changing look AGN and quasars. This sample includes both objects which change from type 1 to type 2 and also the opposite.  Future studies may want to treat these as separate objects or separate QSOs from AGN.  Bibcodes for the samples used are listed next to their functions for reference.
 
 Significant work went into the functions which grab the samples from the papers.  They use Astroquery, NED, SIMBAD, Vizier, and in a few cases grab the tables from the html versions of the paper.  There are trickeries involved in accessing coordinates from tables in the literature. Not every literature table is stored in its entirety in all of these resources, so be sure to check that your chosen method is actually getting the information that you see in the paper table.  Warning: You will get false results if using NED or SIMBAD on a table that has more rows than are printed in the journal.
@@ -188,37 +185,36 @@ df_lc = MultiIndexDFObject()
 ```
 
 ## 2. Find light curves for these targets in NASA catalogs
+
 We search a curated list of time-domain catalogs from NASA astrophysics archives.  Because each archive is different, and in many cases each catalog is different, each function to access a catalog is necessarily specialized to the location and format of that particular catalog.
 
 +++
 
 ### 2.1 HEASARC: FERMI & Beppo SAX
+
 The function to retrieve HEASARC data accesses the HEASARC archive using a pyvo search with a table upload.  This is the fastest way to access data from HEASARC catalogs at scale.
 
 While these aren't strictly light curves, we would like to track if there are gamma rays detected in advance of any change in the CLAGN light curves. We store these gamma ray detections as single data points.  Because gamma ray detections typically have very large error radii, our current technique is to keep matches in the catalogs within some manually selected error radius, currently defaulting to 1 degree for Fermi and 3 degrees for Beppo SAX.  These values are chosen based on a histogram of all values for those catalogs.
 
 ```{code-cell} ipython3
-# This data is temporarily unavailable.
-# This cell will be uncommented once the data is available again.
+start_serial = time.time()  #keep track of all serial archive calls to compare later with parallel archive call time
+heasarcstarttime = time.time()
 
-# start_serial = time.time()  #keep track of all serial archive calls to compare later with parallel archive call time
-# heasarcstarttime = time.time()
-#
-# # What is the size of error_radius for the catalogs that we will accept for our cross-matching?
-# # in degrees; chosen based on histogram of all values for these catalogs
-# max_fermi_error_radius = str(1.0)
-# max_sax_error_radius = str(3.0)
-#
-# # catalogs to query and their corresponding max error radii
-# heasarc_catalogs = {"FERMIGTRIG": max_fermi_error_radius, "SAXGRBMGRB": max_sax_error_radius}
-#
-# # get heasarc light curves in the above curated list of catalogs
-# df_lc_HEASARC = heasarc_get_lightcurves(sample_table, catalog_error_radii=heasarc_catalogs)
-#
-# # add the resulting dataframe to all other archives
-# df_lc.append(df_lc_HEASARC)
-#
-# print('heasarc search took:', time.time() - heasarcstarttime, 's')
+# What is the size of error_radius for the catalogs that we will accept for our cross-matching?
+# in degrees; chosen based on histogram of all values for these catalogs
+max_fermi_error_radius = str(1.0)
+max_sax_error_radius = str(3.0)
+
+# catalogs to query and their corresponding max error radii
+heasarc_catalogs = {"FERMIGTRIG": max_fermi_error_radius, "SAXGRBMGRB": max_sax_error_radius}
+
+# get heasarc light curves in the above curated list of catalogs
+df_lc_HEASARC = heasarc_get_lightcurves(sample_table, catalog_error_radii=heasarc_catalogs)
+
+# add the resulting dataframe to all other archives
+df_lc.append(df_lc_HEASARC)
+
+print('heasarc search took:', time.time() - heasarcstarttime, 's')
 ```
 
 ### 2.2 IRSA: WISE
@@ -242,6 +238,7 @@ print('WISE search took:', time.time() - WISEstarttime, 's')
 ```
 
 ### 2.3 MAST: Pan-STARRS
+
 The function to retrieve lightcurves from Pan-STARRS uses [LSDB](https://docs.lsdb.io/) to access versions of the object and light curve catalogs that are stored in the cloud.  This function is efficient at large scale (sample sizes > ~1000).
 
 Some warnings are expected.
@@ -262,6 +259,7 @@ print('Panstarrs search took:', time.time() - panstarrsstarttime, 's')
 ```
 
 ### 2.4 MAST: TESS, Kepler and K2
+
 The function to retrieve lightcurves from these three missions currently uses the open source package [`lightKurve`](https://docs.lightkurve.org/index.html).  This search is not efficient at scale and we expect it to be replaced in the future.
 
 ```{code-cell} ipython3
@@ -280,8 +278,9 @@ print('TESS/Kepler/K2 search took:', time.time() - lightkurvestarttime, 's')
 # These are not real errors and can be safely ignored.
 ```
 
-### 2.5 MAST: Hubble Catalog of Variables ([HCV](https://archive.stsci.edu/hlsp/hcv))
-The function to retrieve lightcurves from HCV currently uses their API; based on this [example](https://archive.stsci.edu/hst/hsc/help/HCV/HCV_API_demo.html). This search is not efficient at scale and we expect it to be replaced in the future.
+### 2.5 MAST: Hubble Catalog of Variables
+
+The function to retrieve lightcurves from [HCV](https://archive.stsci.edu/hlsp/hcv) currently uses their API; based on this [example](https://archive.stsci.edu/hst/hsc/help/HCV/HCV_API_demo.html). This search is not efficient at scale and we expect it to be replaced in the future.
 
 ```{code-cell} ipython3
 HCVstarttime = time.time()
@@ -301,6 +300,7 @@ print('HCV search took:', time.time() - HCVstarttime, 's')
 +++
 
 ### 3.1 IRSA: ZTF
+
 The function to retrieve ZTF light curves accesses a [HATS](https://hats.readthedocs.io/en/stable/) parquet version of the ZTF catalog stored in the cloud using [LSDB](https://docs.lsdb.io/en/stable/). This is the simplest way to access this dataset at scale.  The ZTF [API](https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html) is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself because lsdb uses dask under the hood.
 
 Expect to see many `INFO` messages from dask. These are normal.
@@ -320,6 +320,7 @@ print('ZTF search took:', time.time() - ZTFstarttime, 's')
 ```
 
 ### 3.2 Gaia
+
 The function to retrieve Gaia light curves accesses the Gaia DR3 "source lite" catalog using an astroquery search with a table upload to do the join with the Gaia photometry. This is currently the fastest way to access light curves from Gaia at scale.
 
 ```{code-cell} ipython3
@@ -354,7 +355,8 @@ df_lc.append(df_lc_icecube)
 print('icecube search took:', time.time() - icecubestarttime, 's')
 ```
 
-### 3.4 Rubin Data
+### 3.4 Rubin
+
 Before running this section, you need to have both 1) a login to the Rubin Science Platform (RSP) and 2) an authenticating token setup in your Fornax home directory.
 
 1) To see if you have Rubin data rights, and if you do, to get that login setup, follow these [instructions](https://rsp.lsst.io/guides/getting-started/get-an-account.html)
@@ -420,7 +422,7 @@ callback = parallel_df_lc.append  # will be called once on the result returned b
 with mp.Pool(processes=n_workers) as pool:
 
     # start the processes that call the archives
-    # pool.apply_async(heasarc_get_lightcurves, args=(sample_table,), kwds=heasarc_kwargs, callback=callback)
+    pool.apply_async(heasarc_get_lightcurves, args=(sample_table,), kwds=heasarc_kwargs, callback=callback)
     pool.apply_async(wise_get_lightcurves, args=(sample_table,), kwds=wise_kwargs, callback=callback)
     pool.apply_async(tess_kepler_get_lightcurves, args=(sample_table,), kwds=tess_kepler_kwargs, callback=callback)
     pool.apply_async(hcv_get_lightcurves, args=(sample_table,), kwds=hcv_kwargs, callback=callback)
@@ -471,6 +473,7 @@ parallel_df_lc.data
 ```
 
 ## 5. Make plots of luminosity as a function of time
+
 These plots are modelled after [van Velzen et al., 2021](https://arxiv.org/pdf/2111.09391.pdf). We show flux in mJy as a function of time for all available bands for each object. `show_nbr_figures` controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with `save_output`, they will be put in the output directory and labelled by sample number.
 
 __Note__ that in the following, we can either plot the results from `df_lc` (from the serial call) or `parallel_df_lc` (from the parallel call). By default (see next cell) the output of the parallel call is used.
@@ -482,7 +485,19 @@ _ = create_figures(df_lc = parallel_df_lc, # either df_lc (serial call) or paral
                   )
 ```
 
-## References
++++
+
+## About this notebook
+
+* **Authors:** Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, David Shupe, and the Fornax team
+* **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
+
+### Acknowledgements
+
+* Suvi Gezari, Antara Basu-zych, Stephanie LaMassa
+* MAST, HEASARC, & IRSA Fornax teams
+
+### References
 
 This work made use of:
 
