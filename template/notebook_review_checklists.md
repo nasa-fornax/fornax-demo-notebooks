@@ -6,8 +6,15 @@ Checklists for those reviews are below.
 Checklists have been written and maintained by the distributed Fornax team.
 Checklists should be applied within reason to notebooks, as occaisionally there will be reasons for a notebook to not check all the boxes, and that is ok.
 
-
 Notebooks in this repo have the extra burden of being tutorials for the general public, so they should be easy to follow, well documented, well maintained, and as fool-proof as possible.  This is different from the average working notebook that we all have written in the past, which may be more of a "scratchpad" for our own use, and not intended for public consumption.
+
+
+
+
+## How to choose reviewers?
+
+-  From the pool of people who have successfully compelted a PR in the fornax-demo-notebooks, choose one developer for a tech review and one scientist for the science review, from any team.  Updates and maintenance to notebooks do not require 2 approvals.
+
 
 
 
@@ -58,11 +65,8 @@ Notebooks in this repo have the extra burden of being tutorials for the general 
    	-   Are code comment lines wrapped so all fit within a max of 90 - 100 characters per line?
    	-   Are code lines reasonably short where possible? some code lines can't easily be wrapped and that is ok
    	-   Do plots use color-blind friendly palettes for plotting? try this [simulator](https://www.color-blindness.com/coblis-color-blindness-simulator/#google_vignette) for visual check
-    -   It is fine to use AI to generate code snippets or surrounding text.  AI generated content should be clearly marked as such, and not used in the notebook unless it is well tested.  
+    -   It is fine to use AI to generate code snippets or surrounding text.  AI generated content should be clearly marked as such, and not used in the notebook unless it is well tested.  AI acknowledgement should be in the acknowledgement section at the bottom of the notebook.
 
-## How to choose reviewers?
-
--  From the pool of people who have successfully compelted a PR in the fornax-demo-notebooks, choose one developer for a tech review and one scientist for the science review, from any team.  Updates and maintenance to notebooks do not require 2 approvals.
 
 
 ```python
