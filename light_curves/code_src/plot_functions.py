@@ -67,17 +67,12 @@ def create_figures(df_lc, show_nbr_figures, save_output):
 
         # Iterate over bands and plot light curves.
         # IceCube needs to be done last so that we know the y-axis limits.
-        cleaned = _clean_lightcurves(singleobj_df)
-        band_groups = cleaned.groupby(["objectid", "band"])
-
-        # Now filter to just the ZTF bands
-        ztf_df = cleaned[cleaned["band"].isin(ZTF_BANDS)]
-
+        band_groups = _clean_lightcurves(singleobj_df).groupby('band')
         max_fluxes = band_groups.flux.max()  # max flux per band
-        for (objectid_val, band_name), band_df in band_groups:
-            if band_name == ICECUBE_BAND:
+        for band, band_df in band_groups:
+            if band == ICECUBE_BAND:
                 continue
-            _plot_lightcurve(band_name, band_df, axes, max_fluxes)
+            _plot_lightcurve(band, band_df, axes, max_fluxes)
         if ICECUBE_BAND in band_groups.groups:
             _plot_lightcurve(ICECUBE_BAND, band_groups.get_group(ICECUBE_BAND), axes)
 
