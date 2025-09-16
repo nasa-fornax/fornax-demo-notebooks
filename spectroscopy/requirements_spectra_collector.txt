@@ -8,8 +8,8 @@ pandas
 # compatible yet
 # sparclclient
 astropy
-# due to Spectrum1D rename to Spectrum
-specutils>=1.20
+# due to Spectrum1D rename to Spectrum and an internap spectutils bug
+specutils>=1.20.1
 # due to astroquery.mast fixes
 astroquery>=0.4.11.dev0
 fsspec
