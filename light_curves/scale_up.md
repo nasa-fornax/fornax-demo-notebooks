@@ -10,6 +10,8 @@ kernelspec:
   display_name: py-scale_up
   language: python
   name: py-scale_up
+execution:
+  timeout: 1200
 ---
 
 # Make Multi-Wavelength Light Curves for Large Samples
