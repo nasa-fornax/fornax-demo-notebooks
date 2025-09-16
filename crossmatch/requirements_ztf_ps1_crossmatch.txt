@@ -1,0 +1,5 @@
+astropy
+pandas
+matplotlib
+lsdb[full]>=0.6.0  # [full] needed for s3fs
+dask
