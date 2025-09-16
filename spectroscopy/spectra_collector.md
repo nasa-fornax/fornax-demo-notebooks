@@ -9,6 +9,8 @@ kernelspec:
   name: py-spectra_collector
   display_name: py-spectra_collector
   language: python
+execution:
+  timeout: 1200
 ---
 
 # Extract Multi-Wavelength Spectroscopy from Archival Data
