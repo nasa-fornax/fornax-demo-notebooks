@@ -17,6 +17,15 @@ forced_photometry/code_src/photometry.py
 forced_photometry/code_src/plot_SED.py
 forced_photometry/code_src/prepare_prf.py
 forced_photometry/data/README.md
+forced_photometry/data/IRAC
+forced_photometry/data/IRAC/README.md
+forced_photometry/data/IRAC/PRF_IRAC_ch4.fits
+forced_photometry/data/IRAC/PRF_IRAC_ch2.fits
+forced_photometry/data/IRAC/PRF_IRAC_ch3.fits
+forced_photometry/data/IRAC/PRF_IRAC_ch1.fit
+forced_photometry/data/Galex/README.md
+forced_photometry/data/Galex/PSFfuv.fits
+forced_photometry/data/Galex/PSFnuv_faint.fits
 forced_photometry/multiband_photometry.md
 forced_photometry/output/README.md
 forced_photometry/requirements_multiband_photometry.txt
