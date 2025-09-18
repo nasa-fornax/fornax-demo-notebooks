@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
   schedule:
     - cron: '0 5 * * 1'
   workflow_dispatch:
@@ -18,7 +15,7 @@ concurrency:
 jobs:
 
   build_docs:
-    if: ${{ (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main' }}
+    if: ${{ (github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
     name: Build HTML
     runs-on: ubuntu-latest
     steps:
