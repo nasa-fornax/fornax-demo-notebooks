@@ -19,10 +19,10 @@ forced_photometry/code_src/prepare_prf.py
 forced_photometry/data/README.md
 forced_photometry/data/IRAC
 forced_photometry/data/IRAC/README.md
-forced_photometry/data/IRAC/PRF_IRAC_ch4.fits
+forced_photometry/data/IRAC/PRF_IRAC_ch1.fits
 forced_photometry/data/IRAC/PRF_IRAC_ch2.fits
 forced_photometry/data/IRAC/PRF_IRAC_ch3.fits
-forced_photometry/data/IRAC/PRF_IRAC_ch1.fit
+forced_photometry/data/IRAC/PRF_IRAC_ch4.fits
 forced_photometry/data/Galex/README.md
 forced_photometry/data/Galex/PSFfuv.fits
 forced_photometry/data/Galex/PSFnuv_faint.fits
