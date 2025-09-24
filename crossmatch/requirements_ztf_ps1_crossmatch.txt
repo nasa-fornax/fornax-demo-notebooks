@@ -1,5 +1,6 @@
 astropy
 pandas
 matplotlib
-lsdb[full]>=0.6.0  # [full] needed for s3fs
+# [full] needed for s3fs. >=0.6.2 for improved s3 read speed.
+lsdb[full]>=0.6.2
 dask
