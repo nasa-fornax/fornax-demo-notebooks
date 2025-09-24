@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import requests
 from astropy.coordinates import SkyCoord
-from astropy.io import fits
 from astropy.table import QTable
 from astroquery.ipac.irsa import Irsa
 from pyvo.dal import DALQueryError
@@ -14,9 +13,8 @@ from data_structures_spec import MultiIndexDFObject
 
 # We filter these specific warnings out as the end user can do nothing to about them, they have to be fixed at the data providers level.
 # Remove the filters once they are not used in a newer data release
-warnings.filterwarnings("ignore", "'Number' did not parse as fits unit", u.UnitsWarning)
-warnings.filterwarnings("ignore", "'erg/s/cm2/Angstrom' contains multiple slashes", u.UnitsWarning)
-warnings.filterwarnings("ignore", "'erg2/s2/cm4/Angstrom2' contains multiple slashes", u.UnitsWarning)
+warnings.filterwarnings("ignore", "The unit 'Angstrom' has been deprecated ", u.UnitsWarning)
+warnings.filterwarnings("ignore", "The unit 'erg' has been deprecated ", u.UnitsWarning)
 
 
 def get_coord_from_objectid(object_id, table_mer="euclid_q1_mer_catalogue"):
@@ -58,9 +56,9 @@ def euclid_get_spec(sample_table, search_radius_arcsec):
     """
     Retrieve Euclid 1D spectra for sources in a sample table using IRSA TAP cloud services.
 
-    This function performs a cone search on the Euclid MER catalog via IRSA (a cloud-based service),retrieves associated 1D spectral file URIs from a TAP-accessible association table,
-    downloads the spectra FITS files, extracts flux and error, and packages them
-    into a MultiIndexDFObject.
+    This function performs a cone search on the Euclid MER catalog via IRSA,
+    retrieves associated 1D spectral file paths from a TAP-accessible association table,
+    downloads the spectra, and packages them into a MultiIndexDFObject.
 
     Parameters
     ----------
@@ -120,40 +118,16 @@ def euclid_get_spec(sample_table, search_radius_arcsec):
             print(f"No 1D spectrum found for object_id {object_id}")
             continue
 
-        uri = result[0]["uri"]
-        hdu_index = result[0]["hdu"]
-        file_uri = f"https://irsa.ipac.caltech.edu/{uri}"
+        path = result[0]["path"]
+        spectrum_path = f"https://irsa.ipac.caltech.edu/{path}"
 
-        try:
-            with fits.open(file_uri, ignore_missing_simple=True) as hdul:
-                spec = QTable.read(hdul[hdu_index], format="fits")
-                header = hdul[hdu_index].header
-        except (OSError, IndexError) as e:
-            print(f"Failed to read spectrum FITS file for object_id {object_id}: {e}")
-            continue
-
-        try:
-            fscale = header.get("FSCALE", 1.0)
-            wave = np.asarray(spec["WAVELENGTH"]) * u.angstrom
-            signal = np.asarray(spec["SIGNAL"])
-            var = np.asarray(spec["VAR"])
-            mask = np.asarray(spec["MASK"])
-
-            if not (len(wave) == len(signal) == len(var) == len(mask)):
-                raise ValueError(f"Spectrum array length mismatch for object_id {object_id}")
-
-            valid = (mask % 2 == 0) & (mask < 64)
-            wave = wave[valid]
-            flux = signal[valid] * fscale * u.erg / u.s / u.cm**2 / u.angstrom
-            error = np.sqrt(var[valid]) * fscale * flux.unit
-        except (KeyError, ValueError) as e:
-            print(f"[ERROR] Could not parse spectrum for object_id {object_id}: {e}")
-            continue
+        spec = QTable.read(spectrum_path)
+        valid = (spec["MASK"] % 2 == 0) & (spec["MASK"] < 64)
 
         dfsingle = pd.DataFrame([{
-            "wave": wave,
-            "flux": flux,
-            "err": error,
+            "wave": spec["WAVELENGTH"][valid],
+            "flux": spec["SIGNAL"][valid],
+            "err": np.sqrt(spec["VAR"][valid]),
             "label": str(stab["label"]),
             "objectid": int(stab["objectid"]),
             "mission": "Euclid",
