@@ -1,0 +1,22 @@
+# List explicit python dependencies here. They are also spelt out at the
+# beginning of the notebook, make sure the lists are consistent and only
+# contain dependencies that are actually used in the notebook.
+#
+# We need to manully add the upper pin both numpy and pandas as the resolver is somehow doesn't
+# pick it up properly from sktime. Remove once sktime removes the upper limit.
+numpy<2.3
+pandas[parquet]<2.3
+matplotlib
+astropy
+sktime
+tqdm
+googledrivedownloader>=1.0
+scikit-learn
+acstools
+## Optional indirect dependencies required by functionalities used in the notebook
+# Required by functionality we use from acstools
+scikit-image
+# Required by functionality we use from sktime
+numba
+# Required for sensible progress bars
+ipywidgets
