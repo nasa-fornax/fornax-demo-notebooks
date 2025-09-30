@@ -12,7 +12,6 @@ jupyter:
     name: python3
 ---
 
-<!-- #region -->
 # This notebook will do the following
 
 * Queries metadata for all Chandra observations using HEASARC VO TAP services.
@@ -32,15 +31,12 @@ jupyter:
 * Assesses the properties of the new sample of sources that have a CXC, Fermi, 2MASS, and GAIA counterpart.
 
 
-<span style="color:red"> Duplicate notebook and replace pyvo with astroquery version of query searches. HEASARC astroquery has ability to take list of sources. Does IRSA/MAST? </span>
-<!-- #endregion -->
-
 ## Methods involved:
 ### 1. VO TAP services with HEASARC, IRSA, and MAST with pyvo
 ### 2. ADQL query search with pyvo
 
 
-<span style="color:red">As of Sept 9, 2025 this notebook took approximately xx seconds to complete start to finish on the small (8GB, 2CPUs) fornax-main server. </span>
+As of Sept 30, 2025 this notebook took approximately 9 minutes to complete start to finish on the small (8GB, 2CPUs) fornax-main server.
 
 **Author: Jordan Eagle on behalf of HEASARC**
 
@@ -50,6 +46,7 @@ jupyter:
 
 Non-standard modules we will need:
 * astropy
+* astroquery
 * pyvo
 * tqdm
 * concurrent
@@ -70,6 +67,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import pyvo as vo
+from astroquery.ipac.irsa import Irsa
+from astroquery.gaia import Gaia
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 from astropy.table import Table, Column
@@ -171,8 +170,6 @@ columns = ', '.join(Heasarc._get_default_columns('csc'))
 query = f'SELECT TOP 9999999 {columns} FROM csc'
 sample = Heasarc.query_tap(query).to_table()
 ```
-
-<span style="color:red">Note: astroquery takes nearly double the time to perform the same search. Check in Fornax.</span>
 
 ```python
 print(sample)
@@ -661,49 +658,24 @@ With this cross-matched set you can do lots of things:
 
 It is interesting to note the extragalactic source classes falling within the Galactic plane. Often, extragalactic high-energy sources have an IR and/or optical counterpart that can help identify and/or characterize the source nature further. 
 
-Can we cross match the table we just created with IRSA and MAST to gather IR and optical counterparts? IRSA includes 2MASS (IR) and MAST has GAIA (optical). We use the registry search tool once again to find the necessary TAP URLs we need to gather the information we want.
+Can we cross match the table we just created with IRSA and MAST to gather IR and optical counterparts? IRSA includes 2MASS (IR) and MAST has GAIA (optical). We can use the registry search tool again to find the necessary TAP URLs we need, but here we show how you can readily use astroquery for both IRSA and GAIA to gather the information we want.
 
 ```python
-vo_search = vo.regsearch(servicetype='tap',keywords='irsa')
-vo_search.to_table()['access_urls']
+mass = Irsa.list_catalogs(filter='twomass')
+Irsa.list_columns(catalog="fp_psc")
 ```
 
 ```python
-vo_search = vo.regsearch(servicetype='tap',keywords='gaia esa')
-vo_search.to_table()['access_urls']
-```
-
-```python
-gaia_dr3 = vo.dal.TAPService("https://gea.esac.esa.int/tap-server/tap")
-mass = vo.dal.TAPService("https://irsa.ipac.caltech.edu/TAP")
+gaia_dr3 = Gaia.load_table('gaiadr3.gaia_source')
+print(gaia_dr3)
 ```
 
 We will want to gather relevant information for the GAIA and 2MASS entries, so we can print the table columns, units, and descriptions, so we have an idea of what our options are.
 
 ```python
-tables = gaia_dr3.tables 
-
-gaia_table = tables['gaiadr3.gaia_source']
-
-col_names = [col.name for col in gaia_table.columns]
-col_units = [str(col.unit) if col.unit is not None else "" for col in gaia_table.columns]
-col_descs = [col.description if col.description is not None else "" for col in gaia_table.columns]
-
-meta_table = Table([col_names, col_units, col_descs],
-                   names=['Name', 'Unit', 'Description'])
-
-meta_table.pprint(max_width=300, max_lines=-1, align=('<', '<', '<')) 
-```
-
-```python
-tables = mass.tables 
-
-mass_table = tables['fp_psc']
-
-
-col_names = [col.name for col in mass_table.columns]
-col_units = [str(col.unit) if col.unit is not None else "" for col in mass_table.columns]
-col_descs = [col.description if col.description is not None else "" for col in mass_table.columns]
+col_names = [col.name for col in gaia_dr3.columns]
+col_units = [str(col.unit) if col.unit is not None else "" for col in gaia_dr3.columns]
+col_descs = [col.description if col.description is not None else "" for col in gaia_dr3.columns]
 
 meta_table = Table([col_names, col_units, col_descs],
                    names=['Name', 'Unit', 'Description'])
@@ -730,7 +702,7 @@ for col in [
         grouped_display_table[col] = Column([None] * len(grouped_display_table), dtype=object)
 ```
 
-A nice feature of ADQL querying is that ability to upload tables. Since we have 340 sources we want to search for counterparts, we can give a list of sources and their locations and perform a query only once, as opposed to running a single query for each source. Below, we truncate the grouped_display_table, storing only the name and location into ``upload_table`` to input into the query. 
+A nice feature of ADQL querying is the ability to upload tables. Since we have 340 sources we want to search for counterparts, we can give a list of sources and their locations and perform a query only once, as opposed to running a single query for each source. Below, we truncate the grouped_display_table, storing only the name and location into ``upload_table`` to input into the query. 
 
 ```python
 fermi_sources = []        
@@ -745,7 +717,7 @@ upload_table = Table(rows=fermi_sources, names=['fermi_name', 'ra', 'dec'])
 
 New ADQL functions introduced below include ``DISTANCE``, which tracks the angular separation between a set of locations, and which we choose to be the GAIA source and the Fermi source. ``FROM TAP_UPLOAD.mytable`` tells the query to expect an input table of sources (aliased as f == ``AS f``). ``JOIN`` takes the input table and *joins* it to the GAIA output, which is generated for values that fall within a region centered on the Fermi source and has the radius we defined above (0.03&deg;). Finally we use ``ORDER BY`` to have the results ordered first by the Fermi name, and second by the angular separation (which has been aliased as dist (``AS dist``) in ascending order ``ASC``.
 
-To provide an input table for the query, you include in the query search kwargs ``uploads={'mytable' : upload_table})``.
+To provide an input table for the query, you include in the query search kwargs ``upload_resource=upload_table, upload_table_name="mytable"``.
 
 ```python
 #uploading a table requires setting location values as CAST(val AS DOUBLE) for proper parsing
@@ -765,7 +737,8 @@ gaia_query = f"""
     )
     ORDER BY f.fermi_name, dist ASC
     """
-gaia_results = gaia_dr3.run_async(gaia_query, uploads={'mytable': upload_table}).to_table()
+job = Gaia.launch_job_async(gaia_query, upload_resource=upload_table, upload_table_name="mytable")
+gaia_results = job.get_results()
 
 gfinish = time.time() - gstart
 print('Time in minutes to complete:', gfinish/60)
@@ -814,12 +787,9 @@ for row in grouped_display_table:
         row['sep_from_csc_gaia'] = [np.nan] * len(gaia_results)
 ```
 
-We do the same thing for 2MASS below, but noting a few differences in the ADQL capabilities.
+We do the same thing for 2MASS below, but using the ``Irsa.query_region`` function in ``astroquery.ipac.irsa``. This does not accept ADQL, but does have parameters that enable a similar query search, which we perform below. One could perform a ADQL query of 2MASS data using the ``query_tap``in astroquery or with ``run_async`` or ``search`` in PyVO, but ``query_region`` is much simpler code-wise, but at the cost of performing a query for every Fermi source individually, which is not efficient for a large sample. We set up the function below so that we can easily track progress of the search. We also go ahead and store the results into the set columns that await the new data in ``grouped_display_table``.
 
-
-**Unfortunately ``DISTANCE()`` might break the 2MASS ADQL search if the coordinates become (-). Moreover, it appears that the ``JOIN()`` function cannot be parsed by IRSA TAP.** See <a href="https://irsa.ipac.caltech.edu/docs/program_interface/TAP.html">IRSA TAP docs</a> for alternate methods.
-
-For now we perform a query without ``DISTANCE()`` or ``JOIN()`` for the 2MASS query. Without ``JOIN()``, we must perform a query for every Fermi source individually, which is not efficient for a large sample like the one we have. We set up the function below so that we can easily track progress of the search. We also go ahead and store the results into the set columns that await the new data in ``grouped_display_table``.
+Note: Currently ``DISTANCE()`` might break the 2MASS ADQL search if the coordinates become (-). It also appears that the ``JOIN()`` function cannot be parsed by IRSA TAP. See <a href="https://irsa.ipac.caltech.edu/docs/program_interface/TAP.html">IRSA TAP docs</a> for alternate methods if you would like to go the ADQL route. 
 
 ```python
 mstart = time.time()
@@ -827,41 +797,38 @@ def process_source(row):
     fname = row['fermi_name']
     f_l, f_b = row['fermi_l'], row['fermi_b']
     f_coord = SkyCoord(l=f_l*u.deg, b=f_b*u.deg, frame="galactic").icrs
-    ra_in = str(f"{f_coord.ra.deg:.5f}")
-    dec_in = str(f"{f_coord.dec.deg:.5f}")
-    rad = str(radius)
     
     #2MASS query
-    twomass_query = (
-    f"""
-    SELECT TOP 3 designation, ra, dec, glon, glat
-    FROM fp_psc
-    WHERE 1=CONTAINS(
-        POINT('ICRS', ra, dec),
-        CIRCLE('ICRS', {f_coord.ra.deg}, {f_coord.dec.deg}, {radius})
-    )
-    """
-    )
-    twomass_results = mass.run_async(twomass_query).to_table()
+    twomass_results = Irsa.query_region(f_coord,catalog="fp_psc", radius = radius*u.deg)
+    
+    if len(twomass_results) > 3:
+        sep = SkyCoord(ra=twomass_results['ra'], dec=twomass_results['dec']).separation(f_coord)
+        idx = np.argsort(sep)[:3]
+        twomass_results = twomass_results[idx]
         
-    #Fill 2MASS values directly into row
-    row["twomass_names"] = [m["designation"] for m in twomass_results]
-    row["twomass_glons"] = [m["glon"] for m in twomass_results]
-    row["twomass_glats"] = [m["glat"] for m in twomass_results]
-    row["sep_from_fermi_2mass"] = [
-        SkyCoord(l=m["glon"] * u.deg, b=m["glat"] * u.deg, frame="galactic").separation(f_coord).arcsec
-        for m in twomass_results
-    ]
+    glon = np.array(twomass_results['glon'], dtype=float) * u.deg
+    glat = np.array(twomass_results['glat'], dtype=float) * u.deg
+    twomass_coords = SkyCoord(l=glon, b=glat, frame='galactic')
+
+    # Fill 2MASS info into row
+    row["twomass_names"] = twomass_results['designation'].tolist()
+    row["twomass_glons"] = glon.value.tolist()
+    row["twomass_glats"] = glat.value.tolist()
+
+    # Separation from Fermi
+    row["sep_from_fermi_2mass"] = twomass_coords.separation(f_coord).arcsec.tolist()
+
+    # Separation from CSC sources if available
     if row["num_csc_matches"] > 0:
         row["sep_from_csc_2mass"] = [
-            SkyCoord(l=m["glon"] * u.deg, b=m["glat"] * u.deg, frame="galactic").separation(csc_coords).arcsec.min()
-            for m in twomass_results
+            twomass_coords[i].separation(csc_coords).arcsec.min()
+            for i in range(len(twomass_coords))
         ]
     else:
-        row["sep_from_csc_2mass"] = [np.nan] * len(twomass_results)
+        row["sep_from_csc_2mass"] = [np.nan] * len(twomass_coords)
 
     return row
-    
+
 results = []
 
 #change max_workers for server size. 
@@ -876,34 +843,6 @@ print('Time in minutes to complete:', mfinish/60)
 ```
 
 This can take several minutes to run, but when it finishes, the results are already ready in our ``grouped_display_table``, and we can finalize the new table adding necessary column units and descriptions and saving to a new CSV file. 
-
-```python
-#testing cell
-#fname = grouped_display_table['fermi_name'][0]
-#f_l, f_b = grouped_display_table['fermi_l'][0], grouped_display_table['fermi_b'][0]
-#f_coord = SkyCoord(l=f_l*u.deg, b=f_b*u.deg, frame="galactic").icrs
-#ra_in = str(f"{f_coord.ra.deg:.5f}")
-#dec_in = str(f"{f_coord.dec.deg:.5f}")
-#rad = str(radius)
-
-#DISTANCE(POINT('ICRS', ra, dec), POINT('ICRS', CAST(""" + ra_in + """ AS DOUBLE), CAST(""" + dec_in + """ AS DOUBLE))) AS dist
-#ORDER BY dist ASC
-#DISTANCE() breaks if coordinates are (-)
-#JOIN() does not appear to be a working option either
-#twomass_query = (
-#    """
-#    SELECT TOP 3 designation, ra, dec, glon, glat
-#    FROM fp_psc
-#    WHERE 1=CONTAINS(
-#        POINT('ICRS', ra, dec),
-#        CIRCLE('ICRS', """ + ra_in + """, """ + dec_in + """, """ + rad + """)
-#    )
-#    """
-#)
-
-#twomass_results = mass.run_async(twomass_query).to_table()
-#print(twomass_results)
-```
 
 ```python
 #add unit metadata to the columns that need it
