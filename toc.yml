@@ -1,0 +1,23 @@
+version: 1
+project:
+  toc:
+    - file: index.md
+    - title: Light Curves
+      file: light_curves/README.md
+      children:
+        - file: light_curves/light_curve_classifier.md
+        - file: light_curves/light_curve_collector.md
+        - file: light_curves/ML_AGNzoo.md
+        - file: light_curves/scale_up.md
+    - title: Spectroscopy
+      file: spectroscopy/README.md
+      children:
+        - file: spectroscopy/spectra_collector.md
+    - title: Forced Photometry
+      file: forced_photometry/README.md
+      children:
+        - file: forced_photometry/multiband_photometry.md
+    - title: Crossmatch
+      file: crossmatch/README.md
+      children:
+        - file: crossmatch/ztf_ps1_crossmatch.md
