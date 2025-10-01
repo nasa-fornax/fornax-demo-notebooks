@@ -8,6 +8,8 @@ project:
   github: https://github.com/nasa-fornax/fornax-demo-notebooks
   references:
     fornax-docs: https://docs.fornax.sciencecloud.nasa.gov
+  settings:
+    output_matplotlib_strings: remove
 extends:
   - toc.yml
 site:
