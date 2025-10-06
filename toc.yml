@@ -5,10 +5,10 @@ project:
     - title: Light Curves
       file: light_curves/README.md
       children:
-        - file: light_curves/light_curve_classifier.md
         - file: light_curves/light_curve_collector.md
-        - file: light_curves/ML_AGNzoo.md
         - file: light_curves/scale_up.md
+        - file: light_curves/light_curve_classifier.md
+        - file: light_curves/ML_AGNzoo.md
     - title: Spectroscopy
       file: spectroscopy/README.md
       children:
