@@ -77,7 +77,6 @@ from astropy.coordinates import SkyCoord
 from astropy import units as u
 
 import lsdb
-from lsdb.core.search import ConeSearch
 from dask.distributed import Client, LocalCluster
 ```
 
@@ -148,7 +147,7 @@ cone_ra, cone_dec = c.ra.value, c.dec.value
 
 if Nrows > 0:
     radius_arcsec = radius[Nrows]
-    search_filter = ConeSearch(cone_ra, cone_dec, radius_arcsec)
+    search_filter = lsdb.ConeSearch(cone_ra, cone_dec, radius_arcsec)
 else:
     # Full cross-match
     # ONLY ON XLARGE ENVIRONMENT USING AT LEAST 32 CPUS

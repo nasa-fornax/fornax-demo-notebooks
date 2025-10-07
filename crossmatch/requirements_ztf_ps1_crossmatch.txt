@@ -1,6 +1,7 @@
 astropy
 pandas
 matplotlib
-# [full] needed for s3fs. >=0.6.2 for improved s3 read speed.
-lsdb[full]>=0.6.2
+# [full] needed for s3fs.
+# >=0.6.5 for ConeSearch import. https://github.com/nasa-fornax/fornax-demo-notebooks/issues/523
+lsdb[full]>=0.6.5
 dask
