@@ -1,6 +1,7 @@
 import astropy.units as u
 import numpy as np
 import pandas as pd
+import requests
 from astroquery.sdss import SDSS
 
 from data_structures_spec import MultiIndexDFObject
@@ -34,14 +35,24 @@ def SDSS_get_spec(sample_table, search_radius_arcsec, data_release):
         # Get Spectra for SDSS
         search_coords = stab["coord"]
 
-        xid = SDSS.query_region(search_coords, radius=search_radius_arcsec
-                                * u.arcsec, spectro=True, data_release=data_release)
+        # Catch service error https://github.com/nasa-fornax/fornax-demo-notebooks/issues/437
+        try:
+            xid = SDSS.query_region(search_coords, radius=search_radius_arcsec
+                                    * u.arcsec, spectro=True, data_release=data_release)
+        except requests.HTTPError:
+            print(f"Encountered SDSS service error when querying region for source {stab['label']}. Skipping.")
+            continue
 
         if xid is None:
             print("Source {} could not be found".format(stab["label"]))
             continue
 
-        sp = SDSS.get_spectra(matches=xid, show_progress=True, data_release=data_release)
+        # Catch service errors https://github.com/nasa-fornax/fornax-demo-notebooks/issues/437
+        try:
+            sp = SDSS.get_spectra(matches=xid, show_progress=True, data_release=data_release)
+        except (KeyError, TimeoutError):
+            print(f"Encountered SDSS service error when requesing spectra for source {stab['label']}. Skipping.")
+            continue
 
         # Get data
         # only one entry because we only search for one xid at a time. Could change that?
