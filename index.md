@@ -14,3 +14,11 @@ Currently, there are four major topics for which we have notebooks, use the navi
 The notebooks and their run-time dependencies are also available pre-installed at the Fornax Science Console, to learn more about the please consult the [](xref:fornax-docs/notebook-tutorials#notebooks-in-fornax) section of the documentation.
 
 These notebooks are written and maintained using the MyST Markdown format, more details and references about it can be found in the [](xref:fornax-docs#working-with-markdown) documentation section.
+
+
+::::{note} List of all the notebooks
+:class: dropdown
+
+:::{toc}
+:::
+::::
