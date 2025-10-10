@@ -1,0 +1,4 @@
+# Workaround for e.g. https://github.com/nasa-fornax/fornax-demo-notebooks/issues/475
+# Some of the notebooks run into a DeadKernelError (hitting the memory limit) on CircleCI,
+# but do execute and render on GHA. Ignore them here.
+light_curves/light_curve_classifier

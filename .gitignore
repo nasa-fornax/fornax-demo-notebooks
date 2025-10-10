@@ -49,3 +49,6 @@ _build/
 
 #pycache
 __pycache__
+
+# MyST build outputs
+_build
