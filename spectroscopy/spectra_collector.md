@@ -107,6 +107,7 @@ import sys
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
+from astropy.utils.data import conf
 
 sys.path.append('code_src/')
 from data_structures_spec import MultiIndexDFObject
@@ -119,6 +120,10 @@ from sample_selection import clean_sample
 from sdss_functions import SDSS_get_spec
 from spitzer_functions import SpitzerIRS_get_spec
 from euclid_functions import euclid_get_spec
+
+# The Euclid spectrum files are large and the time it takes to read
+# them can exceed astropy's default timeout limit. Increase it.
+conf.remote_timeout = 120
 ```
 
 ## 1. Define the sample
