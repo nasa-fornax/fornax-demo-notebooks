@@ -9,6 +9,14 @@ kernelspec:
   display_name: py-light_curve_classifier
   language: python
   name: py-light_curve_classifier
+authors:
+  - name: Jessica Krick, 
+  - name: Shoubaneh Hemmati
+  - name: Troy Raen
+  - name: Brigitta Sipőcz
+  - name: Andreas Faisst
+  - name: Vandana Desai
+  - name: David Shupe
 ---
 
 # Light Curve Classifier

@@ -9,6 +9,8 @@ kernelspec:
   display_name: py-ml_agnzoo
   language: python
   name: py-ml_agnzoo
+authors:
+  - name: Shoubaneh Hemmati
 ---
 
 # AGN Zoo: Comparison of AGN selected with different metrics

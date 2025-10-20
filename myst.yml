@@ -4,7 +4,7 @@ project:
   subject: Fornax Demo Notebooks
   description: Tutorial notebooks for example Fornax use cases
   keywords: [astronomy]
-  authors: [Fornax developers and scientists]
+  authors: [Fornax scientists and developers]
   github: https://github.com/nasa-fornax/fornax-demo-notebooks
   references:
     fornax-docs: https://docs.fornax.sciencecloud.nasa.gov
