@@ -15,12 +15,14 @@ cache/
 *.ecsv
 *.fits
 *.gzip
+*.hdf5
 *.jpg
 *.jpeg
 *.log
 *.parquet
 *.pdf
 *.png
+*.pth
 *.gz
 
 # Tests and reports
