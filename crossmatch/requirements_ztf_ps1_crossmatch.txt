@@ -4,5 +4,5 @@ matplotlib
 # >=0.6.5 for ConeSearch import. https://github.com/nasa-fornax/fornax-demo-notebooks/issues/523
 lsdb>=0.6.5
 dask
-# Read files from AWS S3.
+# Required by lsdb to read files from AWS S3, revise when lsdb[s3fs] is supported by required minimum version.
 s3fs
