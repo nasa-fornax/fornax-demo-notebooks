@@ -1,7 +1,8 @@
 astropy
 pandas
 matplotlib
-# [full] needed for s3fs.
 # >=0.6.5 for ConeSearch import. https://github.com/nasa-fornax/fornax-demo-notebooks/issues/523
-lsdb[full]>=0.6.5
+lsdb>=0.6.5
 dask
+# Required by lsdb to read files from AWS S3, revise when lsdb[s3fs] is supported by required minimum version.
+s3fs

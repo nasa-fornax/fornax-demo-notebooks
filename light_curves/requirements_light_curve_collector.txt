@@ -14,9 +14,10 @@ astroquery>=0.4.8.dev0
 acstools
 lightkurve
 alerce
-# [full] needed for s3fs. >=0.6.2 for improved s3 read speed.
-lsdb[full]>=0.6.2
-universal_pathlib
+# >=0.6.2 for improved s3 read speed.
+lsdb>=0.6.2
+# Required by lsdb to read files from AWS S3, revise when lsdb[s3fs] is supported by required minimum version.
+s3fs
 # We use distributed in this notebook, but installing any dask would make the [dataframe] extras required by dependencies for other notebooks.
 # It feels to be the cleanest solution to add the dependency here as we don't directly use it elsewhere.
 dask[distributed,dataframe]
