@@ -94,7 +94,8 @@ def heasarc_get_lightcurves(sample_table, *, catalog_error_radii={"FERMIGTRIG": 
         print('working on mission', heasarc_cat)
 
         hquery = f"""
-            SELECT cat.name, cat.ra, cat.dec, cat.error_radius, cat.time, mt.objectid, mt.label
+            SELECT cat.name, cat.ra, cat.dec, cat.error_radius, cat.time AS time, 
+            mt.objectid AS objectid, mt.label AS label
             FROM {heasarc_cat} cat, tap_upload.mytable mt
             WHERE
             cat.error_radius < {max_error_radius} AND
