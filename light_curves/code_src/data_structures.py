@@ -6,10 +6,37 @@ from astropy.timeseries import TimeSeries
 
 class MultiIndexDFObject:
     """
-    Pandas MultiIndex data frame to store & manipulate multiband light curves
+    Container for multiband light-curve data stored as a Pandas MultiIndex DataFrame.
+
+    This class standardizes how all archives (Gaia, ZTF, WISE, Pan-STARRS,
+    TESS/Kepler, IceCube, Rubin, HEASARC, HCV) return light-curve data.
+    Each contributing function produces a pandas.DataFrame indexed by:
+
+        objectid : int
+            Unique per-source identifier from the user's sample table.
+        label : str
+            Literature or source-provenance label associated with the object.
+        band : str
+            Photometric band or mission/instrument label.
+        time : float
+            Time of observation in MJD.
+
+    And containing the following columns:
+
+        flux : float
+            Flux measurement in the native calibrated units for that archive
+            (e.g., mJy for Gaia, WISE, Pan-STARRS, ZTF, Rubin, HCV;
+            electrons/s for TESS/Kepler; log(GeV) proxy for IceCube).
+
+        err : float
+            Uncertainty on the flux measurement, in the same units.
+
+    The object provides convenience methods for appending, combining,
+    and deleting light-curve segments.
 
     Examples
     --------
+
     # Initialize Pandas MultiIndex data frame for storing the light curve
     df_lc = MultiIndexDFObject()
 
@@ -32,7 +59,9 @@ class MultiIndexDFObject:
         Parameters
         ----------
         data : pd.DataFrame, optional
-            Dataframe to store in the `data` attribute.
+            A DataFrame already indexed by
+            [objectid, label, band, time] and containing columns ['flux', 'err'].
+            If None, an empty MultiIndex structure is created.
         """
         index = ["objectid", "label", "band", "time"]
         columns = ["flux", "err"]
@@ -41,12 +70,21 @@ class MultiIndexDFObject:
             self.append(data)
 
     def append(self, x):
-        """Add a new band of light curve data to the dataframe
+        """        
+        Append new light-curve data to the object.
 
         Parameters
         ----------
-        x : Pandas dataframe
-            contains columns [flux, fluxerr] and multi-index [objectid, label, band, time]
+        x : pandas.DataFrame or MultiIndexDFObject
+            Data to append. Must contain columns ['flux', 'err']
+            and be indexed by [objectid, label, band, time].
+
+        Notes
+        -----
+        - If `x` is empty, nothing is changed.
+        - If the current container is empty, it is replaced by `x`.
+        - Otherwise, the new data are concatenated with the existing MultiIndex.
+
         """
         if isinstance(x, self.__class__):
             # x is a MultiIndexDFObject. extract the DataFrame
@@ -68,17 +106,25 @@ class MultiIndexDFObject:
         self.data = pd.concat([self.data, new_data])
 
     def combine_Samples(self, other_df):
-        """Concatenate the data of two MultiIndexDFObject instances.
+        """
+        Combine two MultiIndexDFObject instances into a new one.
 
         Parameters
         ----------
         other_df : MultiIndexDFObject
-            The MultiIndexDFObject instance to concatenate with.
+            Another instance whose light-curve data will be concatenated.
 
         Returns
         -------
         MultiIndexDFObject
-            A new MultiIndexDFObject instance with concatenated data.
+            A new container with combined data. The objectid values in
+            `other_df` are shifted upward so that there are no collisions
+            between the two samples.
+
+        Notes
+        -----
+        This is useful when building a composite sample from multiple
+        literature lists or survey queries.
         """
         if not isinstance(other_df, self.__class__):
             raise ValueError("Input must be an instance of MultiIndexDFObject")
@@ -100,12 +146,15 @@ class MultiIndexDFObject:
         return concatenated_df_obj
 
     def remove(self, x):
-        """ Drop a light curve from the dataframe
+        """ 
+        Drop a light curve from the dataframe
 
         Parameters
         ----------
         x : list of values
-             Index values identifying rows to be dropped.
+            MultiIndex coordinates identifying the rows to drop.
+            Must match the existing index levels:
+            (objectid, label, band, time).
         """
         self.data = self.data.drop(x)
 

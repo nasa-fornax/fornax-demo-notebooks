@@ -13,17 +13,47 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
     Parameters
     ----------
     sample_table : astropy.table.Table
-        Table with columns:
-        - objectid : identifier for each target
-        - coord : SkyCoord object for each target position
-        - label : user-defined label for each target
+        Table containing the source sample. The following columns must be present:
+            coord : astropy.coordinates.SkyCoord
+                Sky position of each source.
+            objectid : int
+                Unique identifier for each source in the sample.
+            label : str
+                Literature label for tracking source provenance.    
     radius : float, optional
-        Search radius in arcseconds. Default is 1.0.
+        Matching radius in arcseconds (default: 1.0).
+        This is the separation used by LSDB `crossmatch()` to associate
+        ZTF detections with each sample coordinate.
 
     Returns
     -------
-    MultiIndexDFObject
-     """
+    df_lc : MultiIndexDFObject
+        Indexed by [objectid, label, band, time]. The resulting internal pandas DataFrame
+        contains the following columns:
+
+            flux : float
+                Flux values in millijansky (mJy), converted from ZTF AB magnitudes.
+            err : float
+                Flux uncertainty in millijansky (mJy), derived from the AB-magnitude
+                upper/lower bounds.
+            time : float
+                Modified Julian Date (MJD) derived from ZTF HMJD values.
+            objectid : int
+                Input sample object identifier.
+            band : str
+                ZTF band label ('ztf_g', 'ztf_r', or 'ztf_i').
+            label : str
+                Literature label associated with each source.     
+
+
+    Notes
+    -----
+    - ZTF data are retrieved from the DR23 LSDB HATS light-curve archive.
+    - Only detections with `catflags < 32768` are retained (recommended quality filter).
+    - Fluxes are converted from AB magnitudes using Astropy, then converted to mJy.
+
+    """
+    
     # 1) Start Dask client & read full ZTF light-curve catalog
     client = Client(threads_per_worker=2, memory_limit=None)
     ztf_lc = lsdb.read_hats(

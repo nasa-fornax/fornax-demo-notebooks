@@ -8,19 +8,29 @@ from data_structures import MultiIndexDFObject
 
 def rubin_authenticate():
     """
-    Authenticate to the Rubin Science Platform TAP service using a locally stored token.
+    Authenticate to the Rubin Science Platform (RSP) TAP service using a
+    locally stored authentication token located at ~/.rsp-tap.token.
 
     Returns
     -------
     rsp_tap : pyvo.dal.TAPService
-        An authenticated TAPService instance pointing to DP0 data, assigned to variable `rsp_tap`.
+        An authenticated TAPService instance pointing to DP0 data at
+        https://data.lsst.cloud/api/tap 
 
     Raises
     ------
     FileNotFoundError
         If the token file does not exist or is empty.
+    ValueError
+        If the token file exists but contains no valid token string.
     RuntimeError
         If the TAP session cannot be created or the returned baseurl mismatches the expected URL.
+
+    Notes
+    -----
+    The ~/.rsp-tap.token file must contain a single line with a valid RSP
+    access token. This token must have TAP search permissions enabled.
+
     """
     # Read token from home directory
     token_file = Path.home() / '.rsp-tap.token'
@@ -56,7 +66,13 @@ def rubin_get_objectids(sample_table, rsp_tap, search_radius=0.001):
     Parameters
     ----------
     sample_table : astropy.table.Table
-        Table with columns ['coord', 'objectid', 'label'], where 'coord' is a SkyCoord.
+        Input table containing at minimum the following columns:
+            coord : astropy.coordinates.SkyCoord
+                Sky position for each object.
+            objectid : int
+                Integer identifier assigned to each input source.
+            label : str
+                Source label, provenance tag, or literature reference.
     rsp_tap : pyvo.dal.TAPService
         Authenticated TAP service instance returned by `rubin_authenticate()`.
     search_radius : float, deg
@@ -65,8 +81,24 @@ def rubin_get_objectids(sample_table, rsp_tap, search_radius=0.001):
     Returns
     -------
     combined : astropy.table.Table
-        Combined table with columns ['coord_ra', 'coord_dec', 'objectId',
-        'in_objid', 'in_label'] tagging each DP0 Object match with the input sample info.
+         Table containing Rubin matches with columns:
+            coord_ra : float
+                RA of the matched DP0 Object (deg).
+            coord_dec : float
+                Dec of the matched DP0 Object (deg).
+            objectId : int
+                Rubin DP0 Object identifier.
+            in_objid : int
+                Original objectid from the sample table.
+            in_label : str
+                Original label from the sample table.
+        Returns None if no matches are found.
+
+    Notes
+    -----
+    Only DP0 objects with detect_isPrimary = 1 are returned. If multiple
+    DP0 objects fall within the cone, all are returned.
+
     """
     # could consider parallelizing this but for now we wait for TAP table upload and real data
     all_tables = []
@@ -104,20 +136,63 @@ def rubin_get_objectids(sample_table, rsp_tap, search_radius=0.001):
 
 def rubin_access_lc_catalog(object_table, rsp_tap):
     """
-    Retrieve forced-source light curves for given DP0 object IDs and attach sample metadata.
+    Retrieve forced-source light curves for the given DP0 Object IDs and attach
+    the original sample metadata. This function executes a TAP query against the
+    DP0.2 `ForcedSource` and `CcdVisit` tables, merges the results with the input
+    sample_table identifiers, and returns the result as a MultiIndexDFObject.
 
     Parameters
     ----------
     object_table : astropy.table.Table
-        Table with ['objectId', 'in_objid', 'in_label'] from get_objectids().
+        Table containing:
+            objectId : int
+                Rubin DP0 Object identifier.
+            in_objid : int
+                Original objectid from the input sample table.
+            in_label : str
+                Original label from the input sample table.
     rsp_tap : pyvo.dal.TAPService
         Authenticated TAP service from rubin_authenticate().
 
     Returns
     -------
-    MultiIndexDFObject
-        Indexed by ['objectid', 'label', 'band', 'time'] with flux data.
-    """
+    df_lc : MultiIndexDFObject
+        Indexed by [objectid, label, band, time].  
+        The resulting internal pandas DataFrame contains the following columns:
+
+            band : str
+                Rubin filter name, prefixed with 'rubin_' (e.g., 'rubin_g', 'rubin_r').
+            ccdVisitId : int
+                Visit identifier of the CCD exposure used for the forced measurement.
+            coord_ra : float
+                Source right ascension (deg) at the time of measurement.
+            coord_dec : float
+                Source declination (deg) at the time of measurement.
+            psfFlux : float
+                PSF flux measurement in nanojanskys (nJy).
+            psfFluxErr : float
+                Uncertainty on psfFlux (nJy).
+            psfMag : float
+                AB magnitude computed from psfFlux by `scisql_nanojanskyToAbMag()`.
+            visitId : int
+                Identifier of the parent visit from the CcdVisit table.
+            zeroPoint : float
+                Zero point used to calibrate the flux measurement.
+            time : float
+                Midpoint of the exposure in MJD (taken from `expMidptMJD`).
+            objectid : int
+                Input sample object identifier (from `in_objid`).
+            label : str
+                Literature label associated with each input source (from `in_label`).
+
+    Notes
+    -----
+    - The returned dataframe preserves *all* flux-related Rubin columns; no
+    flux conversion is applied.
+    - The 'objectId' column is dropped because it is replaced by 'objectid'
+    from the input sample.
+    - All time values are in MJD, consistent with other archives.
+   """
     # Pull out a unique, sorted list of integer IDs:
     objids = sorted(set(object_table['objectId']))
 
@@ -179,21 +254,56 @@ def rubin_get_lightcurves(sample_table, search_radius=0.001):
     Parameters
     ----------
     sample_table : astropy.table.Table
-        Table with ['coord', 'objectid', 'label'] input sample.
+        Table containing the input sample with required columns:
+            coord : astropy.coordinates.SkyCoord
+                Sky position of each source.
+            objectid : int
+                Unique integer ID for each input source.
+            label : str
+                Label or reference tag carried through to the output.
     search_radius : float, optional
         Cone search radius in degrees.
 
     Returns
     -------
-    MultiIndexDFObject
-        Light curves indexed by ['objectid', 'label', 'band', 'time'].
+    df_lc : MultiIndexDFObject
+        Indexed by [objectid, label, band, time].
+        The resulting internal pandas DataFrame contains the following columns:
 
+            psfFlux : float
+                Measured PSF flux for the forced-source detection (in nanojanskys).
+            psfFluxErr : float
+                Uncertainty of the PSF flux (in nanojanskys).
+            psfMag : float
+                AB magnitude corresponding to the measured PSF flux.
+            coord_ra : float
+                Right Ascension of the forced-source measurement (degrees).
+            coord_dec : float
+                Declination of the forced-source measurement (degrees).
+            ccdVisitId : int
+                Unique visit/exposure identifier for the detection.
+            visitId : int
+                Visit identifier returned by the CcdVisit table.
+            zeroPoint : float
+                Photometric zeropoint used for the magnitude calibration.
+            objectid : int
+                Identifier from the original sample_table.
+            band : str
+                Rubin filter name (for example, 'rubin_r', 'rubin_i').
+            label : str
+                Literature label associated with each source.
+            time : float
+                Midpoint of the exposure in Modified Julian Date (MJD).
+
+        These columns are obtained from the Rubin DP0 ForcedSource and CcdVisit
+        catalogs and merged with the original sample identifiers.
+    
     Raises
     ------
     FileNotFoundError
-        If the RSP token file is missing or contains no token.
+        If the Rubin TAP token file is missing or empty.
     RuntimeError
-        If authentication fails or any of the TAP queries encounters an error.
+        If TAP authentication or queries fail.
     """
     # authenticate and set up TAP service
     rsp_tap = rubin_authenticate()

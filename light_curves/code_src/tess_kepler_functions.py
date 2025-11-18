@@ -6,21 +6,23 @@ from data_structures import MultiIndexDFObject
 
 
 def clean_filternames(lightcurve):
-    """Simplify mission name from a combined list
-
+    """
+    Normalize mission names returned by Lightkurve.
+    
     Mission names are returned including quarter numbers, remove those to
     simplify. For this use case, we really only need to know which mission,
     not which quarter.
 
     Parameters
     ----------
-    lightcurve : lightkurve result
+    lightcurve : lightkurve.LightCurve or lightkurve.LightCurveCollection element
         object detailing the light curve object found with lightkurve
 
     Returns
     -------
     filtername : str
-        name of the mission without quarter information
+        name of the mission without quarter information. One of:
+        "TESS", "Kepler", or "K2".
     """
     filtername = lightcurve.mission
     # clean this up a bit so all Kepler quarters etc., get the same filtername
@@ -35,19 +37,51 @@ def clean_filternames(lightcurve):
 
 
 def tess_kepler_get_lightcurves(sample_table, *, radius=1.0):
-    """Searches TESS, Kepler, and K2 for light curves from a list of input coordinates.  This is the MAIN function
+    """
+    Searches TESS, Kepler, and K2 for light curves from a list of input coordinates.  This is the MAIN function
 
     Parameters
     ----------
-    sample_table : `~astropy.table.Table`
-        Table with the coordinates and journal reference labels of the sources
-    radius : float
-        search radius, how far from the source should the archives return results
+    sample_table : astropy.table.Table
+        Table containing the source sample. The following columns must be present:
+            coord : astropy.coordinates.SkyCoord
+                Sky position of each source.
+            objectid : int
+                Unique identifier for each source in the sample.
+            label : str
+                Literature label for tracking source provenance.
+    radius : float, optional
+        Search radius in arcseconds for Lightkurve’s cone search.
+        Default is 1.0 arcsec.
 
     Returns
     -------
     df_lc : MultiIndexDFObject
-        the main data structure to store all light curves
+        Combined light curves from TESS, Kepler, and K2, indexed by
+        [objectid, label, band, time]. The resulting internal pandas DataFrame
+        contains the following columns:
+            flux : float
+                Flux values in electrons per second.
+            err : float
+                Flux uncertainties in electrons per second.
+            time : float
+                Time of observation in MJD.
+            objectid : int
+                Input sample object identifier.
+            band : str
+                Mission name: one of ["TESS", "Kepler", "K2"].
+            label : str
+                Literature label associated with each source.
+    Notes
+    -----
+    - Light curves from TESS/Kepler/K2 are heavily oversampled for AGN purposes.
+      This function reduces the sampling by keeping only every 30th point.
+    - TESS negative or invalid fluxes are removed following mission guidance.
+    - Lightkurve occasionally returns incompatible products; these are skipped.
+    - Returned fluxes are not converted to physical units (e.g., mJy) because the
+      mission bandpasses are very broad. Scaling vs. other bands is performed
+      during plotting.
+
     """
 
     df_lc = MultiIndexDFObject()
