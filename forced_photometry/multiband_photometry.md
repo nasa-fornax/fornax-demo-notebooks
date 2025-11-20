@@ -9,6 +9,14 @@ kernelspec:
   display_name: py-multiband_photometry
   language: python
   name: py-multiband_photometry
+authors:
+  - name: Jessica Krick
+  - name: David Shupe
+  - name: Marziye JafariYazani
+  - name: Brigitta Sipőcz
+  - name: Vandana Desai
+  - name: Steve Groom
+  - name: Troy Raen
 ---
 
 # Automated Multiband Forced Photometry on Large Datasets
