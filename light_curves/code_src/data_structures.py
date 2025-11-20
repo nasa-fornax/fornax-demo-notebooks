@@ -8,8 +8,9 @@ class MultiIndexDFObject:
     """
     Container for multiband light-curve data stored as a Pandas MultiIndex DataFrame.
 
-    This class standardizes how all archives (Gaia, ZTF, WISE, Pan-STARRS,
-    TESS/Kepler, IceCube, Rubin, HEASARC, HCV) return light-curve data.
+    This class is intended to be used by the `*_get_lightcurves()` functions
+    that fetch data from the archives(Gaia, ZTF, WISE, Pan-STARRS,
+    TESS/Kepler, IceCube, Rubin, HEASARC, HCV) and return light-curve data.
     Each contributing function produces a pandas.DataFrame indexed by:
 
         objectid : int
