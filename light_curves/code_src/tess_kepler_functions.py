@@ -81,7 +81,6 @@ def tess_kepler_get_lightcurves(sample_table, *, radius=1.0):
     - Returned fluxes are not converted to physical units (e.g., mJy) because the
       mission bandpasses are very broad. Scaling vs. other bands is performed
       during plotting.
-
     """
 
     df_lc = MultiIndexDFObject()

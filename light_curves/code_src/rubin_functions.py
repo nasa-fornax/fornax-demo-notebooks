@@ -30,7 +30,6 @@ def rubin_authenticate():
     -----
     The ~/.rsp-tap.token file must contain a single line with a valid RSP
     access token. This token must have TAP search permissions enabled.
-
     """
     # Read token from home directory
     token_file = Path.home() / '.rsp-tap.token'
@@ -98,7 +97,6 @@ def rubin_get_objectids(sample_table, rsp_tap, search_radius=0.001):
     -----
     Only DP0 objects with detect_isPrimary = 1 are returned. If multiple
     DP0 objects fall within the cone, all are returned.
-
     """
     # could consider parallelizing this but for now we wait for TAP table upload and real data
     all_tables = []

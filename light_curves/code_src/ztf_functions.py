@@ -45,13 +45,11 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
             label : str
                 Literature label associated with each source.     
 
-
     Notes
     -----
     - ZTF data are retrieved from the DR23 LSDB HATS light-curve archive.
     - Only detections with `catflags < 32768` are retained (recommended quality filter).
     - Fluxes are converted from AB magnitudes using Astropy, then converted to mJy.
-
     """
     
     # 1) Start Dask client & read full ZTF light-curve catalog

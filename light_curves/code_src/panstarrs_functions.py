@@ -9,7 +9,7 @@ from data_structures import MultiIndexDFObject
 
 
 def panstarrs_get_lightcurves(sample_table, *, radius=1):
-    """Searches panstarrs hipscat files on S3 for light curves from a list of input coordinates.
+    """Searches Pan-STARRS HATS files on S3 for light curves from a list of input coordinates.
 
     Parameters
     ----------
@@ -43,7 +43,8 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
                 Pan-STARRS filter name ('Pan-STARRS g', 'Pan-STARRS r', 'Pan-STARRS i',
                 'Pan-STARRS z', or 'Pan-STARRS y').
             label : str
-                Literature label associated with each source.    """
+                Literature label associated with each source.
+    """
 
     # read in the panstarrs object table to lsdb
     # this table will be used for cross matching with our sample's ra and decs

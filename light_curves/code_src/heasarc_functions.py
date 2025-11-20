@@ -34,6 +34,7 @@ def make_hist_error_radii(missioncat):
                 Declination (ICRS).
             error_radius : float (deg)
                 Positional localization radius provided by the mission.
+
     Notes
     -----
     This helper function is intended for exploratory analysis to understand
@@ -95,13 +96,12 @@ def heasarc_get_lightcurves(sample_table, *, catalog_error_radii={"FERMIGTRIG": 
         Dictionary specifying which HEASARC mission catalogs to search and the
         **maximum allowed error radius (degrees)** for each.
 
-        Keys must be valid HEASARC table names, for example:
-            {"FERMIGTRIG": 1.0, "SAXGRBMGRB": 3.0}
-
-        Values:
-            float (degrees)
-                Maximum localization error radius to accept from that catalog.
-                This filters out events with very large positional uncertainties.
+        Key : str
+            A valid HEASARC table name, for example: "FERMIGTRIG" or "SAXGRBMGRB".
+        Value : float (degrees)
+            Maximum localization error radius to accept from that catalog.
+            Recommended values are about 1.0 to 3.0.
+            Very large values have the potential to match many target objects.
 
     Returns
     -------
@@ -112,24 +112,20 @@ def heasarc_get_lightcurves(sample_table, *, catalog_error_radii={"FERMIGTRIG": 
             flux : float
                 Flux values in counts per second (ct/s) as provided by the HEASARC
                 mission catalogs (e.g., FERMIGTRIG, SAXGRBMGRB).
-
             err : float
                 Flux uncertainties in counts per second (ct/s), when available.
                 Placeholder flux uncertainty (0.1 ct/s).
-
             time : float
                 Time of the event or binned observation in Mission Elapsed Time
                 converted into MJD.
-
             objectid : int
                 Input sample object identifier.
-
             band : str
                 Mission-specific band or catalog name
                 (e.g., 'FERMIGTRIG', 'SAXGRBMGRB').
-
             label : str
                 Literature label associated with each source.    
+
     Notes
     -----
     * Each HEASARC catalog entry is treated as a **single event**, not a light curve.

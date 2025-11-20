@@ -264,18 +264,16 @@ def hcv_get_lightcurves(sample_table, *, radius=1 / 3600):
                 HST/ACS filter name (e.g., 'F814W').
             label : str
                 Literature label associated with each source.
+
     Notes
     -----
     - The HCV API returns magnitudes, which are converted to flux using ACS
       zeropoints. Time-dependent zeropoints are not fully supported; the function
       currently applies the zeropoint corresponding to the first epoch.
-
     - Additional filters (e.g., F606W, F475W) are available in the HCV, but the
       current implementation retrieves only the ACS F814W band for simplicity.
-
     - Rows where the HCV service returns empty results (no MatchID or missing
       filter data) are skipped silently.
-
     """
 
     df_lc = MultiIndexDFObject()

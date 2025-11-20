@@ -30,7 +30,7 @@ def gaia_get_lightcurves(sample_table, *, search_radius=1 / 3600, verbose=0):
 
     Returns
     --------
-      df_lc : MultiIndexDFObject
+    df_lc : MultiIndexDFObject
         Indexed by [objectid, label, band, time]. The resulting internal pandas DataFrame
         contains the following columns:
         
@@ -176,10 +176,8 @@ def gaia_retrieve_epoch_photometry(gaia_table):
         Table returned by gaia_retrieve_catalog. Must include:
         source_id : int
             Gaia DR3 source identifier for the photometry request.
-
         objectid : int
             Used to label the MultiIndex rows later.
-
         label : str
             Text label used for grouping and plotting.
 
@@ -269,22 +267,18 @@ def gaia_clean_dataframe(gaia_df):
 
     Parameters
     ----------
-   gaia_df : pandas.DataFrame
+    gaia_df : pandas.DataFrame
         Raw Gaia epoch photometry returned by `gaia_retrieve_epoch_photometry()`.
         Must contain the following columns:
 
             g_transit_flux : float
                 G-band transit flux (electrons per second).
-
             g_transit_flux_error : float
                 Uncertainty on the transit flux (electrons per second).
-
             g_transit_time : float
                 Gaia mission time, which will be converted to MJD.
-
             objectid : int
                 Identifier mapped from the input sample.
-
             label : str
                 Literature or provenance label for the target.
 
@@ -296,19 +290,14 @@ def gaia_clean_dataframe(gaia_df):
 
             flux : float
                 Gaia G-band flux in electrons per second (e-/s).
-
             err : float
                 Uncertainty on the Gaia flux (e-/s).
-
             time : float
                 Observation time converted from Gaia mission time to MJD.
-
             objectid : int
                 Input sample object identifier.
-
             band : str
                 Always "G" for Gaia epoch photometry.
-
             label : str
                 Literature label associated with each source.
     """

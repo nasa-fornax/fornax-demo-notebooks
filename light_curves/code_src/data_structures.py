@@ -51,7 +51,8 @@ class MultiIndexDFObject:
     df_lc.data
 
 
-    """
+   df_lc.data
+   """
 
     def __init__(self, data=None):
         """Create a MultiIndex DataFrame that is empty if data is None, else contains the data.

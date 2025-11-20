@@ -53,6 +53,7 @@ def wise_get_lightcurves(sample_table, *, radius=1.0, bandlist=["W1", "W2"]):
                 WISE band label ('W1' or 'W2').
             label : str
                 Literature label associated with each source.
+
     Notes
     -----
     * The unWISE time-domain catalog is stored in parquet format on AWS S3 and
@@ -163,27 +164,27 @@ def load_lightcurves(locations, radius, bandlist):
     -------
     wise_df : pd.DataFrame
         dataframe of light curve data for all objects in `locations`
-            flux       : float
+            flux : float
                 Instrumental WISE flux (raw catalog units DN/s).
-            dflux      : float
+            dflux : float
                 Instrumental flux uncertainty (DN/s).
-            ra         : float (deg)
-            dec        : float (deg)
-            band       : int
+            ra : float (deg)
+            dec : float (deg)
+            band : int
                 Encoded WISE band (1=W1, 2=W2).
-            MJDMEAN    : float
+            MJDMEAN : float
                 Mean MJD timestamp for the detection.
-            objectid   : int
-            coord.ra   : float (deg)
-            coord.dec  : float (deg)
-            label      : str
+            objectid : int
+            coord.ra : float (deg)
+            coord.dec : float (deg)
+            label : str
+
     Notes
     -----
     * Only detections within the `radius` of each source are returned.
     * If a source lies near a HEALPix boundary, detections from multiple
       partitions may be included.
     * Flux unit conversion to mJy is handled separately in `transform_lightcurves()`.
-
     """
     # load the catalog's metadata as a pyarrow dataset. this will be used to query the catalog.
     # the catalog is stored in an AWS S3 bucket
@@ -267,13 +268,13 @@ def transform_lightcurves(wise_df):
             label    : str
             coord.ra : float
             coord.dec: float
+ 
     Notes
     -----
     * Only positive-flux detections are retained.
     * Numeric band codes are converted to "W1" or "W2".
     * Flux conversions use `convert_wise_flux_to_millijansky()` and are applied
       separately to each band.
-
     """
     # rename columns to match a MultiIndexDFObject
     wise_df = wise_df.rename(columns={"MJDMEAN": "time", "dflux": "err"})
