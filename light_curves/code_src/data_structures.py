@@ -71,8 +71,14 @@ class MultiIndexDFObject:
         if data is not None:
             self.append(data)
 
+    def _repr_html_(self):
+        return self.data._repr_html_()
+
+    def __repr__(self):
+        return self.data.__repr__()
+
     def append(self, x):
-        """        
+        """
         Append new light-curve data to the object.
 
         Parameters
@@ -148,7 +154,7 @@ class MultiIndexDFObject:
         return concatenated_df_obj
 
     def remove(self, x):
-        """ 
+        """
         Drop a light curve from the dataframe
 
         Parameters
