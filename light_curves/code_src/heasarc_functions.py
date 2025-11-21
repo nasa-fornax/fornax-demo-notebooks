@@ -9,11 +9,11 @@ from data_structures import MultiIndexDFObject
 
 
 def make_hist_error_radii(missioncat):
-    """plots a histogram of error radii from a HEASARC catalog
+    """
+    Plots a histogram of error radii from a HEASARC catalog
 
     example calling sequences:
     resulttable = make_hist_error_radii('FERMIGTRIG')
-    resulttable = make_hist_error_radii('SAXGRBMGRB')
 
 
     Parameters
@@ -23,8 +23,23 @@ def make_hist_error_radii(missioncat):
             https://astroquery.readthedocs.io/en/latest/heasarc/heasarc.html#getting-list-of-available-missions
     Returns
     -------
-    heasarcresulttable : astropy table
-        results of the heasarc search including name, ra, dec, error_radius
+    heasarcresulttable : astropy.table.Table
+        Table of the first 5000 rows containing:
+
+            name : str
+                Mission source identifier.
+            ra : float (deg)
+                Right Ascension (ICRS).
+            dec : float (deg)
+                Declination (ICRS).
+            error_radius : float (deg)
+                Positional localization radius provided by the mission.
+
+    Notes
+    -----
+    This helper function is intended for exploratory analysis to understand
+    the typical localization precision of different HEASARC catalogs, which
+    can vary from arcminutes to many degrees depending on the mission.
 
     """
     # need to know the distribution of error radii for the catalogs of interest
@@ -56,22 +71,70 @@ def make_hist_error_radii(missioncat):
 
 
 def heasarc_get_lightcurves(sample_table, *, catalog_error_radii={"FERMIGTRIG": 1.0, "SAXGRBMGRB": 3.0}):
-    """Searches HEASARC archive for light curves from a specific list of mission catalogs
+    """
+    Search selected HEASARC gamma-ray mission catalogs for transient events
+    that spatially coincide with entries in the input sample_table.
+
+    This function performs a TAP upload of the source coordinates, queries
+    each HEASARC catalog for events with sufficiently small localization
+    error circles, and records an event “marker” in the returned light-curve
+    structure. HEASARC does not provide multi-epoch flux light curves, so
+    each event is represented as a single time-stamped point with a fixed
+    placeholder flux.
 
     Parameters
     ----------
-    sample_table : `~astropy.table.Table`
-        Table with the coordinates and journal reference labels of the sources
+    sample_table : astropy.table.Table
+        Table containing the source sample. The following columns must be present:
+            coord : astropy.coordinates.SkyCoord
+                Sky position of each source.
+            objectid : int
+                Unique identifier for each source in the sample.
+            label : str
+                Literature label for tracking source provenance.               
     catalog_error_radii : dict
-        Catalogs to query and their corresponding max error radii. Dictionary key must be one of the tables listed
-        here: https://astroquery.readthedocs.io/en/latest/heasarc/heasarc.html#getting-list-of-available-missions.
-        Value must be the maximum error radius to include in the returned catalog of objects (ie., we are not
-        interested in GRBs with a 90degree error radius because they will fit all of our objects).
+        Dictionary specifying which HEASARC mission catalogs to search and the
+        **maximum allowed error radius (degrees)** for each.
+
+        Key : str
+            A valid HEASARC table name, for example: "FERMIGTRIG" or "SAXGRBMGRB".
+        Value : float (degrees)
+            Maximum localization error radius to accept from that catalog.
+            Recommended values are about 1.0 to 3.0.
+            Very large values have the potential to match many target objects.
 
     Returns
     -------
-    df_lc : MultiIndexDFObject
-        the main data structure to store all light curves
+     df_lc : MultiIndexDFObject
+        Indexed by [objectid, label, band, time]. The resulting internal
+        pandas DataFrame contains the following columns:
+
+            flux : float
+                Flux values in counts per second (ct/s) as provided by the HEASARC
+                mission catalogs (e.g., FERMIGTRIG, SAXGRBMGRB).
+            err : float
+                Flux uncertainties in counts per second (ct/s), when available.
+                Placeholder flux uncertainty (0.1 ct/s).
+            time : float
+                Time of the event or binned observation in Mission Elapsed Time
+                converted into MJD.
+            objectid : int
+                Input sample object identifier.
+            band : str
+                Mission-specific band or catalog name
+                (e.g., 'FERMIGTRIG', 'SAXGRBMGRB').
+            label : str
+                Literature label associated with each source.    
+
+    Notes
+    -----
+    * Each HEASARC catalog entry is treated as a **single event**, not a light curve.
+    * Events are matched using cone searches based on the mission-provided
+      error radius for each source.
+    * Large sample tables are internally split into chunks (max 50,000 rows)
+      for TAP upload compatibility.
+    * Returned flux values should not be physically interpreted; only the
+      timestamps and catalog labels carry scientific meaning.
     """
 
     # Prepping sample_table with float R.A. and DEC column instead of SkyCoord mixin for TAP upload

@@ -14,16 +14,38 @@ def gaia_get_lightcurves(sample_table, *, search_radius=1 / 3600, verbose=0):
 
     Parameters
     ----------
-    sample_table : Astropy Table
-        main source catalog with coordinates, labels, and objectids
+    sample_table : astropy.table.Table
+        Table containing the source sample. The following columns must be present:
+            coord : astropy.coordinates.SkyCoord
+                Sky position of each source.
+            objectid : int
+                Unique identifier for each source in the sample.
+            label : str
+                Literature label for tracking source provenance.   
     search_radius: float(degrees)
-        How far from a sources is ok for a match
-     verbose : int
+        Cone-search radius in degrees for matching Gaia DR3 sources.
+        Default is 1/3600 (1 arcsec).
+    verbose : int
         How much to talk. 0 = None, 1 = a little bit , 2 = more, 3 = full
 
     Returns
     --------
-    MultiIndexDFObject with Gaia light curve photometry
+    df_lc : MultiIndexDFObject
+        Indexed by [objectid, label, band, time]. The resulting internal pandas DataFrame
+        contains the following columns:
+        
+            flux : float
+                Gaia G-band transit flux in electrons per second (e-/s).
+            err : float
+                Uncertainty on the G-band transit flux (e-/s).
+            time : float
+                Time of observation in MJD.
+            objectid : int
+                Input sample object identifier.
+            band : str
+                Gaia photometric band. For epoch photometry this is always "G".
+            label : str
+                Literature label associated with each source.
 
     '''
     # This code is broken into two steps.  The first step, `gaia_retrieve_catalog` retrieves the
@@ -63,20 +85,38 @@ def gaia_retrieve_catalog(sample_table, search_radius, verbose):
 
     Parameter
     ----------
-    sample_table : Astropy Table
-        main source catalog with coordinates, labels, and objectids
-
+    sample_table : astropy.table.Table
+        Table containing the source sample. The following columns must be present:
+            coord : astropy.coordinates.SkyCoord
+                Sky position of each source.
+            objectid : int
+                Unique identifier for each source in the sample.
+            label : str
+                Literature label for tracking source provenance.
     search_radius : float
         Search radius in degrees, e.g., 1/3600.
         suggested search radius is 1 arcsecond or 1/3600.
-
     verbose : int
         How much to talk. 0 = None, 1 = a little bit , 2 = more, 3 = full
 
     Returns
     --------
-    Astropy table with the Gaia photometry for each source.
+    gaia_table : astropy.table.Table
+        Table containing Gaia DR3 source matches for the input coordinates.
+        The table includes the following columns:
 
+            ra : float
+                Right Ascension of the matched Gaia source (degrees).
+            dec : float
+                Declination of the matched Gaia source (degrees).
+            random_index : int
+                Gaia random index used for efficient data server partitioning.
+            source_id : int
+                Unique Gaia DR3 source identifier.
+            objectid : int
+                Input sample object identifier.
+            label : str
+                Literature label associated with each source.
     '''
     t1 = time.time()
 
@@ -133,12 +173,34 @@ def gaia_retrieve_epoch_photometry(gaia_table):
     Parameters
     ----------
     gaia_table: Astropy Table
-        catalog of gaia source ids as well as the coords, objectid, and labels of our targets
+        Table returned by gaia_retrieve_catalog. Must include:
+        source_id : int
+            Gaia DR3 source identifier for the photometry request.
+        objectid : int
+            Used to label the MultiIndex rows later.
+        label : str
+            Text label used for grouping and plotting.
 
     Returns
     --------
-    Returns a dictionary (key = source_id) with a table of photometry as a function of time.
+    gaia_df : pandas.DataFrame
+        Concatenated Gaia epoch photometry for all matched sources.
+        The resulting DataFrame contains the following columns:
 
+            source_id : int
+                Gaia DR3 source identifier for this transit measurement.
+            g_transit_flux : float
+                Gaia G-band transit flux (electrons per second).
+            g_transit_flux_error : float
+                Flux uncertainty (electrons per second).
+            g_transit_mag : float
+                Gaia G-band magnitude for the transit.
+            g_transit_time : float
+                Time of observation in Gaia mission time (days).
+            objectid : int
+                Input sample object identifier.
+            label : str
+                Literature label associated with each source.
     """
 
     # gaia datalink server has a threshold of max 5000 requests,
@@ -205,13 +267,39 @@ def gaia_clean_dataframe(gaia_df):
 
     Parameters
     ----------
-    gaia_df: Pandas dataframe with light curve info
+    gaia_df : pandas.DataFrame
+        Raw Gaia epoch photometry returned by `gaia_retrieve_epoch_photometry()`.
+        Must contain the following columns:
 
+            g_transit_flux : float
+                G-band transit flux (electrons per second).
+            g_transit_flux_error : float
+                Uncertainty on the transit flux (electrons per second).
+            g_transit_time : float
+                Gaia mission time, which will be converted to MJD.
+            objectid : int
+                Identifier mapped from the input sample.
+            label : str
+                Literature or provenance label for the target.
 
     Returns
     --------
-    MultiIndexDFObject with all Gaia light curves
+    df_lc : MultiIndexDFObject
+        Indexed by [objectid, label, band, time].  
+        The resulting internal pandas DataFrame contains:
 
+            flux : float
+                Gaia G-band flux in electrons per second (e-/s).
+            err : float
+                Uncertainty on the Gaia flux (e-/s).
+            time : float
+                Observation time converted from Gaia mission time to MJD.
+            objectid : int
+                Input sample object identifier.
+            band : str
+                Always "G" for Gaia epoch photometry.
+            label : str
+                Literature label associated with each source.
     """
 
     # df.flux is in electron/s

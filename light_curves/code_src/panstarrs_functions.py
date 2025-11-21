@@ -9,19 +9,41 @@ from data_structures import MultiIndexDFObject
 
 
 def panstarrs_get_lightcurves(sample_table, *, radius=1):
-    """Searches panstarrs hipscat files for light curves from a list of input coordinates.
+    """Searches Pan-STARRS HATS files on S3 for light curves from a list of input coordinates.
 
     Parameters
     ----------
-    sample_table : `~astropy.table.Table`
-        Table with the coordinates and journal reference labels of the sources
+    sample_table : astropy.table.Table
+        Table containing the source sample. The following columns must be present:
+            coord : astropy.coordinates.SkyCoord
+                Sky position of each source.
+            objectid : int
+                Unique identifier for each source in the sample.
+            label : str
+                Literature label for tracking source provenance.            
     radius : float
-        search radius, how far from the source should the archives return results
+        Angular search radius in arcseconds used for the crossmatch between the input
+        sample and the Pan-STARRS object catalog. Default is 1.0 arcsec.
 
     Returns
     -------
     df_lc : MultiIndexDFObject
-        the main data structure to store all light curves
+        Indexed by [objectid, label, band, time]. The resulting internal pandas DataFrame
+        contains the following columns:
+        
+            flux : float
+                Flux values in millijansky (mJy), converted from PS1 psfFlux (Jy × 1e3).
+            err : float
+                Flux uncertainties in millijansky (mJy), converted from PS1 psfFluxErr.
+            time : float
+                Time of observation in MJD (Pan-STARRS obsTime in MJD).
+            objectid : int
+                Input sample object identifier.
+            band : str
+                Pan-STARRS filter name ('Pan-STARRS g', 'Pan-STARRS r', 'Pan-STARRS i',
+                'Pan-STARRS z', or 'Pan-STARRS y').
+            label : str
+                Literature label associated with each source.
     """
 
     # read in the panstarrs object table to lsdb

@@ -24,9 +24,14 @@ def icecube_get_lightcurves(sample_table, *, icecube_select_topN=3, max_search_r
 
     Parameters
     ----------
-    sample_table : Astropy Table
-        main source catalog with coordinates, labels, and objectids
-
+    sample_table : astropy.table.Table
+        Table containing the source sample. The following columns must be present:
+            coord : astropy.coordinates.SkyCoord
+                Sky position of each source.
+            objectid : int
+                Unique identifier for each source in the sample.
+            label : str
+                Literature label for tracking source provenance.
     icecube_select_topN : int
         Maximum number of events to return for a single object in sample_table. The brightest events
         within the match radius will be returned.
@@ -39,8 +44,22 @@ def icecube_get_lightcurves(sample_table, *, icecube_select_topN=3, max_search_r
 
     Returns
     --------
-    MultiIndexDFObject: IceCube Neutrino events for all the input sources.
-
+     df_lc : MultiIndexDFObject
+        Indexed by [objectid, label, band, time]. The resulting internal pandas DataFrame
+        contains the following columns:
+        
+            flux : float
+                Neutrino event energy expressed as log10(GeV).
+            err : float
+                Placeholder uncertainty column (always 0.0 for IceCube events).
+            time : float
+                Event time in modified Julian date (MJD).
+            objectid : int
+                Input sample object identifier.
+            band : str
+                Always the string "IceCube".
+            label : str
+                Literature label associated with each source.
     '''
     max_search_radius = max_search_radius * u.deg
 
@@ -110,9 +129,25 @@ def icecube_get_catalog(path=DATA_PATH, verbose=False):
 
     Returns
     --------
-    (EVENTS , event_names) : (table , list of str)
-        Returns a catalog of events with columns: mjd, energy_logGeV, AngErr, ra, dec, az, zen
-        Returns also a list of the file names of the IceCube event file names (for convenience)
+    EVENTS : astropy.table.Table
+        Combined event table with columns:
+            mjd : float
+                Event detection time (Modified Julian Date).
+            energy_logGeV : float
+                log10(Energy / GeV).
+            AngErr : float
+                Angular positional uncertainty in degrees.
+            ra : float
+                Right ascension of event direction (deg).
+            dec : float
+                Declination of event direction (deg).
+            az : float
+                Azimuth (deg).
+            zen : float
+                Zenith angle (deg).
+
+    event_names : list of str
+        Filenames of the event catalog files that were read and combined.
     '''
 
     event_names = ["IC40_exp.csv",
@@ -154,13 +189,14 @@ def icecube_download_data(url="http://icecube.wisc.edu/data-releases/20210126_PS
     url : str
         Icecube data URL
     path : str
-        Path to download data to.
+        Destination directory for downloaded and unzipped data.
     verbose : bool
         Default False. Display extra info and warnings if true.
 
     Returns
     -------
-    Unzipped IceCube event tables in the data directory.
+    None
+        Extracted data files are written to disk in `path`.
 
     '''
 

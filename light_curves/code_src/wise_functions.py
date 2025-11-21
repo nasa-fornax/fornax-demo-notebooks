@@ -15,22 +15,56 @@ K = 5  # HEALPix order at which the dataset is partitioned
 
 
 def wise_get_lightcurves(sample_table, *, radius=1.0, bandlist=["W1", "W2"]):
-    """Loads WISE data by searching the unWISE light curve catalog (Meisner et al., 2023AJ....165...36M).
+    """
+    Loads WISE data by searching the unWISE light curve catalog (Meisner et al., 2023AJ....165...36M).
     This is the MAIN function
 
     Parameters
     ----------
-    sample_table : `~astropy.table.Table`
-        Table with the coordinates and journal reference labels of the sources
+    sample_table : astropy.table.Table
+        Table containing the source sample. The following columns must be present:
+            coord : astropy.coordinates.SkyCoord
+                Sky position of each source.
+            objectid : int
+                Unique identifier for each source in the sample.
+            label : str
+                Literature label for tracking source provenance.
     radius : float
-        radius (arcsec) for the cone search to determine whether a particular detection is associated with an object
+        Cone-search radius **in arcseconds** used to match unWISE detections
+        to each source. Only detections within this radius of the source
+        position are returned.
     bandlist: list of strings
         which WISE bands to search for, example: ['W1', 'W2']
 
     Returns
     -------
     df_lc : MultiIndexDFObject
-        the main data structure to store all light curves
+        indexed by [objectid, label, band, time]. The resulting internal pandas DataFrame
+        contains the following columns:
+            flux : float
+                Flux in millijansky (mJy).
+            err : float
+                Flux uncertainty in millijansky (mJy).
+            time : float
+                Time of observation in MJD.
+            objectid : int
+                Input sample object identifier.
+            band : str
+                WISE band label ('W1' or 'W2').
+            label : str
+                Literature label associated with each source.
+
+    Notes
+    -----
+    * The unWISE time-domain catalog is stored in parquet format on AWS S3 and
+      partitioned by HEALPix index at order K=5. Only relevant partitions
+      are loaded, based on the SkyCoord cone search.
+
+    * Fluxes are converted from unWISE native units (DN/s) into millijansky
+      using published zero-points.
+
+    * Only detections with positive flux are included.
+
     """
     radius = radius * u.arcsec
 
@@ -51,19 +85,44 @@ def wise_get_lightcurves(sample_table, *, radius=1.0, bandlist=["W1", "W2"]):
 
 
 def locate_objects(sample_table, radius):
-    """Locate the partitions (HEALPix order 5 pixels) each sample_table object is in.
+    """
+    Identify the HEALPix (order K=5) partitions intersecting a cone of radius
+    `radius` around each source. Helps determine which unWISE parquet files
+    must be loaded.
 
     Parameters
     ----------
-    sample_table : `~astropy.table.Table`
-        Table with the coordinates and journal reference labels of the sources
-    radius : astropy Quantity
-        radius for the cone search to determine which pixels overlap with each object
-
+    sample_table : astropy.table.Table
+        Table containing the source sample. The following columns must be present:
+            coord : astropy.coordinates.SkyCoord
+                Sky position of each source.
+            objectid : int
+                Unique identifier for each source in the sample.
+            label : str
+                Literature label for tracking source provenance.   
+    radius : astropy.units.Quantity
+        Angular radius used to determine which HEALPix pixels overlap each
+        source. Must be in angular units (e.g., arcsec or deg).
+        
     Returns
     -------
-    locations : pd.DataFrame
-        dataframe of location info including ["objectid", "coord.ra", "coord.dec", "label", "pixel"]
+    locations : pandas.DataFrame
+        Expanded dataframe containing one row per (object, HEALPix pixel)
+        combination. Columns include:
+
+            objectid : int  
+            label : str  
+            coord.ra : float (deg)  
+            coord.dec : float (deg)  
+            pixel : int
+                HEALPix pixel number at K=5 that overlaps the cone.
+
+    Notes
+    -----
+    * Each source may correspond to multiple HEALPix pixels.
+    * The resulting dataframe is used to selectively load only the relevant
+      portions of the unWISE catalog.
+
     """
     # loop over objects and determine which HEALPix pixels overlap with a circle of r=`radius` around it
     # this determines which catalog partitions contain each object
@@ -81,14 +140,23 @@ def locate_objects(sample_table, radius):
 
 
 def load_lightcurves(locations, radius, bandlist):
-    """Load data from the unWISE light curve catalog (Meisner et al., 2023AJ....165...36M).
+    """
+    Load unWISE time-domain photometry from the AWS S3 parquet catalog.
+        (Meisner et al., 2023AJ....165...36M).
 
     Parameters
     ----------
-    locations : pd.DataFrame
-        dataframe of location info (coords, pixel index, etc.) for the objects to be loaded
-    radius : astropy Quantity
-        radius for the cone search to determine whether a particular detection is associated with an object
+    locations : pandas.DataFrame
+        Output of locate_objects() containing:
+            objectid   : int
+            coord.ra   : float (deg)
+            coord.dec  : float (deg)
+            label      : str
+            pixel      : int
+                HEALPix pixel indices to check.
+    radius : astropy.units.Quantity (arcsec)
+        Cone-search radius in arcseconds defining how close a detection must be 
+        to a source to be considered a match.
     bandlist: list of strings
         which WISE bands to search for, example: ['W1', 'W2']
 
@@ -96,6 +164,27 @@ def load_lightcurves(locations, radius, bandlist):
     -------
     wise_df : pd.DataFrame
         dataframe of light curve data for all objects in `locations`
+            flux : float
+                Instrumental WISE flux (raw catalog units DN/s).
+            dflux : float
+                Instrumental flux uncertainty (DN/s).
+            ra : float (deg)
+            dec : float (deg)
+            band : int
+                Encoded WISE band (1=W1, 2=W2).
+            MJDMEAN : float
+                Mean MJD timestamp for the detection.
+            objectid : int
+            coord.ra : float (deg)
+            coord.dec : float (deg)
+            label : str
+
+    Notes
+    -----
+    * Only detections within the `radius` of each source are returned.
+    * If a source lies near a HEALPix boundary, detections from multiple
+      partitions may be included.
+    * Flux unit conversion to mJy is handled separately in `transform_lightcurves()`.
     """
     # load the catalog's metadata as a pyarrow dataset. this will be used to query the catalog.
     # the catalog is stored in an AWS S3 bucket
@@ -145,17 +234,47 @@ def load_lightcurves(locations, radius, bandlist):
 
 
 def transform_lightcurves(wise_df):
-    """Clean and transform the data into the form needed for a `MultiIndexDFObject`.
+    """
+    Clean and transform the data into the form needed for a `MultiIndexDFObject`.
 
     Parameters
     ----------
     wise_df : pd.DataFrame
-        dataframe of light curves as returned by `load_lightcurves`.
+        Raw detection table returned by load_lightcurves(), with columns:
+            flux       : float (DN/s)
+            dflux      : float (DN/s)
+            ra         : float
+            dec        : float
+            band       : int
+            MJDMEAN    : float
+            objectid   : int
+            coord.ra   : float
+            coord.dec  : float
+            label      : str
 
     Returns
     -------
     wise_df : pd.DataFrame
         the input dataframe, cleaned and transformed.
+            flux : float
+                Flux converted to millijansky (mJy).
+            err  : float
+                Flux uncertainty in millijansky (mJy).
+            band : str
+                WISE band name ('W1' or 'W2').
+            time : float
+                MJD timestamp.
+            objectid : int
+            label    : str
+            coord.ra : float
+            coord.dec: float
+ 
+    Notes
+    -----
+    * Only positive-flux detections are retained.
+    * Numeric band codes are converted to "W1" or "W2".
+    * Flux conversions use `convert_wise_flux_to_millijansky()` and are applied
+      separately to each band.
     """
     # rename columns to match a MultiIndexDFObject
     wise_df = wise_df.rename(columns={"MJDMEAN": "time", "dflux": "err"})

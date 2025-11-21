@@ -10,7 +10,9 @@ from fluxconversions import convertACSmagtoflux
 
 
 def get_hscapiurl():
-    """ Return the url to use for the HSC API
+    """     
+    Returns the base URL for accessing the Hubble Source Catalog (HSC) and
+    the Hubble Catalog of Variables (HCV) API.
 
     Returns
     -------
@@ -49,11 +51,14 @@ def hcvcone(ra, dec, radius, table="hcvsummary", release="v3", format="csv", mag
         base URL for the request
     verbose: int
         print info about request
-    **kw: other parameters (e.g., 'numimages.gte':2)
+    **kw : dict
+        Additional query parameters. Many HSC/HCV tables require at least one
+        extra constraint (e.g., 'numimages.gte': 2).
 
     Returns
     -------
-    search results: Table
+    str or dict
+        Raw response text (CSV, VOTable XML, or JSON) depending on `format`.
 
     """
 
@@ -86,11 +91,14 @@ def hcvsearch(table="hcvsummary", release="v3", magtype="magaper2", format="csv"
         base URL for the request
     verbose: int
         print info about request
-    **kw: other parameters (e.g., 'numimages.gte':2).  Note this is required!
+    **kw :
+        Additional constraints. Must include at least one parameter (e.g.
+        MatchID=...).
 
     Returns
     -------
-    search results
+    str or dict
+        Raw response text (CSV, VOTable XML, or JSON) depending on `format`.
     """
 
     data = kw.copy()
@@ -218,19 +226,54 @@ def checklegal_hcv(table, release, magtype):
 
 
 def hcv_get_lightcurves(sample_table, *, radius=1 / 3600):
-    """Searches Hubble Catalog of variables for light curves from a list of input coordinates
+    """
+    Searches Hubble Catalog of variables for light curves from a list of input coordinates
 
     Parameters
     ----------
-    sample_table:  `~astropy.table.Table`
-        Table with the coordinates and journal reference labels of the sources
+    sample_table : astropy.table.Table
+        Table containing the source sample. The following columns must be present:
+            coord : astropy.coordinates.SkyCoord
+                Sky position of each source.
+            objectid : int
+                Unique identifier for each source in the sample.
+            label : str
+                Literature label for tracking source provenance.    
     radius : float
-        search radius, how far from the source should the archives return results
+        Angular search radius *in degrees* (default = 1/3600 = 1 arcsec).
+        This radius is applied when calling the HCV cone‐search API.
 
     Returns
     -------
     df_lc : MultiIndexDFObject
-        the main data structure to store all light curves
+        Indexed by [objectid, label, band, time]. The resulting internal pandas DataFrame
+        contains the following columns:
+
+            flux : float
+                HST/ACS F814W flux converted to millijansky (mJy) using
+                `convertACSmagtoflux()` and the filter zeropoint at the time
+                of the first observation.
+            err : float
+                Flux uncertainty in millijansky (mJy), propagated from the
+                ACS magnitude uncertainties.
+            time : float
+                Time of observation in MJD.
+            objectid : int
+                Input sample object identifier.
+            band : str
+                HST/ACS filter name (e.g., 'F814W').
+            label : str
+                Literature label associated with each source.
+
+    Notes
+    -----
+    - The HCV API returns magnitudes, which are converted to flux using ACS
+      zeropoints. Time-dependent zeropoints are not fully supported; the function
+      currently applies the zeropoint corresponding to the first epoch.
+    - Additional filters (e.g., F606W, F475W) are available in the HCV, but the
+      current implementation retrieves only the ACS F814W band for simplicity.
+    - Rows where the HCV service returns empty results (no MatchID or missing
+      filter data) are skipped silently.
     """
 
     df_lc = MultiIndexDFObject()
