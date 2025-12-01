@@ -3,6 +3,7 @@ name: Run CircleCI artifacts redirector, rendered pages are under Details
 on: [status]
 jobs:
   circleci_artifacts_redirector_job:
+    if: ${{ github.repository == 'nasa-fornax/fornax-demo-notebooks' }}
     runs-on: ubuntu-latest
     name: Run CircleCI artifacts redirector
     steps:

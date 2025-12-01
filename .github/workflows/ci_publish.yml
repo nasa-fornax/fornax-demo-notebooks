@@ -21,7 +21,7 @@ env:
 jobs:
 
   publish_html:
-    if: ${{ (github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
+    if: ${{ (github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && github.repository == 'nasa-fornax/fornax-demo-notebooks' }}
     name: Build HTML
     runs-on: ubuntu-latest
     steps:
@@ -47,7 +47,7 @@ jobs:
           commit_message: ${{ github.event.head_commit.message }}
 
   deploy_notebooks:
-    if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
+    if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && github.repository == 'nasa-fornax/fornax-demo-notebooks' }}
     name: Deploy deployed_notebook branch
     runs-on: ubuntu-latest
     needs: publish_html
