@@ -649,7 +649,7 @@ calc_instrflux(*paramlist[0][1:])
 
 ```{code-cell} ipython3
 #wrapper to measure the photometry on a single object, single band
-def calculate_flux(args):):
+def calculate_flux(args):
     """
     Wrapper function for parallel photometry that computes fluxes for a
     single (source, band) combination.
@@ -994,7 +994,7 @@ print('number of Galex detections =',np.sum(merged.galex_detect > 0))
 
 ## 5. Plot Final Results
 
-- We want to understand something about populations based on their colors
+In this section we visualize the final multiwavelength photometry by examining the color–color distributions of the sources. These plots help reveal how different populations separate in color space and allow us to assess whether the Tractor-derived fluxes produce the expected trends across the IRAC and GALEX bands.
 
 ```{code-cell} ipython3
 # IRAC color color plots akin to Lacy et al. 2004
@@ -1043,6 +1043,13 @@ plt.title('IRAC Color Color Plot')
 
 This figure shows an IRAC color color plot akin to the seminal work by Lacy et al. 2004.  Points are color coded for those with Galex UV detections and those with Chandra x-ray detections. Note that the different populations are seperating out in this color color space.
 
+
+
++++
+
+:::{admonition}**Note:**  
+If you are running this notebook with the default very small search radius, you may not see many (or any) points in this color–color diagram. Increasing the search radius will populate this plot with a more statistically meaningful sample, but doing so will significantly increase the runtime of the forced-photometry step.
+
 ```{code-cell} ipython3
 # UV IR color color plot akin to Bouquin et al. 2015
 fig, ax = plt.subplots()
@@ -1082,6 +1089,9 @@ ax.set(xlabel = 'NUV - [3.6]', ylabel = 'FUV - NUV')
 #fig.savefig("output/color_color.png")
 #mpld3.display(fig)
 ```
+
+:::{note}**Note:**  
+This UV–IR color–color diagram may also appear sparsely populated when using the notebook’s default small-area selection. Only a fraction of sources in this subset have reliable GALEX detections, and even fewer have accompanying Chandra matches. Expanding the search radius will produce a richer distribution, but the larger area will require longer processing times in the earlier photometry steps.
 
 ```{code-cell} ipython3
 print(chandra_detect['chandra_HR'].describe())
