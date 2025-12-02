@@ -636,11 +636,6 @@ def check_conditions(obs, cloud_uri_map, transitions):
 Our fifth and final function serves as a wrapper for our other functions. This is the function that, later, we'll feed directly into a parallelization routine. For each input row (from `tmc1a_jwst_table` in our case), it will check certain metadata to determine if the analysis needs to proceed, then load the spectral cube file into memory, run `extension_vs_wavebin` on the whole data cube, and run `detect_spikes` around the wavebin of each Fe II transition wavelength of interest.
 
 ```{code-cell} ipython3
----
-editable: true
-slideshow:
-  slide_type: ''
----
 def line_search(obs, cloud_uri_map, transitions, plot=False):
     """
     Search a spectral cube observation for emission lines.
@@ -720,11 +715,6 @@ def line_search(obs, cloud_uri_map, transitions, plot=False):
 Phew! Let's try this out on our TMC1A observations.
 
 ```{code-cell} ipython3
----
-editable: true
-slideshow:
-  slide_type: ''
----
 # Make a copy of our observations table with a new column detected_feii_lines to hold results.
 copy_tmc1a_jwst_obstable = copy.deepcopy(tmc1a_jwst_obstable)
 new_column = Column(name='detected_feii_lines', dtype=object, length=len(tmc1a_jwst_obstable))
