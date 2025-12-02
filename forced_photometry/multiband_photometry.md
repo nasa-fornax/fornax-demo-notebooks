@@ -108,7 +108,7 @@ except ImportError:
 ## 1. Retrieve Initial Catalog from IRSA
 In this section we query the COSMOS2015 catalog (Laigle et al. 2016) from the IRSA archive using the Table Access Protocol (TAP). We specify the sky position and search radius, select a curated subset of columns needed for forced photometry, validation, and later multiwavelength analysis, and download only those rows that fall within the requested region of the COSMOS field. The result is a compact catalog containing positions, photometric redshifts, optical and infrared fluxes, UV measurements, and existing X-ray associations, which forms the starting point for the remainder of the workflow.
 
-We access the COSMOS2015 catalog using the Table Access Protocol (TAP), an IVOA standard that allows SQL-like queries across astronomical databases. For more about TAP, see the IVOA [documentation](https://www.ivoa.net/documents/TAP/) or [suggestions](https://irsa.ipac.caltech.edu/docs/program_interface/astropy_TAP.html) on its usage from IRSA
+We access the COSMOS2015 catalog using the Table Access Protocol (TAP), an IVOA standard that allows SQL-like queries across astronomical databases. For more about TAP, see the IVOA [documentation](https://www.ivoa.net/documents/TAP/) or [suggestions](https://irsa.ipac.caltech.edu/docs/program_interface/astropy_TAP.html) on its usage from IRSA.
 
 ```{code-cell} ipython3
 # Pull a COSMOS catalog from IRSA using pyVO
@@ -783,7 +783,7 @@ ymax = 80
 xmax = 80
 
 # Ch1
-# First shrink the dataframe to only those rows where I have tractor photometry
+# First shrink the dataframe to only those rows where we have tractor photometry
 df_tractor = df[(df.splash_1_flux> 0) & (df.splash_1_flux < fluxmax)] #200
 #sns.regplot(data = df_tractor, x = "splash_1_flux", y = "ch1flux", ax = ax1, robust = True)
 sns.scatterplot(data = df_tractor, x = "splash_1_flux", y = "ch1flux", ax = ax1)
@@ -794,14 +794,14 @@ lims = [
     np.max([ax1.get_xlim(), ax1.get_ylim()]),  # max of both axes
 ]
 
-# Now plot both limits against eachother
+# Now plot both limits against each other
 ax1.plot(lims, lims, 'k-', alpha=0.75, zorder=0)
 ax1.set(xlabel = r'COSMOS 2015 flux ($\mu$Jy)', ylabel = r'tractor flux ($\mu$Jy)', title = 'IRAC 3.6')
 ax1.set_ylim([0, ymax])
 ax1.set_xlim([0, xmax])
 
 # Ch2
-# First shrink the dataframe to only those rows where I have tractor photometry
+# First shrink the dataframe to only those rows where we have tractor photometry
 df_tractor = df[(df.splash_2_flux> 0) & (df.splash_2_flux < fluxmax)]
 sns.scatterplot(data = df_tractor, x = "splash_2_flux", y = "ch2flux", ax = ax2)
 
@@ -811,7 +811,7 @@ lims = [
     np.max([ax2.get_xlim(), ax2.get_ylim()]),  # max of both axes
 ]
 
-# Now plot both limits against eachother
+# Now plot both limits against each other
 ax2.plot(lims, lims, 'k-', alpha=0.75, zorder=0)
 ax2.set(xlabel = r'COSMOS 2015 flux ($\mu$Jy)', ylabel = r'tractor flux ($\mu$Jy)', title = 'IRAC 4.5')
 ax2.set_ylim([0, ymax])
@@ -819,7 +819,7 @@ ax2.set_xlim([0, xmax])
 
 
 # Ch3
-# First shrink the dataframe to only those rows where I have tractor photometry
+# First shrink the dataframe to only those rows where we have tractor photometry
 df_tractor = df[(df.splash_3_flux> 0) & (df.splash_3_flux < fluxmax)]
 
 sns.scatterplot(data = df_tractor, x = "splash_3_flux", y = "ch3flux", ax = ax3)
@@ -830,7 +830,7 @@ lims = [
     np.max([ax3.get_xlim(), ax3.get_ylim()]),  # max of both axes
 ]
 
-# Now plot both limits against eachother
+# Now plot both limits against each other
 ax3.plot(lims, lims, 'k-', alpha=0.75, zorder=0)
 ax3.set(xlabel = r'COSMOS 2015 flux ($\mu$Jy)', ylabel = r'tractor flux ($\mu$Jy)', title = 'IRAC 5.8')
 ax3.set_ylim([0, ymax])
@@ -838,7 +838,7 @@ ax3.set_xlim([0, xmax])
 
 
 # Ch4
-# First shrink the dataframe to only those rows where I have tractor photometry
+# First shrink the dataframe to only those rows where we have tractor photometry
 df_tractor = df[(df.splash_4_flux> 0) & (df.splash_4_flux < fluxmax)]
 
 sns.scatterplot(data = df_tractor, x = "splash_4_flux", y = "ch4flux", ax = ax4)
@@ -870,23 +870,26 @@ Tractor performs well for the IRAC bands. The panels above compare the Tractor-d
 
 ## 4. Cross Match our New Photometry Catalog with an X-ray archival Catalog
 
-Cross-matching with nway
 To identify X-ray counterparts to our IRAC sources, we use the nway algorithm (Salvato et al. 2017), a Bayesian cross-matching tool designed for catalogs with different positional uncertainties, different source densities, and multiple possible counterparts. Unlike a simple cone-based positional match, nway evaluates the full probability that each IRAC source corresponds to each Chandra detection by combining:
-the positional uncertainties from both catalogs,
-the local surface density of background sources, and
-optional priors such as flux distributions or colors.
-This probabilistic approach is essential for Chandra data in particular, where positional uncertainties vary with off-axis angle and where multiple IRAC sources may lie within the Chandra error ellipse. Because of this, a TAP crossmatch alone would return many candidate matches, but nway rejects those that are statistically unlikely and keeps only the high-probability associations.
 
+- the positional uncertainties from both catalogs,
+- the local surface density of background sources, and
+- optional priors such as flux distributions or colors.
+
+This probabilistic approach is essential for Chandra data in particular, where positional uncertainties vary with off-axis angle and where multiple IRAC sources may lie within the Chandra error ellipse. Because of this, a TAP crossmatch alone would return many candidate matches, but nway rejects those that are statistically unlikely and keeps only the high-probability associations.
 
 The files
 - data/Chandra/COSMOS_chandra.fits
 - data/multiband_phot.fits
 
 are pre-generated catalogs included with this tutorial to keep the workflow focused on the cross-matching step rather than on catalog construction.
+
 COSMOS_chandra.fits
-Contains Chandra source positions and fluxes extracted from the COSMOS Legacy Survey. This file is a cleaned, pre-formatted version of the public catalog (Civano et al.), reduced to the columns needed for nway (RA, Dec, fluxes, positional uncertainties). It is provided so the notebook does not need to repeat the data-reduction steps required to reproduce this catalog.
+contains Chandra source positions and fluxes extracted from the COSMOS Legacy Survey. This file is a cleaned, pre-formatted version of the public catalog (Civano et al.), reduced to the columns needed for nway (RA, Dec, fluxes, positional uncertainties). It is provided so the notebook does not need to repeat the data-reduction steps required to reproduce this catalog.
+
 multiband_phot.fits
-Contains the IRAC catalog with Tractor-measured fluxes and basic metadata. This file is generated earlier in the tutorial workflow and serves as the input photometric catalog for the crossmatch. It is pre-saved to avoid recomputing the photometry every time the notebook is run.
+contains the IRAC catalog with Tractor-measured fluxes and basic metadata. This file is generated earlier in the tutorial workflow and serves as the input photometric catalog for the crossmatch. It is pre-saved to avoid recomputing the photometry every time the notebook is run.
+
 Providing these files keeps the tutorial lightweight and enables readers to run the cross-match step without requiring dedicated compute time to reproduce the upstream photometry or Chandra catalog reduction.
 
 +++
@@ -964,8 +967,8 @@ merged = pd.merge(df, matched, 'outer',left_on='ID', right_on = 'OPT_ID')
 merged = merged.loc[:, ~merged.columns.str.startswith('OPT')]
 
 # Somehow the matching is giving negative fluxes in the band where there is no detection
-# If there is a detection in the other band
-# clean that up to make those negative fluxes = 0
+# if there is a detection in the other band.
+# Clean that up to make those negative fluxes = 0.
 
 merged.loc[merged['flux_chandra_2_10'] < 0, 'flux_chandra_2_10'] = 0
 merged.loc[merged['flux_chandra_05_2'] < 0, 'flux_chandra_05_2'] = 0
@@ -1047,7 +1050,7 @@ This figure shows an IRAC color color plot akin to the seminal work by Lacy et a
 
 +++
 
-:::{admonition}**Note:**  
+:::{note}
 If you are running this notebook with the default very small search radius, you may not see many (or any) points in this color–color diagram. Increasing the search radius will populate this plot with a more statistically meaningful sample, but doing so will significantly increase the runtime of the forced-photometry step.
 
 ```{code-cell} ipython3
@@ -1090,7 +1093,7 @@ ax.set(xlabel = 'NUV - [3.6]', ylabel = 'FUV - NUV')
 #mpld3.display(fig)
 ```
 
-:::{note}**Note:**  
+:::{note}
 This UV–IR color–color diagram may also appear sparsely populated when using the notebook’s default small-area selection. Only a fraction of sources in this subset have reliable GALEX detections, and even fewer have accompanying Chandra matches. Expanding the search radius will produce a richer distribution, but the larger area will require longer processing times in the earlier photometry steps.
 
 ```{code-cell} ipython3
