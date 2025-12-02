@@ -1,7 +1,5 @@
 # setup to store the light curves in a data structure
 import pandas as pd
-from astropy.table import vstack
-from astropy.timeseries import TimeSeries
 
 
 class MultiIndexDFObject:
@@ -113,46 +111,6 @@ class MultiIndexDFObject:
         # if we get here, both new_data and self.data contain data, so concat
         self.data = pd.concat([self.data, new_data])
 
-    def combine_Samples(self, other_df):
-        """
-        Combine two MultiIndexDFObject instances into a new one.
-
-        Parameters
-        ----------
-        other_df : MultiIndexDFObject
-            Another instance whose light-curve data will be concatenated.
-
-        Returns
-        -------
-        MultiIndexDFObject
-            A new container with combined data. The objectid values in
-            `other_df` are shifted upward so that there are no collisions
-            between the two samples.
-
-        Notes
-        -----
-        This is useful when building a composite sample from multiple
-        literature lists or survey queries.
-        """
-        if not isinstance(other_df, self.__class__):
-            raise ValueError("Input must be an instance of MultiIndexDFObject")
-
-        # Get the length of the initial DataFrame's object IDs
-        initial_object_ids_length = self.data.index.get_level_values('objectid').max() + 1
-
-        # Update the object IDs in the second DataFrame
-        other_df.data.index = other_df.data.index.set_levels(
-            other_df.data.index.levels[0] + initial_object_ids_length,
-            level='objectid'
-        )
-        # Concatenate the dataframes
-        concatenated_data = pd.concat([self.data, other_df.data])
-
-        # Create a new MultiIndexDFObject with the concatenated data
-        concatenated_df_obj = self.__class__(data=concatenated_data)
-
-        return concatenated_df_obj
-
     def remove(self, x):
         """
         Drop a light curve from the dataframe
@@ -165,32 +123,3 @@ class MultiIndexDFObject:
             (objectid, label, band, time).
         """
         self.data = self.data.drop(x)
-
-# From Brigitta as a possible data structure
-# Not currently in use
-
-
-class MultibandTimeSeries(TimeSeries):
-    def __init__(self, *, data=None, time=None, **kwargs):
-        # using kwargs to swallow all other arguments a TimeSeries/QTable can have,
-        # but we dont explicitly use. Ideally they are spelt out if we have docstrings here.
-        # Also using keyword only arguments everywhere to force being explicit.
-        super().__init__(data=data, time=time, **kwargs)
-
-    def add_band(self, *, time=None, data=None, band_name="None"):
-        '''Add a time, flux/mag data set and resort the arrays. ``time`` can be a TimeSeries instance'''
-        if 'time' not in self.colnames:
-            if isinstance(time, TimeSeries):
-                super().__init__(time)
-            else:
-                super().__init__(data={band_name: data}, time=time)
-        else:
-            if time is None:
-                # this assumes ``band_name`` fluxes are taken at the very same times as the already exitsing bands
-                # TODO: include checks for sizes and other assumptions
-                self[band_name] = data
-                return
-            elif not isinstance(time, TimeSeries):
-                # TODO: handle band_name=None case
-                time = TimeSeries(time=time, data={band_name: data})
-            super().__init__(vstack([self, time]))
