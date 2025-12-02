@@ -1,34 +1,32 @@
-# Detect spikes in the array of candidate jet sizes (or probability, etc.) vs. wavelength.
-# Replace the contents of this function with your favorite outlier detection algorithm.
-
 import numpy as np
 from scipy.signal import find_peaks
 
 def detect_spikes(blobs, pos, sig=3.0, detect_halfwidth=10, match_halfwidth=2):
     """
+    Detect spikes in the array of candidate jet sizes (or probability, etc.) vs. wavelength.
+    Replace the contents of this function with your favorite outlier detection algorithm.
 
-    Input parameters
+    Parameters
     ----------
-    blobs : 1D Python list
-        The list returned by extension_vs_wavebin.
+    blobs : list[float]
+        The 1D python list returned by extension_vs_wavebin.
         List of length equal to the number of wavebins, with values
         corresponding to the fraction of pixels from that slice above
         a brightness threshold.
-    pos : integer
+    pos : int
         The expected wavebin index of a particular spectral line.
     sig : float
         Scaling factor used to set the detection threshold.
-    detect_halfwidth : integer
+    detect_halfwidth : int
         The number of pixels +/- offset from pos to run peak detector on.
-    match_halfwidth : integer
+    match_halfwidth : int
         The max number of pixels away from pos that a peak can be centered on
         and still have this function yield a detection at pos.
-    
 
     Returns
     ----------
-    True (if spike is detected near pos) or False (if not)
-
+    bool
+        True (if spike is detected near pos) or False (if not)
     """
 
     # Excerpt a range of +/- 10 pixels from the expected wavelength of the Fe II line.

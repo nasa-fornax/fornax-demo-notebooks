@@ -1,30 +1,24 @@
-# Replace the contents of this function with your favorite image segmentation algorithm.
-# The desired output is any 1D list where a peak corresponds to an increased chance of a jet being present at the corresponding wavelength.
-
 import numpy as np
 from scipy.ndimage import label
 
 def extension_vs_wavebin(data):
     """
-    This function generates a 1D list of candidate emission spatial extents 
-    for each wavelength bin of a given spectral cube.
+    Generate a 1D list of candidate emission spatial extents for each 
+    wavelength bin of a given spectral cube. Replace the contents of
+    this function withyour favorite image segmentation algorithm. The desired
+    output is any 1D python list where a peak in some way corresponds to an
+    increased chance of a jet being present at the corresponding wavebin.
 
-    Replace the contents of this function with your favorite image
-    segmentation algorithm. The desired output is any 1D python list where a
-    peak in some way corresponds to an increased chance of a jet being present
-    at the corresponding wavebin.
-
-
-    Input parameters
+    Parameters
     ----------
-    data : numpy.ndarray
+    data : np.ndarray
         A spectral cube as a numpy.ndarray,
         with first axis wavelength,
         second and third axes spatial.
 
     Returns
     ----------
-    blobs : 1D Python list
+    blobs : list[float]
         List of length equal to the number of wavebins, with values
         corresponding to the fraction of pixels from that slice above
         a brightness threshold.

@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.17.2
+    jupytext_version: 1.18.1
 kernelspec:
   display_name: python3
   language: python
@@ -16,15 +16,15 @@ kernelspec:
 +++
 
 ## Runtime
-For this notebook, we recommend using the [Fornax science platform](https://nasa-fornax.github.io/fornax-demo-notebooks/documentation/README.html) with Server Type = "Large - 64GB RAM/16 CPU" and Environment = "Default Astrophysics". As of June 2025, running this notebook once on that server will take about 10 minutes.
+We assume that you are running this notebook on the [Fornax science platform](https://nasa-fornax.github.io/fornax-demo-notebooks/documentation/README.html) in `Environment` = `Default Astrophysics`, but it will also still work (in order of preference) in another AWS-based cloud science platform, a non-AWS cloud science platform, and even on your local computer — perhaps at slower speeds, depending on your computing resources and internet connection.
 
-We assume that you are running this notebook in Fornax, but it will also still work (in order of preference) in another AWS-based cloud science platform, a non-AWS cloud science platform, and even on your local computer — perhaps at slower speeds, depending on your computing resources and internet connection.
+As of December 2025, running this notebook once will take about 10 minutes on the Fornax "Large" server (64GB RAM/16 CPU), or about 25 minutes on the Fornax "Medium" server (16GB RAM/4 CPU)
 
 +++
 
 ## Learning goals
 
-The overarching intent of this notebook is to learn about how to answer data-intensive archival search queries in astronomical data archives like [MAST](https://archive.stsci.edu/). We'll have to think about:
+In this notebook, we'll learn about how to answer data-intensive archival search queries in astronomical data archives like [MAST](https://archive.stsci.edu/). We'll have to think about:
 * when to parallelize our data processing,
 * the order of operations for performing cone searches on large numbers of targets,
 * when to load data into memory versus downloading to storage,
@@ -39,40 +39,21 @@ As you read through a recent paper by [Assani et al. 2025](https://arxiv.org/pdf
 
 You may now be experiencing some despair. "This observation contains a JWST spectral cube" is certainly something readily available from MAST's metadata tables, but "this file contains Fe II transitions" is certainly not. So instead, you need to dig beyond the metadata and into the data of thousands of files. That may sound difficult, but it can be done!
 
-## Table of Contents
-
-More granularly, this notebook is comprised of the following sections:
-
-- [Imports](#Imports)
-- [1. Finding JWST spectral cubes of YSOs](#1.-Finding-JWST-spectral-cubes-of-YSOs)
-    - [1.1 Querying SIMBAD for YSOs](#1.1-Querying-SIMBAD-for-YSOs): *Use `astroquery` to ask SIMBAD for all the YSOs it knows about.*
-    - [1.2 Querying MAST for all JWST spectral cube observations](#1.2-Querying-MAST-for-all-JWST-spectral-cube-observations): *Use `astroquery` to ask MAST for all JWST spectral cube observations.*
-    - [1.3 Crossmatching YSO coordinates to MAST footprints](#1.3-Crossmatching-YSO-coordinates-to-MAST-footprints): *Write custom functions to crossmatch the SIMBAD YSOs to the footprints of the MAST observations, bypassing an astroquery service call that would take to long for this number of targets.*
-    - [1.4 Refining and parallelizing the footprint crossmatch](#1.4-Parallelizing-the-footprint-crossmatch-with-dask): *Improve and parallelize the crossmatch technique, with gnomonic projection and dask.*
-- [2. Finding Fe II emission jets](#2.-Finding-Fe-II-emission-jets)
-    - [2.1 Retrieving sample data from AWS](#2.1-Retrieving-sample-data-from-AWS): *Retrieve MAST data from the AWS cloud into memory.*
-    - [2.2 Searching for emission lines in spectral cubes](#2.2-Searching-for-emission-lines-in-spectral-cubes): *Write custom functions to algorithmically analyze thousands of spectral cube data files, and assess which of these are likely to exhibit extended Fe II emission.*
-    - [2.3 Parallelizing the search for emission lines in spectral cubes](#2.3-Parallelizing-the-search-for-emission-lines-in-spectral-cubes): *Parallelize the spectral line search and apply it to thousands of data files.*
-- [3. Postscript: Transposing to IRSA missions](#3.-Postscript:-Transposing-to-IRSA-missions): *Exercise for transposing these techniques to SOFIA data.*
-- [About this notebook](#About-this-notebook)
-
 +++
 
 ## Imports
 
 +++
 
-All dependencies will be included in the Fornax "Default Astrophysics" environment. If you are not working in Fornax, you can uncomment and run the following cell to install these dependencies into your environment. You may need to restart your kernel after pip-installing new packages, before running the imports.
-
-:::{warning} Temporary Note
-We need to install a recent development version of `astroquery`, pending its incorporation into the default Fornax kernel. To do so, uncomment and run the following cell, then restart your kernel. This will allow us to set `return_uri_map=True` when retrieving MAST cloud URIs, so that we can map data product cloud URIs to their observational metadata.
+:::{tip}
+Temporary note: we'll need `boto3` to retrieve data from the AWS cloud with `astroquery`, and it's not currently installed in the default astrophysics Fornax kernel. Uncomment and run the following cell to install all dependencies, then restart your notebook's kernel.
 :::
 
 ```{code-cell} ipython3
-# !pip install -r requirements_analytical_data_search.txt
+# !pip install -r requirements_emission_search_cubes.txt
 ```
 
-**You may need to restart your kernel now for that to take effect.**
+**You need to restart your kernel for that to take effect.**
 
 ```{code-cell} ipython3
 # Query databases
@@ -110,16 +91,16 @@ import sys
 import copy
 
 # Parallelize
-import dask
-import dask.dataframe as dd
+from multiprocessing import Pool
 ```
 
-We'll also need a couple local functions written specifically for this notebook. These are located in the `code_src` directory, and you can read them there. However, they're pretty long, and their detailed implementation isn't critical to understand. As long as you understand their inputs and outputs, which we'll discuss later, you can write better functions to replace them, tailored to your own science case.
+We'll also need a couple local functions written specifically for this notebook. These are located in the `code_src` directory, and you can read them there. However, some of them are pretty long, and their detailed implementation isn't critical to understand. As long as you understand their inputs and outputs, which we'll discuss later, you can write better functions to replace them, tailored to your own science case.
 
 ```{code-cell} ipython3
 # Local code imports
 sys.path.append('code_src/')
 
+from parse_polygon import parse_polygon
 from extension_vs_wavebin import extension_vs_wavebin
 from detect_spikes import detect_spikes
 ```
@@ -134,7 +115,7 @@ Later, we'll be evaluating boolean conditionals on values that could be `None`, 
 
 ```{code-cell} ipython3
 # Check that x is not None and is not pd.NA
-def exists(x):
+def not_none(x):
     try:
         return x is not None and not pd.isna(x)
     except TypeError:
@@ -146,7 +127,7 @@ def exists(x):
 
 +++
 
-Let's ignore the emission line issue and tackle the easiest parts of our driving question first: I want to find more JWST spectral cubes of young stellar objects.
+Let's ignore the emission line issue and tackle the easiest parts of our driving question first: *I want to find more JWST spectral cubes of young stellar objects.*
 
 +++
 
@@ -167,18 +148,13 @@ yso_table = Simbad.query_tap("SELECT * FROM basic WHERE otype='Y*O..'", maxrec=1
 print(f'We found {len(yso_table)} YSOs.')
 ```
 
-Let's make a list of their sky coordinates:
+Let's drop YSOs that lack coordinates:
 
 ```{code-cell} ipython3
-yso_coords = []  # List of tuples, each tuple a coordinate.
-
-for row in yso_table:
-    # Check if the coordinates exist
-    if isinstance(row['ra'], float) and isinstance(row['dec'], float):
-        # Append the coordinates to the list
-        yso_coords.append((row['ra'], row['dec']))
-    
-print(f'{len(yso_coords)} of these YSOs have good coordinates.')
+# Drop NaNs from YSO catalog
+condition_yso = ~np.isnan(yso_table['ra']) & ~np.isnan(yso_table['dec'])
+yso_table_clean = yso_table[condition_yso]
+print(f'{len(yso_table_clean)} of these YSOs have good coordinates.')
 ```
 
 ### 1.2 Querying MAST for all JWST spectral cube observations
@@ -223,50 +199,29 @@ Now, with that table as our starting point, let's match our YSO coordinates to t
 print(jwst_obstable[0]['s_region'])
 ```
 
-This `s_region` denotes the vertices of a polygon in right ascension and declination. We can make this string more parsable with this function:
+This `s_region` denotes the vertices of a polygon in right ascension and declination. We can parse this string into an array of tuple coordinates with the custom `parse_polygon` function, which we imported from the `code_src` directory for this notebook.
 
-```{code-cell} ipython3
-def parse_polygon(s_region):
-    """
-    Extract coordinates from an s_region string.
+:::{warning}
+As currently written, the `s_region` passed into `parse_polygon` must be a single polygon. This is the case for all JWST and SOFIA spectral cube observations, but not all missions in the Fornax archives.
+:::
 
-    Input parameters
-    ----------
-    s_region : string - s_region from cross-mission archive
-               As written, this s_region must be a single polygon,
-               which is the case for all JWST and SOFIA observations,
-               but not all missions in the Fornax archives.
-
-    Returns
-    ----------
-    coord_array : numpy array - parsed representation of the s_region
-    """
-
-    if 'POLYGON ICRS' in s_region:
-        coords = list(map(float, s_region.replace("POLYGON ICRS", "").strip().split()))
-    elif 'POLYGON' in s_region:
-        coords = list(map(float, s_region.replace("POLYGON", "").strip().split()))
-
-    # Check if the polygon is closed, with the last vertex identical to the first vertex.
-    # If not, append a copy of the first vertex to the end of the list.
-    if (coords[-2], coords[-1]) != (coords[0], coords[1]):
-        coords.append(coords[0])
-        coords.append(coords[1])
-
-    # Create a numpy array listing a coordinate tuple for each vertex
-    coord_array = np.array([(coords[i], coords[i + 1]) for i in range(0, len(coords), 2)])
-
-    return(coord_array)
-```
+:::{warning}
+If you replace `parse_polygon` with another function, be aware that the array of polygon vertices we later pass into `matplotlib.path.Path` must be *closed*, meaning that the last vertex is identical to the first vertex.
+:::
 
 ```{code-cell} ipython3
 # For example...
 print(parse_polygon(jwst_obstable[0]['s_region']))
 ```
 
-Now, we'll parse our polygons and use `Matplotlib`'s `Path` class to test whether any of our YSO coordinates are in each observation's sky footprint.
+In a moment, we'll parse our polygons and use `Matplotlib`'s `Path` class to test whether any of our YSO coordinates are in each observation's sky footprint. `Path.contains_points` expects an array of test coordinates in an *(N, 2)* shape, where N is the number of coordinates to test. Let's make an array of YSO coordinates:
 
-Doing this without parallelizing, as in the following cell, would take about 6 or 7 minutes. On Fornax, if you uncomment this cell and open the "Kernel usage" tab to your right while it runs, you'll notice that you're using only a small percentage of the total CPU capacity that you have access to (e.g., less than 10% if you selected the 16-CPU server option when you launched Fornax). Feel free to click the `Interrupt the kernel` stop button on your notebook, because there's a better way!
+```{code-cell} ipython3
+yso_coords = np.transpose(np.asarray((yso_table_clean['ra'], yso_table_clean['dec'])))
+print(yso_coords.shape)
+```
+
+Performing the test on all observation sky footprints without parallelizing, as in the following cell, would take quite a while (e.g., six or seven minutes on the Fornax 16-CPU server). On Fornax, if you uncomment this cell and open the "Kernel usage" tab to your right while it runs, you'll notice that you're using only a small percentage of the total CPU capacity that you have access to (e.g., less than 10% if you selected the 16-CPU server option when you launched Fornax). Feel free to click the `Interrupt the kernel` stop button on your notebook, because there's a better way!
 
 ```{code-cell} ipython3
 # Since this cell is an example of what not to do,
@@ -274,14 +229,14 @@ Doing this without parallelizing, as in the following cell, would take about 6 o
 
 # yso_jwst_obs = []  # Instantiate a list of observations whose footprints overlap with any of our YSO coordinates.
 
-# for row in jwst_obstable:  # Looping through all JWST spectral cube observations...
-#     polygon = parse_polygon(row['s_region'])  # Parse the polygon
+# for obs in jwst_obstable:  # Looping through all JWST spectral cube observations...
+#     polygon = parse_polygon(obs['s_region'])  # Parse the polygon
 
 #     polygon_path = Path(polygon, closed=True)  # Convert to matplotlib Path
 #     is_inside = polygon_path.contains_points(yso_coords).any()  # Test whether any coordinate from yso_coord is inside this observation's polygon
 
 #     if is_inside:
-#         yso_jwst_obs.append(row)
+#         yso_jwst_obs.append(obs)
 
 # yso_jwst_obstable = Table(rows=yso_jwst_obs, names=jwst_obstable.colnames)  # Convert back to an astropy table.
 
@@ -294,26 +249,31 @@ Doing this without parallelizing, as in the following cell, would take about 6 o
 
 That cell would take a long time to run, so let's parallelize this code to save time! First we'll need to define a function that does what we did above, for each observation, so that we can pass this function into our parallelization tool.
 
+:::{tip}
 While we're at it, we'll also add in a subtle nuance; *RA* and *dec* are spherical coordinates, so the segments of a footprint polygon should be great circles on the celestial sphere, not straight lines. However, they can be treated as straight lines if we project into a 2D cartesian coordinate system, to an excellent approximation in the vicinity of the center of the projection. An appropriate choice is the gnomonic (`TAN`) projection, which is the projection used in the JWST FITS images from which `s_region` values were derived. Before checking which YSO coordinates are inside a particular observation's footprint, we'll convert both the footprint's polygon vertices and the YSO coordinates to a gnomonic projection centered on that specific observation's coordinates.
 
 We mentioned that the projection issue is a subtle nuance; in fact, at the time of writing, you could omit the projection step and still get the same number of observations matched. YSO coordinates tend not to be at the very edges of the observation footprints, after all. Nevertheless, to avoid any future problems, let's do things properly! On the Fornax server recommended above, this will only add about 30 seconds to our parallelized processing.
 
 Note that we are not accounting for proper motions—and neither would `astroquery.mast` cone search, if we were using it. See [High PM Stars in MAST](https://outerspace.stsci.edu/display/MASTDOCS/High+PM+Stars+in+MAST) if this is a concern for your science case.
+:::
 
 ```{code-cell} ipython3
-def check_points_in_polygon(row, coordinates_to_test):
+def check_points_in_polygon(obs, coordinates_to_test):
     """
     Check if coordinates_to_test are in the s_region polygon for an observation.
 
-    Input parameters
+    Parameters
     ----------
-    row : a row of an astropy table of observations from astroquery
-    coordinates_to_test: python list of celestial coordinate tuples
+    obs : pandas.Series
+        A row of a pandas dataframe, converted from an astroquery-flavored astropy Table
+    coordinates_to_test: np.ndarray
+        Array of celestial coordinates shaped like (N, 2), where N is the number of targets
 
     Returns
     ----------
-    Either `row` (same as input) if a match was found,
-    or an empty row of NaNs if a match was not found.
+    pandas.Series
+        Either `obs` (same as input) if a match was found, or an empty row of NaNs if a match
+        was not found.
     """
 
     # Make WCS for a gnomonic (TAN) projection
@@ -321,57 +281,63 @@ def check_points_in_polygon(row, coordinates_to_test):
     wcs = WCS(naxis=2)
     wcs.wcs.crpix = [0., 0.]  # Put center of the projection at projected pixel coords (0, 0)
     wcs.wcs.cdelt = [1., 1.]  # Arbitrary 1 degree per pixel (doesn't matter)
-    wcs.wcs.crval = [row['s_ra'], row['s_dec']]  # Projection center is the observation's coordinates
+    wcs.wcs.crval = [obs['s_ra'], obs['s_dec']]  # Projection center is the observation's coordinates
     wcs.wcs.ctype = ["RA---TAN", "DEC--TAN"]  # Gnomonic projection
+
+    # One option now would be to convert to astropy SkyCoords
+    # and used astropy PolygonSkyRegion.contains(coordinates_to_test, wcs),
+    # but the following technique yields >2x faster performance:
 
     # Convert coordinates_to_test to the gnomonic projection
     proj_coordinates_to_test = wcs.wcs_world2pix(coordinates_to_test, 0)
 
-    # Make footprint polygon path for this observation
-    polygon = parse_polygon(row['s_region'])  # Parse s_region value
+    # Make footprint polygon matplotlib Path for this observation
+    polygon = parse_polygon(obs['s_region'])  # Parse s_region value
     proj_polygon = wcs.wcs_world2pix(polygon, 0)  # Convert to gnomonic projection
     proj_polygon_path = Path(proj_polygon, closed=True) # Convert to matplotlib Path
 
     # Test whether any coordinate from yso_coord is inside this observation's polygon_path.
-    # Return the table row if the match is successful,
-    # otherwise return an empty row full of NaNs.
     if proj_polygon_path.contains_points(proj_coordinates_to_test).any():
-        return row
+        # Return the table row if the match is successful.
+        return obs
     else:
-        return pd.Series([np.nan] * len(row), index=row.index)    
+        # otherwise return an empty row full of NaNs.
+        return pd.Series([np.nan] * len(obs), index=obs.index)
 ```
 
-`dask` is a python module for parallelizing your Python code. Let's set it to use multiple CPU cores to make full use of the computational resources we have in Fornax:
-
-```{code-cell} ipython3
-dask.config.set(scheduler='processes')
-```
-
-For this task, we've found that it's best to partition the Observations table into about 4 times as many partitions as there are CPU cores that you have access to. With 4 cores, the next cell will take about 4 or 5 minutes, a slight improvement over the non-parallel approach. With 16 cores, it'll typically take less than 2 minutes.
+`Multiprocessing` is a python module for parallelizing your code across multiple CPU cores. For this task, we'll set the number of workers to the number of cores...
 
 ```{code-cell} ipython3
 num_cores = os.cpu_count()
-print(f'We have access to {num_cores} cores.')
+num_workers = num_cores
+print(f'We have access to {num_cores} cores, setting to {num_workers} workers.')
+```
+
+...and run `check_points_in_polygon` on the rows of our observations table in parallel. To do that, we'll use `multiprocessing`'s `map` method, which allows us to apply a function in parallel to each item (in this case, a row of `jwst_obstable` representing an observation) in an iterable. To improve performance, we'll first convert `jwst_obstable` to a `pandas` dataframe, and use the latter's `iterrows` method to create the iterable.
+
+```{code-cell} ipython3
+jwst_obstable_pandas = jwst_obstable.to_pandas()
+```
+
+If you examine the `Kernel usage` tab to your right while running this next cell, you'll see that you're now using nearly 100% of your multi-CPU capacity!
+
+```{code-cell} ipython3
+# Apply check_points_in_polygon to each item in the iterable, in parallel
+
+# In this case, since yso_coords will be the same for each row of the observations table,
+# we get the best performance if we define a one-time-use function as follows:
+def temp_apply_check_points(obs):
+    return check_points_in_polygon(obs, yso_coords)
+
+# Apply in parallel:
+with Pool(num_workers) as pool:
+    results = pool.map(temp_apply_check_points, [obs for _, obs in jwst_obstable_pandas.iterrows()])
 ```
 
 ```{code-cell} ipython3
-# Convert jwst_table into a partitioned Dask dataframe,
-# so that the cores can split the partitions amongst themselves.
-jwst_obsddf = dd.from_pandas(jwst_obstable.to_pandas(), npartitions=num_cores*4)  # Adjust npartitions to taste
+# Convert back to a pandas dataframe
+results = pd.DataFrame(results)
 
-# Set up to apply the check_point_in_polygon function in parallel.
-meta = pd.DataFrame(columns=jwst_obstable.to_pandas().columns)
-jwst_job = jwst_obsddf.map_partitions(lambda df: df.apply(lambda row: check_points_in_polygon(row, yso_coords), axis=1), meta=meta)
-```
-
-If you examine the `Kernel usage` tab to your right while running this next cell, you'll see that you're now using about 70% of your multi-CPU capacity.
-
-```{code-cell} ipython3
-# Execute
-results = jwst_job.compute()
-```
-
-```{code-cell} ipython3
 # Remove empty rows, where check_points_in_polygon reached the "else" part of the return statement.
 results = results.dropna(how='all')
 
@@ -407,14 +373,14 @@ tmc1a_dec = float(tmc1a_meta['dec'])  # ICRS Dec of TMC1A in degrees
 tmc1a_jwst = []
 
 # As before...
-for row in yso_jwst_obstable:
-    polygon = parse_polygon(row['s_region'])
+for obs in yso_jwst_obstable:
+    polygon = parse_polygon(obs['s_region'])
     polygon_path = Path(polygon, closed=True)
     # We'll use matplotlib.Path.contains_point (singular) this time,
     # instead of .contains_points (plural)
     is_inside = polygon_path.contains_point((tmc1a_ra, tmc1a_dec))
     if is_inside:
-        tmc1a_jwst.append(row)
+        tmc1a_jwst.append(obs)
 
 # Convert to an astropy Table
 tmc1a_jwst_obstable = Table(rows=tmc1a_jwst, names=jwst_obstable.colnames)
@@ -422,7 +388,7 @@ tmc1a_jwst_obstable = Table(rows=tmc1a_jwst, names=jwst_obstable.colnames)
 print(f'We found {len(tmc1a_jwst_obstable)} JWST spectral cube observations of TMC1A.')
 ```
 
-Let's get the AWS cloud URIs for these spectral cube files. Downloading files from AWS (via a cloud URI) isn't *always faster* than downloading from MAST's on-premise servers (via a `dataURI` converted into an HTTP URL), even when the destination for your downloads is an AWS cloud platform like Fornax, but importantly AWS is more *robust* for large data downloads. By retrieving files from AWS instead of MAST, you avoid the risk of overwhelming MAST's on-premise servers and causing problems for other users, and the substantial risk that MAST's on-premise servers may be overwhelmed by requests from other users in the moment that you want to get your data. AWS is, we believe, less likely to be overwhelmed.
+Let's get the AWS cloud URIs for these spectral cube files. Downloading files from AWS (via a cloud URI) isn't always *faster* than downloading from MAST's on-premise servers (via a `dataURI` converted into an HTTP URL), even when the destination for your downloads is an AWS cloud platform like Fornax. But importantly, AWS is more *robust* for large data downloads. By retrieving files from AWS instead of MAST, you avoid the risk of overwhelming MAST's on-premise servers and causing problems for other users, and the substantial risk that MAST's on-premise servers may be overwhelmed by requests from other users in the moment that you want to get your data. AWS is, we believe, less likely to be overwhelmed.
 
 Regardless, the volume of available astronomical data is growing faster than the MAST archive's capacity to store on-premise and transmit through HTTP links to the on-premise files. For example, the daily downlinked data volume from the Roman Space Telescope will be about 500 times that of HST. So eventually, for some data, cloud downloads are expected to be the only option.
 
@@ -470,8 +436,8 @@ temp_observations = tmc1a_jwst_obstable[
 ]
 
 # Get the first valid cloud URI found
-for row in temp_observations:
-    cloud_uri = cloud_uri_map[row['dataURL']]
+for obs in temp_observations:
+    cloud_uri = cloud_uri_map[obs['dataURL']]
     if cloud_uri:
         break  # When a valid URI is found, exit the loop
 
@@ -484,20 +450,6 @@ MAST cloud data is in the [Registry of Open Data on AWS](https://registry.openda
 with fits.open(cloud_uri, cache=False, use_fsspec=True, fsspec_kwargs={"anon": True}) as hdul:
     header = hdul['SCI'].header
     data = hdul['SCI'].data
-
-# Note: we didn't actually need to manually set use_fsspec=True.
-# This is turned on by default when using an AWS URI.
-
-# Note: instead of using fsspec inside an astropy.fits.open() to handle the cloud connection,
-# you could equivalently use the s3fs module explicitly, as follows.
-# Results are typically similar.
-
-# import s3fs
-# fs = s3fs.S3FileSystem(anon=True)
-# with fs.open(cloud_uri, 'rb') as cloud_file:
-#     with fits.open(cloud_file, 'readonly') as hdul:
-#         header = hdul['SCI'].header
-#         data = hdul['SCI'].data
 ```
 
 Let's turn this into a convenience function that we can use later on:
@@ -507,17 +459,19 @@ def load_cloud(cloud_uri, extension='SCI'):
     """
     Load from a cloud URI into memory, without downloading to storage.
 
-    Input parameters
+    Parameters
     ----------
-    cloud_uri : string
+    cloud_uri : str
         An AWS cloud URI for a FITS file.
-    extension : string
+    extension : str, optional
         The FITS extension in which the desired data is found. Defaults to 'SCI'.
 
     Returns
     ----------
     header : astropy.io.fits.header.Header
-    data : numpy.ndarray
+        Header of the specified FITS extension
+    data : np.ndarray
+        Data array of the specified FITS extension
     """
     with fits.open(cloud_uri, cache=False, use_fsspec=True, fsspec_kwargs={"anon": True}) as hdul:
         header = hdul[extension].header
@@ -536,7 +490,7 @@ Remember that you have a limited storage allocation in your Fornax account: 10 G
 Let's copy down some of the Fe II wavelengths from [Assani et al. 2025](https://arxiv.org/pdf/2504.02136):
 
 ```{code-cell} ipython3
-transitions = [25.988,24.519,17.936,5.340,1.644,1.600,1.257]  # in microns
+transitions = [25.988, 24.519, 17.936, 5.340, 1.644, 1.600, 1.257]*u.um
 ```
 
 For the purposes of demonstration, we'll use five functions that together look at a JWST spectral cube file, and aim to characterize whether or not that spectral cube exhibits spatially-extended Fe II emission at each of these transition wavelengths.
@@ -562,7 +516,7 @@ plt.ylabel('Fraction of non-NaN pixels above threshold')
 plt.show()
 ```
 
-> Figure 1 image description: a line plot of "Fraction of non-NaN pixels above threshold" versus "Wavelength bin index", the latter ranging from around 0 to 1000. The plotted values have substantial scatter and features, but one feature stands out by a factor of two above all others: a narrow, abrupt spike near wavelength bin index 548.
+> Figure 1 alt text: a line plot of "Fraction of non-NaN pixels above threshold" versus "Wavelength bin index", the latter ranging from around 0 to 1000. The plotted values have substantial scatter and features, but one feature stands out by a factor of two above all others: a narrow, abrupt spike near wavelength bin index 548.
 
 +++
 
@@ -575,7 +529,7 @@ plt.ylabel('x')
 plt.show()
 ```
 
-> Figure 2 image description: 2-dimensional astronomical image in pixel coordinates, with rough boundaries of null values near the edges. From a bright circular source near the top edge, a faint hint of jet emission extends downwards and slightly to the right, nearly all the way to the lower edge of the image.
+> Figure 2 alt text: 2-dimensional astronomical image in pixel coordinates, with rough boundaries of null values near the edges. From a bright circular source near the top edge, a faint hint of jet emission extends downwards and slightly to the right, nearly all the way to the lower edge of the image.
 
 +++
 
@@ -609,57 +563,69 @@ Our third function is simple, and retrieves the wavelength array from a JWST spe
 ```{code-cell} ipython3
 def get_jwst_wave_array(header, cloud_uri):
     """
-    Input parameters
+    Get wavelength coordinates array from a JWST spectral cube FITS file.
+    
+    Parameters
     ----------
-    header : the header of a JWST FITS file in which the third axis is wavelength.
+    header : astropy.io.fits.header.Header
+        The header of a JWST FITS file in which the third axis is wavelength.
+    cloud_uri: str
+        An AWS cloud URI for a FITS file.
 
     Returns
     ----------
-    wave : numpy array of wavelengths in units of CUNIT3 (for JWST, microns).
-           Each bin is the wavelength of the corresponding slice of the cube.
+    wave : astropy.units.quantity.Quantity
+        Quantity array of wavelengths in units of CUNIT3 (for JWST, microns).
+        Each bin is the wavelength of the corresponding slice of the cube.
     """
+    # Note: we could more elegantly have used jwst.datamodels in both cases below,
+    # or spectral_cube.SpectralCube.read(file, hdu='SCI').spectral_axis in the first case.
+    # But those options would read the whole file into memory,
+    # which would increase our resource cost.
+    
     try:
         # Populate wavelength array from the WCS
         wave = header['CRVAL3'] + header['CDELT3'] * np.arange(header['NAXIS3'])
-    except:
+    except KeyError:
         # Multi-channel cubes do not have CDELT3,
         # and instead store a nonlinear wavelength solution in extension 'WCS-TABLE'
         _, wavetable = load_cloud(cloud_uri, extension='WCS-TABLE')
         wave = np.asarray(wavetable['wavelength'].flatten())
 
-    # Note: we could more elegantly have used jwst.datamodels in either case,
-    # or spectral_cube.SpectralCube.read(file, hdu='SCI').spectral_axis in the first case.
-    # But those options would read the whole file into memory,
-    # which would increase our resource cost.
-
-    return wave
+    return wave * u.Unit(header['CUNIT3'])
 ```
 
 Our fourth function checks certain metadata for each observation to determine if the analysis should proceed:
 
 ```{code-cell} ipython3
-def check_conditions(row, cloud_uri_map, transitions):
+def check_conditions(obs, cloud_uri_map, transitions):
     """
-    Input parameters
+    Check an observation's metadata for a set of conditions.
+
+    Parameters
     ----------
-    row : row of an astropy table, or a pandas series representing a row of a dask dataframe
-    cloud_uri_map : python dictionary mapping the relevant MAST URIs to AWS cloud URIs
-    transitions : python list of spectral line wavelengths to look for, in microns
+    obs : astropy.table.Row, pandas.Series
+        Row of an astropy or pandas table of observations
+    cloud_uri_map : dict[str, str]
+        Python dictionary mapping the relevant MAST URIs to AWS cloud URIs
+    transitions : astropy.units.quantity.Quantity
+        List of spectral line wavelengths to look for, as astropy Quantities
 
     Returns
     ----------
-    conditions_met : boolean True or False for the union of all conditions
+    conditions_met : bool
+        Boolean True or False for the union of all conditions
     """
     # Set condition: one of our Fe II wavelengths is in the Observation's spectral range.
     # The cross-mission MAST database that astroquery used gives this range in nanometers.
-    condition_1 = any(row['em_min'] <= line*1e3 <= row['em_max'] for line in transitions)
+    condition_1 = any(obs['em_min']*u.nm <= line <= obs['em_max']*u.nm for line in transitions)
 
     # Set condition: check that the data is exists and is accessible in the cloud.
-    condition_2 = exists(row['dataURL']) and exists(cloud_uri_map[row['dataURL']])
+    condition_2 = not_none(obs['dataURL']) and not_none(cloud_uri_map[obs['dataURL']])
 
     # Set condition: exclude stale observations with deprecated obs_id pattern 'shortmediumlong'.
     # These products are no longer available due to a change in the JWST pipeline
-    condition_3 = ('shortmediumlong' not in row['obs_id'])
+    condition_3 = ('shortmediumlong' not in obs['obs_id'])
 
     # Apply all our database metadata criteria
     conditions_met = condition_1 and condition_2 and condition_3
@@ -675,31 +641,38 @@ editable: true
 slideshow:
   slide_type: ''
 ---
-def line_search(row, cloud_uri_map, transitions, plot=False):
+def line_search(obs, cloud_uri_map, transitions, plot=False):
     """
-    Input parameters
+    Search a spectral cube observation for emission lines.
+
+    Parameters
     ----------
-    row : row of an astropy table, or a pandas series representing a row of a dask dataframe
-    cloud_uri_map : python dictionary mapping the relevant MAST URIs to AWS cloud URIs
-    transitions : python list of spectral line wavelengths to look for, in microns
+    obs : astropy.table.Row, pandas.Series
+        Row of an astropy or pandas table of observations
+    cloud_uri_map : dict[str, str]
+        Python dictionary mapping the relevant MAST URIs to AWS cloud URIs
+    transitions : astropy.units.quantity.Quantity
+        List of spectral line wavelengths to look for, as astropy Quantities
 
     Returns
     ----------
-    plot : boolean determining whether this function generates a summary plot for each "blob" spectrum
-    row : an edited row with new column 'detected_feii_lines' populated
+    plot : bool
+        Boolean determining whether this function generates a summary plot for each "blob" spectrum
+    obs : astropy.table.Row, pandas.Series
+        An edited row of the observations table with new column 'detected_feii_lines' populated
     """
     # Initialize a list of Fe II jet emission lines detected in this cube:
     detected_feii_lines = []
 
     # First, let's check_conditions
-    conditions_met = check_conditions(row=row, cloud_uri_map=cloud_uri_map, transitions=transitions)
+    conditions_met = check_conditions(obs=obs, cloud_uri_map=cloud_uri_map, transitions=transitions)
 
     # Apply all our database metadata criteria:
     if conditions_met:
 
         # Load the Observation's spectral cube data file into memory,
         # without downloading a copy to storage.
-        cloud_uri = cloud_uri_map[row['dataURL']]
+        cloud_uri = cloud_uri_map[obs['dataURL']]
         header, data = load_cloud(cloud_uri)
 
         # Get the wavelength array for this cube
@@ -719,11 +692,11 @@ def line_search(row, cloud_uri_map, transitions, plot=False):
 
                 if detected:  # If we found a spike at this wavelength...
                     # ...then this cube may contain extended emission from this Fe+ line.
-                    plt.axvline(x=line, color='r', linestyle='--')
+                    plt.axvline(x=line.value, color='r', linestyle='--')
                     detected_feii_lines.append(line)
 
                 else:  # Otherwise, probably no Fe+ line extended emission here.
-                    plt.axvline(x=line, color='b', linestyle='--')
+                    plt.axvline(x=line.value, color='b', linestyle='--')
             if plot:
                 plt.plot(wave, blobs, color='k')
 
@@ -731,17 +704,17 @@ def line_search(row, cloud_uri_map, transitions, plot=False):
     # display the corresponding blob detection plot.
     if plot:
         if len(detected_feii_lines) > 0:
-            print('obs_id: ' + row['obs_id'])
-            print('Detected lines: ' + str(detected_feii_lines))
+            print('obs_id: ' + obs['obs_id'])
+            print('Detected lines: ', u.Quantity(detected_feii_lines))
             print('Plot:')
             plt.xlabel('Wavelength (microns)')
             plt.ylabel('Fraction of non-NaN pixels above threshold')
             plt.show()
 
     # Return the input row with a new column holding the detected_feii_lines list
-    row['detected_feii_lines'] = detected_feii_lines
+    obs['detected_feii_lines'] = detected_feii_lines
 
-    return row
+    return obs
 ```
 
 Phew! Let's try this out on our TMC1A observations.
@@ -761,9 +734,9 @@ copy_tmc1a_jwst_obstable.add_column(new_column)
 lines_tmc1a_jwst = []
 
 # For reach row in our observations table...
-for row in copy_tmc1a_jwst_obstable:
+for obs in copy_tmc1a_jwst_obstable:
     # Execute line_search.
-    new_row = line_search(row, cloud_uri_map, transitions, plot=True)
+    new_row = line_search(obs, cloud_uri_map, transitions, plot=True)
     # Append results.
     lines_tmc1a_jwst.append(new_row)
 
@@ -771,18 +744,18 @@ for row in copy_tmc1a_jwst_obstable:
 lines_tmc1a_jwst_obstable = Table(rows=lines_tmc1a_jwst, names=copy_tmc1a_jwst_obstable.colnames)
 ```
 
-> Figure 3 image description: a number of line plots similar to Figure 1, except that wavelength in microns is plotted on the horizontal axes instead of wavebin index, and different line plots cover different wavelength ranges. Vertical dashed red lines mark the locations of spikes corresponding to detected Fe II emission. Depending on the data available at the time of plot creation, vertical dashed blue lines may mark the location of non-detected Fe II transitions without co-located spikes.
+> Figure 3 alt text: a number of line plots similar to Figure 1, except that wavelength in microns is plotted on the horizontal axes instead of wavebin index, and different line plots cover different wavelength ranges. Vertical dashed red lines mark the locations of spikes corresponding to detected Fe II emission. Depending on the data available at the time of plot creation, vertical dashed blue lines may mark the location of non-detected Fe II transitions without co-located spikes.
 
 +++
 
 If we grab all the unique values from inside the python lists tabulated in `lines_tmc1a_jwst_table['detected_feii_lines']`...
 
 ```{code-cell} ipython3
-all_values = [line for rowlist in lines_tmc1a_jwst_obstable['detected_feii_lines'] for line in rowlist]
+all_values = [line for linelist in lines_tmc1a_jwst_obstable['detected_feii_lines'] for line in linelist]
 
 detected_lines = set(all_values)
 
-print(detected_lines)
+print(u.Quantity(list(detected_lines)))
 ```
 
 We see that we have reproduced the detection of multiple Fe II lines in the YSO TMC1A.
@@ -800,7 +773,7 @@ We'll be working with the `yso_jwst_table` of observations:
 ```{code-cell} ipython3
 print(f'We need to look at {len(yso_jwst_obstable)} observations.')
 
-# Let's look at a couple rows:
+# Let's look at a couple observations:
 yso_jwst_obstable[0:2]
 ```
 
@@ -819,33 +792,38 @@ new_column = Column(name='detected_feii_lines', dtype=object, length=len(yso_jws
 copy_yso_jwst_obstable.add_column(new_column)
 ```
 
-Finally, let's use the `dask` parallelizing technique we used before to split `yso_jwst_table` into partitions, and allow our CPUs to split those partitions amongst themselves. You can think of this like sending one spectral cube file to each core, applying `line_search` to the cube, and repeating that until we're done.
+Finally, let's use the parallelizing technique we used before to apply `line_search` to the rows (observations) of `yso_jwst_obstable` in parallel across our CPU cores.
+
+We will make one minor modification to the parallelization approach that we used before. Empirically, we can get mildly better performance in this case (using nearly 100% of our available CPU capacity instead of 70-80%) by having slightly more workers than cores. This is probably because reading data from FITS files means that there's an I/O-bound component to the `line_search` function. When a core is waiting on an I/O task (like reading a FITS file), another worker can use that core for computations.
 
 ```{code-cell} ipython3
-yso_jwst_ddf = dd.from_pandas(copy_yso_jwst_obstable.to_pandas(), npartitions=num_cores*4)  # Adjust npartitions to taste
-meta = pd.DataFrame(columns=copy_yso_jwst_obstable.to_pandas().columns)
+# Convert to pandas table so we can make an iterable
+copy_yso_jwst_obstable_pandas = copy_yso_jwst_obstable.to_pandas()
+
+# One-time-use function for use in pool.map
+def temp_apply_line_search(obs):
+    return line_search(obs, cloud_uri_map, transitions)
+
+# Increase the number of workers to compensate for I/O bound tasks
+if num_cores<=4:
+    num_workers = round(num_cores*2)
+else:
+    num_workers = round(num_cores*1.4)
+
+# Execute
+with Pool(num_workers) as pool:
+    results = pool.map(temp_apply_line_search,
+                       [obs for _, obs in copy_yso_jwst_obstable_pandas.iterrows()])
 ```
 
 ```{code-cell} ipython3
-# Set up to apply line_search in parallel
-yso_jwst_job = yso_jwst_ddf.map_partitions(lambda df: df.apply(lambda row: line_search(row, cloud_uri_map, transitions), axis=1), meta=meta)
-```
+# Convert back to a pandas dataframe
+results = pd.DataFrame(results)
 
-```{code-cell} ipython3
-# Execute. This will take a few minutes.
-results = yso_jwst_job.compute()
-```
-
-```{code-cell} ipython3
----
-editable: true
-slideshow:
-  slide_type: ''
----
 # Convert back to an astropy table.
 lines_yso_jwst_obstable = Table.from_pandas(results)
 
-# Remove rows where no Fe II lines were detected
+# Remove observations where no Fe II lines were detected
 # (where detected_feii_lines is an empty list).
 lines_yso_jwst_obstable = lines_yso_jwst_obstable[lines_yso_jwst_obstable['detected_feii_lines'].astype(bool)]
 
@@ -855,11 +833,7 @@ print(f'We found {len(lines_yso_jwst_obstable)} JWST spectral cube observations 
 Let's associate each observation to its closest YSO:
 
 ```{code-cell} ipython3
-# Find the closest coordinates in yso_table for each row in lines_yso_jwst_table
-
-# Drop NaNs from YSO catalog
-condition_yso = ~np.isnan(yso_table['ra']) & ~np.isnan(yso_table['dec'])
-yso_table_clean = yso_table[condition_yso]
+# Find the closest coordinates in yso_table_clean for each observation in lines_yso_jwst_table
 
 # Get coordinates from observations table
 coords_obs = SkyCoord(ra=lines_yso_jwst_obstable['s_ra'] * u.deg, dec=lines_yso_jwst_obstable['s_dec'] * u.deg)
@@ -871,7 +845,7 @@ coords_yso = SkyCoord(ra=yso_table_clean['ra'], dec=yso_table_clean['dec'])
 idx, d2d, d3d = coords_obs.match_to_catalog_sky(coords_yso)
 
 print(idx.shape)
-# idx lists the row indices of yso_table_clean that correspond to each of the observations
+# idx lists the table row indices in yso_table_clean that correspond to each of the observations
 ```
 
 ```{code-cell} ipython3
@@ -894,7 +868,7 @@ index_linecount = []
 # For each group of observations (corresponding to a YSO)...
 for group in grouped_lines_yso_jwst_obstable.groups:
     # Get all detected Fe II lines for this YSO
-    all_values = [line for rowlist in group['detected_feii_lines'] for line in rowlist]
+    all_values = [line for linelist in group['detected_feii_lines'] for line in linelist]
     detected_lines = set(all_values)
 
     #Count the number of detected Fe II lines for this YSO
@@ -917,7 +891,7 @@ Let's take a quick look at a random YSO from this list. At the time of writing, 
 # get yso_index corresponding to target_name = 'PER-EMB-33'.
 temp_yso_index = max(lines_yso_jwst_obstable['yso_index'][lines_yso_jwst_obstable['target_name']=='PER-EMB-33'])
 
-# Show the first few rows of the observations corresponding to that yso_index
+# Show the first few observations corresponding to that yso_index
 lines_yso_jwst_obstable[lines_yso_jwst_obstable['yso_index']==temp_yso_index][0:3]
 ```
 
@@ -933,8 +907,8 @@ temp_observations = lines_yso_jwst_obstable[
 ]
 
 # Get the first valid cloud URI found
-for row in temp_observations:
-    cloud_uri = cloud_uri_map[row['dataURL']]
+for obs in temp_observations:
+    cloud_uri = cloud_uri_map[obs['dataURL']]
     if cloud_uri:
         break  # When a valid URI is found, exit the loop
 
@@ -975,7 +949,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-> Figure 4 image description: three astronomical images in pixel coordinates, side by side, display three different wavebin slices of a spectral cube. The left and right images are labeled "-10 wavebins away" and "+10 wavebins away", respectively, and feature a bright central source with faint hints of adjacent extention to the lower right. The middle image is labeled "5.34 micron line". In the middle image, the central source is much dimmer, emission extends all the way to the lower-right corner, and a blob in the lower-right corner is the brightest feature, in a region where the other two images exhibit no emission.
+> Figure 4 alt text: three astronomical images in pixel coordinates, side by side, display three different wavebin slices of a spectral cube. The left and right images are labeled "-10 wavebins away" and "+10 wavebins away", respectively, and feature a bright central source with faint hints of adjacent extention to the lower right. The middle image is labeled "5.34 micron line". In the middle image, the central source is much dimmer, emission extends all the way to the lower-right corner, and a blob in the lower-right corner is the brightest feature, in a region where the other two images exhibit no emission.
 
 +++
 
@@ -990,7 +964,7 @@ Now let's take a look at a 5.34 micron slice from each of the other YSOs where w
 ```{code-cell} ipython3
 # This cell will take up to a minute to run.
 
-transition = 5.34  # Plotting 5.34 micron line
+transition = 5.34*u.um  # Plotting 5.34 micron line
 
 # Set up a grid of plots
 num_plots = len(index_linecount)
@@ -1006,10 +980,10 @@ for entry in index_linecount:
     temp_yso_index = entry[0]  # Get the yso_index
     yso_name = yso_table_clean['main_id'][temp_yso_index]  # get name from SIMBAD
     # For each observation...
-    for row in lines_yso_jwst_obstable:
+    for obs in lines_yso_jwst_obstable:
         #  If this observation contains a detected 5.34 micron slice from this YSO...
-        if (row['yso_index'] == temp_yso_index) & (transition in row['detected_feii_lines']):
-            cloud_uri = cloud_uri_map[row['dataURL']]  # get cloud URI
+        if (obs['yso_index'] == temp_yso_index) & (transition in obs['detected_feii_lines']):
+            cloud_uri = cloud_uri_map[obs['dataURL']]  # get cloud URI
 
             # Open the file into memory
             header, data = load_cloud(cloud_uri)
@@ -1034,7 +1008,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-> Figure 5 image description: Tens of images plotted in a grid, with an object name labeling each image. Most of the images exhibit obvious extended emission in a wide variety of complex morphologies.
+> Figure 5 alt text: Tens of images plotted in a grid, with an object name labeling each image. Most of the images exhibit obvious extended emission in a wide variety of complex morphologies.
 
 +++
 
@@ -1054,23 +1028,29 @@ That is left as an *extremely challenging* exercise for the reader, but we'll ge
 # Astroquery call
 sofia_temp = Irsa.query_sia(facility='SOFIA', calib_level=3, data_type='cube', format='cube/fits')
 
-# Drop rows without footprints
+# Drop observations without footprints
 sofia_obstable = sofia_temp[np.array(['POLYGON' in str(region) for region in sofia_temp['s_region']])]
 ```
 
 ...and crossmatching these footprints to the SIMBAD YSOs:
 
 ```{code-cell} ipython3
-# Convert jwst_table into a partitioned Dask dataframe,
-# so that the cores can split the partitions amongst themselves.
-sofia_obsddf = dd.from_pandas(sofia_obstable.to_pandas(), npartitions=num_cores*4)  # Adjust npartitions to taste
+# Convert sofia_obstable into a pandas dataframe,
+# so that we can create an iterable with the iterrows method.
+sofia_obstable_pandas = sofia_obstable.to_pandas()
 
 # Apply the check_point_in_polygon function in parallel.
-meta = pd.DataFrame(columns=sofia_obstable.to_pandas().columns)
-sofia_job = sofia_obsddf.map_partitions(lambda df: df.apply(lambda row: check_points_in_polygon(row, yso_coords), axis=1), meta=meta)
-results = sofia_job.compute()
+num_workers = num_cores
+def temp_apply_check_points(obs):
+    return check_points_in_polygon(obs, yso_coords)
+with Pool(num_workers) as pool:
+    results = pool.map(temp_apply_check_points, [obs for _, obs in sofia_obstable_pandas.iterrows()])
 
-# Remove empty rows, where check_points_in_polygon reached the "else" part of the return statement.
+# Convert back to a pandas dataframe
+results = pd.DataFrame(results)
+
+# Remove empty rows in the resulting table of observations,
+# where check_points_in_polygon reached the "else" part of the return statement.
 results = results.dropna(how='all')
 
 # Convert back to an astropy table.
@@ -1078,7 +1058,7 @@ yso_sofia_obstable = Table.from_pandas(results)
 ```
 
 ```{code-cell} ipython3
-# Let's take a look at the first row
+# Let's take a look at the first observation
 yso_sofia_obstable[0]
 ```
 
@@ -1104,7 +1084,7 @@ with fits.open(yso_sofia_obstable['access_url'][0], cache=False, use_fsspec=True
     data = hdul['FLUX'].data
 ```
 
-In the future, spectral cubes in IRSA from [the new SPHEREx mission](https://spherex.caltech.edu/page/data-products) might be more readily integrated into the workflow we've demonstrated in this notebook, so stay tuned!
+In the future, all-sky spectral cubes in IRSA from [the new SPHEREx mission](https://spherex.caltech.edu/page/data-products) might be more readily integrated into the line-search workflow we've demonstrated in this notebook, so stay tuned!
 
 +++
 
@@ -1112,19 +1092,12 @@ In the future, spectral cubes in IRSA from [the new SPHEREx mission](https://sph
 
 +++
 
-### Author
-
-Adrian Lucy, MAST, alucy@stsci.edu
+- **Author**: Adrian Lucy (MAST/STScI, alucy@stsci.edu)
+- **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
 
 ### Acknowledgements
-
-MAST internal review: Thomas Dutkiewicz, Sam Bianco, Zach Claytor, Brian McLean, Jonathan Hargis
-
-Fornax review: TBD
-
-### Publication date
-
-TBD
+- MAST internal review: Thomas Dutkiewicz, Sam Bianco, Zach Claytor, Brian McLean, Jonathan Hargis
+- Fornax review: Troy Raen, Jessica Krick, Brigitta Sipőcz
 
 ### References
 
