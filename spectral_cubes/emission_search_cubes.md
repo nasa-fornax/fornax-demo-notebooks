@@ -18,7 +18,7 @@ kernelspec:
 ## Runtime
 We assume that you are running this notebook on the [Fornax science platform](https://nasa-fornax.github.io/fornax-demo-notebooks/documentation/README.html) in `Environment` = `Default Astrophysics`, but it will also still work (in order of preference) in another AWS-based cloud science platform, a non-AWS cloud science platform, and even on your local computer — perhaps at slower speeds, depending on your computing resources and internet connection.
 
-As of December 2025, running this notebook once will take about 10 minutes on the Fornax "Large" server (64GB RAM/16 CPU), or about 25 minutes on the Fornax "Medium" server (16GB RAM/4 CPU)
+As of December 2025, running this notebook once will take about 10 minutes on the Fornax "Large" server (64 GB RAM / 16 CPU), or about 25 minutes on the Fornax "Medium" server (16 GB RAM / 4 CPU).
 
 +++
 
