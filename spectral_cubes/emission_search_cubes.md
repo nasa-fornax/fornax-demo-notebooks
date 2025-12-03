@@ -1099,4 +1099,3 @@ And the following software:
 - Astropy; Astropy Collaboration 2022, Astropy Collaboration 2018, Astropy Collaboration 2013 (2022ApJ…935..167A, 2018AJ….156..123A, 2013A&A…558A..33A)
 - Matplotlib; Hunter 2007 (2007CSE.....9...90H)
 - SciPy; Pauli et al. 2020 (2020NatMe..17..261V)
-- Dask: Library for dynamic task scheduling; Dask Development Team 2016, http://dask.pydata.org
