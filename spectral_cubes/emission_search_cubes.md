@@ -15,13 +15,6 @@ kernelspec:
 
 +++
 
-## Runtime
-We assume that you are running this notebook on the [Fornax science platform](https://nasa-fornax.github.io/fornax-demo-notebooks/documentation/README.html) in `Environment` = `Default Astrophysics`, but it will also still work (in order of preference) in another AWS-based cloud science platform, a non-AWS cloud science platform, and even on your local computer — perhaps at slower speeds, depending on your computing resources and internet connection.
-
-As of December 2025, running this notebook once will take about 10 minutes on the Fornax "Large" server (64 GB RAM / 16 CPU), or about 25 minutes on the Fornax "Medium" server (16 GB RAM / 4 CPU).
-
-+++
-
 ## Learning goals
 
 In this notebook, we'll learn about how to answer data-intensive archival search queries in astronomical data archives like [MAST](https://archive.stsci.edu/). We'll have to think about:
@@ -38,6 +31,12 @@ As you read through a recent paper by [Assani et al. 2025](https://arxiv.org/pdf
 > I want to find more JWST spectral image cubes containing Fe II emission from jets launched by young stellar objects (YSOs).
 
 You may now be experiencing some despair. "This observation contains a JWST spectral cube" is certainly something readily available from MAST's metadata tables, but "this file contains Fe II transitions" is certainly not. So instead, you need to dig beyond the metadata and into the data of thousands of files. That may sound difficult, but it can be done!
+
+### Runtime
+
+We assume that you are running this notebook on the [Fornax science platform](https://nasa-fornax.github.io/fornax-demo-notebooks/documentation/README.html) in `Environment` = `Default Astrophysics`, but it will also still work (in order of preference) in another AWS-based cloud science platform, a non-AWS cloud science platform, and even on your local computer — perhaps at slower speeds, depending on your computing resources and internet connection.
+
+As of December 2025, running this notebook once will take about 10 minutes on the Fornax "Large" server (64 GB RAM / 16 CPU), or about 25 minutes on the Fornax "Medium" server (16 GB RAM / 4 CPU).
 
 +++
 
