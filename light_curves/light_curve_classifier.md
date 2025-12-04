@@ -122,7 +122,7 @@ pd.options.mode.copy_on_write = True
 
  We use here a sample of AGN including known CLAGN & random SDSS AGN
 
- If you want to use your own sample, you can use the code [light_curve_collector.md](https://nasa-fornax.github.io/fornax-demo-notebooks/light_curves/light_curve_collector.html) in this same repo to make the required pandas dataframe which you will need to run this notebook.
+ If you want to use your own sample, you can use the code from the [light curve collector notebook](light_curve_collector.md) in this same repo to make the required pandas dataframe which you will need to run this notebook.
 
 ```{code-cell} ipython3
 # First we want to load light curves made in the light_curve_collector notebook

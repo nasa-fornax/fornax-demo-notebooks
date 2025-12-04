@@ -262,7 +262,7 @@ print('Panstarrs search took:', time.time() - panstarrsstarttime, 's')
 
 ### 2.4 MAST: TESS, Kepler and K2
 
-The function to retrieve lightcurves from these three missions currently uses the open source package [`lightKurve`](https://docs.lightkurve.org/index.html).  This search is not efficient at scale and we expect it to be replaced in the future.
+The function to retrieve lightcurves from these three missions currently uses the open source package [`Lightkurve`](https://lightkurve.github.io/lightkurve/).  This search is not efficient at scale and we expect it to be replaced in the future.
 
 ```{code-cell} ipython3
 lightkurvestarttime = time.time()
