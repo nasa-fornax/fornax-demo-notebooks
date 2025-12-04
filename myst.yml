@@ -10,6 +10,13 @@ project:
     fornax-docs: https://docs.fornax.sciencecloud.nasa.gov
   settings:
     output_matplotlib_strings: remove
+  error_rules:
+     - rule: link-resolves
+       severity: ignore
+       keys:
+         # These link resolve in the browser but generates did not resolve and 403 for the build
+         - https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-scan?projshort=COSMOS
+         - https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-dd?catalog=irs_enhv211
 extends:
   - toc.yml
 site:
