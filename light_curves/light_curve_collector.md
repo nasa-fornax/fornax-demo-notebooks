@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.17.1
+    jupytext_version: 1.18.1
 kernelspec:
   display_name: py-light_curve_collector
   language: python
@@ -97,6 +97,8 @@ from tess_kepler_functions import tess_kepler_get_lightcurves
 from wise_functions import wise_get_lightcurves
 from rubin_functions import rubin_get_lightcurves
 from ztf_functions import ztf_get_lightcurves
+
+# You may see a warning about "tpfmodel submodule".  This can safely be ignored.
 ```
 
 ## 1. Define the sample
@@ -226,7 +228,7 @@ The function to retrieve WISE light curves accesses an IRSA generated version of
 ```{code-cell} ipython3
 WISEstarttime = time.time()
 
-bandlist = ['W1', 'W2']  #list of the WISE band names
+bandlist = ['WISE_W1', 'WISE_W2']  #list of the WISE band names
 WISE_radius = 1.0  # arcsec
 # get WISE light curves
 df_lc_WISE = wise_get_lightcurves(sample_table, radius=WISE_radius, bandlist=bandlist)
@@ -369,7 +371,6 @@ This code will not work without the above information, so we have commented it o
 Once that setup is complete, this code access Rubin data from the Rubin Science Platform which is hosting their catalogs in Google Cloud.  Specifically, the code uses `pyvo` and `adql` to access a TAP server.
 
 ```{code-cell} ipython3
-
 #uncomment the next 5 lines if you have RSP login and authentication setup
 
 #rspstarttime = time.time()
@@ -484,8 +485,6 @@ _ = create_figures(df_lc = parallel_df_lc, # either df_lc (serial call) or paral
                    save_output = False ,  # should the resulting plots be saved?
                   )
 ```
-
-+++
 
 ## About this notebook
 
