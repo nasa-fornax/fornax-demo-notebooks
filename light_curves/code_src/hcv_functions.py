@@ -320,8 +320,14 @@ def hcv_get_lightcurves(sample_table, *, radius=1 / 3600):
         fluxerr = fluxerr * 1E3  # convert to mJy
 
         # put this single object light curves into a pandas multiindex dataframe
-        dfsingle_814 = pd.DataFrame(dict(flux=flux, err=fluxerr, time=time_814, objectid=objectid,
-                                    band='F814W', label=lab)).set_index(["objectid", "label", "band", "time"])
+        dfsingle_814 = pd.DataFrame(dict(
+            flux=flux, 
+            err=fluxerr, 
+            time=time_814, 
+            objectid=objectid,
+            band='HST_F814W', 
+            label=lab
+        )).set_index(["objectid", "label", "band", "time"])
 
         # then concatenate each individual df together
         df_lc.append(dfsingle_814)

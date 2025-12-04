@@ -10,11 +10,11 @@ from tqdm.auto import tqdm
 from data_structures import MultiIndexDFObject
 from fluxconversions import convert_wise_flux_to_millijansky
 
-BANDMAP = {"W1": 1, "W2": 2}  # map the common names to the values actually stored in the catalog
+BANDMAP = {"WISE_W1": 1, "WISE_W2": 2}  # map the common names to the values actually stored in the catalog
 K = 5  # HEALPix order at which the dataset is partitioned
 
 
-def wise_get_lightcurves(sample_table, *, radius=1.0, bandlist=["W1", "W2"]):
+def wise_get_lightcurves(sample_table, *, radius=1.0, bandlist=["WISE_W1", "WISE_W2"]):
     """
     Loads WISE data by searching the unWISE light curve catalog (Meisner et al., 2023AJ....165...36M).
     This is the MAIN function
@@ -278,7 +278,7 @@ def transform_lightcurves(wise_df):
     """
     # rename columns to match a MultiIndexDFObject
     wise_df = wise_df.rename(columns={"MJDMEAN": "time", "dflux": "err"})
-    # convert the band to its common name ("W1" or "W2"). need to invert the BANDMAP dict.
+    # convert the band to its common name ("WISE_W1" or "WISE_W2"). need to invert the BANDMAP dict.
     wise_df["band"] = wise_df["band"].map({value: key for key, value in BANDMAP.items()})
     # filter for only positive fluxes
     wise_df = wise_df[wise_df["flux"] > 0]

@@ -12,11 +12,11 @@ ELECTRON_BANDS = ["K2", "Kepler", "TESS"]  # flux in electrons/sec
 ICECUBE_BAND = "IceCube"  # "fluxes" are just events (= limits on plot)
 ZTF_BANDS = ["ztf_g", "ztf_r", "ztf_i"]  # will be plotted in "B" zoom-in for better visibility
 # List all other bands
-OTHER_BANDS = ["F814W",  # HCV
+OTHER_BANDS = ["HST_F814W",  # HCV
                "FERMIGTRIG", "SAXGRBMGRB",  # HEASARC
-               "G", "BP", "RP",  # Gaia
+               "Gaia_G", "Gaia_BP", "Gaia_RP",  # Gaia
                "Pan-STARRS g", "Pan-STARRS i", "Pan-STARRS r", "Pan-STARRS y", "Pan-STARRS z",  # Pan-STARRS
-               "W1", "W2"]  # WISE
+               "WISE_W1", "WISE_W2"]  # WISE
 
 # Set a color for each band.
 # Create a generator to yield colors (this will be useful if we need to plot bands not listed above).

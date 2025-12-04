@@ -316,7 +316,7 @@ def gaia_clean_dataframe(gaia_df):
     # get time in mjd
     gaia_df["time"] = gaia_df.g_transit_time + 55197.5
 
-    gaia_df["band"] = 'G'
+    gaia_df["band"] = 'Gaia_G'
 
     # return the light curves as a MultiIndexDFObject
     indexes, columns = ["objectid", "label", "band", "time"], ["flux", "err"]
