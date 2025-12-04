@@ -8,7 +8,7 @@ Checklists should be applied within reason to notebooks, as occaisionally there 
 
 Notebooks in this repo have the extra burden of being tutorials for the general public, so they should be easy to follow, well documented, well maintained, and as fool-proof as possible.  This is different from the average working notebook that we all have written in the past, which may be more of a "scratchpad" for our own use, and not intended for public consumption.
 
-
+If you’re writing or updating tutorial content, please use MyST Markdown — it’s a superset of regular Markdown that lets you embed figures, tables, equations, cross-references, hover-links, citations, metadata, and more. See the quick-start guide at https://mystmd.org/guide/quickstart-myst-markdown
 
 
 ## How to choose reviewers?
