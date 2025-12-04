@@ -4,21 +4,10 @@ jobs:
 
   build-docs:
     docker:
-      - image: cimg/python:3.12
+      - image: cimg/python:3.13-node
 
     steps:
       - checkout
-
-      - run:
-          name: Install Node.js
-          command: |
-            curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-            sudo apt-get install -y nodejs
-
-      - run:
-          name: Install mystmd
-          command: |
-            npm install mystmd
 
       - run:
           name: Install Python dependencies
@@ -34,7 +23,7 @@ jobs:
           command: |
             export BASE_URL="/output/job/$CIRCLE_WORKFLOW_JOB_ID/artifacts/0/$DOCS_PATH"
             export OMP_NUM_THREADS=1
-            python -m tox -e py312-buildhtml
+            python -m tox -e py313-buildhtml
 
       - store_artifacts:
           path: _build/html
