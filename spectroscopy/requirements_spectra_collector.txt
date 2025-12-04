@@ -8,13 +8,16 @@ pandas
 # compatible yet
 # sparclclient
 astropy
-# due to Spectrum1D rename to Spectrum and an internap spectutils bug
+# pin is due to Spectrum1D rename to Spectrum and an internap spectutils bug
 specutils>=1.20.1
-# due to astroquery.mast fixes
-astroquery>=0.4.11.dev0
+# pin is due to astroquery.mast fixes
+astroquery>=0.4.11
+# as astroquery optional dependencies `mast` relies on
+boto3
+botocore
 fsspec
 # Avoid the poor performance and timeouts described here:
 # https://github.com/dask/dask/issues/10276
-s3fs[boto3]>0.6.0
+s3fs>0.6.0
 requests
 pyvo
