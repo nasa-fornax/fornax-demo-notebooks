@@ -1,4 +1,3 @@
-<!-- #region -->
 # Data - Forced Photometry
 
 This directory holds data downloaded or generated during the forced-photometry workflow. Users may place additional data here as needed. Output produced by the notebook is stored in a separate directory called `../output`.
@@ -13,8 +12,3 @@ Two pre-generated files are included for convenience:
 
 
 No new data should be committed to the repository. This directory is listed in .gitignore to prevent accidental commits.
-<!-- #endregion -->
-
-```python
-
-```
