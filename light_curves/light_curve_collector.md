@@ -9,6 +9,13 @@ kernelspec:
   display_name: py-light_curve_collector
   language: python
   name: py-light_curve_collector
+authors:
+  - name: Jessica Krick
+  - name: Shoubaneh Hemmati
+  - name: Andreas Faisst
+  - name: Troy Raen
+  - name: Brigitta Sipőcz
+  - name: David Shupe
 ---
 
 # Make Multi-Wavelength Light Curves Using Archival Data
