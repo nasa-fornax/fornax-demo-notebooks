@@ -24,7 +24,7 @@ By the end of this tutorial, you will be able to:
 
 ## Introduction
 
-This code performs photometry in an automated fashion at all locations in an input catalog on 4 bands of IRAC data from IRSA and 2 bands of Galex data from MAST.  The resulting catalog is then cross-matched with a Chandra catalog from HEASARC to generate a multiband catalog to facilitate galaxy evolution studies.
+This code performs photometry in an automated fashion at all locations in an input catalog on 4 bands of IRAC data from IRSA and 2 bands of GALEX data from MAST.  The resulting catalog is then cross-matched with a Chandra catalog from HEASARC to generate a multiband catalog to facilitate galaxy evolution studies.
 
 If you run this code as is, it will only look at a small region of the COSMOS survey, and as a result, the plots near the end will not be so very informative.  We do this for faster runtimes and to show proof of concept as to how to do this work.  Please change the radius in section 1. to be something larger if you want to work with more data, but expect longer runtimes associated with larger areas.
 
@@ -34,7 +34,6 @@ The code makes full use of multiple processors to optimize run time on large dat
 
 - RA and DEC within COSMOS catalog
 - desired catalog radius in arcminutes
-- mosaics of that region for IRAC and Galex
 
 ### Output
 
@@ -195,7 +194,7 @@ If desired, you can filter the initial catalog to include only sources that meet
 
 ```{code-cell} ipython3
 # Here is an example of how to filter the catalog to
-# select those rows with either chandra fluxes or Galex NUV fluxes
+# select those rows with either chandra fluxes or GALEX NUV fluxes
 
 # example_table = cosmos_table[(cosmos_table['flux_chandra_05_10']> 0) | (cosmos_table['flux_galex_fuv'] > 0)]
 ```
@@ -204,7 +203,7 @@ If desired, you can filter the initial catalog to include only sources that meet
 
 +++
 
-### 2.1 Use the fornax cloud access API to obtain the IRAC data from the IRSA S3 bucket
+### 2.1 Use the Fornax cloud access API to obtain the IRAC data from the IRSA S3 bucket
 
 Details in this section may change over time.
 
@@ -223,7 +222,6 @@ spitzer = cosmos_results[cosmos_results['dataset'] == 'IRAC']
 ```
 
 ```{code-cell} ipython3
-# Temporarily add the cloud_access metadata to the Atlas response.
 # This dataset has limited access, thus 'region' should be used instead of 'open'.
 # S3 access should be available from the Fornax Science Console.
 
@@ -235,6 +233,10 @@ spitzer['cloud_access'] = [(f'{{"aws": {{ "bucket_name": "irsa-fornax-testdata",
 ```
 
 ```{code-cell} ipython3
+---
+jupyter:
+  source_hidden: true
+---
 # Requires https://github.com/nasa-fornax/fornax-cloud-access-API/pull/4
 
 def fornax_download(data_table, data_subdirectory, access_url_column='access_url',
@@ -324,7 +326,7 @@ fornax_download(spitzer, access_url_column='sia_url', fname_filter='go2_sci',
                 data_subdirectory='IRAC', verbose=False)
 ```
 
-### 2.2 Obtain Galex from the MAST archive
+### 2.2 Obtain GALEX from the MAST archive
 
 ```{code-cell} ipython3
 # The GALEX COSMOS mosaic is split into four separate tiles, each with its own
@@ -499,9 +501,13 @@ sci_bkg_pairs = [
 ### 3.2 Main Function to do the Forced Photometry
 
 ```{code-cell} ipython3
+---
+jupyter:
+  source_hidden: true
+---
 def calc_instrflux(band, ra, dec, stype, ks_flux_aper2, img_pair, df):
     """
-    Calculate single-band instrumental fluxes and uncertainties at the given ra, dec
+    Calculate single-band instrumental fluxes and uncertainties at the given RA, Dec
     using tractor.
 
     Parameters:
@@ -511,7 +517,7 @@ def calc_instrflux(band, ra, dec, stype, ks_flux_aper2, img_pair, df):
         A `Band` is a named tuple with the following attributes:
             idx : int
                 Identifier for the band/channel.
-                (integer in [0, 1, 2, 3, 4, 5] for the four IRAC bands and two Galex bands)
+                (integer in [0, 1, 2, 3, 4, 5] for the four IRAC bands and two GALEX bands)
             prf : np.ndarray
                 Point spread function for the band/channel.
             cutout_width : int
@@ -593,28 +599,28 @@ def calc_instrflux(band, ra, dec, stype, ks_flux_aper2, img_pair, df):
 
 Here we demonstrate a baseline implementation of forced photometry that processes each source sequentially and computes fluxes for all bands. Although this approach is simple and instructive, it is computationally inefficient for large catalogs, and we therefore do not use it.
 
-```{raw-cell}
-%%time
-# Do the calculation without multiprocessing for benchmarking
+```{code-cell} ipython3
+#%%time
+## Do the calculation without multiprocessing for benchmarking
 
-# Make a copy for parallel computation
-pl_df = df.copy(deep=True)
+## Make a copy for parallel computation
+#pl_df = df.copy(deep=True)
 
-t0 = time.time()
-# For each object
-for row in df.itertuples():
-    # For each band
-    for band in range(6):
-        # Measure the flux with tractor
-        outband, flux, unc = calc_instrflux(band, row.ra, row.dec, row.type, row.ks_flux_aper2)
+#t0 = time.time()
+## For each object
+#for row in df.itertuples():
+#    # For each band
+#    for band in range(6):
+#        # Measure the flux with tractor
+#        outband, flux, unc = calc_instrflux(band, row.ra, row.dec, row.type, row.ks_flux_aper2)
 
-        # Put the results back into the dataframe
-        df.loc[row.Index, 'ch{:d}flux'.format(outband+1)] = flux
-        df.loc[row.Index, 'ch{:d}flux_unc'.format(outband+1)] = unc
+#        # Put the results back into the dataframe
+#        df.loc[row.Index, 'ch{:d}flux'.format(outband+1)] = flux
+#        df.loc[row.Index, 'ch{:d}flux_unc'.format(outband+1)] = unc
 
-t1 = time.time()
+#t1 = time.time()
 
-#10,000 sources took 1.5 hours with this code on a medium sized machine
+##10,000 sources took 1.5 hours with this code on a medium sized machine
 ```
 
 ### 3.4 Calculate Forced Photometry - Parallelization
@@ -622,7 +628,7 @@ t1 = time.time()
 To improve performance, we parallelize the forced photometry computation across multiple CPU cores. We construct a parameter list containing the source coordinates and band configurations, distribute the workload to worker processes, and combine the results into the main DataFrame. This parallel implementation drastically reduces runtime and enables practical processing of large areas of the COSMOS field.
 
 ```{code-cell} ipython3
-#Setup:
+# Setup:
 
 # list of parameter sets to pass to the parallel photometry function
 paramlist = []
@@ -640,14 +646,18 @@ print('paramlist: ', len(paramlist)) # total number of photometry jobs to run
 ```
 
 ```{code-cell} ipython3
-#prove we can do this for one object
+# Here we show how the calc_instrflux function works on a single source
 calc_instrflux(*paramlist[0][1:])
 
-#same thing, different syntax
+# Another way to run calc_instrflux with different syntax than the line above:
 # calc_instrflux(paramlist[0][1], paramlist[0][2], paramlist[0][3], paramlist[0][4], paramlist[0][5], paramlist[0][6])
 ```
 
 ```{code-cell} ipython3
+---
+jupyter:
+  source_hidden: true
+---
 #wrapper to measure the photometry on a single object, single band
 def calculate_flux(args):
     """
@@ -749,7 +759,7 @@ print('Parallel calculation: number of ch1 fluxes filled in =',
 ### 3.5 Cleanup
 
 ```{code-cell} ipython3
-# Had to call the galex flux columns ch5 and ch6
+# Had to call the GALEX flux columns ch5 and ch6
 # Fix that by renaming them now
 cols = {'ch5flux':'nuvflux', 'ch5flux_unc':'nuvflux_unc','ch6flux':'fuvflux', 'ch6flux_unc':'fuvflux_unc'}
 df.rename(columns=cols, inplace = True)
@@ -926,17 +936,17 @@ ccosmoscat = heasarc.query_region(
 # Astropy doesn't recognize capitalized units
 # so there might be some warnings here on writing out the file, but we can safely ignore those
 
-# Need to make the chandra catalog into a fits table
+# Need to make the chandra catalog into a FITS table
 # and needs to include area of the survey.
 ccosmoscat_rad = 1 #radius of chandra cosmos catalog
 nway_write_header('data/Chandra/COSMOS_chandra.fits', 'CHANDRA', float(ccosmoscat_rad**2) )
 
 
-# Also need to transform the main pandas dataframe into fits table for nway
+# Also need to transform the main pandas dataframe into FITS table for nway
 # Make an index column for tracking later
 df['ID'] = range(1, len(df) + 1)
 
-# Need this to be a fits table and needs to include area of the survey.
+# Need this to be a FITS table and needs to include area of the survey.
 rad_in_arcmin = radius.value  #units attached to this are confusing nway down the line
 nway_write_header('data/multiband_phot.fits', 'OPT', float((2*rad_in_arcmin/60)**2) )
 ```
@@ -976,13 +986,13 @@ merged.loc[merged['flux_chandra_05_2'] < 0, 'flux_chandra_05_2'] = 0
 
 ```{code-cell} ipython3
 # How many Chandra sources are there?
-# How many Galex sources are there?
+# How many GALEX sources are there?
 
 # Make a new column which is a bool of existing chandra measurements
 merged['cosmos_chandra_detect'] = 0
 merged.loc[merged.flux_chandra_2_10 > 0,'cosmos_chandra_detect']=1
 
-# Make one for Galex too
+# Make one for GALEX too
 merged['galex_detect'] = 0
 merged.loc[merged.flux_galex_nuv > 0,'galex_detect']=1
 
@@ -992,7 +1002,7 @@ merged['chandra_HR'] = (merged['flux_chandra_2_10'] - merged['flux_chandra_05_2'
 
 
 print('number of Chandra detections =',np.sum(merged.cosmos_chandra_detect > 0))
-print('number of Galex detections =',np.sum(merged.galex_detect > 0))
+print('number of GALEX detections =',np.sum(merged.galex_detect > 0))
 ```
 
 ## 5. Plot Final Results
@@ -1001,13 +1011,13 @@ In this section we visualize the final multiwavelength photometry by examining t
 
 ```{code-cell} ipython3
 # IRAC color color plots akin to Lacy et al. 2004
-# Overplot galex sources
+# Overplot GALEX sources
 # Overplot xray sources
 
 # First select on 24 micron
 merged_24 = merged[(merged.flux_24 >= 0)].copy()
 
-# Negative Galex fluxes are causing problems, so set those to zero
+# Negative GALEX fluxes are causing problems, so set those to zero
 merged_24.loc[merged_24.fuvflux < 0, 'fuvflux'] = 0
 merged_24.loc[merged_24.nuvflux < 0, 'nuvflux'] = 0
 
@@ -1023,10 +1033,10 @@ fig, ax = plt.subplots()
 sns.scatterplot(data = merged_allirac, x = 'F5.8divF3.6', y = 'F8.0divF4.5',
                  ax = ax, alpha = 0.5, label = 'all')
 
-# Plot only those points with Galex detections
+# Plot only those points with GALEX detections
 galex_detect = merged_allirac[merged_allirac.galex_detect > 0]
 sns.scatterplot(data = galex_detect, x = 'F5.8divF3.6', y = 'F8.0divF4.5',
-                 ax = ax, alpha = 0.5, label = 'Galex detect')
+                 ax = ax, alpha = 0.5, label = 'GALEX detect')
 
 # Plot only those points with chandra detections
 chandra_detect = merged_allirac[merged_allirac.cosmos_chandra_detect > 0]
@@ -1044,9 +1054,7 @@ ax.legend(loc='lower right')
 plt.title('IRAC Color Color Plot')
 ```
 
-This figure shows an IRAC color color plot akin to the seminal work by Lacy et al. 2004.  Points are color coded for those with Galex UV detections and those with Chandra x-ray detections. Note that the different populations are seperating out in this color color space.
-
-
+This figure shows an IRAC color color plot akin to the seminal work by Lacy et al. 2004.  Points are color coded for those with GALEX UV detections and those with Chandra x-ray detections. Note that the different populations are seperating out in this color color space.
 
 +++
 
