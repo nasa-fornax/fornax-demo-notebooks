@@ -654,3 +654,63 @@ def clean_sample(coords_list, labels_list, *, consolidate_nearby_objects=True, v
         print(f'Object sample size, after duplicates removal: {len(uniqued_table)}')
 
     return uniqued_table
+def validate_sample_table(tbl):
+    """
+    Validate the structure of a user-supplied ``sample_table``.
+
+    This function verifies that the supplied object is an
+    ``astropy.table.Table`` and that it contains the required
+    columns (``coord``, ``objectid``, ``label``). It checks that
+    ``coord`` entries are ``SkyCoord`` objects, that ``objectid``
+    values are integers, unique, and sequential starting at 1, and
+    that ``label`` contains strings. Informative exceptions are
+    raised if validation fails.
+    
+    Parameters
+    ----------
+    tbl : astropy.table.Table
+        Table to validate. Must represent a cleaned source sample
+        with one row per sky object.
+
+    Raises
+    ------
+    ValueError
+        If required columns are missing or ``objectid`` values are
+        non-unique or non-sequential.
+    TypeError
+        If column types are not as expected (e.g., ``coord`` not
+        containing ``SkyCoord`` objects).
+
+    """
+    from astropy.coordinates import SkyCoord
+    
+    # Check that tbl is an Astropy Table
+    if not isinstance(tbl, Table):
+        raise TypeError("Input must be an astropy.table.Table instance.")
+
+
+    required = {"coord", "objectid", "label"}
+    missing = required - set(tbl.colnames)
+    if missing:
+        raise ValueError(f"sample_table is missing required columns: {missing}")
+
+    # coord type check
+    if not all(isinstance(c, SkyCoord) for c in tbl["coord"]):
+        raise TypeError("Column 'coord' must contain astropy.coordinates.SkyCoord objects.")
+
+    # objectid checks
+    obj = tbl["objectid"]
+    if not (obj.dtype.kind in ("i", "u")):
+        raise TypeError("Column 'objectid' must contain integers.")
+
+    if len(set(obj)) != len(obj):
+        raise ValueError("Column 'objectid' must contain unique values.")
+
+    if sorted(obj) != list(range(1, len(obj) + 1)):
+        raise ValueError("objectid must start at 1 and increment without gaps.")
+
+    # label check
+    if not all(isinstance(x, str) for x in tbl["label"]):
+        raise TypeError("Column 'label' must contain strings.")
+
+    print("sample_table format is valid.")

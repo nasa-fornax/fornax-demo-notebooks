@@ -157,7 +157,16 @@ or
 You can use [astropy's read](https://docs.astropy.org/en/stable/io/ascii/read.html) function to read in an input table
 to an [astropy table](https://docs.astropy.org/en/stable/table/)
 
-+++
+If you want to build your own sample_table, your table must contain one row per source and include exactly three required pieces of information: a coord column holding an astropy.coordinates.SkyCoord position for each object, a unique integer objectid, and a label column giving a short string describing that source’s origin (e.g., literature reference, sample name, or provenance tag).
+
+```{code-cell} ipython3
+# Run this cell if you build your own sample to validate that it has the 
+# required structure:
+# it must contain `coord` (SkyCoord), `objectid` (unique sequential ints),
+# and `label` (strings). Raises informative errors if anything is malformed.
+
+validate_sample_table(sample_table)
+```
 
 ### 1.2 Write out your sample to disk
 
