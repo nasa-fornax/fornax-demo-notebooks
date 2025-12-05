@@ -227,7 +227,7 @@ def load_lightcurves(locations, radius, bandlist):
         match_df["object_ilocs"] = object_ilocs
         match_df = match_df.set_index("object_ilocs").join(
             locs_df.reset_index(drop=True),
-            rsuffix="_obj"             # prevents ra/dec collisions
+            rsuffix="_obj"             # prevent name collisions if sample_table has extra columns
         )
 
         wise_df_list.append(match_df)
