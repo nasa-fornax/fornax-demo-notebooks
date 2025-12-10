@@ -23,7 +23,7 @@ jobs:
           command: |
             export BASE_URL="/output/job/$CIRCLE_WORKFLOW_JOB_ID/artifacts/0/$DOCS_PATH"
             export OMP_NUM_THREADS=1
-            python -m tox -e py313-buildhtml
+            python -m tox -e py312-buildhtml
 
       - store_artifacts:
           path: _build/html
