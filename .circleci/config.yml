@@ -4,7 +4,7 @@ jobs:
 
   build-docs:
     docker:
-      - image: ghcr.io/nasa-fornax/fornax-images/fornax-main
+      - image: ghcr.io/nasa-fornax/fornax-images/fornax-main:20251202_2209
 
     steps:
       - checkout
