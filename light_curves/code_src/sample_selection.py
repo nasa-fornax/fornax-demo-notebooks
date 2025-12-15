@@ -6,8 +6,8 @@ from astroquery.ipac.ned import Ned
 from astroquery.sdss import SDSS
 from astroquery.simbad import Simbad
 from astroquery.vizier import Vizier
-from requests.exceptions import ConnectionError
-
+from requests.exceptions import ConnectionError, RequestException
+from astroquery.exceptions import TimeoutError
 
 # lamassa et al., 2015  1 source
 def get_lamassa_sample(coords, labels, *, verbose=1):
@@ -33,7 +33,11 @@ def get_lamassa_sample(coords, labels, *, verbose=1):
         The input lists are modified in place.
 
     """
-    lamassa_CLQ = Ned.query_refcode('2015ApJ...800..144L')
+    lamassa_CLQ = Ned_query_refcode_exceptions('2015ApJ...800..144L')
+    if lamassa_CLQ is None:
+        # Warning will be printed from Ned_query_refcode_exceptions()
+        return
+
     lamassa_CLQ = lamassa_CLQ[0]  # dont know what those other targets are.
     coords.append(SkyCoord(lamassa_CLQ['RA'], lamassa_CLQ['DEC'], frame='icrs', unit='deg'))
     labels.append('LaMassa 15')
@@ -96,7 +100,10 @@ def get_ruan_sample(coords, labels, *, verbose=1):
     -------
     None
     """
-    ruan_CSQ = Ned.query_refcode('2016ApJ...826..188R')
+    ruan_CSQ = Ned_query_refcode_exceptions('2016ApJ...826..188R')
+    if ruan_CSQ is None:
+        # Warning will be printed from Ned_query_refcode_exceptions()
+        return
 
     ruan_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
                    for ra, dec in zip(ruan_CSQ['RA'], ruan_CSQ['DEC'])]
@@ -169,7 +176,11 @@ def get_sheng_sample(coords, labels, *, verbose=1):
     -------
     None
     """
-    CLQ = Ned.query_refcode('2020ApJ...889...46S')
+    CLQ = Ned_query_refcode_exceptions('2020ApJ...889...46S')
+    if paper is None:
+        # Warning will be printed from Ned_query_refcode_exceptions()
+        return
+
     sheng_CLQ = CLQ[[0, 1, 3]]  # need the first 3 objects in their table,
     sheng_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
                     for ra, dec in zip(sheng_CLQ['RA'], sheng_CLQ['DEC'])]
@@ -247,7 +258,11 @@ def get_lyu_sample(coords, labels, *, verbose=1):
     -------
     None
     """
-    CLQ = Ned.query_refcode('2022ApJ...927..227L')
+    CLQ = Ned_query_refcode_exceptions('2022ApJ...927..227L')
+    if paper is None:
+        # Warning will be printed from Ned_query_refcode_exceptions()
+        return
+        
     lyu_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
                   for ra, dec in zip(CLQ['RA'], CLQ['DEC'])]
     lyu_labels = ['Lyu 22' for ra in CLQ['RA']]
@@ -308,7 +323,11 @@ def get_hon_sample(coords, labels, *, verbose=1):
     -------
     None
     """
-    CLQ = Ned.query_refcode('2022MNRAS.511...54H')
+    CLQ = Ned_query_refcode_exceptions('2022MNRAS.511...54H')
+    if paper is None:
+        # Warning will be printed from Ned_query_refcode_exceptions()
+        return
+
     hon_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
                   for ra, dec in zip(CLQ['RA'], CLQ['DEC'])]
     hon_labels = ['Hon 22' for ra in CLQ['RA']]
@@ -338,7 +357,11 @@ def get_yang_sample(coords, labels, *, verbose=1):
     -------
     None
     """
-    CLQ = Ned.query_refcode('2018ApJ...862..109Y')
+    CLQ = Ned_query_refcode_exceptions('2018ApJ...862..109Y')
+    if paper is None:
+        # Warning will be printed from Ned_query_refcode_exceptions()
+        return
+        
     yang_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
                    for ra, dec in zip(CLQ['RA'], CLQ['DEC'])]
     yang_labels = ['Yang 18' for ra in CLQ['RA']]
@@ -370,7 +393,10 @@ def get_sanchezsaez_sample(coords, labels, *, verbose=1):
     None
     """
 
-    CSAGN = Ned.query_refcode('2021AJ....162..206S')  # from Sanchez-Saez 2021
+    CSAGN = Ned_query_refcode_exceptions('2021AJ....162..206S')
+    if paper is None:
+        # Warning will be printed from Ned_query_refcode_exceptions()
+        return
 
     ss_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
                  for ra, dec in zip(CSAGN['RA'], CSAGN['DEC'])]
@@ -499,6 +525,29 @@ def get_sdss_sample(coords, labels, *, num=10, zmin=0, zmax=10, randomize_z=Fals
         print('SDSS Quasar: ' + str(num))
 
 
+def Ned_query_refcode_exceptions(paper_link):
+    """
+    Call Ned.query_refcode() with basic network exception handling.
+
+    Parameters
+    ----------
+    paper_link : str
+        ADS/NED reference code or paper identifier.
+
+    Returns
+    -------
+    result : object or None
+        Result from Ned.query_refcode, or None if a network error occurs.
+    """
+    try:
+        return Ned.query_refcode(paper_link)
+    except (ConnectionError, RequestException, TimeoutError):
+        print(
+            f"WARNING: encountered a ConnectionError error for paper "
+            f"{paper_link}. skipping."
+        )
+        return
+
 def get_paper_sample(coords, labels, *, paper_link="2019A&A...627A..33D", label="Cicco19", verbose=1):
     """
     Append coordinates and labels from a reference-code query to NED.
@@ -516,12 +565,11 @@ def get_paper_sample(coords, labels, *, paper_link="2019A&A...627A..33D", label=
     -------
     None
     """
-    try:
-        paper = Ned.query_refcode(paper_link)
-    except ConnectionError:
-        print(f"WARNING: encountered a ConnectionError error for paper {paper_link}. skipping.")
-        return
-
+    paper = Ned_query_refcode_exceptions(paper_link)
+    if paper is None:
+        #warning is already printed inside of Ned_query_refcode_exceptions()
+        continue
+        
     paper_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
                     for ra, dec in zip(paper['RA'], paper['DEC'])]
     paper_labels = [label for ra in paper['RA']]
