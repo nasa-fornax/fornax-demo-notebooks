@@ -8,6 +8,7 @@ from astroquery.simbad import Simbad
 from astroquery.vizier import Vizier
 from requests.exceptions import ConnectionError, RequestException
 from astroquery.exceptions import TimeoutError
+import warnings
 
 # lamassa et al., 2015  1 source
 def get_lamassa_sample(coords, labels, *, verbose=1):
@@ -541,11 +542,12 @@ def Ned_query_refcode_exceptions(paper_link):
     """
     try:
         return Ned.query_refcode(paper_link)
-    except (ConnectionError, RequestException, TimeoutError):
-        print(
-            f"WARNING: encountered a ConnectionError error for paper "
-            f"{paper_link}. skipping."
-        )
+    except (ConnectionError, RequestException, TimeoutError) as e:
+        warnings.warn(
+            f"Encountered {type(e).__name__} for paper {paper_link}. skipping.",
+            category=RuntimeWarning,
+            stacklevel=2,
+        )        
         return
 
 def get_paper_sample(coords, labels, *, paper_link="2019A&A...627A..33D", label="Cicco19", verbose=1):
