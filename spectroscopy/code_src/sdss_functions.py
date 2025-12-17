@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import requests
 from astroquery.sdss import SDSS
+from requests.exceptions import Timeout
 
 from data_structures_spec import MultiIndexDFObject
 
@@ -39,7 +40,7 @@ def SDSS_get_spec(sample_table, search_radius_arcsec, data_release):
         try:
             xid = SDSS.query_region(search_coords, radius=search_radius_arcsec
                                     * u.arcsec, spectro=True, data_release=data_release)
-        except requests.HTTPError:
+        except (requests.HTTPError, Timeout):
             print(f"Encountered SDSS service error when querying region for source {stab['label']}. Skipping.")
             continue
 
@@ -50,7 +51,7 @@ def SDSS_get_spec(sample_table, search_radius_arcsec, data_release):
         # Catch service errors https://github.com/nasa-fornax/fornax-demo-notebooks/issues/437
         try:
             sp = SDSS.get_spectra(matches=xid, show_progress=True, data_release=data_release)
-        except (KeyError, TimeoutError):
+        except (KeyError, Timeout):
             print(f"Encountered SDSS service error when requesing spectra for source {stab['label']}. Skipping.")
             continue
 
