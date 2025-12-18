@@ -12,6 +12,13 @@ kernelspec:
   name: py-scale_up
 execution:
   timeout: 1200
+authors: 
+  - name: Troy Raen
+  - name: Jessica Krick
+  - name: Brigitta Sipőcz
+  - name: Shoubaneh Hemmati
+  - name: Andreas Faisst
+  - name: David Shupe
 ---
 
 # Make Multi-Wavelength Light Curves for Large Samples

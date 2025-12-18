@@ -11,6 +11,13 @@ kernelspec:
   language: python
 execution:
   timeout: 1200
+authors:
+  - name: Andreas Faisst
+  - name: Jessica Krick
+  - name: Shoubaneh Hemmati
+  - name: Troy Raen
+  - name: Brigitta Sipőcz
+  - name: David Shupe
 ---
 
 # Extract Multi-Wavelength Spectroscopy from Archival Data

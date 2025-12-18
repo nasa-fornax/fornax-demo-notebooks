@@ -9,6 +9,8 @@ kernelspec:
   name: py-ztf_ps1_crossmatch
   display_name: py-ztf_ps1_crossmatch
   language: python
+authors:
+  - name: Zach Claytor
 ---
 
 # Cross-Match ZTF and Pan-STARRS using LSDB
