@@ -1,4 +1,5 @@
 import astropy.units as u
+import astroquery.exceptions
 import numpy as np
 import pandas as pd
 import requests
@@ -58,7 +59,7 @@ def SDSS_get_spec(sample_table, search_radius_arcsec, data_release):
         # Catch service errors https://github.com/nasa-fornax/fornax-demo-notebooks/issues/437
         try:
             sp = SDSS.get_spectra(matches=xid, show_progress=True, data_release=data_release)
-        except (KeyError, ReadTimeout):
+        except (KeyError, astroquery.exceptions.TimeoutError):
             warnings.warn(
                 f"SDSS get_spectra failed for source {stab['label']}; skipping.",
                 RuntimeWarning,
