@@ -459,7 +459,6 @@ check_is_mtype(X_train, mtype="pd-multiindex", scitype="Panel", return_metadata=
 ### 4.2 A single Classifier
 
 ```{code-cell} ipython3
-%%time
 #this cell takes 35s to run on a sample of 267 light curves
 
 #setup the classifier
@@ -489,7 +488,6 @@ plt.show()
 Our method is to do a cursory check of a bunch of classifiers and then later drill down deeper on anything with good initial results.  We choose to run a loop over ~10 classifiers that seem promising and check the accuracy scores for each one.  Any classifier with a promising accuracy score could then be followed up with detailed hyperparameter tuning, or potentially with considering other classifiers in that same type.
 
 ```{raw-cell}
-%%time
 #This cell is currently not being run because it takes a long time
 
 #which classifiers are we interestd in
