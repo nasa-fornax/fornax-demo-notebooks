@@ -171,7 +171,6 @@ ps1 = lsdb.open_catalog(ps1_path, columns=["objName","objID","raMean","decMean"]
 ```{code-cell} ipython3
 # Setting up the cross-match actually takes very little time
 ztf_x_ps1 = ztf_piece.crossmatch(ps1, radius_arcsec=1, n_neighbors=1, suffixes=("_ztf", "_ps1"))
-ztf_x_ps1
 ```
 
 ```{code-cell} ipython3
@@ -181,6 +180,7 @@ xmatch = ztf_x_ps1.compute()
 t1 = datetime.now() - t0
 
 print("Time Elapsed:", t1)
+xmatch
 ```
 
 ```{code-cell} ipython3
