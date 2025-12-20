@@ -5,5 +5,3 @@ light_curves/light_curve_collector
 # the actual fornax image instead of the fresh installs
 # (aka tractor install pain).
 forced_photometry/multiband_photometry
-# Disabled until https://github.com/nasa-fornax/fornax-demo-notebooks/issues/596 is fixed
-crossmatch/ztf_ps1_crossmatch
