@@ -10,9 +10,10 @@ from requests.exceptions import ConnectionError, RequestException
 from astroquery.exceptions import TimeoutError
 import warnings
 
+
 # lamassa et al., 2015  1 source
 def get_lamassa_sample(coords, labels, *, verbose=1):
-    """    
+    """
     Append coordinates and labels for the LaMassa et al. (2015) CLAGN sample.
 
     This function performs a NED reference-code query to retrieve the
@@ -27,7 +28,7 @@ def get_lamassa_sample(coords, labels, *, verbose=1):
         List of the first author name and publication year for tracking the sources, shared amongst functions
     verbose : int, optional
         Print out the length of the sample derived from this literature source
-        
+
     Returns
     -------
     None
@@ -48,7 +49,7 @@ def get_lamassa_sample(coords, labels, *, verbose=1):
 
 # MacLeod et al., 2016
 def get_macleod16_sample(coords, labels, *, verbose=1):
-    """    
+    """
     Append coordinates and labels for the MacLeod et al. (2016) CLAGN sample.
 
     Coordinates are parsed from the HTML table hosted by the journal website
@@ -85,10 +86,10 @@ def get_macleod16_sample(coords, labels, *, verbose=1):
 def get_ruan_sample(coords, labels, *, verbose=1):
     """
     Append coordinates and labels for the Ruan et al. (2016) CLAGN sample.
-    
+
     This function performs a NED reference-code query to retrieve the
     coordinates
-    
+
     Parameters
     ----------
     coords : list
@@ -122,7 +123,7 @@ def get_macleod19_sample(coords, labels, *, verbose=1):
     Append coordinates and labels for the MacLeod et al. (2019) CLAGN sample.
 
     Coordinates are parsed from Vizier service
-    
+
     Parameters
     ----------
     coords : list
@@ -131,7 +132,7 @@ def get_macleod19_sample(coords, labels, *, verbose=1):
         List of the first author name and publication year for tracking the sources, shared amongst functions
     verbose : int, optional
         Print out the length of the sample derived from this literature source
-        
+
     Returns
     -------
     None
@@ -163,7 +164,7 @@ def get_sheng_sample(coords, labels, *, verbose=1):
 
     This function performs a NED reference-code query to retrieve the
     coordinates
-    
+
     Parameters
     ----------
     coords : list
@@ -178,7 +179,7 @@ def get_sheng_sample(coords, labels, *, verbose=1):
     None
     """
     CLQ = Ned_query_refcode_exceptions('2020ApJ...889...46S')
-    if paper is None:
+    if CLQ is None:
         # Warning will be printed from Ned_query_refcode_exceptions()
         return
 
@@ -260,10 +261,10 @@ def get_lyu_sample(coords, labels, *, verbose=1):
     None
     """
     CLQ = Ned_query_refcode_exceptions('2022ApJ...927..227L')
-    if paper is None:
+    if CLQ is None:
         # Warning will be printed from Ned_query_refcode_exceptions()
         return
-        
+
     lyu_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
                   for ra, dec in zip(CLQ['RA'], CLQ['DEC'])]
     lyu_labels = ['Lyu 22' for ra in CLQ['RA']]
@@ -325,7 +326,7 @@ def get_hon_sample(coords, labels, *, verbose=1):
     None
     """
     CLQ = Ned_query_refcode_exceptions('2022MNRAS.511...54H')
-    if paper is None:
+    if CLQ is None:
         # Warning will be printed from Ned_query_refcode_exceptions()
         return
 
@@ -359,10 +360,10 @@ def get_yang_sample(coords, labels, *, verbose=1):
     None
     """
     CLQ = Ned_query_refcode_exceptions('2018ApJ...862..109Y')
-    if paper is None:
+    if CLQ is None:
         # Warning will be printed from Ned_query_refcode_exceptions()
         return
-        
+
     yang_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
                    for ra, dec in zip(CLQ['RA'], CLQ['DEC'])]
     yang_labels = ['Yang 18' for ra in CLQ['RA']]
@@ -395,7 +396,7 @@ def get_sanchezsaez_sample(coords, labels, *, verbose=1):
     """
 
     CSAGN = Ned_query_refcode_exceptions('2021AJ....162..206S')
-    if paper is None:
+    if CSAGN is None:
         # Warning will be printed from Ned_query_refcode_exceptions()
         return
 
@@ -443,7 +444,7 @@ def get_graham_sample(coords, labels, *, verbose=1):
 
 
 def get_ztf_objectid_sample(coords, labels, *, objectids=["ZTF18aabtxvd", "ZTF18aahqkbt"], verbose=1):
-    """ 
+    """
     Append coordinates for sources known only by their ZTF object IDs.
 
     Coordinates are retrieved via the ALeRCE API and added to the provided
@@ -547,8 +548,9 @@ def Ned_query_refcode_exceptions(paper_link):
             f"Encountered {type(e).__name__} for paper {paper_link}. skipping.",
             category=RuntimeWarning,
             stacklevel=2,
-        )        
+        )
         return
+
 
 def get_paper_sample(coords, labels, *, paper_link="2019A&A...627A..33D", label="Cicco19", verbose=1):
     """
@@ -569,9 +571,9 @@ def get_paper_sample(coords, labels, *, paper_link="2019A&A...627A..33D", label=
     """
     paper = Ned_query_refcode_exceptions(paper_link)
     if paper is None:
-        #warning is already printed inside of Ned_query_refcode_exceptions()
-        continue
-        
+        # warning is already printed inside of Ned_query_refcode_exceptions()
+        return
+
     paper_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
                     for ra, dec in zip(paper['RA'], paper['DEC'])]
     paper_labels = [label for ra in paper['RA']]
@@ -670,8 +672,8 @@ def clean_sample(coords_list, labels_list, *, consolidate_nearby_objects=True, v
             objectid : int
                 Unique identifier for each source in the sample.
             label : str
-                Literature label for tracking source provenance.        
-    
+                Literature label for tracking source provenance.
+
     The returned table has one row per retained object after optional
         consolidation.
     """
@@ -715,7 +717,7 @@ def validate_sample_table(tbl):
     values are integers, unique, and sequential starting at 1, and
     that ``label`` contains strings. Informative exceptions are
     raised if validation fails.
-    
+
     Parameters
     ----------
     tbl : astropy.table.Table
@@ -733,7 +735,7 @@ def validate_sample_table(tbl):
 
     """
     from astropy.coordinates import SkyCoord
-    
+
     # Check that tbl is an Astropy Table
     if not isinstance(tbl, Table):
         raise TypeError("Input must be an astropy.table.Table instance.")
