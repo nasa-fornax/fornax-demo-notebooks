@@ -9,7 +9,6 @@ kernelspec:
   display_name: py-ztf_ps1_crossmatch
   language: python
   name: python3
-skip_execution: true
 ---
 
 # Cross-Match ZTF and Pan-STARRS using LSDB
@@ -164,12 +163,7 @@ ztf_piece = lsdb.open_catalog(
 
 # Read Pan-STARRS DR2
 ps1_path = "s3://stpubdata/panstarrs/ps1/public/hats/otmo"
-ps1_margin = "s3://stpubdata/panstarrs/ps1/public/hats/otmo_10arcs"
-ps1 = lsdb.open_catalog(
-    ps1_path,
-    margin_cache=ps1_margin,
-    columns=["objName","objID","raMean","decMean"],
-)
+ps1 = lsdb.open_catalog(ps1_path, columns=["objName","objID","raMean","decMean"])
 ```
 
 ## 3. Initialize the crossmatch and compute, measuring the time elapsed.
