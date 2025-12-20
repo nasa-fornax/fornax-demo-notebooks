@@ -114,7 +114,7 @@ We access the COSMOS2015 catalog using the Table Access Protocol (TAP), an IVOA 
 
 # Central RA/Dec of the COSMOS field (from SIMBAD).
 # Used as the center of the TAP cone search.
-coords = SkyCoord('150.01d 2.2d', frame='icrs')  
+coords = SkyCoord('150.01d 2.2d', frame='icrs')
 
 # Search radius (in arcminutes).
 # Full COSMOS radius is ~48', but querying that area is extremely slow
@@ -372,12 +372,12 @@ galex_images = galex_get_images(coords, verbose=True)
 # Check the catalog for missing or invalid values to ensure the data are usable.
 df.isna().sum()
 
-# It is acceptable for some flux columns to contain missing values; 
+# It is acceptable for some flux columns to contain missing values;
 # the remaining columns are complete.
 ```
 
 ```{code-cell} ipython3
-# As an exploratory check, examine how many sources of each 
+# As an exploratory check, examine how many sources of each
 # classification type appear in the catalog.
 #Type: 0 = galaxy, 1 = star, 2 = X-ray source, -9 is failure to fit
 df.type.value_counts()
@@ -456,7 +456,7 @@ prf_fuv = fits.open("data/Galex/PSFfuv.fits")[0].data
 prf_nuv = prf_nuv[0:119, 0:119]
 prf_fuv = prf_fuv[0:119, 0:119]
 
-# These are much larger than the cutouts we are using, so only keep the central 
+# These are much larger than the cutouts we are using, so only keep the central
 # region which is the size of our cutouts
 ngalex_pix = galex_cutout_width / galex_mosaic_pix_scale
 prf_cen = int(60)
@@ -600,7 +600,6 @@ def calc_instrflux(band, ra, dec, stype, ks_flux_aper2, img_pair, df):
 Here we demonstrate a baseline implementation of forced photometry that processes each source sequentially and computes fluxes for all bands. Although this approach is simple and instructive, it is computationally inefficient for large catalogs, and we therefore do not use it.
 
 ```{code-cell} ipython3
-#%%time
 ## Do the calculation without multiprocessing for benchmarking
 
 ## Make a copy for parallel computation
@@ -636,8 +635,8 @@ paramlist = []
 for row in df.itertuples():
     for band in all_bands:
          # Select the appropriate science/background image pair for this band and GALEX tile
-        img_pair = lookup_img_pair(sci_bkg_pairs, band.idx, row.galex_image)  
-        
+        img_pair = lookup_img_pair(sci_bkg_pairs, band.idx, row.galex_image)
+
         # Append the full set of parameters needed by calc_instrflux()
         paramlist.append(
             [row.Index, band, row.ra, row.dec, row.type, row.ks_flux_aper2, img_pair, df]
@@ -1078,7 +1077,7 @@ chandra_detect = merged[merged.cosmos_chandra_detect > 0]
 sns.scatterplot(data = chandra_detect, x = 'NUV-3.6', y = 'FUV-NUV',
                 ax = ax, hue= 'chandra_HR',palette="flare")
 
-# Make the legend for hue into a colorbar outside the plot 
+# Make the legend for hue into a colorbar outside the plot
 norm = plt.Normalize(merged['chandra_HR'].min(), merged['chandra_HR'].max())
 sm = plt.cm.ScalarMappable(cmap="flare", norm=norm)
 sm.set_array([])

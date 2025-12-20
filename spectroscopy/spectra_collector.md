@@ -222,21 +222,18 @@ This archive includes spectra taken by
  &bull; Euclid/NISP
 
 ```{code-cell} ipython3
-%%time
 # Get Keck Spectra (COSMOS only)
 df_spec_DEIMOS = KeckDEIMOS_get_spec(sample_table=sample_table, search_radius_arcsec=1)
 df_spec.append(df_spec_DEIMOS)
 ```
 
 ```{code-cell} ipython3
-%%time
 # Get Spitzer IRS Spectra
 df_spec_IRS = SpitzerIRS_get_spec(sample_table, search_radius_arcsec=1, COMBINESPEC=False)
 df_spec.append(df_spec_IRS)
 ```
 
 ```{code-cell} ipython3
-%%time
 # Get Euclid Spectra
 df_spec_Euclid = euclid_get_spec(sample_table=sample_table, search_radius_arcsec=1)
 df_spec.append(df_spec_Euclid)
@@ -251,7 +248,6 @@ This archive includes spectra taken by
  &bull; JWST (including MSA and slit spectroscopy)
 
 ```{code-cell} ipython3
-%%time
 # Get Spectra for HST
 df_spec_HST = HST_get_spec(
     sample_table,
@@ -264,7 +260,6 @@ df_spec.append(df_spec_HST)
 ```
 
 ```{code-cell} ipython3
-%%time
 # Get Spectra for JWST
 df_jwst = JWST_get_spec(
     sample_table,
@@ -293,7 +288,6 @@ herschel_download_directory = 'data/herschel'
 ### 2.4 SDSS Archive
 
 ```{code-cell} ipython3
-%%time
 # Get SDSS Spectra
 df_spec_SDSS = SDSS_get_spec(sample_table, search_radius_arcsec=5, data_release=17)
 df_spec.append(df_spec_SDSS)
@@ -308,7 +302,6 @@ Therefore, we will not include SDSS DR16 here (this is treated in the SDSS searc
 The DESI search is currently commented out because `SPARCL` is not compatible with numpy > 2 which we require for the other modules to run.
 
 ```{code-cell} ipython3
-#%%time
 ## Get DESI and BOSS spectra with SPARCL
 #df_spec_DESIBOSS = DESIBOSS_get_spec(sample_table, search_radius_arcsec=5)
 #df_spec.append(df_spec_DESIBOSS)

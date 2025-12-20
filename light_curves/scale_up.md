@@ -410,7 +410,6 @@ is one of the main reasons that it was developed -- it launches the archive jobs
 different way, so that the calls are also allowed to parallelize their own internal code and thus run much faster.
 
 ```{code-cell}
-%%time
 # Skip archive calls that use internal parallelization.
 _archive_names = [name for name in archive_names if name.lower() not in ["panstarrs", "ztf"]]
 
