@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.17.2
 kernelspec:
-  name: py-ztf_ps1_crossmatch
   display_name: py-ztf_ps1_crossmatch
   language: python
+  name: py-ztf_ps1_crossmatch
 ---
 
 # Cross-Match ZTF and Pan-STARRS using LSDB
