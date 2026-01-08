@@ -91,8 +91,10 @@ from heasarc_functions import heasarc_get_lightcurves
 from icecube_functions import icecube_get_lightcurves
 from panstarrs_functions import panstarrs_get_lightcurves
 from plot_functions import create_figures
-from sample_selection import (clean_sample, get_green_sample, get_hon_sample, get_lamassa_sample, get_lopeznavas_sample,
-    get_lyu_sample, get_macleod16_sample, get_macleod19_sample, get_ruan_sample, get_sdss_sample, get_sheng_sample, get_yang_sample)
+from sample_selection import (clean_sample, get_green_sample, get_hon_sample,
+    get_lamassa_sample, get_lopeznavas_sample, get_lyu_sample, get_macleod16_sample,
+    get_macleod19_sample, get_ruan_sample, get_sdss_sample, get_sheng_sample,
+    get_yang_sample, validate_sample_table)
 from tess_kepler_functions import tess_kepler_get_lightcurves
 from wise_functions import wise_get_lightcurves
 from rubin_functions import rubin_get_lightcurves
@@ -160,7 +162,7 @@ to an [astropy table](https://docs.astropy.org/en/stable/table/)
 If you want to build your own sample_table, your table must contain one row per source and include exactly three required pieces of information: a coord column holding an astropy.coordinates.SkyCoord position for each object, a unique integer objectid, and a label column giving a short string describing that source’s origin (e.g., literature reference, sample name, or provenance tag).
 
 ```{code-cell} ipython3
-# Run this cell if you build your own sample to validate that it has the 
+# Run this cell if you build your own sample to validate that it has the
 # required structure:
 # it must contain `coord` (SkyCoord), `objectid` (unique sequential ints),
 # and `label` (strings). Raises informative errors if anything is malformed.
