@@ -83,7 +83,6 @@ import pyvo
 sys.path.append('code_src/')
 
 import cutout
-from exceptions import TractorError
 import photometry
 from nway_write_header import nway_write_header
 from photometry import Band

@@ -6,7 +6,6 @@ from typing import NamedTuple
 
 import numpy as np
 from astropy.stats import sigma_clipped_stats
-from exceptions import TractorError
 
 # temporarily let the notebook start without tractor as dependency
 try:
