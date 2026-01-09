@@ -134,11 +134,16 @@ def run_tractor(*, subimage, prf, objsrc, skymean, skynoise):
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", ".*divide by zero.*")
             for tr in range(20):
-                try:
-                    dlnp, X, alpha, flux_var = tractor.optimize(variance=True)
                 # If Tractor cannot converge (common when sources are faint or blended),
                 # return None to signal failure for this band.
+                try:
+                    dlnp, X, alpha, flux_var = tractor.optimize(variance=True)
+                # These errors are known to occur.
                 except (AssertionError, IndexError):
+                    return
+                # If there are other errors, raise a warning but don't crash.
+                except Exception as exc:
+                    warnings.warn(f"Tractor encountered an unexpected exception: {exc}", RuntimeWarning)
                     return
 
                 if dlnp < 1e-3:
