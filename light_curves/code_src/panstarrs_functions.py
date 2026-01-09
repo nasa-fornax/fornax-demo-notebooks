@@ -20,7 +20,7 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
             objectid : int
                 Unique identifier for each source in the sample.
             label : str
-                Literature label for tracking source provenance.            
+                Literature label for tracking source provenance.
     radius : float
         Angular search radius in arcseconds used for the crossmatch between the input
         sample and the Pan-STARRS object catalog. Default is 1.0 arcsec.
@@ -30,7 +30,7 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
     df_lc : MultiIndexDFObject
         Indexed by [objectid, label, band, time]. The resulting internal pandas DataFrame
         contains the following columns:
-        
+
             flux : float
                 Flux values in millijansky (mJy), converted from PS1 psfFlux (Jy × 1e3).
             err : float
@@ -49,9 +49,8 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
     # read in the panstarrs object table to lsdb
     # this table will be used for cross matching with our sample's ra and decs
     # but does not have light curve information
-    panstarrs_object = lsdb.read_hats(
+    panstarrs_object = lsdb.open_catalog(
         's3://stpubdata/panstarrs/ps1/public/hats/otmo',
-        margin_cache='s3://stpubdata/panstarrs/ps1/public/hats/otmo_10arcs',
         columns=["objID",  # PS1 ID
                  "raMean", "decMean",  # coordinates to use for cross-matching
                  "nStackDetections",  # some other data to use
@@ -60,9 +59,8 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
     # read in the panstarrs light curves to lsdb
     # panstarrs recommendation is not to index into this table with ra and dec
     # but to use object ids from the above object table
-    panstarrs_detect = lsdb.read_hats(
+    panstarrs_detect = lsdb.open_catalog(
         's3://stpubdata/panstarrs/ps1/public/hats/detection',
-        margin_cache='s3://stpubdata/panstarrs/ps1/public/hats/detection_10arcs',
         columns=["objID",  # PS1 object ID
                  "detectID",  # PS1 detection ID
                  # light-curve stuff
