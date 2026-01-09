@@ -576,13 +576,13 @@ def calc_instrflux(band, ra, dec, stype, ks_flux_aper2, img_pair, df):
     skymean, skynoise = photometry.calc_background(bkgsubimage=bkgsubimage)
 
     # Run Tractor to fit the model PRF + sky + neighbors to the science cutout.
+    flux_var = photometry.run_tractor(
+        subimage=subimage, prf=band.prf, objsrc=objsrc, skymean=skymean, skynoise=skynoise
+    )
+
     # If Tractor cannot converge (common when sources are faint or blended),
     # return NaNs to signal failure for this band.
-    try:
-        flux_var = photometry.run_tractor(
-            subimage=subimage, prf=band.prf, objsrc=objsrc, skymean=skymean, skynoise=skynoise
-        )
-    except TractorError:
+    if flux_var is None:
         return (band.idx, np.nan, np.nan)
 
     # Convert Tractor’s instrumental flux and variance into physical units

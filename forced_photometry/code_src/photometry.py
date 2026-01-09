@@ -131,21 +131,19 @@ def run_tractor(*, subimage, prf, objsrc, skymean, skynoise):
 
     # run the tractor optimization (do forced photometry)
     # Take several linearized least squares steps
-    try:
-        tr = 0
-        with suppress_stdout():
-            with warnings.catch_warnings():
-                warnings.filterwarnings("ignore", ".*divide by zero.*")
-                # warnings.simplefilter('ignore')
-                for tr in range(20):
+    with suppress_stdout():
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", ".*divide by zero.*")
+            for tr in range(20):
+                try:
                     dlnp, X, alpha, flux_var = tractor.optimize(variance=True)
-                    # print('dlnp',dlnp)
-                    if dlnp < 1e-3:
-                        break
+                # If Tractor cannot converge (common when sources are faint or blended),
+                # return None to signal failure for this band.
+                except (AssertionError, IndexError):
+                    return
 
-    # catch exceptions and bad fits
-    except Exception as e:
-        raise TractorError("Tractor failed to converge") from e
+                if dlnp < 1e-3:
+                    break
 
     return flux_var
 
