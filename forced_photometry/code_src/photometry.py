@@ -6,7 +6,6 @@ from typing import NamedTuple
 
 import numpy as np
 from astropy.stats import sigma_clipped_stats
-from exceptions import TractorError
 
 # temporarily let the notebook start without tractor as dependency
 try:
@@ -131,21 +130,24 @@ def run_tractor(*, subimage, prf, objsrc, skymean, skynoise):
 
     # run the tractor optimization (do forced photometry)
     # Take several linearized least squares steps
-    try:
-        tr = 0
-        with suppress_stdout():
-            with warnings.catch_warnings():
-                warnings.filterwarnings("ignore", ".*divide by zero.*")
-                # warnings.simplefilter('ignore')
-                for tr in range(20):
+    with suppress_stdout():
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", ".*divide by zero.*")
+            for tr in range(20):
+                # If Tractor cannot converge (common when sources are faint or blended),
+                # return None to signal failure for this band.
+                try:
                     dlnp, X, alpha, flux_var = tractor.optimize(variance=True)
-                    # print('dlnp',dlnp)
-                    if dlnp < 1e-3:
-                        break
+                # These errors are known to occur.
+                except (AssertionError, IndexError):
+                    return
+                # If there are other errors, raise a warning but don't crash.
+                except Exception as exc:
+                    warnings.warn(f"Tractor encountered an unexpected exception: {exc}", RuntimeWarning)
+                    return
 
-    # catch exceptions and bad fits
-    except Exception as e:
-        raise TractorError("Tractor failed to converge") from e
+                if dlnp < 1e-3:
+                    break
 
     return flux_var
 
