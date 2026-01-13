@@ -8,7 +8,6 @@ forced_photometry/code_src/calc_irac_uncertainty.py
 forced_photometry/code_src/cutout.py
 forced_photometry/code_src/determine_source_type.py
 forced_photometry/code_src/display_images.py
-forced_photometry/code_src/exceptions.py
 forced_photometry/code_src/find_nconfsources.py
 forced_photometry/code_src/fornax.py
 forced_photometry/code_src/galex_functions.py
