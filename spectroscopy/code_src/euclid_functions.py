@@ -100,8 +100,8 @@ def euclid_get_spec(sample_table, search_radius_arcsec, verbose=True):
         ssa_coords = SkyCoord(ssa_result["s_ra"], ssa_result["s_dec"], unit=u.deg)
 
         # Compute separations and choose the closest SSA row
-        seps = coord.separation(ssa_coords)
-        closest_idx = int(np.argmin(seps))
+        separations = coord.separation(ssa_coords)
+        closest_idx = int(np.argmin(separations))
         row = ssa_result[closest_idx]
  
         # Read the spectrum file from the SSA access URL
