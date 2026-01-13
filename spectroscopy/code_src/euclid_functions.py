@@ -50,7 +50,7 @@ def euclid_get_spec(sample_table, search_radius_arcsec):
     euclid_ssa_collection = "euclid_DpdSirCombinedSpectra"
 
     # Convert search radius once
-    radius = float(search_radius_arcsec) * u.arcsec
+    radius = u.Quantity(search_radius_arcsec, unit=u.arcsec)
 
     # Expected Euclid spectrum column names (same as original query_region path)
     required_cols = ["WAVELENGTH", "SIGNAL", "VAR", "MASK"]
@@ -89,10 +89,7 @@ def euclid_get_spec(sample_table, search_radius_arcsec):
         print(f"Found Euclid SSA spectra for {label}")
     
         # Build SkyCoord array for all returned spectra positions
-        ssa_coords = SkyCoord(
-            ra=np.array(ssa_result["s_ra"], dtype=float) * u.deg,
-            dec=np.array(ssa_result["s_dec"], dtype=float) * u.deg,
-        )
+        ssa_coords = SkyCoord(ssa_result["s_ra"], ssa_result["s_dec"], unit=u.deg)
 
         # Compute separations and choose the closest SSA row
         seps = coord.separation(ssa_coords)
