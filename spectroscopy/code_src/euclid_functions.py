@@ -17,7 +17,7 @@ warnings.filterwarnings("ignore", "The unit 'Angstrom' has been deprecated ", u.
 warnings.filterwarnings("ignore", "The unit 'erg' has been deprecated ", u.UnitsWarning)
 
 
-def euclid_get_spec(sample_table, search_radius_arcsec):
+def euclid_get_spec(sample_table, search_radius_arcsec, verbose=True):
     """
     Retrieve Euclid 1D spectra for sources in a sample table using IRSA's
     Simple Spectral Access (SSA) service.
@@ -36,6 +36,9 @@ def euclid_get_spec(sample_table, search_radius_arcsec):
 
     search_radius_arcsec : float
         Search radius in arcseconds.
+
+    verbose : bool, optional
+        If True, print status messages when spectra are found or not found.
 
     Returns
     -------
@@ -79,15 +82,20 @@ def euclid_get_spec(sample_table, search_radius_arcsec):
 
         # If no spectra are returned
         if ssa_result is None or len(ssa_result) == 0:
-            print(
-                f"No Euclid SSA spectra found for {label} within {radius.to_value(u.arcsec)} arcsec."
-            )
+            if verbose:
+                print(
+                    f"No Euclid SSA spectra found for {label} within "
+                    f"{radius.to_value(u.arcsec)} arcsec."
+                )
             continue
+
+        # Report success if requested
+        if verbose:
+            print(f"Found Euclid SSA spectra for {label}")
 
         # Pick the single nearest SSA row to the query coordinate using SSA-provided sky positions
         # SSA standard commonly provides these as 's_ra' and 's_dec' in degrees.
-        print(f"Found Euclid SSA spectra for {label}")
-    
+
         # Build SkyCoord array for all returned spectra positions
         ssa_coords = SkyCoord(ssa_result["s_ra"], ssa_result["s_dec"], unit=u.deg)
 
