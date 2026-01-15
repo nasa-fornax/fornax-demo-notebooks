@@ -4,9 +4,7 @@
 numpy
 matplotlib
 pandas
-# Right now we don't include DESI by default as sparclclient is not numpy2
-# compatible yet
-# sparclclient
+sparclclient
 astropy
 # pin is due to Spectrum1D rename to Spectrum and an internap spectutils bug
 specutils>=1.20.1
