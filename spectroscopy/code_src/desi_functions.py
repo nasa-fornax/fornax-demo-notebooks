@@ -5,7 +5,7 @@ from astropy import nddata
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
 from sparcl.client import SparclClient
-from specutils import Spectrum1D
+from specutils import Spectrum
 
 from data_structures_spec import MultiIndexDFObject
 
@@ -38,7 +38,7 @@ def DESIBOSS_get_spec(sample_table, search_radius_arcsec):
     for stab in sample_table:
 
         # Search
-        data_releases = ['DESI-EDR', 'BOSS-DR16']
+        data_releases = ['DESI-EDR', 'BOSS-DR17']
 
         search_coords = stab["coord"]
         dra = (search_radius_arcsec * u.arcsec).to(u.degree)
@@ -66,7 +66,7 @@ def DESIBOSS_get_spec(sample_table, search_radius_arcsec):
         inc = ['sparcl_id', 'specid', 'data_release', 'redshift', 'flux',
                'wavelength', 'model', 'ivar', 'mask', 'spectype', 'ra', 'dec']
         results_I = client.retrieve(uuid_list=found_I.ids, include=inc)
-        specs = [Spectrum1D(spectral_axis=r.wavelength * u.AA,
+        specs = [Spectrum(spectral_axis=r.wavelength * u.AA,
                             flux=np.array(r.flux) * 10**-17 * u.Unit('erg cm-2 s-1 AA-1'),
                             uncertainty=nddata.InverseVariance(np.array(r.ivar)),
                             redshift=r.redshift,
