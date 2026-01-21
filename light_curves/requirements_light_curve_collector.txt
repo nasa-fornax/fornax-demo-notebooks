@@ -19,6 +19,8 @@ alerce
 lsdb>=0.6.2,<0.8
 # Required by lsdb to read files from AWS S3, revise when lsdb[s3fs] is supported by required minimum version.
 s3fs
+# Required by lsdb, and limiting version to work around known bug/regression https://github.com/astronomy-commons/lsdb/issues/1201
+fsspec<2025.12
 # We use distributed in this notebook, but installing any dask would make the [dataframe] extras required by dependencies for other notebooks.
 # It feels to be the cleanest solution to add the dependency here as we don't directly use it elsewhere.
 dask[distributed,dataframe]
