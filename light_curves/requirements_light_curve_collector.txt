@@ -15,13 +15,13 @@ acstools
 lightkurve
 alerce
 # >=0.6.2 for improved s3 read speed
-#=0.6.4 is for a bug that throws deserialized reads
+#=0.6.4 pin for both lsdb and hats.
+# This is for a bug that throws deserialized reads (astronomy-commons/lsdb#1201)
 # Upper limit <0.8 is for instant workaround of coming incompatibility https://github.com/nasa-fornax/fornax-demo-notebooks/issues/587
-lsdb=0.6.4
+lsdb==0.6.4
+hats==0.6.4
 # Required by lsdb to read files from AWS S3, revise when lsdb[s3fs] is supported by required minimum version.
 s3fs
-#0.6.4 required to avoid deserialized read bug
-hats=0.6.4
 # We use distributed in this notebook, but installing any dask would make the [dataframe] extras required by dependencies for other notebooks.
 # It feels to be the cleanest solution to add the dependency here as we don't directly use it elsewhere.
 dask[distributed,dataframe]
