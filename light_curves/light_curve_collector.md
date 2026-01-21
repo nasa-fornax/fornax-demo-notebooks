@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.19.0
 kernelspec:
-  name: py-light_curve_collector
   display_name: py-light_curve_collector
   language: python
+  name: py-light_curve_collector  
 ---
 
 # Make Multi-Wavelength Light Curves Using Archival Data
