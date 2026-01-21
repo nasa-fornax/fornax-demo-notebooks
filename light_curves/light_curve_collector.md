@@ -4,11 +4,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.19.0
 kernelspec:
+  name: py-light_curve_collector
   display_name: py-light_curve_collector
   language: python
-  name: py-light_curve_collector
 ---
 
 # Make Multi-Wavelength Light Curves Using Archival Data
@@ -100,6 +100,7 @@ from wise_functions import wise_get_lightcurves
 from rubin_functions import rubin_get_lightcurves
 from ztf_functions import ztf_get_lightcurves
 
+# You may see a warning about passwords for the Gaia Archive.  This can safely be ignored.
 # You may see a warning about "tpfmodel submodule".  This can safely be ignored.
 ```
 
