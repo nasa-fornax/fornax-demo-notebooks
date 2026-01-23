@@ -90,7 +90,8 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
         panstarrs_object,
         radius_arcsec=radius,
         n_neighbors=1,
-        suffixes=("", "")
+        suffixes=("", ""),
+        suffix_method="all_columns",
     )
 
     # plan to join that cross match with detections to get light-curves
@@ -99,12 +100,14 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
         left_on="objID",
         right_on="objID",
         output_catalog_name="yang_ps_lc",
-        suffixes=["", ""]
+        suffixes=["", ""],
+        suffix_method="all_columns",
     )
 
     # Create default local cluster
     # here is where the actual work gets done
-    with Client():
+    # Use multiple workers with a single thread per worker for better performance on Fornax
+    with Client(n_workers=2, threads_per_worker=1, memory_limit=None):
         # compute the cross match with object table
         # and the join with the detections table
         matched_df = matched_lc.compute()
