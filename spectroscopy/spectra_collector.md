@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.19.0
 kernelspec:
   name: py-spectra_collector
   display_name: py-spectra_collector
@@ -112,7 +112,7 @@ from data_structures_spec import MultiIndexDFObject
 from desi_functions import DESIBOSS_get_spec
 from herschel_functions import Herschel_get_spec
 from keck_functions import KeckDEIMOS_get_spec
-from mast_functions import HST_get_spec, JWST_get_spec
+#from mast_functions import HST_get_spec, JWST_get_spec
 from plot_functions import create_figures
 from sample_selection import clean_sample
 from sdss_functions import SDSS_get_spec
@@ -142,29 +142,29 @@ labels.append("NGC4670")
 coords.append(SkyCoord("{} {}".format("14 01 19.92", "−33 04 10.7"), unit=(u.hourangle, u.deg)))
 labels.append("Tol_89")
 
-coords.append(SkyCoord(233.73856, 23.50321, unit=u.deg))
-labels.append("Arp220")
+#coords.append(SkyCoord(233.73856, 23.50321, unit=u.deg))
+#labels.append("Arp220")
 
-coords.append(SkyCoord(150.091, 2.2745833, unit=u.deg))
-labels.append("COSMOS1")
+#coords.append(SkyCoord(150.091, 2.2745833, unit=u.deg))
+#labels.append("COSMOS1")
 
-coords.append(SkyCoord(150.1024475, 2.2815559, unit=u.deg))
-labels.append("COSMOS2")
+#coords.append(SkyCoord(150.1024475, 2.2815559, unit=u.deg))
+#labels.append("COSMOS2")
 
-coords.append(SkyCoord("{} {}".format("150.000", "+2.00"), unit=(u.deg, u.deg)))
-labels.append("COSMOS3")
+#coords.append(SkyCoord("{} {}".format("150.000", "+2.00"), unit=(u.deg, u.deg)))
+#labels.append("COSMOS3")
 
-coords.append(SkyCoord("{} {}".format("+53.15508", "-27.80178"), unit=(u.deg, u.deg)))
-labels.append("JADESGS-z7-01-QU")
+#coords.append(SkyCoord("{} {}".format("+53.15508", "-27.80178"), unit=(u.deg, u.deg)))
+#labels.append("JADESGS-z7-01-QU")
 
-coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg)))
-labels.append("TestJWST")
+#coords.append(SkyCoord("{} {}".format("+53.15398", "-27.80095"), unit=(u.deg, u.deg)))
+#labels.append("TestJWST")
 
-coords.append(SkyCoord("{} {}".format("268.48058743", "64.78064676"), unit=(u.deg, u.deg)))
-labels.append("TestEuclid")
+#coords.append(SkyCoord("{} {}".format("268.48058743", "64.78064676"), unit=(u.deg, u.deg)))
+#labels.append("TestEuclid")
 
-coords.append(SkyCoord("{} {}".format("+150.33622", "+55.89878"), unit=(u.deg, u.deg)))
-labels.append("Twin Quasar")
+#coords.append(SkyCoord("{} {}".format("+150.33622", "+55.89878"), unit=(u.deg, u.deg)))
+#labels.append("Twin Quasar")
 
 sample_table = clean_sample(coords, labels, precision=2.0 * u.arcsecond, verbose=1)
 ```
@@ -246,6 +246,163 @@ This archive includes spectra taken by
  &bull; JWST (including MSA and slit spectroscopy)
 
 ```{code-cell} ipython3
+import os
+import shutil
+import warnings
+
+import astropy.constants as const
+import astropy.units as u
+import astroquery.exceptions
+import fsspec
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from astropy.io import fits
+from astropy.table import Table, vstack
+from astroquery.mast import Observations
+from specutils import Spectrum
+from astroquery.mast import MastMissions
+
+from data_structures_spec import MultiIndexDFObject
+
+def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose= True,
+                 delete_downloaded_data=True):
+    """
+    Retrieve HST spectra for a list of sources.
+
+    Parameters
+    ----------
+    sample_table : astropy.table.Table
+        Table with the coordinates and journal reference labels of the sources.
+    search_radius_arcsec : float
+        Search radius in arcseconds.
+    datadir : str
+        Data directory where to store the data. Each function will create a
+        separate data directory (for example "[datadir]/HST/" for HST data).
+    verbose : bool
+        Verbosity level. Set to True for extra talking.
+    delete_downloaded_data : bool, optional
+        If True, delete the downloaded data files. Default is True.
+
+    Returns
+    -------
+    MultiIndexDFObject
+        The spectra returned from the archive.
+    """
+
+    # Create directory
+    if not os.path.exists(datadir):
+        os.mkdir(datadir)
+    this_data_dir = os.path.join(datadir, "HST/")
+
+    # Initialize multi-index object:
+    df_spec = MultiIndexDFObject()
+
+    #setup to use MastMissions class from MAST
+    m = MastMissions()
+
+    for stab in sample_table:
+
+        print("Processing source {}".format(stab["label"]))
+
+        # Query results
+        search_coords = stab["coord"]
+        # If no results are found, this will raise a warning. We explicitly handle the no-results
+        # case below, so let's suppress the warning to avoid confusing notebook users.
+        warnings.filterwarnings("ignore", message='Query returned no results.',
+                                category=astroquery.exceptions.NoResultsWarning,
+                                module="astroquery.mast.discovery_portal")
+ #       query_results = Observations.query_criteria(
+ #           coordinates=search_coords, radius=search_radius_arcsec * u.arcsec,
+ #           dataproduct_type=["spectrum"], obs_collection=["HST"], intentType="science",
+ #           calib_level=[3, 4],)
+
+        query_results = m.query_criteria(coordinates=search_coords,
+                             radius=search_radius_arcsec * u.arcsec,
+                             sci_obs_type='spectrum',
+                             sci_aec='S')
+
+        print("Number of search results: {}".format(len(query_results)))
+
+        if len(query_results) == 0:
+            if verbose:
+                print("Source {} could not be found".format(stab["label"]))
+            continue
+
+        # Retrieve spectra
+        data_products_list = m.get_product_list(query_results)
+
+        # Filter
+        filtered = m.filter_products(
+            data_products_list, 
+            type='science',         # only science products
+            extension="fits",
+ #           file_suffix=['x1d','x2d'],  # calibrated 1D spectra
+            access=['PUBLIC']            # public data
+        )
+        
+        print("Number of files to download: {}".format(len(filtered)))
+
+        print("filtered", filtered)
+        
+        if len(filtered) == 0:
+            if verbose:
+                print("Nothing to download for source {}.".format(stab["label"]))
+            continue
+
+        # Download
+        download_results = m.download_products(
+            filtered, 
+            download_dir=this_data_dir, 
+            verbose=True)
+
+        # download_results is an Astropy Table 
+        paths = download_results['Local Path'].tolist()
+
+
+        # read each file and append to MultiIndexDFObject
+        for prod, path in zip(filtered, paths):
+            # read the 1D spectrum (HDU 1)
+            tbl = Table.read(path, hdu=1)
+            wave = tbl['WAVELENGTH'].data * tbl['WAVELENGTH'].unit
+            flux = tbl['FLUX'].data       * tbl['FLUX'].unit
+            err  = tbl['ERROR'].data * tbl['ERROR'].unit
+
+            # product metadata
+            inst = prod['instrument_name']
+            filt = prod['filters']
+
+            # build a single-entry DataFrame
+            df = pd.DataFrame({
+                'wave':       [wave],
+                'flux':       [flux],
+                'err':        [err],
+                'instrument': [inst],
+                'objectid':   [objid],
+                'label':      [label],
+                'filter':     [filt],
+                'mission':    ['JWST']
+            }).set_index(['objectid','label','filter','mission'])
+
+            # append to container
+            df_spec.append(df)
+      
+        # optionally clean up downloaded files
+        if delete_downloaded_data:
+            shutil.rmtree(download_dir)
+            os.makedirs(download_dir, exist_ok=True)
+
+        # Create table
+        # NOTE: `download_results` has NOT the same order as `data_products_list_filter`.
+        # We therefore have to "manually" get the product file names here and then use
+        # those to open the files.
+
+        #check that this happens in the code above??
+        
+    return df_spec
+```
+
+```{code-cell} ipython3
 # Get Spectra for HST
 df_spec_HST = HST_get_spec(
     sample_table,
@@ -255,6 +412,10 @@ df_spec_HST = HST_get_spec(
     delete_downloaded_data=True
 )
 df_spec.append(df_spec_HST)
+```
+
+```{code-cell} ipython3
+df_spec.data
 ```
 
 ```{code-cell} ipython3

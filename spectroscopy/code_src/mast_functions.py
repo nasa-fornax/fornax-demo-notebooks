@@ -13,6 +13,7 @@ from astropy.io import fits
 from astropy.table import Table, vstack
 from astroquery.mast import Observations
 from specutils import Spectrum
+from astroquery.mast import MastMissions
 
 from data_structures_spec import MultiIndexDFObject
 
@@ -282,7 +283,7 @@ def JWST_group_spectra(df, verbose, quickplot):
 
 
 def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
-                 delete_downloaded_data=True):
+                 delete_downloaded_data=True, verbose = True):
     """
     Retrieve HST spectra for a list of sources.
 
@@ -314,6 +315,9 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
     # Initialize multi-index object:
     df_spec = MultiIndexDFObject()
 
+    #setup to use MastMissions class from MAST
+    m = MastMissions()
+
     for stab in sample_table:
 
         print("Processing source {}".format(stab["label"]))
@@ -325,73 +329,89 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
         warnings.filterwarnings("ignore", message='Query returned no results.',
                                 category=astroquery.exceptions.NoResultsWarning,
                                 module="astroquery.mast.discovery_portal")
-        query_results = Observations.query_criteria(
-            coordinates=search_coords, radius=search_radius_arcsec * u.arcsec,
-            dataproduct_type=["spectrum"], obs_collection=["HST"], intentType="science",
-            calib_level=[3, 4],)
+ #       query_results = Observations.query_criteria(
+ #           coordinates=search_coords, radius=search_radius_arcsec * u.arcsec,
+ #           dataproduct_type=["spectrum"], obs_collection=["HST"], intentType="science",
+ #           calib_level=[3, 4],)
+
+        query_results = m.query_criteria(coordinates=search_coords,
+                             radius=search_radius_arcsec * u.arcsec,
+                             sci_obs_type='spectrum',
+                             sci_aec='S')
+
         print("Number of search results: {}".format(len(query_results)))
 
         if len(query_results) == 0:
-            print("Source {} could not be found".format(stab["label"]))
+            if verbose:
+                print("Source {} could not be found".format(stab["label"]))
             continue
 
         # Retrieve spectra
-        data_products_list = Observations.get_product_list(query_results)
+        data_products_list = m.get_product_list(query_results)
 
         # Filter
-        data_products_list_filter = Observations.filter_products(
-            data_products_list, productType=["SCIENCE"], extension="fits",
-            calib_level=[3, 4],  # only fully reduced or contributed
-            productSubGroupDescription=["SX1"])  # only 1D spectra
-        print("Number of files to download: {}".format(len(data_products_list_filter)))
+        filtered = m.filter_products(
+            data_products_list, 
+            type='science',         # only science products
+            extension="fits",
+            file_suffix=['_c1d','x1d'],  # calibrated 1D spectra
+            access=['PUBLIC']            # public data
+        
+        if verbose:
+            print("Number of files to download: {}".format(len(data_products_list_filter)))
 
         if len(data_products_list_filter) == 0:
-            print("Nothing to download for source {}.".format(stab["label"]))
+            if verbose:
+                print("Nothing to download for source {}.".format(stab["label"]))
             continue
 
         # Download
-        download_results = Observations.download_products(
-            data_products_list_filter, download_dir=this_data_dir, verbose=False)
+        download_results = m.download_products(
+            filtered, 
+            download_dir=this_data_dir, 
+            verbose=False)
+
+        # download_results is an Astropy Table 
+        paths = download_results['Local Path'].tolist()
+
+
+        # read each file and append to MultiIndexDFObject
+        for prod, path in zip(filtered, paths):
+            # read the 1D spectrum (HDU 1)
+            tbl = Table.read(path, hdu=1)
+            wave = tbl['WAVELENGTH'].data * tbl['WAVELENGTH'].unit
+            flux = tbl['FLUX'].data       * tbl['FLUX'].unit
+            err  = tbl['ERROR'].data * tbl['ERROR'].unit
+
+            # product metadata
+            inst = prod['instrument_name']
+            filt = prod['filters']
+
+            # build a single-entry DataFrame
+            df = pd.DataFrame({
+                'wave':       [wave],
+                'flux':       [flux],
+                'err':        [err],
+                'instrument': [inst],
+                'objectid':   [objid],
+                'label':      [label],
+                'filter':     [filt],
+                'mission':    ['JWST']
+            }).set_index(['objectid','label','filter','mission'])
+
+            # append to container
+            df_spec.append(df)
+      
+        # optionally clean up downloaded files
+        if delete_downloaded_data:
+            shutil.rmtree(download_dir)
+            os.makedirs(download_dir, exist_ok=True)
 
         # Create table
         # NOTE: `download_results` has NOT the same order as `data_products_list_filter`.
         # We therefore have to "manually" get the product file names here and then use
         # those to open the files.
-        keys = ["filters", "obs_collection", "instrument_name", "calib_level",
-                "t_obs_release", "proposal_id", "obsid", "objID", "distance"]
-        tab = Table(names=keys + ["productFilename"], dtype=[str,
-                    str, str, int, float, int, int, int, float] + [str])
-        for jj in range(len(data_products_list_filter)):
-            idx_cross = np.where(query_results["obsid"]
-                                 == data_products_list_filter["obsID"][jj])[0]
-            tmp = query_results[idx_cross][keys]
-            tab.add_row(list(tmp[0]) + [data_products_list_filter["productFilename"][jj]])
 
-        # Create multi-index object
-        for jj in range(len(tab)):
-
-            # find correct path name:
-            # Note that `download_results` does NOT have same order as `tab`!!
-            file_idx = np.where([tab["productFilename"][jj] in download_results["Local Path"][iii]
-                                for iii in range(len(download_results))])[0]
-
-            # open spectrum
-            filepath = download_results["Local Path"][file_idx[0]]
-            spec1d = Spectrum.read(filepath)
-
-            # Note: this should be in erg/s/cm2/A and any wavelength unit.
-            dfsingle = pd.DataFrame(dict(
-                wave=[spec1d.spectral_axis], flux=[spec1d.flux], err=[
-                    spec1d.uncertainty.array * spec1d.uncertainty.unit],
-                label=[stab["label"]],
-                objectid=[stab["objectid"]],
-                mission=[tab["obs_collection"][jj]],
-                instrument=[tab["instrument_name"][jj]],
-                filter=[tab["filters"][jj]],
-            )).set_index(["objectid", "label", "filter", "mission"])
-            df_spec.append(dfsingle)
-
-        if delete_downloaded_data:
-            shutil.rmtree(this_data_dir)
-
+        #check that this happens in the code above??
+        
     return df_spec
