@@ -408,7 +408,7 @@ df_spec_HST = HST_get_spec(
     sample_table,
     search_radius_arcsec=0.5,
     datadir="./data/",
-    verbose=False,
+    verbose=True,
     delete_downloaded_data=True
 )
 df_spec.append(df_spec_HST)
