@@ -12,7 +12,7 @@ import pandas as pd
 from astropy.io import fits
 from astropy.table import Table, vstack
 from astroquery.mast import Observations, MastMissions
-from specutils import Spectrum1D
+from specutils import Spectrum
 
 from data_structures_spec import MultiIndexDFObject
 
@@ -337,9 +337,11 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose= True,
             Unique identifier for each source in the sample.
         label : str
             Human-readable label for each source.
-   search_radius : float or astropy.units.Quantity
-        Search radius. If a float is provided, it is interpreted as arcseconds.
-        If a Quantity is provided, it must be an angular unit.
+    search_radius_arcsec : float, str, or astropy.units.Quantity
+        Search radius passed to astroquery. If a float/int is provided, it is
+        interpreted as arcseconds (not arcminutes). If a string is provided,
+        it must be parsable by astropy.coordinates.Angle (e.g., "0.5 arcsec",
+        "1 arcmin"). If a Quantity is provided, it must be an angular unit.
     datadir : str
         Data directory where to store the data. Each function will create a
         separate data directory (for example "[datadir]/HST/" for HST data).
@@ -366,10 +368,10 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose= True,
     mastm = MastMissions()
 
     # Normalize radius to an angular Quantity in arcsec
-    if isinstance(search_radius, u.Quantity):
-        search_radius_quantity = search_radius.to(u.arcsec)
+    if isinstance(search_radius_arcsec, (int, float, np.floating)):
+        radius = search_radius_arcsec * u.arcsec
     else:
-        search_radius_quantity = search_radius * u.arcsec
+        radius = search_radius_arcsec  # Quantity or string: pass through
 
     for stab in sample_table:
 
@@ -390,10 +392,12 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose= True,
  
         # Query MAST for HST spectra near this target position.
         query_results = mastm.query_criteria(coordinates=search_coords,
-                             radius=search_radius_quantity,
+                             radius=radius,
                              sci_obs_type='spectrum',
-                             sci_aec='S')
-
+                             sci_aec='S',
+                             sci_status="PUBLIC"
+                        )
+        
         if verbose:
             print("Number of search results: {}".format(len(query_results)))
 
@@ -406,15 +410,13 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose= True,
         data_products_list = mastm.get_product_list(query_results)
 
         # Filter down to public science FITS products.
-        filtered = m.filter_products(
+        filtered = mastm.filter_products(
             data_products_list, 
             type='science',         # only science products
             extension="fits",
- #           file_suffix=['x1d','x2d'],  # calibrated 1D spectra
-            access=['PUBLIC']            # public data
         )
 
-        # Manual filter on suffix
+        # Manual filter on suffix to get calibrated 1D spectra
         keys = np.asarray(filtered["product_key"]).astype(str)
         suffix_mask = (
             np.char.endswith(keys, "_x1d.fits") |
