@@ -1,8 +1,6 @@
 crossmatch/output/xmatch_benchmarks.csv
-crossmatch/crossmatch.md
 crossmatch/requirements_ztf_ps1_crossmatch.txt
 crossmatch/ztf_ps1_crossmatch.md
-forced_photometry/forced-photometry.md
 forced_photometry/code_src/README.md
 forced_photometry/code_src/calc_irac_uncertainty.py
 forced_photometry/code_src/cutout.py
@@ -31,7 +29,6 @@ forced_photometry/multiband_photometry.md
 forced_photometry/output/README.md
 forced_photometry/requirements_multiband_photometry.txt
 light_curves/ML_AGNzoo.md
-light_curves/time-domain.md
 light_curves/code_src/AGNzoo_functions.py
 light_curves/code_src/README.md
 light_curves/code_src/classifier_functions.py
@@ -70,7 +67,6 @@ light_curves/requirements_light_curve_classifier.txt
 light_curves/requirements_light_curve_collector.txt
 light_curves/requirements_scale_up.txt
 light_curves/scale_up.md
-spectroscopy/spectroscopy.md
 spectroscopy/code_src/README.md
 spectroscopy/code_src/data_structures_spec.py
 spectroscopy/code_src/desi_functions.py
