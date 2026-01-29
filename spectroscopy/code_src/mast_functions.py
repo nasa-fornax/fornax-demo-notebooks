@@ -11,9 +11,8 @@ import numpy as np
 import pandas as pd
 from astropy.io import fits
 from astropy.table import Table, vstack
-from astroquery.mast import Observations
-from specutils import Spectrum
-from astroquery.mast import MastMissions
+from astroquery.mast import Observations, MastMissions
+from specutils import Spectrum1D
 
 from data_structures_spec import MultiIndexDFObject
 
@@ -281,56 +280,10 @@ def JWST_group_spectra(df, verbose, quickplot):
 
     return df_spec
 
-def unit_from_tunit(tunit, fallback):
-    """
-    Parse a FITS ``TUNITn`` string into an Astropy unit.
-
-    This helper normalizes a few common non-FITS-standard unit spellings seen
-    in HST pipeline products (e.g., ``Angstroms``) before parsing.  Helps to 
-    remove lots of warnings about units that are actually harmless
-
-    Parameters
-    ----------
-    tunit : str or None
-        The FITS unit string taken from a ``TUNITn`` keyword (or ``None`` if
-        not present).
-    fallback : astropy.units.UnitBase
-        Unit to return when parsing fails or ``tunit`` is ``None``.
-
-    Returns
-    -------
-    unit : astropy.units.UnitBase
-        Parsed unit, or ``fallback`` if parsing fails.
-    """
-    # If the file doesn't specify a unit, fall back to a caller-provided default.
-    if tunit is None:
-        return fallback
-
-    # Normalize whitespace and coerce to a plain string.
-    s = str(tunit).strip()
-
-    # Normalize common non-FITS-standard strings
-    if s.lower() == "angstroms":
-        s = "Angstrom"
-    if s.lower() == "counts/s":
-        s = "count / s"
-    if s == "erg/s/cm**2/Angstrom":
-        s = "erg cm-2 s-1 Angstrom-1"
-        
-    return u.Unit(s)
-
 
 def read_sci_spectrum(path):
     """
     Read wavelength, flux density, and uncertainty from an HST 1D spectrum file.
-
-    This function targets HST products where the extracted 1D spectrum is stored
-    in the ``SCI`` BinTable extension (common for ``*_x1d.fits`` and ``*_c1d.fits``).
-    The table typically contains a *single row* with vector-valued columns; this
-    function returns the first row (order 0) as 1D arrays.
-
-    Units are derived from the FITS header ``TUNITn`` keywords in the ``SCI`` HDU,
-    which is more reliable than relying on Astropy's table column unit parsing.
 
     Parameters
     ----------
@@ -346,50 +299,24 @@ def read_sci_spectrum(path):
     err : astropy.units.Quantity
         1-sigma flux density uncertainty array with units.
 
-    Raises
-    ------
-    KeyError
-        If the ``SCI`` extension is missing or required columns are not present.
-    ValueError
-        If the ``SCI`` table is empty or does not contain a usable first row.
-    """
+     """
+    # read the 1D spectrum (HDU 1)
+    spec1d = Spectrum.read(path)
     
-    with fits.open(path) as hdul:
-        # Require an explicit SCI extension
-        if "SCI" not in hdul:
-            raise KeyError("No SCI extension found")
+    wave = spec1d.spectral_axis          
+    flux = spec1d.flux                   
 
-        # Pull the SCI binary table HDU containing the extracted spectrum vectors.
-        hdu = hdul["SCI"]
-        
-        # Convert the HDU data to an Astropy Table for convenient column access.
-        tbl = Table(hdu.data)
-
-        # Ensure the expected spectral columns exist in this product.
-        required = ["WAVELENGTH", "FLUX", "ERROR"]
-        missing = [c for c in required if c not in tbl.colnames]
-        if missing:
-            raise KeyError(f"Missing columns in SCI: {missing}. Available: {tbl.colnames}")
-
-        # Build a mapping of column name -> FITS TUNIT index (1-based).
-        col_index = {name: i + 1 for i, name in enumerate(hdu.columns.names)}
-
-        # Parse units from the SCI header TUNIT keywords
-        wave_unit = unit_from_tunit(hdu.header.get(f"TUNIT{col_index['WAVELENGTH']}"), u.AA)
-        flux_unit = unit_from_tunit(hdu.header.get(f"TUNIT{col_index['FLUX']}"), u.dimensionless_unscaled)
-        err_unit  = unit_from_tunit(hdu.header.get(f"TUNIT{col_index['ERROR']}"), flux_unit)
-
-        # Extract the first row's vectors as plain float arrays and attach units.
-        flux = np.asarray(tbl["FLUX"][0], dtype=float) * flux_unit
-        wave = np.asarray(tbl["WAVELENGTH"][0], dtype=float) * wave_unit
-        err  = np.asarray(tbl["ERROR"][0], dtype=float) * err_unit
-
-        #remove zero and NaN fluxes
-        good = (flux.value > 0) & np.isfinite(flux.value)
-        wave = wave[good]
-        flux = flux[good]
-        err  = err[good]
-
+    if spec1d.uncertainty is not None:
+        err = spec1d.uncertainty.quantity
+    else:
+        err = np.full(flux.shape, np.nan) * flux.unit
+                
+    #remove zero and NaN fluxes
+    good = (flux.value > 0) & np.isfinite(flux.value)
+    wave = wave[good]
+    flux = flux[good]
+    err  = err[good]
+    
     return wave, flux, err
 
 
