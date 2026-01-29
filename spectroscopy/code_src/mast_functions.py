@@ -337,8 +337,9 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose= True,
             Unique identifier for each source in the sample.
         label : str
             Human-readable label for each source.
-    search_radius_arcsec : float
-        Search radius in arcseconds.
+   search_radius : float or astropy.units.Quantity
+        Search radius. If a float is provided, it is interpreted as arcseconds.
+        If a Quantity is provided, it must be an angular unit.
     datadir : str
         Data directory where to store the data. Each function will create a
         separate data directory (for example "[datadir]/HST/" for HST data).
@@ -362,7 +363,13 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose= True,
     df_spec = MultiIndexDFObject()
 
     # Initialize the MAST client used for querying, listing products, and downloading.
-    m = MastMissions()
+    mastm = MastMissions()
+
+    # Normalize radius to an angular Quantity in arcsec
+    if isinstance(search_radius, u.Quantity):
+        search_radius_quantity = search_radius.to(u.arcsec)
+    else:
+        search_radius_quantity = search_radius * u.arcsec
 
     for stab in sample_table:
 
@@ -376,14 +383,14 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose= True,
         # Query results
         search_coords = stab["coord"]
         # If no results are found, this will raise a warning. We explicitly handle the no-results
-        # case below, so let's suppress the warning to avoid confuson.
+        # case below, so let's suppress the warning to avoid confusion.
         warnings.filterwarnings("ignore", message='Query returned no results.',
                                 category=astroquery.exceptions.NoResultsWarning,
                                 module="astroquery.mast.discovery_portal")
  
         # Query MAST for HST spectra near this target position.
-        query_results = m.query_criteria(coordinates=search_coords,
-                             radius=search_radius_arcsec * u.arcsec,
+        query_results = mastm.query_criteria(coordinates=search_coords,
+                             radius=search_radius_quantity,
                              sci_obs_type='spectrum',
                              sci_aec='S')
 
@@ -396,7 +403,7 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose= True,
             continue
 
         # Retrieve spectra
-        data_products_list = m.get_product_list(query_results)
+        data_products_list = mastm.get_product_list(query_results)
 
         # Filter down to public science FITS products.
         filtered = m.filter_products(
@@ -424,7 +431,7 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose= True,
             continue
 
         # Download
-        download_results = m.download_products(
+        download_results = mastm.download_products(
             filtered, 
             download_dir=this_data_dir, 
             verbose=verbose)
