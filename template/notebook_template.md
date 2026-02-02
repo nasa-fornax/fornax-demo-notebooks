@@ -26,7 +26,7 @@ Alter this file according to your use case but retain the basic structure and tr
 Specifically the headings in this Intro section should not be edited to maintain consistency between notebooks.
 
 All contributed notebooks should be in [MyST markdown](https://mystmd.org) format.
-See the [Fornax documentation](https://docs.fornax.sciencecloud.nasa.gov/markdown-and-code-dev) for more info about this.
+See the [Fornax documentation](https://docs.fornax.sciencecloud.nasa.gov/markdown-notebooks/) for more info about this.
 
 The Introduction should provide context and motivation.
 Why should someone use this notebook?
