@@ -4,6 +4,8 @@ matplotlib
 # >=0.6.5 for ConeSearch import. https://github.com/nasa-fornax/fornax-demo-notebooks/issues/523
 # Upper limit <0.8 is for instant workaround of coming incompatibility https://github.com/nasa-fornax/fornax-demo-notebooks/issues/587
 lsdb>=0.6.5,<0.8
+# Indirect dependency of lsdb via hats. Remove once our minimum required version of lsdb/hats is 0.8.1
+cdshealpix<0.8
 dask
 # Required by lsdb to read files from AWS S3, revise when lsdb[s3fs] is supported by required minimum version.
 s3fs
