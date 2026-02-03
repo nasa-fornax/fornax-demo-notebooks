@@ -414,14 +414,8 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose= True,
             data_products_list, 
             type='science',         # only science products
             extension="fits",
+            file_suffix = "SX1"     # calibrated 1D spectra
         )
-
-        # Manual filter on suffix to get calibrated 1D spectra
-        keys = np.asarray(filtered["product_key"]).astype(str)
-        suffix_mask = (
-            np.char.endswith(keys, "_sx1.fits") 
-        )
-        filtered = filtered[suffix_mask]
 
         if verbose:
             print("Number of files to download: {}".format(len(filtered)))
