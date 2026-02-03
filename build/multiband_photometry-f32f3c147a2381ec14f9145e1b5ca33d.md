@@ -5,11 +5,12 @@ jupytext:
     format_name: myst
     format_version: 0.13
     jupytext_version: 1.18.1
+execute:
+  skip: true
 kernelspec:
   display_name: py-multiband_photometry
   language: python
   name: python3
-skip_execution: true
 ---
 
 # Automated Multiband Forced Photometry on Large Datasets

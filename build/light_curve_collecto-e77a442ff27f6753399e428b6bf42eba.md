@@ -5,11 +5,12 @@ jupytext:
     format_name: myst
     format_version: 0.13
     jupytext_version: 1.19.0
+execute:
+  skip: true
 kernelspec:
   display_name: py-light_curve_collector
   language: python
   name: python3
-skip_execution: true
 ---
 
 # Make Multi-Wavelength Light Curves Using Archival Data
