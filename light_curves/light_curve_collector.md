@@ -45,7 +45,7 @@ By the end of this tutorial, you will be able to:
 
 ### Runtime
 
-- As of 2025 May, this notebook takes ~1000s (17 min.) to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 64GB RAM/ 16CPU.
+- As of 2025 May, this notebook takes ~1000s (17 min.) to run to completion on Fornax using a server with 64GB RAM/ 16CPU.
 
 ## Imports
 
