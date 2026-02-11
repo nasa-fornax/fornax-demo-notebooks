@@ -55,7 +55,7 @@ Trained classifiers as well as estimates of their accuracy and plots of confusio
 
 ### Runtime
 
-As of 2024 August, this notebook takes ~170s to run to completion on Fornax using the 'Astrophysics Default Image' and the 'Large' server with 16GB RAM/ 4CPU.
+As of 2024 August, this notebook takes ~170s to run to completion on Fornax using a server with 16GB RAM/ 4CPU.
 
 ## Imports
 

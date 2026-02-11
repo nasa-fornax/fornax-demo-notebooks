@@ -29,7 +29,7 @@ We use manifold learning and dimensionality reduction to learn the distribution 
 
 ### Runtime
 
-As of 2024 September, this notebook takes ~160s to run to completion (after installs and imports) on Fornax using the ‘Astrophysics Default Image’ environment and the ‘Large’ server with 16GB RAM/ 4CPU.
+As of 2024 September, this notebook takes ~160s to run to completion (after installs and imports) on Fornax using a server with 16GB RAM/ 4CPU.
 
 ## Imports
 
