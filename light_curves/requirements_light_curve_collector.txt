@@ -1,0 +1,32 @@
+# List explicit python dependencies here. They are also spelt out at the
+# beginning of the notebook, make sure the lists are consistent and only
+# contain dependencies that are actually used in the notebook.
+requests
+tqdm
+numpy
+scipy
+pandas[aws, parquet]
+matplotlib
+hpgeom
+astropy
+pyvo
+astroquery>=0.4.8.dev0
+acstools
+lightkurve
+alerce
+# >=0.6.2 for improved s3 read speed.
+# Upper limit <0.8 is for instant workaround of coming incompatibility https://github.com/nasa-fornax/fornax-demo-notebooks/issues/587
+lsdb>=0.6.2,<0.8
+# Indirect dependency of lsdb via hats. Remove once our minimum required version of lsdb/hats is 0.8.1
+cdshealpix<0.8
+# Required by lsdb to read files from AWS S3, revise when lsdb[s3fs] is supported by required minimum version.
+s3fs
+# Required by lsdb, a few versions are known to cause issues
+fsspec!=2025.12,!=2026.1
+# We use distributed in this notebook, but installing any dask would make the [dataframe] extras required by dependencies for other notebooks.
+# It feels to be the cleanest solution to add the dependency here as we don't directly use it elsewhere.
+dask[distributed,dataframe]
+# Required by functionality we use from acstools
+scikit-image
+# Required for sensible progress bars
+ipywidgets
