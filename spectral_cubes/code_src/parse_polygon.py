@@ -10,6 +10,11 @@ def parse_polygon(s_region):
                As written, this s_region must be a single polygon,
                which is the case for all JWST and SOFIA observations,
                but not all missions in the Fornax archives.
+               For example:
+               POLYGON 11.885732601 -25.291345071 11.885732601
+               -25.289267294 11.888030654 -25.289267294 11.888030654
+               -25.291345071
+               (or "POLYGON ICRS")
 
     Returns
     ----------
@@ -33,3 +38,4 @@ def parse_polygon(s_region):
     coord_array = np.array([(coords[i], coords[i + 1]) for i in range(0, len(coords), 2)])
 
     return(coord_array)
+    
