@@ -255,7 +255,7 @@ print('WISE search took:', time.time() - WISEstarttime, 's')
 
 The function to retrieve lightcurves from Pan-STARRS uses [LSDB](https://docs.lsdb.io/) to access versions of the object and light curve catalogs that are stored in the cloud.  This function is efficient at large scale (sample sizes > ~1000).
 
-Some warnings are expected.
+When running this step, you may see a Dask warning about a “large task graph.” This can be safely ignored.
 
 ```{code-cell} ipython3
 panstarrsstarttime = time.time()
@@ -269,7 +269,7 @@ df_lc.append(df_lc_panstarrs)
 
 print('Panstarrs search took:', time.time() - panstarrsstarttime, 's')
 
-# Warnings from the panstarrs query about both NESTED and margins are known issues
+# Warnings from the panstarrs query are expected and can be ignored. 
 ```
 
 ### 2.4 MAST: TESS, Kepler and K2

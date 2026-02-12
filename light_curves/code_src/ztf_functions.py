@@ -53,7 +53,8 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
     """
     
     # 1) Start Dask client & read full ZTF light-curve catalog
-    client = Client(threads_per_worker=2, memory_limit=None)
+    # Use multiple workers with a single thread per worker for better performance on Fornax
+    client = Client(n_workers=2, threads_per_worker=1, memory_limit=None)
     ztf_lc = lsdb.read_hats(
         's3://ipac-irsa-ztf/contributed/dr23/lc/hats/',
         columns=[
@@ -93,6 +94,7 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
             n_neighbors=1,
             require_right_margin=True,
             suffixes=("_sample", ""),
+            suffix_method="all_columns",
         )
         df = matched.compute()
 
