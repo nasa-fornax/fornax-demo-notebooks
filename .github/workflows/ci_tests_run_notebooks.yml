@@ -23,6 +23,11 @@ jobs:
       image: ghcr.io/nasa-fornax/fornax-images/fornax-main:stable
 
     steps:
+      # Revise once https://github.com/actions/checkout/issues/1720 is addressed differently
+      - name: Workaround before checkout
+        run: |
+          chmod -R u+rwX .
+
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
 
       - name: Install test dependencies
