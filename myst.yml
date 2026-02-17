@@ -6,7 +6,9 @@ project:
   keywords: [astronomy]
   authors: [Fornax developers and scientists]
   github: https://github.com/nasa-fornax/fornax-demo-notebooks
-  license: BSD-3-Clause
+  license:
+    id: BSD-3-Clause
+    url: https://github.com/nasa-fornax/fornax-demo-notebooks/blob/main/LICENSE
   references:
     fornax-docs: https://docs.fornax.sciencecloud.nasa.gov
   settings:
