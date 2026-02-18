@@ -32,7 +32,9 @@ jobs:
         run: git config --global --add safe.directory $GITHUB_WORKSPACE
 
       - name: Install test dependencies
-        run: python -m pip install --upgrade tox
+        run: |
+          python -m pip install --upgrade tox
+          jupyter kernelspec list
 
       - name: Test with tox
         run: tox -e forcedphot
