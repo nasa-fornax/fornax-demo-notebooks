@@ -36,8 +36,8 @@ jobs:
 
       - name: Install test dependencies
         run: |
-          python -m pip install --upgrade tox tox-current-env
+          python -m pip install --upgrade tox
           jupyter kernelspec list
 
       - name: Test with tox
-        run: tox --current-env -e forcedphot
+        run: tox -e forcedphot
