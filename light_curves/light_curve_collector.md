@@ -8,7 +8,7 @@ jupytext:
 kernelspec:
   display_name: py-light_curve_collector
   language: python
-  name: py-light_curve_collector  
+  name: py-light_curve_collector
 ---
 
 # Make Multi-Wavelength Light Curves Using Archival Data
@@ -23,13 +23,26 @@ By the end of this tutorial, you will be able to:
 
 ## Introduction
 
- * A user has a sample of interesting targets for which they would like to see a plot of available archival light curves.  We start with a small set of changing look AGN from Yang et al., 2018, which are automatically downloaded. Changing look AGN are cases where the broad emission lines appear or disappear (and not just that the flux is variable).
+ * A user has a sample of interesting targets for which they would like to see a plot of available archival light curves.
+ We start with a small set of changing look AGN from Yang et al., 2018, which are automatically downloaded.
+ Changing look AGN are cases where the broad emission lines appear or disappear (and not just that the flux is variable).
 
- * We model light curve plots after van Velzen et al. 2021.  We search through a curated list of time-domain NASA holdings as well as non-NASA sources.  HEASARC catalogs used are Fermi and Beppo-Sax, IRSA catalogs used are ZTF and WISE, and MAST catalogs used are Pan-STARRS, TESS, Kepler, and K2.  Non-NASA sources are Gaia and IceCube. This list is generalized enough to include many types of targets to make this notebook interesting for many types of science.  All of these time-domain archives are searched in an automated and efficient fashion using astroquery, pyvo, pyarrow or APIs.
+ * We model light curve plots after van Velzen et al. 2021.
+ We search through a curated list of time-domain NASA holdings as well as non-NASA sources.
+ HEASARC catalogs used are Fermi and Beppo-Sax, IRSA catalogs used are ZTF and WISE, and MAST catalogs used are Pan-STARRS, TESS, Kepler, and K2.
+ Non-NASA sources are Gaia and IceCube.
+ This list is generalized enough to include many types of targets to make this notebook interesting for many types of science.
+ All of these time-domain archives are searched in an automated and efficient fashion using astroquery, pyvo, pyarrow or APIs.
 
- * Light curve data storage is a tricky problem.  Currently we are using a MultiIndex Pandas dataframe, as the best existing choice for right now.  One downside is that we need to manually track the units of flux and time instead of relying on an astropy storage scheme which would be able to do some of the units worrying for us (even astropy can't do all magnitude to flux conversions).  Astropy does not currently have a good option for multi-band light curve storage.
+ * Light curve data storage is a tricky problem.
+ Currently we are using a MultiIndex Pandas dataframe, as the best existing choice for right now.
+ One downside is that we need to manually track the units of flux and time instead of relying on an astropy storage scheme which would be able to do some of the units worrying for us (even astropy can't do all magnitude to flux conversions).
+ Astropy does not currently have a good option for multi-band light curve storage.
 
- * This notebook walks through the individual steps required to collect the targets and their light curves and create figures. It also shows how to speed up the collection of light curves using python's `multiprocessing`. This is expected to be sufficient for up to ~500 targets. For a larger number of targets, consider using the bash script demonstrated in the neighboring notebook [scale_up](scale_up.md).
+ * This notebook walks through the individual steps required to collect the targets and their light curves and create figures.
+ It also shows how to speed up the collection of light curves using python's `multiprocessing`.
+ This is expected to be sufficient for up to ~500 targets.
+ For a larger number of targets, consider using the bash script demonstrated in the neighboring notebook [scale_up](scale_up.md).
 
  * ML work using these time-series light curves is in two neighboring notebooks: [ML_AGNzoo](ML_AGNzoo.md) and [light_curve_classifier](light_curve_classifier.md).
 
@@ -487,7 +500,7 @@ parallel_df_lc.data
 
 ## 5. Make plots of luminosity as a function of time
 
-These plots are modelled after [van Velzen et al., 2021](https://arxiv.org/pdf/2111.09391.pdf). We show flux in mJy as a function of time for all available bands for each object. `show_nbr_figures` controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with `save_output`, they will be put in the output directory and labelled by sample number.
+These plots are modelled after [van Velzen et al., 2021](https://arxiv.org/abs/2111.09391). We show flux in mJy as a function of time for all available bands for each object. `show_nbr_figures` controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with `save_output`, they will be put in the output directory and labelled by sample number.
 
 __Note__ that in the following, we can either plot the results from `df_lc` (from the serial call) or `parallel_df_lc` (from the parallel call). By default (see next cell) the output of the parallel call is used.
 
