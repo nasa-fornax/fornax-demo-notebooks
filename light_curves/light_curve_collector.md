@@ -8,7 +8,7 @@ jupytext:
 kernelspec:
   display_name: py-light_curve_collector
   language: python
-  name: py-light_curve_collector  
+  name: py-light_curve_collector
 ---
 
 # Make Multi-Wavelength Light Curves Using Archival Data
@@ -487,7 +487,7 @@ parallel_df_lc.data
 
 ## 5. Make plots of luminosity as a function of time
 
-These plots are modelled after [van Velzen et al., 2021](https://arxiv.org/pdf/2111.09391.pdf). We show flux in mJy as a function of time for all available bands for each object. `show_nbr_figures` controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with `save_output`, they will be put in the output directory and labelled by sample number.
+These plots are modelled after [van Velzen et al., 2021](https://arxiv.org/abs/2111.09391). We show flux in mJy as a function of time for all available bands for each object. `show_nbr_figures` controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with `save_output`, they will be put in the output directory and labelled by sample number.
 
 __Note__ that in the following, we can either plot the results from `df_lc` (from the serial call) or `parallel_df_lc` (from the parallel call). By default (see next cell) the output of the parallel call is used.
 
