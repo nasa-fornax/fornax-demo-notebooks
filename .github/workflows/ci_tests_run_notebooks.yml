@@ -11,13 +11,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  forcedphot:
+  fornaxtest:
     # Do not run the test matrix on PRs affecting the rendering
     if: >-
       (!(github.event_name == 'pull_request') || !contains(github.event.pull_request.labels.*.name, 'html rendering / skip testing')) &&
       github.repository == 'nasa-fornax/fornax-demo-notebooks'
 
-    name: Testing forced photometry
+    name: Testing with fornax docker image
     runs-on: ubuntu-latest
     container:
       # Revise once https://github.com/actions/checkout/issues/1575 is addressed differently
@@ -40,4 +40,4 @@ jobs:
           jupyter kernelspec list
 
       - name: Test with tox
-        run: tox -e forcedphot
+        run: tox -e fornaxtest
