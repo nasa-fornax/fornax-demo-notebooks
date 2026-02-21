@@ -4,7 +4,7 @@
 numpy
 matplotlib
 pandas
-sparclclient
+sparclclient>=1.2.8
 astropy
 # pin is due to Spectrum1D rename to Spectrum and an internap spectutils bug
 specutils>=1.20.1
