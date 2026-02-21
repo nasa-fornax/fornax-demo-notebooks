@@ -23,9 +23,17 @@ By the end of this tutorial, you will:
 
 ## Introduction
 
-Active Galactic Nuclei (AGNs), some of the most powerful sources in the universe, emit a broad range of electromagnetic radiation, from radio waves to gamma rays. Consequently, there is a wide variety of AGN labels depending on the identification/selection scheme and the presence or absence of certain emissions (e.g., Radio loud/quiet, Quasars, Blazars, Seiferts, Changing looks). According to the unified model, this zoo of labels we see depend on a limited number of parameters, namely the viewing angle, the accretion rate, presence or lack of jets, and perhaps the properties of the host/environment (e.g., [Padovani et al. 2017](https://arxiv.org/pdf/1707.07134.pdf)). Here, we collect archival photometry and labels from the literature to compare how some of these different labels/selection schemes compare.
+Active Galactic Nuclei (AGNs), some of the most powerful sources in the universe, emit a broad range of electromagnetic radiation, from radio waves to gamma rays.
+Consequently, there is a wide variety of AGN labels depending on the identification/selection scheme and the presence or absence of certain emissions (e.g., Radio loud/quiet, Quasars, Blazars, Seiferts, Changing looks).
+According to the unified model, this zoo of labels we see depend on a limited number of parameters, namely the viewing angle, the accretion rate, presence or lack of jets, and perhaps the properties of the host/environment (e.g., [Padovani et al. 2017](https://arxiv.org/abs/1707.07134)).
+Here, we collect archival photometry and labels from the literature to compare how some of these different labels/selection schemes compare.
 
-We use manifold learning and dimensionality reduction to learn the distribution of AGN lightcurves observed with different facilities. We mostly focus on UMAP ([Uniform Manifold Approximation and Projection, McInnes 2020](https://arxiv.org/pdf/1802.03426.pdf)) but also show SOM ([Self organizing Map, Kohonen 1990](https://ieeexplore.ieee.org/document/58325)) examples. The reduced 2D projections from these two unsupervised ML techniques reveal similarities and overlaps of different selection techniques. Coloring the projections with various statistical physical properties (e.g., mean brightness, fractional lightcurve variation) is informative of correlations of the selections technique with physics such as AGN variability. Using different parts of the EM in training (or in building the initial higher dimensional manifold) demonstrates how much information if any is in that part of the data for each labeling scheme, for example whether with ZTF optical light curves alone, we can identify sources with variability in WISE near IR bands. These techniques also have a potential for identifying targets of a specific class or characteristic for future follow up observations.
+We use manifold learning and dimensionality reduction to learn the distribution of AGN lightcurves observed with different facilities.
+We mostly focus on UMAP ([Uniform Manifold Approximation and Projection, McInnes 2020](https://arxiv.org/pdf/1802.03426.pdf)) but also show SOM ([Self organizing Map, Kohonen 1990](https://ieeexplore.ieee.org/document/58325)) examples.
+The reduced 2D projections from these two unsupervised ML techniques reveal similarities and overlaps of different selection techniques.
+Coloring the projections with various statistical physical properties (e.g., mean brightness, fractional lightcurve variation) is informative of correlations of the selections technique with physics such as AGN variability.
+Using different parts of the EM in training (or in building the initial higher dimensional manifold) demonstrates how much information if any is in that part of the data for each labeling scheme, for example whether with ZTF optical light curves alone, we can identify sources with variability in WISE near IR bands.
+These techniques also have a potential for identifying targets of a specific class or characteristic for future follow up observations.
 
 ### Runtime
 
@@ -33,7 +41,8 @@ As of 2024 September, this notebook takes ~160s to run to completion (after inst
 
 ## Imports
 
-Here are the libraries used in this network. They are also mostly mentioned in the requirements in case you don't have them installed.
+Here are the libraries used in this network.
+They are also mostly mentioned in the requirements in case you don't have them installed.
 - *sys* and *os* to handle file names, paths, and directories
 - *numpy*  and *pandas* to handle array functions
 - *matplotlib* *pyplot* and *cm* for plotting data
@@ -146,9 +155,9 @@ h = plt.pie(new_queue.values(), labels=new_queue.keys(), autopct=autopct_format(
             wedgeprops={'linewidth': 3, 'edgecolor': 'white'}, colors=colors)
 ```
 
-In this particular example, the largest subsamples of AGNs, all with a criteria on redshift (z<1), are from the optical spectra by the [SDSS quasar sample DR16Q](https://www.sdss4.org/dr17/algorithms/qso_catalog/), the value added SDSS spectra from [SPIDERS](https://www.sdss.org/dr18/bhm/programs/spiders/), and a subset of AGNs selected in MIR WISE bands based on their variability ([csv in data folder credit RChary](https://ui.adsabs.harvard.edu/abs/2019AAS...23333004P/abstract)). 
+In this particular example, the largest subsamples of AGNs, all with a criteria on redshift (z<1), are from the optical spectra by the [SDSS quasar sample DR16Q](https://www.sdss4.org/dr17/algorithms/qso_catalog/), the value added SDSS spectra from [SPIDERS](https://www.sdss.org/dr18/bhm/programs/spiders/), and a subset of AGNs selected in MIR WISE bands based on their variability ([csv in data folder credit RChary](https://ui.adsabs.harvard.edu/abs/2019AAS...23333004P/abstract)).
 We also include some smaller samples from the literature to see where they sit compared to the rest of the population and if they are localized on the 2D projection.
-These include the Changing Look AGNs from the literature (e.g., [LaMassa et al. 2015](https://ui.adsabs.harvard.edu/abs/2015ApJ...800..144L/abstract), [Lyu et al. 2022](https://ui.adsabs.harvard.edu/abs/2022ApJ...927..227L/abstract), [Hon et al. 2022](https://ui.adsabs.harvard.edu/abs/2022MNRAS.511...54H/abstract)), a sample which showed variability in Galex UV images ([Wasleske et al. 2022](https://ui.adsabs.harvard.edu/abs/2022ApJ...933...37W/abstract)), a sample of variable sources identified in optical Palomar observations ([Baldassare et al. 2020](https://ui.adsabs.harvard.edu/abs/2020ApJ...896...10B/abstract)), and the optically variable AGNs in the COSMOS field from a three year program on the VLT([De Cicco et al. 2019](https://ui.adsabs.harvard.edu/abs/2019A%26A...627A..33D/abstract)). 
+These include the Changing Look AGNs from the literature (e.g., [LaMassa et al. 2015](https://ui.adsabs.harvard.edu/abs/2015ApJ...800..144L/abstract), [Lyu et al. 2022](https://ui.adsabs.harvard.edu/abs/2022ApJ...927..227L/abstract), [Hon et al. 2022](https://ui.adsabs.harvard.edu/abs/2022MNRAS.511...54H/abstract)), a sample which showed variability in Galex UV images ([Wasleske et al. 2022](https://ui.adsabs.harvard.edu/abs/2022ApJ...933...37W/abstract)), a sample of variable sources identified in optical Palomar observations ([Baldassare et al. 2020](https://ui.adsabs.harvard.edu/abs/2020ApJ...896...10B/abstract)), and the optically variable AGNs in the COSMOS field from a three year program on the VLT([De Cicco et al. 2019](https://ui.adsabs.harvard.edu/abs/2019A%26A...627A..33D/abstract)).
 We also include 30 Tidal Disruption Event coordinates identified from ZTF light curves {cite}`doi.org/10.3847/1538-4357/aca283`.
 
 
