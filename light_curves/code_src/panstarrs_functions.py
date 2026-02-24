@@ -107,7 +107,7 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
     # Create default local cluster
     # here is where the actual work gets done
     # Use multiple workers with a single thread per worker for better performance on Fornax
-    with Client(n_workers=2, threads_per_worker=1, memory_limit=None):
+    with Client(threads_per_worker=1, memory_limit=None):
         # compute the cross match with object table
         # and the join with the detections table
         matched_df = matched_lc.compute()
