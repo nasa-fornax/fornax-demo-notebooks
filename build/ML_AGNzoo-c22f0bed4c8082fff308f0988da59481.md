@@ -43,13 +43,13 @@ As of 2024 September, this notebook takes ~160s to run to completion (after inst
 
 Here are the libraries used in this network.
 They are also mostly mentioned in the requirements in case you don't have them installed.
-- *sys* and *os* to handle file names, paths, and directories
-- *numpy*  and *pandas* to handle array functions
-- *matplotlib* *pyplot* and *cm* for plotting data
-- *astropy.io fits* for accessing FITS files
-- *astropy.table Table* for creating tidy tables of the data
-- *AGNzoo_functions* for reading in and prepreocessing of lightcurve data
-- *umap* and *minisom* for manifold learning, dimensionality reduction, and visualization
+- `sys` and `os` to handle file names, paths, and directories
+- `numpy`  and `pandas` to handle array functions
+- `matplotlib` `pyplot` and `cm` for plotting data
+- `astropy.io.fits` for accessing FITS files
+- `astropy.table.Table` for creating tidy tables of the data
+- `AGNzoo_functions` for reading in and prepreocessing of lightcurve data
+- `umap` and `minisom` for manifold learning, dimensionality reduction, and visualization
 
 This cell will install them if needed:
 
