@@ -40,6 +40,12 @@ class MultiIndexDFObject:
         if data is not None:
             self.append(data)
 
+    def _repr_html_(self):
+        return self.data._repr_html_()
+
+    def __repr__(self):
+        return self.data.__repr__()
+
     def append(self, x):
         """
         Add a new spectra data to the dataframe.
