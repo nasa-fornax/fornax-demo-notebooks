@@ -491,7 +491,6 @@ Define an extended set of parameters and save it as a yaml file:
 yaml_run_id = "demo-kwargs-yaml"
 
 get_samples = {
-    "green": {},
     "ruan": {},
     "papers_list": {
         "paper_kwargs": [
