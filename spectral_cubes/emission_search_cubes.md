@@ -62,7 +62,7 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.colors import PowerNorm
 
-# Wrangle data 
+# Wrangle data
 from astropy.table import Table, Column, Row
 from astropy.io import fits
 import pandas as pd
@@ -591,7 +591,7 @@ from .temp_load_cloud_data import load_cloud_data
 def get_jwst_wave_array(header, cloud_uri):
     """
     Get wavelength coordinates array from a JWST spectral cube FITS file.
-    
+
     Parameters
     ----------
     header : astropy.io.fits.header.Header
@@ -609,7 +609,7 @@ def get_jwst_wave_array(header, cloud_uri):
     # or spectral_cube.SpectralCube.read(file, hdu='SCI').spectral_axis in the first case.
     # But those options would read the whole file into memory,
     # which would increase our resource cost.
-    
+
     try:
         # Populate wavelength array from the WCS
         wave = header['CRVAL3'] + header['CDELT3'] * np.arange(header['NAXIS3'])
@@ -711,14 +711,14 @@ def line_search(obs, cloud_uri_map=None, transitions=None, plot=False):
     """
 
     # If cloud_uri_map and transitions not provided,
-    # assume that they can be read from pickle files 
+    # assume that they can be read from pickle files
     if cloud_uri_map is None:
         with open("cloud_uri_map.pkl", "rb") as f:
             cloud_uri_map = pickle.load(f)
     if transitions is None:
         with open("transitions.pkl", "rb") as f:
             transitions = pickle.load(f)
-    
+
     # Initialize a list of Fe II jet emission lines detected in this cube:
     detected_feii_lines = []
 
@@ -993,7 +993,7 @@ header, data = load_cloud_data(cloud_uri)
 
 ```{code-cell} ipython3
 # Find the wavebin for the 5.34 micron line
-wave = header['CRVAL3'] + header['CDELT3'] * np.arange(header['NAXIS3']) 
+wave = header['CRVAL3'] + header['CDELT3'] * np.arange(header['NAXIS3'])
 pos = bisect.bisect_left(wave, 5.340)  # Find the approximate wavebin index
 print(pos)
 ```
@@ -1161,6 +1161,7 @@ In the future, all-sky spectral cubes in IRSA from [the new SPHEREx mission](htt
 +++
 
 - **Author**: Adrian Lucy (MAST/STScI, alucy@stsci.edu)
+
 - **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
 
 ### Acknowledgements
