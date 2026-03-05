@@ -1093,8 +1093,8 @@ At a glance, it looks like we've done a pretty good job of detecting candidate s
 
 We've done JWST, now here's how you would start to identify relevant data in other NASA datasets with spectral cubes.
 NASA has spectral cube data available across missions.
-Currently, [IRSA](https://irsa.ipac.caltech.edu/frontpage/) hosts spectral cubes from Herschel and SOFIA, as well as a few contributed Spitzer IRS cubes from Legacy programs.
-[SPHEREx](https://spherex.caltech.edu/page/data-products) has recently launched and its spectral cube data products will be available in the future.
+Currently, [IRSA](https://irsa.ipac.caltech.edu) hosts spectral cubes from Herschel and SOFIA, as well as a few contributed Spitzer IRS cubes from Legacy programs.
+SPHEREx has recently launched and its spectral cube [data products](https://spherex.caltech.edu/page/data-products) will be available in the future.
 
 The core approach for querying and accessing these datasets is the same as for JWST: use the archive's SIA service to find observations, crossmatch footprints with your target list, and retrieve the data files.
 Below we'll get you started retrieving spectral cube data for SOFIA...
