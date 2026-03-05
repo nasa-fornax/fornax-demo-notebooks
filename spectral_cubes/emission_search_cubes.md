@@ -1087,13 +1087,17 @@ At a glance, it looks like we've done a pretty good job of detecting candidate s
 
 +++
 
-## 3. Postscript: Transposing to IRSA missions
+## 3. Spectral cubes from other NASA missions
 
 +++
 
-We note that the spectral cubes in [IRSA](https://irsa.ipac.caltech.edu/frontpage/) from Herschel and SOFIA would not be as easy to integrate into this method, largely due to the smaller field of view and the sharp variations in the number of image pixels between adjacent wavebin slices. But with a different set of algorithms in `detect_spikes` and `extension_vs_wavebin`, and a different set of emission lines of interest (say from [Karska et al. 2025](https://arxiv.org/pdf/2503.15059)), it might be possible.
+We've done JWST, now here's how you would start to identify relevant data in other NASA datasets with spectral cubes.
+NASA has spectral cube data available across missions.
+Currently, [IRSA](https://irsa.ipac.caltech.edu) hosts spectral cubes from Herschel and SOFIA, as well as a few contributed Spitzer IRS cubes from Legacy programs.
+SPHEREx has recently launched and its spectral cube [data products](https://spherex.caltech.edu/page/data-products) will be available in the future.
 
-That is left as an *extremely challenging* exercise for the reader, but we'll get you started retrieving spectral cube data for SOFIA...
+The core approach for querying and accessing these datasets is the same as for JWST: use the archive's SIA service to find observations, crossmatch footprints with your target list, and retrieve the data files.
+Below we'll get you started retrieving spectral cube data for SOFIA...
 
 ```{code-cell} ipython3
 # Astroquery call
@@ -1151,8 +1155,6 @@ with fits.open(yso_sofia_obstable['access_url'][0], cache=False, use_fsspec=True
     header = hdul['FLUX'].header
     data = hdul['FLUX'].data
 ```
-
-In the future, all-sky spectral cubes in IRSA from [the new SPHEREx mission](https://spherex.caltech.edu/page/data-products) might be more readily integrated into the line-search workflow we've demonstrated in this notebook, so stay tuned!
 
 +++
 
