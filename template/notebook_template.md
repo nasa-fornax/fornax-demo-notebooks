@@ -136,6 +136,9 @@ These can be sections or subsections.
 
 ### 3.2 Style Principles
 
+-   The notebook title and all section headings should be succinct and informative and use title case.
+-   Links to non-HTML resources such as PDFs and CSVs should include the file type and size in the link text so screen reader users and those on slow connections know what to expect before clicking.
+    For example: [SPHEREx Explanatory Supplement (PDF, 34 MB)](https://irsa.ipac.caltech.edu/data/SPHEREx/docs/SPHEREx_Expsupp_QR.pdf).
 -   Follow suggestions of The Turing Way community [markdown style](https://book.the-turing-way.org/community-handbook/style)
 -   Write each sentence in a new line (line breaks) to make changes easier to read in PRs.
 -   Avoid latin abbreviation to avoid failing CI.

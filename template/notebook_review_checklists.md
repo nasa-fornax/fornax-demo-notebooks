@@ -23,6 +23,7 @@ If you’re writing or updating tutorial content, please use MyST Markdown — i
 -   Is there a use case in the introduction which motivates the code?  will our community understand this motivation/code?
 -   Does the code do what the intro says it is going to do?
 -   Is it scientifically accurate?
+-	Are all figures followed by text that accurately describes what is being visualized and what patterns or information users should notice?
 -   Does it include all three archives HEASARC, MAST, IRSA?\
     -   if not, is that justified?
 -   Does it include work linked to a buzzword:
@@ -55,6 +56,10 @@ If you’re writing or updating tutorial content, please use MyST Markdown — i
 	-   If the notebook is intended to be scaled up, does it do that efficiently?
 	-   Is memory usage optimized where possible?
 -   Style:
+	- 	Are the notebook title and all section headings succinct and informative, and do they use title case?
+	-	Do links to non-HTML resources such as PDFs and CSVs include the file type and size in the link text?
+  		For example: [SPHEREx Explanatory Supplement (PDF, 34 MB)](https://irsa.ipac.caltech.edu/data/SPHEREx/docs/SPHEREx_Expsupp_QR.pdf).
+	- 	Are all acronyms defined on first use?
     - Follow suggestions of The Turing Way community on [markdown style](https://book.the-turing-way.org/community-handbook/style) including but not limited to:
         - Write each sentence in a new line (line breaks) to make changes easier to read in PRs
         - Avoid latin abbreviation to avoid failing CI 
