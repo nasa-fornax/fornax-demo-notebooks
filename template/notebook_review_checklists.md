@@ -20,6 +20,7 @@ If you’re writing or updating tutorial content, please use MyST Markdown — i
 
 ## Science Review Checklist
 
+-	Are appropriate and accurate learning goals listed at the top?
 -   Is there a use case in the introduction which motivates the code?  will our community understand this motivation/code?
 -   Does the code do what the intro says it is going to do?
 -   Is it scientifically accurate?
