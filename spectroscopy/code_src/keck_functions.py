@@ -34,7 +34,7 @@ def KeckDEIMOS_get_spec(sample_table, search_radius_arcsec):
 
         search_coords = stab["coord"]
         tab = None
-        for attempt in range(max_retries + 1):
+        for attempt in range(max_retries):
             try:
                 tab = Irsa.query_region(
                     coordinates=search_coords,
@@ -45,10 +45,10 @@ def KeckDEIMOS_get_spec(sample_table, search_radius_arcsec):
                 )
                 break
             except (ConnectionError, RequestException) as exc:
-                if attempt == max_retries:
+                if attempt == max_retries - 1:
                     raise RuntimeError(
                         f"IRSA query failed for source {stab['label']} after "
-                        f"{max_retries + 1} attempts"
+                        f"{max_retries} attempts"
                     ) from exc
                 print(
                     f"IRSA query attempt {attempt + 1} failed for source "
