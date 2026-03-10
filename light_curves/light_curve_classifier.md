@@ -47,7 +47,7 @@ We choose to use a Pandas multiindex dataframe to store and work with the data b
 4. Can be scaled up to big data numbers of rows (altough we don't push to out of memory structures in this use case)
 5. Pandas is user friendly with a lot of existing functionality
 
-A useful reference for what sktime expects as input to its ML algorithms: https://github.com/sktime/sktime/blob/main/examples/AA_datatypes_and_datasets.ipynb
+A useful reference for what sktime expects as input to its ML algorithms: https://www.sktime.net/en/stable/examples/AA_datatypes_and_datasets.html
 
 ### Output
 
