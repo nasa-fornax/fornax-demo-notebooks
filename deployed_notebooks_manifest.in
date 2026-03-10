@@ -81,3 +81,7 @@ spectroscopy/data/README.md
 spectroscopy/output/README.md
 spectroscopy/requirements_spectra_collector.txt
 spectroscopy/spectra_collector.md
+spectral_cubes/emission_search_cubes.md
+spectral_cubes/requirements_emission_search_cubes.txt
+spectral_cubes/code_src/parse_polygon.py
+spectral_cubes/code_src/find_extended_emission.py
