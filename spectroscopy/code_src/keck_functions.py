@@ -4,6 +4,7 @@ import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
 from astroquery.ipac.irsa import Irsa
+from requests.exceptions import ConnectionError, RequestException
 
 from data_structures_spec import MultiIndexDFObject
 
@@ -27,12 +28,33 @@ def KeckDEIMOS_get_spec(sample_table, search_radius_arcsec):
 
     # Initialize multi-index object:
     df_spec = MultiIndexDFObject()
+    max_retries = 2
 
     for stab in sample_table:
 
         search_coords = stab["coord"]
-        tab = Irsa.query_region(coordinates=search_coords, catalog="cosmos_deimos",
-                                spatial="Cone", radius=search_radius_arcsec * u.arcsec)
+        tab = None
+        for attempt in range(max_retries + 1):
+            try:
+                tab = Irsa.query_region(
+                    coordinates=search_coords,
+                    catalog="cosmos_deimos",
+                    spatial="Cone",
+                    radius=search_radius_arcsec * u.arcsec,
+                    async_job=True,
+                )
+                break
+            except (ConnectionError, RequestException) as exc:
+                if attempt == max_retries:
+                    raise RuntimeError(
+                        f"IRSA query failed for source {stab['label']} after "
+                        f"{max_retries + 1} attempts"
+                    ) from exc
+                print(
+                    f"IRSA query attempt {attempt + 1} failed for source "
+                    f"{stab['label']}; retrying."
+                )
+
         print("Number of entries found: {}".format(len(tab)))
 
         if len(tab) == 0:
