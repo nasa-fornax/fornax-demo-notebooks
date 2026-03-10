@@ -19,6 +19,8 @@ cache/
 *.jpg
 *.jpeg
 *.log
+*.npy
+*.npz
 *.parquet
 *.pdf
 *.png
