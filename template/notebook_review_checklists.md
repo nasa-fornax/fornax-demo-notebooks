@@ -32,6 +32,7 @@ If you’re writing or updating tutorial content, please use MyST Markdown — i
 -   Has each NASA archive been given the option to comment on modules for their relevant data access?\
     -   Discourse `staff` channel is one method of contacting people to check for this
 -   Is archival data accessed in the most efficient way according to that archive?
+-	Has the primary author finalized the author list and added it to the notebook?
 
 ## Tech Review Checklist
 

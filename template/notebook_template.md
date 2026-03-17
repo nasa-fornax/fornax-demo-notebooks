@@ -171,9 +171,34 @@ Any PRs can be opened as drafts, which is in fact preferred, if authors are stil
 
 +++
 
+## 5. Author List
+
+The author list serves two purposes:
+
+-   Gives credit to those who contributed.
+-   Tells us who to contact if/when the notebook needs updates or maintenance that requires knowledge of the content.
+
+The notebook's primary author is responsible for setting the author list.
+(In cases where the "primary" author is unclear, the top 2 or 3 contributors need to decide amongst themselves.)
+Please follow this process:
+
+1.  Come up with an author list that includes individuals who contributed to the notebook (see guidelines below).
+2.  Contact those people to give them the opportunity to review the final draft and ask them if they want to be included as an author.
+3.  Put the finalized list into the "About this Notebook" section below.
+
+What counts as a "contribution" is not always clear.
+The following are guidelines to help the primary author determine the initial list:
+
+-   In most cases, thinking of the notebook as analogous to a scientific paper makes it clear whether an individual should be included and what the ordering should be.
+-   We recommend that PR reviewers be included if their comments/suggestions are used to make substantive improvements to the notebook.
+-   Other PR reviewers and individuals who perform other tasks to help get the notebook published may be included at the primary author's discretion.
+    -   If these individuals are not included as authors, we recommend that you credit their work in the "Acknowledgements" section.
+
++++
+
 ## About this notebook
 
--   **Authors:** Specific author names
+-   **Authors:** List authors as described above.
 -   **Contact:** For help with this notebook, please open a topic in the [Fornax Helpdesk](https://discourse.fornax.sciencecloud.nasa.gov/c/helpdesk).
 -   Please edit and keep the above 2 bullet points, and remove this last line.
 
