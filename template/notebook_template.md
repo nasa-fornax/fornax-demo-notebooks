@@ -11,7 +11,7 @@ kernelspec:
   name: python3
 ---
 
-# Title: How to Make a Tutorial Notebook in the fornax-demo-notebooks repo
+# Notebook Template and Instructions
 
 ## Learning Goals
 
@@ -144,6 +144,7 @@ These can be sections or subsections.
 -   Avoid latin abbreviation to avoid failing CI.
 
 #### 3.2.1 Best Practice Guidelines
+
 It would be nice if all contributed codes did the following, but these guidelines will not be checked in a code review
 
 -   Section titles should not end with ":".
@@ -152,9 +153,7 @@ It would be nice if all contributed codes did the following, but these guideline
 -   One empty line before a list and after.
 -   No more than one empty line between any two non-empty lines.
 
-```{code-cell} ipython3
-
-```
++++
 
 ## 4. PR Review
 
@@ -196,7 +195,7 @@ The following are guidelines to help the primary author determine the initial li
 
 +++
 
-## About this notebook
+## About this Notebook
 
 -   **Authors:** List authors as described above.
 -   **Contact:** For help with this notebook, please open a topic in the [Fornax Helpdesk](https://discourse.fornax.sciencecloud.nasa.gov/c/helpdesk).
