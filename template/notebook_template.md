@@ -174,7 +174,7 @@ Any PRs can be opened as drafts, which is in fact preferred, if authors are stil
 ## About this notebook
 
 -   **Authors:** Specific author names
--   **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
+-   **Contact:** For help with this notebook, please open a topic in the [Fornax Helpdesk](https://discourse.fornax.sciencecloud.nasa.gov/c/helpdesk).
 -   Please edit and keep the above 2 bullet points, and remove this last line.
 
 +++
