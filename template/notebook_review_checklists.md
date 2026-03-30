@@ -24,6 +24,7 @@ If you’re writing or updating tutorial content, please use MyST Markdown — i
 -   Is there a use case in the introduction which motivates the code?  will our community understand this motivation/code?
 -   Does the code do what the intro says it is going to do?
 -   Is it scientifically accurate?
+-	Is the tone professional, avoiding overly informal language?
 -	Are all figures followed by text that accurately describes what is being visualized and what patterns or information users should notice?
 -   Does it include all three archives HEASARC, MAST, IRSA?\
     -   if not, is that justified?
