@@ -20,9 +20,12 @@ If you’re writing or updating tutorial content, please use MyST Markdown — i
 
 ## Science Review Checklist
 
+-	Are appropriate and accurate learning goals listed at the top?
 -   Is there a use case in the introduction which motivates the code?  will our community understand this motivation/code?
 -   Does the code do what the intro says it is going to do?
 -   Is it scientifically accurate?
+-	Is the tone professional, avoiding overly informal language?
+-	Are all figures followed by text that accurately describes what is being visualized and what patterns or information users should notice?
 -   Does it include all three archives HEASARC, MAST, IRSA?\
     -   if not, is that justified?
 -   Does it include work linked to a buzzword:
@@ -30,6 +33,7 @@ If you’re writing or updating tutorial content, please use MyST Markdown — i
 -   Has each NASA archive been given the option to comment on modules for their relevant data access?\
     -   Discourse `staff` channel is one method of contacting people to check for this
 -   Is archival data accessed in the most efficient way according to that archive?
+-	Has the primary author finalized the author list and added it to the notebook?
 
 ## Tech Review Checklist
 
@@ -55,6 +59,10 @@ If you’re writing or updating tutorial content, please use MyST Markdown — i
 	-   If the notebook is intended to be scaled up, does it do that efficiently?
 	-   Is memory usage optimized where possible?
 -   Style:
+	- 	Are the notebook title and all section headings succinct and informative, and do they use title case?
+	-	Do links to non-HTML resources such as PDFs and CSVs include the file type and size in the link text?
+  		For example: [SPHEREx Explanatory Supplement (PDF, 34 MB)](https://irsa.ipac.caltech.edu/data/SPHEREx/docs/SPHEREx_Expsupp_QR.pdf).
+	- 	Are all acronyms defined on first use?
     - Follow suggestions of The Turing Way community on [markdown style](https://book.the-turing-way.org/community-handbook/style) including but not limited to:
         - Write each sentence in a new line (line breaks) to make changes easier to read in PRs
         - Avoid latin abbreviation to avoid failing CI 

@@ -9,9 +9,13 @@ kernelspec:
   display_name: python3
   language: python
   name: python3
+authors:
+  - name: Jessica Krick
+  - name: Troy Raen
+  - name: Brigitta Sipőcz
 ---
 
-# Title: How to Make a Tutorial Notebook in the fornax-demo-notebooks repo
+# Notebook Template and Instructions
 
 ## Learning Goals
 
@@ -136,11 +140,15 @@ These can be sections or subsections.
 
 ### 3.2 Style Principles
 
+-   The notebook title and all section headings should be succinct and informative and use title case.
+-   Links to non-HTML resources such as PDFs and CSVs should include the file type and size in the link text so screen reader users and those on slow connections know what to expect before clicking.
+    For example: [SPHEREx Explanatory Supplement (PDF, 34 MB)](https://irsa.ipac.caltech.edu/data/SPHEREx/docs/SPHEREx_Expsupp_QR.pdf).
 -   Follow suggestions of The Turing Way community [markdown style](https://book.the-turing-way.org/community-handbook/style)
 -   Write each sentence in a new line (line breaks) to make changes easier to read in PRs.
 -   Avoid latin abbreviation to avoid failing CI.
 
 #### 3.2.1 Best Practice Guidelines
+
 It would be nice if all contributed codes did the following, but these guidelines will not be checked in a code review
 
 -   Section titles should not end with ":".
@@ -149,9 +157,7 @@ It would be nice if all contributed codes did the following, but these guideline
 -   One empty line before a list and after.
 -   No more than one empty line between any two non-empty lines.
 
-```{code-cell} ipython3
-
-```
++++
 
 ## 4. PR Review
 
@@ -168,10 +174,34 @@ Any PRs can be opened as drafts, which is in fact preferred, if authors are stil
 
 +++
 
-## About this notebook
+## 5. Author List
 
--   **Authors:** Specific author and/or team names, plus "and the Fornax team".
--   **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
+The author list serves two purposes:
+
+-   Gives credit to those who contributed.
+-   Tells us who to contact if/when the notebook needs updates or maintenance that requires knowledge of the content.
+
+The notebook's primary author is responsible for setting the author list.
+(In cases where the "primary" author is unclear, the top 2 or 3 contributors need to decide amongst themselves.)
+Please follow this process:
+
+1.  Come up with an author list that includes individuals who contributed to the notebook (see guidelines below).
+2.  Contact those people to give them the opportunity to review the final draft and ask them if they want to be included as an author.
+3.  Put the finalized list into the `authors` metadata above, replacing the names listed in the template.
+
+What counts as a "contribution" is not always clear.
+The following are guidelines to help the primary author determine the initial list:
+
+-   In most cases, thinking of the notebook as analogous to a scientific paper makes it clear whether an individual should be included and what the ordering should be.
+-   We recommend that PR reviewers be included if their comments/suggestions are used to make substantive improvements to the notebook.
+-   Other PR reviewers and individuals who perform other tasks to help get the notebook published may be included at the primary author's discretion.
+    -   If these individuals are not included as authors, we recommend that you credit their work in the "Acknowledgements" section.
+
++++
+
+## About this Notebook
+
+-   **Contact:** For help with this notebook, please open a topic in the [Fornax Helpdesk](https://discourse.fornax.sciencecloud.nasa.gov/c/helpdesk).
 -   Please edit and keep the above 2 bullet points, and remove this last line.
 
 +++
