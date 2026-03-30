@@ -100,10 +100,9 @@ To understand the local configuration, read the man page (run `man top` in a ter
 There are a couple of things to be aware of when running on the Fornax Science Console.
 
 Take note of the amount of CPU and RAM available to the server type you choose when starting the session.
-In particular, beware that `top` can show a larger amount of total RAM than is actually accessible to your server due to resource sharing between users.
 
 The Science Console is primarily intended for interactive use and will cull sessions which appear to be inactive.
-If you want a notebook or script to run for longer than about 30 minutes and you will not be interacting with the Console, running `top` during that time can help keep the session active.
+If you want a notebook or script to run for longer than 15 minutes and you will not be interacting with the Console, use the "keep alive" option described in the [Session Information](https://docs.fornax.sciencecloud.nasa.gov/jupyterlab/#jupyterlab-session-information) documentation.
 
 +++
 
