@@ -9,6 +9,10 @@ kernelspec:
   display_name: python3
   language: python
   name: python3
+authors:
+  - name: Jessica Krick
+  - name: Troy Raen
+  - name: Brigitta Sipőcz
 ---
 
 # Notebook Template and Instructions
@@ -183,7 +187,7 @@ Please follow this process:
 
 1.  Come up with an author list that includes individuals who contributed to the notebook (see guidelines below).
 2.  Contact those people to give them the opportunity to review the final draft and ask them if they want to be included as an author.
-3.  Put the finalized list into the "About this Notebook" section below.
+3.  Put the finalized list into the `authors` metadata above, replacing the names listed in the template.
 
 What counts as a "contribution" is not always clear.
 The following are guidelines to help the primary author determine the initial list:
@@ -197,7 +201,6 @@ The following are guidelines to help the primary author determine the initial li
 
 ## About this Notebook
 
--   **Authors:** List authors as described above.
 -   **Contact:** For help with this notebook, please open a topic in the [Fornax Helpdesk](https://discourse.fornax.sciencecloud.nasa.gov/c/helpdesk).
 -   Please edit and keep the above 2 bullet points, and remove this last line.
 
