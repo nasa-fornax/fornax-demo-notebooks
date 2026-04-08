@@ -114,7 +114,7 @@ At this time, MAST doesn't support reliable object classification search. So let
 In the cell below, we search for all SIMBAD-catalogued objects labeled as YSOs (`otype='Y*O'`) or as any of the descendant sub-concepts of YSOs, like T Tauri stars (`otype='Y*O..'` to retrieve both explicitly labeled YSOs and their subtypes). This cell will take a minute or two.
 
 ```{code-cell} ipython3
-yso_table = Simbad.query_tap("SELECT * FROM basic WHERE otype='Y*O..'", maxrec=1000000)
+yso_table = Simbad.query_hierarchy(name="Taurus Molecular Cloud", hierarchy="children", criteria="otype='Y*O..'")
 ```
 
 ```{code-cell} ipython3
@@ -959,8 +959,8 @@ Let's take a quick look at a random YSO from this list. At the time of writing, 
 
 ```{code-cell} ipython3
 # For demonstration purposes, so that the rest of this section knows what data to expect,
-# get yso_index corresponding to target_name = 'PER-EMB-33'.
-temp_yso_index = max(lines_yso_jwst_obstable['yso_index'][lines_yso_jwst_obstable['target_name']=='PER-EMB-33'])
+# get yso_index corresponding to target_name = 'TAU042021'.
+temp_yso_index = max(lines_yso_jwst_obstable['yso_index'][lines_yso_jwst_obstable['target_name']=='TAU042021'])
 
 # Show the first few observations corresponding to that yso_index
 lines_yso_jwst_obstable[lines_yso_jwst_obstable['yso_index']==temp_yso_index][0:3]
@@ -969,12 +969,12 @@ lines_yso_jwst_obstable[lines_yso_jwst_obstable['yso_index']==temp_yso_index][0:
 We're already familiar with the 5.34 micron line, so let's take a look at that one of the cubes above that contains it:
 
 ```{code-cell} ipython3
-# Retrieve all observations for this YSO with MIRI CH1-SHORT and proposal ID 1236
+# Retrieve all observations for this YSO with MIRI CH1-SHORT and proposal ID 1751
 temp_observations = lines_yso_jwst_obstable[
     (lines_yso_jwst_obstable['yso_index']==temp_yso_index) &
     (lines_yso_jwst_obstable['instrument_name']=='MIRI/IFU') &
     (lines_yso_jwst_obstable['filters']=='CH1-SHORT') &
-    (lines_yso_jwst_obstable['proposal_id']=='1236')
+    (lines_yso_jwst_obstable['proposal_id']=='1751')
 ]
 
 # Get the first valid cloud URI found
