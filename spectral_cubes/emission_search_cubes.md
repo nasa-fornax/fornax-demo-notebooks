@@ -62,7 +62,7 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.colors import PowerNorm
 
-# Wrangle data 
+# Wrangle data
 from astropy.table import Table, Column, Row
 from astropy.io import fits
 import pandas as pd
