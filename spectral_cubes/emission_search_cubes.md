@@ -148,6 +148,7 @@ This cell will typically take anywhere from a few seconds to a minute or so, dep
 jwst_obstable = Observations.query_criteria(dataproduct_type='cube',
                                             obs_collection='JWST',
                                             dataRights='PUBLIC',  # Limit to public data
+                                            t_min=[59824.6, 60007.4],  # Include TMC1A and PER-EMB-33
                                             calib_level = [0, 1, 2, 3, 4])  # Exclude planned observations
 ```
 
