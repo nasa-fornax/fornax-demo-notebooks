@@ -114,7 +114,7 @@ At this time, MAST doesn't support reliable object classification search. So let
 In the cell below, we search for all SIMBAD-catalogued objects labeled as YSOs (`otype='Y*O'`) or as any of the descendant sub-concepts of YSOs, like T Tauri stars (`otype='Y*O..'` to retrieve both explicitly labeled YSOs and their subtypes). This cell will take a minute or two.
 
 ```{code-cell} ipython3
-yso_table = Simbad.query_tap("SELECT * FROM basic WHERE otype='Y*O..'", maxrec=1000000)
+yso_table = Simbad.query_hierarchy(name="Taurus Molecular Cloud", hierarchy="children", criteria="otype='Y*O..'")
 ```
 
 ```{code-cell} ipython3
