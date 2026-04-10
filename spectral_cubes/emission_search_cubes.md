@@ -62,7 +62,7 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.colors import PowerNorm
 
-# Wrangle data 
+# Wrangle data
 from astropy.table import Table, Column, Row
 from astropy.io import fits
 import pandas as pd
@@ -114,7 +114,7 @@ At this time, MAST doesn't support reliable object classification search. So let
 In the cell below, we search for all SIMBAD-catalogued objects labeled as YSOs (`otype='Y*O'`) or as any of the descendant sub-concepts of YSOs, like T Tauri stars (`otype='Y*O..'` to retrieve both explicitly labeled YSOs and their subtypes). This cell will take a minute or two.
 
 ```{code-cell} ipython3
-yso_table = Simbad.query_tap("SELECT * FROM basic WHERE otype='Y*O..'", maxrec=1000000)
+yso_table = Simbad.query_hierarchy(name="Taurus Molecular Cloud", hierarchy="children", criteria="otype='Y*O..'")
 ```
 
 ```{code-cell} ipython3
@@ -148,6 +148,7 @@ This cell will typically take anywhere from a few seconds to a minute or so, dep
 jwst_obstable = Observations.query_criteria(dataproduct_type='cube',
                                             obs_collection='JWST',
                                             dataRights='PUBLIC',  # Limit to public data
+                                            t_min=[59824.6, 60007.4],  # Include TMC1A and PER-EMB-33
                                             calib_level = [0, 1, 2, 3, 4])  # Exclude planned observations
 ```
 
