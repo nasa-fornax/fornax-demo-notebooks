@@ -883,8 +883,9 @@ else:
 
 # Execute
 with Pool(num_workers) as pool:
-    results = pool.map(line_search,
-                       [obs for _, obs in copy_yso_jwst_obstable_iterable])
+    results = list(pool.imap_unordered(line_search,
+        (obs for _, obs in copy_yso_jwst_obstable_iterable),
+        chunksize=15))
 ```
 
 ```{code-cell} ipython3
