@@ -875,11 +875,7 @@ We will make one minor modification to the parallelization approach that we used
 # Use pandas to make the iterable
 copy_yso_jwst_obstable_iterable = copy_yso_jwst_obstable.to_pandas().iterrows()
 
-# Increase the number of workers to compensate for I/O bound tasks
-if num_cores<=4:
-    num_workers = round(num_cores*2)
-else:
-    num_workers = round(num_cores*1.4)
+num_workers = num_cores
 
 # Execute
 with Pool(num_workers) as pool:
