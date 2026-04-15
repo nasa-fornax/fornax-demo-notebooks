@@ -372,27 +372,20 @@ Lower resolution images are upsampled to match, while the high resolution image 
 print("Comparing pixel scales:")
 print("-" * 50)
 
+# Dictionary mapping missions to their relevant HDUs/extensions
+mission_hdus = {
+    'Chandra': chandra_hdu[0] if chandra_hdu else None,
+    'HST': hst_hdu['SCI'] if hst_hdu else None,
+    'Swift': swift_hdu[1] if swift_hdu else None,
+    'Spitzer': spitzer_hdu[0] if spitzer_hdu else None
+}
+
 pixel_scales = {}
-
-if chandra_hdu is not None:
-    ch_scale = get_pixel_scale(chandra_hdu[0])
-    pixel_scales['Chandra'] = ch_scale
-    print(f"Chandra ACIS:   {ch_scale.to('arcsec/pix'):.3f}")
-
-if hst_hdu is not None:
-    hst_scale = get_pixel_scale(hst_hdu['SCI'])
-    pixel_scales['HST'] = hst_scale
-    print(f"Hubble ACS:     {hst_scale.to('arcsec/pix'):.3f}")
-
-if swift_hdu is not None:
-    sw_scale = get_pixel_scale(swift_hdu[1])
-    pixel_scales['Swift'] = sw_scale
-    print(f"Swift UVOT:     {sw_scale.to('arcsec/pix'):.3f}")
-
-if spitzer_hdu is not None:
-    sp_scale = get_pixel_scale(spitzer_hdu[0])
-    pixel_scales['Spitzer'] = sp_scale
-    print(f"Spitzer IRAC:   {sp_scale.to('arcsec/pix'):.3f}")
+for mission, hdu in mission_hdus.items():
+    if hdu is not None:
+        scale = get_pixel_scale(hdu)
+        pixel_scales[mission] = scale
+        print(f"{mission:<10}: {scale.to('arcsec/pix'):.3f}")
 
 print("-" * 50)
 

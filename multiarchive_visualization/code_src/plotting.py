@@ -5,12 +5,13 @@ This module provides classes for creating interactive RGB composites
 and multi-panel stretches using HoloViz (Panel, HoloViews, Datashader).
 """
 import os
-os.environ['KMP_WARNINGS'] = '0' # Silences the OpenMP warning
-
+import gc
+import asyncio
 import numpy as np
 import panel as pn
 import holoviews as hv
 from holoviews.operation.datashader import regrid
+from holoviews.streams import Pipe
 from astropy.visualization import (
     AsymmetricPercentileInterval,
     LinearStretch, LogStretch, SqrtStretch,
@@ -18,20 +19,41 @@ from astropy.visualization import (
 )
 from image_processing import create_rgb_composite
 
+# Silences the OpenMP warning
+os.environ['KMP_WARNINGS'] = '0'
+
 # Initialize Panel and HoloViews with the loading spinner
 pn.extension(loading_spinner='dots', loading_color='#00aa41')
 hv.extension('bokeh')
 
+# Default visualization constants
+RGB_PANEL_WIDTH = 700
+RGB_PANEL_HEIGHT = 700
+MULTI_PANEL_WIDTH = 337
+MULTI_PANEL_HEIGHT = 337
+CONTROL_PANEL_WIDTH = 250
 
-import asyncio
-import panel as pn
-import holoviews as hv
-import numpy as np
-from holoviews.operation.datashader import regrid
-from holoviews.streams import Pipe
-from image_processing import create_rgb_composite
+DEFAULT_RED_PERC = 95
+DEFAULT_GREEN_PERC = 95
+DEFAULT_BLUE_PERC = 99.5
+DEFAULT_Q = 8
+DEFAULT_STRETCH = 0.1
+
 
 class InteractiveRGBPanel:
+    """
+    An interactive Panel dashboard for creating RGB composite images from 3 bands.
+
+    Parameters
+    ----------
+    red_data : numpy.ndarray
+        Array containing the red channel data.
+    green_data : numpy.ndarray
+        Array containing the green channel data.
+    blue_data : numpy.ndarray
+        Array containing the blue channel data.
+    """
+
     def __init__(self, red_data, green_data, blue_data):
         self.r = np.nan_to_num(red_data, nan=0)
         self.g = np.nan_to_num(green_data, nan=0)
@@ -40,17 +62,33 @@ class InteractiveRGBPanel:
         self.width = self.r.shape[1]
         self.height = self.r.shape[0]
 
-        self.q_slider = pn.widgets.FloatSlider(name='Lupton Q', start=0.1, end=20, value=8, step=0.5)
-        self.stretch_slider = pn.widgets.FloatSlider(name='Stretch', start=0.01, end=2, value=0.1, step=0.05)
-        self.r_perc = pn.widgets.FloatSlider(name='Red %', start=50, end=100, value=95, step=0.5)
-        self.g_perc = pn.widgets.FloatSlider(name='Green %', start=50, end=100, value=95, step=0.5)
-        self.b_perc = pn.widgets.FloatSlider(name='Blue %', start=50, end=100, value=99.5, step=0.5)
+        # Initialize sliders
+        self.q_slider = pn.widgets.FloatSlider(
+            name='Lupton Q', start=0.1, end=20, value=DEFAULT_Q, step=0.5
+        )
+        self.stretch_slider = pn.widgets.FloatSlider(
+            name='Stretch', start=0.01, end=2, value=DEFAULT_STRETCH, step=0.05
+        )
+        self.r_perc = pn.widgets.FloatSlider(
+            name='Red %', start=50, end=100, value=DEFAULT_RED_PERC, step=0.5
+        )
+        self.g_perc = pn.widgets.FloatSlider(
+            name='Green %', start=50, end=100, value=DEFAULT_GREEN_PERC, step=0.5
+        )
+        self.b_perc = pn.widgets.FloatSlider(
+            name='Blue %', start=50, end=100, value=DEFAULT_BLUE_PERC, step=0.5
+        )
+
+        # Placeholder for the main image pane (to handle spinner status)
+        self.image_pane = None
 
         # 1. Compute initial data and setup the Pipe
         initial_rgb = create_rgb_composite(
             self.r, self.g, self.b,
-            red_percentile=95, green_percentile=95, blue_percentile=99.5,
-            Q=8, stretch=0.1
+            red_percentile=DEFAULT_RED_PERC,
+            green_percentile=DEFAULT_GREEN_PERC,
+            blue_percentile=DEFAULT_BLUE_PERC,
+            Q=DEFAULT_Q, stretch=DEFAULT_STRETCH
         )
         self.pipe = Pipe(data=initial_rgb)
 
@@ -61,25 +99,43 @@ class InteractiveRGBPanel:
         self.dmap = hv.DynamicMap(render_rgb, streams=[self.pipe])
 
         self.interactive_plot = regrid(self.dmap).opts(
-            width=700, height=700,
+            width=RGB_PANEL_WIDTH, height=RGB_PANEL_HEIGHT,
             tools=[],
             active_tools=['wheel_zoom', 'box_zoom'],
             xaxis=None, yaxis=None,
             hooks=[self.apply_bokeh_tweaks]
         )
 
-    def apply_bokeh_tweaks(self, plot, element):
+    def apply_bokeh_tweaks(self, plot, _):
+        """
+        Applies manual tweaks to the Bokeh plot object (bounds and logo removal).
+
+        Parameters
+        ----------
+        plot : holoviews.plotting.bokeh.ElementPlot
+            The HoloViews plot instance.
+        _ : holoviews.core.Element
+            The HoloViews element (unused).
+        """
         plot.state.x_range.bounds = (0, self.width)
         plot.state.y_range.bounds = (0, self.height)
         if hasattr(plot.state, 'toolbar') and plot.state.toolbar:
             plot.state.toolbar.logo = None
 
-    # 3. Panel watcher handles the spinner and pushes data to the Pipe
-    async def process_and_push(self, *events):
-        if hasattr(self, 'image_pane'):
+    async def process_and_push(self, *_):
+        """
+        Asynchronously computes the new RGB composite and pushes it to the Pipe.
+        Manages the loading spinner on the image pane.
+
+        Parameters
+        ----------
+        *_ : tuple
+            Positional arguments from the Panel event watcher (unused).
+        """
+        if self.image_pane:
             self.image_pane.loading = True
 
-        await asyncio.sleep(0.05) # Allow UI to render spinner
+        await asyncio.sleep(0.05)  # Allow UI to render spinner
 
         new_rgb = create_rgb_composite(
             self.r, self.g, self.b,
@@ -92,14 +148,26 @@ class InteractiveRGBPanel:
 
         self.pipe.send(new_rgb)
 
-        if hasattr(self, 'image_pane'):
+        # Explicitly clean up large array to help garbage collection
+        del new_rgb
+        gc.collect()
+
+        if self.image_pane:
             self.image_pane.loading = False
 
     def view(self):
+        """
+        Returns the Panel layout for the dashboard.
+
+        Returns
+        -------
+        panel.Row
+            A row containing the controls and the main image plot.
+        """
         controls = pn.Column(
             self.q_slider, self.stretch_slider,
             self.r_perc, self.g_perc, self.b_perc,
-            width=250
+            width=CONTROL_PANEL_WIDTH
         )
 
         self.image_pane = pn.pane.HoloViews(self.interactive_plot)
@@ -113,6 +181,17 @@ class InteractiveRGBPanel:
 
 
 class InteractiveMultiPanel:
+    """
+    An interactive Panel dashboard for multi-panel multi-wavelength visualization.
+
+    Parameters
+    ----------
+    reprojected_data : dict
+        A dictionary mapping mission names to 2D numpy arrays.
+    cmaps : dict
+        A dictionary mapping mission names to colormap strings.
+    """
+
     def __init__(self, reprojected_data, cmaps):
         # NaNs replaced with 0.0 to restore the original visual style
         self.data_dict = {k: np.nan_to_num(v, nan=0.0) for k, v in reprojected_data.items()}
@@ -138,33 +217,83 @@ class InteractiveMultiPanel:
 
         self.grid = hv.Layout(plots).cols(2)
 
-    def apply_bounds(self, plot, element):
-        """Enforces hard panning bounds (leaves the logo alone for the multi-panel)"""
+    def apply_bounds(self, plot, _):
+        """
+        Enforces hard panning bounds on the plot.
+
+        Parameters
+        ----------
+        plot : holoviews.plotting.bokeh.ElementPlot
+            The HoloViews plot instance.
+        _ : holoviews.core.Element
+            The HoloViews element (unused).
+        """
         plot.state.x_range.bounds = (0, self.width)
         plot.state.y_range.bounds = (0, self.height)
 
-    def _process_image(self, data, stretch_name, upper_pct):
+    @staticmethod
+    def _process_image(data, stretch_name, upper_pct):
+        """
+        Applies stretch and normalization to an image.
+
+        Parameters
+        ----------
+        data : numpy.ndarray
+            The image data.
+        stretch_name : str
+            Type of stretch ('linear', 'sqrt', 'log').
+        upper_pct : float
+            Upper percentile for the stretch.
+
+        Returns
+        -------
+        numpy.ndarray
+            The processed and normalized image data.
+        """
         interval = AsymmetricPercentileInterval(0.0, upper_pct)
         vmin, vmax = interval.get_limits(data)
 
-        if stretch_name == 'linear':
-            stretch = LinearStretch()
-        elif stretch_name == 'sqrt':
+        # Ensure stretch is always defined to avoid potential UnboundLocalError
+        if stretch_name == 'sqrt':
             stretch = SqrtStretch()
         elif stretch_name == 'log':
             stretch = LogStretch()
+        else:
+            # Default to linear
+            stretch = LinearStretch()
 
         norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=stretch, clip=True)
-        return norm(data).filled(0.0)
+        processed = norm(data).filled(0.0)
+
+        # Help garbage collection for large arrays
+        del norm
+        return processed
 
     def _create_panel(self, mission, data):
+        """
+        Creates a single interactive panel for a mission.
+
+        Parameters
+        ----------
+        mission : str
+            The name of the mission.
+        data : numpy.ndarray
+            The image data for the mission.
+
+        Returns
+        -------
+        holoviews.operation.datashader.regrid
+            The regridded DynamicMap for the panel.
+        """
         stretch_widget = self.stretch_widgets[mission]
         perc_slider = self.perc_sliders[mission]
         cmap = self.cmaps.get(mission, 'viridis')
 
         def generate_img(stretch_val, pct_val):
-            processed = self._process_image(data, stretch_val, pct_val)
-            return hv.Image(processed, bounds=(0, 0, self.width, self.height))
+            return hv.Image(
+                self._process_image(data, stretch_val, pct_val),
+                bounds=(0, 0, self.width, self.height)
+            )
 
         bound_fn = pn.bind(
             generate_img,
@@ -174,7 +303,7 @@ class InteractiveMultiPanel:
 
         return regrid(hv.DynamicMap(bound_fn)).opts(
             cmap=cmap,
-            width=337, height=337,
+            width=MULTI_PANEL_WIDTH, height=MULTI_PANEL_HEIGHT,
             title=mission,
             tools=[],
             default_tools=['box_zoom', 'pan', 'wheel_zoom', 'reset', 'save'],
@@ -184,6 +313,14 @@ class InteractiveMultiPanel:
         )
 
     def view(self):
+        """
+        Returns the Panel layout for the multi-panel visualization.
+
+        Returns
+        -------
+        panel.Row
+            A row containing the controls and the grid of plots.
+        """
         controls_list = []
         for miss in self.data_dict.keys():
             controls_list.extend([
@@ -193,7 +330,6 @@ class InteractiveMultiPanel:
                 pn.layout.Divider()
             ])
 
-        controls = pn.Column(*controls_list, width=250)
+        controls = pn.Column(*controls_list, width=CONTROL_PANEL_WIDTH)
 
-        # Display layout
         return pn.Row(controls, self.grid)
