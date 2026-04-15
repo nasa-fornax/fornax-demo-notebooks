@@ -6,8 +6,8 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.19.1
 kernelspec:
-  name: python3
-  display_name: Python 3 (ipykernel)
+  name: py-multiwavelength_image
+  display_name: py-multiwavelength_image
   language: python
 authors:
   - name: David J Turner
