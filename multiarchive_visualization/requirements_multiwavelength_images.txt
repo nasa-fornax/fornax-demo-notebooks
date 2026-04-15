@@ -2,12 +2,10 @@
 # Do not pin versions, and do not use upper version limits unless absolute necessary, and always leave a comment as an explanation in those cases.
 # Always leave a comment for any non-direct dependencies that you may need to include in this file (for example if a direct dependency requires it, but it is just their optional dependency, or if there is a version limit implied by some functionality)
 
-# Core astronomy libraries
 astropy
 astroquery
-
-# Image reprojection
 reproject
+numpy
 
 # Visualization
 plotly
@@ -16,9 +14,16 @@ panel
 holoviews
 datashader
 bokeh
+pyviz_comms
+jupyter_bokeh
+# Indirectly for holoviews
+pyparsing
+# Required for the use of Astropy's normalizing functions
+matplotlib
+scipy
 
-# Numerical computing
-numpy
-
-# S3 access for cloud data (required for fsspec functionality in astropy)
+# S3 access for cloud data (required for fsspec functionality in Astropy)
 s3fs
+# Required for AWS downloads in Astroquery
+boto3
+
