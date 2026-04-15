@@ -22,10 +22,6 @@ from image_processing import create_rgb_composite
 # Silences the OpenMP warning
 os.environ['KMP_WARNINGS'] = '0'
 
-# Initialize Panel and HoloViews with the loading spinner
-pn.extension(loading_spinner='dots', loading_color='#00aa41')
-hv.extension('bokeh')
-
 # Default visualization constants
 RGB_PANEL_WIDTH = 700
 RGB_PANEL_HEIGHT = 700
@@ -100,27 +96,12 @@ class InteractiveRGBPanel:
 
         self.interactive_plot = regrid(self.dmap).opts(
             width=RGB_PANEL_WIDTH, height=RGB_PANEL_HEIGHT,
-            tools=[],
+            tools=['pan', 'box_zoom', 'wheel_zoom', 'reset', 'save'],
+            default_tools=[],
             active_tools=['wheel_zoom', 'box_zoom'],
-            xaxis=None, yaxis=None,
-            hooks=[self.apply_bokeh_tweaks]
+            xlim=(0, self.width), ylim=(0, self.height),
+            xaxis=None, yaxis=None
         )
-
-    def apply_bokeh_tweaks(self, plot, _):
-        """
-        Applies manual tweaks to the Bokeh plot object (bounds and logo removal).
-
-        Parameters
-        ----------
-        plot : holoviews.plotting.bokeh.ElementPlot
-            The HoloViews plot instance.
-        _ : holoviews.core.Element
-            The HoloViews element (unused).
-        """
-        plot.state.x_range.bounds = (0, self.width)
-        plot.state.y_range.bounds = (0, self.height)
-        if hasattr(plot.state, 'toolbar') and plot.state.toolbar:
-            plot.state.toolbar.logo = None
 
     async def process_and_push(self, *_):
         """
@@ -183,6 +164,7 @@ class InteractiveRGBPanel:
 class InteractiveMultiPanel:
     """
     An interactive Panel dashboard for multi-panel multi-wavelength visualization.
+    Refactored for maximum stability in cloud environments.
 
     Parameters
     ----------
@@ -203,6 +185,7 @@ class InteractiveMultiPanel:
         self.perc_sliders = {}
         self.stretch_widgets = {}
 
+        # Initialize widgets
         for miss in self.data_dict.keys():
             self.perc_sliders[miss] = pn.widgets.FloatSlider(
                 name=f'{miss} Max %', start=90.0, end=100.0, value=99.0, step=0.1
@@ -211,11 +194,16 @@ class InteractiveMultiPanel:
                 name=f'{miss} Stretch', options=['linear', 'sqrt', 'log'], value='linear'
             )
 
+        # Create the grid of plots
         plots = []
         for miss, data in self.data_dict.items():
             plots.append(self._create_panel(miss, data))
 
-        self.grid = hv.Layout(plots).cols(2)
+        # Use hv.Layout and ensure it is properly initialized for linking
+        self.grid = hv.Layout(plots).cols(2).opts(
+            shared_axes=True,  # Explicitly enable axis linking
+            merge_tools=True   # Combine toolbars for better performance
+        )
 
     def apply_bounds(self, plot, _):
         """
@@ -253,21 +241,15 @@ class InteractiveMultiPanel:
         interval = AsymmetricPercentileInterval(0.0, upper_pct)
         vmin, vmax = interval.get_limits(data)
 
-        # Ensure stretch is always defined to avoid potential UnboundLocalError
         if stretch_name == 'sqrt':
             stretch = SqrtStretch()
         elif stretch_name == 'log':
             stretch = LogStretch()
         else:
-            # Default to linear
             stretch = LinearStretch()
 
         norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=stretch, clip=True)
-        processed = norm(data).filled(0.0)
-
-        # Help garbage collection for large arrays
-        del norm
-        return processed
+        return norm(data).filled(0.0)
 
     def _create_panel(self, mission, data):
         """
@@ -289,25 +271,19 @@ class InteractiveMultiPanel:
         perc_slider = self.perc_sliders[mission]
         cmap = self.cmaps.get(mission, 'viridis')
 
+        # Reactive function tied to the specific widgets for this panel
+        @pn.depends(stretch_val=stretch_widget, pct_val=perc_slider.param.value_throttled)
         def generate_img(stretch_val, pct_val):
-            return hv.Image(
-                self._process_image(data, stretch_val, pct_val),
-                bounds=(0, 0, self.width, self.height)
-            )
+            processed = self._process_image(data, stretch_val, pct_val)
+            return hv.Image(processed, bounds=(0, 0, self.width, self.height), label=mission)
 
-        bound_fn = pn.bind(
-            generate_img,
-            stretch_val=stretch_widget,
-            pct_val=perc_slider.param.value_throttled
-        )
-
-        return regrid(hv.DynamicMap(bound_fn)).opts(
+        # Apply regrid to the DynamicMap and set stable Bokeh options
+        return regrid(hv.DynamicMap(generate_img)).opts(
             cmap=cmap,
             width=MULTI_PANEL_WIDTH, height=MULTI_PANEL_HEIGHT,
-            title=mission,
-            tools=[],
-            default_tools=['box_zoom', 'pan', 'wheel_zoom', 'reset', 'save'],
-            active_tools=['box_zoom', 'wheel_zoom'],
+            tools=['pan', 'box_zoom', 'wheel_zoom', 'reset', 'save'],
+            default_tools=[],
+            active_tools=['wheel_zoom', 'box_zoom'],
             xaxis=None, yaxis=None,
             hooks=[self.apply_bounds]
         )

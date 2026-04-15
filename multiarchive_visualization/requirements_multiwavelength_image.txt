@@ -6,8 +6,6 @@ astropy
 astroquery
 reproject
 numpy
-pandas
-xarray
 
 # Visualization and Interactivity
 ipywidgets
@@ -15,7 +13,6 @@ ipykernel
 panel
 holoviews
 datashader
-colorcet
 param
 numba
 bokeh
