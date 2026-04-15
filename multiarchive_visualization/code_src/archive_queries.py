@@ -267,7 +267,7 @@ def download_hst(obs_table, data_dir, dataset_name=None):
             download_dir=data_dir,
             extension='fits',
             type='science',
-            file_suffix=['drc'],
+            file_suffix=['DRC'],
             flat=True
         )
 
