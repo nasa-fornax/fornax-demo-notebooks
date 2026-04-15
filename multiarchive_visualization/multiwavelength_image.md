@@ -260,8 +260,6 @@ else:
 
 ### 3.2 Load Spitzer data from the IRSA S3 bucket
 
-Spitzer data can be accessed directly from AWS S3 without downloading.
-This is much faster and more efficient than traditional file downloads.
 
 ```{code-cell} ipython3
 if spitzer_obs is not None:
@@ -413,20 +411,8 @@ if spitzer_hdu is not None:
     # Special handling for S3-loaded files
     images_dict['Spitzer'] = (spitzer_hdu[0].data, spitzer_hdu[0].header)
 
-# Reproject to common grid
-print("Reprojecting images to common grid...")
-print("(This may take a few minutes)")
-print()
-
-reprojected_images = reproject_to_common_grid(images_dict, donor_wcs_hdr)
-
-print()
-print("Reprojection complete!")
-print()
-
-# Extract reprojected data arrays
 reprojected_data = {}
-for name, result in reprojected_images.items():
+for name, result in reproject_to_common_grid(images_dict, donor_wcs_hdr).items():
     if result is not None:
         data, footprint = result
         reprojected_data[name] = data
@@ -453,13 +439,12 @@ sep_reproj_im_cmaps = {
 ```
 
 ```{code-cell} ipython3
-thing_ui = InteractiveMultiPanel(reprojected_data, sep_reproj_im_cmaps)
-thing_ui.view()
+sep_ims = InteractiveMultiPanel(reprojected_data, sep_reproj_im_cmaps)
+sep_ims.view()
 ```
 
 Each panel shows the same region at a different wavelength.
 The interactive plot allows you to zoom and pan simultaneously across all panels.
-Different wavelengths reveal different physical processes and components of the source.
 
 +++
 
@@ -486,8 +471,8 @@ red_channel = reprojected_data['Spitzer']
 green_channel = reprojected_data['HST']
 blue_channel = reprojected_data['Chandra']
 
-ui = InteractiveRGBPanel(red_channel, green_channel, blue_channel)
-ui.view()
+multi_wav_im = InteractiveRGBPanel(red_channel, green_channel, blue_channel)
+multi_wav_im.view()
 ```
 
 By adjusting the controls, you can create different visualizations that emphasize various aspects of the source's physics and structure.
