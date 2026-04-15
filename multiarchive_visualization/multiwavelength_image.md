@@ -88,9 +88,9 @@ We start by specifying which astronomical object we want to visualize.
 The default target is the Crab Nebula, but you can change this to any object resolvable 
 by name through the SIMBAD or NED databases for instance:
 
-- Suggestion 1 that we have vetted
-- Suggestion 2 ...
-- You get the idea...
+- ***Suggestion 1 that we have vetted***
+- ***Suggestion 2 ...***
+- ***You get the idea...***
 
 ```{code-cell} ipython3
 # Define the target
@@ -99,8 +99,8 @@ SOURCE_NAME = "Crab"
 # Resolve coordinates from name
 SOURCE_COORD = SkyCoord.from_name(SOURCE_NAME)
 
-print(f"Target: {SOURCE_NAME}")
-print(f"Coordinates: RA={SOURCE_COORD.ra.deg:.4f}°, Dec={SOURCE_COORD.dec.deg:.4f}°")
+print(f"{SOURCE_NAME} Coordinate:".upper())
+print(SOURCE_COORD.to_string())
 ```
 
 Set up directories for downloaded data.
@@ -258,7 +258,7 @@ else:
     chandra_hdu = None
 ```
 
-### 3.2 Load Spitzer data from cloud
+### 3.2 Load Spitzer data from the IRSA S3 bucket
 
 Spitzer data can be accessed directly from AWS S3 without downloading.
 This is much faster and more efficient than traditional file downloads.
@@ -320,7 +320,7 @@ else:
 
 +++
 
-## 4. Assess resolution and reproject to common grid
+## 4. Reproject images to a common coordinate grid
 
 Different telescopes have vastly different spatial resolutions (pixel sizes).
 Before we can combine images, we must reproject them all to a common coordinate grid.
@@ -362,7 +362,7 @@ if 'HST' in pixel_scales:
 
 +++
 
-### 4.2 Select common WCS grid
+### 4.2 Choosing the coordinate grid for reprojection
 
 We select the highest resolution image's coordinate system as our target grid.
 
@@ -463,7 +463,7 @@ Different wavelengths reveal different physical processes and components of the 
 
 +++
 
-## 6. Create interactive multi-wavelength composite
+## 6. Interactive multi-wavelength image
 
 Finally, we combine three wavelength bands into a single RGB composite image.
 We use:
@@ -489,11 +489,6 @@ blue_channel = reprojected_data['Chandra']
 ui = InteractiveRGBPanel(red_channel, green_channel, blue_channel)
 ui.view()
 ```
-
-The resulting image reveals the complex interplay of physical processes across different energy scales.
-Red regions show cooler dust and molecular material.
-Green traces ionized gas and stellar populations.
-Blue highlights the most energetic phenomena, from X-ray emitting hot gas to particle acceleration sites.
 
 By adjusting the controls, you can create different visualizations that emphasize various aspects of the source's physics and structure.
 
