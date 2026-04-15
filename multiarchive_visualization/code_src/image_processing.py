@@ -175,27 +175,6 @@ def create_rgb_composite(red_data, green_data, blue_data,
     return rgb_array
 
 
-def extract_image_cutout(data, x_min, x_max, y_min, y_max):
-    """
-    Extract a cutout region from image data.
-
-    Parameters
-    ----------
-    data : numpy.ndarray
-        Full image data
-    x_min, x_max : int
-        X-axis pixel range (column indices)
-    y_min, y_max : int
-        Y-axis pixel range (row indices)
-
-    Returns
-    -------
-    numpy.ndarray
-        Cutout image region
-    """
-    return data[y_min:y_max, x_min:x_max]
-
-
 def load_fits_from_s3(s3_path):
     """
     Load a FITS file directly from S3 using fsspec.

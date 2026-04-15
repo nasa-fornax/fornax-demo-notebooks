@@ -13,65 +13,37 @@ authors:
   - name: David J Turner
 ---
 
-# Create beautiful multi-wavelength images of astronomical sources
+# Create interactively multi-wavelength images of astronomical sources
 
 ## Learning Goals
 
+***NEED MORE ENTRIES***
+
 By the end of this tutorial, you will be able to:
-- Query imaging data from three NASA archives (HEASARC, IRSA, and MAST)
-- Download and process multi-wavelength observations of astronomical objects
-- Reproject images from different instruments to a common coordinate system
-- Create interactive visualizations showing individual wavelength bands
-- Combine multiple wavelengths into stunning RGB composite images
-- Adjust image parameters interactively to highlight different features
+- Reproject images from different missions to a common coordinate grid.
+- Create interactive visualizations of individual reprojected images.
 
 ## Introduction
 
-Astronomical objects emit light across the entire electromagnetic spectrum, from high-energy X-rays to low-energy infrared radiation.
-By combining observations at different wavelengths, astronomers can reveal physical processes that would be invisible in any single band.
-
-This notebook demonstrates how to create professional multi-wavelength images using publicly available data from NASA's astrophysics archives.
-We query observations from space telescopes operating at four different wavelengths and combine them into a single composite view.
-The process is designed to be accessible to anyone with basic Python knowledge, including those without an astronomy background.
-
-We use the Crab Nebula as our default example.
-This supernova remnant is one of the most studied objects in astronomy and has been observed by virtually every major space telescope.
-However, the notebook is fully generalizable to any astronomical target with available multi-wavelength coverage.
-
-The main technical challenges we address are:
-- Different space telescopes have different spatial resolutions (pixel sizes)
-- Image coordinates systems must be aligned before combining
-- High-resolution images can cause memory issues if not handled carefully
-- Interactive exploration helps understand how different physical processes contribute to the overall appearance
+***SOMETHING SOMETHING ALL THREE ARCHIVES, SOMETHING SOMETHING DIFFERENT WAVELENGTHS HIGHLIGHT DIFFERENT PROCESSES***
 
 ### Input
 
-- Target name or coordinates (default: Crab Nebula)
-- Archive query parameters (default values provided for common use cases)
+- The name of the target
+- ***CHOICES OF INSTRUMENT????***
 
-Data are queried and downloaded from:
-- HEASARC: Chandra X-ray Observatory data
-- IRSA: Spitzer Space Telescope infrared data
-- MAST: Hubble Space Telescope optical data and Swift ultraviolet data
 
 ### Output
 
-- Four-panel plot showing individual wavelength observations with interactive linked zooming
-- RGB composite image combining X-ray (blue), optical (green), and infrared (red) bands
-- Interactive controls to adjust image scaling and channel contributions
-- All intermediate reprojected images saved to the output directory
+- 
 
 ### Runtime
 
-As of April 2026, this notebook takes approximately 5-10 minutes to run to completion on Fornax using the 'Default Astrophysics' image and the 'Standard: 8GB RAM / 4 CPU' server.
+As of 15th April 2026, this notebook takes ***HOW LONG***-minutes to run to completion on Fornax using the small server with 8GB RAM/ 2 CPU.
 
-This runtime is heavily dependent on archive servers, which means runtime will vary for users.
-Data download times are typically a few minutes, while image reprojection takes 1-2 minutes per image.
+This demonstration acquires data from remote services, and as such the runtime can vary depending on the state of those services, and the speed of your internet connection (if running locally).
 
 ## Imports
-
-This notebook requires several astronomy-specific libraries for querying archives, processing images, and visualization.
-All required dependencies are listed in the requirements file.
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
@@ -83,19 +55,9 @@ import os
 os.environ['KMP_WARNINGS'] = '0' # Silences the OpenMP warning
 import sys
 
-# Core astronomy libraries
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
 from astropy.units import Quantity
-
-# Visualization
-# matplotlib
-from matplotlib import pyplot as plt
-# plotly
-import plotly.io as pio
-pio.renderers.default = "jupyterlab"
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
 from astropy.visualization import ImageNormalize, PercentileInterval, LogStretch
 import numpy as np
@@ -112,17 +74,23 @@ from archive_queries import (
 )
 from image_processing import (
     get_pixel_scale, reproject_to_common_grid,
-    load_fits_from_s3, extract_image_cutout
+    load_fits_from_s3
 )
 from plotting import InteractiveRGBPanel, InteractiveMultiPanel
 ```
 
 +++
 
-## 1. Define target source
+## 1. Choosing the source to visualize and setting up directories
 
 We start by specifying which astronomical object we want to visualize.
-The default target is the Crab Nebula, but you can change this to any object resolvable by name through the SIMBAD or NED databases.
+
+The default target is the Crab Nebula, but you can change this to any object resolvable 
+by name through the SIMBAD or NED databases for instance:
+
+- Suggestion 1 that we have vetted
+- Suggestion 2 ...
+- You get the idea...
 
 ```{code-cell} ipython3
 # Define the target
@@ -139,27 +107,21 @@ Set up directories for downloaded data.
 The data directory will store raw files from each archive, while the output directory will store processed images.
 
 ```{code-cell} ipython3
-# Create directory structure
+# Setting up the directory structure
 ROOT_DATA_DIR = "data/"
-OUTPUT_DIR = "output/"
 
-os.makedirs(ROOT_DATA_DIR, exist_ok=True)
-os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-# Separate directories for each archive
-HEA_DATA_DIR = os.path.join(ROOT_DATA_DIR, "HEASARC")
-IRSA_DATA_DIR = os.path.join(ROOT_DATA_DIR, "IRSA")
-MAST_DATA_DIR = os.path.join(ROOT_DATA_DIR, "MAST")
-
-CHAN_DATA_DIR = os.path.join(HEA_DATA_DIR, "Chandra")
-SPITZER_DATA_DIR = os.path.join(IRSA_DATA_DIR, "Spitzer")
-HST_DATA_DIR = os.path.join(MAST_DATA_DIR, "Hubble")
-SWIFT_DATA_DIR = os.path.join(MAST_DATA_DIR, "Swift")
+# Separate directories for each mission
+CHAN_DATA_DIR = os.path.join(ROOT_DATA_DIR, "HEASARC", "Chandra")
+SPITZER_DATA_DIR = os.path.join(ROOT_DATA_DIR, "IRSA", "Spitzer")
+HST_DATA_DIR = os.path.join(ROOT_DATA_DIR, "MAST", "Hubble")
+SWIFT_DATA_DIR = os.path.join(ROOT_DATA_DIR, "MAST", "Swift")
 
 for directory in [CHAN_DATA_DIR, SPITZER_DATA_DIR, HST_DATA_DIR, SWIFT_DATA_DIR]:
     os.makedirs(directory, exist_ok=True)
-
-print("Directory structure created successfully")
+    
+# Now where any outputs will be stored
+OUTPUT_DIR = "output/"
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 ```
 
 +++
