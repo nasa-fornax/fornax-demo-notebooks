@@ -10,7 +10,6 @@ pandas
 xarray
 
 # Visualization and Interactivity
-plotly
 ipywidgets
 ipykernel
 panel
@@ -22,7 +21,6 @@ numba
 bokeh
 pyviz_comms
 jupyter_bokeh
-watchdog
 
 # Indirectly for holoviews
 pyparsing
