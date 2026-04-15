@@ -61,15 +61,9 @@ from astropy.units import Quantity
 
 from astropy.visualization import ImageNormalize, PercentileInterval, LogStretch
 import numpy as np
-import panel as pn
-import holoviews as hv
 
 # Add local code directory to path
 sys.path.append('code_src/')
-
-# Initialize Panel and HoloViews with a Jupyter compatible communication channel
-pn.extension(loading_spinner='dots', loading_color='#00aa41')
-hv.extension('bokeh')
 
 # Import our custom functions
 from archive_queries import (

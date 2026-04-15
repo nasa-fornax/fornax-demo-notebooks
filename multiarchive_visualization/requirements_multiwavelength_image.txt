@@ -6,17 +6,24 @@ astropy
 astroquery
 reproject
 numpy
+pandas
+xarray
 
-# Visualization
+# Visualization and Interactivity
 plotly
 ipywidgets
+ipykernel
 panel
 holoviews
 datashader
+colorcet
+param
+numba
 bokeh
 pyviz_comms
 jupyter_bokeh
 watchdog
+
 # Indirectly for holoviews
 pyparsing
 # Required for the use of Astropy's normalizing functions
@@ -27,4 +34,3 @@ scipy
 s3fs
 # Required for AWS downloads in Astroquery
 boto3
-
