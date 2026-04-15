@@ -13,7 +13,7 @@ authors:
   - name: David J Turner
 ---
 
-# Create interactively multi-wavelength images of astronomical sources
+# Create interactive multi-wavelength images of astronomical sources
 
 ## Learning Goals
 
