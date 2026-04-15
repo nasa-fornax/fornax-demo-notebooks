@@ -22,10 +22,6 @@ from image_processing import create_rgb_composite
 # Silences the OpenMP warning
 os.environ['KMP_WARNINGS'] = '0'
 
-# Initialize Panel and HoloViews with the loading spinner
-pn.extension(loading_spinner='dots', loading_color='#00aa41')
-hv.extension('bokeh')
-
 # Default visualization constants
 RGB_PANEL_WIDTH = 700
 RGB_PANEL_HEIGHT = 700

@@ -16,6 +16,7 @@ datashader
 bokeh
 pyviz_comms
 jupyter_bokeh
+watchdog
 # Indirectly for holoviews
 pyparsing
 # Required for the use of Astropy's normalizing functions
