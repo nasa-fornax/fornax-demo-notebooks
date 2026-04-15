@@ -13,6 +13,7 @@ project:
       file: spectroscopy/spectroscopy.md
       children:
         - file: spectroscopy/spectra_collector.md
+        - file: spectroscopy/emission_search_cubes.md
     - title: Forced Photometry
       file: forced_photometry/forced-photometry.md
       children:
