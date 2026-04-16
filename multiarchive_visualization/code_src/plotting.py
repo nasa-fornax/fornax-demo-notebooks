@@ -7,6 +7,7 @@ and multi-panel stretches using HoloViz (Panel, HoloViews, Datashader).
 import os
 import gc
 import asyncio
+import logging
 import numpy as np
 import panel as pn
 import holoviews as hv
@@ -18,6 +19,10 @@ from astropy.visualization import (
     ImageNormalize
 )
 from image_processing import create_rgb_composite
+
+# Configure logging for Fornax diagnostics
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('FornaxPlotting')
 
 # Silences the OpenMP warning
 os.environ['KMP_WARNINGS'] = '0'
@@ -34,6 +39,31 @@ DEFAULT_GREEN_PERC = 95
 DEFAULT_BLUE_PERC = 99.5
 DEFAULT_Q = 8
 DEFAULT_STRETCH = 0.1
+
+
+def diagnostic_wrapper(func):
+    """
+    Decorator to catch silent errors in HoloViz callbacks and provide UI feedback.
+    This ensures that errors occurring inside asynchronous or background event loops
+    are captured, logged, and reported to the user via the status_pane.
+    """
+    def wrapper(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+        except Exception as e:
+            # Log the full traceback for development/debugging in the Fornax terminal
+            logger.exception(f"Internal error in {func.__name__}")
+
+            # Update the UI with a professional, sanitized message
+            if hasattr(self, 'status_pane') and self.status_pane:
+                self.status_pane.object = (
+                    "### System Status\n"
+                    f"An internal error occurred during processing: {type(e).__name__}. "
+                    "Please check the kernel logs for more information."
+                )
+                self.status_pane.visible = True
+            raise e
+    return wrapper
 
 
 class InteractiveRGBPanel:
@@ -75,6 +105,9 @@ class InteractiveRGBPanel:
             name='Blue %', start=50, end=100, value=DEFAULT_BLUE_PERC, step=0.5
         )
 
+        # Diagnostic pane for providing explicit feedback to the user in case of failures
+        self.status_pane = pn.pane.Markdown("System: Ready", visible=False)
+
         # Placeholder for the main image pane (to handle spinner status)
         self.image_pane = None
 
@@ -89,10 +122,12 @@ class InteractiveRGBPanel:
         self.pipe = Pipe(data=initial_rgb)
 
         # 2. DynamicMap only reads from the Pipe
-        def render_rgb(data):
-            return hv.RGB(data, bounds=(0, 0, self.width, self.height))
+        @diagnostic_wrapper
+        def render_rgb(self_inner, data):
+            return hv.RGB(data, bounds=(0, 0, self_inner.width, self_inner.height))
 
-        self.dmap = hv.DynamicMap(render_rgb, streams=[self.pipe])
+        # Use a lambda to pass self correctly to the decorated internal function
+        self.dmap = hv.DynamicMap(lambda data: render_rgb(self, data), streams=[self.pipe])
 
         self.interactive_plot = regrid(self.dmap).opts(
             width=RGB_PANEL_WIDTH, height=RGB_PANEL_HEIGHT,
@@ -103,15 +138,11 @@ class InteractiveRGBPanel:
             xaxis=None, yaxis=None
         )
 
+    @diagnostic_wrapper
     async def process_and_push(self, *_):
         """
         Asynchronously computes the new RGB composite and pushes it to the Pipe.
         Manages the loading spinner on the image pane.
-
-        Parameters
-        ----------
-        *_ : tuple
-            Positional arguments from the Panel event watcher (unused).
         """
         if self.image_pane:
             self.image_pane.loading = True
@@ -148,6 +179,7 @@ class InteractiveRGBPanel:
         controls = pn.Column(
             self.q_slider, self.stretch_slider,
             self.r_perc, self.g_perc, self.b_perc,
+            self.status_pane,
             width=CONTROL_PANEL_WIDTH
         )
 
@@ -158,7 +190,24 @@ class InteractiveRGBPanel:
         for slider in sliders:
             slider.param.watch(self.process_and_push, 'value_throttled')
 
-        return pn.Row(controls, self.image_pane)
+        layout = pn.Row(controls, self.image_pane)
+
+        # Verification check: Attempt to generate the Bokeh plot state in the kernel.
+        # If this fails, it indicates that the Bokeh/HoloViews models cannot be correctly
+        # serialized, typically due to a missing or misconfigured Lab extension on Fornax.
+        try:
+            hv.renderer('bokeh').get_plot(self.interactive_plot)
+        except Exception:
+            logger.exception("Initial serialization of RGB panel failed")
+            self.status_pane.object = (
+                "### System Error\n"
+                "The browser failed to initialize the plotting manager. "
+                "Please verify that the **jupyter_bokeh** Lab extension is installed and run "
+                "`jupyter lab clean` if the problem persists."
+            )
+            self.status_pane.visible = True
+
+        return layout
 
 
 class InteractiveMultiPanel:
@@ -184,6 +233,9 @@ class InteractiveMultiPanel:
 
         self.perc_sliders = {}
         self.stretch_widgets = {}
+
+        # Diagnostic pane for providing explicit feedback to the user in case of failures
+        self.status_pane = pn.pane.Markdown("System: Ready", visible=False)
 
         # Initialize widgets for each mission
         for miss in self.data_dict.keys():
@@ -232,12 +284,13 @@ class InteractiveMultiPanel:
         perc_slider = self.perc_sliders[mission]
         cmap = self.cmaps.get(mission, 'viridis')
 
-        def generate_img(stretch_val, pct_val):
-            processed = self._process_image(data, stretch_val, pct_val)
-            return hv.Image(processed, bounds=(0, 0, self.width, self.height), label=mission)
+        @diagnostic_wrapper
+        def generate_img(self_inner, stretch_val, pct_val):
+            processed = self_inner._process_image(data, stretch_val, pct_val)
+            return hv.Image(processed, bounds=(0, 0, self_inner.width, self_inner.height), label=mission)
 
         bound_fn = pn.bind(
-            generate_img,
+            lambda stretch_val, pct_val: generate_img(self, stretch_val, pct_val),
             stretch_val=stretch_widget,
             pct_val=perc_slider.param.value_throttled
         )
@@ -265,5 +318,23 @@ class InteractiveMultiPanel:
                 pn.layout.Divider()
             ])
 
+        controls_list.append(self.status_pane)
         controls = pn.Column(*controls_list, width=CONTROL_PANEL_WIDTH)
-        return pn.Row(controls, self.grid)
+
+        layout = pn.Row(controls, self.grid)
+
+        # Verification check: Attempt to generate the Bokeh plot state in the kernel.
+        # If this fails, it indicates that the Bokeh/HoloViews models cannot be correctly
+        # serialized, typically due to a missing or misconfigured Lab extension on Fornax.
+        try:
+            hv.renderer('bokeh').get_plot(self.grid)
+        except Exception:
+            logger.exception("Initial serialization of MultiPanel layout failed")
+            self.status_pane.object = (
+                "### System Error\n"
+                "The browser failed to initialize the plotting manager. "
+                "Please verify that the **jupyter_bokeh** Lab extension is installed."
+            )
+            self.status_pane.visible = True
+
+        return layout
