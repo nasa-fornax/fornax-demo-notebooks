@@ -63,6 +63,8 @@ hv.extension('bokeh')
 
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
+from astropy.time import Time
+from astropy.units import Quantity
 
 import numpy as np
 
@@ -71,7 +73,7 @@ sys.path.append('code_src/')
 
 # Import our custom functions
 from archive_queries import (
-    query_chandra, download_chandra,
+    load_chandra_image,
     query_spitzer, get_spitzer_s3_path,
     query_hst, download_hst,
     query_swift, download_swift
@@ -128,39 +130,42 @@ OUTPUT_DIR = "output/"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 ```
 
+```{code-cell} python
+CHANDRA_SEARCH_RAD = Quantity(3, 'arcmin')
+
+VETTED_OBS = {"crab": {'Chandra': "1994", "Hubble": "JC6801010", "Swift": "00030371012", "Spitzer": ""}, }
+```
+
 +++
 
 ## 2. Query archives for available data
 
-We now query each archive to find observations covering our target.
-Each archive has different data organization and search interfaces.
 
-### 2.1 Query HEASARC for X-ray data
+### 2.1 Query HEASARC for Chandra X-ray observations
 
-Chandra provides the highest resolution X-ray images available.
-We search for ACIS-S observations without a grating, as these produce the best imaging data.
+```{code-cell} python
+all_chandra_obs = Heasarc.query_region(SOURCE_COORD, 'chanmaster', column_filters={"detector": ["ACIS-S", "ACIS-I"], "grating": "NONE"}, columns='*', radius=CHANDRA_SEARCH_RAD)
+all_chandra_obs['time'] = Time(all_chandra_obs['time'], format='mjd').datetime
+all_chandra_obs.sort('exposure', reverse=True)
 
-```{code-cell} ipython3
-print("Querying HEASARC for Chandra observations...")
-
-chandra_obs = query_chandra(SOURCE_COORD, detector="ACIS-S", grating="NONE")
-
-if chandra_obs is not None and len(chandra_obs) > 0:
-    print(f"Found {len(chandra_obs)} Chandra observations")
-    print(f"Longest exposure: {chandra_obs['exposure'][0]:.0f} seconds")
-
-    # Select a specific high-quality observation for Crab
-    # For other targets, you may want to use the longest exposure (first row)
-    if SOURCE_NAME.lower() == "crab":
-        selected_chandra = chandra_obs[chandra_obs['obsid'] == 1994]
-        print(f"Selected ObsID 1994 (well-known deep observation)")
-    else:
-        selected_chandra = chandra_obs[0]
-        print(f"Selected longest exposure (ObsID {selected_chandra['obsid'][0]})")
-else:
-    print("No Chandra data found for this target")
-    selected_chandra = None
+all_chandra_obs
 ```
+
+```{code-cell} python
+if SOURCE_NAME.lower() in VETTED_OBS and "Chandra" in VETTED_OBS[SOURCE_NAME.lower()]:
+    chandra_obs_id = VETTED_OBS[SOURCE_NAME.lower()]["Chandra"]
+else:
+    chandra_obs_id = all_chandra_obs[0]['obsid']
+    
+sel_chandra_obs = all_chandra_obs[all_chandra_obs['obsid'] == int(chandra_obs_id)]
+
+sel_chandra_datalink = Heasarc.locate_data(sel_obs_table)['aws']
+```
+
+```{code-cell} python
+chandra_hdu = load_chandra_image(sel_chandra_datalink, preproc_cent_hi_res=True)
+```
+
 
 ### 2.2 Query IRSA for infrared data
 
@@ -245,22 +250,6 @@ Some archives provide direct cloud access, which is faster than traditional down
 
 ### 3.1 Download Chandra data
 
-```{code-cell} ipython3
-if selected_chandra is not None:
-    print("Downloading Chandra data...")
-    chandra_img_path = download_chandra(selected_chandra, CHAN_DATA_DIR, obsid=1994)
-
-    if chandra_img_path and os.path.exists(chandra_img_path):
-        print(f"Chandra data downloaded to: {chandra_img_path}")
-        chandra_hdu = fits.open(chandra_img_path)
-        print(f"Image shape: {chandra_hdu[0].data.shape}")
-    else:
-        print("Failed to download or locate Chandra data")
-        chandra_hdu = None
-else:
-    print("Skipping Chandra download (no data available)")
-    chandra_hdu = None
-```
 
 ### 3.2 Load Spitzer data from the IRSA S3 bucket
 
@@ -336,7 +325,7 @@ Lower resolution images are upsampled to match, while the high resolution image 
 # Dictionary mapping missions to their relevant HDU extensions
 mission_hdus = {
     'Chandra': chandra_hdu['PRIMARY'] if chandra_hdu else None,
-    'HST': hst_hdu['SCI'] if hst_hdu else None,
+    'Hubble': hst_hdu['SCI'] if hst_hdu else None,
     'Swift': swift_hdu[1] if swift_hdu else None,
     'Spitzer': spitzer_hdu['PRIMARY'] if spitzer_hdu else None
 }
@@ -391,7 +380,7 @@ for cur_miss, rp_info in reproj_data_cov.items():
 
 ```{code-cell} ipython3
 sep_reproj_im_cmaps = {
-    'HST': 'Greens',
+    'Hubble': 'Greens',
     'Swift': 'Blues',
     'Chandra': 'Purples',
     'Spitzer': 'YlOrBr'
@@ -402,9 +391,6 @@ sep_reproj_im_cmaps = {
 sep_ims = InteractiveMultiPanel({mn: res['data'] for mn, res in reproj_data_cov.items()}, sep_reproj_im_cmaps)
 sep_ims.view()
 ```
-
-Each panel shows the same region at a different wavelength.
-The interactive plot allows you to zoom and pan simultaneously across all panels.
 
 +++
 
@@ -430,7 +416,7 @@ The interactive controls allow you to adjust:
 ```{code-cell} ipython3
 # Extract the three channels
 red_channel = reproj_data_cov['Spitzer']['data']
-green_channel = reproj_data_cov['HST']['data']
+green_channel = reproj_data_cov['Hubble']['data']
 blue_channel = reproj_data_cov['Chandra']['data']
 
 multi_wav_im = InteractiveRGBPanel(red_channel, green_channel, blue_channel)

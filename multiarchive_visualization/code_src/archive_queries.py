@@ -7,15 +7,19 @@ This module provides functions to search for and download imaging data from:
 - MAST (Optical: HST, UV: Swift)
 """
 
+from warnings import warn
+
 import os
 import glob
 import numpy as np
+from s3fs import S3FileSystem
 from astropy.coordinates import SkyCoord
 from astropy.units import Quantity
 from astroquery.heasarc import Heasarc
 from astroquery.ipac.irsa import Irsa
 from astroquery.mast import MastMissions, Observations
 
+S3_CONN = S3FileSystem(anon=True)
 
 def query_chandra(coord, detector="ACIS-S", grating="NONE"):
     """
@@ -55,51 +59,30 @@ def query_chandra(coord, detector="ACIS-S", grating="NONE"):
         return None
 
 
-def download_chandra(obs_table, data_dir, obsid=None):
-    """
-    Download Chandra data products.
-
-    Parameters
-    ----------
-    obs_table : astropy.table.Table
-        Results from query_chandra
-    data_dir : str
-        Directory to save downloaded files
-    obsid : int, optional
-        Specific observation ID to download. If None, downloads longest exposure.
-
-    Returns
-    -------
-    str or None
-        Path to downloaded image file, or None if download failed
-    """
-    if obs_table is None or len(obs_table) == 0:
-        return None
-
-    # Select observation
-    if obsid is not None:
-        sel_obs = obs_table[obs_table['obsid'] == obsid]
+def load_chandra_image(chandra_datalink, preproc_cent_hi_res: bool = True):
+    if preproc_cent_hi_res:
+        im_patt = "*cntr_img2*.fits*"
     else:
-        sel_obs = obs_table[0]  # Longest exposure (already sorted)
+        im_patt = "*full_img2*.fits*"
+
+    patt_uri = os.path.join(chandra_datalink, "primary", im_patt)
 
     try:
-        download_list = Heasarc.locate_data(sel_obs)
-        Heasarc.download_data(download_list, host='aws', location=data_dir)
+        patt_res = S3_CONN.expand_path(patt_uri)
 
-        # Return path to image file (Chandra archive structure)
-        obsid_str = str(sel_obs['obsid'][0])
-        img_path = os.path.join(data_dir, obsid_str, "primary",
-                               f"acisf{obsid_str.zfill(5)}N005_full_img2.fits.gz")
+        if len(patt_res) != 1:
+            warn(f"Multiple Chandra images found, selecting the first; {patt_res}")
 
-        if os.path.exists(img_path):
-            return img_path
-        else:
-            print(f"Warning: Expected image file not found at {img_path}")
-            return None
+        # Either way selecting the first entry
+        im_s3_uri = patt_res[0]
 
-    except (ValueError, KeyError, OSError) as e:
-        print(f"Chandra download failed: {e}")
+    except FileNotFoundError:
+        warn('No Chandra image can be identified.')
         return None
+
+    im_s3_uri = os.path.join(chandra_datalink, "primary", os.path.basename(im_s3_uri))
+
+    return fits.open(im_s3_uri, use_fsspec=True, fsspec_kwargs={'anon': True})
 
 
 def query_spitzer(coord, radius_arcmin=3.0):
