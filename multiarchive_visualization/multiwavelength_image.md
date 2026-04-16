@@ -56,7 +56,6 @@ import os
 os.environ['KMP_WARNINGS'] = '0' # Silences the OpenMP warning
 import sys
 
-# Initialize interactivity for cloud proxies (Fornax)
 import panel as pn
 import holoviews as hv
 pn.extension(loading_spinner='dots', loading_color='#00aa41', comms='ipywidgets', inline=True)
@@ -64,9 +63,7 @@ hv.extension('bokeh')
 
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
-from astropy.units import Quantity
 
-from astropy.visualization import ImageNormalize, PercentileInterval, LogStretch
 import numpy as np
 
 # Add local code directory to path
