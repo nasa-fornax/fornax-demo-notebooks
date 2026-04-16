@@ -284,9 +284,9 @@ class InteractiveMultiPanel:
             cmap=cmap,
             width=MULTI_PANEL_WIDTH, height=MULTI_PANEL_HEIGHT,
             title=mission,
-            tools=[],
-            default_tools=['box_zoom', 'pan', 'wheel_zoom', 'reset', 'save'],
-            active_tools=['box_zoom', 'wheel_zoom'],
+            tools=['pan', 'wheel_zoom', 'reset', 'save'],
+            default_tools=[],
+            active_tools=['wheel_zoom'],
             xaxis=None, yaxis=None,
             hooks=[self.apply_bounds]
         )
