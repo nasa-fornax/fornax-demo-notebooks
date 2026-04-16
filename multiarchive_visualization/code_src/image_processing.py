@@ -50,20 +50,23 @@ def get_pixel_scale(hdu_or_header):
 
 
 def reproject_to_common_grid(image, targ_hdr):
+    # Warning catch still necessary because proj_plane_pixel_scales will
+    #  produce these warnings.
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', category=FITSFixedWarning)
+        try:
+            # Handle both HDU objects and (data, header) tuples
+            if isinstance(image, tuple):
+                data, header = image
+                reproj_data, reproj_foot = reproject_interp(
+                    (data, header), targ_hdr
+                )
+            else:
+                reproj_data, reproj_foot = reproject_interp(image, targ_hdr)
 
-    try:
-        # Handle both HDU objects and (data, header) tuples
-        if isinstance(image, tuple):
-            data, header = image
-            reproj_data, reproj_foot = reproject_interp(
-                (data, header), targ_hdr
-            )
-        else:
-            reproj_data, reproj_foot = reproject_interp(image, targ_hdr)
-
-    except (ValueError, TypeError):
-        reproj_data = None
-        reproj_foot = None
+        except (ValueError, TypeError):
+            reproj_data = None
+            reproj_foot = None
 
     return reproj_data, reproj_foot
 

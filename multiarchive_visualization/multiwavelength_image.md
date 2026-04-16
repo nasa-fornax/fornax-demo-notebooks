@@ -376,11 +376,11 @@ donor_wcs_hdr = mission_hdus[finest_pix_miss].header.copy()
 
 
 ```{code-cell} ipython3
-reproj_data_cov = {mn: {"data": (rp := reproject_to_common_grid((cur_hdu.data, cur_hdu.header), donor_wcs_hdr))[0], "cov": rp[1]} for mn, cur_hdu in mission_hdus.items() if cur_hdu is not None}
+reproj_data_cov = {mn: {"data": (rp := reproject_to_common_grid((cur_hdu.data, cur_hdu.header), donor_wcs_hdr))[0], "cov": ((rp[1] > 0).sum() / rp[1].size)} for mn, cur_hdu in mission_hdus.items() if cur_hdu is not None}
 
 for cur_miss, rp_info in reproj_data_cov.items():
     if rp_info['data'] is not None:
-        print(f"{cur_miss}: {rp_info['data'].shape}, coverage = {(rp_info['cov'] > 0).sum() / rp_info['cov'].size * 100:.1f}%")
+        print(f"{cur_miss}: {rp_info['data'].shape}, coverage = {rp_info['cov'] * 100:.1f}%")
 ```
 
 +++
@@ -399,7 +399,7 @@ sep_reproj_im_cmaps = {
 ```
 
 ```{code-cell} ipython3
-sep_ims = InteractiveMultiPanel(reprojected_data, sep_reproj_im_cmaps)
+sep_ims = InteractiveMultiPanel({mn: res['data'] for mn, res in reproj_data_cov.items()}, sep_reproj_im_cmaps)
 sep_ims.view()
 ```
 
@@ -429,9 +429,9 @@ The interactive controls allow you to adjust:
 
 ```{code-cell} ipython3
 # Extract the three channels
-red_channel = reprojected_data['Spitzer']
-green_channel = reprojected_data['HST']
-blue_channel = reprojected_data['Chandra']
+red_channel = reproj_data_cov['Spitzer']['data']
+green_channel = reproj_data_cov['HST']['data']
+blue_channel = reproj_data_cov['Chandra']['data']
 
 multi_wav_im = InteractiveRGBPanel(red_channel, green_channel, blue_channel)
 multi_wav_im.view()
