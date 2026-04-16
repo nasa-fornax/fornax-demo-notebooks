@@ -397,8 +397,6 @@ print(f"Final pixel scale: {final_pixel_scale.to('arcsec/pix'):.3f}")
 
 ### 4.3 Reproject all images
 
-This step performs the coordinate transformation for each image.
-It may take a minute or two per image depending on size and complexity.
 
 ```{code-cell} ipython3
 # Prepare images dictionary
@@ -429,11 +427,7 @@ for name, result in reproject_to_common_grid(images_dict, donor_wcs_hdr).items()
 
 ## 5. Visualize individual wavelength images
 
-Now we create an interactive four-panel plot showing each wavelength band separately.
-This allows us to see what each telescope captured and understand the contribution of each band to the final composite.
 
-The plot includes linked zooming across all four panels.
-Select a region in any panel to zoom all panels to that area.
 
 ```{code-cell} ipython3
 sep_reproj_im_cmaps = {
@@ -456,20 +450,22 @@ The interactive plot allows you to zoom and pan simultaneously across all panels
 
 ## 6. Interactive multi-wavelength image
 
+
+***IMPROVE ALL THIS***
+
 Finally, we combine three wavelength bands into a single RGB composite image.
 We use:
 - Red channel: Spitzer infrared (cool dust and molecular gas)
 - Green channel: Hubble optical (stellar emission and ionized gas)
 - Blue channel: Chandra X-ray (extremely hot plasma and high-energy particles)
 
-This composite uses the Lupton algorithm, which is designed specifically for astronomical images with high dynamic range.
 
 The interactive controls allow you to adjust:
 - **Channel percentiles**: Control the brightness scaling for each color
 - **Lupton Q**: Softening parameter (higher values show more faint detail)
 - **Lupton stretch**: Overall brightness (higher values make the image brighter)
 
-Experiment with the sliders to highlight different physical components and create striking visualizations.
+***Experiment with the sliders...***
 
 ```{code-cell} ipython3
 # Extract the three channels
@@ -480,8 +476,6 @@ blue_channel = reprojected_data['Chandra']
 multi_wav_im = InteractiveRGBPanel(red_channel, green_channel, blue_channel)
 multi_wav_im.view()
 ```
-
-By adjusting the controls, you can create different visualizations that emphasize various aspects of the source's physics and structure.
 
 +++
 
