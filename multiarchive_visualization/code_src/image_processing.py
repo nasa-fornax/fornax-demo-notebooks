@@ -7,6 +7,8 @@ This module provides utilities to:
 - Create RGB composite images from multiple wavelengths
 """
 
+import warnings
+
 import numpy as np
 from astropy.io import fits
 from astropy.units import Quantity
@@ -14,9 +16,8 @@ from astropy.visualization import (
     ImageNormalize, PercentileInterval, LinearStretch, LogStretch,
     SqrtStretch, AsinhStretch, make_lupton_rgb
 )
-from astropy.wcs import WCS
+from astropy.wcs import WCS, FITSFixedWarning
 from reproject import reproject_interp
-
 
 def get_pixel_scale(hdu_or_header):
     """
@@ -38,50 +39,33 @@ def get_pixel_scale(hdu_or_header):
     else:
         header = hdu_or_header
 
-    # Calculate pixel scale from WCS
-    wcs = WCS(header)
-    pixel_scales = wcs.proj_plane_pixel_scales()
+    # Warning catch still necessary because proj_plane_pixel_scales will
+    #  produce these warnings.
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', category=FITSFixedWarning)
+        # Calculate pixel scale from WCS
+        wcs = WCS(header, fix=False)
+        pixel_scales = wcs.proj_plane_pixel_scales()
     return pixel_scales[0] / Quantity(1, 'pix')
 
 
-def reproject_to_common_grid(images_dict, target_header):
-    """
-    Reproject multiple images to a common WCS grid.
+def reproject_to_common_grid(image, targ_hdr):
 
-    Parameters
-    ----------
-    images_dict : dict
-        Dictionary mapping mission names to FITS HDU objects or (data, header) tuples
-    target_header : astropy.io.fits.Header
-        Target WCS header for reprojection
+    try:
+        # Handle both HDU objects and (data, header) tuples
+        if isinstance(image, tuple):
+            data, header = image
+            reproj_data, reproj_foot = reproject_interp(
+                (data, header), targ_hdr
+            )
+        else:
+            reproj_data, reproj_foot = reproject_interp(image, targ_hdr)
 
-    Returns
-    -------
-    dict
-        Dictionary mapping mission names to reprojected (data, footprint) tuples
-    """
-    reprojected = {}
+    except (ValueError, TypeError):
+        reproj_data = None
+        reproj_foot = None
 
-    for name, image in images_dict.items():
-        print(f"Reprojecting {name}...")
-
-        try:
-            # Handle both HDU objects and (data, header) tuples
-            if isinstance(image, tuple):
-                data, header = image
-                reproj_data, reproj_foot = reproject_interp(
-                    (data, header), target_header
-                )
-            else:
-                reproj_data, reproj_foot = reproject_interp(image, target_header)
-
-            reprojected[name] = (reproj_data, reproj_foot)
-
-        except (ValueError, TypeError) as e:
-            print(f"Warning: Failed to reproject {name}: {e}")
-            reprojected[name] = None
-
-    return reprojected
+    return reproj_data, reproj_foot
 
 
 def normalize_image(data, percentile=95, stretch='linear', stretch_params=None):

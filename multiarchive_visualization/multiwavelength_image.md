@@ -333,92 +333,54 @@ Lower resolution images are upsampled to match, while the high resolution image 
 ### 4.1 Compare pixel scales
 
 ```{code-cell} ipython3
-print("Comparing pixel scales:")
-print("-" * 50)
-
-# Dictionary mapping missions to their relevant HDUs/extensions
+# Dictionary mapping missions to their relevant HDU extensions
 mission_hdus = {
-    'Chandra': chandra_hdu[0] if chandra_hdu else None,
+    'Chandra': chandra_hdu['PRIMARY'] if chandra_hdu else None,
     'HST': hst_hdu['SCI'] if hst_hdu else None,
     'Swift': swift_hdu[1] if swift_hdu else None,
-    'Spitzer': spitzer_hdu[0] if spitzer_hdu else None
+    'Spitzer': spitzer_hdu['PRIMARY'] if spitzer_hdu else None
 }
 
-pixel_scales = {}
-for mission, hdu in mission_hdus.items():
-    if hdu is not None:
-        scale = get_pixel_scale(hdu)
-        pixel_scales[mission] = scale
-        print(f"{mission:<10}: {scale.to('arcsec/pix'):.3f}")
+pixel_scales = {miss: get_pixel_scale(miss_hdu) for miss, miss_hdu in mission_hdus.items() if miss_hdu is not None}
+finest_pix_miss = min(pixel_scales, key=pixel_scales.get)
 
 print("-" * 50)
-
-# Hubble is typically much higher resolution than others
-if 'HST' in pixel_scales:
-    print(f"\nHubble has the highest resolution")
-    if 'Chandra' in pixel_scales:
-        ratio = (pixel_scales['Chandra'] / pixel_scales['HST']).decompose()
-        print(f"Chandra pixels are ~{ratio:.1f}x larger than HST pixels")
-    print("We will use HST resolution as the common grid")
+print(f"{finest_pix_miss:<10}: {pixel_scales[finest_pix_miss].to('arcsec/pix'):.3f} [x1.00]")
+tab_strs = {}
+for cur_miss, cur_scale in pixel_scales.items():
+    if cur_miss == finest_pix_miss:
+        continue  
+    coarse_factor = (cur_scale / pixel_scales[finest_pix_miss]).value.round(1)
+    tab_strs[coarse_factor] = f"{cur_miss:<10}: {cur_scale.to('arcsec/pix'):.3f} [x{coarse_factor}]\n"
+    
+print("".join(dict(sorted(tab_strs.items())).values()))
+print("-" * 50)
 ```
 
 +++
 
-### 4.2 Choosing the coordinate grid for reprojection
+### 4.2 Reproject all images
 
-We select the highest resolution image's coordinate system as our target grid.
+We have to reproject the images to a common coordinate grid, giving them a matching 
+spatial resolution for when we make visualizations. 
 
+If we were trying to do science with these images directly, we would likely not 
+reproject them.
+
+Here we fetch out the highest resolution image's FITS header, to provide the
+reprojection grid for all images (note though that we will not reproject the donor
+image):
 ```{code-cell} ipython3
-# Find highest resolution image
-print("Selecting common WCS grid...")
-
-# Identify which image has the finest pixel scale
-finest_mission = min(pixel_scales, key=pixel_scales.get)
-print(f"Using {finest_mission} as reference (highest resolution)")
-
-# Get the reference header
-if finest_mission == 'Chandra':
-    donor_wcs_hdr = chandra_hdu[0].header.copy()
-elif finest_mission == 'HST':
-    donor_wcs_hdr = hst_hdu['SCI'].header.copy()
-elif finest_mission == 'Swift':
-    donor_wcs_hdr = swift_hdu[1].header.copy()
-elif finest_mission == 'Spitzer':
-    donor_wcs_hdr = spitzer_hdu[0].header.copy()
-
-print(f"Common grid size: {donor_wcs_hdr['NAXIS1']} x {donor_wcs_hdr['NAXIS2']} pixels")
-
-# Calculate pixel scale of final grid
-final_pixel_scale = get_pixel_scale(donor_wcs_hdr)
-print(f"Final pixel scale: {final_pixel_scale.to('arcsec/pix'):.3f}")
+donor_wcs_hdr = mission_hdus[finest_pix_miss].header.copy()
 ```
 
-### 4.3 Reproject all images
-
 
 ```{code-cell} ipython3
-# Prepare images dictionary
-images_dict = {}
+reproj_data_cov = {mn: {"data": (rp := reproject_to_common_grid((cur_hdu.data, cur_hdu.header), donor_wcs_hdr))[0], "cov": rp[1]} for mn, cur_hdu in mission_hdus.items() if cur_hdu is not None}
 
-if chandra_hdu is not None:
-    images_dict['Chandra'] = chandra_hdu[0]
-
-if hst_hdu is not None:
-    images_dict['HST'] = hst_hdu['SCI']
-
-if swift_hdu is not None:
-    images_dict['Swift'] = swift_hdu[1]
-
-if spitzer_hdu is not None:
-    # Special handling for S3-loaded files
-    images_dict['Spitzer'] = (spitzer_hdu[0].data, spitzer_hdu[0].header)
-
-reprojected_data = {}
-for name, result in reproject_to_common_grid(images_dict, donor_wcs_hdr).items():
-    if result is not None:
-        data, footprint = result
-        reprojected_data[name] = data
-        print(f"{name}: {data.shape}, coverage = {(footprint > 0).sum() / footprint.size * 100:.1f}%")
+for cur_miss, rp_info in reproj_data_cov.items():
+    if rp_info['data'] is not None:
+        print(f"{cur_miss}: {rp_info['data'].shape}, coverage = {(rp_info['cov'] > 0).sum() / rp_info['cov'].size * 100:.1f}%")
 ```
 
 +++
