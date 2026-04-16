@@ -164,7 +164,7 @@ class InteractiveRGBPanel:
 class InteractiveMultiPanel:
     """
     An interactive Panel dashboard for multi-panel multi-wavelength visualization.
-    Refactored for maximum stability in cloud environments.
+    Uses independent DynamicMaps in a linked Layout for stability.
 
     Parameters
     ----------
@@ -185,7 +185,7 @@ class InteractiveMultiPanel:
         self.perc_sliders = {}
         self.stretch_widgets = {}
 
-        # Initialize widgets
+        # Initialize widgets for each mission
         for miss in self.data_dict.keys():
             self.perc_sliders[miss] = pn.widgets.FloatSlider(
                 name=f'{miss} Max %', start=90.0, end=100.0, value=99.0, step=0.1
@@ -194,50 +194,25 @@ class InteractiveMultiPanel:
                 name=f'{miss} Stretch', options=['linear', 'sqrt', 'log'], value='linear'
             )
 
-        # Create the grid of plots
+        # Create independent panels for each mission
         plots = []
         for miss, data in self.data_dict.items():
             plots.append(self._create_panel(miss, data))
 
-        # Use hv.Layout and ensure it is properly initialized for linking
+        # Create the grid and merge tools for a single reset/save toolbar
         self.grid = hv.Layout(plots).cols(2).opts(
-            shared_axes=True,  # Explicitly enable axis linking
-            merge_tools=True   # Combine toolbars for better performance
+            shared_axes=True,
+            merge_tools=True
         )
 
     def apply_bounds(self, plot, _):
-        """
-        Enforces hard panning bounds on the plot.
-
-        Parameters
-        ----------
-        plot : holoviews.plotting.bokeh.ElementPlot
-            The HoloViews plot instance.
-        _ : holoviews.core.Element
-            The HoloViews element (unused).
-        """
+        """Enforces hard panning bounds at the Bokeh level."""
         plot.state.x_range.bounds = (0, self.width)
         plot.state.y_range.bounds = (0, self.height)
 
     @staticmethod
     def _process_image(data, stretch_name, upper_pct):
-        """
-        Applies stretch and normalization to an image.
-
-        Parameters
-        ----------
-        data : numpy.ndarray
-            The image data.
-        stretch_name : str
-            Type of stretch ('linear', 'sqrt', 'log').
-        upper_pct : float
-            Upper percentile for the stretch.
-
-        Returns
-        -------
-        numpy.ndarray
-            The processed and normalized image data.
-        """
+        """Applies stretch and normalization to an image."""
         interval = AsymmetricPercentileInterval(0.0, upper_pct)
         vmin, vmax = interval.get_limits(data)
 
@@ -252,51 +227,35 @@ class InteractiveMultiPanel:
         return norm(data).filled(0.0)
 
     def _create_panel(self, mission, data):
-        """
-        Creates a single interactive panel for a mission.
-
-        Parameters
-        ----------
-        mission : str
-            The name of the mission.
-        data : numpy.ndarray
-            The image data for the mission.
-
-        Returns
-        -------
-        holoviews.operation.datashader.regrid
-            The regridded DynamicMap for the panel.
-        """
+        """Creates a single interactive regridded panel."""
         stretch_widget = self.stretch_widgets[mission]
         perc_slider = self.perc_sliders[mission]
         cmap = self.cmaps.get(mission, 'viridis')
 
-        # Reactive function tied to the specific widgets for this panel
-        @pn.depends(stretch_val=stretch_widget, pct_val=perc_slider.param.value_throttled)
         def generate_img(stretch_val, pct_val):
             processed = self._process_image(data, stretch_val, pct_val)
             return hv.Image(processed, bounds=(0, 0, self.width, self.height), label=mission)
 
-        # Apply regrid to the DynamicMap and set stable Bokeh options
-        return regrid(hv.DynamicMap(generate_img)).opts(
+        bound_fn = pn.bind(
+            generate_img,
+            stretch_val=stretch_widget,
+            pct_val=perc_slider.param.value_throttled
+        )
+
+        # Applying regrid here ensures each panel resamples independently
+        return regrid(hv.DynamicMap(bound_fn)).opts(
             cmap=cmap,
             width=MULTI_PANEL_WIDTH, height=MULTI_PANEL_HEIGHT,
-            tools=['pan', 'box_zoom', 'wheel_zoom', 'reset', 'save'],
-            default_tools=[],
-            active_tools=['wheel_zoom', 'box_zoom'],
+            title=mission,
+            tools=[],
+            default_tools=['box_zoom', 'pan', 'wheel_zoom', 'reset', 'save'],
+            active_tools=['box_zoom', 'wheel_zoom'],
             xaxis=None, yaxis=None,
             hooks=[self.apply_bounds]
         )
 
     def view(self):
-        """
-        Returns the Panel layout for the multi-panel visualization.
-
-        Returns
-        -------
-        panel.Row
-            A row containing the controls and the grid of plots.
-        """
+        """Returns the dashboard layout."""
         controls_list = []
         for miss in self.data_dict.keys():
             controls_list.extend([
@@ -307,5 +266,4 @@ class InteractiveMultiPanel:
             ])
 
         controls = pn.Column(*controls_list, width=CONTROL_PANEL_WIDTH)
-
         return pn.Row(controls, self.grid)

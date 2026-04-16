@@ -58,7 +58,8 @@ import sys
 # Initialize interactivity for cloud proxies (Fornax)
 import panel as pn
 import holoviews as hv
-pn.extension(loading_spinner='dots', loading_color='#00aa41', comms='ipywidgets', inline=True)
+# comms='ipywidgets', inline=True
+pn.extension(loading_spinner='dots', loading_color='#00aa41')
 hv.extension('bokeh')
 
 from astropy.coordinates import SkyCoord
