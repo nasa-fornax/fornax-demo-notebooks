@@ -24,6 +24,20 @@ from astroquery.mast import MastMissions, Observations
 
 S3_CONN = S3FileSystem(anon=True)
 
+VETTED_OBS = {"crab": {'chandra': "1994", "hubble": "JC6801010", "swift": "00030371012", "spitzer": "50059401.50059401-10.IRAC"}, }
+
+
+def vetted_source_check(check_src_name, check_miss_name):
+    check_src_name = check_src_name.lower()
+    check_miss_name = check_miss_name.lower()
+
+    if check_src_name not in VETTED_OBS:
+        return None
+    elif check_miss_name not in VETTED_OBS[check_src_name]:
+        return None
+    else:
+        return VETTED_OBS[check_src_name][check_miss_name]
+
 
 def load_chandra_image(chandra_datalink, preproc_cent_hi_res: bool = True):
     if preproc_cent_hi_res:
@@ -66,6 +80,8 @@ def load_chandra_image(chandra_datalink, preproc_cent_hi_res: bool = True):
 
 def load_spitzer_image(spitzer_cloud_info):
 
+    # TODO HANDLE NULL INPUTS, RETURN NONE
+
     if isinstance(spitzer_cloud_info, str):
         spitzer_cloud_info = ast.literal_eval(spitzer_cloud_info)
     elif not isinstance(spitzer_cloud_info, dict):
@@ -81,6 +97,20 @@ def load_spitzer_image(spitzer_cloud_info):
     im_s3_uri = f"s3://{spitzer_cloud_info['aws']['bucket_name']}/{spitzer_cloud_info['aws']['key']}"
 
     return fits.open(im_s3_uri, use_fsspec=True, fsspec_kwargs={'anon': True})
+
+
+def load_swift_image(swift_url):
+
+    if isinstance(swift_url, Column):
+        if len(swift_url) == 1:
+            swift_url = swift_url[0]
+        elif len(swift_url) > 1:
+            raise ValueError("The 'swift_url' argument must have only "
+                             "one element.")
+        else:
+            return None
+
+    return fits.open(swift_url)
 
 
 def query_hst(coord, instrument="ACS", aperture="WFC", filter_spec="F550M;CLEAR2L",
@@ -183,92 +213,3 @@ def download_hst(obs_table, data_dir, dataset_name=None):
         print(f"HST download failed: {e}")
         return None
 
-
-def query_swift(coord, filter_name='UVW2'):
-    """
-    Query MAST for Swift UVOT observations at a given position.
-
-    Parameters
-    ----------
-    coord : astropy.coordinates.SkyCoord
-        Target coordinates
-    filter_name : str, optional
-        UVOT filter name (default: 'UVW2')
-
-    Returns
-    -------
-    astropy.table.Table or None
-        Table of matching observations, sorted by exposure time (longest first).
-        Returns None if no data found.
-    """
-    try:
-        results = Observations.query_criteria(
-            coordinates=coord,
-            obs_collection='SWIFT',
-            filters=filter_name
-        )
-
-        if results is None or len(results) == 0:
-            return None
-
-        results.sort('t_exptime', reverse=True)
-        return results
-
-    except (ValueError, KeyError, OSError) as e:
-        print(f"Swift query failed: {e}")
-        return None
-
-
-def download_swift(obs_table, data_dir, obs_id=None):
-    """
-    Download Swift UVOT data products.
-
-    Parameters
-    ----------
-    obs_table : astropy.table.Table
-        Results from query_swift
-    data_dir : str
-        Directory to save downloaded files
-    obs_id : str, optional
-        Specific observation ID to download. If None, downloads longest exposure.
-
-    Returns
-    -------
-    str or None
-        Path to downloaded sky image file, or None if download failed
-    """
-    if obs_table is None or len(obs_table) == 0:
-        return None
-
-    try:
-        # Select observation
-        if obs_id is not None:
-            sel_obs = obs_table[obs_table['obs_id'] == obs_id]
-        else:
-            sel_obs = obs_table[0]  # Longest exposure (already sorted)
-
-        # Get products and download
-        products = Observations.get_product_list(sel_obs)
-        Observations.download_products(
-            products,
-            mrp_only=True,  # Minimum recommended products
-            download_dir=data_dir,
-            flat=True
-        )
-
-        # Find the sky image file
-        obs_id_str = sel_obs['obs_id'][0]
-
-        # Swift filenames follow pattern: sw{obsid}{filter}_sk.img
-        pattern = os.path.join(data_dir, f"sw{obs_id_str}*_sk.img")
-        matches = glob.glob(pattern)
-
-        if len(matches) > 0:
-            return matches[0]
-        else:
-            print(f"Warning: Expected Swift image file not found")
-            return None
-
-    except (ValueError, KeyError, OSError) as e:
-        print(f"Swift download failed: {e}")
-        return None

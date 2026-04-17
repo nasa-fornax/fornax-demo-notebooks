@@ -67,6 +67,7 @@ from astropy.time import Time
 from astropy.units import Quantity
 from astroquery.heasarc import Heasarc
 from astroquery.ipac.irsa import Irsa
+from astroquery.mast import MastMissions, Observations
 
 import numpy as np
 
@@ -77,13 +78,18 @@ sys.path.append('code_src/')
 from archive_queries import (
     load_chandra_image, load_spitzer_image,
     query_hst, download_hst,
-    query_swift, download_swift
+    load_swift_image,
+    vetted_source_check
 )
 from image_processing import (
     get_pixel_scale, reproject_to_common_grid,
     
 )
 from plotting import InteractiveRGBPanel, InteractiveMultiPanel
+```
+
+```{code-cell} python
+Observations.enable_cloud_dataset(provider='AWS')
 ```
 
 +++
@@ -134,8 +140,8 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 ```{code-cell} python
 CHANDRA_SEARCH_RAD = Quantity(3, 'arcmin')
 SPITZER_SEARCH_RAD = Quantity(3, 'arcmin')
+SWIFT_SEARCH_RAD = Quantity(5, 'arcmin')
 
-VETTED_OBS = {"crab": {'Chandra': "1994", "Hubble": "JC6801010", "Swift": "00030371012", "Spitzer": "50059401.50059401-10.IRAC"}, }
 ```
 
 +++
@@ -143,6 +149,10 @@ VETTED_OBS = {"crab": {'Chandra': "1994", "Hubble": "JC6801010", "Swift": "00030
 ## 2. Query archives for available data
 
 ### 2.1 Query HEASARC for Chandra X-ray observations
+
+```{code-cell} python
+chandra_obs_id = vetted_source_check(SOURCE_NAME, "Chandra")
+```
 
 ```{code-cell} python
 all_chandra_obs = Heasarc.query_region(SOURCE_COORD, 'chanmaster', column_filters={"detector": ["ACIS-S", "ACIS-I"], "grating": "NONE"}, columns='*', radius=CHANDRA_SEARCH_RAD)
@@ -154,12 +164,9 @@ all_chandra_obs
 
 ```{code-cell} python
 # TODO THIS NEEDS TO HAVE EXCEPTION CATCHING
-
-if SOURCE_NAME.lower() in VETTED_OBS and "Chandra" in VETTED_OBS[SOURCE_NAME.lower()]:
-    chandra_obs_id = VETTED_OBS[SOURCE_NAME.lower()]["Chandra"]
-else:
+if chandra_obs_id is None:
     chandra_obs_id = all_chandra_obs[0]['obsid']
-    
+
 sel_chandra_obs = all_chandra_obs[all_chandra_obs['obsid'] == int(chandra_obs_id)]
 
 sel_chandra_datalink = Heasarc.locate_data(sel_chandra_obs)['aws']
@@ -173,27 +180,32 @@ chandra_hdu = load_chandra_image(sel_chandra_datalink, preproc_cent_hi_res=True)
 ### 2.2 Query IRSA for infrared data
 
 ```{code-cell} python
+spitzer_obs_id = vetted_source_check(SOURCE_NAME, "Spitzer")
+spitzer_obs_id
+```
+
+```{code-cell} python
 all_spitzer_ims = Irsa.query_sia(pos=(SOURCE_COORD, SPITZER_SEARCH_RAD), facility="Spitzer Space Telescope", 
                              data_type="image", instrument='IRAC', res_format='image/fits', calib_level=3)
-sel_spitzer_ims = all_spitzer_ims[all_spitzer_ims['dataproduct_subtype'] == 'science']
-sel_spitzer_ims
+all_spitzer_ims = all_spitzer_ims[all_spitzer_ims['dataproduct_subtype'] == 'science']
+all_spitzer_ims
 ```
 
 ```{code-cell} python
-sel_spitzer_ims = sel_spitzer_ims[sel_spitzer_ims['s_resolution'] == sel_spitzer_ims['s_resolution'].min()]
-```
-
-```{code-cell} python
-# Filter to mean mosaics (exclude short HDR exposures and median mosaics)
-not_short_median_filt = (
-    (~np.char.find(sel_spitzer_ims['access_url'].data.astype(str), 'short') > -1) &
-    (~np.char.find(sel_spitzer_ims['access_url'].data.astype(str), 'median') > -1)
-)
-
-sel_spitzer_ims = sel_spitzer_ims[not_short_median_filt]
-
-sel_spitzer_ims.sort('dist_to_point')
-sel_spitzer_ims = sel_spitzer_ims[0]
+if spitzer_obs_id is None:
+    sel_spitzer_ims = sel_spitzer_ims[sel_spitzer_ims['s_resolution'] == sel_spitzer_ims['s_resolution'].min()]
+    # Filter to mean mosaics (exclude short HDR exposures and median mosaics)
+    not_short_median_filt = (
+        (~np.char.find(sel_spitzer_ims['access_url'].data.astype(str), 'short') > -1) &
+        (~np.char.find(sel_spitzer_ims['access_url'].data.astype(str), 'median') > -1)
+    )
+    
+    sel_spitzer_ims = sel_spitzer_ims[not_short_median_filt]
+    
+    sel_spitzer_ims.sort('dist_to_point')
+    sel_spitzer_ims = sel_spitzer_ims[0]
+else:
+    sel_spitzer_ims = all_spitzer_ims[all_spitzer_ims['obs_id'] == sel_spitzer_ims]
 
 sel_spitzer_ims
 ```
@@ -236,27 +248,43 @@ else:
 ### 2.4 Query MAST for ultraviolet data
 
 Swift's UV/Optical Telescope provides ultraviolet imaging.
+
 We search for observations with the UVW2 filter, which covers near-ultraviolet wavelengths.
 
-```{code-cell} ipython3
-print("Querying MAST for Swift observations...")
+```{code-cell} python
+SWIFT_UVOT_FILT = "UVW2"
+```
 
-swift_obs = query_swift(SOURCE_COORD, filter_name='UVW2')
+```{code-cell} python
+swift_obs_id = vetted_source_check(SOURCE_NAME, "Swift")
+swift_obs_id
+```
 
-if swift_obs is not None and len(swift_obs) > 0:
-    print(f"Found {len(swift_obs)} Swift observations")
-    print(f"Longest exposure: {swift_obs['t_exptime'][0]:.0f} seconds")
+```{code-cell} python
+all_swift_obs = Observations.query_criteria(
+    coordinates=SOURCE_COORD,
+    radius=SWIFT_SEARCH_RAD,
+    obs_collection='SWIFT',
+    filters=SWIFT_UVOT_FILT,
+    calib_level=2,
+)
 
-    # Select observation
-    if SOURCE_NAME.lower() == "crab":
-        selected_swift_obsid = "00030371012"
-        print(f"Selected ObsID {selected_swift_obsid}")
-    else:
-        selected_swift_obsid = swift_obs['obs_id'][0]
-        print(f"Selected longest exposure (ObsID {selected_swift_obsid})")
+del all_swift_obs['s_region']
+all_swift_obs.sort('t_exptime', reverse=True)
+
+all_swift_obs
+```
+
+```{code-cell} python
+if swift_obs_id is None:
+    sel_swift_obs = all_swift_obs[0]
 else:
-    print("No Swift data found for this target")
-    selected_swift_obsid = None
+    sel_swift_obs = all_swift_obs[all_swift_obs['obs_id'] == swift_obs_id]
+sel_swift_obs
+```
+
+```{code-cell} python
+swift_hdu = fits.open(sel_swift_obs['dataURL'])
 ```
 
 +++
