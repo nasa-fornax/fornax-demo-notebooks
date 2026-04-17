@@ -15,48 +15,13 @@ import numpy as np
 from s3fs import S3FileSystem
 from astropy.coordinates import SkyCoord
 from astropy.units import Quantity
+from astropy.table.column import Column
+from astropy.io import fits
 from astroquery.heasarc import Heasarc
 from astroquery.ipac.irsa import Irsa
 from astroquery.mast import MastMissions, Observations
 
 S3_CONN = S3FileSystem(anon=True)
-
-def query_chandra(coord, detector="ACIS-S", grating="NONE"):
-    """
-    Query HEASARC for Chandra observations at a given position.
-
-    Parameters
-    ----------
-    coord : astropy.coordinates.SkyCoord
-        Target coordinates
-    detector : str, optional
-        Chandra detector to search for (default: "ACIS-S")
-    grating : str, optional
-        Grating configuration (default: "NONE")
-
-    Returns
-    -------
-    astropy.table.Table or None
-        Table of matching observations, sorted by exposure time (longest first).
-        Returns None if no data found.
-    """
-    try:
-        results = Heasarc.query_region(
-            coord,
-            'chanmaster',
-            column_filters={"detector": detector, "grating": grating},
-            columns='*'
-        )
-
-        if results is None or len(results) == 0:
-            return None
-
-        results.sort('exposure', reverse=True)
-        return results
-
-    except (ValueError, KeyError, OSError) as e:
-        print(f"Chandra query failed: {e}")
-        return None
 
 
 def load_chandra_image(chandra_datalink, preproc_cent_hi_res: bool = True):
@@ -64,6 +29,19 @@ def load_chandra_image(chandra_datalink, preproc_cent_hi_res: bool = True):
         im_patt = "*cntr_img2*.fits*"
     else:
         im_patt = "*full_img2*.fits*"
+
+    # Validity checks on chandra_datalink
+    if isinstance(chandra_datalink, Column):
+        if len(chandra_datalink) == 1:
+            chandra_datalink = chandra_datalink[0]
+        elif len(chandra_datalink) > 1:
+            raise ValueError("The 'chandra_datalink' argument must have only "
+                             "one element.")
+        else:
+            raise ValueError("Passed 'chandra_datalink' argument is empty.")
+    elif not isinstance(chandra_datalink, str):
+        raise TypeError("Pass either a single-entry Astropy column, or a string, to "
+                        "the 'chandra_datalink' argument.")
 
     patt_uri = os.path.join(chandra_datalink, "primary", im_patt)
 

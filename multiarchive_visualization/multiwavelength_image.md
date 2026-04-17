@@ -65,6 +65,7 @@ from astropy.coordinates import SkyCoord
 from astropy.io import fits
 from astropy.time import Time
 from astropy.units import Quantity
+from astroquery.heasarc import Heasarc
 
 import numpy as np
 
@@ -152,6 +153,8 @@ all_chandra_obs
 ```
 
 ```{code-cell} python
+# TODO THIS NEEDS TO HAVE EXCEPTION CATCHING
+
 if SOURCE_NAME.lower() in VETTED_OBS and "Chandra" in VETTED_OBS[SOURCE_NAME.lower()]:
     chandra_obs_id = VETTED_OBS[SOURCE_NAME.lower()]["Chandra"]
 else:
@@ -159,7 +162,7 @@ else:
     
 sel_chandra_obs = all_chandra_obs[all_chandra_obs['obsid'] == int(chandra_obs_id)]
 
-sel_chandra_datalink = Heasarc.locate_data(sel_obs_table)['aws']
+sel_chandra_datalink = Heasarc.locate_data(sel_chandra_obs)['aws']
 ```
 
 ```{code-cell} python
