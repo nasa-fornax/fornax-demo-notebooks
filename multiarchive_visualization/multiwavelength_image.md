@@ -66,6 +66,7 @@ from astropy.io import fits
 from astropy.time import Time
 from astropy.units import Quantity
 from astroquery.heasarc import Heasarc
+from astroquery.ipac.irsa import Irsa
 
 import numpy as np
 
@@ -74,14 +75,13 @@ sys.path.append('code_src/')
 
 # Import our custom functions
 from archive_queries import (
-    load_chandra_image,
-    query_spitzer, get_spitzer_s3_path,
+    load_chandra_image, load_spitzer_image,
     query_hst, download_hst,
     query_swift, download_swift
 )
 from image_processing import (
     get_pixel_scale, reproject_to_common_grid,
-    load_fits_from_s3
+    
 )
 from plotting import InteractiveRGBPanel, InteractiveMultiPanel
 ```
@@ -133,14 +133,14 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 ```{code-cell} python
 CHANDRA_SEARCH_RAD = Quantity(3, 'arcmin')
+SPITZER_SEARCH_RAD = Quantity(3, 'arcmin')
 
-VETTED_OBS = {"crab": {'Chandra': "1994", "Hubble": "JC6801010", "Swift": "00030371012", "Spitzer": ""}, }
+VETTED_OBS = {"crab": {'Chandra': "1994", "Hubble": "JC6801010", "Swift": "00030371012", "Spitzer": "50059401.50059401-10.IRAC"}, }
 ```
 
 +++
 
 ## 2. Query archives for available data
-
 
 ### 2.1 Query HEASARC for Chandra X-ray observations
 
@@ -172,19 +172,34 @@ chandra_hdu = load_chandra_image(sel_chandra_datalink, preproc_cent_hi_res=True)
 
 ### 2.2 Query IRSA for infrared data
 
-Spitzer's IRAC instrument provides infrared imaging.
-We search for processed mosaics at the 3.6 micron band, which typically has good sensitivity.
+```{code-cell} python
+all_spitzer_ims = Irsa.query_sia(pos=(SOURCE_COORD, SPITZER_SEARCH_RAD), facility="Spitzer Space Telescope", 
+                             data_type="image", instrument='IRAC', res_format='image/fits', calib_level=3)
+sel_spitzer_ims = all_spitzer_ims[all_spitzer_ims['dataproduct_subtype'] == 'science']
+sel_spitzer_ims
+```
+
+```{code-cell} python
+sel_spitzer_ims = sel_spitzer_ims[sel_spitzer_ims['s_resolution'] == sel_spitzer_ims['s_resolution'].min()]
+```
+
+```{code-cell} python
+# Filter to mean mosaics (exclude short HDR exposures and median mosaics)
+not_short_median_filt = (
+    (~np.char.find(sel_spitzer_ims['access_url'].data.astype(str), 'short') > -1) &
+    (~np.char.find(sel_spitzer_ims['access_url'].data.astype(str), 'median') > -1)
+)
+
+sel_spitzer_ims = sel_spitzer_ims[not_short_median_filt]
+
+sel_spitzer_ims.sort('dist_to_point')
+sel_spitzer_ims = sel_spitzer_ims[0]
+
+sel_spitzer_ims
+```
 
 ```{code-cell} ipython3
-print("Querying IRSA for Spitzer observations...")
-
-spitzer_obs = query_spitzer(SOURCE_COORD, radius_arcmin=3.0)
-
-if spitzer_obs is not None:
-    print("Found Spitzer IRAC mosaic")
-    print(f"Distance from target: {spitzer_obs['dist_to_point']:.4f} degrees")
-else:
-    print("No Spitzer data found for this target")
+spitzer_hdu = load_spitzer_image(sel_spitzer_ims['cloud_access'])
 ```
 
 ### 2.3 Query MAST for optical data
@@ -256,23 +271,6 @@ Some archives provide direct cloud access, which is faster than traditional down
 
 ### 3.2 Load Spitzer data from the IRSA S3 bucket
 
-
-```{code-cell} ipython3
-if spitzer_obs is not None:
-    print("Loading Spitzer data from S3...")
-    spitzer_s3_path = get_spitzer_s3_path(spitzer_obs)
-
-    if spitzer_s3_path:
-        print(f"S3 path: {spitzer_s3_path}")
-        spitzer_hdu = load_fits_from_s3(spitzer_s3_path)
-        print(f"Image shape: {spitzer_hdu[0].data.shape}")
-    else:
-        print("Failed to get Spitzer S3 path")
-        spitzer_hdu = None
-else:
-    print("Skipping Spitzer load (no data available)")
-    spitzer_hdu = None
-```
 
 ### 3.3 Download Hubble data
 

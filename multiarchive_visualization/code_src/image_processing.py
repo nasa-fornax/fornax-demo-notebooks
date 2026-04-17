@@ -160,20 +160,3 @@ def create_rgb_composite(red_data, green_data, blue_data,
     rgb_array = make_lupton_rgb(r_norm, g_norm, b_norm, Q=Q, stretch=stretch)
 
     return rgb_array
-
-
-def load_fits_from_s3(s3_path):
-    """
-    Load a FITS file directly from S3 using fsspec.
-
-    Parameters
-    ----------
-    s3_path : str
-        S3 URI (s3://bucket/key)
-
-    Returns
-    -------
-    astropy.io.fits.HDUList
-        FITS file object
-    """
-    return fits.open(s3_path, use_fsspec=True, fsspec_kwargs={'anon': True})

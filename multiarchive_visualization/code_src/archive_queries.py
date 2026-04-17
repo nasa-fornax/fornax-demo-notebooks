@@ -8,6 +8,7 @@ This module provides functions to search for and download imaging data from:
 """
 
 from warnings import warn
+import ast
 
 import os
 import glob
@@ -63,86 +64,23 @@ def load_chandra_image(chandra_datalink, preproc_cent_hi_res: bool = True):
     return fits.open(im_s3_uri, use_fsspec=True, fsspec_kwargs={'anon': True})
 
 
-def query_spitzer(coord, radius_arcmin=3.0):
-    """
-    Query IRSA for Spitzer IRAC imaging at a given position.
+def load_spitzer_image(spitzer_cloud_info):
 
-    Parameters
-    ----------
-    coord : astropy.coordinates.SkyCoord
-        Target coordinates
-    radius_arcmin : float, optional
-        Search radius in arcminutes (default: 3.0)
+    if isinstance(spitzer_cloud_info, str):
+        spitzer_cloud_info = ast.literal_eval(spitzer_cloud_info)
+    elif not isinstance(spitzer_cloud_info, dict):
+        raise TypeError("'spitzer_cloud_info' must be either a dictionary or a "
+                        "string representation of a dictionary.")
 
-    Returns
-    -------
-    astropy.table.Row or None
-        Single best matching observation (mean mosaic, closest to target).
-        Returns None if no data found.
-    """
-    try:
-        results = Irsa.query_sia(
-            pos=(coord, Quantity(radius_arcmin, 'arcmin')),
-            facility="Spitzer Space Telescope",
-            data_type="image",
-            spatial_resolution=1.66,  # IRAC pixel scale
-            res_format='image/fits',
-            calib_level=3
-        )
+    if 'aws' not in spitzer_cloud_info:
+        raise KeyError("The 'spitzer_cloud_info' dictionary must have an 'aws' entry.")
+    elif 'bucket_name' not in spitzer_cloud_info['aws'] or 'key' not in spitzer_cloud_info['aws']:
+        raise KeyError("The 'spitzer_cloud_info['aws']' dictionary must contain "
+                       "'bucket_name' and 'key' keys.")
 
-        if results is None or len(results) == 0:
-            return None
+    im_s3_uri = f"s3://{spitzer_cloud_info['aws']['bucket_name']}/{spitzer_cloud_info['aws']['key']}"
 
-        # Filter to science products only
-        results = results[results['dataproduct_subtype'] == 'science']
-
-        if len(results) == 0:
-            return None
-
-        # Filter to mean mosaics (exclude short HDR exposures and median mosaics)
-        not_short_median = (
-            (~np.char.find(results['access_url'].data.astype(str), 'short') > -1) &
-            (~np.char.find(results['access_url'].data.astype(str), 'median') > -1)
-        )
-
-        results = results[not_short_median]
-
-        if len(results) == 0:
-            return None
-
-        # Select closest to target
-        results.sort('dist_to_point')
-        return results[0]
-
-    except (ValueError, KeyError, OSError) as e:
-        print(f"Spitzer query failed: {e}")
-        return None
-
-
-def get_spitzer_s3_path(obs_row):
-    """
-    Extract S3 path from Spitzer observation metadata.
-
-    Parameters
-    ----------
-    obs_row : astropy.table.Row
-        Single row from query_spitzer results
-
-    Returns
-    -------
-    str or None
-        S3 URI (s3://bucket/key) for direct cloud access
-    """
-    if obs_row is None:
-        return None
-
-    try:
-        aws_info = eval(obs_row['cloud_access'])['aws']
-        s3_path = f"s3://{aws_info['bucket_name']}/{aws_info['key']}"
-        return s3_path
-    except (KeyError, TypeError, SyntaxError) as e:
-        print(f"Failed to extract S3 path: {e}")
-        return None
+    return fits.open(im_s3_uri, use_fsspec=True, fsspec_kwargs={'anon': True})
 
 
 def query_hst(coord, instrument="ACS", aperture="WFC", filter_spec="F550M;CLEAR2L",
