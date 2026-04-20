@@ -159,6 +159,9 @@ spitzer_obs_id
 ```{code-cell} python
 all_spitzer_ims = Irsa.query_sia(pos=(SOURCE_COORD, SPITZER_SEARCH_RAD), facility="Spitzer Space Telescope", 
                              data_type="image", instrument='IRAC', res_format='image/fits', calib_level=3)
+del all_spitzer_ims['s_region']
+del all_spitzer_ims['proposal_title']
+
 all_spitzer_ims = all_spitzer_ims[all_spitzer_ims['dataproduct_subtype'] == 'science']
 all_spitzer_ims
 ```
@@ -189,7 +192,7 @@ sel_spitzer_ims
 ```
 
 ```{code-cell} python
-spitzer_hdu = load_spitzer_image(sel_spitzer_ims['cloud_access'])
+spitzer_hdu = load_spitzer_image(sel_spitzer_ims)
 ```
 
 ### 2.3 Query MAST for optical data
@@ -207,6 +210,7 @@ all_hubble_obs = Observations.query_criteria(
     instrument_name="ACS/WFC",
     filters="F550M",
     obs_id="*" if hubble_obs_id is None else hubble_obs_id.lower(),
+    wave_region="OPTICAL",
     intentType='science',
     dataRights='PUBLIC',
     radius=HUBBLE_SEARCH_RAD

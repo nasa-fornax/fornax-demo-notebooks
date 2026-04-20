@@ -91,25 +91,39 @@ def load_chandra_image(chandra_datalink, preproc_cent_hi_res: bool = True):
     return fits.open(im_s3_uri, use_fsspec=True, fsspec_kwargs={'anon': True})
 
 
-def load_spitzer_image(spitzer_cloud_info):
+def load_spitzer_image(chosen_spitzer_im):
 
     # TODO HANDLE NULL INPUTS, RETURN NONE
 
-    if isinstance(spitzer_cloud_info, str):
-        spitzer_cloud_info = ast.literal_eval(spitzer_cloud_info)
-    elif not isinstance(spitzer_cloud_info, dict):
-        raise TypeError("'spitzer_cloud_info' must be either a dictionary or a "
-                        "string representation of a dictionary.")
+    if isinstance(chosen_spitzer_im, (Table, Row)) and 'cloud_access' not in chosen_spitzer_im and 'access_url' not in chosen_spitzer_im:
+        raise KeyError("The 'chosen_spitzer_im' argument must have a 'cloud_access' or 'access_url' column.")
+    elif isinstance(chosen_spitzer_im, (Table, Row)):
+        raise TypeError("The 'chosen_spitzer_im' argument must be either an Astropy Table or Row instance.")
+    elif isinstance(chosen_spitzer_im, Table):
+        if len(chosen_spitzer_im) != 1:
+            raise ValueError("The 'chosen_spitzer_im' argument must represent a "
+                             "single Spitzer image.")
+        else:
+            chosen_spitzer_im = chosen_spitzer_im[0]
 
-    if 'aws' not in spitzer_cloud_info:
-        raise KeyError("The 'spitzer_cloud_info' dictionary must have an 'aws' entry.")
-    elif 'bucket_name' not in spitzer_cloud_info['aws'] or 'key' not in spitzer_cloud_info['aws']:
-        raise KeyError("The 'spitzer_cloud_info['aws']' dictionary must contain "
-                       "'bucket_name' and 'key' keys.")
+    spitzer_cloud_info =  ast.literal_eval(chosen_spitzer_im['cloud_access'])
+    spitzer_access_url = chosen_spitzer_im['access_url']
 
-    im_s3_uri = f"s3://{spitzer_cloud_info['aws']['bucket_name']}/{spitzer_cloud_info['aws']['key']}"
+    if len(spitzer_cloud_info) == 0 and spitzer_access_url is None:
+        raise ValueError("The 'chosen_spitzer_im' value has null entries for "
+                         "'cloud_access' and 'access_url' columns.")
+    elif len(spitzer_cloud_info) > 0:
+        if 'aws' not in spitzer_cloud_info:
+            raise KeyError("The 'spitzer_cloud_info' dictionary must have an 'aws' entry.")
+        elif 'bucket_name' not in spitzer_cloud_info['aws'] or 'key' not in spitzer_cloud_info['aws']:
+            raise KeyError("The 'spitzer_cloud_info['aws']' dictionary must contain "
+                           "'bucket_name' and 'key' keys.")
 
-    return fits.open(im_s3_uri, use_fsspec=True, fsspec_kwargs={'anon': True})
+        im_s3_uri = f"s3://{spitzer_cloud_info['aws']['bucket_name']}/{spitzer_cloud_info['aws']['key']}"
+
+        return fits.open(im_s3_uri, use_fsspec=True, fsspec_kwargs={'anon': True})
+    else:
+        return fits.open(spitzer_access_url)
 
 
 def load_swift_image(swift_url):
