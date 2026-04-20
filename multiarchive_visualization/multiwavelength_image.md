@@ -46,19 +46,22 @@ This demonstration acquires data from remote services, and as such the runtime c
 
 ## Imports
 
-```{code-cell} ipython3
+```{code-cell} python
 # Uncomment the next line to install dependencies if needed.
 # %pip install -r requirements_multiwavelength_images.txt
 ```
 
-```{code-cell} ipython3
+```{code-cell} python
 import os
 os.environ['KMP_WARNINGS'] = '0' # Silences the OpenMP warning
 import sys
 
 import panel as pn
 import holoviews as hv
-pn.extension(loading_spinner='dots', loading_color='#00aa41', comms='ipywidgets', inline=True)
+pn.extension(loading_spinner='dots', 
+             loading_color='#00aa41', 
+             comms='ipywidgets', 
+             inline=True)
 hv.extension('bokeh')
 
 from astropy.coordinates import SkyCoord
@@ -67,7 +70,7 @@ from astropy.time import Time
 from astropy.units import Quantity
 from astroquery.heasarc import Heasarc
 from astroquery.ipac.irsa import Irsa
-from astroquery.mast import MastMissions, Observations
+from astroquery.mast import Observations
 
 import numpy as np
 
@@ -75,21 +78,10 @@ import numpy as np
 sys.path.append('code_src/')
 
 # Import our custom functions
-from archive_queries import (
-    load_chandra_image, load_spitzer_image,
-    query_hst, download_hst,
-    load_swift_image,
-    vetted_source_check
-)
-from image_processing import (
-    get_pixel_scale, reproject_to_common_grid,
-    
-)
+from archive_queries import (vetted_source_check, load_chandra_image, 
+                             load_spitzer_image, load_hubble_image, load_swift_image)
+from image_processing import get_pixel_scale, reproject_to_common_grid
 from plotting import InteractiveRGBPanel, InteractiveMultiPanel
-```
-
-```{code-cell} python
-Observations.enable_cloud_dataset(provider='AWS')
 ```
 
 +++
@@ -105,7 +97,7 @@ by name through the SIMBAD or NED databases for instance:
 - ***Suggestion 2 ...***
 - ***You get the idea...***
 
-```{code-cell} ipython3
+```{code-cell} python
 # Define the target
 SOURCE_NAME = "Crab"
 
@@ -116,32 +108,11 @@ print(f"{SOURCE_NAME} Coordinate:".upper())
 print(SOURCE_COORD.to_string())
 ```
 
-Set up directories for downloaded data.
-The data directory will store raw files from each archive, while the output directory will store processed images.
-
-```{code-cell} ipython3
-# Setting up the directory structure
-ROOT_DATA_DIR = "data/"
-
-# Separate directories for each mission
-CHAN_DATA_DIR = os.path.join(ROOT_DATA_DIR, "HEASARC", "Chandra")
-SPITZER_DATA_DIR = os.path.join(ROOT_DATA_DIR, "IRSA", "Spitzer")
-HST_DATA_DIR = os.path.join(ROOT_DATA_DIR, "MAST", "Hubble")
-SWIFT_DATA_DIR = os.path.join(ROOT_DATA_DIR, "MAST", "Swift")
-
-for directory in [CHAN_DATA_DIR, SPITZER_DATA_DIR, HST_DATA_DIR, SWIFT_DATA_DIR]:
-    os.makedirs(directory, exist_ok=True)
-    
-# Now where any outputs will be stored
-OUTPUT_DIR = "output/"
-os.makedirs(OUTPUT_DIR, exist_ok=True)
-```
-
 ```{code-cell} python
 CHANDRA_SEARCH_RAD = Quantity(3, 'arcmin')
 SPITZER_SEARCH_RAD = Quantity(3, 'arcmin')
 SWIFT_SEARCH_RAD = Quantity(5, 'arcmin')
-
+HUBBLE_SEARCH_RAD = Quantity(2, 'arcmin')
 ```
 
 +++
@@ -152,6 +123,7 @@ SWIFT_SEARCH_RAD = Quantity(5, 'arcmin')
 
 ```{code-cell} python
 chandra_obs_id = vetted_source_check(SOURCE_NAME, "Chandra")
+chandra_obs_id
 ```
 
 ```{code-cell} python
@@ -192,58 +164,81 @@ all_spitzer_ims
 ```
 
 ```{code-cell} python
-if spitzer_obs_id is None:
-    sel_spitzer_ims = sel_spitzer_ims[sel_spitzer_ims['s_resolution'] == sel_spitzer_ims['s_resolution'].min()]
-    # Filter to mean mosaics (exclude short HDR exposures and median mosaics)
-    not_short_median_filt = (
-        (~np.char.find(sel_spitzer_ims['access_url'].data.astype(str), 'short') > -1) &
-        (~np.char.find(sel_spitzer_ims['access_url'].data.astype(str), 'median') > -1)
-    )
+sel_spitzer_ims = all_spitzer_ims[all_spitzer_ims['s_resolution'] == all_spitzer_ims['s_resolution'].min()]
+
+if spitzer_obs_id is not None:
+    sel_spitzer_ims = sel_spitzer_ims[sel_spitzer_ims['obs_id'] == spitzer_obs_id]
     
-    sel_spitzer_ims = sel_spitzer_ims[not_short_median_filt]
+sel_spitzer_ims
+```
+
+```{code-cell} python
     
-    sel_spitzer_ims.sort('dist_to_point')
-    sel_spitzer_ims = sel_spitzer_ims[0]
-else:
-    sel_spitzer_ims = all_spitzer_ims[all_spitzer_ims['obs_id'] == sel_spitzer_ims]
+# Filter to mean mosaics (exclude short HDR exposures and median mosaics)
+not_short_median_filt = (
+    (~np.char.find(sel_spitzer_ims['access_url'].data.astype(str), 'short') > -1) &
+    (~np.char.find(sel_spitzer_ims['access_url'].data.astype(str), 'median') > -1)
+)
+
+sel_spitzer_ims = sel_spitzer_ims[not_short_median_filt]
+
+sel_spitzer_ims.sort('dist_to_point')
+sel_spitzer_ims = sel_spitzer_ims[0]
 
 sel_spitzer_ims
 ```
 
-```{code-cell} ipython3
+```{code-cell} python
 spitzer_hdu = load_spitzer_image(sel_spitzer_ims['cloud_access'])
 ```
 
 ### 2.3 Query MAST for optical data
 
-Hubble's Advanced Camera for Surveys provides extremely high resolution optical imaging.
-We search for ACS/WFC observations with the F550M filter, which is sensitive to green-yellow light.
+```{code-cell} python
+hubble_obs_id = vetted_source_check(SOURCE_NAME, "Hubble")
+hubble_obs_id
+```
 
-```{code-cell} ipython3
-print("Querying MAST for Hubble observations...")
-
-hst_obs = query_hst(
-    SOURCE_COORD,
-    instrument="ACS",
-    aperture="WFC",
-    filter_spec="F550M;CLEAR2L",  # Both filter wheel elements
-    min_exposure=1000
+```{code-cell} python
+all_hubble_obs = Observations.query_criteria(
+    coordinates=SOURCE_COORD,
+    obs_collection='HST',
+    dataproduct_type='image',
+    instrument_name="ACS/WFC",
+    filters="F550M",
+    obs_id="*" if hubble_obs_id is None else hubble_obs_id.lower(),
+    intentType='science',
+    dataRights='PUBLIC',
+    radius=HUBBLE_SEARCH_RAD
 )
 
-if hst_obs is not None and len(hst_obs) > 0:
-    print(f"Found {len(hst_obs)} Hubble observations")
+del all_hubble_obs['s_region']
 
-    # Select a specific observation for Crab
-    if SOURCE_NAME.lower() == "crab":
-        selected_hst_dataset = "JC6801010"
-        print(f"Selected dataset {selected_hst_dataset}")
-    else:
-        selected_hst_dataset = hst_obs['sci_data_set_name'][0]
-        print(f"Selected dataset {selected_hst_dataset}")
-else:
-    print("No Hubble data found for this target")
-    selected_hst_dataset = None
+all_hubble_obs = all_hubble_obs[all_hubble_obs['t_exptime'] > 0]
+
+all_hubble_obs.sort('t_exptime', reverse=True)
+
+all_hubble_obs
 ```
+
+```{code-cell} python
+sel_hubble_obs = all_hubble_obs[0]
+```
+
+```{code-cell} python
+sel_hubble_prods = Observations.get_unique_product_list(sel_hubble_obs)
+sel_hubble_prods
+```
+
+```{code-cell} python
+sel_hubble_im = Observations.filter_products(sel_hubble_prods, productType='science', productSubGroupDescription="DRC",  mrp_only=True)
+sel_hubble_im
+```
+
+```{code-cell} python
+hubble_hdu = load_hubble_image(sel_hubble_im)
+```
+
 
 ### 2.4 Query MAST for ultraviolet data
 
@@ -284,63 +279,12 @@ sel_swift_obs
 ```
 
 ```{code-cell} python
-swift_hdu = fits.open(sel_swift_obs['dataURL'])
+swift_hdu = load_swift_image(sel_swift_obs['dataURL'])
 ```
 
 +++
 
-## 3. Download and load image data
-
-Now that we have identified suitable observations, we download the data products.
-Some archives provide direct cloud access, which is faster than traditional downloads.
-
-### 3.1 Download Chandra data
-
-
-### 3.2 Load Spitzer data from the IRSA S3 bucket
-
-
-### 3.3 Download Hubble data
-
-```{code-cell} ipython3
-if selected_hst_dataset is not None:
-    print("Downloading Hubble data...")
-    hst_img_path = download_hst(hst_obs, HST_DATA_DIR, dataset_name=selected_hst_dataset)
-
-    if hst_img_path and os.path.exists(hst_img_path):
-        print(f"Hubble data downloaded to: {hst_img_path}")
-        hst_hdu = fits.open(hst_img_path)
-        print(f"Image shape: {hst_hdu['SCI'].data.shape}")
-    else:
-        print("Failed to download or locate Hubble data")
-        hst_hdu = None
-else:
-    print("Skipping Hubble download (no data available)")
-    hst_hdu = None
-```
-
-### 3.4 Download Swift data
-
-```{code-cell} ipython3
-if selected_swift_obsid is not None:
-    print("Downloading Swift data...")
-    swift_img_path = download_swift(swift_obs, SWIFT_DATA_DIR, obs_id=selected_swift_obsid)
-
-    if swift_img_path and os.path.exists(swift_img_path):
-        print(f"Swift data downloaded to: {swift_img_path}")
-        swift_hdu = fits.open(swift_img_path)
-        print(f"Image shape: {swift_hdu[1].data.shape}")
-    else:
-        print("Failed to download or locate Swift data")
-        swift_hdu = None
-else:
-    print("Skipping Swift download (no data available)")
-    swift_hdu = None
-```
-
-+++
-
-## 4. Reproject images to a common coordinate grid
+## 3. Reproject images to a common coordinate grid
 
 Different telescopes have vastly different spatial resolutions (pixel sizes).
 Before we can combine images, we must reproject them all to a common coordinate grid.
@@ -348,13 +292,13 @@ Before we can combine images, we must reproject them all to a common coordinate 
 We use the highest resolution image (typically Hubble) as our reference coordinate system.
 Lower resolution images are upsampled to match, while the high resolution image remains at its native scale.
 
-### 4.1 Compare pixel scales
+### 3.1 Compare pixel scales
 
-```{code-cell} ipython3
+```{code-cell} python
 # Dictionary mapping missions to their relevant HDU extensions
 mission_hdus = {
     'Chandra': chandra_hdu['PRIMARY'] if chandra_hdu else None,
-    'Hubble': hst_hdu['SCI'] if hst_hdu else None,
+    'Hubble': hubble_hdu['SCI'] if hubble_hdu else None,
     'Swift': swift_hdu[1] if swift_hdu else None,
     'Spitzer': spitzer_hdu['PRIMARY'] if spitzer_hdu else None
 }
@@ -377,7 +321,7 @@ print("-" * 50)
 
 +++
 
-### 4.2 Reproject all images
+### 3.2 Reproject all images
 
 We have to reproject the images to a common coordinate grid, giving them a matching 
 spatial resolution for when we make visualizations. 
@@ -388,26 +332,29 @@ reproject them.
 Here we fetch out the highest resolution image's FITS header, to provide the
 reprojection grid for all images (note though that we will not reproject the donor
 image):
-```{code-cell} ipython3
+```{code-cell} python
 donor_wcs_hdr = mission_hdus[finest_pix_miss].header.copy()
 ```
 
 
-```{code-cell} ipython3
-reproj_data_cov = {mn: {"data": (rp := reproject_to_common_grid((cur_hdu.data, cur_hdu.header), donor_wcs_hdr))[0], "cov": ((rp[1] > 0).sum() / rp[1].size)} for mn, cur_hdu in mission_hdus.items() if cur_hdu is not None}
+```{code-cell} python
+reproj_data_cov = {mn: {"data": (rp := reproject_to_common_grid((cur_hdu.data, cur_hdu.header), donor_wcs_hdr))[0], "cov": ((rp[1] > 0).sum() / rp[1].size)} for mn, cur_hdu in mission_hdus.items() if cur_hdu is not None and mn != finest_pix_miss}
 
 for cur_miss, rp_info in reproj_data_cov.items():
     if rp_info['data'] is not None:
         print(f"{cur_miss}: {rp_info['data'].shape}, coverage = {rp_info['cov'] * 100:.1f}%")
+        
+reproj_data_cov[finest_pix_miss] = {'data': mission_hdus[finest_pix_miss].data}
+reproj_data_cov = {mn: reproj_data_cov[mn] for mn in mission_hdus}
 ```
 
 +++
 
-## 5. Visualize individual wavelength images
+## 4. Visualize individual wavelength images
 
 
 
-```{code-cell} ipython3
+```{code-cell} python
 sep_reproj_im_cmaps = {
     'Hubble': 'Greens',
     'Swift': 'Blues',
@@ -416,14 +363,14 @@ sep_reproj_im_cmaps = {
 }
 ```
 
-```{code-cell} ipython3
+```{code-cell} python
 sep_ims = InteractiveMultiPanel({mn: res['data'] for mn, res in reproj_data_cov.items()}, sep_reproj_im_cmaps)
 sep_ims.view()
 ```
 
 +++
 
-## 6. Interactive multi-wavelength image
+## 5. Interactive multi-wavelength image
 
 
 ***IMPROVE ALL THIS***
@@ -442,7 +389,7 @@ The interactive controls allow you to adjust:
 
 ***Experiment with the sliders...***
 
-```{code-cell} ipython3
+```{code-cell} python
 # Extract the three channels
 red_channel = reproj_data_cov['Spitzer']['data']
 green_channel = reproj_data_cov['Hubble']['data']

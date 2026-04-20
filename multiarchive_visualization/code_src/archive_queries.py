@@ -11,20 +11,33 @@ from warnings import warn
 import ast
 
 import os
-import glob
-import numpy as np
 from s3fs import S3FileSystem
-from astropy.coordinates import SkyCoord
-from astropy.units import Quantity
 from astropy.table.column import Column
+from astropy.table.row import Row
+from astropy.table import Table
 from astropy.io import fits
-from astroquery.heasarc import Heasarc
-from astroquery.ipac.irsa import Irsa
-from astroquery.mast import MastMissions, Observations
+from astroquery.mast import Observations
+
+Observations.enable_cloud_dataset(provider='AWS')
 
 S3_CONN = S3FileSystem(anon=True)
 
-VETTED_OBS = {"crab": {'chandra': "1994", "hubble": "JC6801010", "swift": "00030371012", "spitzer": "50059401.50059401-10.IRAC"}, }
+# Crab - hst_skycell-p1784x19y11_acs_wfc_f550m_all is a fantastic multi-visit-mosaic,
+#  but actually a bit large for our purposes.
+
+VETTED_OBS = {"crab": {'chandra': "1994", "hubble": "jc6801010", "swift": "00030371012", "spitzer": "50059401.50059401-10.IRAC"}, }
+
+# Setting up the directory structure
+ROOT_DATA_DIR = "data/"
+
+# Separate directories for each mission
+CHAN_DATA_DIR = os.path.join(ROOT_DATA_DIR, "HEASARC", "Chandra")
+SPITZER_DATA_DIR = os.path.join(ROOT_DATA_DIR, "IRSA", "Spitzer")
+HST_DATA_DIR = os.path.join(ROOT_DATA_DIR, "MAST", "Hubble")
+SWIFT_DATA_DIR = os.path.join(ROOT_DATA_DIR, "MAST", "Swift")
+
+# Now where any outputs will be stored
+OUTPUT_DIR = "output/"
 
 
 def vetted_source_check(check_src_name, check_miss_name):
@@ -113,103 +126,66 @@ def load_swift_image(swift_url):
     return fits.open(swift_url)
 
 
-def query_hst(coord, instrument="ACS", aperture="WFC", filter_spec="F550M;CLEAR2L",
-              min_exposure=1000):
-    """
-    Query MAST for HST observations at a given position.
+def load_hubble_image(chosen_hubble_im):
 
-    Parameters
-    ----------
-    coord : astropy.coordinates.SkyCoord
-        Target coordinates
-    instrument : str, optional
-        HST instrument (default: "ACS")
-    aperture : str, optional
-        Instrument aperture (default: "WFC")
-    filter_spec : str, optional
-        Filter specification with both wheel elements separated by semicolon
-        (default: "F550M;CLEAR2L")
-    min_exposure : float, optional
-        Minimum exposure time in seconds (default: 1000)
+    # If the input is a string, we'll assume it's a URI.
+    if isinstance(chosen_hubble_im, str):
+        # Certain Astroquery-MAST methods don't get on well with numpy strings, which
+        #  are typically the dtype returned from accessing an astropy table string
+        #  column. As such we make sure to turn them into base Python strings
+        rel_mast_uri = str(chosen_hubble_im)
 
-    Returns
-    -------
-    astropy.table.Table or None
-        Table of matching observations.
-        Returns None if no data found.
-    """
-    try:
-        mast_hst = MastMissions(mission="hst")
+    elif isinstance(chosen_hubble_im, (Table, Row, Column)):
 
-        results = mast_hst.query_criteria(
-            coordinates=coord,
-            sci_instrume=instrument,
-            sci_aper_1234=aperture,
-            sci_actual_duration=f">{min_exposure}",
-            sci_spec_1234=filter_spec,
-            sci_status='PUBLIC'
-        )
+        if isinstance(chosen_hubble_im, (Table, Row)):
+            chosen_hubble_im = chosen_hubble_im['dataURI']
 
-        if results is None or len(results) == 0:
-            return None
+        # It should (fingers crossed) definitely be a Column instance by now
+        #  We'll quickly check that the name of the Column is correct
+        if chosen_hubble_im.name != 'dataURI':
+            raise ValueError("If an Astropy Column instance is passed for "
+                             "'chosen_hubble_im', it must be named 'dataURI'.")
 
-        return results
+        if len(chosen_hubble_im) == 1:
+            rel_mast_uri = str(chosen_hubble_im[0])
 
-    except (ValueError, KeyError, OSError) as e:
-        print(f"HST query failed: {e}")
-        return None
+        elif len(chosen_hubble_im) > 1:
+            raise ValueError("The 'chosen_hubble_im' should represent a single "
+                             "image, rather than multiple products.")
 
+    else:
+        raise TypeError("The 'chosen_hubble_im' argument must be either a string "
+                        "representing a URI, or an Astropy Table, Row, or Column.")
 
-def download_hst(obs_table, data_dir, dataset_name=None):
-    """
-    Download HST data products.
+    hubble_im_s3_uri = Observations.get_cloud_uri(rel_mast_uri)
 
-    Parameters
-    ----------
-    obs_table : astropy.table.Table
-        Results from query_hst
-    data_dir : str
-        Directory to save downloaded files
-    dataset_name : str, optional
-        Specific dataset name to download. If None, downloads first result.
+    # Possible that the product in question won't be available in a MAST S3
+    #  bucket, and unfortunately, neither 'get_cloud_uri' nor 'get_cloud_uris'
+    #  actually throw an error when that happens.
+    # As such, if the return is None, we have to try to get the file another way
+    if hubble_im_s3_uri is None:
+        # Ideally, we would fail over to fetching the MAST on prem URL, but there
+        #  isn't a method that returns that URL in the MAST submodule of Astroquery,
+        #  and it would be a little fragile to re-implement the URL construction
+        #  here (see the Observations.download_file(...) method for the steps
+        #  required to get the URL.
+        # As such, we just have to download the image.
+        Observations.download_file(rel_mast_uri,
+                                   local_path=HST_DATA_DIR,
+                                   verbose=False)
 
-    Returns
-    -------
-    str or None
-        Path to downloaded drizzled image file, or None if download failed
-    """
-    if obs_table is None or len(obs_table) == 0:
-        return None
+        # We force on prem to stop it
+        #  trying to download from S3, as if it were available on S3 we'd never have
+        #  gotten to this fallback method
+        # THIS ARGUMENT IS NOT YET AVAILABLE IN THE RELEASED VERSION OF
+        #  ASTROQUERY - SHOULD BE IN v0.4.12
+        # force_on_prem=True
 
-    try:
-        mast_hst = MastMissions(mission="hst")
+        hst_im = fits.open(os.path.join(HST_DATA_DIR, os.path.basename(rel_mast_uri)))
 
-        # Select dataset
-        if dataset_name is not None:
-            target_dataset = dataset_name
-        else:
-            target_dataset = obs_table[0]['sci_data_set_name']
+    # In this case we have a valid S3 URI, so we can stream the file as we hoped
+    else:
+        hst_im = fits.open(hubble_im_s3_uri, use_fsspec=True,
+                           fsspec_kwargs={'anon': True})
 
-        # Download drizzled product
-        mast_hst.download_products(
-            target_dataset,
-            download_dir=data_dir,
-            extension='fits',
-            type='science',
-            file_suffix=['DRC'],
-            flat=True
-        )
-
-        # Return path to downloaded file
-        img_path = os.path.join(data_dir, f"{target_dataset.lower()}_drc.fits")
-
-        if os.path.exists(img_path):
-            return img_path
-        else:
-            print(f"Warning: Expected image file not found at {img_path}")
-            return None
-
-    except (ValueError, KeyError, OSError) as e:
-        print(f"HST download failed: {e}")
-        return None
-
+    return hst_im

@@ -19,6 +19,7 @@ from astropy.visualization import (
 from astropy.wcs import WCS, FITSFixedWarning
 from reproject import reproject_interp
 
+
 def get_pixel_scale(hdu_or_header):
     """
     Calculate pixel scale from WCS.
