@@ -17,31 +17,25 @@ authors:
 
 ## Learning Goals
 
-***NEED MORE ENTRIES***
-
 By the end of this tutorial, you will be able to:
 - Find Chandra, Hubble, Spitzer, and Swift observations of a named source.
 - Reproject images from different missions to a common coordinate grid.
 - Create interactive visualizations of individual reprojected images.
-- Interactively explore how RGB images can be made from multi-wavelength observations.
+- Interactively explore how 'pretty' RGB images can be made from multi-wavelength observations.
 
 ## Introduction
 
-***SOMETHING SOMETHING ALL THREE ARCHIVES, SOMETHING SOMETHING DIFFERENT WAVELENGTHS HIGHLIGHT DIFFERENT PROCESSES***
 
 ### Input
-
-- The name of the target
-- ***CHOICES OF INSTRUMENT????***
-
+- The name of the target source; *we provide a few suggestions in the first section of this notebook.*
 
 ### Output
 
-- 
+- Interactive multi-wavelength images of the target source.
 
 ### Runtime
 
-As of 15th April 2026, this notebook takes 8-minutes to run to completion on Fornax using the small server with 8GB RAM/ 2 CPU.
+As of 21st April 2026, this notebook takes approximately 8 minutes to run to completion on Fornax using the small server with 8GB RAM/ 2 CPU, with the default settings.
 
 This demonstration acquires data from remote services, and as such the runtime can vary depending on the state of those services and the speed of your internet connection (if running locally).
 
@@ -87,16 +81,13 @@ from plotting import InteractiveRGBPanel, InteractiveMultiPanel
 
 +++
 
-## 1. Choosing the source to visualize and setting up directories
+## 1. Choosing the object we want to visualize
 
-We start by specifying which astronomical object we want to visualize.
+We start by specifying which...
 
-The default target is the Crab Nebula, but you can change this to any object resolvable 
-by name through the SIMBAD or NED databases for instance:
 
-- ***Suggestion 1 that we have vetted***
-- ***Suggestion 2 ...***
-- ***You get the idea...***
+- ***The Crab Nebula [Crab; default]*** – One of the most observed sources in the Milky Way, a favorite for calibrating space observatories, and famously visually striking.
+- ***Kepler's Supernova [SN 1604]*** - 
 
 ```{code-cell} python
 # Define the target
@@ -203,10 +194,16 @@ hubble_obs_id = vetted_source_check(SOURCE_NAME, "Hubble")
 hubble_obs_id
 ```
 
+We set `project="HST"` to avoid identifying 'Hubble Advanced Product' (HAP) results, as 
+though the multi-visit-mosaics would be ideal for our purposes, they tend to be 
+very large (both in storage and in the number of pixels in the image), which can
+cause issues with running out of memory.
+
 ```{code-cell} python
 all_hubble_obs = Observations.query_criteria(
     coordinates=SOURCE_COORD,
     obs_collection='HST',
+    project="HST",
     dataproduct_type='image',
     obs_id="*" if hubble_obs_id is None else hubble_obs_id.lower(),
     wave_region="OPTICAL",
