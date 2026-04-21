@@ -211,7 +211,8 @@ class InteractiveMultiPanel:
         # Initialize widgets for each mission
         for miss in self.data_dict.keys():
             self.perc_sliders[miss] = pn.widgets.RangeSlider(
-                name=f'{miss} Interval %', start=0.0, end=100.0, value=(0.0, 100.), step=0.1
+                name=f'{miss} Interval %', start=0.0, end=100.0, value=(0.0, 100.),
+                value_throttled=(0.0, 100.), step=0.1
             )
 
             self.stretch_widgets[miss] = pn.widgets.RadioButtonGroup(

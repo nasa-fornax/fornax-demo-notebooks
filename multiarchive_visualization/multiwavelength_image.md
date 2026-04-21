@@ -92,6 +92,7 @@ To get started, we provide a few suggestions to try out:
 - ***The Crab Nebula*** **[Crab; default]** – One of the most observed sources in the Milky Way, a favorite for calibrating space observatories, and famously visually striking.
 - ***Kepler's Supernova*** **[SN 1604]** – The remnant of the most recent supernova observed with the naked eye (in 1604).
 - ***NGC 4753*** - A lenticular galaxy, discovered by William Herschel in 1784, with eye-catching dust lanes.
+- ***Abell 370*** - 
 
 ```{code-cell} python
 # Define the target
@@ -100,6 +101,7 @@ SOURCE_NAME = "Crab"
 # Other source suggestions - uncomment them (and comment out the others) to try them out.
 # SOURCE_NAME = "SN1604"
 # SOURCE_NAME = "NGC4753"
+# SOURCE_NAME = "A370"
 
 # Resolve coordinates from name
 SOURCE_COORD = SkyCoord.from_name(SOURCE_NAME)

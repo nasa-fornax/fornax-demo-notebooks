@@ -169,9 +169,10 @@ def load_hubble_image(chosen_hubble_im):
         rel_mast_uri = str(chosen_hubble_im)
 
     elif isinstance(chosen_hubble_im, (Table, Row, Column)):
-
-        if isinstance(chosen_hubble_im, (Table, Row)):
+        if isinstance(chosen_hubble_im, Table):
             chosen_hubble_im = chosen_hubble_im['dataURI']
+        elif isinstance(chosen_hubble_im, Row):
+            rel_mast_uri = chosen_hubble_im['dataURI']
 
         # It should (fingers crossed) definitely be a Column instance by now
         #  We'll quickly check that the name of the Column is correct
