@@ -91,7 +91,7 @@ a SkyCoord from the RA-Dec (or other coordinate system) of your source of intere
 To get started, we provide a few suggestions to try out:
 - ***The Crab Nebula*** **[Crab; default]** – One of the most observed sources in the Milky Way, a favorite for calibrating space observatories, and famously visually striking.
 - ***Kepler's Supernova*** **[SN 1604]** – The remnant of the most recent supernova observed with the naked eye (in 1604).
-- 
+- ***NGC 4753*** - A lenticular galaxy, discovered by William Herschel in 1784, with eye-catching dust lanes.
 
 ```{code-cell} python
 # Define the target
@@ -304,10 +304,23 @@ also have disparate spatial resolutions, driven by the available technology and 
 scientific purpose.
 
 As such, we can't just plot the images directly over the top of each other and expect 
-everything to line up - if we _did_ do that, we'd find that 
+everything to line up properly. Of course, we can't expect that every feature we see in
+one image will be present in the others, as the whole point of observing in different
+wavelengths is to understand _different_ astrophysical processes going on in a source.
 
-We use the highest resolution image (typically Hubble) as our reference coordinate system.
-Lower resolution images are upsampled to match, while the high-resolution image remains at its native scale.
+Here we use the image with the highest spatial resolution (almost certain to be the 
+Hubble image if we managed to find one for the current source) as the reference 
+coordinate grid. We'll refer to it as the 'donor' image.
+
+That means that all other images will be aligned to the 'donor', and will have to be 
+upscaled to match the donor's higher spatial resolution.
+
+
+:::{note}
+We would not necessarily recommend this interpolating and upscaling for images that 
+are going to be used for scientific analyses, but given we're just making nice 
+visualizations, it is fine to do it here.
+:::
 
 ### 3.1 Compare pixel scales
 
@@ -362,7 +375,7 @@ for cur_miss, rp_info in reproj_data_cov.items():
         
         # While we're here, we also remove the original data for the current 
         #  mission from memory, as we have the reprojected data now.
-        del mission_hdus[mn].data
+        del mission_hdus[cur_miss].data
         
 reproj_data_cov[finest_pix_miss] = {'data': mission_hdus[finest_pix_miss].data}
 reproj_data_cov = {mn: reproj_data_cov[mn] for mn in mission_hdus if mission_hdus[mn] is not None}
@@ -409,10 +422,21 @@ The interactive controls allow you to adjust:
 
 ***Experiment with the sliders...***
 
+We note that NGC 4753 has poor Chandra coverage, so for that source we use the UV 
+observation from Swift as the blue channel instead.
+
 ```{code-cell} python
-multi_wav_im = InteractiveRGBPanel(red_data=reproj_data_cov['Spitzer']['data'],
-                                   green_data=reproj_data_cov['Hubble']['data'],
-                                   blue_data=reproj_data_cov['Chandra']['data'])
+
+red_chan = reproj_data_cov['Spitzer']['data']
+green_chan = reproj_data_cov['Hubble']['data']
+if SOURCE_NAME == 'NGC 4753':
+    blue_chan = reproj_data_cov['Swift']['data']
+else:
+    blue_chan = reproj_data_cov['Chandra']['data']
+
+multi_wav_im = InteractiveRGBPanel(red_data=red_chan,
+                                   green_data=green_chan,
+                                   blue_data=blue_chan)
 multi_wav_im.view()
 ```
 

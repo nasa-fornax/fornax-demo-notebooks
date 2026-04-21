@@ -195,7 +195,7 @@ class InteractiveMultiPanel:
     """
 
     def __init__(self, reprojected_data, cmaps):
-        # NaNs replaced with 0.0 to restore the original visual style
+
         self.data_dict = {k: np.nan_to_num(v, nan=0.0) for k, v in reprojected_data.items()}
         self.cmaps = cmaps
 
@@ -210,9 +210,10 @@ class InteractiveMultiPanel:
 
         # Initialize widgets for each mission
         for miss in self.data_dict.keys():
-            self.perc_sliders[miss] = pn.widgets.FloatSlider(
-                name=f'{miss} Max %', start=90.0, end=100.0, value=99.0, step=0.1
+            self.perc_sliders[miss] = pn.widgets.RangeSlider(
+                name=f'{miss} Interval %', start=0.0, end=100.0, value=(0.0, 100.), step=0.1
             )
+
             self.stretch_widgets[miss] = pn.widgets.RadioButtonGroup(
                 name=f'{miss} Stretch', options=['linear', 'sqrt', 'log'], value='linear'
             )
@@ -229,15 +230,19 @@ class InteractiveMultiPanel:
         )
 
     def apply_bounds(self, plot, _):
-        """Enforces hard panning bounds at the Bokeh level."""
+        """
+        Enforces hard panning bounds at the Bokeh level.
+        """
         plot.state.x_range.bounds = (0, self.width)
         plot.state.y_range.bounds = (0, self.height)
 
     @staticmethod
-    def _process_image(data, stretch_name, upper_pct):
-        """Applies stretch and normalization to an image."""
-        interval = AsymmetricPercentileInterval(0.0, upper_pct)
-        vmin, vmax = interval.get_limits(data)
+    def _process_image(data, stretch_name, lower_pct, upper_pct):
+        """
+        Applies stretch and normalization to an image.
+        """
+        cur_interval = AsymmetricPercentileInterval(lower_pct, upper_pct)
+        cur_val_min, cur_val_max = cur_interval.get_limits(data)
 
         if stretch_name == 'sqrt':
             stretch = SqrtStretch()
@@ -246,18 +251,24 @@ class InteractiveMultiPanel:
         else:
             stretch = LinearStretch()
 
-        norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=stretch, clip=True)
+        norm = ImageNormalize(vmin=cur_val_min,
+                              vmax=cur_val_max,
+                              stretch=stretch,
+                              clip=True)
         return norm(data).filled(0.0)
 
     def _create_panel(self, mission, data):
-        """Creates a single interactive regridded panel."""
+        """
+        Creates a single, interactive, re-gridded panel - representing one
+        mission's image.
+        """
         stretch_widget = self.stretch_widgets[mission]
         perc_slider = self.perc_sliders[mission]
         cmap = self.cmaps.get(mission, 'viridis')
 
-        def generate_img(stretch_val, pct_val):
+        def generate_img(stretch_val, low_pct_val, upp_pct_val):
             try:
-                processed = self._process_image(data, stretch_val, pct_val)
+                processed = self._process_image(data, stretch_val, low_pct_val, upp_pct_val)
                 return hv.Image(processed, bounds=(0, 0, self.width, self.height), label=mission)
             except Exception as e:
                 # Silence specific AttributeError that occurs during Jupyter teardown/re-run
@@ -276,7 +287,8 @@ class InteractiveMultiPanel:
         bound_fn = pn.bind(
             generate_img,
             stretch_val=stretch_widget,
-            pct_val=perc_slider.param.value_throttled
+            low_pct_val=perc_slider.param.value_throttled[0],
+            upp_pct_val=perc_slider.param.value_throttled[1]
         )
 
         # Applying regrid here ensures each panel resamples independently
