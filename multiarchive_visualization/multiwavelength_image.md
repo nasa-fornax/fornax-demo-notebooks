@@ -226,6 +226,7 @@ all_hubble_obs = Observations.query_criteria(
 del all_hubble_obs['s_region']
 del all_hubble_obs['obs_title']
 
+all_hubble_obs = all_hubble_obs[np.char.find(all_hubble_obs['instrument_name'].data, 'STIS') != 0]
 all_hubble_obs = all_hubble_obs[all_hubble_obs['t_exptime'] > 0]
 
 all_hubble_obs.sort('t_exptime', reverse=True)
