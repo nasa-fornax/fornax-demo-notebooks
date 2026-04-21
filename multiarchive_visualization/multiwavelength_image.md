@@ -83,15 +83,23 @@ from plotting import InteractiveRGBPanel, InteractiveMultiPanel
 
 ## 1. Choosing the object we want to visualize
 
-We start by specifying which...
+We start by choosing the source for which we want to create a multi-wavelength image; as we are 
+using the `SkyCoord.from_name(...)` method to initialize the SkyCoord object, you may any name that 
+can be identified by the CDS name resolver service. Alternatively, you could manually set up 
+a SkyCoord from the RA-Dec (or other coordinate system) of your source of interest.
 
-
-- ***The Crab Nebula [Crab; default]*** – One of the most observed sources in the Milky Way, a favorite for calibrating space observatories, and famously visually striking.
-- ***Kepler's Supernova [SN 1604]*** - 
+To get started, we provide a few suggestions to try out:
+- ***The Crab Nebula*** **[Crab; default]** – One of the most observed sources in the Milky Way, a favorite for calibrating space observatories, and famously visually striking.
+- ***Kepler's Supernova*** **[SN 1604]** – The remnant of the most recent supernova observed with the naked eye (in 1604).
+- 
 
 ```{code-cell} python
 # Define the target
 SOURCE_NAME = "Crab"
+
+# Other source suggestions - uncomment them (and comment out the others) to try them out.
+# SOURCE_NAME = "SN1604"
+# SOURCE_NAME = "NGC4753"
 
 # Resolve coordinates from name
 SOURCE_COORD = SkyCoord.from_name(SOURCE_NAME)
@@ -213,6 +221,7 @@ all_hubble_obs = Observations.query_criteria(
 )
 
 del all_hubble_obs['s_region']
+del all_hubble_obs['obs_title']
 
 all_hubble_obs = all_hubble_obs[all_hubble_obs['t_exptime'] > 0]
 
@@ -244,7 +253,9 @@ hubble_hdu = load_hubble_image(sel_hubble_im)
 
 Swift's UV/Optical Telescope provides ultraviolet imaging.
 
-We search for observations with the UVW2 filter, which covers near-ultraviolet wavelengths.
+We search for observations that were taken with the UVW2, UVM2, and UVW1 filters, which 
+cover parts of the Far/Mid-UV wavelength ranges. Swift's UVOT instrument also provides
+filters with higher wavelength, optical, band passes, but we specifically want UV data here.
 
 
 ```{code-cell} python
@@ -283,11 +294,16 @@ swift_hdu = load_swift_image(sel_swift_obs)
 
 ## 3. Reproject images to a common coordinate grid
 
-Different telescopes have vastly different spatial resolutions (pixel sizes).
-Before we can combine images, we must reproject them all to a common coordinate grid.
+The various telescopes whose images we've just acquired have, in some cases, wildly different 
+angular (spatial) resolutions. Indeed, for several of these telescopes, the different instruments
+also have disparate spatial resolutions, driven by the available technology and the instrument's
+scientific purpose.
+
+As such, we can't just plot the images directly over the top of each other and expect 
+everything to line up - if we _did_ do that, we'd find that 
 
 We use the highest resolution image (typically Hubble) as our reference coordinate system.
-Lower resolution images are upsampled to match, while the high resolution image remains at its native scale.
+Lower resolution images are upsampled to match, while the high-resolution image remains at its native scale.
 
 ### 3.1 Compare pixel scales
 
@@ -318,7 +334,7 @@ print("-" * 50)
 
 +++
 
-### 3.2 Reproject all images
+### 3.2 Reprojecting images to a common coordinate grid
 
 We have to reproject the images to a common coordinate grid, giving them a matching 
 spatial resolution for when we make visualizations. 
@@ -333,13 +349,16 @@ image):
 donor_wcs_hdr = mission_hdus[finest_pix_miss].header.copy()
 ```
 
-
 ```{code-cell} python
 reproj_data_cov = {mn: {"data": (rp := reproject_to_common_grid((cur_hdu.data, cur_hdu.header), donor_wcs_hdr))[0], "cov": ((rp[1] > 0).sum() / rp[1].size)} for mn, cur_hdu in mission_hdus.items() if cur_hdu is not None and mn != finest_pix_miss}
 
 for cur_miss, rp_info in reproj_data_cov.items():
     if rp_info['data'] is not None:
         print(f"{cur_miss}: {rp_info['data'].shape}, coverage = {rp_info['cov'] * 100:.1f}%")
+        
+        # While we're here, we also remove the original data for the current 
+        #  mission from memory, as we have the reprojected data now.
+        del mission_hdus[mn].data
         
 reproj_data_cov[finest_pix_miss] = {'data': mission_hdus[finest_pix_miss].data}
 reproj_data_cov = {mn: reproj_data_cov[mn] for mn in mission_hdus if mission_hdus[mn] is not None}
@@ -387,12 +406,9 @@ The interactive controls allow you to adjust:
 ***Experiment with the sliders...***
 
 ```{code-cell} python
-# Extract the three channels
-red_channel = reproj_data_cov['Spitzer']['data']
-green_channel = reproj_data_cov['Hubble']['data']
-blue_channel = reproj_data_cov['Chandra']['data']
-
-multi_wav_im = InteractiveRGBPanel(red_channel, green_channel, blue_channel)
+multi_wav_im = InteractiveRGBPanel(red_data=reproj_data_cov['Spitzer']['data'],
+                                   green_data=reproj_data_cov['Hubble']['data'],
+                                   blue_data=reproj_data_cov['Chandra']['data'])
 multi_wav_im.view()
 ```
 
@@ -409,10 +425,10 @@ multi_wav_im.view()
 ### Acknowledgements
 
 This notebook was created with assistance from:
-- The Fornax team
-- The High Energy Astrophysics Science Archive Research Center (HEASARC) team
-- The NASA/IPAC Infrared Science Archive (IRSA) team
-- The Barbara A. Mikulski Archive for Space Telescopes (MAST) team
+- The Fornax team.
+- The High Energy Astrophysics Science Archive Research Center (HEASARC) team.
+- The NASA/IPAC Infrared Science Archive (IRSA) team.
+- The Barbara A. Mikulski Archive for Space Telescopes (MAST) team.
 
 AI: This notebook was created with assistance from Google's Gemini models and NASA ChatGSFC.
 
