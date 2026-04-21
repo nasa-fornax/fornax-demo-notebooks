@@ -212,9 +212,12 @@ class InteractiveMultiPanel:
 
         # Initialize widgets for each mission
         for miss in self.data_dict.keys():
-            self.perc_sliders[miss] = pn.widgets.RangeSlider(
-                name=f'{miss} Interval %', start=0.0, end=100.0, value=(0.0, 100.),
-                value_throttled=(0.0, 100.), step=0.1
+            # self.perc_sliders[miss] = pn.widgets.RangeSlider(
+            #     name=f'{miss} Interval %', start=0.0, end=100.0, value=(0.0, 100.),
+            #     value_throttled=(0.0, 100.), step=0.1
+            # )
+            self.perc_sliders[miss] = pn.widgets.FloatSlider(
+                name=f'{miss} Interval %', start=50.0, end=100.0, value=99.0, step=0.1
             )
 
             self.stretch_widgets[miss] = pn.widgets.RadioButtonGroup(
@@ -240,7 +243,7 @@ class InteractiveMultiPanel:
         plot.state.y_range.bounds = (0, self.height)
 
     @staticmethod
-    def _process_image(data, stretch_name, lower_pct, upper_pct):
+    def _process_image(data, stretch_name, upper_pct, lower_pct=0.):
         """
         Applies stretch and normalization to an image.
         """
@@ -269,9 +272,13 @@ class InteractiveMultiPanel:
         perc_slider = self.perc_sliders[mission]
         cmap = self.cmaps.get(mission, 'viridis')
 
-        def generate_img(stretch_val, low_pct_val, upp_pct_val):
+        def generate_img(stretch_val, range_val):
             try:
-                processed = self._process_image(data, stretch_val, low_pct_val, upp_pct_val)
+                processed = self._process_image(data, stretch_val, range_val)
+
+                if (processed == 0).all() or np.isnan(processed).all():
+                    raise ValueError("Recalculated image is all zeros or NaNs.")
+
                 return hv.Image(processed, bounds=(0, 0, self.width, self.height), label=mission)
             except Exception as e:
                 # Silence specific AttributeError that occurs during Jupyter teardown/re-run
@@ -290,8 +297,7 @@ class InteractiveMultiPanel:
         bound_fn = pn.bind(
             generate_img,
             stretch_val=stretch_widget,
-            low_pct_val=perc_slider.value_throttled[0],
-            upp_pct_val=perc_slider.value_throttled[1]
+            range_val=perc_slider.param.value_throttled,
         )
 
         # Applying regrid here ensures each panel resamples independently
