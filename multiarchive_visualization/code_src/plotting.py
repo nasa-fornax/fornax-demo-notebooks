@@ -18,6 +18,8 @@ from astropy.visualization import (
     LinearStretch, LogStretch, SqrtStretch,
     ImageNormalize
 )
+from panel.widgets import RangeSlider
+
 from image_processing import create_rgb_composite
 
 # Configure logging for Fornax diagnostics
@@ -288,8 +290,8 @@ class InteractiveMultiPanel:
         bound_fn = pn.bind(
             generate_img,
             stretch_val=stretch_widget,
-            low_pct_val=perc_slider.param.value_throttled[0],
-            upp_pct_val=perc_slider.param.value_throttled[1]
+            low_pct_val=perc_slider.value_throttled[0],
+            upp_pct_val=perc_slider.value_throttled[1]
         )
 
         # Applying regrid here ensures each panel resamples independently
