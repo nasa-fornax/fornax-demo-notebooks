@@ -134,8 +134,10 @@ def load_swift_image(chosen_swift_im):
         rel_swift_url = str(chosen_swift_im)
 
     elif isinstance(chosen_swift_im, (Table, Row, Column)):
-        if isinstance(chosen_swift_im, (Table, Row)):
+        if isinstance(chosen_swift_im, Table):
             chosen_swift_im = chosen_swift_im['dataURL']
+        elif isinstance(chosen_swift_im, Row):
+            rel_swift_url = chosen_swift_im['dataURL']
 
         # It should (fingers crossed) definitely be a Column instance by now
         #  We'll quickly check that the name of the Column is correct

@@ -20,6 +20,7 @@ authors:
 ***NEED MORE ENTRIES***
 
 By the end of this tutorial, you will be able to:
+- Find Chandra, Hubble, Spitzer, and Swift observations of a named source.
 - Reproject images from different missions to a common coordinate grid.
 - Create interactive visualizations of individual reprojected images.
 - Interactively explore how RGB images can be made from multi-wavelength observations.
