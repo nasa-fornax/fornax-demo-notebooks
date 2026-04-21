@@ -132,8 +132,8 @@ def load_swift_image(chosen_swift_im):
         #  are typically the dtype returned from accessing an astropy table string
         #  column. As such we make sure to turn them into base Python strings
         rel_swift_url = str(chosen_swift_im)
-    elif isinstance(chosen_swift_im, (Table, Row, Column)):
 
+    elif isinstance(chosen_swift_im, (Table, Row, Column)):
         if isinstance(chosen_swift_im, (Table, Row)):
             chosen_swift_im = chosen_swift_im['dataURL']
 
@@ -142,13 +142,13 @@ def load_swift_image(chosen_swift_im):
         if isinstance(chosen_swift_im, Column) and chosen_swift_im.name != 'dataURL':
             raise ValueError("If an Astropy Column instance is passed for "
                              "'chosen_swift_im', it must be named 'dataURL'.")
+        elif isinstance(chosen_swift_im, Column):
+            if len(chosen_swift_im) == 1:
+                rel_swift_url = str(chosen_swift_im[0])
 
-        if len(chosen_swift_im) == 1:
-            rel_swift_url = str(chosen_swift_im[0])
-
-        elif len(chosen_swift_im) > 1:
-            raise ValueError("The 'chosen_swift_im' should represent a single "
-                             "image, rather than multiple products.")
+            elif len(chosen_swift_im) > 1:
+                raise ValueError("The 'chosen_swift_im' should represent a single "
+                                 "image, rather than multiple products.")
 
     else:
         raise TypeError("The 'chosen_swift_im' argument must be either a string "
@@ -176,13 +176,13 @@ def load_hubble_image(chosen_hubble_im):
         if isinstance(chosen_hubble_im, Column) and chosen_hubble_im.name != 'dataURI':
             raise ValueError("If an Astropy Column instance is passed for "
                              "'chosen_hubble_im', it must be named 'dataURI'.")
+        elif isinstance(chosen_hubble_im, Column):
+            if len(chosen_hubble_im) == 1:
+                rel_mast_uri = str(chosen_hubble_im[0])
 
-        if len(chosen_hubble_im) == 1:
-            rel_mast_uri = str(chosen_hubble_im[0])
-
-        elif len(chosen_hubble_im) > 1:
-            raise ValueError("The 'chosen_hubble_im' should represent a single "
-                             "image, rather than multiple products.")
+            elif len(chosen_hubble_im) > 1:
+                raise ValueError("The 'chosen_hubble_im' should represent a single "
+                                 "image, rather than multiple products.")
 
     else:
         raise TypeError("The 'chosen_hubble_im' argument must be either a string "

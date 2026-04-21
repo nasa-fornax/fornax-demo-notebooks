@@ -40,9 +40,9 @@ By the end of this tutorial, you will be able to:
 
 ### Runtime
 
-As of 15th April 2026, this notebook takes ***HOW LONG***-minutes to run to completion on Fornax using the small server with 8GB RAM/ 2 CPU.
+As of 15th April 2026, this notebook takes 8-minutes to run to completion on Fornax using the small server with 8GB RAM/ 2 CPU.
 
-This demonstration acquires data from remote services, and as such the runtime can vary depending on the state of those services, and the speed of your internet connection (if running locally).
+This demonstration acquires data from remote services, and as such the runtime can vary depending on the state of those services and the speed of your internet connection (if running locally).
 
 ## Imports
 
@@ -233,7 +233,7 @@ sel_hubble_prods
 ```
 
 ```{code-cell} python
-sel_hubble_im = Observations.filter_products(sel_hubble_prods, productType='science', productSubGroupDescription="DRC",  mrp_only=True)
+sel_hubble_im = Observations.filter_products(sel_hubble_prods, productType='SCIENCE', productSubGroupDescription="DRC",  mrp_only=True)
 sel_hubble_im
 ```
 
@@ -259,7 +259,7 @@ all_swift_obs = Observations.query_criteria(
     coordinates=SOURCE_COORD,
     radius=SWIFT_SEARCH_RAD,
     obs_collection='SWIFT',
-    filters=["UVW2", "UVM2", "UVW1],
+    filters=["UVW2", "UVM2", "UVW1"],
     calib_level=2,
 )
 
