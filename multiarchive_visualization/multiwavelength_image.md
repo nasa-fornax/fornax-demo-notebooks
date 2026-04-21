@@ -159,6 +159,9 @@ spitzer_obs_id
 ```{code-cell} python
 all_spitzer_ims = Irsa.query_sia(pos=(SOURCE_COORD, SPITZER_SEARCH_RAD), facility="Spitzer Space Telescope", 
                              data_type="image", instrument='IRAC', res_format='image/fits', calib_level=3)
+if len(all_spitzer_ims) == 0:
+    all_spitzer_ims = Irsa.query_sia(pos=(SOURCE_COORD, SPITZER_SEARCH_RAD), facility="Spitzer Space Telescope", 
+                             data_type="image", instrument='IRAC', res_format='image/fits', calib_level=2)
 del all_spitzer_ims['s_region']
 del all_spitzer_ims['proposal_title']
 
