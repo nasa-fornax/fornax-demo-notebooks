@@ -93,11 +93,9 @@ def load_chandra_image(chandra_datalink, preproc_cent_hi_res: bool = True):
 
 def load_spitzer_image(chosen_spitzer_im):
 
-    # TODO HANDLE NULL INPUTS, RETURN NONE
-
-    if isinstance(chosen_spitzer_im, (Table, Row)) and 'cloud_access' not in chosen_spitzer_im and 'access_url' not in chosen_spitzer_im:
+    if isinstance(chosen_spitzer_im, (Table, Row)) and 'cloud_access' not in chosen_spitzer_im.columns and 'access_url' not in chosen_spitzer_im.columns:
         raise KeyError("The 'chosen_spitzer_im' argument must have a 'cloud_access' or 'access_url' column.")
-    elif isinstance(chosen_spitzer_im, (Table, Row)):
+    elif not isinstance(chosen_spitzer_im, (Table, Row)):
         raise TypeError("The 'chosen_spitzer_im' argument must be either an Astropy Table or Row instance.")
     elif isinstance(chosen_spitzer_im, Table):
         if len(chosen_spitzer_im) != 1:
@@ -126,18 +124,37 @@ def load_spitzer_image(chosen_spitzer_im):
         return fits.open(spitzer_access_url)
 
 
-def load_swift_image(swift_url):
+def load_swift_image(chosen_swift_im):
 
-    if isinstance(swift_url, Column):
-        if len(swift_url) == 1:
-            swift_url = swift_url[0]
-        elif len(swift_url) > 1:
-            raise ValueError("The 'swift_url' argument must have only "
-                             "one element.")
-        else:
-            return None
+    # If the input is a string, we'll assume it's the URL
+    if isinstance(chosen_swift_im, str):
+        # Certain Astroquery-MAST methods don't get on well with numpy strings, which
+        #  are typically the dtype returned from accessing an astropy table string
+        #  column. As such we make sure to turn them into base Python strings
+        rel_swift_url = str(chosen_swift_im)
+    elif isinstance(chosen_swift_im, (Table, Row, Column)):
 
-    return fits.open(swift_url)
+        if isinstance(chosen_swift_im, (Table, Row)):
+            chosen_swift_im = chosen_swift_im['dataURL']
+
+        # It should (fingers crossed) definitely be a Column instance by now
+        #  We'll quickly check that the name of the Column is correct
+        if chosen_swift_im.name != 'dataURL':
+            raise ValueError("If an Astropy Column instance is passed for "
+                             "'chosen_swift_im', it must be named 'dataURL'.")
+
+        if len(chosen_swift_im) == 1:
+            rel_swift_url = str(chosen_swift_im[0])
+
+        elif len(chosen_swift_im) > 1:
+            raise ValueError("The 'chosen_swift_im' should represent a single "
+                             "image, rather than multiple products.")
+
+    else:
+        raise TypeError("The 'chosen_swift_im' argument must be either a string "
+                        "representing a URL, or an Astropy Table, Row, or Column.")
+
+    return fits.open(rel_swift_url)
 
 
 def load_hubble_image(chosen_hubble_im):

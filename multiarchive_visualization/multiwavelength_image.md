@@ -283,7 +283,7 @@ sel_swift_obs
 ```
 
 ```{code-cell} python
-swift_hdu = load_swift_image(sel_swift_obs['dataURL'])
+swift_hdu = load_swift_image(sel_swift_obs)
 ```
 
 +++
@@ -349,7 +349,7 @@ for cur_miss, rp_info in reproj_data_cov.items():
         print(f"{cur_miss}: {rp_info['data'].shape}, coverage = {rp_info['cov'] * 100:.1f}%")
         
 reproj_data_cov[finest_pix_miss] = {'data': mission_hdus[finest_pix_miss].data}
-reproj_data_cov = {mn: reproj_data_cov[mn] for mn in mission_hdus}
+reproj_data_cov = {mn: reproj_data_cov[mn] for mn in mission_hdus if mission_hdus[mn] is not None}
 ```
 
 +++
