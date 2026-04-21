@@ -90,6 +90,7 @@ a SkyCoord from the RA-Dec (or other coordinate system) of your source of intere
 
 To get started, we provide a few suggestions to try out:
 - ***The Crab Nebula*** **[Crab; default]** – One of the most observed sources in the Milky Way, a favorite for calibrating space observatories, and famously visually striking.
+- ***Messier 61***
 - ***Kepler's Supernova*** **[SN 1604]** – The remnant of the most recent supernova observed with the naked eye (in 1604).
 - ***NGC 4753*** - A lenticular galaxy, discovered by William Herschel in 1784, with eye-catching dust lanes.
 - ***Abell 370*** - 
@@ -379,7 +380,7 @@ for cur_miss, rp_info in reproj_data_cov.items():
         #  mission from memory, as we have the reprojected data now.
         del mission_hdus[cur_miss].data
         
-reproj_data_cov[finest_pix_miss] = {'data': mission_hdus[finest_pix_miss].data}
+reproj_data_cov[finest_pix_miss] = {'data': mission_hdus[finest_pix_miss].data, 'cov': 1.0}
 reproj_data_cov = {mn: reproj_data_cov[mn] for mn in mission_hdus if mission_hdus[mn] is not None}
 ```
 
@@ -399,7 +400,7 @@ sep_reproj_im_cmaps = {
 ```
 
 ```{code-cell} python
-sep_ims = InteractiveMultiPanel({mn: res['data'] for mn, res in reproj_data_cov.items()}, sep_reproj_im_cmaps)
+sep_ims = InteractiveMultiPanel({mn: res['data'] for mn, res in reproj_data_cov.items() if res['cov'] > 0.}, sep_reproj_im_cmaps)
 sep_ims.view()
 ```
 

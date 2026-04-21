@@ -275,7 +275,6 @@ class InteractiveMultiPanel:
         def generate_img(stretch_val, range_val):
             try:
                 processed = self._process_image(data, stretch_val, range_val)
-
                 if (processed == 0).all() or np.isnan(processed).all():
                     raise ValueError("Recalculated image is all zeros or NaNs.")
 
