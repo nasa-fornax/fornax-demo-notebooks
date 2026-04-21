@@ -248,9 +248,6 @@ Swift's UV/Optical Telescope provides ultraviolet imaging.
 
 We search for observations with the UVW2 filter, which covers near-ultraviolet wavelengths.
 
-```{code-cell} python
-SWIFT_UVOT_FILT = "UVW2"
-```
 
 ```{code-cell} python
 swift_obs_id = vetted_source_check(SOURCE_NAME, "Swift")
@@ -262,7 +259,7 @@ all_swift_obs = Observations.query_criteria(
     coordinates=SOURCE_COORD,
     radius=SWIFT_SEARCH_RAD,
     obs_collection='SWIFT',
-    filters=SWIFT_UVOT_FILT,
+    filters=["UVW2", "UVM2", "UVW1],
     calib_level=2,
 )
 
