@@ -139,7 +139,7 @@ def load_swift_image(chosen_swift_im):
 
         # It should (fingers crossed) definitely be a Column instance by now
         #  We'll quickly check that the name of the Column is correct
-        if chosen_swift_im.name != 'dataURL':
+        if isinstance(chosen_swift_im, Column) and chosen_swift_im.name != 'dataURL':
             raise ValueError("If an Astropy Column instance is passed for "
                              "'chosen_swift_im', it must be named 'dataURL'.")
 
@@ -173,7 +173,7 @@ def load_hubble_image(chosen_hubble_im):
 
         # It should (fingers crossed) definitely be a Column instance by now
         #  We'll quickly check that the name of the Column is correct
-        if chosen_hubble_im.name != 'dataURI':
+        if isinstance(chosen_hubble_im, Column) and chosen_hubble_im.name != 'dataURI':
             raise ValueError("If an Astropy Column instance is passed for "
                              "'chosen_hubble_im', it must be named 'dataURI'.")
 
