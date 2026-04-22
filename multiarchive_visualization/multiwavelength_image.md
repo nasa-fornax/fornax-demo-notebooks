@@ -567,6 +567,10 @@ mission_hdus = {
     'Spitzer': spitzer_hdu['PRIMARY'] if spitzer_hdu else None
 }
 
+# A check for all HDUs being None
+if all([v for v in mission_hdus.values()]):
+    raise ValueError(f"No data are available for {SOURCE_NAME}.")
+
 pixel_scales = {miss: get_pixel_scale(miss_hdu) for miss, miss_hdu in mission_hdus.items() if miss_hdu is not None}
 finest_pix_miss = min(pixel_scales, key=pixel_scales.get)
 
@@ -646,7 +650,7 @@ Finally, we combine three wavelength bands into a single RGB composite image.
 We use:
 - Red channel: Spitzer infrared (cool dust and molecular gas)
 - Green channel: Hubble optical (stellar emission and ionized gas)
-- Blue channel: Chandra X-ray (extremely hot plasma and high-energy particles)
+- Blue channel: Chandra X-ray (hot plasma and high-energy astrophysical processes)
 
 
 The interactive controls allow you to adjust:
@@ -663,7 +667,7 @@ observation from Swift as the blue channel instead.
 
 red_chan = reproj_data_cov['Spitzer']['data']
 green_chan = reproj_data_cov['Hubble']['data']
-if SOURCE_NAME == 'NGC 4753':
+if SOURCE_NAME == 'NGC 4753' or "Chandra" not in reproj_data_cov:
     blue_chan = reproj_data_cov['Swift']['data']
 else:
     blue_chan = reproj_data_cov['Chandra']['data']
