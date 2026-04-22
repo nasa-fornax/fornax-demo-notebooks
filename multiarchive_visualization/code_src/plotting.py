@@ -58,6 +58,18 @@ class InteractiveRGBPanel:
     """
 
     def __init__(self, red_data, green_data, blue_data):
+        """
+        Initialize the interactive RGB panel.
+
+        Parameters
+        ----------
+        red_data : numpy.ndarray
+            Array containing the red channel data.
+        green_data : numpy.ndarray
+            Array containing the green channel data.
+        blue_data : numpy.ndarray
+            Array containing the blue channel data.
+        """
         self.r = np.nan_to_num(red_data, nan=0)
         self.g = np.nan_to_num(green_data, nan=0)
         self.b = np.nan_to_num(blue_data, nan=0)
@@ -197,6 +209,16 @@ class InteractiveMultiPanel:
     """
 
     def __init__(self, reprojected_data, cmaps):
+        """
+        Initialize the interactive multi-panel dashboard.
+
+        Parameters
+        ----------
+        reprojected_data : dict
+            A dictionary mapping mission names to 2D numpy arrays.
+        cmaps : dict
+            A dictionary mapping mission names to colormap strings.
+        """
 
         self.data_dict = {k: np.nan_to_num(v, nan=0.0) for k, v in reprojected_data.items()}
         self.cmaps = cmaps
@@ -312,7 +334,14 @@ class InteractiveMultiPanel:
         )
 
     def view(self):
-        """Returns the dashboard layout."""
+        """
+        Returns the Panel layout for the dashboard.
+
+        Returns
+        -------
+        panel.Row
+            A row containing the controls and the grid of plots.
+        """
         controls_list = []
         for miss in self.data_dict.keys():
             controls_list.extend([

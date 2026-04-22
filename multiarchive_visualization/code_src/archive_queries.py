@@ -41,6 +41,21 @@ OUTPUT_DIR = "output/"
 
 
 def vetted_source_check(check_src_name, check_miss_name):
+    """
+    Check if a source and mission combination has been vetted.
+
+    Parameters
+    ----------
+    check_src_name : str
+        Name of the astronomical source.
+    check_miss_name : str
+        Name of the mission/archive.
+
+    Returns
+    -------
+    str or None
+        The vetted observation ID if found, otherwise None.
+    """
     check_src_name = check_src_name.lower()
     check_miss_name = check_miss_name.lower()
 
@@ -53,6 +68,21 @@ def vetted_source_check(check_src_name, check_miss_name):
 
 
 def load_chandra_image(chosen_chandra_dl, preproc_cent_hi_res: bool = True):
+    """
+    Load a Chandra image from AWS S3.
+
+    Parameters
+    ----------
+    chosen_chandra_dl : str, Table, Row, or Column
+        Information to identify the Chandra observation to load.
+    preproc_cent_hi_res : bool, optional
+        Whether to load pre-processed high-resolution center images (default: True).
+
+    Returns
+    -------
+    astropy.io.fits.HDUList or None
+        The opened FITS file, or None if the image cannot be found.
+    """
     if preproc_cent_hi_res:
         im_patt = "*cntr_img2*.fits*"
     else:
@@ -108,6 +138,19 @@ def load_chandra_image(chosen_chandra_dl, preproc_cent_hi_res: bool = True):
 
 
 def load_spitzer_image(chosen_spitzer_im):
+    """
+    Load a Spitzer image from AWS S3 or a provided URL.
+
+    Parameters
+    ----------
+    chosen_spitzer_im : Table or Row
+        Information identifying the Spitzer image to load.
+
+    Returns
+    -------
+    astropy.io.fits.HDUList or None
+        The opened FITS file, or None if the input is None.
+    """
 
     if chosen_spitzer_im is None:
         return None
@@ -143,6 +186,19 @@ def load_spitzer_image(chosen_spitzer_im):
 
 
 def load_swift_image(chosen_swift_im):
+    """
+    Load a Swift image from a provided URL.
+
+    Parameters
+    ----------
+    chosen_swift_im : str, Table, Row, or Column
+        Information identifying the Swift image to load.
+
+    Returns
+    -------
+    astropy.io.fits.HDUList or None
+        The opened FITS file, or None if the input is None.
+    """
 
     if chosen_swift_im is None:
         return None
@@ -180,6 +236,19 @@ def load_swift_image(chosen_swift_im):
 
 
 def load_hubble_image(chosen_hubble_im):
+    """
+    Load a Hubble image from AWS S3 or by downloading from MAST.
+
+    Parameters
+    ----------
+    chosen_hubble_im : str, Table, Row, or Column
+        Information identifying the Hubble image to load.
+
+    Returns
+    -------
+    astropy.io.fits.HDUList or None
+        The opened FITS file, or None if the input is None.
+    """
 
     if chosen_hubble_im is None:
         return None

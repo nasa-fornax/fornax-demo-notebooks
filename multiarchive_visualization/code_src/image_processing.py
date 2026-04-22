@@ -51,6 +51,21 @@ def get_pixel_scale(hdu_or_header):
 
 
 def reproject_to_common_grid(image, targ_hdr):
+    """
+    Reproject an image to a target FITS header's WCS grid.
+
+    Parameters
+    ----------
+    image : HDU, tuple, or str
+        The input image to reproject.
+    targ_hdr : astropy.io.fits.Header
+        The target header defining the WCS and shape.
+
+    Returns
+    -------
+    tuple
+        A tuple of (reprojected_data, footprint).
+    """
     # Warning catch still necessary because proj_plane_pixel_scales will
     #  produce these warnings.
     with warnings.catch_warnings():

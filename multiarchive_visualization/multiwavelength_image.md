@@ -25,6 +25,22 @@ By the end of this tutorial, you will be able to:
 
 ## Introduction
 
+This notebook is intended as a gentle introduction to the sort of things you can do 
+on the Fornax Science Console, while also providing a demonstration of how you might
+begin to make visually appealing multi-wavelength images of astronomical sources (though 
+the author makes no claims as to having any _good_ sense of aesthetics – so you're on 
+your own there).
+
+We'll be searching the NASA astrophysics archives for observations of named 
+sources, with a set of suggested objects to try out, and setting up interactive 
+visualizations where you can adjust how different wavelengths are combined and
+see what makes the nicest looking image.
+
+Throughout this demonstration we make use of the Python module Astroquery to search and 
+acquire data from the HEASARC, MAST, and IRSA archives, while the HoloViz, Panel, and 
+Bokeh libraries are used to create interactive figures that are performant even with
+the thousands-of-pixels-per-side images we will be dealing with.
+
 
 ### Input
 - The name of the target source; *we provide a few suggestions in the first section of this notebook.*
@@ -98,7 +114,7 @@ To get started, we provide a few suggestions to try out:
 - ***Messier 61*** – Also known as the 'Swelling Spiral Galaxy', M61 is one of the largest members of the Virgo galaxy cluster and has played host to 8 observed supernovae since 1926 (a considerable number). 
 - ***Kepler's Supernova*** **[SN 1604]** – The remnant of the most recent supernova observed with the naked eye (in 1604).
 - ***NGC 4753*** - A lenticular galaxy, discovered by William Herschel in 1784, with eye-catching dust lanes.
-- ***Abell 370*** - 
+- ***Abell 370*** - A galaxy cluster known for several prominent strong-lensing arc features.
 
 ```{code-cell} python
 # Define the target
@@ -128,14 +144,39 @@ HUBBLE_SEARCH_RAD = Quantity(2, 'arcmin')
 
 ## 2. Searching NASA's astrophysical archives for images of our source
 
-We 
+Our goal is to be able to compare and combine images of the same source, taken in 
+different wavelength bands. Some space telescopes (Hubble, for instance) can take 
+observations in several, usually adjacent, wavelength bands. However, for this 
+notebook, and to explore a wider range of physical processes highlighted by different
+wavelengths of light, we will search for observations taken by four **different** 
+observatories:
+- Chandra [X-ray photons]
+- Swift [UV photons]
+- Spitzer Infrared Telescope [Infrared photons]
+- Hubble Space Telescope [Optical photons]
 
 ### 2.1 Query HEASARC for Chandra X-ray observations
+
+Chandra has the highest angular resolution of any X-ray telescope, which is of particular
+importance given that we want to make nice visualizations of our target, and that, as 
+high-energy photons are much harder to focus than their lower-energy cousins, even 
+Chandra's spatial resolution is significantly worse than that of Hubble.
+
+The High Energy Astrophysics Science Archive Research Center (HEASARC) provides 
+access to the full public set of Chandra observations, and we'll use the `Heasarc` 
+object imported from the `astroquery.heasarc` module to search for observations of 
+current target.
+
+First, though, we can check if the current target source has been pre-vetted to identify
+a good observation to use for this demonstration. If it has, then the `chandra_obs_id`
+variable will be set to the relevant ObsID, and if not it will be set to `None`:
 
 ```{code-cell} python
 chandra_obs_id = vetted_source_check(SOURCE_NAME, "Chandra")
 chandra_obs_id
 ```
+
+
 
 ```{code-cell} python
 search_filt = {"detector": ["ACIS-S", "ACIS-I"], 
@@ -375,9 +416,9 @@ spatial resolution for when we make visualizations.
 If we were trying to do science with these images directly, we would likely not 
 reproject them.
 
-Here we fetch out the highest resolution image's FITS header, to provide the
-reprojection grid for all images (note though that we will not reproject the donor
-image):
+Here we fetch out the highest resolution image's FITS header, from which we can fetch 
+the information that will act as the common coordinate grid for all images (note though 
+that we will not reproject the donor image):
 ```{code-cell} python
 donor_wcs_hdr = mission_hdus[finest_pix_miss].header.copy()
 ```
@@ -413,7 +454,7 @@ sep_reproj_im_cmaps = {
 ```
 
 ```{code-cell} python
-sep_ims = InteractiveMultiPanel({mn: res['data'] for mn, res in reproj_data_cov.items() if res['cov'] > 0.}, sep_reproj_im_cmaps)
+sep_ims = InteractiveMultiPanel({mn: res['data'] for mn, res in reproj_data_cov.items() if res['cov'] > 0.1}, sep_reproj_im_cmaps)
 sep_ims.view()
 ```
 
