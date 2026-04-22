@@ -36,6 +36,9 @@ sources, with a set of suggested objects to try out, and setting up interactive
 visualizations where you can adjust how different wavelengths are combined and
 see what makes the nicest looking image.
 
+Note that we will only be using pre-generated images, rather than making any new
+ones of our own from the raw observation data.
+
 Throughout this demonstration we make use of the Python module Astroquery to search and 
 acquire data from the HEASARC, MAST, and IRSA archives, while the HoloViz, Panel, and 
 Bokeh libraries are used to create interactive figures that are performant even with
@@ -131,12 +134,6 @@ SOURCE_COORD = SkyCoord.from_name(SOURCE_NAME)
 
 print(f"{SOURCE_NAME} Coordinate:".upper())
 print(SOURCE_COORD.to_string())
-```
-
-```{code-cell} python
-
-
-SWIFT_SEARCH_RAD = Quantity(5, 'arcmin')
 ```
 
 +++
@@ -467,17 +464,41 @@ hubble_hdu = load_hubble_image(sel_hubble_im)
 
 ### 2.4 Query MAST for ultraviolet data
 
-Swift's UV/Optical Telescope provides ultraviolet imaging.
+Finally, for UV images, we're going to tap the prodigious data archive of the 
+Neil Gehrels Swift Observatory. Primarily designed as a fast-follow-up telescope for
+Gamma-ray bursts, Swift's main instruments are actually both for high-energy 
+astrophysics, in the X-ray and Gamma-ray regimes. There is, however, also a very
+capable optical instrument, the UV and Optical Telescope (UVOT), and as it is 
+generally collecting data during every Swift observation, it has accrued coverage
+of a lot of the sky.
+
+Due to this high-energy, optical/UV dichotomy, Swift data are archived both by the 
+HEASARC and by MAST. We will be pulling the images from the MAST archive, as we did for
+the Hubble data in the last section. 
 
 We search for observations that were taken with the UVW2, UVM2, and UVW1 filters, which 
 cover parts of the Far/Mid-UV wavelength ranges. Swift's UVOT instrument also provides
 filters with higher wavelength, optical, band passes, but we specifically want UV data here.
 
+Once again, we check to see if a particular observation has been pre-vetted for the 
+current source - `swift_obs_id` will be set to the relevant ObsID, if it exists, 
+otherwise it will be set to `None`:
 
 ```{code-cell} python
 swift_obs_id = vetted_source_check(SOURCE_NAME, "Swift")
 swift_obs_id
 ```
+
+We define a radius within which we will search for Swift-UVOT images of our target source:
+
+```{code-cell} python
+SWIFT_SEARCH_RAD = Quantity(5, 'arcmin')
+```
+
+Using the same `Observations` class as we did to retrieve Hubble observations from 
+MAST, we perform the search for relevant data - once again we sort by exposure time as 
+a proxy for the 'quality' of the image (though we do not recommend this for scientific
+purposes, we have to have _some_ metric in order to automate this demonstration):
 
 ```{code-cell} python
 all_swift_obs = Observations.query_criteria(
@@ -494,6 +515,10 @@ all_swift_obs.sort('t_exptime', reverse=True)
 
 all_swift_obs
 ```
+
+If any Swift-UVOT data with one of the UV filters we specified can be found, we proceed
+to choosing the one with the longest exposure time, and then reading the image using
+a convenience function defined in the `code_src/archive_queries.py` file:
 
 ```{code-cell} python
 if len(all_swift_obs) > 0:
