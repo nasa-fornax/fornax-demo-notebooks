@@ -137,7 +137,6 @@ print(SOURCE_COORD.to_string())
 
 
 SWIFT_SEARCH_RAD = Quantity(5, 'arcmin')
-HUBBLE_SEARCH_RAD = Quantity(2, 'arcmin')
 ```
 
 +++
@@ -353,15 +352,50 @@ spitzer_hdu = load_spitzer_image(sel_spitzer_im)
 
 ### 2.3 Query MAST for optical data
 
+For optical observations, we turn to the Hubble Space Telescope (HST), the third great 
+observatory of this demonstration! Of course, Hubble is more than just an optical
+telescope, as it also has some near-infrared and UV imaging and spectroscopic capabilities. 
+
+Even our specification of 'optical' observations is a bit fuzzy, as not only has 
+Hubble hosted four generations of scientific instruments with differing sensitives 
+within what we consider to be the 'optical' bandpass, but each instrument has often
+included a number of different wide and narrow filters that limit the bandpass further.
+
+As the purpose of this demonstration is just to make nice visualizations and to be
+relatively robust to choices of target other than those we suggest, we aren't going
+to be picky about exactly which instrument or filter we use. So long as the data
+are ostensibly in the 'optical' range, we'll take them.
+
+Once again, we check to see if a particular observation has been pre-vetted for the 
+current source - `hubble_obs_id` will be set to the relevant ObsID, if it exists, 
+otherwise it will be set to `None`:
+
 ```{code-cell} python
 hubble_obs_id = vetted_source_check(SOURCE_NAME, "Hubble")
 hubble_obs_id
 ```
 
+We define a radius within which we will search for optical images of our target source:
+
+```{code-cell} python
+HUBBLE_SEARCH_RAD = Quantity(2, 'arcmin')
+```
+
+Now we proceed to search the Hubble archive, maintained and served by 
+Barbara A. Mikulski Archive for Space Telescopes (MAST), using the `Observations` class
+imported from the `astroquery.mast` submodule. This search for observations will be 
+followed up by a search for **data products** related to the observation we end up choosing.
+
 We set `project="HST"` to avoid identifying 'Hubble Advanced Product' (HAP) results, as 
 though the multi-visit-mosaics would be ideal for our purposes, they tend to be 
 very large (both in storage and in the number of pixels in the image), which can
 cause issues with running out of memory.
+
+After the initial search for observations with image data, we filter out any that were
+taken using Hubble's STIS instrument. We don't want to specify a list of instruments
+to search, because Hubble has (and has had) so many. However, we specifically **do** 
+wish to exclude STIS images because they are often just for targeting prior to 
+spectroscopic observations and not high enough quality for our purposes.
 
 ```{code-cell} python
 all_hubble_obs = Observations.query_criteria(
@@ -376,28 +410,55 @@ all_hubble_obs = Observations.query_criteria(
     radius=HUBBLE_SEARCH_RAD
 )
 
+# These columns are removed to make the table look nicer when shown in the notebook
 del all_hubble_obs['s_region']
 del all_hubble_obs['obs_title']
 
+# Don't want to filter on specific instruments, because Hubble has had so many, but the
+#  STIS images are often just targetting images before spectroscopic observations, and
+#  aren't useful for our purpose.
 all_hubble_obs = all_hubble_obs[np.char.find(all_hubble_obs['instrument_name'].data, 'STIS') != 0]
 all_hubble_obs = all_hubble_obs[all_hubble_obs['t_exptime'] > 0]
 
+# Sort by exposure time, longest first
 all_hubble_obs.sort('t_exptime', reverse=True)
 
 all_hubble_obs
 ```
 
+If any candidate observations have been identified, we will automatically select the
+first entry in the table (which will have the longest exposure time, as we sorted by
+it in the previous cell). You could easily modify this to select an observation
+based on some other criteria, as the exposure time is no guarantee of quality.
+
+Once an observation has been chosen, we run an additional search to retrieve the
+table of **data products** associated with the observation, and then a filtering 
+operation to pare down the list to just science imaging products:
+
 ```{code-cell} python
 if len(all_hubble_obs) > 0:
     sel_hubble_obs = all_hubble_obs[0]
+    
     sel_hubble_prods = Observations.get_unique_product_list(sel_hubble_obs)
     display(sel_hubble_prods)
     
-    sel_hubble_im = Observations.filter_products(sel_hubble_prods, productType='SCIENCE', productSubGroupDescription="DRC",  mrp_only=True)
+    sel_hubble_im = Observations.filter_products(sel_hubble_prods, 
+                                                 productType='SCIENCE', 
+                                                 productSubGroupDescription=["DRC", "DRZ"], 
+                                                 mrp_only=True)
+    
+    if "DRC" in sel_hubble_im['productSubGroupDescription'].value:
+        sel_hubble_im = sel_hubble_im[sel_hubble_im['productSubGroupDescription'] == "DRC"]
+    else:
+        sel_hubble_im = sel_hubble_im[sel_hubble_im['productSubGroupDescription'] == "DRZ"]
+    
     display(sel_hubble_im)
 else:
     sel_hubble_im = None
 ```
+
+Now we can load the Hubble image – see the `code_src/archive_queries.py` file for the 
+definition of the `load_hubble_image` convenience function:
 
 ```{code-cell} python
 hubble_hdu = load_hubble_image(sel_hubble_im)
