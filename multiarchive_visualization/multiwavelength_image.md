@@ -118,6 +118,7 @@ To get started, we provide a few suggestions to try out:
 - ***Kepler's Supernova*** **[SN 1604]** – The remnant of the most recent supernova observed with the naked eye (in 1604).
 - ***NGC 4753*** - A lenticular galaxy, discovered by William Herschel in 1784, with eye-catching dust lanes.
 - ***Abell 370*** - A galaxy cluster known for several prominent strong-lensing arc features.
+- ***NGC 2595*** - A large elliptical galaxy, part of a galaxy group, discovered by William Herschel in 1787.
 
 ```{code-cell} python
 # Define the target
@@ -128,6 +129,7 @@ SOURCE_NAME = "Crab"
 # SOURCE_NAME = "SN1604"
 # SOURCE_NAME = "NGC4753"
 # SOURCE_NAME = "A370"
+# SOURCE_NAME = "NGC2595"
 
 # Resolve coordinates from name
 SOURCE_COORD = SkyCoord.from_name(SOURCE_NAME)
@@ -549,7 +551,6 @@ coordinate grid. We'll refer to it as the 'donor' image.
 That means that all other images will be aligned to the 'donor', and will have to be 
 upscaled to match the donor's higher spatial resolution.
 
-
 :::{note}
 We would not necessarily recommend this interpolating and upscaling for images that 
 are going to be used for scientific analyses, but given we're just making nice 
@@ -643,22 +644,16 @@ sep_ims.view()
 
 ## 5. Interactive multi-wavelength image
 
-
-***IMPROVE ALL THIS***
-
-Finally, we combine three wavelength bands into a single RGB composite image.
+Finally, we combine three images in different wavelengths into a single RGB composite image.
 We use:
 - Red channel: Spitzer infrared (cool dust and molecular gas)
 - Green channel: Hubble optical (stellar emission and ionized gas)
 - Blue channel: Chandra X-ray (hot plasma and high-energy astrophysical processes)
 
-
 The interactive controls allow you to adjust:
-- **Channel percentiles**: Control the brightness scaling for each color
+- **Channel percentiles**: Control the upper percentile cut off for pixel values, lower values will exclude brighter features.
 - **Lupton Q**: Softening parameter (higher values show more faint detail)
 - **Lupton stretch**: Overall brightness (higher values make the image brighter)
-
-***Experiment with the sliders...***
 
 We note that NGC 4753 has poor Chandra coverage, so for that source we use the UV 
 observation from Swift as the blue channel instead.
