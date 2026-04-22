@@ -109,7 +109,9 @@ def load_chandra_image(chosen_chandra_dl, preproc_cent_hi_res: bool = True):
 
 def load_spitzer_image(chosen_spitzer_im):
 
-    if isinstance(chosen_spitzer_im, (Table, Row)) and 'cloud_access' not in chosen_spitzer_im.columns and 'access_url' not in chosen_spitzer_im.columns:
+    if chosen_spitzer_im is None:
+        return None
+    elif isinstance(chosen_spitzer_im, (Table, Row)) and 'cloud_access' not in chosen_spitzer_im.columns and 'access_url' not in chosen_spitzer_im.columns:
         raise KeyError("The 'chosen_spitzer_im' argument must have a 'cloud_access' or 'access_url' column.")
     elif not isinstance(chosen_spitzer_im, (Table, Row)):
         raise TypeError("The 'chosen_spitzer_im' argument must be either an Astropy Table or Row instance.")

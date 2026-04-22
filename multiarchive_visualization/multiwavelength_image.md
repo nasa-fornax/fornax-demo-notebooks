@@ -124,7 +124,9 @@ HUBBLE_SEARCH_RAD = Quantity(2, 'arcmin')
 
 +++
 
-## 2. Query archives for available data
+## 2. Searching NASA's astrophysical archives for images of our source
+
+We 
 
 ### 2.1 Query HEASARC for Chandra X-ray observations
 
@@ -134,9 +136,9 @@ chandra_obs_id
 ```
 
 ```{code-cell} python
-
 search_filt = {"detector": ["ACIS-S", "ACIS-I"], 
                "grating": "NONE"}
+               
 search_filt.update({} if chandra_obs_id is None else {"obsid": chandra_obs_id})
 
 all_chandra_obs = Heasarc.query_region(SOURCE_COORD, 
@@ -144,6 +146,7 @@ all_chandra_obs = Heasarc.query_region(SOURCE_COORD,
                                        column_filters=search_filt, 
                                        columns='*', 
                                        radius=CHANDRA_SEARCH_RAD)
+                                       
 all_chandra_obs['time'] = Time(all_chandra_obs['time'], format='mjd').datetime
 all_chandra_obs.sort('exposure', reverse=True)
 
@@ -171,44 +174,46 @@ spitzer_obs_id
 
 ```{code-cell} python
 all_spitzer_ims = Irsa.query_sia(pos=(SOURCE_COORD, SPITZER_SEARCH_RAD), facility="Spitzer Space Telescope", 
-                             data_type="image", instrument='IRAC', res_format='image/fits', calib_level=3)
-if len(all_spitzer_ims) == 0:
-    all_spitzer_ims = Irsa.query_sia(pos=(SOURCE_COORD, SPITZER_SEARCH_RAD), facility="Spitzer Space Telescope", 
-                             data_type="image", instrument='IRAC', res_format='image/fits', calib_level=2)
+                             data_type="image", instrument='IRAC', res_format='image/fits', calib_level=[2, 3])
 del all_spitzer_ims['s_region']
 del all_spitzer_ims['proposal_title']
+
+if spitzer_obs_id is not None:
+    all_spitzer_ims = all_spitzer_ims[all_spitzer_ims['obs_id'] == spitzer_obs_id]
 
 all_spitzer_ims = all_spitzer_ims[all_spitzer_ims['dataproduct_subtype'] == 'science']
 all_spitzer_ims
 ```
 
 ```{code-cell} python
-sel_spitzer_ims = all_spitzer_ims[all_spitzer_ims['s_resolution'] == all_spitzer_ims['s_resolution'].min()]
-
-if spitzer_obs_id is not None:
-    sel_spitzer_ims = sel_spitzer_ims[sel_spitzer_ims['obs_id'] == spitzer_obs_id]
+if len(all_spitzer_ims) > 0:
+    # Select the highest calibration level available
+    filt_spitzer_ims = all_spitzer_ims[all_spitzer_ims['calib_level'] == all_spitzer_ims['calib_level'].max()]
     
-sel_spitzer_ims
+    # Select the highest resolution images available
+    filt_spitzer_ims = filt_spitzer_ims[filt_spitzer_ims['s_resolution'] == filt_spitzer_ims['s_resolution'].min()]
+    
+    # Filter to mean mosaics (exclude short HDR exposures and median mosaics) - if the
+    #  products aren't mosaics at all then this has no effect
+    not_short_median_filt = (
+        (~np.char.find(filt_spitzer_ims['access_url'].data.astype(str), 'short') > -1) &
+        (~np.char.find(filt_spitzer_ims['access_url'].data.astype(str), 'median') > -1)
+    )
+    filt_spitzer_ims = filt_spitzer_ims[not_short_median_filt]
+    
+    # Also sort by the distance from the target (closest at the top of the table)
+    filt_spitzer_ims.sort('dist_to_point')
+else:
+    filt_spitzer_ims = None
+
+# Show the table of products
+filt_spitzer_ims
 ```
 
 ```{code-cell} python
-    
-# Filter to mean mosaics (exclude short HDR exposures and median mosaics)
-not_short_median_filt = (
-    (~np.char.find(sel_spitzer_ims['access_url'].data.astype(str), 'short') > -1) &
-    (~np.char.find(sel_spitzer_ims['access_url'].data.astype(str), 'median') > -1)
-)
+sel_spitzer_im = None if filt_spitzer_ims is None else filt_spitzer_ims[0]
 
-sel_spitzer_ims = sel_spitzer_ims[not_short_median_filt]
-
-sel_spitzer_ims.sort('dist_to_point')
-sel_spitzer_ims = sel_spitzer_ims[0]
-
-sel_spitzer_ims
-```
-
-```{code-cell} python
-spitzer_hdu = load_spitzer_image(sel_spitzer_ims)
+spitzer_hdu = load_spitzer_image(sel_spitzer_im)
 ```
 
 ### 2.3 Query MAST for optical data
@@ -476,13 +481,7 @@ AI: This notebook was created with assistance from Google's Gemini models and NA
 ### References
 
 This work made use of:
-- [Chandra X-ray Observatory Data Archive](https://cxc.harvard.edu/cda/)
-- [Spitzer Heritage Archive at IRSA](https://irsa.ipac.caltech.edu/Missions/spitzer.html)
-- [Mikulski Archive for Space Telescopes (MAST)](https://archive.stsci.edu/)
 - [AstroPy: A Community Python Library for Astronomy](https://www.astropy.org/)
 - [AstroQuery: Access to Online Astronomical Data](https://astroquery.readthedocs.io/)
 - [Reproject: Image Reprojection in Python](https://reproject.readthedocs.io/)
 - [Lupton et al. 2004, PASP, 116, 133: "Preparing Red-Green-Blue Images from CCD Data"](https://ui.adsabs.harvard.edu/abs/2004PASP..116..133L)
-- STScI style guide: https://github.com/spacetelescope/style-guides/blob/master/guides/jupyter-notebooks.md
-- Fornax tech and science review guidelines: https://github.com/nasa-fornax/fornax-demo-notebooks/blob/main/template/notebook_review_checklists.md
-- The Turing Way Style Guide: https://book.the-turing-way.org/community-handbook/style
