@@ -134,7 +134,7 @@ print(SOURCE_COORD.to_string())
 ```
 
 ```{code-cell} python
-CHANDRA_SEARCH_RAD = Quantity(3, 'arcmin')
+
 SPITZER_SEARCH_RAD = Quantity(3, 'arcmin')
 SWIFT_SEARCH_RAD = Quantity(5, 'arcmin')
 HUBBLE_SEARCH_RAD = Quantity(2, 'arcmin')
@@ -176,12 +176,46 @@ chandra_obs_id = vetted_source_check(SOURCE_NAME, "Chandra")
 chandra_obs_id
 ```
 
+Now, we need to search for observations of our current target – note though that if 
+there is a pre-vetted observation for the source, we won't consider any other 
+observations that might be relevant to the source.
 
+We set a search radius of $3^{\prime}$, which should help exclude any observations 
+where the source is not on or near the CCD chip positioned at the aimpoint – you could
+experiment with adjusting this radius if you aren't finding observations of your 
+source:
+
+```{code-cell} python
+CHANDRA_SEARCH_RAD = Quantity(3, 'arcmin')
+```
+
+Our search then begins by defining filters, to specify which Chandra instruments we might
+want to consider using for our visualizations:
+- **ACIS-S/I** - Chandra's CCD spectro-imagers, these are much more commonly used than HRC-I/S (the other Chandra instruments).
+- **No grating** – If a grating was deployed, then the resulting 'image' would actually be a dispersed spectrum trace, rather than an image of the source.
+
+Note that pre-vetted ObsID is added to the filters, if available.
+
+Following the definition of our filters, we pass the coordinate of the source (specified 
+by `SOURCE_COORD`), the name of the Chandra 'master' catalog (_chanmaster_), our 
+filters, a `columns='*'` argument to force return of all _chanmaster_ columns, and the
+search radius.
+
+Once we have the results of our search (though don't forget that there might not be 
+_any_ observations of your source of interest), we sort them so that the first entries
+in the table have the longest exposures. 
+
+Exposure time is not necessarily a good metric for determining the quality of a Chandra
+observation, particularly those taken by the ACIS detectors, which have degraded in
+sensitivity significantly since the beginning of the mission, but it is the best
+we have on hand.
 
 ```{code-cell} python
 search_filt = {"detector": ["ACIS-S", "ACIS-I"], 
                "grating": "NONE"}
-               
+
+# If a pre-vetted observation exists, we'll add an extra filter to only select that
+#  one observation.              
 search_filt.update({} if chandra_obs_id is None else {"obsid": chandra_obs_id})
 
 all_chandra_obs = Heasarc.query_region(SOURCE_COORD, 
@@ -190,18 +224,27 @@ all_chandra_obs = Heasarc.query_region(SOURCE_COORD,
                                        columns='*', 
                                        radius=CHANDRA_SEARCH_RAD)
                                        
-all_chandra_obs['time'] = Time(all_chandra_obs['time'], format='mjd').datetime
 all_chandra_obs.sort('exposure', reverse=True)
 
 all_chandra_obs
 ```
 
-```{code-cell} python
-sel_chandra_datalink = None
+If there are any observations of the target source, we will select the first entry, 
+with the longest exposure time; you could also experiment with choosing other 
+observations by filtering the `all_chandra_obs` table yourself.
 
+From there, we use another `Heasarc` function to fetch the 'data link' for our chosen
+observation, which will tell us where we can fetch the data files from:
+
+```{code-cell} python
 if len(all_chandra_obs) > 0:
     sel_chandra_datalink = Heasarc.locate_data(all_chandra_obs[0])
+else:
+    sel_chandra_datalink = None
 ```
+
+Now we use a convenience function (see the `code_src/archive_queries.py` file for the 
+definition) to use the data link to fetch and load the Chandra image:
 
 ```{code-cell} python
 chandra_hdu = load_chandra_image(sel_chandra_datalink, preproc_cent_hi_res=True)
