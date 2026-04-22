@@ -67,6 +67,9 @@ from astroquery.heasarc import Heasarc
 from astroquery.ipac.irsa import Irsa
 from astroquery.mast import Observations
 
+from astropy import conf
+conf.max_lines = 6
+
 import numpy as np
 
 # Add local code directory to path
@@ -133,18 +136,18 @@ chandra_obs_id
 ```{code-cell} python
 
 search_filt = {"detector": ["ACIS-S", "ACIS-I"], 
-               "grating": "NONE"}.update({} if chandra_obs_id is None 
-                                         else {"obsid": chandra_obs_id})
+               "grating": "NONE"}
+search_filt.update({} if chandra_obs_id is None else {"obsid": chandra_obs_id})
 
 all_chandra_obs = Heasarc.query_region(SOURCE_COORD, 
-                                       table='chanmaster', 
+                                       catalog='chanmaster', 
                                        column_filters=search_filt, 
                                        columns='*', 
                                        radius=CHANDRA_SEARCH_RAD)
 all_chandra_obs['time'] = Time(all_chandra_obs['time'], format='mjd').datetime
 all_chandra_obs.sort('exposure', reverse=True)
 
-all_chandra_obs.head(6)
+all_chandra_obs
 ```
 
 ```{code-cell} python
