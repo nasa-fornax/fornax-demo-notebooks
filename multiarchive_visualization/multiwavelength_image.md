@@ -90,7 +90,7 @@ a SkyCoord from the RA-Dec (or other coordinate system) of your source of intere
 
 To get started, we provide a few suggestions to try out:
 - ***The Crab Nebula*** **[Crab; default]** – One of the most observed sources in the Milky Way, a favorite for calibrating space observatories, and famously visually striking.
-- ***Messier 61***
+- ***Messier 61*** – Also known as the 'Swelling Spiral Galaxy', M61 is one of the largest members of the Virgo galaxy cluster and has played host to 8 observed supernovae since 1926 (a considerable number). 
 - ***Kepler's Supernova*** **[SN 1604]** – The remnant of the most recent supernova observed with the naked eye (in 1604).
 - ***NGC 4753*** - A lenticular galaxy, discovered by William Herschel in 1784, with eye-catching dust lanes.
 - ***Abell 370*** - 
@@ -100,6 +100,7 @@ To get started, we provide a few suggestions to try out:
 SOURCE_NAME = "Crab"
 
 # Other source suggestions - uncomment them (and comment out the others) to try them out.
+# SOURCE_NAME = "M61"
 # SOURCE_NAME = "SN1604"
 # SOURCE_NAME = "NGC4753"
 # SOURCE_NAME = "A370"
@@ -130,21 +131,27 @@ chandra_obs_id
 ```
 
 ```{code-cell} python
-all_chandra_obs = Heasarc.query_region(SOURCE_COORD, 'chanmaster', column_filters={"detector": ["ACIS-S", "ACIS-I"], "grating": "NONE"}, columns='*', radius=CHANDRA_SEARCH_RAD)
+
+search_filt = {"detector": ["ACIS-S", "ACIS-I"], 
+               "grating": "NONE"}.update({} if chandra_obs_id is None 
+                                         else {"obsid": chandra_obs_id})
+
+all_chandra_obs = Heasarc.query_region(SOURCE_COORD, 
+                                       table='chanmaster', 
+                                       column_filters=search_filt, 
+                                       columns='*', 
+                                       radius=CHANDRA_SEARCH_RAD)
 all_chandra_obs['time'] = Time(all_chandra_obs['time'], format='mjd').datetime
 all_chandra_obs.sort('exposure', reverse=True)
 
-all_chandra_obs
+all_chandra_obs.head(6)
 ```
 
 ```{code-cell} python
-# TODO THIS NEEDS TO HAVE EXCEPTION CATCHING
-if chandra_obs_id is None:
-    chandra_obs_id = all_chandra_obs[0]['obsid']
+sel_chandra_datalink = None
 
-sel_chandra_obs = all_chandra_obs[all_chandra_obs['obsid'] == int(chandra_obs_id)]
-
-sel_chandra_datalink = Heasarc.locate_data(sel_chandra_obs)['aws']
+if len(all_chandra_obs) > 0:
+    sel_chandra_datalink = Heasarc.locate_data(all_chandra_obs[0])
 ```
 
 ```{code-cell} python
