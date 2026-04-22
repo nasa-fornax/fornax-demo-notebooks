@@ -135,7 +135,7 @@ print(SOURCE_COORD.to_string())
 
 ```{code-cell} python
 
-SPITZER_SEARCH_RAD = Quantity(3, 'arcmin')
+
 SWIFT_SEARCH_RAD = Quantity(5, 'arcmin')
 HUBBLE_SEARCH_RAD = Quantity(2, 'arcmin')
 ```
@@ -253,23 +253,70 @@ chandra_hdu = load_chandra_image(sel_chandra_datalink, preproc_cent_hi_res=True)
 
 ### 2.2 Query IRSA for infrared data
 
+For infrared data, we turn to the Spitzer space telescope; Spitzer is one of NASA's 
+'great observatories' (alongside Chandra, Hubble, and Compton) and provides infrared 
+imaging (and spectroscopy, but that isn't relevant to this demonstration) in the 
+mid/far-IR bands.
+
+Unlike the Chandra and Hubble great observatories that we're also using in this 
+tutorial, Spitzer is no longer active, but its data are all maintained and served by 
+the NASA/IPAC Infrared Science Archive (IRSA). 
+
+We can use the `Irsa` object imported from the `astroquery.ipac.irsa` submodule to 
+find Spitzer images of our target source. Our approach here is a little different
+to how we found the Chandra data, however – as each archive creates and maintains its 
+own Astroquery submodule, the capabilities and interface tend to vary.
+
+For IRSA, we're going to use a 'Simple Image Access' (SIA) function, which can search
+for specific _image_ products, rather than whole observations. 
+
+Once again, we check to see if a particular observation has been pre-vetted for the 
+current source - `spitzer_obs_id` will be set to the relevant ObsID, if it exists, 
+otherwise it will be set to `None`:
+
 ```{code-cell} python
 spitzer_obs_id = vetted_source_check(SOURCE_NAME, "Spitzer")
 spitzer_obs_id
 ```
 
+We define a radius within which we will search for Spitzer images of our target source:
+
 ```{code-cell} python
-all_spitzer_ims = Irsa.query_sia(pos=(SOURCE_COORD, SPITZER_SEARCH_RAD), facility="Spitzer Space Telescope", 
-                             data_type="image", instrument='IRAC', res_format='image/fits', calib_level=[2, 3])
+SPITZER_SEARCH_RAD = Quantity(3, 'arcmin')
+```
+
+For simplicity, we're only going to search for images taken by one of Spitzer's 
+instruments – the Infrared Array Camera (IRAC). We pass the source coordinate and
+search radius, specify that we want image products, and particularly those that have
+a calibration level of **2** (science ready calibrated image mosaics) or **3** (enhanced 
+data products often made up of data from multiple visits):
+
+```{code-cell} python
+all_spitzer_ims = Irsa.query_sia(pos=(SOURCE_COORD, SPITZER_SEARCH_RAD), 
+                                 facility="Spitzer Space Telescope", 
+                                 data_type="image", 
+                                 instrument='IRAC', 
+                                 res_format='image/fits', 
+                                 calib_level=[2, 3])
+
+# These columns are removed to make the table look nicer when shown in the notebook
 del all_spitzer_ims['s_region']
 del all_spitzer_ims['proposal_title']
 
+# If a pre-vetted observation exists for the target, we'll filter out all 
+#  products related to other observations.
 if spitzer_obs_id is not None:
     all_spitzer_ims = all_spitzer_ims[all_spitzer_ims['obs_id'] == spitzer_obs_id]
 
+# Don't want any calibration products or any such, just science products
 all_spitzer_ims = all_spitzer_ims[all_spitzer_ims['dataproduct_subtype'] == 'science']
 all_spitzer_ims
 ```
+
+If Spitzer images are available, we automatically select the one with the highest calibration level, and the 
+highest spatial resolution, available, that is centered on a point closest to our target. Again, this isn't a 
+particularly good way to determine which data to use, but it means we can make this tutorial work for
+any target source:
 
 ```{code-cell} python
 if len(all_spitzer_ims) > 0:
@@ -296,10 +343,11 @@ else:
 filt_spitzer_ims
 ```
 
+We use another convenience function (see the `code_src/archive_queries.py` file for the 
+definition) to load the Spitzer image:
+
 ```{code-cell} python
-#
 sel_spitzer_im = None if filt_spitzer_ims is None else filt_spitzer_ims[0]
-#
 spitzer_hdu = load_spitzer_image(sel_spitzer_im)
 ```
 
