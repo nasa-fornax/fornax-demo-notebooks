@@ -52,26 +52,42 @@ def vetted_source_check(check_src_name, check_miss_name):
         return VETTED_OBS[check_src_name][check_miss_name]
 
 
-def load_chandra_image(chandra_datalink, preproc_cent_hi_res: bool = True):
+def load_chandra_image(chosen_chandra_dl, preproc_cent_hi_res: bool = True):
     if preproc_cent_hi_res:
         im_patt = "*cntr_img2*.fits*"
     else:
         im_patt = "*full_img2*.fits*"
 
-    # Validity checks on chandra_datalink
-    if isinstance(chandra_datalink, Column):
-        if len(chandra_datalink) == 1:
-            chandra_datalink = chandra_datalink[0]
-        elif len(chandra_datalink) > 1:
-            raise ValueError("The 'chandra_datalink' argument must have only "
-                             "one element.")
-        else:
-            raise ValueError("Passed 'chandra_datalink' argument is empty.")
-    elif not isinstance(chandra_datalink, str):
-        raise TypeError("Pass either a single-entry Astropy column, or a string, to "
-                        "the 'chandra_datalink' argument.")
+    if chosen_chandra_dl is None:
+        return None
+    # If the input is a string, we'll assume it's the URI
+    if isinstance(chosen_chandra_dl, str):
+        rel_chandra_uri = str(chosen_chandra_dl)
 
-    patt_uri = os.path.join(chandra_datalink, "primary", im_patt)
+    elif isinstance(chosen_chandra_dl, (Table, Row, Column)):
+        if isinstance(chosen_chandra_dl, Table):
+            chosen_chandra_dl = chosen_chandra_dl['aws']
+        elif isinstance(chosen_chandra_dl, Row):
+            rel_chandra_uri = chosen_chandra_dl['aws']
+
+        # It should (fingers crossed) definitely be a Column instance by now
+        #  We'll quickly check that the name of the Column is correct
+        if isinstance(chosen_chandra_dl, Column) and chosen_chandra_dl.name != 'aws':
+            raise ValueError("If an Astropy Column instance is passed for "
+                             "'chosen_chandra_dl', it must be named 'aws'.")
+        elif isinstance(chosen_chandra_dl, Column):
+            if len(chosen_chandra_dl) == 1:
+                rel_chandra_uri = str(chosen_chandra_dl[0])
+
+            elif len(chosen_chandra_dl) > 1:
+                raise ValueError("The 'chosen_chandra_dl' should represent a single "
+                                 "observation, rather than multiple.")
+
+    else:
+        raise TypeError("The 'chosen_chandra_dl' argument must be either a string "
+                        "representing an AWS URI, or an Astropy Table, Row, or Column.")
+
+    patt_uri = os.path.join(rel_chandra_uri, "primary", im_patt)
 
     try:
         patt_res = S3_CONN.expand_path(patt_uri)
@@ -86,7 +102,7 @@ def load_chandra_image(chandra_datalink, preproc_cent_hi_res: bool = True):
         warn('No Chandra image can be identified.')
         return None
 
-    im_s3_uri = os.path.join(chandra_datalink, "primary", os.path.basename(im_s3_uri))
+    im_s3_uri = os.path.join(rel_chandra_uri, "primary", os.path.basename(im_s3_uri))
 
     return fits.open(im_s3_uri, use_fsspec=True, fsspec_kwargs={'anon': True})
 
