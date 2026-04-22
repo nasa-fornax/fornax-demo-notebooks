@@ -179,8 +179,10 @@ def load_swift_image(chosen_swift_im):
 
 def load_hubble_image(chosen_hubble_im):
 
+    if chosen_hubble_im is None:
+        return None
     # If the input is a string, we'll assume it's a URI.
-    if isinstance(chosen_hubble_im, str):
+    elif isinstance(chosen_hubble_im, str):
         # Certain Astroquery-MAST methods don't get on well with numpy strings, which
         #  are typically the dtype returned from accessing an astropy table string
         #  column. As such we make sure to turn them into base Python strings

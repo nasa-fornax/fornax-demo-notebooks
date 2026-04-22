@@ -67,6 +67,8 @@ from astroquery.heasarc import Heasarc
 from astroquery.ipac.irsa import Irsa
 from astroquery.mast import Observations
 
+from ipython.display import display
+
 from astropy import conf
 conf.max_lines = 6
 
@@ -211,8 +213,9 @@ filt_spitzer_ims
 ```
 
 ```{code-cell} python
+#
 sel_spitzer_im = None if filt_spitzer_ims is None else filt_spitzer_ims[0]
-
+#
 spitzer_hdu = load_spitzer_image(sel_spitzer_im)
 ```
 
@@ -253,17 +256,15 @@ all_hubble_obs
 ```
 
 ```{code-cell} python
-sel_hubble_obs = all_hubble_obs[0]
-```
-
-```{code-cell} python
-sel_hubble_prods = Observations.get_unique_product_list(sel_hubble_obs)
-sel_hubble_prods
-```
-
-```{code-cell} python
-sel_hubble_im = Observations.filter_products(sel_hubble_prods, productType='SCIENCE', productSubGroupDescription="DRC",  mrp_only=True)
-sel_hubble_im
+if len(all_hubble_obs) > 0:
+    sel_hubble_obs = all_hubble_obs[0]
+    sel_hubble_prods = Observations.get_unique_product_list(sel_hubble_obs)
+    display(sel_hubble_prods)
+    
+    sel_hubble_im = Observations.filter_products(sel_hubble_prods, productType='SCIENCE', productSubGroupDescription="DRC",  mrp_only=True)
+    display(sel_hubble_im)
+else:
+    sel_hubble_im = None
 ```
 
 ```{code-cell} python
