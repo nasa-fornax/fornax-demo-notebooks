@@ -144,8 +144,10 @@ def load_spitzer_image(chosen_spitzer_im):
 
 def load_swift_image(chosen_swift_im):
 
+    if chosen_swift_im is None:
+        return None
     # If the input is a string, we'll assume it's the URL
-    if isinstance(chosen_swift_im, str):
+    elif isinstance(chosen_swift_im, str):
         # Certain Astroquery-MAST methods don't get on well with numpy strings, which
         #  are typically the dtype returned from accessing an astropy table string
         #  column. As such we make sure to turn them into base Python strings

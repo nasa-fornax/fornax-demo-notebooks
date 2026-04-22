@@ -67,7 +67,7 @@ from astroquery.heasarc import Heasarc
 from astroquery.ipac.irsa import Irsa
 from astroquery.mast import Observations
 
-from ipython.display import display
+from IPython.display import display
 
 from astropy import conf
 conf.max_lines = 6
@@ -291,6 +291,7 @@ all_swift_obs = Observations.query_criteria(
     coordinates=SOURCE_COORD,
     radius=SWIFT_SEARCH_RAD,
     obs_collection='SWIFT',
+    obs_id="*" if swift_obs_id is None else swift_obs_id,
     filters=["UVW2", "UVM2", "UVW1"],
     calib_level=2,
 )
@@ -302,17 +303,13 @@ all_swift_obs
 ```
 
 ```{code-cell} python
-if swift_obs_id is None:
+if len(all_swift_obs) > 0:
     sel_swift_obs = all_swift_obs[0]
 else:
-    sel_swift_obs = all_swift_obs[all_swift_obs['obs_id'] == swift_obs_id]
-sel_swift_obs
-```
+    sel_swift_obs = None
 
-```{code-cell} python
 swift_hdu = load_swift_image(sel_swift_obs)
 ```
-
 +++
 
 ## 3. Reproject images to a common coordinate grid
