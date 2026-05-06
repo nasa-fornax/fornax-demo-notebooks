@@ -52,16 +52,9 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
     - Fluxes are converted from AB magnitudes using Astropy, then converted to mJy.
     """
     
-    # 1) Start Dask client & read full ZTF light-curve catalog
+    # 1) Start Dask client
     # Use multiple workers with a single thread per worker for better performance on Fornax
     client = Client(threads_per_worker=1, memory_limit=None)
-    ztf_lc = lsdb.read_hats(
-        's3://ipac-irsa-ztf/contributed/dr23/lc/hats/',
-        columns=[
-            "objectid", "objra", "objdec", "filterid",
-            "lightcurve.hmjd", "lightcurve.mag", "lightcurve.magerr", "lightcurve.catflags"
-        ]
-    )
 
     # 2) Convert Astropy table → pandas → LSDB catalog
     sample_df = pd.DataFrame({
@@ -84,8 +77,15 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
     per_band_dfs = []
 
     for fid, band_name in band_map.items():
-        # 3a) filter to one band and select relevant sky tiles
-        ztf_band = ztf_lc.query(f"filterid == {fid}")
+        # 3a) open ZTF light-curve catalog filtered to each band 
+        ztf_band = lsdb.open_catalog(
+            's3://ipac-irsa-ztf/contributed/dr23/lc/hats/',
+            filters=[("filterid", "==", fid)],
+            columns=[
+                "objectid", "objra", "objdec", "filterid",
+                "lightcurve.hmjd", "lightcurve.mag", "lightcurve.magerr", "lightcurve.catflags"
+            ]
+        )
 
         # 3b) crossmatch: sample (left) → filtered band (right)
         matched = sample_lsdb.crossmatch(
