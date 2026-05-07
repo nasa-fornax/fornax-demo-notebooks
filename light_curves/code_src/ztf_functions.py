@@ -4,6 +4,7 @@ from astropy import units as u
 from dask.distributed import Client
 
 from data_structures import MultiIndexDFObject
+from lsdb_utils import sample_table_to_lsdb
 
 
 def ztf_get_lightcurves(sample_table, *, radius=1.0):
@@ -56,21 +57,8 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
     # Use multiple workers with a single thread per worker for better performance on Fornax
     client = Client(threads_per_worker=1, memory_limit=None)
 
-    # 2) Convert Astropy table → pandas → LSDB catalog
-    sample_df = pd.DataFrame({
-        'objectid': sample_table['objectid'],
-        'ra_deg': sample_table['coord'].ra.deg,
-        'dec_deg': sample_table['coord'].dec.deg,
-        'label': sample_table['label'],
-    })
-    sample_lsdb = lsdb.from_dataframe(
-        sample_df,
-        ra_column="ra_deg",
-        dec_column="dec_deg",
-        margin_threshold=10,
-        drop_empty_siblings=True
-    )
-    del sample_df
+    # 2) Convert Astropy table → LSDB catalog
+    sample_lsdb = sample_table_to_lsdb(sample_table)
 
     # 3) Cross-match per band
     band_map = {1: "ztf_g", 2: "ztf_r", 3: "ztf_i"}

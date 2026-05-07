@@ -4,6 +4,7 @@ import pandas as pd
 from dask.distributed import Client
 
 from data_structures import MultiIndexDFObject
+from lsdb_utils import sample_table_to_lsdb
 
 # panstarrs light curves from hats catalog in S3 using lsdb
 
@@ -56,22 +57,8 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
                  "nStackDetections",  # some other data to use
                  ]
     )
-    # convert astropy table to pandas dataframe
-    # special care for the SkyCoords in the table
-    sample_df = pd.DataFrame({'objectid': sample_table['objectid'],
-                              'ra_deg': sample_table['coord'].ra.deg,
-                              'dec_deg': sample_table['coord'].dec.deg,
-                              'label': sample_table['label']})
-
-    # convert dataframe to hipscat
-    sample_lsdb = lsdb.from_dataframe(
-        sample_df,
-        ra_column="ra_deg",
-        dec_column="dec_deg",
-        margin_threshold=10,
-        # Optimize partition size
-        drop_empty_siblings=True
-    )
+    # convert astropy table to lsdb catalog
+    sample_lsdb = sample_table_to_lsdb(sample_table)
 
     # plan to cross match panstarrs object with my sample
     # only keep the best match
