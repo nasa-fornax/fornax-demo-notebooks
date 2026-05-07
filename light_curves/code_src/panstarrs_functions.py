@@ -56,17 +56,6 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
                  "nStackDetections",  # some other data to use
                  ]
     )
-    # read in the panstarrs light curves to lsdb
-    # panstarrs recommendation is not to index into this table with ra and dec
-    # but to use object ids from the above object table
-    panstarrs_detect = lsdb.open_catalog(
-        's3://stpubdata/panstarrs/ps1/public/hats/detection',
-        columns=["objID",  # PS1 object ID
-                 "detectID",  # PS1 detection ID
-                 # light-curve stuff
-                 "obsTime", "filterID", "psfFlux", "psfFluxErr",
-                 ]
-    )
     # convert astropy table to pandas dataframe
     # special care for the SkyCoords in the table
     sample_df = pd.DataFrame({'objectid': sample_table['objectid'],
@@ -92,6 +81,20 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
         n_neighbors=1,
         suffixes=("", ""),
         suffix_method="all_columns",
+    )
+
+    # read in the panstarrs light curves to lsdb, pre-filtered to the matched sky pixels
+    # to keep the join task graph small (~83K → ~84 partitions) and faster (~2x).
+    # panstarrs recommendation is not to index into this table with ra and dec
+    # but to use object ids from the above object table.
+    panstarrs_detect = lsdb.open_catalog(
+        's3://stpubdata/panstarrs/ps1/public/hats/detection',
+        search_filter=lsdb.PixelSearch(matched_objects.get_healpix_pixels()),
+        columns=["objID",  # PS1 object ID
+                 "detectID",  # PS1 detection ID
+                 # light-curve stuff
+                 "obsTime", "filterID", "psfFlux", "psfFluxErr",
+                 ]
     )
 
     # plan to join that cross match with detections to get light-curves
