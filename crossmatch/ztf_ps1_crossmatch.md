@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.17.2
+    jupytext_version: 1.19.1
 kernelspec:
   display_name: py-ztf_ps1_crossmatch
   language: python
@@ -170,7 +170,8 @@ ps1 = lsdb.open_catalog(ps1_path, columns=["objName","objID","raMean","decMean"]
 
 ```{code-cell} ipython3
 # Setting up the cross-match actually takes very little time
-ztf_x_ps1 = ztf_piece.crossmatch(ps1, radius_arcsec=1, n_neighbors=1, suffixes=("_ztf", "_ps1"))
+ztf_x_ps1 = ztf_piece.crossmatch(ps1, radius_arcsec=1, n_neighbors=1,
+                                 suffixes=("_ztf", "_ps1"), suffix_method='all_columns')
 ztf_x_ps1
 ```
 
