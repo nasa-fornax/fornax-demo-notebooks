@@ -67,7 +67,8 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
         radius_arcsec=radius,
         n_neighbors=1,
         suffixes=("", ""),
-        suffix_method="all_columns",
+        suffix_method="overlapping_columns",
+        log_changes=False,
     )
 
     # read in the panstarrs light curves to lsdb, pre-filtered to the matched sky pixels
@@ -91,7 +92,8 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
         right_on="objID",
         output_catalog_name="yang_ps_lc",
         suffixes=["", ""],
-        suffix_method="all_columns",
+        suffix_method="overlapping_columns",
+        log_changes=False,
     )
 
     # Create default local cluster

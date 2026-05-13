@@ -82,13 +82,14 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
             n_neighbors=1,
             require_right_margin=True,
             suffixes=("_sample", ""),
-            suffix_method="all_columns",
+            suffix_method="overlapping_columns",
+            log_changes=False,
         )
         df = matched.compute()
 
         # 3c) explode to one row per data point, add band name, and drop points with bad flags
         df["lightcurve.objectid"] = df["objectid_sample"]
-        df["lightcurve.label"] = df["label_sample"]
+        df["lightcurve.label"] = df["label"]
         df["lightcurve.band"] = band_name
         df = df["lightcurve"].nest.to_flat()
         df = df.query("catflags < 32768")
