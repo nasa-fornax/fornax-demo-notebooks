@@ -4,6 +4,7 @@ import pandas as pd
 from dask.distributed import Client
 
 from data_structures import MultiIndexDFObject
+from lsdb_utils import sample_table_to_lsdb
 
 # panstarrs light curves from hats catalog in S3 using lsdb
 
@@ -56,33 +57,8 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
                  "nStackDetections",  # some other data to use
                  ]
     )
-    # read in the panstarrs light curves to lsdb
-    # panstarrs recommendation is not to index into this table with ra and dec
-    # but to use object ids from the above object table
-    panstarrs_detect = lsdb.open_catalog(
-        's3://stpubdata/panstarrs/ps1/public/hats/detection',
-        columns=["objID",  # PS1 object ID
-                 "detectID",  # PS1 detection ID
-                 # light-curve stuff
-                 "obsTime", "filterID", "psfFlux", "psfFluxErr",
-                 ]
-    )
-    # convert astropy table to pandas dataframe
-    # special care for the SkyCoords in the table
-    sample_df = pd.DataFrame({'objectid': sample_table['objectid'],
-                              'ra_deg': sample_table['coord'].ra.deg,
-                              'dec_deg': sample_table['coord'].dec.deg,
-                              'label': sample_table['label']})
-
-    # convert dataframe to hipscat
-    sample_lsdb = lsdb.from_dataframe(
-        sample_df,
-        ra_column="ra_deg",
-        dec_column="dec_deg",
-        margin_threshold=10,
-        # Optimize partition size
-        drop_empty_siblings=True
-    )
+    # convert astropy table to lsdb catalog
+    sample_lsdb = sample_table_to_lsdb(sample_table)
 
     # plan to cross match panstarrs object with my sample
     # only keep the best match
@@ -91,7 +67,22 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
         radius_arcsec=radius,
         n_neighbors=1,
         suffixes=("", ""),
-        suffix_method="all_columns",
+        suffix_method="overlapping_columns",
+        log_changes=False,
+    )
+
+    # read in the panstarrs light curves to lsdb, pre-filtered to the matched sky pixels
+    # to keep the join task graph small (~83K → ~84 partitions) and faster (~2x).
+    # panstarrs recommendation is not to index into this table with ra and dec
+    # but to use object ids from the above object table.
+    panstarrs_detect = lsdb.open_catalog(
+        's3://stpubdata/panstarrs/ps1/public/hats/detection',
+        search_filter=lsdb.PixelSearch(matched_objects.get_healpix_pixels()),
+        columns=["objID",  # PS1 object ID
+                 "detectID",  # PS1 detection ID
+                 # light-curve stuff
+                 "obsTime", "filterID", "psfFlux", "psfFluxErr",
+                 ]
     )
 
     # plan to join that cross match with detections to get light-curves
@@ -101,7 +92,8 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
         right_on="objID",
         output_catalog_name="yang_ps_lc",
         suffixes=["", ""],
-        suffix_method="all_columns",
+        suffix_method="overlapping_columns",
+        log_changes=False,
     )
 
     # Create default local cluster

@@ -4,6 +4,7 @@ from astropy import units as u
 from dask.distributed import Client
 
 from data_structures import MultiIndexDFObject
+from lsdb_utils import sample_table_to_lsdb
 
 
 def ztf_get_lightcurves(sample_table, *, radius=1.0):
@@ -52,40 +53,27 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
     - Fluxes are converted from AB magnitudes using Astropy, then converted to mJy.
     """
     
-    # 1) Start Dask client & read full ZTF light-curve catalog
+    # 1) Start Dask client
     # Use multiple workers with a single thread per worker for better performance on Fornax
     client = Client(threads_per_worker=1, memory_limit=None)
-    ztf_lc = lsdb.read_hats(
-        's3://ipac-irsa-ztf/contributed/dr23/lc/hats/',
-        columns=[
-            "objectid", "objra", "objdec", "filterid",
-            "lightcurve.hmjd", "lightcurve.mag", "lightcurve.magerr", "lightcurve.catflags"
-        ]
-    )
 
-    # 2) Convert Astropy table → pandas → LSDB catalog
-    sample_df = pd.DataFrame({
-        'objectid': sample_table['objectid'],
-        'ra_deg': sample_table['coord'].ra.deg,
-        'dec_deg': sample_table['coord'].dec.deg,
-        'label': sample_table['label'],
-    })
-    sample_lsdb = lsdb.from_dataframe(
-        sample_df,
-        ra_column="ra_deg",
-        dec_column="dec_deg",
-        margin_threshold=10,
-        drop_empty_siblings=True
-    )
-    del sample_df
+    # 2) Convert Astropy table → LSDB catalog
+    sample_lsdb = sample_table_to_lsdb(sample_table)
 
     # 3) Cross-match per band
     band_map = {1: "ztf_g", 2: "ztf_r", 3: "ztf_i"}
     per_band_dfs = []
 
     for fid, band_name in band_map.items():
-        # 3a) filter to one band and select relevant sky tiles
-        ztf_band = ztf_lc.query(f"filterid == {fid}")
+        # 3a) open ZTF light-curve catalog filtered to each band 
+        ztf_band = lsdb.open_catalog(
+            's3://ipac-irsa-ztf/contributed/dr23/lc/hats/',
+            filters=[("filterid", "==", fid)],
+            columns=[
+                "objectid", "objra", "objdec", "filterid",
+                "lightcurve.hmjd", "lightcurve.mag", "lightcurve.magerr", "lightcurve.catflags"
+            ]
+        )
 
         # 3b) crossmatch: sample (left) → filtered band (right)
         matched = sample_lsdb.crossmatch(
@@ -94,13 +82,14 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
             n_neighbors=1,
             require_right_margin=True,
             suffixes=("_sample", ""),
-            suffix_method="all_columns",
+            suffix_method="overlapping_columns",
+            log_changes=False,
         )
         df = matched.compute()
 
         # 3c) explode to one row per data point, add band name, and drop points with bad flags
         df["lightcurve.objectid"] = df["objectid_sample"]
-        df["lightcurve.label"] = df["label_sample"]
+        df["lightcurve.label"] = df["label"]
         df["lightcurve.band"] = band_name
         df = df["lightcurve"].nest.to_flat()
         df = df.query("catflags < 32768")
