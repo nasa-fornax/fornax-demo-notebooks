@@ -20,7 +20,7 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
             objectid : int
                 Unique identifier for each source in the sample.
             label : str
-                Literature label for tracking source provenance.    
+                Literature label for tracking source provenance.
     radius : float, optional
         Matching radius in arcseconds (default: 1.0).
         This is the separation used by LSDB `crossmatch()` to associate
@@ -44,15 +44,15 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
             band : str
                 ZTF band label ('ztf_g', 'ztf_r', or 'ztf_i').
             label : str
-                Literature label associated with each source.     
+                Literature label associated with each source.
 
     Notes
     -----
-    - ZTF data are retrieved from the DR23 LSDB HATS light-curve archive.
+    - ZTF data are retrieved from the DR24 LSDB HATS light-curve archive.
     - Only detections with `catflags < 32768` are retained (recommended quality filter).
     - Fluxes are converted from AB magnitudes using Astropy, then converted to mJy.
     """
-    
+
     # 1) Start Dask client
     # Use multiple workers with a single thread per worker for better performance on Fornax
     client = Client(threads_per_worker=1, memory_limit=None)
@@ -65,9 +65,9 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
     per_band_dfs = []
 
     for fid, band_name in band_map.items():
-        # 3a) open ZTF light-curve catalog filtered to each band 
+        # 3a) open ZTF light-curve catalog filtered to each band
         ztf_band = lsdb.open_catalog(
-            's3://ipac-irsa-ztf/contributed/dr23/lc/hats/',
+            's3://ipac-irsa-ztf/ztf/enhanced/dr24/lc/hats',
             filters=[("filterid", "==", fid)],
             columns=[
                 "objectid", "objra", "objdec", "filterid",

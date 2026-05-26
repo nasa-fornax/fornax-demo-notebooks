@@ -153,8 +153,8 @@ else:
     # ONLY ON XLARGE ENVIRONMENT USING AT LEAST 32 CPUS
     search_filter = None
 
-# Read ZTF DR23
-ztf_path = "s3://ipac-irsa-ztf/contributed/dr23/objects/hats"
+# Read ZTF DR24
+ztf_path = "s3://ipac-irsa-ztf/ztf/enhanced/dr24/objects/hats"
 ztf_piece = lsdb.open_catalog(
     ztf_path,
     columns=["oid", "ra", "dec"],
