@@ -1,3 +1,4 @@
+from time import sleep
 import astropy.units as u
 from alerce.core import Alerce
 from astropy.coordinates import SkyCoord
@@ -527,7 +528,7 @@ def get_sdss_sample(coords, labels, *, num=10, zmin=0, zmax=10, randomize_z=Fals
         print('SDSS Quasar: ' + str(num))
 
 
-def Ned_query_refcode_exceptions(paper_link):
+def Ned_query_refcode_exceptions(paper_link, *, max_retries=2, retry_idx=0):
     """
     Call Ned.query_refcode() with basic network exception handling.
 
@@ -535,6 +536,10 @@ def Ned_query_refcode_exceptions(paper_link):
     ----------
     paper_link : str
         ADS/NED reference code or paper identifier.
+    max_retries: int
+        Maximum number of times to retry the call.
+    retry_idx: int
+        Number of times the call has already been retried.
 
     Returns
     -------
@@ -544,6 +549,11 @@ def Ned_query_refcode_exceptions(paper_link):
     try:
         return Ned.query_refcode(paper_link)
     except (ConnectionError, RequestException, TimeoutError) as e:
+        if retry_idx < max_retries:
+            sleep(10)
+            return Ned_query_refcode_exceptions(paper_link, max_retries=max_retries, retry_idx=retry_idx + 1)
+
+        # We've hit the maximum number of retries.
         warnings.warn(
             f"Encountered {type(e).__name__} for paper {paper_link}. skipping.",
             category=RuntimeWarning,
