@@ -528,7 +528,7 @@ def get_sdss_sample(coords, labels, *, num=10, zmin=0, zmax=10, randomize_z=Fals
         print('SDSS Quasar: ' + str(num))
 
 
-def Ned_query_refcode_exceptions(paper_link, *, max_retries=2, retry_idx=0):
+def Ned_query_refcode_exceptions(paper_link, *, max_retries=2):
     """
     Call Ned.query_refcode() with basic network exception handling.
 
@@ -538,28 +538,26 @@ def Ned_query_refcode_exceptions(paper_link, *, max_retries=2, retry_idx=0):
         ADS/NED reference code or paper identifier.
     max_retries: int
         Maximum number of times to retry the call.
-    retry_idx: int
-        Number of times the call has already been retried.
 
     Returns
     -------
     result : object or None
         Result from Ned.query_refcode, or None if a network error occurs.
     """
-    try:
-        return Ned.query_refcode(paper_link)
-    except (ConnectionError, RequestException, TimeoutError) as e:
-        if retry_idx < max_retries:
-            sleep(10)
-            return Ned_query_refcode_exceptions(paper_link, max_retries=max_retries, retry_idx=retry_idx + 1)
-
-        # We've hit the maximum number of retries.
-        warnings.warn(
-            f"Encountered {type(e).__name__} for paper {paper_link}. skipping.",
-            category=RuntimeWarning,
-            stacklevel=2,
-        )
-        return
+    for attempt in range(max_retries + 1):
+        try:
+            return Ned.query_refcode(paper_link)
+        except (ConnectionError, RequestException, TimeoutError) as e:
+            if attempt < max_retries:
+                # Sleep for a bit, then try again.
+                sleep(10)
+            else:
+                # We've hit the maximum number of retries.
+                warnings.warn(
+                    f"Encountered {type(e).__name__} for paper {paper_link}. skipping.",
+                    category=RuntimeWarning,
+                    stacklevel=2,
+                )
 
 
 def get_paper_sample(coords, labels, *, paper_link="2019A&A...627A..33D", label="Cicco19", verbose=1):
