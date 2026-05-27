@@ -677,6 +677,8 @@ def clean_sample(coords_list, labels_list, *, consolidate_nearby_objects=True, v
     The returned table has one row per retained object after optional
         consolidation.
     """
+    if not len(coords_list) > 0:
+        raise ValueError("'coords_list' is empty. Cannot clean sample.")
 
     sample_table = Table([coords_list, labels_list], names=['coord', 'label'])
 
