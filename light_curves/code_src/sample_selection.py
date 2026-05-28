@@ -685,10 +685,11 @@ def clean_sample(coords_list, labels_list, *, consolidate_nearby_objects=True, v
     The returned table has one row per retained object after optional
         consolidation.
     """
-    if not len(coords_list) > 0:
-        raise ValueError("'coords_list' is empty. Cannot clean sample.")
-
     sample_table = Table([coords_list, labels_list], names=['coord', 'label'])
+
+    if len(sample_table) == 0:
+        # Return now, else join will fail. validate_sample_table() checks number of rows.
+        return sample_table
 
     if not consolidate_nearby_objects:
         # create a range 'objectid'. must start with 1 to match what the astropy `join` produces below.
@@ -716,12 +717,14 @@ def clean_sample(coords_list, labels_list, *, consolidate_nearby_objects=True, v
         print(f'Object sample size, after duplicates removal: {len(uniqued_table)}')
 
     return uniqued_table
+
+
 def validate_sample_table(tbl):
     """
     Validate the structure of a user-supplied ``sample_table``.
 
     This function verifies that the supplied object is an
-    ``astropy.table.Table`` and that it contains the required
+    ``astropy.table.Table`` of non-zero length and that it contains the required
     columns (``coord``, ``objectid``, ``label``). It checks that
     ``coord`` entries are ``SkyCoord`` objects, that ``objectid``
     values are integers, unique, and sequential starting at 1, and
@@ -750,7 +753,11 @@ def validate_sample_table(tbl):
     if not isinstance(tbl, Table):
         raise TypeError("Input must be an astropy.table.Table instance.")
 
+    # Sample should not be empty
+    if len(tbl) == 0:
+        raise ValueError("Sample table is empty.")
 
+    # check for required columns
     required = {"coord", "objectid", "label"}
     missing = required - set(tbl.colnames)
     if missing:
