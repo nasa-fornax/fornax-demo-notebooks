@@ -1,3 +1,4 @@
+from time import sleep
 import astropy.units as u
 from alerce.core import Alerce
 from astropy.coordinates import SkyCoord
@@ -527,7 +528,7 @@ def get_sdss_sample(coords, labels, *, num=10, zmin=0, zmax=10, randomize_z=Fals
         print('SDSS Quasar: ' + str(num))
 
 
-def Ned_query_refcode_exceptions(paper_link):
+def Ned_query_refcode_exceptions(paper_link, *, max_retries=2):
     """
     Call Ned.query_refcode() with basic network exception handling.
 
@@ -535,21 +536,28 @@ def Ned_query_refcode_exceptions(paper_link):
     ----------
     paper_link : str
         ADS/NED reference code or paper identifier.
+    max_retries: int
+        Maximum number of times to retry the call.
 
     Returns
     -------
     result : object or None
         Result from Ned.query_refcode, or None if a network error occurs.
     """
-    try:
-        return Ned.query_refcode(paper_link)
-    except (ConnectionError, RequestException, TimeoutError) as e:
-        warnings.warn(
-            f"Encountered {type(e).__name__} for paper {paper_link}. skipping.",
-            category=RuntimeWarning,
-            stacklevel=2,
-        )
-        return
+    for attempt in range(max_retries + 1):
+        try:
+            return Ned.query_refcode(paper_link)
+        except (ConnectionError, RequestException, TimeoutError) as e:
+            if attempt < max_retries:
+                # Sleep for a bit, then try again.
+                sleep(10)
+            else:
+                # We've hit the maximum number of retries.
+                warnings.warn(
+                    f"Encountered {type(e).__name__} for paper {paper_link}. skipping.",
+                    category=RuntimeWarning,
+                    stacklevel=2,
+                )
 
 
 def get_paper_sample(coords, labels, *, paper_link="2019A&A...627A..33D", label="Cicco19", verbose=1):
@@ -677,8 +685,11 @@ def clean_sample(coords_list, labels_list, *, consolidate_nearby_objects=True, v
     The returned table has one row per retained object after optional
         consolidation.
     """
-
     sample_table = Table([coords_list, labels_list], names=['coord', 'label'])
+
+    if len(sample_table) == 0:
+        # Return now, else join will fail. validate_sample_table() checks number of rows.
+        return sample_table
 
     if not consolidate_nearby_objects:
         # create a range 'objectid'. must start with 1 to match what the astropy `join` produces below.
@@ -706,12 +717,14 @@ def clean_sample(coords_list, labels_list, *, consolidate_nearby_objects=True, v
         print(f'Object sample size, after duplicates removal: {len(uniqued_table)}')
 
     return uniqued_table
+
+
 def validate_sample_table(tbl):
     """
     Validate the structure of a user-supplied ``sample_table``.
 
     This function verifies that the supplied object is an
-    ``astropy.table.Table`` and that it contains the required
+    ``astropy.table.Table`` of non-zero length and that it contains the required
     columns (``coord``, ``objectid``, ``label``). It checks that
     ``coord`` entries are ``SkyCoord`` objects, that ``objectid``
     values are integers, unique, and sequential starting at 1, and
@@ -740,7 +753,11 @@ def validate_sample_table(tbl):
     if not isinstance(tbl, Table):
         raise TypeError("Input must be an astropy.table.Table instance.")
 
+    # Sample should not be empty
+    if len(tbl) == 0:
+        raise ValueError("Sample table is empty.")
 
+    # check for required columns
     required = {"coord", "objectid", "label"}
     missing = required - set(tbl.colnames)
     if missing:
