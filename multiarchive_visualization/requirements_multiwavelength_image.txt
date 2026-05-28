@@ -1,0 +1,31 @@
+# Include *all* libraries that are direct dependencies of the notebook.
+# Do not pin versions, and do not use upper version limits unless absolute necessary, and always leave a comment as an explanation in those cases.
+# Always leave a comment for any non-direct dependencies that you may need to include in this file (for example if a direct dependency requires it, but it is just their optional dependency, or if there is a version limit implied by some functionality)
+
+astropy
+astroquery
+reproject
+numpy
+
+# Visualization and Interactivity
+ipywidgets
+ipykernel
+panel
+holoviews
+datashader
+param
+numba
+bokeh
+pyviz_comms
+jupyter_bokeh
+
+# Indirectly for holoviews
+pyparsing
+# Required for the use of Astropy's normalizing functions
+matplotlib
+scipy
+
+# S3 access for cloud data (required for fsspec functionality in Astropy)
+s3fs
+# Required for AWS downloads in Astroquery
+boto3
