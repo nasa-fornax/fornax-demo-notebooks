@@ -297,7 +297,6 @@ This includes DESI spectra. Here, we use the `SPARCL` query. Note that this can 
 for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is included.
 Therefore, we will not include SDSS DR16 here (this is treated in the SDSS search above).
 
-The DESI search is currently commented out because `SPARCL` is not compatible with numpy > 2 which we require for the other modules to run.
 
 ```{code-cell} ipython3
 ## Get DESI and BOSS spectra with SPARCL
