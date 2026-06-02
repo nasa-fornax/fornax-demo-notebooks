@@ -1156,6 +1156,291 @@ with fits.open(yso_sofia_obstable['access_url'][0], cache=False, use_fsspec=True
     data = hdul['FLUX'].data
 ```
 
+### 3.1 Adapting the emission line search for SOFIA
+
++++
+
+Now let's go further and search these SOFIA cubes for Fe II emission, just as we did for JWST in Section 2.
+There are a few key differences to account for:
+- **Data access:** SOFIA data is accessed via HTTP (`access_url`) rather than AWS cloud URIs.
+Cloud access is not yet available for SOFIA.
+- **FITS extension:** SOFIA cubes store flux data in a `FLUX` extension, rather than `SCI`.
+- **Wavelength units:** The `em_min` and `em_max` metadata columns are in meters for SOFIA (via IRSA's SIA service), rather than nanometers (as in the MAST cross-mission database for JWST).
+
+First, let's write a convenience function to load SOFIA data, analogous to `load_cloud_data` from Section 2:
+
+```{code-cell} ipython3
+%%writefile code_src/temp_load_sofia_data.py
+
+from astropy.io import fits
+
+def load_sofia_data(access_url, extension='FLUX'):
+    """
+    Load a SOFIA spectral cube from an HTTP URL into memory,
+    without downloading a copy to storage.
+
+    Parameters
+    ----------
+    access_url : str
+        An HTTP URL for a SOFIA FITS file, from IRSA's SIA service.
+    extension : str, optional
+        The FITS extension in which the desired data is found. Defaults to 'FLUX'.
+
+    Returns
+    ----------
+    header : astropy.io.fits.header.Header
+        Header of the specified FITS extension.
+    data : np.ndarray
+        Data array of the specified FITS extension.
+    """
+    with fits.open(access_url, cache=False, use_fsspec=True) as hdul:
+        header = hdul[extension].header
+        data = hdul[extension].data
+    return header, data
+```
+
+```{code-cell} ipython3
+try:
+    importlib.reload(sys.modules['code_src.temp_load_sofia_data'])
+except KeyError:
+    pass
+
+from code_src.temp_load_sofia_data import load_sofia_data
+```
+
+Next, a function to extract the wavelength array from a SOFIA cube header.
+SOFIA FITS headers use the same WCS convention as JWST (`CRVAL3`, `CDELT3`, `NAXIS3`),
+so the approach is similar:
+
+```{code-cell} ipython3
+%%writefile code_src/temp_get_sofia_wave_array.py
+
+import numpy as np
+import astropy.units as u
+
+def get_sofia_wave_array(header):
+    """
+    Get wavelength coordinates array from a SOFIA spectral cube FITS header.
+
+    Parameters
+    ----------
+    header : astropy.io.fits.header.Header
+        The header of a SOFIA FITS file in which the third axis is wavelength.
+
+    Returns
+    ----------
+    wave : astropy.units.quantity.Quantity
+        Quantity array of wavelengths in units of CUNIT3 (typically microns for SOFIA).
+        Each element is the wavelength of the corresponding slice of the cube.
+    """
+    wave = header['CRVAL3'] + header['CDELT3'] * np.arange(header['NAXIS3'])
+    return wave * u.Unit(header['CUNIT3'])
+```
+
+```{code-cell} ipython3
+try:
+    importlib.reload(sys.modules['code_src.temp_get_sofia_wave_array'])
+except KeyError:
+    pass
+
+from code_src.temp_get_sofia_wave_array import get_sofia_wave_array
+```
+
+Let's test these on the first SOFIA cube we already loaded:
+
+```{code-cell} ipython3
+sofia_wave = get_sofia_wave_array(header)
+print(f'SOFIA cube: {data.shape[0]} wavebins, {sofia_wave[0]:.4f} to {sofia_wave[-1]:.4f}')
+print(f'Spatial dimensions: {data.shape[1]} x {data.shape[2]} pixels')
+```
+
+```{code-cell} ipython3
+plt.plot(sofia_wave, extension_vs_wavebin(data), color='k')
+plt.xlabel(f'Wavelength ({sofia_wave.unit})')
+plt.ylabel('Fraction of non-NaN pixels above threshold')
+plt.title('SOFIA cube: extended emission vs. wavelength')
+plt.show()
+```
+
+> Figure alt text: a line plot of "Fraction of non-NaN pixels above threshold" versus wavelength for a SOFIA spectral cube.
+The plot shows the output of the same `extension_vs_wavebin` algorithm used for JWST,
+applied to a SOFIA cube.
+
++++
+
+### 3.2 Searching SOFIA cubes for Fe II emission
+
++++
+
+Now let's write a wrapper function that searches a SOFIA cube for Fe II emission,
+adapted from the `line_search` function used for JWST in Section 2.
+The key differences are:
+we use `access_url` instead of cloud URIs to retrieve data,
+`em_min`/`em_max` are in meters instead of nanometers,
+and we use the `FLUX` FITS extension instead of `SCI`.
+
+```{code-cell} ipython3
+%%writefile code_src/temp_sofia_line_search.py
+
+import pickle
+import numpy as np
+import bisect
+import matplotlib.pyplot as plt
+import astropy.units as u
+import pandas as pd
+from .find_extended_emission import extension_vs_wavebin, detect_spikes, not_none
+from .temp_load_sofia_data import load_sofia_data
+from .temp_get_sofia_wave_array import get_sofia_wave_array
+
+def sofia_line_search(obs, transitions=None, plot=False):
+    """
+    Search a SOFIA spectral cube observation for emission lines.
+    Adapted from the JWST line_search function for SOFIA-specific data access.
+
+    Parameters
+    ----------
+    obs : astropy.table.Row, pandas.Series
+        Row of an astropy or pandas table of SOFIA observations from IRSA's SIA service.
+        Columns must at least include access_url, obs_id, and em_min + em_max
+        (wavelength bounds in meters).
+    transitions : astropy.units.quantity.Quantity, optional
+        List of spectral line wavelengths to look for, as astropy Quantities.
+        If not provided, defaults to looking for transitions.pkl in the local directory.
+    plot : bool, optional
+        Whether to generate a summary plot for each observation with detections.
+
+    Returns
+    ----------
+    obs : astropy.table.Row, pandas.Series
+        The input row with a new column 'detected_feii_lines' populated.
+    """
+
+    # If transitions not provided,
+    # assume that it can be read from a pickle file
+    if transitions is None:
+        with open("transitions.pkl", "rb") as f:
+            transitions = pickle.load(f)
+
+    # Initialize a list of Fe II jet emission lines detected in this cube:
+    detected_feii_lines = []
+
+    # Check that access_url is valid
+    if not not_none(obs.get('access_url', None) if isinstance(obs, dict) else obs['access_url']):
+        obs['detected_feii_lines'] = detected_feii_lines
+        return obs
+
+    # Check wavelength coverage.
+    # For SOFIA via IRSA SIA, em_min and em_max are in meters.
+    em_min = obs['em_min'] * u.m
+    em_max = obs['em_max'] * u.m
+    condition_wavelength = any(em_min <= line <= em_max for line in transitions)
+
+    if condition_wavelength:
+        try:
+            # Load the SOFIA cube into memory via HTTP
+            header, data = load_sofia_data(obs['access_url'])
+
+            # Get the wavelength array
+            wave = get_sofia_wave_array(header)
+
+            # Run our algorithm to look for extended emission in each slice
+            blobs = extension_vs_wavebin(data)
+
+            # Check for extended emission peaks at Fe II wavelengths
+            for line in transitions:
+                if np.min(wave) <= line <= np.max(wave):
+                    # Find the approximate wavebin index matching the wavelength
+                    pos = bisect.bisect_left(wave, line)
+
+                    # Look for a spike in the blobs array near this wavelength
+                    detected = detect_spikes(blobs, pos, sig=3.0)
+
+                    if detected:
+                        plt.axvline(x=line.value, color='r', linestyle='--')
+                        detected_feii_lines.append(line)
+                    else:
+                        plt.axvline(x=line.value, color='b', linestyle='--')
+
+            if plot:
+                plt.plot(wave, blobs, color='k')
+
+        except Exception as e:
+            # Handle files that cannot be opened or read
+            if plot:
+                print(f"Could not process {obs.get('obs_id', 'unknown')}: {e}")
+
+    # If plot=True and at least one Fe II line detected,
+    # display the corresponding blob detection plot.
+    if plot:
+        if len(detected_feii_lines) > 0:
+            print('obs_id: ' + str(obs.get('obs_id', 'unknown')))
+            print('Detected lines: ', u.Quantity(detected_feii_lines))
+            print('Plot:')
+            plt.xlabel('Wavelength (microns)')
+            plt.ylabel('Fraction of non-NaN pixels above threshold')
+            plt.show()
+
+    obs['detected_feii_lines'] = detected_feii_lines
+
+    return obs
+```
+
+```{code-cell} ipython3
+try:
+    importlib.reload(sys.modules['code_src.temp_sofia_line_search'])
+except KeyError:
+    pass
+
+from code_src.temp_sofia_line_search import sofia_line_search
+```
+
+Now let's run `sofia_line_search` on all the matched SOFIA observations.
+Since the number of SOFIA cubes overlapping with YSOs is relatively small,
+we run this sequentially rather than in parallel.
+The parallelization pattern from Section 2.3 can be applied if needed for larger datasets.
+
+```{code-cell} ipython3
+# Make a copy of our observations table with a new column to hold results
+copy_yso_sofia_obstable = copy.deepcopy(yso_sofia_obstable)
+new_column = Column(name='detected_feii_lines', dtype=object, length=len(yso_sofia_obstable))
+copy_yso_sofia_obstable.add_column(new_column)
+
+print(f'Searching {len(yso_sofia_obstable)} SOFIA spectral cube observations for Fe II emission...')
+
+# Run the emission line search on each observation
+lines_sofia = []
+for obs in copy_yso_sofia_obstable:
+    new_row = sofia_line_search(obs, transitions, plot=True)
+    lines_sofia.append(new_row)
+
+lines_yso_sofia_obstable = Table(rows=lines_sofia, names=copy_yso_sofia_obstable.colnames)
+```
+
+> Figure alt text: one or more line plots similar to Figure 1 from the JWST analysis,
+showing "Fraction of non-NaN pixels above threshold" versus wavelength for SOFIA cubes.
+Red dashed vertical lines mark detected Fe II emission, blue dashed lines mark non-detections.
+
+```{code-cell} ipython3
+# Count detections
+sofia_with_detections = [obs for obs in lines_yso_sofia_obstable if len(obs['detected_feii_lines']) > 0]
+print(f'Found {len(sofia_with_detections)} SOFIA observations with candidate Fe II emission,')
+print(f'out of {len(yso_sofia_obstable)} SOFIA spectral cube observations of YSOs.')
+
+# List all detected lines
+if len(sofia_with_detections) > 0:
+    all_sofia_lines = [line for obs in sofia_with_detections for line in obs['detected_feii_lines']]
+    print(f'Detected Fe II transitions: {u.Quantity(list(set(all_sofia_lines)))}')
+```
+
++++
+
+Whether or not Fe II emission is found depends on the wavelength coverage and spatial resolution of the SOFIA observations overlapping with our YSO coordinates.
+SOFIA's FIFI-LS and FORCAST instruments cover different infrared wavelength ranges than JWST's MIRI and NIRSpec,
+so some of the Fe II transitions we searched for may not fall within the SOFIA cubes' spectral coverage.
+
+The same parallelization approach from Section 2.3 can be applied here if the number of SOFIA observations grows.
+The `sofia_line_search` function can be passed into `multiprocessing.Pool.map` in the same way as `line_search`.
+
 +++
 
 ## About this notebook
