@@ -40,6 +40,7 @@ light_curves/code_src/helpers/scale_up.py
 light_curves/code_src/helpers/scale_up.sh
 light_curves/code_src/helpers/top.py
 light_curves/code_src/icecube_functions.py
+light_curves/code_src/lsdb_utils.py
 light_curves/code_src/panstarrs_functions.py
 light_curves/code_src/plot_functions.py
 light_curves/code_src/rsp_token_instructions.txt
