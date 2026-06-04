@@ -5,7 +5,9 @@ numpy
 pandas[parquet]
 matplotlib
 astropy
-sktime
+# explicit lower pin helps uv with dependency resolution, TODO: explore what the actual minimum
+# version we require is, it is likely much newer than this pin
+sktime>=0.26
 tqdm
 googledrivedownloader>=1.0
 scikit-learn
