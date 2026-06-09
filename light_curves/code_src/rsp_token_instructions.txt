@@ -1,0 +1,17 @@
+1.0 Generate a new RSP token:
+- point a new browser window to data.lsst.cloud
+- use the drop-down menu at upper right to log in
+- from the upper-right drop-down menu with your login name, click on "Security tokens"
+- on the new page, under "User Tokens" click "Create Token"
+- in the pop-up panel, enter a name of your choosing, e.g., "fornax-rsp-token"
+- click boxes to select both "read:image" and "read:tap"
+- under "Expires" select "Never"
+- click "Create"
+- the token will be a long string of characters, copy the token
+
+2.0 Save the token in a hidden file
+You will create a hidden file containing only the token and ensure it has read/write permissions for user only
+- open a terminal (blue plus sign in the upper left on Fornax, then click on terminal)
+- use your favorite editor to past the token into a file named ~/.rsp-tap.token
+- chmod 600 .rsp-tap.token to change permissions to user only
+- check permissions ('ls -lah ~/.rsp-tap.token' should be -rw-------)
