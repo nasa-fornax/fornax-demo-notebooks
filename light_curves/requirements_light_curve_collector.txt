@@ -10,7 +10,7 @@ matplotlib
 hpgeom
 astropy
 pyvo
-astroquery>=0.4.8.dev0
+astroquery>=0.4.8
 acstools
 lightkurve
 alerce
