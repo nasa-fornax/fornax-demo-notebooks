@@ -1,5 +1,7 @@
 astropy
 pandas
 matplotlib
-lsdb[full]>=0.6.0  # [full] needed for s3fs
+lsdb>=0.8.1
 dask
+# Required by lsdb to read files from AWS S3, revise when lsdb[s3fs] is supported by required minimum version.
+s3fs

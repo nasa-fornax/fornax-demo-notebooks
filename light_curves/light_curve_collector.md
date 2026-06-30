@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.17.1
+    jupytext_version: 1.19.0
 kernelspec:
   display_name: py-light_curve_collector
   language: python
@@ -23,13 +23,26 @@ By the end of this tutorial, you will be able to:
 
 ## Introduction
 
- * A user has a sample of interesting targets for which they would like to see a plot of available archival light curves.  We start with a small set of changing look AGN from Yang et al., 2018, which are automatically downloaded. Changing look AGN are cases where the broad emission lines appear or disappear (and not just that the flux is variable).
+ * A user has a sample of interesting targets for which they would like to see a plot of available archival light curves.
+ We start with a small set of changing look AGN from Yang et al., 2018, which are automatically downloaded.
+ Changing look AGN are cases where the broad emission lines appear or disappear (and not just that the flux is variable).
 
- * We model light curve plots after van Velzen et al. 2021.  We search through a curated list of time-domain NASA holdings as well as non-NASA sources.  HEASARC catalogs used are Fermi and Beppo-Sax, IRSA catalogs used are ZTF and WISE, and MAST catalogs used are Pan-STARRS, TESS, Kepler, and K2.  Non-NASA sources are Gaia and IceCube. This list is generalized enough to include many types of targets to make this notebook interesting for many types of science.  All of these time-domain archives are searched in an automated and efficient fashion using astroquery, pyvo, pyarrow or APIs.
+ * We model light curve plots after van Velzen et al. 2021.
+ We search through a curated list of time-domain NASA holdings as well as non-NASA sources.
+ HEASARC catalogs used are Fermi and Beppo-Sax, IRSA catalogs used are ZTF and WISE, and MAST catalogs used are Pan-STARRS, TESS, Kepler, and K2.
+ Non-NASA sources are Gaia and IceCube.
+ This list is generalized enough to include many types of targets to make this notebook interesting for many types of science.
+ All of these time-domain archives are searched in an automated and efficient fashion using astroquery, pyvo, pyarrow or APIs.
 
- * Light curve data storage is a tricky problem.  Currently we are using a MultiIndex Pandas dataframe, as the best existing choice for right now.  One downside is that we need to manually track the units of flux and time instead of relying on an astropy storage scheme which would be able to do some of the units worrying for us (even astropy can't do all magnitude to flux conversions).  Astropy does not currently have a good option for multi-band light curve storage.
+ * Light curve data storage is a tricky problem.
+ Currently we are using a MultiIndex Pandas dataframe, as the best existing choice for right now.
+ One downside is that we need to manually track the units of flux and time instead of relying on an astropy storage scheme which would be able to do some of the units worrying for us (even astropy can't do all magnitude to flux conversions).
+ Astropy does not currently have a good option for multi-band light curve storage.
 
- * This notebook walks through the individual steps required to collect the targets and their light curves and create figures. It also shows how to speed up the collection of light curves using python's `multiprocessing`. This is expected to be sufficient for up to ~500 targets. For a larger number of targets, consider using the bash script demonstrated in the neighboring notebook [scale_up](scale_up.md).
+ * This notebook walks through the individual steps required to collect the targets and their light curves and create figures.
+ It also shows how to speed up the collection of light curves using python's `multiprocessing`.
+ This is expected to be sufficient for up to ~500 targets.
+ For a larger number of targets, consider using the bash script demonstrated in the neighboring notebook [scale_up](scale_up.md).
 
  * ML work using these time-series light curves is in two neighboring notebooks: [ML_AGNzoo](ML_AGNzoo.md) and [light_curve_classifier](light_curve_classifier.md).
 
@@ -45,7 +58,7 @@ By the end of this tutorial, you will be able to:
 
 ### Runtime
 
-- As of 2025 May, this notebook takes ~1000s (17 min.) to run to completion on Fornax using the ‘Astrophysics Default Image’ and the ‘Large’ server with 64GB RAM/ 16CPU.
+- As of 2025 May, this notebook takes ~1000s (17 min.) to run to completion on Fornax using a server with 64GB RAM/ 16CPU.
 
 ## Imports
 
@@ -91,12 +104,17 @@ from heasarc_functions import heasarc_get_lightcurves
 from icecube_functions import icecube_get_lightcurves
 from panstarrs_functions import panstarrs_get_lightcurves
 from plot_functions import create_figures
-from sample_selection import (clean_sample, get_green_sample, get_hon_sample, get_lamassa_sample, get_lopeznavas_sample,
-    get_lyu_sample, get_macleod16_sample, get_macleod19_sample, get_ruan_sample, get_sdss_sample, get_sheng_sample, get_yang_sample)
+from sample_selection import (clean_sample, get_green_sample, get_hon_sample,
+    get_lamassa_sample, get_lopeznavas_sample, get_lyu_sample, get_macleod16_sample,
+    get_macleod19_sample, get_ruan_sample, get_sdss_sample, get_sheng_sample,
+    get_yang_sample, validate_sample_table)
 from tess_kepler_functions import tess_kepler_get_lightcurves
 from wise_functions import wise_get_lightcurves
 from rubin_functions import rubin_get_lightcurves
 from ztf_functions import ztf_get_lightcurves
+
+# You may see a warning about passwords for the Gaia Archive.  This can safely be ignored.
+# You may see a warning about "tpfmodel submodule".  This can safely be ignored.
 ```
 
 ## 1. Define the sample
@@ -155,7 +173,16 @@ or
 You can use [astropy's read](https://docs.astropy.org/en/stable/io/ascii/read.html) function to read in an input table
 to an [astropy table](https://docs.astropy.org/en/stable/table/)
 
-+++
+If you want to build your own sample_table, your table must contain one row per source and include exactly three required pieces of information: a coord column holding an astropy.coordinates.SkyCoord position for each object, a unique integer objectid, and a label column giving a short string describing that source’s origin (e.g., literature reference, sample name, or provenance tag).
+
+```{code-cell} ipython3
+# Run this cell if you build your own sample to validate that it has the
+# required structure:
+# it must contain `coord` (SkyCoord), `objectid` (unique sequential ints),
+# and `label` (strings). Raises informative errors if anything is malformed.
+
+validate_sample_table(sample_table)
+```
 
 ### 1.2 Write out your sample to disk
 
@@ -226,7 +253,7 @@ The function to retrieve WISE light curves accesses an IRSA generated version of
 ```{code-cell} ipython3
 WISEstarttime = time.time()
 
-bandlist = ['W1', 'W2']  #list of the WISE band names
+bandlist = ['WISE_W1', 'WISE_W2']  #list of the WISE band names
 WISE_radius = 1.0  # arcsec
 # get WISE light curves
 df_lc_WISE = wise_get_lightcurves(sample_table, radius=WISE_radius, bandlist=bandlist)
@@ -241,8 +268,6 @@ print('WISE search took:', time.time() - WISEstarttime, 's')
 
 The function to retrieve lightcurves from Pan-STARRS uses [LSDB](https://docs.lsdb.io/) to access versions of the object and light curve catalogs that are stored in the cloud.  This function is efficient at large scale (sample sizes > ~1000).
 
-Some warnings are expected.
-
 ```{code-cell} ipython3
 panstarrsstarttime = time.time()
 
@@ -254,13 +279,11 @@ df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius=panstarrs_searc
 df_lc.append(df_lc_panstarrs)
 
 print('Panstarrs search took:', time.time() - panstarrsstarttime, 's')
-
-# Warnings from the panstarrs query about both NESTED and margins are known issues
 ```
 
 ### 2.4 MAST: TESS, Kepler and K2
 
-The function to retrieve lightcurves from these three missions currently uses the open source package [`lightKurve`](https://docs.lightkurve.org/index.html).  This search is not efficient at scale and we expect it to be replaced in the future.
+The function to retrieve lightcurves from these three missions currently uses the open source package [`Lightkurve`](https://lightkurve.github.io/lightkurve/).  This search is not efficient at scale and we expect it to be replaced in the future.
 
 ```{code-cell} ipython3
 lightkurvestarttime = time.time()
@@ -369,7 +392,6 @@ This code will not work without the above information, so we have commented it o
 Once that setup is complete, this code access Rubin data from the Rubin Science Platform which is hosting their catalogs in Google Cloud.  Specifically, the code uses `pyvo` and `adql` to access a TAP server.
 
 ```{code-cell} ipython3
-
 #uncomment the next 5 lines if you have RSP login and authentication setup
 
 #rspstarttime = time.time()
@@ -474,7 +496,7 @@ parallel_df_lc.data
 
 ## 5. Make plots of luminosity as a function of time
 
-These plots are modelled after [van Velzen et al., 2021](https://arxiv.org/pdf/2111.09391.pdf). We show flux in mJy as a function of time for all available bands for each object. `show_nbr_figures` controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with `save_output`, they will be put in the output directory and labelled by sample number.
+These plots are modelled after [van Velzen et al., 2021](https://arxiv.org/abs/2111.09391). We show flux in mJy as a function of time for all available bands for each object. `show_nbr_figures` controls how many plots are actually generated and returned to the screen.  If you choose to save the plots with `save_output`, they will be put in the output directory and labelled by sample number.
 
 __Note__ that in the following, we can either plot the results from `df_lc` (from the serial call) or `parallel_df_lc` (from the parallel call). By default (see next cell) the output of the parallel call is used.
 
@@ -484,8 +506,6 @@ _ = create_figures(df_lc = parallel_df_lc, # either df_lc (serial call) or paral
                    save_output = False ,  # should the resulting plots be saved?
                   )
 ```
-
-+++
 
 ## About this notebook
 

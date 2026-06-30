@@ -1,3 +1,4 @@
+from time import sleep
 import astropy.units as u
 from alerce.core import Alerce
 from astropy.coordinates import SkyCoord
@@ -6,23 +7,40 @@ from astroquery.ipac.ned import Ned
 from astroquery.sdss import SDSS
 from astroquery.simbad import Simbad
 from astroquery.vizier import Vizier
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError, RequestException
+from astroquery.exceptions import TimeoutError
+import warnings
 
 
 # lamassa et al., 2015  1 source
 def get_lamassa_sample(coords, labels, *, verbose=1):
-    """Automatically grabs changing look AGN from LaMassa et al 2015 sample.
+    """
+    Append coordinates and labels for the LaMassa et al. (2015) CLAGN sample.
+
+    This function performs a NED reference-code query to retrieve the
+    coordinates of the LaMassa+2015 changing-look AGN and appends them to
+    the shared `coords` and `labels` lists.
 
     Parameters
     ----------
     coords : list
         list of Astropy SkyCoords derived from literature sources, shared amongst functions
-    lables : list
+    labels : list
         List of the first author name and publication year for tracking the sources, shared amongst functions
     verbose : int, optional
         Print out the length of the sample derived from this literature source
+
+    Returns
+    -------
+    None
+        The input lists are modified in place.
+
     """
-    lamassa_CLQ = Ned.query_refcode('2015ApJ...800..144L')
+    lamassa_CLQ = Ned_query_refcode_exceptions('2015ApJ...800..144L')
+    if lamassa_CLQ is None:
+        # Warning will be printed from Ned_query_refcode_exceptions()
+        return
+
     lamassa_CLQ = lamassa_CLQ[0]  # dont know what those other targets are.
     coords.append(SkyCoord(lamassa_CLQ['RA'], lamassa_CLQ['DEC'], frame='icrs', unit='deg'))
     labels.append('LaMassa 15')
@@ -32,16 +50,24 @@ def get_lamassa_sample(coords, labels, *, verbose=1):
 
 # MacLeod et al., 2016
 def get_macleod16_sample(coords, labels, *, verbose=1):
-    """Automatically grabs changing look AGN from MacLeod et al., 2016 sample.
+    """
+    Append coordinates and labels for the MacLeod et al. (2016) CLAGN sample.
+
+    Coordinates are parsed from the HTML table hosted by the journal website
+    and converted into SkyCoord objects.
 
     Parameters
     ----------
     coords : list
         list of Astropy SkyCoords derived from literature sources, shared amongst functions
-    lables : list
+    labels : list
         List of the first author name and publication year for tracking the sources, shared amongst functions
     verbose : int, optional
         Print out the length of the sample derived from this literature source
+    Returns
+    -------
+    None
+        The input lists are modified in place.
     """
     macleod_CSQ = Table.read('https://academic.oup.com/mnras/article/457/1/389/989199',
                              htmldict={'table_id': 5}, format='ascii.html')
@@ -59,18 +85,28 @@ def get_macleod16_sample(coords, labels, *, verbose=1):
 
 # Ruan et al., 2016  3 sources
 def get_ruan_sample(coords, labels, *, verbose=1):
-    """Automatically grabs changing look AGN from Ruan et al., 2016 sample.
+    """
+    Append coordinates and labels for the Ruan et al. (2016) CLAGN sample.
+
+    This function performs a NED reference-code query to retrieve the
+    coordinates
 
     Parameters
     ----------
     coords : list
         list of Astropy SkyCoords derived from literature sources, shared amongst functions
-    lables : list
+    labels : list
         List of the first author name and publication year for tracking the sources, shared amongst functions
     verbose : int, optional
         Print out the length of the sample derived from this literature source
+    Returns
+    -------
+    None
     """
-    ruan_CSQ = Ned.query_refcode('2016ApJ...826..188R')
+    ruan_CSQ = Ned_query_refcode_exceptions('2016ApJ...826..188R')
+    if ruan_CSQ is None:
+        # Warning will be printed from Ned_query_refcode_exceptions()
+        return
 
     ruan_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
                    for ra, dec in zip(ruan_CSQ['RA'], ruan_CSQ['DEC'])]
@@ -84,16 +120,24 @@ def get_ruan_sample(coords, labels, *, verbose=1):
 
 # MacLeod et al., 2019 17 sources
 def get_macleod19_sample(coords, labels, *, verbose=1):
-    """Automatically grabs changing look AGN from MacLeod et al., 2019 sample.
+    """
+    Append coordinates and labels for the MacLeod et al. (2019) CLAGN sample.
+
+    Coordinates are parsed from Vizier service
 
     Parameters
     ----------
     coords : list
         list of Astropy SkyCoords derived from literature sources, shared amongst functions
-    lables : list
+    labels : list
         List of the first author name and publication year for tracking the sources, shared amongst functions
     verbose : int, optional
         Print out the length of the sample derived from this literature source
+
+    Returns
+    -------
+    None
+
     """
     # try vizier
     Vizier.ROW_LIMIT = -1
@@ -116,18 +160,30 @@ def get_macleod19_sample(coords, labels, *, verbose=1):
 
 # sheng et al., 2020
 def get_sheng_sample(coords, labels, *, verbose=1):
-    """Automatically grabs changing look AGN from sheng et al., 2020 sample.
+    """
+    Append coordinates and labels for the Sheng et al. (2020) CLAGN sample.
+
+    This function performs a NED reference-code query to retrieve the
+    coordinates
 
     Parameters
     ----------
     coords : list
         list of Astropy SkyCoords derived from literature sources, shared amongst functions
-    lables : list
+    labels : list
         List of the first author name and publication year for tracking the sources, shared amongst functions
     verbose : int, optional
         Print out the length of the sample derived from this literature source
+
+    Returns
+    -------
+    None
     """
-    CLQ = Ned.query_refcode('2020ApJ...889...46S')
+    CLQ = Ned_query_refcode_exceptions('2020ApJ...889...46S')
+    if CLQ is None:
+        # Warning will be printed from Ned_query_refcode_exceptions()
+        return
+
     sheng_CLQ = CLQ[[0, 1, 3]]  # need the first 3 objects in their table,
     sheng_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
                     for ra, dec in zip(sheng_CLQ['RA'], sheng_CLQ['DEC'])]
@@ -141,16 +197,23 @@ def get_sheng_sample(coords, labels, *, verbose=1):
 
 # green et al., 2022  19 sources
 def get_green_sample(coords, labels, *, verbose=1):
-    """Automatically grabs changing look AGN from green et al., 2022 sample.
+    """
+    Append coordinates and labels for the Green et al. (2022) CLAGN sample.
+
+    Coordinates are parsed from Vizier service
 
     Parameters
     ----------
     coords : list
         list of Astropy SkyCoords derived from literature sources, shared amongst functions
-    lables : list
+    labels : list
         List of the first author name and publication year for tracking the sources, shared amongst functions
     verbose : int, optional
         Print out the length of the sample derived from this literature source
+
+    Returns
+    -------
+    None
     """
 
     # try vizier
@@ -182,18 +245,27 @@ def get_green_sample(coords, labels, *, verbose=1):
 
 
 def get_lyu_sample(coords, labels, *, verbose=1):
-    """Automatically grabs changing look AGN from Lyu et al., 2021 sample.
+    """
+    Append coordinates and labels for the Lyu et al. (2021/2022) CLAGN sample.
 
     Parameters
     ----------
     coords : list
         list of Astropy SkyCoords derived from literature sources, shared amongst functions
-    lables : list
+    labels : list
         List of the first author name and publication year for tracking the sources, shared amongst functions
     verbose : int, optional
         Print out the length of the sample derived from this literature source
+
+    Returns
+    -------
+    None
     """
-    CLQ = Ned.query_refcode('2022ApJ...927..227L')
+    CLQ = Ned_query_refcode_exceptions('2022ApJ...927..227L')
+    if CLQ is None:
+        # Warning will be printed from Ned_query_refcode_exceptions()
+        return
+
     lyu_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
                   for ra, dec in zip(CLQ['RA'], CLQ['DEC'])]
     lyu_labels = ['Lyu 22' for ra in CLQ['RA']]
@@ -206,16 +278,21 @@ def get_lyu_sample(coords, labels, *, verbose=1):
 
 # Lopez-navas et al., 2022
 def get_lopeznavas_sample(coords, labels, *, verbose=1):
-    """Automatically grabs changing look AGN from Lopez-navas et al., 2022 sample.
+    """
+    Append coordinates and labels for the López-Navas et al. (2022) CLAGN sample.
 
     Parameters
     ----------
     coords : list
         list of Astropy SkyCoords derived from literature sources, shared amongst functions
-    lables : list
+    labels : list
         List of the first author name and publication year for tracking the sources, shared amongst functions
     verbose : int, optional
         Print out the length of the sample derived from this literature source
+
+    Returns
+    -------
+    None
     """
     result_table = Simbad.query_bibobj('2022MNRAS.513L..57L')
     result_table = result_table[[0, 1, 2, 3]]  # pick the correct sources by hand
@@ -232,19 +309,28 @@ def get_lopeznavas_sample(coords, labels, *, verbose=1):
 
 # Hon et al., 2022
 def get_hon_sample(coords, labels, *, verbose=1):
-    """Automatically grabs changing look AGN from Hon et al., 2022 sample.
+    """
+    Append coordinates and labels for the Hon et al. (2022) CLAGN sample.
 
     Parameters
     ----------
     coords : list
         list of Astropy SkyCoords derived from literature sources, shared amongst functions
-    lables : list
+    labels : list
 
         List of the first author name and publication year for tracking the sources, shared amongst functions
     verbose : int, optional
         Print out the length of the sample derived from this literature source
+
+    Returns
+    -------
+    None
     """
-    CLQ = Ned.query_refcode('2022MNRAS.511...54H')
+    CLQ = Ned_query_refcode_exceptions('2022MNRAS.511...54H')
+    if CLQ is None:
+        # Warning will be printed from Ned_query_refcode_exceptions()
+        return
+
     hon_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
                   for ra, dec in zip(CLQ['RA'], CLQ['DEC'])]
     hon_labels = ['Hon 22' for ra in CLQ['RA']]
@@ -258,18 +344,27 @@ def get_hon_sample(coords, labels, *, verbose=1):
 
 
 def get_yang_sample(coords, labels, *, verbose=1):
-    """Automatically grabs changing look AGN from yang et al., 2018 sample.
+    """
+    Append coordinates and labels for the Yang et al. (2018) CLAGN sample.
 
     Parameters
     ----------
     coords : list
         list of Astropy SkyCoords derived from literature sources, shared amongst functions
-    lables : list
+    labels : list
         List of the first author name and publication year for tracking the sources, shared amongst functions
     verbose : int, optional
         Print out the length of the sample derived from this literature source
+
+    Returns
+    -------
+    None
     """
-    CLQ = Ned.query_refcode('2018ApJ...862..109Y')
+    CLQ = Ned_query_refcode_exceptions('2018ApJ...862..109Y')
+    if CLQ is None:
+        # Warning will be printed from Ned_query_refcode_exceptions()
+        return
+
     yang_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
                    for ra, dec in zip(CLQ['RA'], CLQ['DEC'])]
     yang_labels = ['Yang 18' for ra in CLQ['RA']]
@@ -284,19 +379,27 @@ def get_yang_sample(coords, labels, *, verbose=1):
 # but not spectroscopically confirmed
 # Sanchez Saez et al., 2021
 def get_sanchezsaez_sample(coords, labels, *, verbose=1):
-    """Automatically grabs changing look AGN from Sanchez Saez et al., 2021 sample.
+    """
+    Append coordinates and labels for the Sánchez-Sáez et al. (2021) CLAGN sample.
 
     Parameters
     ----------
     coords : list
         list of Astropy SkyCoords derived from literature sources, shared amongst functions
-    lables : list
+    labels : list
         List of the first author name and publication year for tracking the sources, shared amongst functions
     verbose : int, optional
         Print out the length of the sample derived from this literature source
+
+    Returns
+    -------
+    None
     """
 
-    CSAGN = Ned.query_refcode('2021AJ....162..206S')  # from Sanchez-Saez 2021
+    CSAGN = Ned_query_refcode_exceptions('2021AJ....162..206S')
+    if CSAGN is None:
+        # Warning will be printed from Ned_query_refcode_exceptions()
+        return
 
     ss_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
                  for ra, dec in zip(CSAGN['RA'], CSAGN['DEC'])]
@@ -310,16 +413,21 @@ def get_sanchezsaez_sample(coords, labels, *, verbose=1):
 
 
 def get_graham_sample(coords, labels, *, verbose=1):
-    """Automatically grabs changing look AGN from Graham et al., 2019  sample.
+    """
+    Append coordinates and labels for the Graham et al. (2019) CLAGN sample.
 
     Parameters
     ----------
     coords : list
         list of Astropy SkyCoords derived from literature sources, shared amongst functions
-    lables : list
+    labels : list
         List of the first author name and publication year for tracking the sources, shared amongst functions
     verbose : int, optional
         Print out the length of the sample derived from this literature source
+
+    Returns
+    -------
+    None
     """
     # use astropy table to get larger sample that neither NED nor astropy can access.
     CSQ = Table.read('https://academic.oup.com/mnras/article/491/4/4925/5634279',
@@ -337,7 +445,11 @@ def get_graham_sample(coords, labels, *, verbose=1):
 
 
 def get_ztf_objectid_sample(coords, labels, *, objectids=["ZTF18aabtxvd", "ZTF18aahqkbt"], verbose=1):
-    """ To find and append coordinates of objects with only ZTF obj name
+    """
+    Append coordinates for sources known only by their ZTF object IDs.
+
+    Coordinates are retrieved via the ALeRCE API and added to the provided
+    `coords` and `labels` lists.
 
     Parameters
     ----------
@@ -349,6 +461,10 @@ def get_ztf_objectid_sample(coords, labels, *, objectids=["ZTF18aabtxvd", "ZTF18
         List of ZTF objectid. eg., [ "ZTF18accqogs", "ZTF19aakyhxi", "ZTF19abyylzv", "ZTF19acyfpno"]
     verbose: int
         print out debugging info (1) or not(0)
+
+    Returns
+    -------
+    None
     """
     alerce = Alerce()
     objects = alerce.query_objects(oid=objectids, format="pandas")
@@ -364,13 +480,14 @@ def get_ztf_objectid_sample(coords, labels, *, objectids=["ZTF18aabtxvd", "ZTF18
 # SDSS QSO sample of any desired number
 # These are "normal" QSOs to use in the classifier
 def get_sdss_sample(coords, labels, *, num=10, zmin=0, zmax=10, randomize_z=False, verbose=1):
-    """Automatically grabs SDSS quasar sample.
+    """
+    Append coordinates and labels for SDSS quasars selected within a redshift range.
 
     Parameters
     ----------
     coords : list
         list of Astropy SkyCoords derived from literature sources, shared amongst functions
-    lables : list
+    labels : list
         List of the first author name and publication year for tracking the sources, shared amongst functions
     num : int < 500K
         How many quasars for which to return the coords and labels
@@ -385,6 +502,10 @@ def get_sdss_sample(coords, labels, *, num=10, zmin=0, zmax=10, randomize_z=Fals
         and thus not reproducible.
     verbose : int, optional
         Print out the length of the sample derived from this literature source
+
+    Returns
+    -------
+    None
     """
     # Define the query
     query = "SELECT TOP " + str(num) + " specObjID, ra, dec, z FROM SpecObj \
@@ -407,22 +528,58 @@ def get_sdss_sample(coords, labels, *, num=10, zmin=0, zmax=10, randomize_z=Fals
         print('SDSS Quasar: ' + str(num))
 
 
+def Ned_query_refcode_exceptions(paper_link, *, max_retries=2):
+    """
+    Call Ned.query_refcode() with basic network exception handling.
+
+    Parameters
+    ----------
+    paper_link : str
+        ADS/NED reference code or paper identifier.
+    max_retries: int
+        Maximum number of times to retry the call.
+
+    Returns
+    -------
+    result : object or None
+        Result from Ned.query_refcode, or None if a network error occurs.
+    """
+    for attempt in range(max_retries + 1):
+        try:
+            return Ned.query_refcode(paper_link)
+        except (ConnectionError, RequestException, TimeoutError) as e:
+            if attempt < max_retries:
+                # Sleep for a bit, then try again.
+                sleep(10)
+            else:
+                # We've hit the maximum number of retries.
+                warnings.warn(
+                    f"Encountered {type(e).__name__} for paper {paper_link}. skipping.",
+                    category=RuntimeWarning,
+                    stacklevel=2,
+                )
+
+
 def get_paper_sample(coords, labels, *, paper_link="2019A&A...627A..33D", label="Cicco19", verbose=1):
-    """Looks for RA,DEC in a paper using Ned query and returns list of coords and lables
+    """
+    Append coordinates and labels from a reference-code query to NED.
 
     Parameters
     ----------
     coords : list
         list of Astropy SkyCoords derived from literature sources, shared amongst functions
-    lables : list
+    labels : list
         List of the first author name and publication year for tracking the sources, shared amongst functions
     verbose : int, optional
         Print out the length of the sample derived from this literature source
+
+    Returns
+    -------
+    None
     """
-    try:
-        paper = Ned.query_refcode(paper_link)
-    except ConnectionError:
-        print(f"WARNING: encountered a ConnectionError error for paper {paper_link}. skipping.")
+    paper = Ned_query_refcode_exceptions(paper_link)
+    if paper is None:
+        # warning is already printed inside of Ned_query_refcode_exceptions()
         return
 
     paper_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
@@ -435,16 +592,21 @@ def get_paper_sample(coords, labels, *, paper_link="2019A&A...627A..33D", label=
 
 
 def get_papers_list_sample(coords, labels, *, paper_kwargs=[dict(),]):
-    """Wrapper for get_paper_sample. Calls get_paper_sample for each item in paper_kwargs.
+    """
+    Wrapper for get_paper_sample. Calls get_paper_sample for each item in paper_kwargs.
 
     Parameters
     ----------
     coords : list
         list of Astropy SkyCoords derived from literature sources, shared amongst functions
-    lables : list
+    labels : list
         List of the first author name and publication year for tracking the sources, shared amongst functions
     paper_kwargs : list[dict]
         List of dicts containing keyword arguments passed on to get_paper_sample.
+
+    Returns
+    -------
+    None
     """
     # loop over the papers in paper_kwargs and call get_paper_sample for each
     for kwargs in paper_kwargs:
@@ -452,13 +614,14 @@ def get_papers_list_sample(coords, labels, *, paper_kwargs=[dict(),]):
 
 
 def get_csv_sample(coords, labels, *, csv_path, label, ra_colname="ra", dec_colname="dec", frame="icrs", unit="deg"):
-    """Loads coordinates from file at `csv_path` and adds them to `coords` and `lables`
+    """
+    Loads coordinates from file at `csv_path` and adds them to `coords` and `labels`
 
     Parameters
     ----------
     coords : list
         list of Astropy SkyCoords derived from literature sources, shared amongst functions
-    lables : list
+    labels : list
         List of the first author name and publication year for tracking the sources, shared amongst functions
     csv_path : str
         Path to a csv file containing (at least) columns
@@ -472,6 +635,10 @@ def get_csv_sample(coords, labels, *, csv_path, label, ra_colname="ra", dec_coln
         Coordinate frame to pass to SkyCoord.
     unit : str
         Coordinate unit to pass to SkyCoord.
+
+    Returns
+    -------
+    None
     """
     csv_sample = Table.read(csv_path)[ra_colname, dec_colname]
     coords.extend([SkyCoord(ra, dec, frame=frame, unit=unit)
@@ -480,7 +647,12 @@ def get_csv_sample(coords, labels, *, csv_path, label, ra_colname="ra", dec_coln
 
 
 def clean_sample(coords_list, labels_list, *, consolidate_nearby_objects=True, verbose=1):
-    """Create a Table with objectid, skycoords, and labels.
+    """
+    Construct a cleaned sample table with unique on-sky sources.
+
+    Combines coordinate and label lists into an Astropy Table and optionally
+    merges entries within 0.005 deg (~18 arcsec). Each retained source is
+    assigned a unique integer `objectid`, starting at 1.
 
     Parameters
     ----------
@@ -489,18 +661,35 @@ def clean_sample(coords_list, labels_list, *, consolidate_nearby_objects=True, v
     labels_list : list
         List of the first author name and publication year for tracking the sources
     consolidate_nearby_objects : bool
-        Whether to return only the objects that are unique within a small, on-sky separation (True)
-        or all objects in coords_list (False).
+        When True (default), merge objects that are closer than 0.005 deg
+        (~18 arcsec) using an on-sky join. All coordinates within this
+        angular separation are treated as the same source and assigned a
+        single `objectid`.
+
+        When False, each entry in `coords_list` becomes a separate row and
+        receives a unique objectid regardless of separation.
     verbose : int, optional
         Print out the length of the sample after applying this function
 
     Returns
     -------
-    sample_table : `~astropy.table.Table`
-        sample cleaned of duplicates, with an object ID attached.
-    """
+    sample_table : astropy.table.Table
+        Table containing the source sample. The following columns must be present:
+            coord : astropy.coordinates.SkyCoord
+                Sky position of each source.
+            objectid : int
+                Unique identifier for each source in the sample.
+            label : str
+                Literature label for tracking source provenance.
 
+    The returned table has one row per retained object after optional
+        consolidation.
+    """
     sample_table = Table([coords_list, labels_list], names=['coord', 'label'])
+
+    if len(sample_table) == 0:
+        # Return now, else join will fail. validate_sample_table() checks number of rows.
+        return sample_table
 
     if not consolidate_nearby_objects:
         # create a range 'objectid'. must start with 1 to match what the astropy `join` produces below.
@@ -528,3 +717,69 @@ def clean_sample(coords_list, labels_list, *, consolidate_nearby_objects=True, v
         print(f'Object sample size, after duplicates removal: {len(uniqued_table)}')
 
     return uniqued_table
+
+
+def validate_sample_table(tbl):
+    """
+    Validate the structure of a user-supplied ``sample_table``.
+
+    This function verifies that the supplied object is an
+    ``astropy.table.Table`` of non-zero length and that it contains the required
+    columns (``coord``, ``objectid``, ``label``). It checks that
+    ``coord`` entries are ``SkyCoord`` objects, that ``objectid``
+    values are integers, unique, and sequential starting at 1, and
+    that ``label`` contains strings. Informative exceptions are
+    raised if validation fails.
+
+    Parameters
+    ----------
+    tbl : astropy.table.Table
+        Table to validate. Must represent a cleaned source sample
+        with one row per sky object.
+
+    Raises
+    ------
+    ValueError
+        If required columns are missing or ``objectid`` values are
+        non-unique or non-sequential.
+    TypeError
+        If column types are not as expected (e.g., ``coord`` not
+        containing ``SkyCoord`` objects).
+
+    """
+    from astropy.coordinates import SkyCoord
+
+    # Check that tbl is an Astropy Table
+    if not isinstance(tbl, Table):
+        raise TypeError("Input must be an astropy.table.Table instance.")
+
+    # Sample should not be empty
+    if len(tbl) == 0:
+        raise ValueError("Sample table is empty.")
+
+    # check for required columns
+    required = {"coord", "objectid", "label"}
+    missing = required - set(tbl.colnames)
+    if missing:
+        raise ValueError(f"sample_table is missing required columns: {missing}")
+
+    # coord type check
+    if not all(isinstance(c, SkyCoord) for c in tbl["coord"]):
+        raise TypeError("Column 'coord' must contain astropy.coordinates.SkyCoord objects.")
+
+    # objectid checks
+    obj = tbl["objectid"]
+    if not (obj.dtype.kind in ("i", "u")):
+        raise TypeError("Column 'objectid' must contain integers.")
+
+    if len(set(obj)) != len(obj):
+        raise ValueError("Column 'objectid' must contain unique values.")
+
+    if sorted(obj) != list(range(1, len(obj) + 1)):
+        raise ValueError("objectid must start at 1 and increment without gaps.")
+
+    # label check
+    if not all(isinstance(x, str) for x in tbl["label"]):
+        raise TypeError("Column 'label' must contain strings.")
+
+    print("sample_table format is valid.")

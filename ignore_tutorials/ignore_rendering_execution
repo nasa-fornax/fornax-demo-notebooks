@@ -1,0 +1,7 @@
+# light_curve_collector fails with a dead kernel.
+# https://github.com/nasa-fornax/fornax-demo-notebooks/issues/459
+light_curves/light_curve_collector
+# Don't execute the forced photometry notebook until we base the CI on
+# the actual fornax image instead of the fresh installs
+# (aka tractor install pain).
+forced_photometry/multiband_photometry

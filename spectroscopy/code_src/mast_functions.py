@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from astropy.io import fits
 from astropy.table import Table, vstack
-from astroquery.mast import Observations
+from astroquery.mast import Observations, MastMissions
 from specutils import Spectrum
 
 from data_structures_spec import MultiIndexDFObject
@@ -281,7 +281,48 @@ def JWST_group_spectra(df, verbose, quickplot):
     return df_spec
 
 
-def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
+def read_sci_spectrum(path):
+    """
+    Read wavelength, flux density, and uncertainty from an HST 1D spectrum file.
+
+    Parameters
+    ----------
+    path : str
+        Local filesystem path to an HST 1D spectrum FITS file (e.g., ``*_x1d.fits``).
+
+    Returns
+    -------
+    wave : astropy.units.Quantity
+        Wavelength array with units.
+    flux : astropy.units.Quantity
+        Flux density array with units.
+    err : astropy.units.Quantity
+        1-sigma flux density uncertainty array with units.
+
+     """
+    # read the 1D spectrum (HDU 1)
+    spec1d = Spectrum.read(path)
+    
+    wave = spec1d.spectral_axis          
+    flux = spec1d.flux                   
+
+    if spec1d.uncertainty is not None:
+        err = spec1d.uncertainty.quantity
+    else:
+        err = np.full(flux.shape, np.nan) * flux.unit
+                
+    #remove zero and NaN fluxes
+    good = (flux.value > 0) & np.isfinite(flux.value)
+    wave = wave[good]
+    flux = flux[good]
+    err  = err[good]
+    
+    return wave, flux, err
+
+
+
+
+def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose= True,
                  delete_downloaded_data=True):
     """
     Retrieve HST spectra for a list of sources.
@@ -289,9 +330,18 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
     Parameters
     ----------
     sample_table : astropy.table.Table
-        Table with the coordinates and journal reference labels of the sources.
-    search_radius_arcsec : float
-        Search radius in arcseconds.
+        Table containing the source sample. The following columns must be present:
+        coord : astropy.coordinates.SkyCoord
+            Sky position of each source.
+        objectid : int
+            Unique identifier for each source in the sample.
+        label : str
+            Human-readable label for each source.
+    search_radius_arcsec : float, str, or astropy.units.Quantity
+        Search radius passed to astroquery. If a float/int is provided, it is
+        interpreted as arcseconds (not arcminutes). If a string is provided,
+        it must be parsable by astropy.coordinates.Angle (e.g., "0.5 arcsec",
+        "1 arcmin"). If a Quantity is provided, it must be an angular unit.
     datadir : str
         Data directory where to store the data. Each function will create a
         separate data directory (for example "[datadir]/HST/" for HST data).
@@ -314,84 +364,118 @@ def HST_get_spec(sample_table, search_radius_arcsec, datadir, verbose,
     # Initialize multi-index object:
     df_spec = MultiIndexDFObject()
 
+    # Initialize the MAST client used for querying, listing products, and downloading.
+    mastm = MastMissions()
+
+    # Normalize radius to an angular Quantity in arcsec
+    if isinstance(search_radius_arcsec, (int, float, np.floating)):
+        radius = search_radius_arcsec * u.arcsec
+    else:
+        radius = search_radius_arcsec  # Quantity or string: pass through
+
     for stab in sample_table:
 
-        print("Processing source {}".format(stab["label"]))
+        if verbose:
+            print("Processing source {}".format(stab["label"]))
+        
+        # Pull per-source identifiers from the input table for indexing/metadata.        
+        label = stab["label"]
+        objid = stab["objectid"]
 
         # Query results
         search_coords = stab["coord"]
         # If no results are found, this will raise a warning. We explicitly handle the no-results
-        # case below, so let's suppress the warning to avoid confusing notebook users.
+        # case below, so let's suppress the warning to avoid confusion.
         warnings.filterwarnings("ignore", message='Query returned no results.',
                                 category=astroquery.exceptions.NoResultsWarning,
                                 module="astroquery.mast.discovery_portal")
-        query_results = Observations.query_criteria(
-            coordinates=search_coords, radius=search_radius_arcsec * u.arcsec,
-            dataproduct_type=["spectrum"], obs_collection=["HST"], intentType="science",
-            calib_level=[3, 4],)
-        print("Number of search results: {}".format(len(query_results)))
+ 
+        # Query MAST for HST spectra near this target position.
+        query_results = mastm.query_criteria(coordinates=search_coords,
+                             radius=radius,
+                             sci_obs_type='spectrum',
+                             sci_aec='S',
+                             sci_status="PUBLIC"
+                        )
+        
+        if verbose:
+            print("Number of search results: {}".format(len(query_results)))
 
         if len(query_results) == 0:
-            print("Source {} could not be found".format(stab["label"]))
+            if verbose:
+                print("Source {} could not be found".format(stab["label"]))
             continue
 
         # Retrieve spectra
-        data_products_list = Observations.get_product_list(query_results)
+        data_products_list = mastm.get_product_list(query_results)
 
-        # Filter
-        data_products_list_filter = Observations.filter_products(
-            data_products_list, productType=["SCIENCE"], extension="fits",
-            calib_level=[3, 4],  # only fully reduced or contributed
-            productSubGroupDescription=["SX1"])  # only 1D spectra
-        print("Number of files to download: {}".format(len(data_products_list_filter)))
+        # Filter down to public science FITS products.
+        filtered = mastm.filter_products(
+            data_products_list, 
+            type='science',         # only science products
+            extension="fits",
+            file_suffix = "SX1"     # calibrated 1D spectra
+        )
 
-        if len(data_products_list_filter) == 0:
-            print("Nothing to download for source {}.".format(stab["label"]))
+        if verbose:
+            print("Number of files to download: {}".format(len(filtered)))
+        
+        if len(filtered) == 0:
+            if verbose:
+                print("Nothing to download for source {}.".format(stab["label"]))
             continue
 
         # Download
-        download_results = Observations.download_products(
-            data_products_list_filter, download_dir=this_data_dir, verbose=False)
+        download_results = mastm.download_products(
+            filtered, 
+            download_dir=this_data_dir, 
+            verbose=verbose)
 
-        # Create table
-        # NOTE: `download_results` has NOT the same order as `data_products_list_filter`.
-        # We therefore have to "manually" get the product file names here and then use
-        # those to open the files.
-        keys = ["filters", "obs_collection", "instrument_name", "calib_level",
-                "t_obs_release", "proposal_id", "obsid", "objID", "distance"]
-        tab = Table(names=keys + ["productFilename"], dtype=[str,
-                    str, str, int, float, int, int, int, float] + [str])
-        for jj in range(len(data_products_list_filter)):
-            idx_cross = np.where(query_results["obsid"]
-                                 == data_products_list_filter["obsID"][jj])[0]
-            tmp = query_results[idx_cross][keys]
-            tab.add_row(list(tmp[0]) + [data_products_list_filter["productFilename"][jj]])
+        # Map local file basename -> full local path
+        dl_by_basename = {
+            os.path.basename(row["Local Path"]): row["Local Path"]
+            for row in download_results
+            if row["Local Path"] not in (None, "")
+        }
+        
+        # Read each downloaded spectrum and append it to the MultiIndex container.
+        for prod in filtered:
+            pkey = str(prod["product_key"])
+            
+            # Find the downloaded file whose basename matches the tail of product_key
+            match = None
+            for base, lpath in dl_by_basename.items():
+                if pkey.lower().endswith(base.lower()):
+                    match = lpath
+                    break
+                    
+            path = match
 
-        # Create multi-index object
-        for jj in range(len(tab)):
+            # read the 1D spectrum (HDU 1)
+            wave, flux, err = read_sci_spectrum(path)
 
-            # find correct path name:
-            # Note that `download_results` does NOT have same order as `tab`!!
-            file_idx = np.where([tab["productFilename"][jj] in download_results["Local Path"][iii]
-                                for iii in range(len(download_results))])[0]
+            #product metadata 
+            inst = prod.get("instrument_name", None)
+            filt = prod.get("filters", None)
 
-            # open spectrum
-            filepath = download_results["Local Path"][file_idx[0]]
-            spec1d = Spectrum.read(filepath)
+            # build a single-entry DataFrame
+            df = pd.DataFrame({
+                'wave':       [wave],
+                'flux':       [flux],
+                'err':        [err],
+                'instrument': [inst],
+                'objectid':   [objid],
+                'label':      [label],
+                'filter':     [filt],
+                'mission':    ['HST']
+            }).set_index(['objectid','label','filter','mission'])
 
-            # Note: this should be in erg/s/cm2/A and any wavelength unit.
-            dfsingle = pd.DataFrame(dict(
-                wave=[spec1d.spectral_axis], flux=[spec1d.flux], err=[
-                    spec1d.uncertainty.array * spec1d.uncertainty.unit],
-                label=[stab["label"]],
-                objectid=[stab["objectid"]],
-                mission=[tab["obs_collection"][jj]],
-                instrument=[tab["instrument_name"][jj]],
-                filter=[tab["filters"][jj]],
-            )).set_index(["objectid", "label", "filter", "mission"])
-            df_spec.append(dfsingle)
-
+            # append to container
+            df_spec.append(df)
+      
+        # optionally clean up downloaded files
         if delete_downloaded_data:
             shutil.rmtree(this_data_dir)
-
+            os.makedirs(this_data_dir, exist_ok=True)
+        
     return df_spec

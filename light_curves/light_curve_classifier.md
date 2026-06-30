@@ -47,7 +47,7 @@ We choose to use a Pandas multiindex dataframe to store and work with the data b
 4. Can be scaled up to big data numbers of rows (altough we don't push to out of memory structures in this use case)
 5. Pandas is user friendly with a lot of existing functionality
 
-A useful reference for what sktime expects as input to its ML algorithms: https://github.com/sktime/sktime/blob/main/examples/AA_datatypes_and_datasets.ipynb
+A useful reference for what sktime expects as input to its ML algorithms: https://www.sktime.net/en/stable/examples/AA_datatypes_and_datasets.html
 
 ### Output
 
@@ -55,7 +55,7 @@ Trained classifiers as well as estimates of their accuracy and plots of confusio
 
 ### Runtime
 
-As of 2024 August, this notebook takes ~170s to run to completion on Fornax using the 'Astrophysics Default Image' and the 'Large' server with 16GB RAM/ 4CPU.
+As of 2024 August, this notebook takes ~170s to run to completion on Fornax using a server with 16GB RAM/ 4CPU.
 
 ## Imports
 
@@ -122,7 +122,7 @@ pd.options.mode.copy_on_write = True
 
  We use here a sample of AGN including known CLAGN & random SDSS AGN
 
- If you want to use your own sample, you can use the code [light_curve_collector.md](https://nasa-fornax.github.io/fornax-demo-notebooks/light_curves/light_curve_collector.html) in this same repo to make the required pandas dataframe which you will need to run this notebook.
+ If you want to use your own sample, you can use the code from the [light curve collector notebook](light_curve_collector.md) in this same repo to make the required pandas dataframe which you will need to run this notebook.
 
 ```{code-cell} ipython3
 # First we want to load light curves made in the light_curve_collector notebook
@@ -459,7 +459,6 @@ check_is_mtype(X_train, mtype="pd-multiindex", scitype="Panel", return_metadata=
 ### 4.2 A single Classifier
 
 ```{code-cell} ipython3
-%%time
 #this cell takes 35s to run on a sample of 267 light curves
 
 #setup the classifier
@@ -489,7 +488,6 @@ plt.show()
 Our method is to do a cursory check of a bunch of classifiers and then later drill down deeper on anything with good initial results.  We choose to run a loop over ~10 classifiers that seem promising and check the accuracy scores for each one.  Any classifier with a promising accuracy score could then be followed up with detailed hyperparameter tuning, or potentially with considering other classifiers in that same type.
 
 ```{raw-cell}
-%%time
 #This cell is currently not being run because it takes a long time
 
 #which classifiers are we interestd in

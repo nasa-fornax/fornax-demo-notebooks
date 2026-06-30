@@ -1,0 +1,8 @@
+astroquery>=0.4.11
+astropy
+matplotlib
+numpy
+pandas
+scipy
+s3fs
+boto3

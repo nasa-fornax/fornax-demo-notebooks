@@ -1,14 +1,11 @@
 crossmatch/output/xmatch_benchmarks.csv
-crossmatch/README.md
 crossmatch/requirements_ztf_ps1_crossmatch.txt
 crossmatch/ztf_ps1_crossmatch.md
-forced_photometry/README.md
 forced_photometry/code_src/README.md
 forced_photometry/code_src/calc_irac_uncertainty.py
 forced_photometry/code_src/cutout.py
 forced_photometry/code_src/determine_source_type.py
 forced_photometry/code_src/display_images.py
-forced_photometry/code_src/exceptions.py
 forced_photometry/code_src/find_nconfsources.py
 forced_photometry/code_src/fornax.py
 forced_photometry/code_src/galex_functions.py
@@ -17,7 +14,6 @@ forced_photometry/code_src/photometry.py
 forced_photometry/code_src/plot_SED.py
 forced_photometry/code_src/prepare_prf.py
 forced_photometry/data/README.md
-forced_photometry/data/IRAC
 forced_photometry/data/IRAC/README.md
 forced_photometry/data/IRAC/PRF_IRAC_ch1.fits
 forced_photometry/data/IRAC/PRF_IRAC_ch2.fits
@@ -32,7 +28,6 @@ forced_photometry/multiband_photometry.md
 forced_photometry/output/README.md
 forced_photometry/requirements_multiband_photometry.txt
 light_curves/ML_AGNzoo.md
-light_curves/README.md
 light_curves/code_src/AGNzoo_functions.py
 light_curves/code_src/README.md
 light_curves/code_src/classifier_functions.py
@@ -45,6 +40,7 @@ light_curves/code_src/helpers/scale_up.py
 light_curves/code_src/helpers/scale_up.sh
 light_curves/code_src/helpers/top.py
 light_curves/code_src/icecube_functions.py
+light_curves/code_src/lsdb_utils.py
 light_curves/code_src/panstarrs_functions.py
 light_curves/code_src/plot_functions.py
 light_curves/code_src/rsp_token_instructions.txt
@@ -71,7 +67,6 @@ light_curves/requirements_light_curve_classifier.txt
 light_curves/requirements_light_curve_collector.txt
 light_curves/requirements_scale_up.txt
 light_curves/scale_up.md
-spectroscopy/README.md
 spectroscopy/code_src/README.md
 spectroscopy/code_src/data_structures_spec.py
 spectroscopy/code_src/desi_functions.py

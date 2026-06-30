@@ -17,48 +17,17 @@ warnings.filterwarnings("ignore", "The unit 'Angstrom' has been deprecated ", u.
 warnings.filterwarnings("ignore", "The unit 'erg' has been deprecated ", u.UnitsWarning)
 
 
-def get_coord_from_objectid(object_id, table_mer="euclid_q1_mer_catalogue"):
+def euclid_get_spec(sample_table, search_radius_arcsec, verbose=True):
     """
-    Query IRSA's TAP service for object coordinates given object_id.
+    Retrieve Euclid 1D spectra for sources in a sample table using IRSA's
+    Simple Spectral Access (SSA) service.
 
-    Parameters
-    ----------
-    object_id : int or str
-        The Euclid object ID to look up.
+    This function queries IRSA’s SSA endpoint for Euclid NISP 1D spectra
+    around each input sky position, selects the single spectrum whose
+    on-sky position is closest to the query coordinate, downloads the
+    corresponding spectral file via its SSA access URL, and packages the
+    result into a MultiIndexDFObject.
 
-    table_mer : str, optional
-        Name of the IRSA TAP-accessible MER catalog table.
-
-    Returns
-    -------
-    coord : astropy.coordinates.SkyCoord or None
-        SkyCoord of the object if found, None if not found.
-
-    """
-    adql_query = f"""
-    SELECT ra, dec FROM {table_mer}
-    WHERE object_id = {object_id}
-    """
-    try:
-        result = Irsa.query_tap(adql_query).to_table()
-    except (DALQueryError, requests.exceptions.RequestException) as e:
-        raise RuntimeError(f"IRSA TAP query failed for object_id {object_id}: {e}")
-
-    if len(result) == 0:
-        print(f"No match found for object_id {object_id}")
-        return None
-
-    ra, dec = result[0]["ra"], result[0]["dec"]
-    return SkyCoord(ra=ra * u.deg, dec=dec * u.deg)
-
-
-def euclid_get_spec(sample_table, search_radius_arcsec):
-    """
-    Retrieve Euclid 1D spectra for sources in a sample table using IRSA TAP cloud services.
-
-    This function performs a cone search on the Euclid MER catalog via IRSA,
-    retrieves associated 1D spectral file paths from a TAP-accessible association table,
-    downloads the spectra, and packages them into a MultiIndexDFObject.
 
     Parameters
     ----------
@@ -68,67 +37,85 @@ def euclid_get_spec(sample_table, search_radius_arcsec):
     search_radius_arcsec : float
         Search radius in arcseconds.
 
+    verbose : bool, optional
+        If True, print status messages when spectra are found or not found.
+
     Returns
     -------
     MultiIndexDFObject
         The spectra returned from the archive.
 
     """
+    # Container for all spectra returned from the archive
     df_spec = MultiIndexDFObject()
-    table_mer = "euclid_q1_mer_catalogue"
-    table_1dspectra = "euclid.objectid_spectrafile_association_q1"
+    
+    # Hard-coded SSA collection name 
+    euclid_ssa_collection = "euclid_DpdSirCombinedSpectra"
 
+    # Convert search radius once
+    radius = u.Quantity(search_radius_arcsec, unit=u.arcsec)
+
+    # Expected Euclid spectrum column names (same as original query_region path)
+    required_cols = ["WAVELENGTH", "SIGNAL", "VAR", "MASK"]
+
+    # Loop over each source in the input sample table
     for stab in sample_table:
-        print(f"Processing source {stab['label']}")
+        
+        # Sky position and label of the source
         coord = stab["coord"]
-
+        label = str(stab["label"])
+        
+        # Query the IRSA SSA service for spectra near this position
         try:
-            tab = Irsa.query_region(
-                coordinates=coord,
-                catalog=table_mer,
-                spatial="Cone",
-                radius=search_radius_arcsec * u.arcsec
+            ssa_result = Irsa.query_ssa(
+                pos=coord,
+                radius=radius,
+                collection=euclid_ssa_collection,
             )
         except (DALQueryError, requests.exceptions.RequestException) as e:
-            print(f"IRSA cone search failed for {stab['label']}: {e}")
+            # SSA query-level failure (service down, bad response, network error)
+            warnings.warn(
+                f"SSA query failed for {label}: {e}",
+                RuntimeWarning,
+            )
             continue
 
-        if len(tab) == 0:
-            print(f"No match found in Euclid MER catalog for {stab['label']}.")
+        # If no spectra are returned
+        if ssa_result is None or len(ssa_result) == 0:
+            if verbose:
+                print(
+                    f"No Euclid SSA spectra found for {label} within "
+                    f"{radius.to_value(u.arcsec)} arcsec."
+                )
             continue
 
-        closest_idx = np.argmin([
-            coord.separation(SkyCoord(ra=t["ra"] * u.deg, dec=t["dec"] * u.deg)).arcsec
-            for t in tab
-        ])
-        object_id = tab[closest_idx]["object_id"]
-        print(f"Found Euclid object_id: {object_id}")
+        # Report success if requested
+        if verbose:
+            print(f"Found Euclid SSA spectra for {label}")
 
-        adql_query = f"""
-        SELECT * FROM {table_1dspectra}
-        WHERE objectid = {object_id}
-        """
-        try:
-            result = Irsa.query_tap(adql_query).to_table()
-        except (DALQueryError, requests.exceptions.RequestException) as e:
-            print(f"IRSA spectrum query failed for object_id {object_id}: {e}")
-            continue
+        # Pick the single nearest SSA row to the query coordinate using SSA-provided sky positions
+        # SSA standard commonly provides these as 's_ra' and 's_dec' in degrees.
 
-        if len(result) == 0:
-            print(f"No 1D spectrum found for object_id {object_id}")
-            continue
+        # Build SkyCoord array for all returned spectra positions
+        ssa_coords = SkyCoord(ssa_result["s_ra"], ssa_result["s_dec"], unit=u.deg)
 
-        path = result[0]["path"]
-        spectrum_path = f"https://irsa.ipac.caltech.edu/{path}"
+        # Compute separations and choose the closest SSA row
+        separations = coord.separation(ssa_coords)
+        closest_idx = int(np.argmin(separations))
+        row = ssa_result[closest_idx]
+ 
+        # Read the spectrum file from the SSA access URL
+        spectrum_url = row["access_url"]
+        spec = QTable.read(spectrum_url)
 
-        spec = QTable.read(spectrum_path)
+        #filter out bad or conatminated parts of the Euclid spectrum using the bitmask
         valid = (spec["MASK"] % 2 == 0) & (spec["MASK"] < 64)
 
         dfsingle = pd.DataFrame([{
             "wave": spec["WAVELENGTH"][valid],
             "flux": spec["SIGNAL"][valid],
             "err": np.sqrt(spec["VAR"][valid]),
-            "label": str(stab["label"]),
+            "label": label,
             "objectid": int(stab["objectid"]),
             "mission": "Euclid",
             "instrument": "NISP",

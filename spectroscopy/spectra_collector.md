@@ -4,13 +4,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.17.2
+    jupytext_version: 1.18.1
 kernelspec:
   name: py-spectra_collector
   display_name: py-spectra_collector
   language: python
-execution:
-  timeout: 1200
 ---
 
 # Extract Multi-Wavelength Spectroscopy from Archival Data
@@ -58,7 +56,7 @@ this to work, the `specutils` functions may have to be update or a wrapper has t
 | MAST    | HST*         | Slitless spectra would need reduction and extraction. There are some reduced slit spectra from COS in the Hubble Archive | `astroquery.mast` | Implemented using `astroquery.mast` |
 | MAST    | JWST*        | Reduced slit MSA and Slit spectra that can be queried | `astroquery.mast` | Implemented using `astroquery.mast` |
 | SDSS    | SDSS optical| Optical spectra that are reduced | [Sky Server](https://skyserver.sdss.org/dr18/SearchTools) or `astroquery.sdss` (preferred) | Implemented using `astroquery.sdss`. |
-| DESI    | DESI*        | Optical spectra | [DESI public data release](https://data.desi.lbl.gov/public/) | Implemented with `SPARCL` library.  Currently commented out because `SPARCL` library is incompatible with numpy > 2 which we need for other modules|
+| DESI    | DESI*        | Optical spectra | [DESI public data release](https://data.desi.lbl.gov/public/) | Implemented with `SPARCL` library.  |
 | BOSS    | BOSS*        | Optical spectra | [BOSS webpage (part of SDSS)](https://www.sdss4.org/surveys/boss/) | Implemented with `SPARCL` library together with DESI |
 | HEASARC | None        | Could link to Chandra observations to check AGN occurrence. | `astroquery.heasarc` | More thoughts on how to include scientifically.   |
 
@@ -107,10 +105,11 @@ import sys
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
+from astropy.utils.data import conf
 
 sys.path.append('code_src/')
 from data_structures_spec import MultiIndexDFObject
-#from desi_functions import DESIBOSS_get_spec
+from desi_functions import DESIBOSS_get_spec
 from herschel_functions import Herschel_get_spec
 from keck_functions import KeckDEIMOS_get_spec
 from mast_functions import HST_get_spec, JWST_get_spec
@@ -119,6 +118,10 @@ from sample_selection import clean_sample
 from sdss_functions import SDSS_get_spec
 from spitzer_functions import SpitzerIRS_get_spec
 from euclid_functions import euclid_get_spec
+
+# The Euclid spectrum files are large and the time it takes to read
+# them can exceed astropy's default timeout limit. Increase it.
+conf.remote_timeout = 120
 ```
 
 ## 1. Define the sample
@@ -217,21 +220,18 @@ This archive includes spectra taken by
  &bull; Euclid/NISP
 
 ```{code-cell} ipython3
-%%time
 # Get Keck Spectra (COSMOS only)
 df_spec_DEIMOS = KeckDEIMOS_get_spec(sample_table=sample_table, search_radius_arcsec=1)
 df_spec.append(df_spec_DEIMOS)
 ```
 
 ```{code-cell} ipython3
-%%time
 # Get Spitzer IRS Spectra
 df_spec_IRS = SpitzerIRS_get_spec(sample_table, search_radius_arcsec=1, COMBINESPEC=False)
 df_spec.append(df_spec_IRS)
 ```
 
 ```{code-cell} ipython3
-%%time
 # Get Euclid Spectra
 df_spec_Euclid = euclid_get_spec(sample_table=sample_table, search_radius_arcsec=1)
 df_spec.append(df_spec_Euclid)
@@ -246,7 +246,6 @@ This archive includes spectra taken by
  &bull; JWST (including MSA and slit spectroscopy)
 
 ```{code-cell} ipython3
-%%time
 # Get Spectra for HST
 df_spec_HST = HST_get_spec(
     sample_table,
@@ -259,7 +258,6 @@ df_spec.append(df_spec_HST)
 ```
 
 ```{code-cell} ipython3
-%%time
 # Get Spectra for JWST
 df_jwst = JWST_get_spec(
     sample_table,
@@ -288,7 +286,6 @@ herschel_download_directory = 'data/herschel'
 ### 2.4 SDSS Archive
 
 ```{code-cell} ipython3
-%%time
 # Get SDSS Spectra
 df_spec_SDSS = SDSS_get_spec(sample_table, search_radius_arcsec=5, data_release=17)
 df_spec.append(df_spec_SDSS)
@@ -300,13 +297,11 @@ This includes DESI spectra. Here, we use the `SPARCL` query. Note that this can 
 for SDSS searches, however, according to the SPARCL webpage, only up to DR16 is included.
 Therefore, we will not include SDSS DR16 here (this is treated in the SDSS search above).
 
-The DESI search is currently commented out because `SPARCL` is not compatible with numpy > 2 which we require for the other modules to run.
 
 ```{code-cell} ipython3
-#%%time
 ## Get DESI and BOSS spectra with SPARCL
-#df_spec_DESIBOSS = DESIBOSS_get_spec(sample_table, search_radius_arcsec=5)
-#df_spec.append(df_spec_DESIBOSS)
+df_spec_DESIBOSS = DESIBOSS_get_spec(sample_table, search_radius_arcsec=5)
+df_spec.append(df_spec_DESIBOSS)
 ```
 
 ## 3. Make plots of luminosity as a function of time

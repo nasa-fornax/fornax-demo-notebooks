@@ -27,7 +27,7 @@ def convert_wise_flux_to_millijansky(flux_nanomaggy, *, band=None):
         band = flux_nanomaggy.name
 
     # Vega to AB magnitude conversions
-    vega_to_ab_conv = {"W1": 2.699, "W2": 3.339, "W3": 5.174, "W4": 6.620}
+    vega_to_ab_conv = {"WISE_W1": 2.699, "WISE_W2": 3.339, "WISE_W3": 5.174, "WISE_W4": 6.620}
 
     # get Vega magnitude from nanomaggy flux as described in Meisner et al. (2023)
     mag_vega = 22.5 - 2.5 * np.log10(flux_nanomaggy)

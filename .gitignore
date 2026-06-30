@@ -15,12 +15,16 @@ cache/
 *.ecsv
 *.fits
 *.gzip
+*.hdf5
 *.jpg
 *.jpeg
 *.log
+*.npy
+*.npz
 *.parquet
 *.pdf
 *.png
+*.pth
 *.gz
 
 # Tests and reports
@@ -49,3 +53,6 @@ _build/
 
 #pycache
 __pycache__
+
+# MyST build outputs
+_build

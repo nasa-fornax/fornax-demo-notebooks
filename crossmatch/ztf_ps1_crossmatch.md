@@ -4,11 +4,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.17.2
+    jupytext_version: 1.19.1
 kernelspec:
-  name: py-ztf_ps1_crossmatch
   display_name: py-ztf_ps1_crossmatch
   language: python
+  name: py-ztf_ps1_crossmatch
 ---
 
 # Cross-Match ZTF and Pan-STARRS using LSDB
@@ -77,7 +77,6 @@ from astropy.coordinates import SkyCoord
 from astropy import units as u
 
 import lsdb
-from lsdb.core.search import ConeSearch
 from dask.distributed import Client, LocalCluster
 ```
 
@@ -148,14 +147,14 @@ cone_ra, cone_dec = c.ra.value, c.dec.value
 
 if Nrows > 0:
     radius_arcsec = radius[Nrows]
-    search_filter = ConeSearch(cone_ra, cone_dec, radius_arcsec)
+    search_filter = lsdb.ConeSearch(cone_ra, cone_dec, radius_arcsec)
 else:
     # Full cross-match
     # ONLY ON XLARGE ENVIRONMENT USING AT LEAST 32 CPUS
     search_filter = None
 
-# Read ZTF DR23
-ztf_path = "s3://ipac-irsa-ztf/contributed/dr23/objects/hats"
+# Read ZTF DR24
+ztf_path = "s3://ipac-irsa-ztf/ztf/enhanced/dr24/objects/hats"
 ztf_piece = lsdb.open_catalog(
     ztf_path,
     columns=["oid", "ra", "dec"],
@@ -164,19 +163,15 @@ ztf_piece = lsdb.open_catalog(
 
 # Read Pan-STARRS DR2
 ps1_path = "s3://stpubdata/panstarrs/ps1/public/hats/otmo"
-ps1_margin = "s3://stpubdata/panstarrs/ps1/public/hats/otmo_10arcs"
-ps1 = lsdb.open_catalog(
-    ps1_path,
-    margin_cache=ps1_margin,
-    columns=["objName","objID","raMean","decMean"],
-)
+ps1 = lsdb.open_catalog(ps1_path, columns=["objName","objID","raMean","decMean"])
 ```
 
 ## 3. Initialize the crossmatch and compute, measuring the time elapsed.
 
 ```{code-cell} ipython3
 # Setting up the cross-match actually takes very little time
-ztf_x_ps1 = ztf_piece.crossmatch(ps1, radius_arcsec=1, n_neighbors=1, suffixes=("_ztf", "_ps1"))
+ztf_x_ps1 = ztf_piece.crossmatch(ps1, radius_arcsec=1, n_neighbors=1,
+                                 suffixes=("_ztf", "_ps1"), suffix_method='all_columns')
 ztf_x_ps1
 ```
 

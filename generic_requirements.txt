@@ -1,0 +1,5 @@
+# For supporting myst-based notebooks
+jupytext
+# Making admonotions look nice for the myst notebooks
+jupyterlab-myst
+
