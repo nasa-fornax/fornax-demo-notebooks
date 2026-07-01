@@ -332,6 +332,10 @@ if len(all_spitzer_ims) > 0:
     )
     filt_spitzer_ims = filt_spitzer_ims[not_short_median_filt]
     
+    # Calculate distance of pointing from source
+    cur_sep = SkyCoord(filt_spitzer_ims['s_ra'].value, filt_spitzer_ims['s_dec'].value, unit='deg').separation(SOURCE_COORD)
+    filt_spitzer_ims['dist_to_point'] = cur_sep
+    
     # Also sort by the distance from the target (closest at the top of the table)
     filt_spitzer_ims.sort('dist_to_point')
 else:
