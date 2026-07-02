@@ -62,7 +62,7 @@ This demonstration acquires data from remote services, and as such the runtime c
 
 ```{code-cell} python
 # Uncomment the next line to install dependencies if needed.
-# %pip install -r requirements_multiwavelength_images.txt
+# %pip install -r requirements_multiwavelength_image.txt
 ```
 
 ```{code-cell} python
