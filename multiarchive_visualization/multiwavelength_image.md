@@ -15,7 +15,7 @@ authors:
 
 # Create interactive multi-wavelength images of astronomical sources
 
-## Learning Goals
+## Learning goals
 
 By the end of this tutorial, you will be able to:
 - Find Chandra, Hubble, Spitzer, and Swift observations of a named source.
@@ -27,21 +27,21 @@ By the end of this tutorial, you will be able to:
 
 This notebook is intended as a gentle introduction to the sort of things you can do 
 on the Fornax Science Console, while also providing a demonstration of how you might
-begin to make visually appealing multi-wavelength images of astronomical sources (though 
-the author makes no claims as to having any _good_ sense of aesthetics – so you're on 
+begin to make visually appealing multi-wavelength images of astronomical sources.
+(Though the author makes no claims as to having any _good_ sense of aesthetics – you're on 
 your own there).
 
 We'll be searching the NASA astrophysics archives for observations of named 
-sources, with a set of suggested objects to try out, and setting up interactive 
-visualizations where you can adjust how different wavelengths are combined and
+sources, with a set of suggested objects to try out.
+We will also be setting up interactive visualizations where you can adjust how different wavelengths are combined and
 see what makes the nicest looking image.
 
 Note that we will only be using pre-generated images, rather than making any new
 ones of our own from the raw observation data.
 
 Throughout this demonstration we make use of the Python module Astroquery to search and 
-acquire data from the HEASARC, MAST, and IRSA archives, while the HoloViz, Panel, and 
-Bokeh libraries are used to create interactive figures that are performant even with
+acquire data from the HEASARC, MAST, and IRSA archives.
+The Matplotlib and ipywidgets libraries are used to create interactive figures that are performant even with
 the thousands-of-pixels-per-side images we will be dealing with.
 
 
@@ -69,14 +69,6 @@ This demonstration acquires data from remote services, and as such the runtime c
 import os
 os.environ['KMP_WARNINGS'] = '0' # Silences the OpenMP warning
 import sys
-
-import panel as pn
-import holoviews as hv
-pn.extension(loading_spinner='dots', 
-             loading_color='#00aa41', 
-             comms='ipywidgets', 
-             inline=True)
-hv.extension('bokeh')
 
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
@@ -143,8 +135,10 @@ print(SOURCE_COORD.to_string())
 ## 2. Searching NASA's astrophysical archives for images of our source
 
 Our goal is to be able to compare and combine images of the same source, taken in 
-different wavelength bands. Some space telescopes (Hubble, for instance) can take 
-observations in several, usually adjacent, wavelength bands. However, for this 
+different wavelength bands.
+Some space telescopes (Hubble, for instance) can take 
+observations in several, usually adjacent, wavelength bands.
+However, for this 
 notebook, and to explore a wider range of physical processes highlighted by different
 wavelengths of light, we will search for observations taken by four **different** 
 observatories:
@@ -156,12 +150,13 @@ observatories:
 ### 2.1 Query HEASARC for Chandra X-ray observations
 
 Chandra has the highest angular resolution of any X-ray telescope, which is of particular
-importance given that we want to make nice visualizations of our target, and that, as 
-high-energy photons are much harder to focus than their lower-energy cousins, even 
+importance given that we want to make nice visualizations of our target.
+As high-energy photons are much harder to focus than their lower-energy cousins, even 
 Chandra's spatial resolution is significantly worse than that of Hubble.
 
 The High Energy Astrophysics Science Archive Research Center (HEASARC) provides 
-access to the full public set of Chandra observations, and we'll use the `Heasarc` 
+access to the full public set of Chandra observations.
+We'll use the `Heasarc` 
 object imported from the `astroquery.heasarc` module to search for observations of 
 current target.
 
@@ -174,12 +169,14 @@ chandra_obs_id = vetted_source_check(SOURCE_NAME, "Chandra")
 chandra_obs_id
 ```
 
-Now, we need to search for observations of our current target – note though that if 
+Now, we need to search for observations of our current target.
+Note though that if 
 there is a pre-vetted observation for the source, we won't consider any other 
 observations that might be relevant to the source.
 
 We set a search radius of $3^{\prime}$, which should help exclude any observations 
-where the source is not on or near the CCD chip positioned at the aimpoint – you could
+where the source is not on or near the CCD chip positioned at the aimpoint.
+You could
 experiment with adjusting this radius if you aren't finding observations of your 
 source:
 
@@ -251,7 +248,8 @@ chandra_hdu = load_chandra_image(sel_chandra_datalink, preproc_cent_hi_res=True)
 
 ### 2.2 Query IRSA for infrared data
 
-For infrared data, we turn to the Spitzer space telescope; Spitzer is one of NASA's 
+For infrared data, we turn to the Spitzer space telescope.
+Spitzer is one of NASA's 
 'great observatories' (alongside Chandra, Hubble, and Compton) and provides infrared 
 imaging (and spectroscopy, but that isn't relevant to this demonstration) in the 
 mid/far-IR bands.
@@ -261,8 +259,10 @@ tutorial, Spitzer is no longer active, but its data are all maintained and serve
 the NASA/IPAC Infrared Science Archive (IRSA). 
 
 We can use the `Irsa` object imported from the `astroquery.ipac.irsa` submodule to 
-find Spitzer images of our target source. Our approach here is a little different
-to how we found the Chandra data, however – as each archive creates and maintains its 
+find Spitzer images of our target source.
+Our approach here is a little different
+to how we found the Chandra data, however.
+As each archive creates and maintains its 
 own Astroquery submodule, the capabilities and interface tend to vary.
 
 For IRSA, we're going to use a 'Simple Image Access' (SIA) function, which can search
@@ -312,7 +312,8 @@ all_spitzer_ims
 ```
 
 If Spitzer images are available, we automatically select the one with the highest calibration level, and the 
-highest spatial resolution, available, that is centered on a point closest to our target. Again, this isn't a 
+highest spatial resolution, available, that is centered on a point closest to our target.
+Again, this isn't a 
 particularly good way to determine which data to use, but it means we can make this tutorial work for
 any target source:
 
@@ -358,17 +359,20 @@ spitzer_hdu = load_spitzer_image(sel_spitzer_im)
 ### 2.3 Query MAST for optical data
 
 For optical observations, we turn to the Hubble Space Telescope (HST), the third great 
-observatory of this demonstration! Of course, Hubble is more than just an optical
+observatory of this demonstration!
+Of course, Hubble is more than just an optical
 telescope, as it also has some near-infrared and UV imaging and spectroscopic capabilities. 
 
-Even our specification of 'optical' observations is a bit fuzzy, as not only has 
+Even our specification of 'optical' observations is a bit fuzzy.
+Not only has 
 Hubble hosted four generations of scientific instruments with differing sensitives 
 within what we consider to be the 'optical' bandpass, but each instrument has often
 included a number of different wide and narrow filters that limit the bandpass further.
 
 As the purpose of this demonstration is just to make nice visualizations and to be
 relatively robust to choices of target other than those we suggest, we aren't going
-to be picky about exactly which instrument or filter we use. So long as the data
+to be picky about exactly which instrument or filter we use.
+So long as the data
 are ostensibly in the 'optical' range, we'll take them.
 
 Once again, we check to see if a particular observation has been pre-vetted for the 
@@ -388,17 +392,20 @@ HUBBLE_SEARCH_RAD = Quantity(2, 'arcmin')
 
 Now we proceed to search the Hubble archive, maintained and served by 
 Barbara A. Mikulski Archive for Space Telescopes (MAST), using the `Observations` class
-imported from the `astroquery.mast` submodule. This search for observations will be 
+imported from the `astroquery.mast` submodule.
+This search for observations will be 
 followed up by a search for **data products** related to the observation we end up choosing.
 
-We set `project="HST"` to avoid identifying 'Hubble Advanced Product' (HAP) results, as 
-though the multi-visit-mosaics would be ideal for our purposes, they tend to be 
+We set `project="HST"` to avoid identifying 'Hubble Advanced Product' (HAP) results.
+Though the multi-visit-mosaics would be ideal for our purposes, they tend to be 
 very large (both in storage and in the number of pixels in the image), which can
 cause issues with running out of memory.
 
 After the initial search for observations with image data, we filter out any that were
-taken using Hubble's STIS instrument. We don't want to specify a list of instruments
-to search, because Hubble has (and has had) so many. However, we specifically **do** 
+taken using Hubble's STIS instrument.
+We don't want to specify a list of instruments
+to search, because Hubble has (and has had) so many.
+However, we specifically **do** 
 wish to exclude STIS images because they are often just for targeting prior to 
 spectroscopic observations and not high enough quality for our purposes.
 
@@ -473,19 +480,24 @@ hubble_hdu = load_hubble_image(sel_hubble_im)
 ### 2.4 Query MAST for ultraviolet data
 
 Finally, for UV images, we're going to tap the prodigious data archive of the 
-Neil Gehrels Swift Observatory. Primarily designed as a fast-follow-up telescope for
+Neil Gehrels Swift Observatory.
+Primarily designed as a fast-follow-up telescope for
 Gamma-ray bursts, Swift's main instruments are actually both for high-energy 
-astrophysics, in the X-ray and Gamma-ray regimes. There is, however, also a very
-capable optical instrument, the UV and Optical Telescope (UVOT), and as it is 
+astrophysics, in the X-ray and Gamma-ray regimes.
+There is, however, also a very
+capable optical instrument, the UV and Optical Telescope (UVOT).
+As it is 
 generally collecting data during every Swift observation, it has accrued coverage
 of a lot of the sky.
 
 Due to this high-energy, optical/UV dichotomy, Swift data are archived both by the 
-HEASARC and by MAST. We will be pulling the images from the MAST archive, as we did for
+HEASARC and by MAST.
+We will be pulling the images from the MAST archive, as we did for
 the Hubble data in the last section. 
 
 We search for observations that were taken with the UVW2, UVM2, and UVW1 filters, which 
-cover parts of the Far/Mid-UV wavelength ranges. Swift's UVOT instrument also provides
+cover parts of the Far/Mid-UV wavelength ranges.
+Swift's UVOT instrument also provides
 filters with higher wavelength, optical, band passes, but we specifically want UV data here.
 
 Once again, we check to see if a particular observation has been pre-vetted for the 
@@ -525,7 +537,8 @@ all_swift_obs
 ```
 
 If any Swift-UVOT data with one of the UV filters we specified can be found, we proceed
-to choosing the one with the longest exposure time, and then reading the image using
+to choosing the one with the longest exposure time.
+Then reading the image using
 a convenience function defined in the `code_src/archive_queries.py` file:
 
 ```{code-cell} python
@@ -541,18 +554,22 @@ swift_hdu = load_swift_image(sel_swift_obs)
 ## 3. Reproject images to a common coordinate grid
 
 The various telescopes whose images we've just acquired have, in some cases, wildly different 
-angular (spatial) resolutions. Indeed, for several of these telescopes, the different instruments
+angular (spatial) resolutions.
+Indeed, for several of these telescopes, the different instruments
 also have disparate spatial resolutions, driven by the available technology and the instrument's
 scientific purpose.
 
 As such, we can't just plot the images directly over the top of each other and expect 
-everything to line up properly. Of course, we can't expect that every feature we see in
-one image will be present in the others, as the whole point of observing in different
+everything to line up properly.
+Of course, we can't expect that every feature we see in
+one image will be present in the others.
+The whole point of observing in different
 wavelengths is to understand _different_ astrophysical processes going on in a source.
 
 Here we use the image with the highest spatial resolution (almost certain to be the 
 Hubble image if we managed to find one for the current source) as the reference 
-coordinate grid. We'll refer to it as the 'donor' image.
+coordinate grid.
+We'll refer to it as the 'donor' image.
 
 That means that all other images will be aligned to the 'donor', and will have to be 
 upscaled to match the donor's higher spatial resolution.
@@ -575,7 +592,7 @@ mission_hdus = {
 }
 
 # A check for all HDUs being None
-if all([v for v in mission_hdus.values()]):
+if all([v is None for v in mission_hdus.values()]):
     raise ValueError(f"No data are available for {SOURCE_NAME}.")
 
 pixel_scales = {miss: get_pixel_scale(miss_hdu) for miss, miss_hdu in mission_hdus.items() if miss_hdu is not None}
@@ -605,8 +622,9 @@ If we were trying to do science with these images directly, we would likely not
 reproject them.
 
 Here we fetch out the highest resolution image's FITS header, from which we can fetch 
-the information that will act as the common coordinate grid for all images (note though 
-that we will not reproject the donor image):
+the information that will act as the common coordinate grid for all images.
+Note though 
+that we will not reproject the donor image:
 ```{code-cell} python
 donor_wcs_hdr = mission_hdus[finest_pix_miss].header.copy()
 ```
@@ -657,9 +675,10 @@ We use:
 - Blue channel: Chandra X-ray (hot plasma and high-energy astrophysical processes)
 
 The interactive controls allow you to adjust:
-- **Channel percentiles**: Control the upper percentile cut off for pixel values, lower values will exclude brighter features.
-- **Lupton Q**: Softening parameter (higher values show more faint detail)
-- **Lupton stretch**: Overall brightness (higher values make the image brighter)
+- **Channel percentiles**: Control the upper percentile cut off for pixel values.
+  - Lower values will exclude brighter features, and highlight fainter emission.
+- **Lupton Q**: Softening parameter (higher values show more faint detail).
+- **Lupton stretch**: Overall brightness (higher values make the image brighter).
 
 We note that NGC 4753 has poor Chandra coverage, so for that source we use the UV 
 observation from Swift as the blue channel instead.
@@ -681,7 +700,7 @@ multi_wav_im.view()
 
 +++
 
-## About this Notebook
+## About this notebook
 
 **Authors:** David J Turner
 
@@ -697,12 +716,13 @@ This notebook was created with assistance from:
 - The NASA/IPAC Infrared Science Archive (IRSA) team.
 - The Barbara A. Mikulski Archive for Space Telescopes (MAST) team.
 
-AI: This notebook was created with assistance from Google's Gemini models and NASA ChatGSFC.
+This notebook was created with assistance from NASA-provided AI models.
 
 ### References
 
 This work made use of:
 - [AstroPy: A Community Python Library for Astronomy](https://www.astropy.org/)
 - [AstroQuery: Access to Online Astronomical Data](https://astroquery.readthedocs.io/)
+- [Matplotlib: Visualization with Python](https://matplotlib.org/)
 - [Reproject: Image Reprojection in Python](https://reproject.readthedocs.io/)
 - [Lupton et al. 2004, PASP, 116, 133: "Preparing Red-Green-Blue Images from CCD Data"](https://ui.adsabs.harvard.edu/abs/2004PASP..116..133L)

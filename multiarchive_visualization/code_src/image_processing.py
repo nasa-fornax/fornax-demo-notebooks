@@ -100,7 +100,7 @@ def normalize_image(data, percentile=95, stretch='linear', stretch_params=None):
     stretch : str, optional
         Stretch type: 'linear', 'log', 'sqrt', 'asinh' (default: 'linear')
     stretch_params : dict, optional
-        Parameters for the stretch function (e.g., {'intercept': 0.2} for LinearStretch)
+        Parameters for the stretch function (for example, {'intercept': 0.2} for LinearStretch)
 
     Returns
     -------

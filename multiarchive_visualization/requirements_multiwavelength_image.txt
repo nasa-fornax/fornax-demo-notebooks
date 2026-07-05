@@ -10,19 +10,8 @@ numpy
 # Visualization and Interactivity
 ipywidgets
 ipykernel
-panel
-holoviews
-datashader
-param
-numba
-bokeh
-pyviz_comms
-jupyter_bokeh
-
-# Indirectly for holoviews
-pyparsing
-# Required for the use of Astropy's normalizing functions
-matplotlib
+# Required for the use of Astropy's normalizing functions and colormaps
+matplotlib>=3.5.0
 scipy
 
 # S3 access for cloud data (required for fsspec functionality in Astropy)

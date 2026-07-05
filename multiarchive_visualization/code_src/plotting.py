@@ -2,39 +2,25 @@
 Interactive plotting functions for multi-wavelength images.
 
 This module provides classes for creating interactive RGB composites
-and multi-panel stretches using HoloViz (Panel, HoloViews, Datashader).
+and multi-panel stretches using Matplotlib and ipywidgets.
 """
-import os
-import gc
-import asyncio
-import logging
 import numpy as np
-import panel as pn
-import holoviews as hv
-from holoviews.operation.datashader import regrid
-from holoviews.streams import Pipe
+import matplotlib.pyplot as plt
+from matplotlib import colormaps
+import ipywidgets as widgets
+from IPython.display import display, clear_output
 from astropy.visualization import (
     AsymmetricPercentileInterval,
     LinearStretch, LogStretch, SqrtStretch,
     ImageNormalize
 )
-from panel.widgets import RangeSlider
 
 from image_processing import create_rgb_composite
 
-# Configure logging for Fornax diagnostics
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('FornaxPlotting')
-
-# Silences the OpenMP warning
-os.environ['KMP_WARNINGS'] = '0'
-
 # Default visualization constants
-RGB_PANEL_WIDTH = 700
-RGB_PANEL_HEIGHT = 700
-MULTI_PANEL_WIDTH = 337
-MULTI_PANEL_HEIGHT = 337
-CONTROL_PANEL_WIDTH = 250
+RGB_FIG_SIZE = (6.5, 6.5)
+MULTI_FIG_SIZE = (6.5, 6.5)
+CONTROL_PANEL_WIDTH = '480px'
 
 DEFAULT_RED_PERC = 95
 DEFAULT_GREEN_PERC = 95
@@ -42,316 +28,232 @@ DEFAULT_BLUE_PERC = 99.5
 DEFAULT_Q = 8
 DEFAULT_STRETCH = 0.1
 
+# Max dimension for interactive display to prevent memory issues
+MAX_DISPLAY_DIM = 1024
+
+
+def get_display_data(data):
+    """
+    Downsample image data for interactive display if it exceeds MAX_DISPLAY_DIM.
+    """
+    if data is None:
+        return None
+
+    h, w = data.shape[:2]
+    max_dim = max(h, w)
+
+    if max_dim > MAX_DISPLAY_DIM:
+        step = int(np.ceil(max_dim / MAX_DISPLAY_DIM))
+        return data[::step, ::step]
+    return data
+
+
+def apply_colormap(data, cmap_name, upper_pct=99.0, stretch_name='linear'):
+    """
+    Normalize data and apply a colormap, returning an RGB array.
+    """
+    interval = AsymmetricPercentileInterval(0, upper_pct)
+    vmin, vmax = interval.get_limits(data)
+
+    if stretch_name == 'sqrt':
+        stretch = SqrtStretch()
+    elif stretch_name == 'log':
+        stretch = LogStretch()
+    else:
+        stretch = LinearStretch()
+
+    norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=stretch, clip=True)
+    normalized = norm(data).filled(0.0)
+
+    cmap = colormaps.get_cmap(cmap_name)
+    return cmap(normalized)[:, :, :3]
+
 
 class InteractiveRGBPanel:
     """
-    An interactive Panel dashboard for creating RGB composite images from 3 bands.
-
-    Parameters
-    ----------
-    red_data : numpy.ndarray
-        Array containing the red channel data.
-    green_data : numpy.ndarray
-        Array containing the green channel data.
-    blue_data : numpy.ndarray
-        Array containing the blue channel data.
+    An interactive dashboard for creating RGB composite images.
     """
 
     def __init__(self, red_data, green_data, blue_data):
-        """
-        Initialize the interactive RGB panel.
+        # Downsample for display stability
+        self.r = get_display_data(np.nan_to_num(red_data, nan=0, copy=False))
+        self.g = get_display_data(np.nan_to_num(green_data, nan=0, copy=False))
+        self.b = get_display_data(np.nan_to_num(blue_data, nan=0, copy=False))
 
-        Parameters
-        ----------
-        red_data : numpy.ndarray
-            Array containing the red channel data.
-        green_data : numpy.ndarray
-            Array containing the green channel data.
-        blue_data : numpy.ndarray
-            Array containing the blue channel data.
-        """
-        self.r = np.nan_to_num(red_data, nan=0)
-        self.g = np.nan_to_num(green_data, nan=0)
-        self.b = np.nan_to_num(blue_data, nan=0)
-
-        self.width = self.r.shape[1]
-        self.height = self.r.shape[0]
-
-        # Initialize sliders
-        self.q_slider = pn.widgets.FloatSlider(
-            name='Lupton Q', start=0.1, end=20, value=DEFAULT_Q, step=0.5
+        # Initialize widgets
+        self.q_slider = widgets.FloatSlider(
+            description='Lupton Q', min=0.1, max=20, value=DEFAULT_Q, step=0.5, continuous_update=False
         )
-        self.stretch_slider = pn.widgets.FloatSlider(
-            name='Stretch', start=0.01, end=2, value=DEFAULT_STRETCH, step=0.05
+        self.stretch_slider = widgets.FloatSlider(
+            description='Stretch', min=0.01, max=2, value=DEFAULT_STRETCH, step=0.05, continuous_update=False
         )
-        self.r_perc = pn.widgets.FloatSlider(
-            name='Red %', start=50, end=100, value=DEFAULT_RED_PERC, step=0.5
+        self.r_perc = widgets.FloatSlider(
+            description='Red %', min=50, max=100, value=DEFAULT_RED_PERC, step=0.5, continuous_update=False
         )
-        self.g_perc = pn.widgets.FloatSlider(
-            name='Green %', start=50, end=100, value=DEFAULT_GREEN_PERC, step=0.5
+        self.g_perc = widgets.FloatSlider(
+            description='Green %', min=50, max=100, value=DEFAULT_GREEN_PERC, step=0.5, continuous_update=False
         )
-        self.b_perc = pn.widgets.FloatSlider(
-            name='Blue %', start=50, end=100, value=DEFAULT_BLUE_PERC, step=0.5
+        self.b_perc = widgets.FloatSlider(
+            description='Blue %', min=50, max=100, value=DEFAULT_BLUE_PERC, step=0.5, continuous_update=False
         )
 
-        # Diagnostic pane for providing explicit feedback to the user
-        self.status_pane = pn.pane.Markdown("System: Ready", visible=False)
+        self.status = widgets.HTML(
+            "<div style='display: flex; flex-direction: column; align-items: center; margin-top: 30px;'>"
+            "<span style='color: #666; font-size: 1.2em;'><i>✓ Ready</i></span>"
+            "</div>"
+        )
 
-        # Placeholder for the main image pane (to handle spinner status)
-        self.image_pane = None
+        self.out = widgets.Output(layout=widgets.Layout(width='100%', height='100%'))
+        
+        # Attach observers
+        for w in [self.q_slider, self.stretch_slider, self.r_perc, self.g_perc, self.b_perc]:
+            w.observe(self._update_plot, names='value')
 
-        # 1. Compute initial data and setup the Pipe
-        initial_rgb = create_rgb_composite(
+        # Initial render
+        with self.out:
+            self._render_initial()
+
+    def _render_initial(self):
+        plt.close('all')  # Clean up
+        self.fig, self.ax = plt.subplots(figsize=RGB_FIG_SIZE)
+        rgb = create_rgb_composite(
             self.r, self.g, self.b,
-            red_percentile=DEFAULT_RED_PERC,
-            green_percentile=DEFAULT_GREEN_PERC,
-            blue_percentile=DEFAULT_BLUE_PERC,
-            Q=DEFAULT_Q, stretch=DEFAULT_STRETCH
+            red_percentile=self.r_perc.value,
+            green_percentile=self.g_perc.value,
+            blue_percentile=self.b_perc.value,
+            Q=self.q_slider.value, stretch=self.stretch_slider.value
         )
-        self.pipe = Pipe(data=initial_rgb)
+        self.ax.imshow(rgb, origin='lower')
+        self.ax.axis('off')
+        plt.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
+        plt.show()
 
-        # 2. DynamicMap only reads from the Pipe
-        def render_rgb(data):
-            try:
-                return hv.RGB(data, bounds=(0, 0, self.width, self.height))
-            except Exception as e:
-                logger.exception("Error rendering RGB frame")
-                self.status_pane.object = f"### System Status\nError rendering frame: {type(e).__name__}"
-                self.status_pane.visible = True
-                raise e
-
-        self.dmap = hv.DynamicMap(render_rgb, streams=[self.pipe])
-
-        self.interactive_plot = regrid(self.dmap).opts(
-            width=RGB_PANEL_WIDTH, height=RGB_PANEL_HEIGHT,
-            tools=['pan', 'box_zoom', 'wheel_zoom', 'reset', 'save'],
-            default_tools=[],
-            active_tools=['wheel_zoom', 'box_zoom'],
-            xlim=(0, self.width), ylim=(0, self.height),
-            xaxis=None, yaxis=None
+    def _update_plot(self, _):
+        self.status.value = (
+            "<div style='display: flex; flex-direction: column; align-items: center; color: #00aa41; margin-top: 30px;'>"
+            "<div class='loader' style='border: 8px solid #f3f3f3; border-top: 8px solid #00aa41; "
+            "border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; "
+            "margin-bottom: 15px;'></div>"
+            "<span style='font-size: 1.3em;'><b>Processing blend...</b></span>"
+            "<style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>"
+            "</div>"
         )
+        
+        with self.out:
+            clear_output(wait=True)
+            self._render_initial()
 
-    async def process_and_push(self, *_):
-        """
-        Asynchronously computes the new RGB composite and pushes it to the Pipe.
-        Manages the loading spinner on the image pane.
-        """
-        try:
-            if self.image_pane:
-                self.image_pane.loading = True
-
-            await asyncio.sleep(0.05)  # Allow UI to render spinner
-
-            new_rgb = create_rgb_composite(
-                self.r, self.g, self.b,
-                red_percentile=self.r_perc.value,
-                green_percentile=self.g_perc.value,
-                blue_percentile=self.b_perc.value,
-                Q=self.q_slider.value,
-                stretch=self.stretch_slider.value
-            )
-
-            self.pipe.send(new_rgb)
-
-            # Explicitly clean up large array to help garbage collection
-            del new_rgb
-            gc.collect()
-
-        except Exception as e:
-            logger.exception("Internal error in process_and_push")
-            self.status_pane.object = (
-                "### System Status\n"
-                f"An internal error occurred during processing: {type(e).__name__}. "
-                "Please check the kernel logs for more information."
-            )
-            self.status_pane.visible = True
-        finally:
-            if self.image_pane:
-                self.image_pane.loading = False
+        self.status.value = (
+            "<div style='display: flex; flex-direction: column; align-items: center; margin-top: 30px;'>"
+            "<span style='color: #666; font-size: 1.2em;'><i>✓ Ready</i></span>"
+            "</div>"
+        )
 
     def view(self):
-        """
-        Returns the Panel layout for the dashboard.
-
-        Returns
-        -------
-        panel.Row
-            A row containing the controls and the main image plot.
-        """
-        controls = pn.Column(
+        controls = widgets.VBox([
+            widgets.HTML("<b>RGB Composite Controls</b>"),
             self.q_slider, self.stretch_slider,
             self.r_perc, self.g_perc, self.b_perc,
-            self.status_pane,
-            width=CONTROL_PANEL_WIDTH
-        )
-
-        self.image_pane = pn.pane.HoloViews(self.interactive_plot)
-
-        # Trigger the async process on slider release
-        sliders = [self.q_slider, self.stretch_slider, self.r_perc, self.g_perc, self.b_perc]
-        for slider in sliders:
-            slider.param.watch(self.process_and_push, 'value_throttled')
-
-        return pn.Row(controls, self.image_pane)
+            self.status
+        ], layout=widgets.Layout(width=CONTROL_PANEL_WIDTH))
+        return widgets.HBox([controls, self.out])
 
 
 class InteractiveMultiPanel:
     """
-    An interactive Panel dashboard for multi-panel multi-wavelength visualization.
-    Uses independent DynamicMaps in a linked Layout for stability.
-
-    Parameters
-    ----------
-    reprojected_data : dict
-        A dictionary mapping mission names to 2D numpy arrays.
-    cmaps : dict
-        A dictionary mapping mission names to colormap strings.
+    An interactive dashboard for multi-panel visualization.
     """
 
     def __init__(self, reprojected_data, cmaps):
-        """
-        Initialize the interactive multi-panel dashboard.
-
-        Parameters
-        ----------
-        reprojected_data : dict
-            A dictionary mapping mission names to 2D numpy arrays.
-        cmaps : dict
-            A dictionary mapping mission names to colormap strings.
-        """
-
-        self.data_dict = {k: np.nan_to_num(v, nan=0.0) for k, v in reprojected_data.items()}
+        self.data_dict = {
+            k: get_display_data(np.nan_to_num(v, nan=0.0, copy=False))
+            for k, v in reprojected_data.items()
+        }
         self.cmaps = cmaps
+        self.missions = list(self.data_dict.keys())
 
-        first_img = list(self.data_dict.values())[0]
-        self.height, self.width = first_img.shape
-
+        # Create widgets
         self.perc_sliders = {}
         self.stretch_widgets = {}
 
-        # Diagnostic pane for providing explicit feedback
-        self.status_pane = pn.pane.Markdown("System: Ready", visible=False)
-
-        # Initialize widgets for each mission
-        for miss in self.data_dict.keys():
-            # self.perc_sliders[miss] = pn.widgets.RangeSlider(
-            #     name=f'{miss} Interval %', start=0.0, end=100.0, value=(0.0, 100.),
-            #     value_throttled=(0.0, 100.), step=0.1
-            # )
-            self.perc_sliders[miss] = pn.widgets.FloatSlider(
-                name=f'{miss} Interval %', start=50.0, end=100.0, value=99.0, step=0.1
+        for miss in self.missions:
+            self.perc_sliders[miss] = widgets.FloatSlider(
+                description='Interval %', min=50.0, max=100.0, value=99.0, step=0.1, continuous_update=False
             )
-
-            self.stretch_widgets[miss] = pn.widgets.RadioButtonGroup(
-                name=f'{miss} Stretch', options=['linear', 'sqrt', 'log'], value='linear'
+            self.stretch_widgets[miss] = widgets.Dropdown(
+                description='Stretch', options=['linear', 'sqrt', 'log'], value='linear'
             )
+            self.perc_sliders[miss].observe(lambda _, m=miss: self._update_plot(m), names='value')
+            self.stretch_widgets[miss].observe(lambda _, m=miss: self._update_plot(m), names='value')
 
-        # Create independent panels for each mission
-        plots = []
-        for miss, data in self.data_dict.items():
-            plots.append(self._create_panel(miss, data))
-
-        # Create the grid and merge tools for a single reset/save toolbar
-        self.grid = hv.Layout(plots).cols(2).opts(
-            shared_axes=True,
-            merge_tools=True
+        self.status = widgets.HTML(
+            "<div style='display: flex; flex-direction: column; align-items: center; margin-top: 30px;'>"
+            "<span style='color: #666; font-size: 1.2em;'><i>✓ Ready</i></span>"
+            "</div>"
         )
 
-    def apply_bounds(self, plot, _):
-        """
-        Enforces hard panning bounds at the Bokeh level.
-        """
-        plot.state.x_range.bounds = (0, self.width)
-        plot.state.y_range.bounds = (0, self.height)
+        self.out = widgets.Output(layout=widgets.Layout(width='100%', height='100%'))
+        
+        with self.out:
+            self._render_initial()
 
-    @staticmethod
-    def _process_image(data, stretch_name, upper_pct, lower_pct=0.):
-        """
-        Applies stretch and normalization to an image.
-        """
-        cur_interval = AsymmetricPercentileInterval(lower_pct, upper_pct)
-        cur_val_min, cur_val_max = cur_interval.get_limits(data)
+    def _render_initial(self):
+        n_cols = 2
+        n_rows = (len(self.missions) + 1) // 2
+        # Use a consistent figure creation pattern
+        plt.close('all')  # Clean up to prevent memory creep
+        self.fig, self.axes = plt.subplots(n_rows, n_cols, figsize=MULTI_FIG_SIZE)
+        self.axes = np.atleast_2d(self.axes).flatten()
+        
+        for i, miss in enumerate(self.missions):
+            rgb = apply_colormap(
+                self.data_dict[miss], self.cmaps.get(miss, 'viridis'),
+                upper_pct=self.perc_sliders[miss].value,
+                stretch_name=self.stretch_widgets[miss].value
+            )
+            self.axes[i].imshow(rgb, origin='lower')
+            self.axes[i].set_title(miss, fontsize=10, pad=5)
+            self.axes[i].axis('off')
+            
+        # Hide any unused axes
+        for j in range(i + 1, len(self.axes)):
+            self.axes[j].axis('off')
+            
+        plt.subplots_adjust(left=0.01, right=0.99, top=0.92, bottom=0.01, wspace=0.02, hspace=0.1)
+        plt.show()
 
-        if stretch_name == 'sqrt':
-            stretch = SqrtStretch()
-        elif stretch_name == 'log':
-            stretch = LogStretch()
-        else:
-            stretch = LinearStretch()
-
-        norm = ImageNormalize(vmin=cur_val_min,
-                              vmax=cur_val_max,
-                              stretch=stretch,
-                              clip=True)
-        return norm(data).filled(0.0)
-
-    def _create_panel(self, mission, data):
-        """
-        Creates a single, interactive, re-gridded panel - representing one
-        mission's image.
-        """
-        stretch_widget = self.stretch_widgets[mission]
-        perc_slider = self.perc_sliders[mission]
-        cmap = self.cmaps.get(mission, 'viridis')
-
-        def generate_img(stretch_val, range_val):
-            try:
-                processed = self._process_image(data, stretch_val, range_val)
-                if (processed == 0).all() or np.isnan(processed).all():
-                    raise ValueError("Recalculated image is all zeros or NaNs.")
-
-                return hv.Image(processed, bounds=(0, 0, self.width, self.height), label=mission)
-            except Exception as e:
-                # Silence specific AttributeError that occurs during Jupyter teardown/re-run
-                # where widgets attempt to update plots that have lost their document connection.
-                if isinstance(e, AttributeError) and "'NoneType' object has no attribute 'document'" in str(e):
-                    return hv.Image(np.array([[0]]), bounds=(0, 0, 1, 1))
-
-                logger.exception(f"Internal error in panel: {mission}")
-                self.status_pane.object = (
-                    "### System Status\n"
-                    f"Error in {mission}: {type(e).__name__}. Check kernel logs."
-                )
-                self.status_pane.visible = True
-                raise e
-
-        bound_fn = pn.bind(
-            generate_img,
-            stretch_val=stretch_widget,
-            range_val=perc_slider.param.value_throttled,
+    def _update_plot(self, mission):
+        self.status.value = (
+            "<div style='display: flex; flex-direction: column; align-items: center; color: #00aa41; margin-top: 30px;'>"
+            "<div class='loader' style='border: 8px solid #f3f3f3; border-top: 8px solid #00aa41; "
+            "border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; "
+            "margin-bottom: 15px;'></div>"
+            f"<span style='font-size: 1.3em;'><b>Processing {mission}...</b></span>"
+            "<style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>"
+            "</div>"
         )
+        
+        with self.out:
+            clear_output(wait=True)
+            self._render_initial()
 
-        # Applying regrid here ensures each panel resamples independently
-        return regrid(hv.DynamicMap(bound_fn)).opts(
-            cmap=cmap,
-            width=MULTI_PANEL_WIDTH, height=MULTI_PANEL_HEIGHT,
-            title=mission,
-            tools=['pan', 'wheel_zoom', 'reset', 'save'],
-            default_tools=[],
-            active_tools=['wheel_zoom'],
-            xaxis=None, yaxis=None,
-            hooks=[self.apply_bounds]
+        self.status.value = (
+            "<div style='display: flex; flex-direction: column; align-items: center; margin-top: 30px;'>"
+            "<span style='color: #666; font-size: 1.2em;'><i>✓ Ready</i></span>"
+            "</div>"
         )
 
     def view(self):
-        """
-        Returns the Panel layout for the dashboard.
+        all_controls = []
+        for miss in self.missions:
+            all_controls.append(widgets.HTML(f"<b>{miss}</b>"))
+            all_controls.append(self.stretch_widgets[miss])
+            all_controls.append(self.perc_sliders[miss])
+            all_controls.append(widgets.HTML("<hr>"))
 
-        Returns
-        -------
-        panel.Row
-            A row containing the controls and the grid of plots.
-        """
-        controls_list = []
-        for miss in self.data_dict.keys():
-            controls_list.extend([
-                pn.pane.Markdown(f"**{miss}**"),
-                self.stretch_widgets[miss],
-                self.perc_sliders[miss],
-                pn.layout.Divider()
-            ])
+        all_controls.append(self.status)
+        # Increase max_height to prevent cutting off the status spinner
+        controls_layout = widgets.Layout(width=CONTROL_PANEL_WIDTH, overflow='auto', max_height='800px')
+        controls = widgets.VBox(all_controls, layout=controls_layout)
 
-        controls_list.append(self.status_pane)
-        controls = pn.Column(*controls_list, width=CONTROL_PANEL_WIDTH)
-
-        return pn.Row(controls, self.grid)
+        return widgets.HBox([controls, self.out])
