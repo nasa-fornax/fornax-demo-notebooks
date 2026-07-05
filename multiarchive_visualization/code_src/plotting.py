@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
 import ipywidgets as widgets
-from IPython.display import display, clear_output
+from IPython.display import clear_output
 from astropy.visualization import (
     AsymmetricPercentileInterval,
     LinearStretch, LogStretch, SqrtStretch,
@@ -193,32 +193,40 @@ class InteractiveMultiPanel:
         )
 
         self.out = widgets.Output(layout=widgets.Layout(width='100%', height='100%'))
-        
-        with self.out:
-            self._render_initial()
 
-    def _render_initial(self):
+        # Initialize RGB cache for faster updates
+        self.rgb_cache = {}
+        for miss in self.missions:
+            self.rgb_cache[miss] = apply_colormap(
+                self.data_dict[miss], self.cmaps.get(miss, 'viridis'),
+                upper_pct=self.perc_sliders[miss].value,
+                stretch_name=self.stretch_widgets[miss].value
+            )
+
+        with self.out:
+            self._render_from_cache()
+
+    def _render_from_cache(self):
+        """
+        Renders the multi-panel plot using the cached RGB arrays.
+        """
         n_cols = 2
         n_rows = (len(self.missions) + 1) // 2
         # Use a consistent figure creation pattern
         plt.close('all')  # Clean up to prevent memory creep
         self.fig, self.axes = plt.subplots(n_rows, n_cols, figsize=MULTI_FIG_SIZE)
         self.axes = np.atleast_2d(self.axes).flatten()
-        
+
         for i, miss in enumerate(self.missions):
-            rgb = apply_colormap(
-                self.data_dict[miss], self.cmaps.get(miss, 'viridis'),
-                upper_pct=self.perc_sliders[miss].value,
-                stretch_name=self.stretch_widgets[miss].value
-            )
+            rgb = self.rgb_cache[miss]
             self.axes[i].imshow(rgb, origin='lower')
             self.axes[i].set_title(miss, fontsize=10, pad=5)
             self.axes[i].axis('off')
-            
+
         # Hide any unused axes
         for j in range(i + 1, len(self.axes)):
             self.axes[j].axis('off')
-            
+
         plt.subplots_adjust(left=0.01, right=0.99, top=0.92, bottom=0.01, wspace=0.02, hspace=0.1)
         plt.show()
 
@@ -232,10 +240,17 @@ class InteractiveMultiPanel:
             "<style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>"
             "</div>"
         )
-        
+
+        # Update only the changed mission in the cache
+        self.rgb_cache[mission] = apply_colormap(
+            self.data_dict[mission], self.cmaps.get(mission, 'viridis'),
+            upper_pct=self.perc_sliders[mission].value,
+            stretch_name=self.stretch_widgets[mission].value
+        )
+
         with self.out:
             clear_output(wait=True)
-            self._render_initial()
+            self._render_from_cache()
 
         self.status.value = (
             "<div style='display: flex; flex-direction: column; align-items: center; margin-top: 30px;'>"

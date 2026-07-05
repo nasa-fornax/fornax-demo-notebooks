@@ -66,8 +66,6 @@ This demonstration acquires data from remote services, and as such the runtime c
 ```
 
 ```{code-cell} python
-import os
-os.environ['KMP_WARNINGS'] = '0' # Silences the OpenMP warning
 import sys
 
 from astropy.coordinates import SkyCoord
