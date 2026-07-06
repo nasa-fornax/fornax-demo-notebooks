@@ -31,7 +31,17 @@ OBJ_PRESETS = {"crab": {'start_red_int_perc': 85.,
                        'start_green_int_perc': 95.,
                        'start_blue_int_perc': 98.5,
                        'start_q': 4.,
-                       'start_stretch': 1.5}
+                       'start_stretch': 1.5},
+               "SN1604": {'start_red_int_perc': 99.,
+                          'start_green_int_perc': 99.5,
+                          'start_blue_int_perc': 99.5,
+                          'start_q': 2.6,
+                          'start_stretch': 0.5},
+               "ZwCl0024+1652": {'start_red_int_perc': 98.5,
+                          'start_green_int_perc': 98.5,
+                          'start_blue_int_perc': 97.,
+                          'start_q': 4.5,
+                          'start_stretch': 1.2}
                }
 
 def get_vis_presets(check_src_name):

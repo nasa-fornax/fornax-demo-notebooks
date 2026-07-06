@@ -105,8 +105,8 @@ a SkyCoord from the RA-Dec (or other coordinate system) of your source of intere
 To get started, we provide a few suggestions to try out:
 - ***The Crab Nebula*** **[Crab; default]** – One of the most observed sources in the Milky Way, a favorite for calibrating space observatories, and famously visually striking.
 - ***Messier 61*** – Also known as the 'Swelling Spiral Galaxy', M61 is one of the largest members of the Virgo galaxy cluster and has played host to 8 observed supernovae since 1926 (a considerable number). 
+- ***ZwCl 0024+1652*** - A galaxy cluster that demonstrates significant structure in its dark matter distribution.
 - ***Kepler's Supernova*** **[SN 1604]** – The remnant of the most recent supernova observed with the naked eye (in 1604).
-- ***NGC 4753*** - A lenticular galaxy, discovered by William Herschel in 1784, with eye-catching dust lanes.
 - ***Abell 370*** - A galaxy cluster known for several prominent strong-lensing arc features.
 - ***NGC 2595*** - A large elliptical galaxy, part of a galaxy group, discovered by William Herschel in 1787.
 
@@ -116,8 +116,8 @@ SOURCE_NAME = "Crab"
 
 # Other source suggestions - uncomment them (and comment out the others) to try them out.
 # SOURCE_NAME = "M61"
+# SOURCE_NAME = "ZwCl0024+1652"
 # SOURCE_NAME = "SN1604"
-# SOURCE_NAME = "NGC4753"
 # SOURCE_NAME = "A370"
 # SOURCE_NAME = "NGC2595"
 
@@ -702,7 +702,7 @@ The interactive controls allow you to adjust:
 - **Lupton Q**: Softening parameter (higher values show more faint detail).
 - **Lupton stretch**: Overall brightness (higher values make the image brighter).
 
-We note that NGC 4753 has poor Chandra coverage, so for that source we use the UV 
+We note that in cases where there are no Chandra data available, we use the UV 
 observation from Swift as the blue channel instead.
 
 ```{code-cell} python
@@ -710,7 +710,7 @@ red_chan = reproj_data_cov['Spitzer']['data']
 
 green_chan = reproj_data_cov['Hubble']['data']
 
-if SOURCE_NAME == 'NGC 4753' or "Chandra" not in reproj_data_cov:
+if "Chandra" not in reproj_data_cov:
     blue_chan = reproj_data_cov['Swift']['data']
 else:
     blue_chan = reproj_data_cov['Chandra']['data']
