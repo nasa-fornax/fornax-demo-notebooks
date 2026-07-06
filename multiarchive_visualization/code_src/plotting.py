@@ -22,22 +22,12 @@ RGB_FIG_SIZE = (6.5, 6.5)
 MULTI_FIG_SIZE = (6.5, 6.5)
 CONTROL_PANEL_WIDTH = '480px'
 
-OBJ_PRESETS = {"crab": {'start_red_int_perc': 95.,
+OBJ_PRESETS = {"crab": {'start_red_int_perc': 85.,
                         'start_green_int_perc': 95.,
                         'start_blue_int_perc': 94.,
-                        'start_q': 4.,
+                        'start_q': 5.,
                         'start_stretch': 0.5}
                }
-
-# DEFAULT_RED_PERC = 95
-# DEFAULT_GREEN_PERC = 95
-# DEFAULT_BLUE_PERC = 99.5
-# DEFAULT_Q = 8
-# DEFAULT_STRETCH = 0.1
-
-# Max dimension for interactive display to prevent memory issues
-# MAX_DISPLAY_DIM = 1024
-
 
 def get_vis_presets(check_src_name):
 
