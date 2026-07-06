@@ -296,7 +296,7 @@ def load_hubble_image(chosen_hubble_im):
     if rel_mast_uri is not None:
         hubble_im_s3_uri = Observations.get_cloud_uri(rel_mast_uri)
     else:
-        hubble_im_s3_uri = None
+        return None
 
     # Possible that the product in question won't be available in a MAST S3
     #  bucket, and unfortunately, neither 'get_cloud_uri' nor 'get_cloud_uris'
