@@ -29,7 +29,9 @@ VETTED_OBS = {"crab": {'chandra': "1994",
                        "hubble": "jc6801010",
                        "swift": "00030371012",
                        "spitzer": "50059401.50059401-10.IRAC"},
-              "m61": {'hubble': 'ieyq34020'}}
+              "m61": {'hubble': 'ieyq34020'},
+              "a370": {'hubble': "jcsz25010"}
+              }
 
 # Setting up the directory structure
 ROOT_DATA_DIR = "data/"
