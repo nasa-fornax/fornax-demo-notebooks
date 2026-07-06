@@ -278,14 +278,25 @@ def load_hubble_image(chosen_hubble_im):
                 rel_mast_uri = str(chosen_hubble_im[0])
 
             elif len(chosen_hubble_im) > 1:
-                raise ValueError("The 'chosen_hubble_im' should represent a single "
-                                 "image, rather than multiple products.")
+                warn(f"The 'chosen_hubble_im' represent {len(chosen_hubble_im)} "
+                     f"images, rather than a single product. The first entry has "
+                     f"been automatically selected, but you may wish to manually "
+                     f"decide which image to use for this source.")
+                rel_mast_uri = str(chosen_hubble_im[0])
+
+            elif len(chosen_hubble_im) == 0:
+                warn("The 'chosen_hubble_im' table does not contain any "
+                     "information, meaning that no Hubble image was found.")
+                rel_mast_uri = None
 
     else:
         raise TypeError("The 'chosen_hubble_im' argument must be either a string "
                         "representing a URI, or an Astropy Table, Row, or Column.")
 
-    hubble_im_s3_uri = Observations.get_cloud_uri(rel_mast_uri)
+    if rel_mast_uri is not None:
+        hubble_im_s3_uri = Observations.get_cloud_uri(rel_mast_uri)
+    else:
+        hubble_im_s3_uri = None
 
     # Possible that the product in question won't be available in a MAST S3
     #  bucket, and unfortunately, neither 'get_cloud_uri' nor 'get_cloud_uris'
