@@ -457,7 +457,7 @@ if len(all_hubble_obs) > 0:
                                                  productSubGroupDescription=["DRC", "DRZ"], 
                                                  mrp_only=True)
     
-    if "DRC" in sel_hubble_im['productSubGroupDescription'].value:
+    if "DRC" in np.array(sel_hubble_im['productSubGroupDescription'].value):
         sel_hubble_im = sel_hubble_im[sel_hubble_im['productSubGroupDescription'] == "DRC"]
     else:
         sel_hubble_im = sel_hubble_im[sel_hubble_im['productSubGroupDescription'] == "DRZ"]
