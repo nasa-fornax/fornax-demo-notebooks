@@ -140,6 +140,82 @@ def load_chandra_image(chosen_chandra_dl, preproc_cent_hi_res: bool = True):
     return fits.open(im_s3_uri, use_fsspec=True, fsspec_kwargs={'anon': True})
 
 
+def load_swift_image(chosen_swift_dl, uvot_filt_expo_col: str):
+    """
+    Load a Swift image from AWS S3.
+
+    Parameters
+    ----------
+    chosen_swift_dl : str, Table, Row, or Column
+        Information to identify the Swift observation to load.
+
+    Returns
+    -------
+    astropy.io.fits.HDUList or None
+        The opened FITS file, or None if the image cannot be found.
+    """
+    if 'w1' in uvot_filt_expo_col.lower():
+        im_patt = "*uw1_sk*"
+    elif 'w2' in uvot_filt_expo_col.lower():
+        im_patt = "*uw2_sk*"
+    elif 'm2' in uvot_filt_expo_col.lower():
+        im_patt = "*um2_sk*"
+    elif 'b' in uvot_filt_expo_col.lower():
+        im_patt = "*ubb_sk*"
+    elif 'v' in uvot_filt_expo_col.lower():
+        im_patt = "*uvv_sk*"
+    elif 'u' in uvot_filt_expo_col.lower():
+        im_patt = "*uuu_sk*"
+
+    if chosen_swift_dl is None:
+        return None
+    # If the input is a string, we'll assume it's the URI
+    if isinstance(chosen_swift_dl, str):
+        rel_swift_uri = str(chosen_swift_dl)
+
+    elif isinstance(chosen_swift_dl, (Table, Row, Column)):
+        if isinstance(chosen_swift_dl, Table):
+            chosen_swift_dl = chosen_swift_dl['aws']
+        elif isinstance(chosen_swift_dl, Row):
+            rel_swift_uri = chosen_swift_dl['aws']
+
+        # It should (fingers crossed) definitely be a Column instance by now
+        #  We'll quickly check that the name of the Column is correct
+        if isinstance(chosen_swift_dl, Column) and chosen_swift_dl.name != 'aws':
+            raise ValueError("If an Astropy Column instance is passed for "
+                             "'chosen_swift_dl', it must be named 'aws'.")
+        elif isinstance(chosen_swift_dl, Column):
+            if len(chosen_swift_dl) == 1:
+                rel_swift_uri = str(chosen_swift_dl[0])
+
+            elif len(chosen_swift_dl) > 1:
+                raise ValueError("The 'chosen_swift_dl' should represent a single "
+                                 "observation, rather than multiple.")
+
+    else:
+        raise TypeError("The 'chosen_swift_dl' argument must be either a string "
+                        "representing an AWS URI, or an Astropy Table, Row, or Column.")
+
+    patt_uri = os.path.join(rel_swift_uri, "uvot", "image", im_patt)
+
+    try:
+        patt_res = S3_CONN.expand_path(patt_uri)
+
+        if len(patt_res) != 1:
+            warn(f"Multiple Swift images found, selecting the first; {patt_res}")
+
+        # Either way selecting the first entry
+        im_s3_uri = patt_res[0]
+
+    except FileNotFoundError:
+        warn('No Swift image can be identified.')
+        return None
+
+    im_s3_uri = os.path.join(rel_swift_uri, "uvot", 'image', os.path.basename(im_s3_uri))
+
+    return fits.open(im_s3_uri, use_fsspec=True, fsspec_kwargs={'anon': True})
+
+
 def load_spitzer_image(chosen_spitzer_im):
     """
     Load a Spitzer image from AWS S3 or a provided URL.
@@ -186,56 +262,6 @@ def load_spitzer_image(chosen_spitzer_im):
         return fits.open(im_s3_uri, use_fsspec=True, fsspec_kwargs={'anon': True})
     else:
         return fits.open(spitzer_access_url)
-
-
-def load_swift_image(chosen_swift_im):
-    """
-    Load a Swift image from a provided URL.
-
-    Parameters
-    ----------
-    chosen_swift_im : str, Table, Row, or Column
-        Information identifying the Swift image to load.
-
-    Returns
-    -------
-    astropy.io.fits.HDUList or None
-        The opened FITS file, or None if the input is None.
-    """
-
-    if chosen_swift_im is None:
-        return None
-    # If the input is a string, we'll assume it's the URL
-    elif isinstance(chosen_swift_im, str):
-        # Certain Astroquery-MAST methods don't get on well with numpy strings, which
-        #  are typically the dtype returned from accessing an astropy table string
-        #  column. As such we make sure to turn them into base Python strings
-        rel_swift_url = str(chosen_swift_im)
-
-    elif isinstance(chosen_swift_im, (Table, Row, Column)):
-        if isinstance(chosen_swift_im, Table):
-            chosen_swift_im = chosen_swift_im['dataURL']
-        elif isinstance(chosen_swift_im, Row):
-            rel_swift_url = chosen_swift_im['dataURL']
-
-        # It should (fingers crossed) definitely be a Column instance by now
-        #  We'll quickly check that the name of the Column is correct
-        if isinstance(chosen_swift_im, Column) and chosen_swift_im.name != 'dataURL':
-            raise ValueError("If an Astropy Column instance is passed for "
-                             "'chosen_swift_im', it must be named 'dataURL'.")
-        elif isinstance(chosen_swift_im, Column):
-            if len(chosen_swift_im) == 1:
-                rel_swift_url = str(chosen_swift_im[0])
-
-            elif len(chosen_swift_im) > 1:
-                raise ValueError("The 'chosen_swift_im' should represent a single "
-                                 "image, rather than multiple products.")
-
-    else:
-        raise TypeError("The 'chosen_swift_im' argument must be either a string "
-                        "representing a URL, or an Astropy Table, Row, or Column.")
-
-    return fits.open(rel_swift_url)
 
 
 def load_hubble_image(chosen_hubble_im):

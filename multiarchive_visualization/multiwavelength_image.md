@@ -28,7 +28,7 @@ By the end of this tutorial, you will be able to:
 This notebook is intended as a gentle introduction to the sort of things you can do 
 on the Fornax Science Console, while also providing a demonstration of how you might
 begin to make visually appealing multi-wavelength images of astronomical sources.
-(Though the author makes no claims as to having any _good_ sense of aesthetics – you're on 
+(Though the author makes no claims as to having a _good_ sense of aesthetics – you're on 
 your own there).
 
 We'll be searching the NASA astrophysics archives for observations of named 
@@ -510,8 +510,48 @@ swift_obs_id
 We define a radius within which we will search for Swift-UVOT images of our target source:
 
 ```{code-cell} python
-SWIFT_SEARCH_RAD = Quantity(5, 'arcmin')
+SWIFT_SEARCH_RAD = Quantity(4, 'arcmin')
 ```
+
+
+
+```{code-cell} python
+SWIFT_FILTER_EXPO_COL = "uvot_expo_w2"
+swift_filter_expr = {SWIFT_FILTER_EXPO_COL: (">", 0.0)}
+```
+
+```{code-cell} python
+# If a pre-vetted observation exists, we'll add an extra filter to only select that
+ # one observation.              
+swift_filter_expr.update({} if swift_obs_id is None else {"obsid": swift_obs_id})
+
+all_swift_obs = Heasarc.query_region(SOURCE_COORD, 
+                                     catalog='swiftmastr', 
+                                     column_filters=swift_filter_expr, 
+                                     columns='*', 
+                                     radius=SWIFT_SEARCH_RAD)
+                                     
+all_swift_obs.sort(SWIFT_FILTER_EXPO_COL, reverse=True)
+all_swift_obs
+```
+
+If any Swift-UVOT data with one of the UV filters we specified can be found, we proceed
+to choose the one with the longest exposure time (we already sorted by descending 
+exposure time in the cell above):
+
+```{code-cell} python
+if len(all_swift_obs) > 0:
+    sel_swift_datalink = Heasarc.locate_data(all_swift_obs[0])
+else:
+    sel_swift_datalink = None
+```
+
+Finally, we read in the image using a convenience function defined in the `code_src/archive_queries.py` file:
+
+```{code-cell} python
+swift_hdu = load_swift_image(sel_swift_datalink, SWIFT_FILTER_EXPO_COL)
+```
+
 
 Using the same `Observations` class as we did to retrieve Hubble observations from 
 MAST, we perform the search for relevant data - once again we sort by exposure time as 
@@ -519,34 +559,24 @@ a proxy for the 'quality' of the image (though we do not recommend this for scie
 purposes, we have to have _some_ metric in order to automate this demonstration):
 
 ```{code-cell} python
-all_swift_obs = Observations.query_criteria(
-    coordinates=SOURCE_COORD,
-    radius=SWIFT_SEARCH_RAD,
-    obs_collection='SWIFT',
-    obs_id="*" if swift_obs_id is None else swift_obs_id,
-    filters=["UVW2", "UVM2", "UVW1"],
-    calib_level=2,
-)
-
-del all_swift_obs['s_region']
-all_swift_obs.sort('t_exptime', reverse=True)
-
-all_swift_obs
+# all_swift_obs = Observations.query_criteria(
+#     coordinates=SOURCE_COORD,
+#     radius=SWIFT_SEARCH_RAD,
+#     obs_collection='SWIFT',
+#     obs_id="*" if swift_obs_id is None else swift_obs_id,
+#     filters=["UVW2", "UVM2", "UVW1"],
+#     calib_level=2,
+# )
+# 
+# del all_swift_obs['s_region']
+# all_swift_obs.sort('t_exptime', reverse=True)
+# 
+# all_swift_obs
 ```
 
-If any Swift-UVOT data with one of the UV filters we specified can be found, we proceed
-to choosing the one with the longest exposure time.
-Then reading the image using
-a convenience function defined in the `code_src/archive_queries.py` file:
 
-```{code-cell} python
-if len(all_swift_obs) > 0:
-    sel_swift_obs = all_swift_obs[0]
-else:
-    sel_swift_obs = None
 
-swift_hdu = load_swift_image(sel_swift_obs)
-```
+
 +++
 
 ## 3. Reproject images to a common coordinate grid
