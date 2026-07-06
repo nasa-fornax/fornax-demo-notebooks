@@ -4,7 +4,7 @@
 
 # Core Astronomy and Data Analysis
 astropy
-astroquery
+astroquery>=0.4.12.dev10885
 numpy
 
 # Image Reprojection
