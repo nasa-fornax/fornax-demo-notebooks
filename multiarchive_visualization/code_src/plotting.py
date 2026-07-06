@@ -22,28 +22,27 @@ RGB_FIG_SIZE = (6.5, 6.5)
 MULTI_FIG_SIZE = (6.5, 6.5)
 CONTROL_PANEL_WIDTH = '480px'
 
-DEFAULT_RED_PERC = 95
-DEFAULT_GREEN_PERC = 95
-DEFAULT_BLUE_PERC = 99.5
-DEFAULT_Q = 8
-DEFAULT_STRETCH = 0.1
+# DEFAULT_RED_PERC = 95
+# DEFAULT_GREEN_PERC = 95
+# DEFAULT_BLUE_PERC = 99.5
+# DEFAULT_Q = 8
+# DEFAULT_STRETCH = 0.1
 
 # Max dimension for interactive display to prevent memory issues
-MAX_DISPLAY_DIM = 1024
+# MAX_DISPLAY_DIM = 1024
 
 
-def get_display_data(data):
+def get_display_data(data, max_pix: int):
     """
-    Downsample image data for interactive display if it exceeds MAX_DISPLAY_DIM.
+    Downsample image data for interactive display if it exceeds the input `max_pix`.
     """
     if data is None:
         return None
 
-    h, w = data.shape[:2]
-    max_dim = max(h, w)
+    longest_im_pix_size = data.shape[:2].max()
 
-    if max_dim > MAX_DISPLAY_DIM:
-        step = int(np.ceil(max_dim / MAX_DISPLAY_DIM))
+    if longest_im_pix_size > max_pix:
+        step = int(np.ceil(longest_im_pix_size / max_pix))
         return data[::step, ::step]
     return data
 
@@ -74,27 +73,36 @@ class InteractiveRGBPanel:
     An interactive dashboard for creating RGB composite images.
     """
 
-    def __init__(self, red_data, green_data, blue_data):
+    def __init__(self, red_data: np.ndarray,
+                 green_data: np.ndarray,
+                 blue_data: np.ndarray,
+                 start_red_int_perc: float = 95,
+                 start_green_int_perc: float = 95,
+                 start_blue_int_perc: float = 99.5,
+                 start_q: float = 8,
+                 start_stretch: float = 0.1,
+                 max_pix_per_side: int = 1024):
+
         # Downsample for display stability
-        self.r = get_display_data(np.nan_to_num(red_data, nan=0, copy=False))
-        self.g = get_display_data(np.nan_to_num(green_data, nan=0, copy=False))
-        self.b = get_display_data(np.nan_to_num(blue_data, nan=0, copy=False))
+        self.r = get_display_data(np.nan_to_num(red_data, nan=0, copy=False), max_pix_per_side)
+        self.g = get_display_data(np.nan_to_num(green_data, nan=0, copy=False), max_pix_per_side)
+        self.b = get_display_data(np.nan_to_num(blue_data, nan=0, copy=False), max_pix_per_side)
 
         # Initialize widgets
         self.q_slider = widgets.FloatSlider(
-            description='Lupton Q', min=0.1, max=20, value=DEFAULT_Q, step=0.5, continuous_update=False
+            description='Lupton Q', min=0.1, max=20, value=start_q, step=0.5, continuous_update=False
         )
         self.stretch_slider = widgets.FloatSlider(
-            description='Stretch', min=0.01, max=2, value=DEFAULT_STRETCH, step=0.05, continuous_update=False
+            description='Stretch', min=0.01, max=2, value=start_stretch, step=0.05, continuous_update=False
         )
         self.r_perc = widgets.FloatSlider(
-            description='Red %', min=50, max=100, value=DEFAULT_RED_PERC, step=0.5, continuous_update=False
+            description='Red %', min=50, max=100, value=start_red_int_perc, step=0.5, continuous_update=False
         )
         self.g_perc = widgets.FloatSlider(
-            description='Green %', min=50, max=100, value=DEFAULT_GREEN_PERC, step=0.5, continuous_update=False
+            description='Green %', min=50, max=100, value=start_green_int_perc, step=0.5, continuous_update=False
         )
         self.b_perc = widgets.FloatSlider(
-            description='Blue %', min=50, max=100, value=DEFAULT_BLUE_PERC, step=0.5, continuous_update=False
+            description='Blue %', min=50, max=100, value=start_blue_int_perc, step=0.5, continuous_update=False
         )
 
         self.status = widgets.HTML(
@@ -164,9 +172,9 @@ class InteractiveMultiPanel:
     An interactive dashboard for multi-panel visualization.
     """
 
-    def __init__(self, reprojected_data, cmaps):
+    def __init__(self, reprojected_data, cmaps, max_pix: int = 1024):
         self.data_dict = {
-            k: get_display_data(np.nan_to_num(v, nan=0.0, copy=False))
+            k: get_display_data(np.nan_to_num(v, nan=0.0, copy=False), max_pix)
             for k, v in reprojected_data.items()
         }
         self.cmaps = cmaps
