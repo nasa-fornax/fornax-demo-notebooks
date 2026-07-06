@@ -25,7 +25,10 @@ S3_CONN = S3FileSystem(anon=True)
 # Crab - hst_skycell-p1784x19y11_acs_wfc_f550m_all is a fantastic multi-visit-mosaic,
 #  but actually a bit large for our purposes.
 
-VETTED_OBS = {"crab": {'chandra': "1994", "hubble": "jc6801010", "swift": "00030371012", "spitzer": "50059401.50059401-10.IRAC"}, }
+VETTED_OBS = {"crab": {'chandra': "1994",
+                       "hubble": "jc6801010",
+                       "swift": "00030371012",
+                       "spitzer": "50059401.50059401-10.IRAC"}, }
 
 # Setting up the directory structure
 ROOT_DATA_DIR = "data/"

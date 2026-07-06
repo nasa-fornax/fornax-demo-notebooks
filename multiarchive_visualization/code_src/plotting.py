@@ -22,6 +22,13 @@ RGB_FIG_SIZE = (6.5, 6.5)
 MULTI_FIG_SIZE = (6.5, 6.5)
 CONTROL_PANEL_WIDTH = '480px'
 
+OBJ_PRESETS = {"crab": {'start_red_int_perc': 95.,
+                        'start_green_int_perc': 95.,
+                        'start_blue_int_perc': 94.,
+                        'start_q': 4.,
+                        'start_stretch': 0.5}
+               }
+
 # DEFAULT_RED_PERC = 95
 # DEFAULT_GREEN_PERC = 95
 # DEFAULT_BLUE_PERC = 99.5
@@ -32,6 +39,16 @@ CONTROL_PANEL_WIDTH = '480px'
 # MAX_DISPLAY_DIM = 1024
 
 
+def get_vis_presets(check_src_name):
+
+    check_src_name = check_src_name.lower()
+
+    if check_src_name not in OBJ_PRESETS:
+        return {}
+    else:
+        return OBJ_PRESETS[check_src_name]
+
+
 def get_display_data(data, max_pix: int):
     """
     Downsample image data for interactive display if it exceeds the input `max_pix`.
@@ -39,7 +56,7 @@ def get_display_data(data, max_pix: int):
     if data is None:
         return None
 
-    longest_im_pix_size = data.shape[:2].max()
+    longest_im_pix_size = int(max(data.shape[:2]))
 
     if longest_im_pix_size > max_pix:
         step = int(np.ceil(longest_im_pix_size / max_pix))

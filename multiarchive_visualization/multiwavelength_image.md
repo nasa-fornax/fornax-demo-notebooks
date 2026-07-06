@@ -90,7 +90,7 @@ sys.path.append('code_src/')
 from archive_queries import (vetted_source_check, load_chandra_image, 
                              load_spitzer_image, load_hubble_image, load_swift_image)
 from image_processing import get_pixel_scale, reproject_to_common_grid
-from plotting import InteractiveRGBPanel, InteractiveMultiPanel
+from plotting import InteractiveRGBPanel, InteractiveMultiPanel, get_vis_presets
 ```
 
 +++
@@ -682,17 +682,21 @@ We note that NGC 4753 has poor Chandra coverage, so for that source we use the U
 observation from Swift as the blue channel instead.
 
 ```{code-cell} python
-
 red_chan = reproj_data_cov['Spitzer']['data']
+
 green_chan = reproj_data_cov['Hubble']['data']
+
 if SOURCE_NAME == 'NGC 4753' or "Chandra" not in reproj_data_cov:
     blue_chan = reproj_data_cov['Swift']['data']
 else:
     blue_chan = reproj_data_cov['Chandra']['data']
 
+vis_arg_presets = get_vis_presets(SOURCE_NAME)
+
 multi_wav_im = InteractiveRGBPanel(red_data=red_chan,
                                    green_data=green_chan,
-                                   blue_data=blue_chan)
+                                   blue_data=blue_chan,
+                                   **vis_arg_presets)
 multi_wav_im.view()
 ```
 
