@@ -46,7 +46,12 @@ OBJ_PRESETS = {"crab": {'start_red_int_perc': 85.,
                          'start_green_int_perc': 96.5,
                          'start_blue_int_perc': 93.,
                          'start_q': 4.0,
-                         'start_stretch': 1.4}
+                         'start_stretch': 1.4},
+               "ic5201": {'start_red_int_perc': 96.,
+                         'start_green_int_perc': 97.,
+                         'start_blue_int_perc': 99.,
+                         'start_q': 2.1,
+                         'start_stretch': 1.1}
                }
 
 def get_vis_presets(check_src_name):

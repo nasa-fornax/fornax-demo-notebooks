@@ -109,6 +109,7 @@ To get started, we provide a few suggestions to try out:
 - ***Kepler's Supernova*** **[SN 1604]** – The remnant of the most recent supernova observed with the naked eye (in 1604).
 - ***Abell 370*** - A galaxy cluster known for several prominent strong-lensing arc features.
 - ***NGC 2595*** - A large elliptical galaxy, part of a galaxy group, discovered by William Herschel in 1787.
+- ***IC 5201*** - A bar spiral galaxy with areas of significant star formation.
 
 ```{code-cell} python
 # Define the target
@@ -120,6 +121,7 @@ SOURCE_NAME = "Crab"
 # SOURCE_NAME = "SN1604"
 # SOURCE_NAME = "A370"
 # SOURCE_NAME = "NGC2595"
+# SOURCE_NAME = "IC5201"
 
 # Resolve coordinates from name
 SOURCE_COORD = SkyCoord.from_name(SOURCE_NAME)
