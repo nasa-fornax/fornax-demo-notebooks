@@ -425,7 +425,7 @@ n_workers = 6
 # keyword arguments for the archive calls
 heasarc_kwargs = dict(catalog_error_radii={"FERMIGTRIG": "1.0", "SAXGRBMGRB": "3.0"})
 ztf_search_radius = 1.0 #  arcsec
-wise_kwargs = dict(radius=1.0, bandlist=['W1', 'W2'])
+wise_kwargs = dict(radius=1.0, bandlist=['WISE_W1', 'WISE_W2'])
 panstarrs_search_radius = 1.0 # arcsec
 tess_kepler_kwargs = dict(radius=1.0)
 hcv_kwargs = dict(radius=1.0/3600.0)

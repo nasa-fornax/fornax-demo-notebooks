@@ -34,7 +34,7 @@ def wise_get_lightcurves(sample_table, *, radius=1.0, bandlist=["WISE_W1", "WISE
         to each source. Only detections within this radius of the source
         position are returned.
     bandlist: list of strings
-        which WISE bands to search for, example: ['W1', 'W2']
+        which WISE bands to search for, example: ['WISE_W1', 'WISE_W2']
 
     Returns
     -------
@@ -50,7 +50,7 @@ def wise_get_lightcurves(sample_table, *, radius=1.0, bandlist=["WISE_W1", "WISE
             objectid : int
                 Input sample object identifier.
             band : str
-                WISE band label ('W1' or 'W2').
+                WISE band label ('WISE_W1' or 'WISE_W2').
             label : str
                 Literature label associated with each source.
 
@@ -158,7 +158,7 @@ def load_lightcurves(locations, radius, bandlist):
         Cone-search radius in arcseconds defining how close a detection must be 
         to a source to be considered a match.
     bandlist: list of strings
-        which WISE bands to search for, example: ['W1', 'W2']
+        which WISE bands to search for, example: ['WISE_W1', 'WISE_W2']
 
     Returns
     -------
@@ -171,7 +171,7 @@ def load_lightcurves(locations, radius, bandlist):
             ra : float (deg)
             dec : float (deg)
             band : int
-                Encoded WISE band (1=W1, 2=W2).
+                Encoded WISE band (1=WISE_W1, 2=WISE_W2).
             MJDMEAN : float
                 Mean MJD timestamp for the detection.
             objectid : int
@@ -264,7 +264,7 @@ def transform_lightcurves(wise_df):
             err  : float
                 Flux uncertainty in millijansky (mJy).
             band : str
-                WISE band name ('W1' or 'W2').
+                WISE band name ('WISE_W1' or 'WISE_W2').
             time : float
                 MJD timestamp.
             objectid : int
@@ -275,7 +275,7 @@ def transform_lightcurves(wise_df):
     Notes
     -----
     * Only positive-flux detections are retained.
-    * Numeric band codes are converted to "W1" or "W2".
+    * Numeric band codes are converted to "WISE_W1" or "WISE_W2".
     * Flux conversions use `convert_wise_flux_to_millijansky()` and are applied
       separately to each band.
     """
