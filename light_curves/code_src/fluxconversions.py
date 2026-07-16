@@ -14,7 +14,7 @@ def convert_wise_flux_to_millijansky(flux_nanomaggy, *, band=None):
     flux_nanomaggy : float or iterable of floats
         Flux in nanomaggy.
     band : str
-        WISE band name corresponding to flux_nanomaggy. One of "W1", "W2", "W3", "W4", or None.
+        WISE band name corresponding to flux_nanomaggy. One of "WISE_W1", "WISE_W2", "WISE_W3", "WISE_W4", or None.
         If None, band will be set to the name attribute of flux_nanomaggy. Useful when applying this
         transform to a DataFrame grouped by band.
 
