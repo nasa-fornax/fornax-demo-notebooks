@@ -5,8 +5,6 @@ jupytext:
     format_name: myst
     format_version: 0.13
     jupytext_version: 1.18.1
-execute:
-  skip: true
 kernelspec:
   name: python3
   display_name: py-spectra_collector

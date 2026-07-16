@@ -6,8 +6,6 @@ jupytext:
     format_name: myst
     format_version: 0.13
     jupytext_version: 1.16.1
-execute:
-  skip: true
 kernelspec:
   display_name: py-scale_up
   language: python
@@ -381,7 +379,7 @@ kwargs_dict = {
         "Gaia": {"search_radius": 1 / 3600, "verbose": 0},
         "HEASARC": {"catalog_error_radii": {"FERMIGTRIG": 1.0, "SAXGRBMGRB": 3.0}},
         "IceCube": {"icecube_select_topN": 3, "max_search_radius": 2.0},
-        "WISE": {"radius": 1.0, "bandlist": ["W1", "W2"]},
+        "WISE": {"radius": 1.0, "bandlist": ["WISE_W1", "WISE_W2"]},
         "ZTF": {"match_radius": 1 / 3600, "nworkers": None},
     },
 }
@@ -507,7 +505,7 @@ archives = {
     "Gaia": {"search_radius": 2 / 3600},
     "HEASARC": {"catalog_error_radii": {"FERMIGTRIG": 1.0, "SAXGRBMGRB": 3.0}},
     "IceCube": {"icecube_select_topN": 4, "max_search_radius": 2.0},
-    "WISE": {"radius": 1.5, "bandlist": ["W1", "W2"]},
+    "WISE": {"radius": 1.5, "bandlist": ["WISE_W1", "WISE_W2"]},
     "ZTF": {"nworkers": 6, "match_radius": 2 / 3600},
 }
 
