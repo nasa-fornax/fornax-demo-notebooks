@@ -1,0 +1,25 @@
+# Include *all* libraries that are direct dependencies of the notebook.
+# Do not pin versions, and do not use upper version limits unless absolute necessary, and always leave a comment as an explanation in those cases.
+# Always leave a comment for any non-direct dependencies that you may need to include in this file (for example if a direct dependency requires it, but it is just their optional dependency, or if there is a version limit implied by some functionality)
+
+# Core Astronomy and Data Analysis
+astropy
+astroquery>=0.4.12.dev10885
+numpy
+
+# Image Reprojection
+reproject
+# Required for interpolation functionality in reproject
+scipy
+
+# Visualization and Interactivity
+# Required for the use of Astropy's normalizing functions and colormaps
+matplotlib>=3.5.0
+ipywidgets
+ipykernel
+ipython
+
+# Cloud Data Access
+s3fs
+# Required for AWS S3 access in Astroquery
+boto3
