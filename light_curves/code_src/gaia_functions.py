@@ -1,8 +1,11 @@
 import time
 
+import lsdb
 import numpy as np
 import pandas as pd
+from astropy.table import Table
 from astroquery.gaia import Gaia
+from dask.distributed import Client
 
 from data_structures import MultiIndexDFObject
 
@@ -49,10 +52,11 @@ def gaia_get_lightcurves(sample_table, *, search_radius=1 / 3600, verbose=0):
 
     '''
     # This code is broken into two steps.  The first step, `gaia_retrieve_catalog` retrieves the
-    # Gaia source ids for the positions of our sample. These come from the "Gaia DR3 source lite catalog".
+    # Gaia source ids for the positions of our sample. These come from the Gaia DR3 "gaia_source"
+    # catalog, accessed as a HATS catalog on AWS S3 and cross-matched with LSDB.
     # However, that catalog only has a single photometry point per object.  To get the light curve
     # information, we use the function `gaia_retrieve_epoch_photometry` to use the source ids to
-    # access the "EPOCH_PHOTOMETRY" catalog.
+    # access the "EPOCH_PHOTOMETRY" catalog via the Gaia DataLink service.
 
     # Retrieve Gaia table with Source IDs ==============
     gaia_table = gaia_retrieve_catalog(sample_table,
@@ -81,7 +85,8 @@ def gaia_get_lightcurves(sample_table, *, search_radius=1 / 3600, verbose=0):
 
 def gaia_retrieve_catalog(sample_table, search_radius, verbose):
     '''
-    Retrieves the photometry table for a list of sources.
+    Retrieves the Gaia DR3 source_ids for a list of sources by cross-matching against the
+    Gaia DR3 "gaia_source" HATS catalog hosted on AWS S3, using LSDB.
 
     Parameter
     ----------
@@ -102,15 +107,13 @@ def gaia_retrieve_catalog(sample_table, search_radius, verbose):
     Returns
     --------
     gaia_table : astropy.table.Table
-        Table containing Gaia DR3 source matches for the input coordinates.
-        The table includes the following columns:
+        Table containing Gaia DR3 source matches for the input coordinates, restricted to
+        sources that have epoch photometry available. The table includes the following columns:
 
             ra : float
                 Right Ascension of the matched Gaia source (degrees).
             dec : float
                 Declination of the matched Gaia source (degrees).
-            random_index : int
-                Gaia random index used for efficient data server partitioning.
             source_id : int
                 Unique Gaia DR3 source identifier.
             objectid : int
@@ -120,32 +123,56 @@ def gaia_retrieve_catalog(sample_table, search_radius, verbose):
     '''
     t1 = time.time()
 
-    # first make an astropy table from our master list of coordinates
-    # as input to the pyvo TAP query
-    upload_table = sample_table['objectid', 'label']
-    upload_table['ra'] = sample_table['coord'].ra.deg
-    upload_table['dec'] = sample_table['coord'].dec.deg
+    # Open the Gaia DR3 "gaia_source" HATS catalog hosted on AWS S3 (via the STScI registry).
+    # This catalog has a single row per source; we only need enough columns to cross-match and
+    # to grab the source_id used to request epoch photometry from the DataLink service below.
+    # has_epoch_photometry lets us skip sources with no light curve before we ever hit DataLink.
+    gaia_object = lsdb.open_catalog(
+        's3://stpubdata/gaia/gaia_dr3/public/hats/',
+        columns=["source_id", "ra", "dec", "has_epoch_photometry"],
+    )
 
-    # this query is too slow without gaia.random_index.
-    # Gaia helpdesk is aware of this bug somewhere on their end
-    querystr = f"""
-        SELECT gaia.ra, gaia.dec, gaia.random_index, gaia.source_id, mt.ra, mt.dec, mt.objectid, mt.label
-        FROM tap_upload.table_test AS mt
-        JOIN gaiadr3.gaia_source_lite AS gaia
-        ON 1=CONTAINS(POINT('ICRS',mt.ra,mt.dec),CIRCLE('ICRS',gaia.ra,gaia.dec,{search_radius}))
-        """
-    # use an asynchronous query of the Gaia database
-    # cross match with our uploaded table
-    j = Gaia.launch_job_async(query=querystr, upload_resource=upload_table,
-                              upload_table_name="table_test")
+    # convert our sample's coordinates into an LSDB catalog for cross-matching
+    sample_df = pd.DataFrame({
+        'objectid': sample_table['objectid'],
+        'ra_deg': sample_table['coord'].ra.deg,
+        'dec_deg': sample_table['coord'].dec.deg,
+        'label': sample_table['label'],
+    })
+    sample_lsdb = lsdb.from_dataframe(
+        sample_df,
+        ra_column="ra_deg",
+        dec_column="dec_deg",
+        margin_threshold=10,
+        drop_empty_siblings=True,
+    )
 
-    results = j.get_results()
+    # cross-match our sample (left) against Gaia (right), keeping only the nearest source.
+    # search_radius is in degrees (for backwards compatibility); LSDB wants arcseconds.
+    matched = sample_lsdb.crossmatch(
+        gaia_object,
+        radius_arcsec=search_radius * 3600,
+        n_neighbors=1,
+        suffixes=("", ""),
+        suffix_method="all_columns",
+    )
+
+    # the cross-match is lazy; run it on a local Dask cluster.
+    # Use multiple workers with a single thread per worker for better performance on Fornax
+    with Client(threads_per_worker=1, memory_limit=None):
+        matched_df = matched.compute()
+
+    # only keep sources that actually have epoch photometry to retrieve from DataLink
+    matched_df = matched_df[matched_df["has_epoch_photometry"].astype(bool)]
 
     if verbose:
         print(f"\nSearch completed in {time.time() - t1:.2f} seconds \n"
-              f"Number of objects matched: {len(results)} out of {len(sample_table)}.")
+              f"Number of objects matched: {len(matched_df)} out of {len(sample_table)}.")
 
-    return results
+    # return an astropy table with the columns gaia_retrieve_epoch_photometry expects
+    return Table.from_pandas(
+        matched_df[["ra", "dec", "source_id", "objectid", "label"]].reset_index(drop=True)
+    )
 
 
 def gaia_chunks(lst, n):
