@@ -83,7 +83,7 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-%pip install -r requirements_light_curve_collector.txt
+#%pip install -r requirements_light_curve_collector.txt
 ```
 
 ```{code-cell} ipython3
@@ -114,10 +114,6 @@ from rubin_functions import rubin_get_lightcurves
 from ztf_functions import ztf_get_lightcurves
 
 # You may see a warning about "tpfmodel submodule".  This can safely be ignored.
-```
-
-```{code-cell} ipython3
-starttime = time.time()
 ```
 
 ## 1. Define the sample
@@ -532,11 +528,3 @@ This work made use of:
 * Lightkurve; Lightkurve Collaboration 2018, 2018ascl.soft12013L
 * acstools; https://zenodo.org/record/7406933#.ZBH1HS-B0eY
 * unWISE light curves; Meisner et al., 2023, 2023AJ....165...36M
-
-```{code-cell} ipython3
-print("total duration", (time.time() - starttime)/60.)
-```
-
-```{code-cell} ipython3
-
-```
