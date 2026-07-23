@@ -113,7 +113,6 @@ from wise_functions import wise_get_lightcurves
 from rubin_functions import rubin_get_lightcurves
 from ztf_functions import ztf_get_lightcurves
 
-# You may see a warning about passwords for the Gaia Archive.  This can safely be ignored.
 # You may see a warning about "tpfmodel submodule".  This can safely be ignored.
 ```
 
@@ -348,7 +347,7 @@ print('ZTF search took:', time.time() - ZTFstarttime, 's')
 
 ### 3.2 Gaia
 
-The function to retrieve Gaia light curves works in two steps. First it cross-matches our sample against the Gaia DR3 `gaia_source` catalog, accessed as a HATS catalog on AWS S3 using LSDB (the same cloud-native, scalable approach used for the ZTF and Pan-STARRS light curves), to look up the Gaia `source_id` of each target and keep only those with epoch photometry available. It then retrieves the epoch photometry for those sources from the Gaia DataLink service.
+The function to retrieve Gaia light curves cross-matches our sample against the Gaia DR3 epoch-photometry catalog, accessed as a HATS catalog using LSDB (the same cloud-native, scalable approach used for the ZTF and Pan-STARRS light curves). This catalog contains only the sources that have epoch photometry, with the light curves stored in a nested column, so a single positional cross-match returns the light curves directly.
 
 ```{code-cell} ipython3
 gaiastarttime = time.time()
@@ -508,7 +507,7 @@ These plots are modelled after [van Velzen et al., 2021](https://arxiv.org/abs/2
 __Note__ that in the following, we can either plot the results from `df_lc` (from the serial call) or `parallel_df_lc` (from the parallel call). By default (see next cell) the output of the parallel call is used.
 
 ```{code-cell} ipython3
-_ = create_figures(df_lc = parallel_df_lc, # either df_lc (serial call) or parallel_df_lc (parallel call)
+_ = create_figures(df_lc = df_lc, # either df_lc (serial call) or parallel_df_lc (parallel call)
                    show_nbr_figures = 5,  # how many plots do you actually want to see?
                    save_output = False ,  # should the resulting plots be saved?
                   )
