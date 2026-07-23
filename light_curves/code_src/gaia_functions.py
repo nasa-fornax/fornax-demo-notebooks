@@ -1,10 +1,18 @@
 import time
 
+import lsdb
 import numpy as np
 import pandas as pd
-from astroquery.gaia import Gaia
+from dask.distributed import Client
 
 from data_structures import MultiIndexDFObject
+
+# Gaia DR3 epoch photometry, hosted as a HATS catalog by LINCC.
+# This "object" catalog holds exactly the DR3 sources that have epoch photometry (one row per
+# source), with the light curves stored in a nested `epoch_photometry` column. Because it is
+# crossmatchable by position and already restricted to sources with light curves, a single
+# LSDB cross-match returns both the source match and its epoch photometry.
+GAIA_EPOCH_PHOT_HATS = "https://data.lsdb.io/hats/gaia_dr3_epoch_phot/"
 
 
 def gaia_get_lightcurves(sample_table, *, search_radius=1 / 3600, verbose=0):
@@ -21,7 +29,7 @@ def gaia_get_lightcurves(sample_table, *, search_radius=1 / 3600, verbose=0):
             objectid : int
                 Unique identifier for each source in the sample.
             label : str
-                Literature label for tracking source provenance.   
+                Literature label for tracking source provenance.
     search_radius: float(degrees)
         Cone-search radius in degrees for matching Gaia DR3 sources.
         Default is 1/3600 (1 arcsec).
@@ -33,7 +41,7 @@ def gaia_get_lightcurves(sample_table, *, search_radius=1 / 3600, verbose=0):
     df_lc : MultiIndexDFObject
         Indexed by [objectid, label, band, time]. The resulting internal pandas DataFrame
         contains the following columns:
-        
+
             flux : float
                 Gaia G-band transit flux in electrons per second (e-/s).
             err : float
@@ -48,26 +56,14 @@ def gaia_get_lightcurves(sample_table, *, search_radius=1 / 3600, verbose=0):
                 Literature label associated with each source.
 
     '''
-    # This code is broken into two steps.  The first step, `gaia_retrieve_catalog` retrieves the
-    # Gaia source ids for the positions of our sample. These come from the "Gaia DR3 source lite catalog".
-    # However, that catalog only has a single photometry point per object.  To get the light curve
-    # information, we use the function `gaia_retrieve_epoch_photometry` to use the source ids to
-    # access the "EPOCH_PHOTOMETRY" catalog.
-
-    # Retrieve Gaia table with Source IDs ==============
-    gaia_table = gaia_retrieve_catalog(sample_table,
-                                       search_radius=search_radius,
-                                       verbose=verbose
-                                       )
-    # if none of the objects were found, there's nothing to load and the gaia_retrieve_epoch_photometry fnc
-    # will raise an HTTPError. just return an empty dataframe instead of proceeding
-    if len(gaia_table) == 0:
-        return MultiIndexDFObject()
-
-    # Extract Light curves ===============
-    # request the EPOCH_PHOTOMETRY from the Gaia DataLink Service
-
-    gaia_df = gaia_retrieve_epoch_photometry(gaia_table)
+    # We cross-match our sample against the Gaia DR3 epoch-photometry HATS catalog with LSDB
+    # (the same cloud-native approach used for the ZTF and Pan-STARRS light curves). That
+    # catalog already contains only the sources that have epoch photometry, stored in a nested
+    # column, so a single cross-match returns the light curves directly.
+    gaia_df = gaia_retrieve_epoch_photometry(sample_table,
+                                             search_radius=search_radius,
+                                             verbose=verbose
+                                             )
 
     # if the epochal photometry is empty, return an empty dataframe
     if len(gaia_df) == 0:
@@ -79,11 +75,12 @@ def gaia_get_lightcurves(sample_table, *, search_radius=1 / 3600, verbose=0):
     return df_lc
 
 
-def gaia_retrieve_catalog(sample_table, search_radius, verbose):
+def gaia_retrieve_epoch_photometry(sample_table, search_radius, verbose):
     '''
-    Retrieves the photometry table for a list of sources.
+    Retrieves Gaia DR3 epoch photometry for a list of sources by cross-matching against the
+    Gaia DR3 epoch-photometry HATS catalog hosted by LINCC, using LSDB.
 
-    Parameter
+    Parameters
     ----------
     sample_table : astropy.table.Table
         Table containing the source sample. The following columns must be present:
@@ -101,94 +98,10 @@ def gaia_retrieve_catalog(sample_table, search_radius, verbose):
 
     Returns
     --------
-    gaia_table : astropy.table.Table
-        Table containing Gaia DR3 source matches for the input coordinates.
-        The table includes the following columns:
-
-            ra : float
-                Right Ascension of the matched Gaia source (degrees).
-            dec : float
-                Declination of the matched Gaia source (degrees).
-            random_index : int
-                Gaia random index used for efficient data server partitioning.
-            source_id : int
-                Unique Gaia DR3 source identifier.
-            objectid : int
-                Input sample object identifier.
-            label : str
-                Literature label associated with each source.
-    '''
-    t1 = time.time()
-
-    # first make an astropy table from our master list of coordinates
-    # as input to the pyvo TAP query
-    upload_table = sample_table['objectid', 'label']
-    upload_table['ra'] = sample_table['coord'].ra.deg
-    upload_table['dec'] = sample_table['coord'].dec.deg
-
-    # this query is too slow without gaia.random_index.
-    # Gaia helpdesk is aware of this bug somewhere on their end
-    querystr = f"""
-        SELECT gaia.ra, gaia.dec, gaia.random_index, gaia.source_id, mt.ra, mt.dec, mt.objectid, mt.label
-        FROM tap_upload.table_test AS mt
-        JOIN gaiadr3.gaia_source_lite AS gaia
-        ON 1=CONTAINS(POINT('ICRS',mt.ra,mt.dec),CIRCLE('ICRS',gaia.ra,gaia.dec,{search_radius}))
-        """
-    # use an asynchronous query of the Gaia database
-    # cross match with our uploaded table
-    j = Gaia.launch_job_async(query=querystr, upload_resource=upload_table,
-                              upload_table_name="table_test")
-
-    results = j.get_results()
-
-    if verbose:
-        print(f"\nSearch completed in {time.time() - t1:.2f} seconds \n"
-              f"Number of objects matched: {len(results)} out of {len(sample_table)}.")
-
-    return results
-
-
-def gaia_chunks(lst, n):
-    """
-    "Split an input list into multiple chunks of size =< n"
-
-    Parameters
-    ----------
-    lst: list of gaia Ids
-    n: int = maximum size of the desired chunk
-
-    """
-    for i in range(0, len(lst), n):
-        yield lst[i:i + n]
-
-
-def gaia_retrieve_epoch_photometry(gaia_table):
-    """
-    Function to retrieve EPOCH_PHOTOMETRY catalog product for Gaia
-    entries using the DataLink. Note that the IDs need to be DR3 source_id and needs to be a list.
-
-    Code fragments taken from:
-    https://www.cosmos.esa.int/web/gaia-users/archive/datalink-products#datalink_jntb_get_above_lim
-
-    Parameters
-    ----------
-    gaia_table: Astropy Table
-        Table returned by gaia_retrieve_catalog. Must include:
-        source_id : int
-            Gaia DR3 source identifier for the photometry request.
-        objectid : int
-            Used to label the MultiIndex rows later.
-        label : str
-            Text label used for grouping and plotting.
-
-    Returns
-    --------
     gaia_df : pandas.DataFrame
-        Concatenated Gaia epoch photometry for all matched sources.
-        The resulting DataFrame contains the following columns:
+        Flattened Gaia epoch photometry, one row per transit measurement, for the matched
+        sources. The resulting DataFrame contains the following columns:
 
-            source_id : int
-                Gaia DR3 source identifier for this transit measurement.
             g_transit_flux : float
                 Gaia G-band transit flux (electrons per second).
             g_transit_flux_error : float
@@ -201,63 +114,67 @@ def gaia_retrieve_epoch_photometry(gaia_table):
                 Input sample object identifier.
             label : str
                 Literature label associated with each source.
-    """
+    '''
+    t1 = time.time()
 
-    # gaia datalink server has a threshold of max 5000 requests,
-    # so we break the input datasets into chunks of size <=5000 sources
-    # and then send each chunk into the datalink server
-    ids = list(gaia_table["source_id"])
-    dl_threshold = 5000  # Datalink server threshold
-    ids_chunks = list(gaia_chunks(ids, dl_threshold))
-    datalink_all = []
+    # Open the Gaia DR3 epoch-photometry HATS catalog. We only need the light curves (nested in
+    # `epoch_photometry`); ra/dec are used implicitly for the positional cross-match.
+    epoch_catalog = lsdb.open_catalog(
+        GAIA_EPOCH_PHOT_HATS,
+        columns=["ra", "dec", "source_id", "epoch_photometry"],
+    )
 
-    # setup to request the epochal photometry
-    # See astroquery.gaia.Gaia.load_data docs for options for parameter options as they may change
-    retrieval_type = "EPOCH_PHOTOMETRY"
-    data_structure = "RAW"
-    data_release = "Gaia DR3"
+    # convert our sample's coordinates into an LSDB catalog for cross-matching
+    sample_df = pd.DataFrame({
+        'objectid': sample_table['objectid'],
+        'ra_deg': sample_table['coord'].ra.deg,
+        'dec_deg': sample_table['coord'].dec.deg,
+        'label': sample_table['label'],
+    })
+    sample_lsdb = lsdb.from_dataframe(
+        sample_df,
+        ra_column="ra_deg",
+        dec_column="dec_deg",
+        margin_threshold=10,
+        drop_empty_siblings=True,
+    )
 
-    for chunk in ids_chunks:
-        datalink = Gaia.load_data(ids=chunk,
-                                  data_release=data_release,
-                                  retrieval_type=retrieval_type,
-                                  data_structure=data_structure,
-                                  verbose=False,
-                                  valid_data=True,
-                                  overwrite_output_file=True,
-                                  format="votable")
+    # cross-match our sample (left) against Gaia (right), keeping only the nearest source.
+    # search_radius is in degrees (for backwards compatibility); LSDB wants arcseconds.
+    matched = sample_lsdb.crossmatch(
+        epoch_catalog,
+        radius_arcsec=search_radius * 3600,
+        n_neighbors=1,
+        suffixes=("", ""),
+        suffix_method="all_columns",
+    )
 
-        # datalink contains a single VOTable, but it's wrapped in a list which is itself wrapped in a dict
-        # it's safest to act as if both list and dict may contain an arbitrary number of items
-        # we want to extract the VO table, turn it into a pandas dataframe, and add it to the datalink_all list
-        for list_of_tables in datalink.values():
-            for votable in list_of_tables:
-                # We need to filter out masked cells from the multidim rows, so we can convert them later to a
-                # MultiIndexDFObject avoiding the ``TypeError: unhashable type: 'MaskedConstant'``.
+    # the cross-match is lazy; run it on a local Dask cluster.
+    # Use multiple workers with a single thread per worker for better performance on Fornax
+    with Client(threads_per_worker=1, memory_limit=None):
+        matched_df = matched.compute()
 
-                import numpy.ma
-                arr_cols = ['g_transit_flux', 'g_transit_flux_error',
-                            'g_transit_mag', 'g_transit_time']
-                keep_cols = arr_cols + ['source_id']
+    if verbose:
+        print(f"\nSearch completed in {time.time() - t1:.2f} seconds \n"
+              f"Number of objects matched: {len(matched_df)} out of {len(sample_table)}.")
 
-                datalink_df = votable.to_table()[keep_cols].to_pandas().explode(arr_cols)
-                mask = np.array(
-                    [val is numpy.ma.masked for val in datalink_df.g_transit_flux.to_numpy()])
-                datalink_df = datalink_df.loc[~mask].astype({col: float for col in arr_cols})
-                datalink_all.append(datalink_df)
-
-    # if there is no epochal photometry return an empty dataframe
-    if len(datalink_all) == 0:
+    if len(matched_df) == 0:
         return pd.DataFrame()
 
-    datalink_all = pd.concat(datalink_all)
+    # push objectid/label into the nested epoch_photometry frame so they attach to every
+    # flattened transit row, then flatten to one row per transit measurement.
+    matched_df["epoch_photometry.objectid"] = matched_df["objectid"]
+    matched_df["epoch_photometry.label"] = matched_df["label"]
+    gaia_df = matched_df["epoch_photometry"].nest.to_flat()
 
-    # join with gaia_table to attach the objectid and label
-    idcols = ["source_id", "objectid", "label"]
-    gaia_source_df = gaia_table[idcols].to_pandas().set_index("source_id")
-    gaia_df = datalink_all.set_index("source_id").join(gaia_source_df, how="left")
+    # the nested arrays can arrive as object dtype; coerce the columns we use to float and drop
+    # transits with no valid flux (masked/NaN measurements).
+    arr_cols = ['g_transit_flux', 'g_transit_flux_error', 'g_transit_mag', 'g_transit_time']
+    for col in arr_cols:
+        gaia_df[col] = pd.to_numeric(gaia_df[col], errors="coerce").astype(np.float64)
+    gaia_df = gaia_df.dropna(subset=['g_transit_flux'])
 
-    return gaia_df.reset_index()
+    return gaia_df.reset_index(drop=True)
 
 
 # clean and transform the data
@@ -285,7 +202,7 @@ def gaia_clean_dataframe(gaia_df):
     Returns
     --------
     df_lc : MultiIndexDFObject
-        Indexed by [objectid, label, band, time].  
+        Indexed by [objectid, label, band, time].
         The resulting internal pandas DataFrame contains:
 
             flux : float

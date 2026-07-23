@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.0
+    jupytext_version: 1.19.4
 kernelspec:
   display_name: py-light_curve_collector
   language: python
@@ -58,7 +58,7 @@ By the end of this tutorial, you will be able to:
 
 ### Runtime
 
-- As of 2025 May, this notebook takes ~1000s (17 min.) to run to completion on Fornax using a server with 64GB RAM/ 16CPU.
+- As of 2026 July, this notebook takes ~1000s (17 min.) to run to completion on Fornax using a server with 64GB RAM/ 16CPU.
 
 ## Imports
 
@@ -83,7 +83,7 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-# %pip install -r requirements_light_curve_collector.txt
+#%pip install -r requirements_light_curve_collector.txt
 ```
 
 ```{code-cell} ipython3
@@ -113,7 +113,6 @@ from wise_functions import wise_get_lightcurves
 from rubin_functions import rubin_get_lightcurves
 from ztf_functions import ztf_get_lightcurves
 
-# You may see a warning about passwords for the Gaia Archive.  This can safely be ignored.
 # You may see a warning about "tpfmodel submodule".  This can safely be ignored.
 ```
 
@@ -344,7 +343,7 @@ print('ZTF search took:', time.time() - ZTFstarttime, 's')
 
 ### 3.2 Gaia
 
-The function to retrieve Gaia light curves accesses the Gaia DR3 "source lite" catalog using an astroquery search with a table upload to do the join with the Gaia photometry. This is currently the fastest way to access light curves from Gaia at scale.
+The function to retrieve Gaia light curves cross-matches our sample against the Gaia DR3 epoch-photometry catalog, accessed as a HATS catalog using LSDB (the same cloud-native, scalable approach used for the ZTF and Pan-STARRS light curves). This catalog contains only the sources that have epoch photometry, with the light curves stored in a nested column, so a single positional cross-match returns the light curves directly.
 
 ```{code-cell} ipython3
 gaiastarttime = time.time()
@@ -419,8 +418,9 @@ For sample sizes >~500 and/or improved logging and monitoring options, consider 
 
 ```{code-cell} ipython3
 # number of workers to use in the parallel processing pool
-# this should equal the total number of archives called
-n_workers = 6
+# this should equal the total number of archives called in the pool below
+# (Gaia, ZTF, and Pan-STARRS are run outside the pool, see below)
+n_workers = 5
 
 # keyword arguments for the archive calls
 heasarc_kwargs = dict(catalog_error_radii={"FERMIGTRIG": "1.0", "SAXGRBMGRB": "3.0"})
@@ -448,16 +448,18 @@ with mp.Pool(processes=n_workers) as pool:
     pool.apply_async(wise_get_lightcurves, args=(sample_table,), kwds=wise_kwargs, callback=callback)
     pool.apply_async(tess_kepler_get_lightcurves, args=(sample_table,), kwds=tess_kepler_kwargs, callback=callback)
     pool.apply_async(hcv_get_lightcurves, args=(sample_table,), kwds=hcv_kwargs, callback=callback)
-    pool.apply_async(gaia_get_lightcurves, args=(sample_table,), kwds=gaia_kwargs, callback=callback)
     pool.apply_async(icecube_get_lightcurves, args=(sample_table,), kwds=icecube_kwargs, callback=callback)
 #    pool.apply_async(rubin_get_lightcurves, args=(sample_table,), kwds=rsp_kwargs, callback=callback)
 
     pool.close()  # signal that no more jobs will be submitted to the pool
     pool.join()  # wait for all jobs to complete, including the callback
 
-# run ZTF and panstarrs queries outside of multiprocessing since they
+# run Gaia, ZTF, and panstarrs queries outside of multiprocessing since they
 # are using dask distributed under the hood,
 # which doesn't work with multiprocessing, and dask is already parallelized
+
+df_lc_gaia = gaia_get_lightcurves(sample_table, **gaia_kwargs)
+parallel_df_lc.append(df_lc_gaia)# add the resulting dataframe to all other archives
 
 df_lc_ZTF = ztf_get_lightcurves(sample_table, radius = ztf_search_radius)
 parallel_df_lc.append(df_lc_ZTF)# add the resulting dataframe to all other archives
@@ -501,7 +503,7 @@ These plots are modelled after [van Velzen et al., 2021](https://arxiv.org/abs/2
 __Note__ that in the following, we can either plot the results from `df_lc` (from the serial call) or `parallel_df_lc` (from the parallel call). By default (see next cell) the output of the parallel call is used.
 
 ```{code-cell} ipython3
-_ = create_figures(df_lc = parallel_df_lc, # either df_lc (serial call) or parallel_df_lc (parallel call)
+_ = create_figures(df_lc = df_lc, # either df_lc (serial call) or parallel_df_lc (parallel call)
                    show_nbr_figures = 5,  # how many plots do you actually want to see?
                    save_output = False ,  # should the resulting plots be saved?
                   )
