@@ -121,7 +121,9 @@ def gaia_retrieve_epoch_photometry(sample_table, search_radius, verbose):
     # `epoch_photometry`); ra/dec are used implicitly for the positional cross-match.
     epoch_catalog = lsdb.open_catalog(
         GAIA_EPOCH_PHOT_HATS,
-        columns=["ra", "dec", "source_id", "epoch_photometry"],
+        columns=["ra", "dec", "source_id",
+                 "epoch_photometry.g_transit_flux", "epoch_photometry.g_transit_flux_error",
+                 "epoch_photometry.g_transit_mag", "epoch_photometry.g_transit_time"],
     )
 
     # convert our sample's coordinates into an LSDB catalog for cross-matching
@@ -167,11 +169,11 @@ def gaia_retrieve_epoch_photometry(sample_table, search_radius, verbose):
     matched_df["epoch_photometry.label"] = matched_df["label"]
     gaia_df = matched_df["epoch_photometry"].nest.to_flat()
 
-    # the nested arrays can arrive as object dtype; coerce the columns we use to float and drop
-    # transits with no valid flux (masked/NaN measurements).
+    # the flattened columns are pyarrow-backed; convert the ones we use to numpy floats
+    # (like the other archives) so downstream plotting works, then drop transits with no
+    # valid flux (masked/NaN measurements).
     arr_cols = ['g_transit_flux', 'g_transit_flux_error', 'g_transit_mag', 'g_transit_time']
-    for col in arr_cols:
-        gaia_df[col] = pd.to_numeric(gaia_df[col], errors="coerce").astype(np.float64)
+    gaia_df = gaia_df.astype({col: 'float64' for col in arr_cols})
     gaia_df = gaia_df.dropna(subset=['g_transit_flux'])
 
     return gaia_df.reset_index(drop=True)

@@ -343,7 +343,7 @@ print('ZTF search took:', time.time() - ZTFstarttime, 's')
 
 ### 3.2 Gaia
 
-The function to retrieve Gaia light curves cross-matches our sample against the Gaia DR3 epoch-photometry catalog, accessed as a HATS catalog using LSDB (the same cloud-native, scalable approach used for the ZTF and Pan-STARRS light curves). This catalog contains only the sources that have epoch photometry, with the light curves stored in a nested column, so a single positional cross-match returns the light curves directly.
+The function to retrieve Gaia light curves cross-matches our sample against the Gaia DR3 epoch-photometry catalog, accessed as a HATS catalog using LSDB (the same cloud-native, scalable approach used for the ZTF and Pan-STARRS light curves).
 
 ```{code-cell} ipython3
 gaiastarttime = time.time()
