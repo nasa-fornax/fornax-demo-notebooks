@@ -66,7 +66,7 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
         panstarrs_object,
         radius_arcsec=radius,
         n_neighbors=1,
-        suffixes=("", ""),
+        suffixes=("_sample", "_panstarrs"),
         suffix_method="overlapping_columns",
         log_changes=False,
     )
@@ -91,7 +91,7 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
         left_on="objID",
         right_on="objID",
         output_catalog_name="yang_ps_lc",
-        suffixes=["", ""],
+        suffixes=["_matched", "_panstarrs"],
         suffix_method="overlapping_columns",
         log_changes=False,
     )
