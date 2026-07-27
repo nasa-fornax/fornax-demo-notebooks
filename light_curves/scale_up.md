@@ -410,7 +410,7 @@ different way, so that the calls are also allowed to parallelize their own inter
 
 ```{code-cell}
 # Skip archive calls that use internal parallelization.
-_archive_names = [name for name in archive_names if name.lower() not in ["panstarrs", "ztf"]]
+_archive_names = [name for name in archive_names if name.lower() not in ["gaia", "panstarrs", "ztf"]]
 
 sample_table = helpers.scale_up.run(build="sample", **kwargs_dict)
 # sample_table is returned if you want to look at it but it is not used below
