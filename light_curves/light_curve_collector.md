@@ -101,7 +101,6 @@ from data_structures import MultiIndexDFObject
 from gaia_functions import gaia_get_lightcurves
 from hcv_functions import hcv_get_lightcurves
 from heasarc_functions import heasarc_get_lightcurves
-from icecube_functions import icecube_get_lightcurves
 from panstarrs_functions import panstarrs_get_lightcurves
 from plot_functions import create_figures
 from sample_selection import (clean_sample, get_green_sample, get_hon_sample,
@@ -228,14 +227,14 @@ heasarcstarttime = time.time()
 
 # What is the size of error_radius for the catalogs that we will accept for our cross-matching?
 # in degrees; chosen based on histogram of all values for these catalogs
-max_fermi_error_radius = str(1.0)
-max_sax_error_radius = str(3.0)
+max_fermi_error_radius = 1.0
+max_sax_error_radius = 3.0
 
 # catalogs to query and their corresponding max error radii
 heasarc_catalogs = {"FERMIGTRIG": max_fermi_error_radius, "SAXGRBMGRB": max_sax_error_radius}
 
 # get heasarc light curves in the above curated list of catalogs
-df_lc_HEASARC = heasarc_get_lightcurves(sample_table, catalog_error_radii=heasarc_catalogs)
+df_lc_HEASARC = heasarc_get_lightcurves(sample_table, catalog_constraints=heasarc_catalogs)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_HEASARC)
@@ -369,7 +368,8 @@ This time series (time vs. neutrino energy) information is similar to photometry
 icecubestarttime = time.time()
 
 # get icecube data points
-df_lc_icecube = icecube_get_lightcurves(sample_table, icecube_select_topN=3)
+heasarc_catalogs = {"icecubepsc": {"select_topN": 3, "max_search_radius": 2.0}}
+df_lc_icecube = heasarc_get_lightcurves(sample_table, catalog_constraints=heasarc_catalogs)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_icecube)
@@ -420,17 +420,17 @@ For sample sizes >~500 and/or improved logging and monitoring options, consider 
 # number of workers to use in the parallel processing pool
 # this should equal the total number of archives called in the pool below
 # (Gaia, ZTF, and Pan-STARRS are run outside the pool, see below)
-n_workers = 5
+n_workers = 4
 
 # keyword arguments for the archive calls
-heasarc_kwargs = dict(catalog_error_radii={"FERMIGTRIG": "1.0", "SAXGRBMGRB": "3.0"})
+heasarc_kwargs = dict(catalog_constraints={"FERMIGTRIG": 1.0, "SAXGRBMGRB": 3.0,
+                      "icecubepsc": {"select_topN": 3, "max_search_radius": 2.0}})
 ztf_search_radius = 1.0 #  arcsec
 wise_kwargs = dict(radius=1.0, bandlist=['WISE_W1', 'WISE_W2'])
 panstarrs_search_radius = 1.0 # arcsec
 tess_kepler_kwargs = dict(radius=1.0)
 hcv_kwargs = dict(radius=1.0/3600.0)
 gaia_kwargs = dict(search_radius=1/3600, verbose=0)
-icecube_kwargs = dict(icecube_select_topN=3)
 rsp_search_radius = 0.001
 rsp_kwargs = dict(search_radius=rsp_search_radius)
 ```
@@ -448,7 +448,6 @@ with mp.Pool(processes=n_workers) as pool:
     pool.apply_async(wise_get_lightcurves, args=(sample_table,), kwds=wise_kwargs, callback=callback)
     pool.apply_async(tess_kepler_get_lightcurves, args=(sample_table,), kwds=tess_kepler_kwargs, callback=callback)
     pool.apply_async(hcv_get_lightcurves, args=(sample_table,), kwds=hcv_kwargs, callback=callback)
-    pool.apply_async(icecube_get_lightcurves, args=(sample_table,), kwds=icecube_kwargs, callback=callback)
 #    pool.apply_async(rubin_get_lightcurves, args=(sample_table,), kwds=rsp_kwargs, callback=callback)
 
     pool.close()  # signal that no more jobs will be submitted to the pool

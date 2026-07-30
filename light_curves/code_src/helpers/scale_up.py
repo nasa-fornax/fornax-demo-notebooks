@@ -16,9 +16,9 @@ sys.path.append(str(HELPERS_DIR.parent))  # put code_src dir on the path
 # Lazy-load all other imports to avoid depending on modules that will not actually be used.
 
 ARCHIVE_NAMES = {
-    "all": ["Gaia", "HCV", "HEASARC", "IceCube", "PanSTARRS", "TESS_Kepler", "WISE", "ZTF"],
+    "all": ["Gaia", "HCV", "HEASARC", "PanSTARRS", "TESS_Kepler", "WISE", "ZTF"],
     # these are expected to run successfully at scale
-    "scaled": ["Gaia", "HEASARC", "IceCube", "PanSTARRS", "WISE", "ZTF"],
+    "scaled": ["Gaia", "HEASARC", "PanSTARRS", "WISE", "ZTF"],
 }
 DEFAULTS = {
     "run_id": "my-run",
