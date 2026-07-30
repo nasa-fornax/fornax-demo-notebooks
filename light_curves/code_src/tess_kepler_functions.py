@@ -1,5 +1,7 @@
 import lightkurve as lk
 import pandas as pd
+import warnings
+from astropy.utils.exceptions import AstropyDeprecationWarning
 from tqdm.auto import tqdm
 
 from data_structures import MultiIndexDFObject
@@ -93,7 +95,10 @@ def tess_kepler_get_lightcurves(sample_table, *, radius=1.0):
 
         # use lightkurve to search TESS, Kepler and K2. if nothing is found, continue to the next object.
         # https://docs.lightkurve.org/tutorials/1-getting-started/searching-for-data-products.html
-        search_result = lk.search_lightcurve(row["coord"], radius=radius)
+        # Silence warnings about "objectname" being deprecated in Astropy version 0.4.12
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=AstropyDeprecationWarning)
+            search_result = lk.search_lightcurve(row["coord"], radius=radius)
         if not search_result:
             continue
 
