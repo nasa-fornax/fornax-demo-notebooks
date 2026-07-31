@@ -10,7 +10,10 @@ matplotlib
 hpgeom
 astropy
 pyvo
-astroquery>=0.4.8
+# astroquery>=0.4.12 needed for table upload to Heasarc.query_tap.
+# .dev needed until v0.4.12 is released.
+# When .dev is removed, also remove --pre from pip-install cell of notebook.
+astroquery>=0.4.12.dev
 acstools
 lightkurve
 alerce
