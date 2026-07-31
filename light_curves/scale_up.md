@@ -52,6 +52,11 @@ Also be aware that the script path shown in the commands below assumes you are i
 
 +++
 
+### Runtime
+
+As of 2026 July, this notebook is expected to run to completion in about 4 minutes on a Fornax server with 8 GB RAM and 2 CPU.
+The actual runtime may vary due to the performance of various archive services and other factors that affect data and metadata retrieval times.
+
 ### Parallel processing methods: bash script vs. python's `multiprocessing`
 
 - Bash script: Recommended for most runs with medium to large sample sizes (>~500). Allows ZTF to use additional parallelization internally, and so is often faster (ZTF often takes the longest and returns the most data for AGN-like samples). Writes stdout and stderr to log files, useful for monitoring jobs and resource usage. Can save `top` output to a file to help identify CPU and RAM usage/needs.
