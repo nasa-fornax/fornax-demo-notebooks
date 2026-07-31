@@ -217,7 +217,7 @@ We search a curated list of time-domain catalogs from NASA astrophysics archives
 
 ### 2.1 HEASARC: FERMI & Beppo SAX
 
-The function to retrieve HEASARC data accesses the HEASARC archive using a pyvo search with a table upload.  This is the fastest way to access data from HEASARC catalogs at scale.
+The function to retrieve data from HEASARC accesses the HEASARC archive using an astroquery TAP query with a table upload.  This is the fastest way to access data from HEASARC catalogs at scale.
 
 While these aren't strictly light curves, we would like to track if there are gamma rays detected in advance of any change in the CLAGN light curves. We store these gamma ray detections as single data points.  Because gamma ray detections typically have very large error radii, our current technique is to keep matches in the catalogs within some manually selected error radius, currently defaulting to 1 degree for Fermi and 3 degrees for Beppo SAX.  These values are chosen based on a histogram of all values for those catalogs.
 
@@ -231,10 +231,10 @@ max_fermi_error_radius = 1.0
 max_sax_error_radius = 3.0
 
 # catalogs to query and their corresponding max error radii
-heasarc_catalogs = {"FERMIGTRIG": max_fermi_error_radius, "SAXGRBMGRB": max_sax_error_radius}
+catalog_constraints = {"FERMIGTRIG": max_fermi_error_radius, "SAXGRBMGRB": max_sax_error_radius}
 
 # get heasarc light curves in the above curated list of catalogs
-df_lc_HEASARC = heasarc_get_lightcurves(sample_table, catalog_constraints=heasarc_catalogs)
+df_lc_HEASARC = heasarc_get_lightcurves(sample_table, catalog_constraints=catalog_constraints)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_HEASARC)
@@ -356,7 +356,7 @@ df_lc.append(df_lc_gaia)
 print('gaia search took:', time.time() - gaiastarttime, 's')
 ```
 
-### 3.3 IceCube neutrinos
+### 3.3 HEASARC: IceCube neutrinos
 
 There are several [catalogs](https://icecube.wisc.edu/data-releases/2021/01/all-sky-point-source-icecube-data-years-2008-2018) (basically one for each year of IceCube data from 2008 - 2018). The following code creates a large catalog by combining
 all the yearly catalogs.
@@ -368,8 +368,8 @@ This time series (time vs. neutrino energy) information is similar to photometry
 icecubestarttime = time.time()
 
 # get icecube data points
-heasarc_catalogs = {"icecubepsc": {"select_topN": 3, "max_search_radius": 2.0}}
-df_lc_icecube = heasarc_get_lightcurves(sample_table, catalog_constraints=heasarc_catalogs)
+icecube_constraints = {"icecubepsc": {"select_topN": 3, "max_search_radius": 2.0}}
+df_lc_icecube = heasarc_get_lightcurves(sample_table, catalog_constraints=icecube_constraints)
 
 # add the resulting dataframe to all other archives
 df_lc.append(df_lc_icecube)

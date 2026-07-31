@@ -208,7 +208,6 @@ def _handle_fermi_sax(heasarc_cat, *, max_error_radius=None, hresulttable=None):
         processed from `hresulttable`.
     """
     if max_error_radius is not None:
-        # SELECT cat.name, cat.ra, cat.dec, cat.error_radius, cat.time AS time,
         query = f"""
             SELECT cat.time AS time, mt.objectid AS objectid, mt.label AS label
             FROM {heasarc_cat} cat, tap_upload.mytable mt
@@ -257,7 +256,6 @@ def _handle_icecube(heasarc_cat, *, max_search_radius=None, hresulttable=None, s
     if max_search_radius is not None:
         # ADQL to find IceCube events within max_search_radius of our sample targets.
         # AND DISTANCE removes events with an error radius less than the distance between the event and our sample target.
-            # SELECT mt.objectid, mt.label, cat.time, cat.event_energy
         query = f"""
             SELECT cat.event_energy AS event_energy, cat.time AS time, mt.objectid AS objectid, mt.label AS label
             FROM {heasarc_cat} cat, tap_upload.mytable mt
