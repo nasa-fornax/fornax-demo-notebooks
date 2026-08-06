@@ -58,7 +58,7 @@ By the end of this tutorial, you will be able to:
 
 ### Runtime
 
-- As of 2026 July, this notebook takes about 15 minutes to run to completion on Fornax using a server with 64GB RAM/ 16CPU.
+- As of 2026 July, this notebook takes about 15 minutes to run to completion on Fornax using a server with 64 GB RAM and 16 CPU.
 
 ## Imports
 

@@ -37,7 +37,7 @@ These techniques also have a potential for identifying targets of a specific cla
 
 ### Runtime
 
-As of 2024 September, this notebook takes ~160s to run to completion (after installs and imports) on Fornax using a server with 16GB RAM/ 4CPU.
+As of 2024 September, this notebook takes about 3 minutes to run to completion on Fornax using a server with 16 GB RAM and 4 CPU.
 
 ## Imports
 

@@ -32,7 +32,7 @@ Inspired by the jet in [Assani et al. 2025](https://arxiv.org/pdf/2504.02136), t
 
 ### Runtime
 
-As of December 2025, running this notebook once will take about 10 minutes on the Fornax "Large" server (64 GB RAM / 16 CPU), or about 25 minutes on the Fornax "Medium" server (16 GB RAM / 4 CPU).
+As of December 2025, this notebook takes about 10 minutes on a Fornax server with 64 GB RAM and 16 CPU, or about 25 minutes on a Fornax server with 16 GB RAM and 4 CPU.
 
 +++
 

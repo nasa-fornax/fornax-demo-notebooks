@@ -42,7 +42,7 @@ The code makes full use of multiple processors to optimize run time on large dat
 
 ### Runtime
 
-As of 2025 September, this notebook takes about 13 minutes to run to completion on Fornax using a server with 8GB RAM/2 CPU' and Environment: 'Default Astrophysics' (image).
+As of 2025 September, this notebook takes about 13 minutes to run to completion on Fornax using a server with 8 GB RAM and 2 CPU.
 
 ## Imports
 
