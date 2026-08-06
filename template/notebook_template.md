@@ -65,7 +65,7 @@ As of {Date}, this notebook takes ~{N}s to run to completion on Fornax using the
 This should be a list of the modules that are required to run this code.
 Importantly, even those that are already installed in Fornax should be listed here so users wanting to run this locally on their own machines have the information they need to do this.
 
-Make sure that you have built a "requirements_notebook_name.txt" file with the modules to be imported.  
+Make sure that you have built a "requirements_notebook_name.txt" file with the modules to be imported.
 The name of the notebook should be present in the name of the requirements file, as in our example "requirements_notebook_template.txt"
 
 ```{code-cell} ipython3
@@ -99,7 +99,7 @@ data = np.random.randint(0, 100, size=100)
 Describe what the data look like.
 Add summary statistics, initial plots, sanity checks.
 
-For cuts or other data filtering and cleaning steps, explain the scientific reasoning behind them. 
+For cuts or other data filtering and cleaning steps, explain the scientific reasoning behind them.
 This helps people understand both the notebook and the data so that they're more equipped to use the data appropriately in other contexts.
 
 +++
@@ -107,7 +107,7 @@ This helps people understand both the notebook and the data so that they're more
 :::{tip}
 Please include narrative along with *all* your code cells to help the reader figure out what you are doing and why you chose that path.
 
-Using [MyST admonitions](https://mystmd.org/guide/admonitions) such as this `tip` are encouraged 
+Using [MyST admonitions](https://mystmd.org/guide/admonitions) such as this `tip` are encouraged
 :::
 
 ```{code-cell} ipython3
@@ -202,7 +202,6 @@ The following are guidelines to help the primary author determine the initial li
 ## About this Notebook
 
 -   **Contact:** For help with this notebook, please open a topic in the [Fornax Helpdesk](https://discourse.fornax.sciencecloud.nasa.gov/c/helpdesk).
--   Please edit and keep the above 2 bullet points, and remove this last line.
 
 +++
 
