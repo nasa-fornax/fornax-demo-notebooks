@@ -319,7 +319,7 @@ The example science case used here is an investigation to collect time-series ph
 ## About this Notebook
 
 - **Authors:** Zach Claytor (Astronomical Data Scientist at Space Telescope Science Institute) and the Fornax team
-- **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
+- **Contact:** For help with this notebook, please open a topic in the [Fornax Helpdesk](https://discourse.fornax.sciencecloud.nasa.gov/c/helpdesk).
 
 +++
 

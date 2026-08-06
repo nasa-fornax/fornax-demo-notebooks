@@ -323,7 +323,7 @@ create_figures(df_spec=df_spec,
 ## About this notebook
 
 - **Authors:** Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, David Shupe, and the Fornax team
-- **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
+- **Contact:** For help with this notebook, please open a topic in the [Fornax Helpdesk](https://discourse.fornax.sciencecloud.nasa.gov/c/helpdesk).
 
 ### Acknowledgements
 

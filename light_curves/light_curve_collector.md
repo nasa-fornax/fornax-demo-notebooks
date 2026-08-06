@@ -508,7 +508,7 @@ _ = create_figures(df_lc = df_lc, # either df_lc (serial call) or parallel_df_lc
 ## About this notebook
 
 * **Authors:** Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, David Shupe, and the Fornax team
-* **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
+* **Contact:** For help with this notebook, please open a topic in the [Fornax Helpdesk](https://discourse.fornax.sciencecloud.nasa.gov/c/helpdesk).
 
 ### Acknowledgements
 

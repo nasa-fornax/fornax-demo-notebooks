@@ -1113,7 +1113,7 @@ We extend the works of Bouquin et al. 2015 and Moutard et al. 2020 by showing a 
 ## About this notebook
 
 - **Authors:** Jessica Krick, David Shupe, Marziye JafariYazani, Brigitta Sipőcz, Vandana Desai, Steve Groom, Troy Raen, and the Fornax team
-- **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
+- **Contact:** For help with this notebook, please open a topic in the [Fornax Helpdesk](https://discourse.fornax.sciencecloud.nasa.gov/c/helpdesk).
 
 ### Acknowledgements
 

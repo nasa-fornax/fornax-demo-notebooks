@@ -794,7 +794,7 @@ plt.axis('off')
 ## About this notebook
 
 - **Authors:** Shoubaneh Hemmati (IRSA Research Scientist) and the Fornax team
-- **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
+- **Contact:** For help with this notebook, please open a topic in the [Fornax Helpdesk](https://discourse.fornax.sciencecloud.nasa.gov/c/helpdesk).
 
 ### Acknowledgements
 
