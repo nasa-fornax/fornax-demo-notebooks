@@ -4,7 +4,8 @@
 numpy
 matplotlib
 pandas
-sparclclient>=1.2.8
+# sparclclient<1.3.0 causes https://github.com/nasa-fornax/fornax-demo-notebooks/issues/677
+sparclclient>=1.3.0
 astropy
 # pin is due to Spectrum1D rename to Spectrum and an internap spectutils bug
 specutils>=1.20.1
