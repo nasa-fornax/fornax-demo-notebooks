@@ -58,7 +58,7 @@ By the end of this tutorial, you will be able to:
 
 ### Runtime
 
-- As of 2026 July, this notebook takes about 15 minutes to run to completion on Fornax using a server with 64GB RAM/ 16CPU.
+- As of 2026 July, this notebook takes about 15 minutes to run to completion on Fornax using a server with 64 GB RAM and 16 CPU.
 
 ## Imports
 
@@ -322,10 +322,7 @@ print('HCV search took:', time.time() - HCVstarttime, 's')
 
 ### 3.1 IRSA: ZTF
 
-The function to retrieve ZTF light curves accesses a [HATS](https://hats.readthedocs.io/en/stable/) parquet version of the ZTF catalog stored in the cloud using [LSDB](https://docs.lsdb.io/en/stable/). This is the simplest way to access this dataset at scale.  The ZTF [API](https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html) is available for small sample searches.  One unique thing about this function is that it has parallelization built in to the function itself because lsdb uses dask under the hood.
-
-Expect to see many `INFO` messages from dask. These are normal.
-The traceback for `CommClosedErrors` is also expected and is just a dask housekeeping issue, the function is still running to completion and returning light curves.
+The function to retrieve ZTF light curves accesses a [HATS](https://hats.readthedocs.io/en/stable/) parquet version of the ZTF catalog stored in the cloud using [LSDB](https://docs.lsdb.io/en/stable/). This is the simplest way to access this dataset at scale.  The ZTF [API](https://irsa.ipac.caltech.edu/docs/program_interface/ztf_lightcurve_api.html) is available for small sample searches.
 
 ```{code-cell} ipython3
 ZTFstarttime = time.time()
@@ -511,7 +508,7 @@ _ = create_figures(df_lc = df_lc, # either df_lc (serial call) or parallel_df_lc
 ## About this notebook
 
 * **Authors:** Jessica Krick, Shoubaneh Hemmati, Andreas Faisst, Troy Raen, Brigitta Sipőcz, David Shupe, and the Fornax team
-* **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
+* **Contact:** For help with this notebook, please open a topic in the [Fornax Helpdesk](https://discourse.fornax.sciencecloud.nasa.gov/c/helpdesk).
 
 ### Acknowledgements
 

@@ -74,8 +74,7 @@ The ones with an asterisk (*) are the challenging ones.
 
 ### Runtime
 
-As of 2025 July, this notebook takes about 18 minutes to run to completion on Fornax using
-a server with 16GB RAM/4 CPU' and Environment: 'Default Astrophysics' (image).
+As of 2026 August, this notebook takes about 10 minutes to run to completion on Fornax using a server with 8 GB RAM and 2 CPU.
 
 +++
 
@@ -323,7 +322,7 @@ create_figures(df_spec=df_spec,
 ## About this notebook
 
 - **Authors:** Andreas Faisst, Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, David Shupe, and the Fornax team
-- **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
+- **Contact:** For help with this notebook, please open a topic in the [Fornax Helpdesk](https://discourse.fornax.sciencecloud.nasa.gov/c/helpdesk).
 
 ### Acknowledgements
 
