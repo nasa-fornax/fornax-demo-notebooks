@@ -55,7 +55,7 @@ Trained classifiers as well as estimates of their accuracy and plots of confusio
 
 ### Runtime
 
-As of 2024 August, this notebook takes ~170s to run to completion on Fornax using a server with 16GB RAM/ 4CPU.
+As of 2024 August, this notebook takes about 3 minutes to run to completion on Fornax using a server with 16 GB RAM and 4 CPU.
 
 ## Imports
 
@@ -691,7 +691,7 @@ Depending on your comfort level with the accuracy of the classifier you have tra
 ## About this notebook
 
 - **Authors:** Jessica Krick, Shoubaneh Hemmati, Troy Raen, Brigitta Sipőcz, Andreas Faisst, Vandana Desai, David Shupe, and the Fornax team
-- **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
+- **Contact:** For help with this notebook, please open a topic in the [Fornax Helpdesk](https://discourse.fornax.sciencecloud.nasa.gov/c/helpdesk).
 
 ### Acknowledgements
 

@@ -47,7 +47,7 @@ For generality, we will refer to the server type by the number of CPUs. For each
 
 ### Runtime
 
-As of August 2025, as written (10,000 rows with the "default" `dask` settings), this notebook takes about 45 seconds to run on the "small" Fornax Science Console server type (4 GB RAM and 2 CPUs). Users can modify the configuration for larger cross-matches, which will take more time. E.g., cross-matching 10 million rows on the "large" server type (64 GB RAM and 16 CPUs) can take ~5 minutes.
+As of August 2026, as written (10,000 rows with the "default" `dask` settings), this notebook takes about 2 minutes to run on Fornax using a server with 8 GB RAM and 2 CPU. Users can modify the configuration for larger cross-matches, which will take more time. E.g., cross-matching 10 million rows on a server with 64 GB RAM and 16 CPU can take about 5 minutes.
 
 +++
 
@@ -319,7 +319,7 @@ The example science case used here is an investigation to collect time-series ph
 ## About this Notebook
 
 - **Authors:** Zach Claytor (Astronomical Data Scientist at Space Telescope Science Institute) and the Fornax team
-- **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
+- **Contact:** For help with this notebook, please open a topic in the [Fornax Helpdesk](https://discourse.fornax.sciencecloud.nasa.gov/c/helpdesk).
 
 +++
 

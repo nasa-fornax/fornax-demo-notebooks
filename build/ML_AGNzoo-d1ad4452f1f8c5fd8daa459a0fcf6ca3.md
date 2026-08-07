@@ -37,7 +37,7 @@ These techniques also have a potential for identifying targets of a specific cla
 
 ### Runtime
 
-As of 2024 September, this notebook takes ~160s to run to completion (after installs and imports) on Fornax using a server with 16GB RAM/ 4CPU.
+As of 2024 September, this notebook takes about 3 minutes to run to completion on Fornax using a server with 16 GB RAM and 4 CPU.
 
 ## Imports
 
@@ -794,7 +794,7 @@ plt.axis('off')
 ## About this notebook
 
 - **Authors:** Shoubaneh Hemmati (IRSA Research Scientist) and the Fornax team
-- **Contact:** For help with this notebook, please open a topic in the [Fornax Community Forum](https://discourse.fornax.sciencecloud.nasa.gov/) "Support" category.
+- **Contact:** For help with this notebook, please open a topic in the [Fornax Helpdesk](https://discourse.fornax.sciencecloud.nasa.gov/c/helpdesk).
 
 ### Acknowledgements
 
