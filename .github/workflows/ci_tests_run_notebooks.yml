@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       # Revise once https://github.com/actions/checkout/issues/1575 is addressed differently
-      image: ghcr.io/nasa-fornax/fornax-images/fornax-main:stable
+      image: ghcr.io/nasa-fornax/fornax-images/fornax-nb:stable
       options: --user root
 
     steps:
