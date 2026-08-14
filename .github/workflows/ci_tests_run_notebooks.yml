@@ -19,9 +19,12 @@ jobs:
 
     name: Testing with fornax docker image
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: ["stable", "develop"]
     container:
       # Revise once https://github.com/actions/checkout/issues/1575 is addressed differently
-      image: ghcr.io/nasa-fornax/fornax-images/fornax-nb:stable
+      image: ghcr.io/nasa-fornax/fornax-images/fornax-nb:${{ matrix.image }}
       options: --user root
 
     steps:
