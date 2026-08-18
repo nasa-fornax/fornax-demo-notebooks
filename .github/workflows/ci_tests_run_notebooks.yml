@@ -21,7 +21,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image: ["stable", "develop"]
+        image: >-
+          ${{ github.event_name == 'pull_request'
+          ? ["stable"]
+          : ["stable", "develop"] }}
+
     container:
       # Revise once https://github.com/actions/checkout/issues/1575 is addressed differently
       image: ghcr.io/nasa-fornax/fornax-images/fornax-nb:${{ matrix.image }}
