@@ -1,0 +1,28 @@
+- title: Cross Match with LSDB
+  file: crossmatch/ztf_ps1_crossmatch.md
+  section: Cross Match
+  description: Cross-match ZTF and Pan-STARRS HATS catalogs using LSDB.
+- title: Multi-band Photometry
+  file: forced_photometry/multiband_photometry.md
+  section: Forced Photometry
+  description: Run forced photometry on IRAC and GALEX images using The Tractor, cross-match with Chandra, and plot results.
+- title: AGN Comparisons
+  file: light_curves/ML_AGNzoo.md
+  section: Light Curves
+  description: Use UMAP/SOM manifold learning to visualize and compare AGN light curve samples.
+- title: AGN Light Curve Classifier
+  file: light_curves/light_curve_classifier.md
+  section: Light Curves
+  description: Train an sktime classifier to distinguish changing-look AGN from a broad sample of quasars.
+- title: Light Curve Collector
+  file: light_curves/light_curve_collector.md
+  section: Light Curves
+  description: Build multi-wavelength light curves for a target sample of objects by retrieving photometry measurements from about 10 different catalogs.
+- title: Large-scale Light Curve Collector
+  file: light_curves/scale_up.md
+  section: Light Curves
+  description: Run the Light Curve Collector for a large sample of up to 500,000+ target objects.
+- title: Spectra Collector
+  file: spectroscopy/spectra_collector.md
+  section: Spectroscopy
+  description: Collect spectra for a target sample of objects from about 5 different archives.

@@ -66,6 +66,7 @@ light_curves/requirements_light_curve_classifier.txt
 light_curves/requirements_light_curve_collector.txt
 light_curves/requirements_scale_up.txt
 light_curves/scale_up.md
+notebook_metadata.yml
 spectroscopy/code_src/README.md
 spectroscopy/code_src/data_structures_spec.py
 spectroscopy/code_src/desi_functions.py
