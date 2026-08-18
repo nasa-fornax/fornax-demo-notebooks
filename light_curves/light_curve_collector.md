@@ -40,9 +40,7 @@ By the end of this tutorial, you will be able to:
  Astropy does not currently have a good option for multi-band light curve storage.
 
  * This notebook walks through the individual steps required to collect the targets and their light curves and create figures.
- It also shows how to speed up the collection of light curves using python's `multiprocessing`.
- This is expected to be sufficient for up to ~500 targets.
- For a larger number of targets, consider using the bash script demonstrated in the neighboring notebook [scale_up](scale_up.md).
+ It also shows how to speed up the collection of light curves using Dask Gateway to query the archives concurrently.
 
  * ML work using these time-series light curves is in two neighboring notebooks: [ML_AGNzoo](ML_AGNzoo.md) and [light_curve_classifier](light_curve_classifier.md).
 
@@ -66,9 +64,9 @@ By the end of this tutorial, you will be able to:
  * `astropy` to work with coordinates/units and data structures
  * `astroquery` to interface with archives APIs
  * `hpgeom` to locate coordinates in HEALPix space
+ * `dask_gateway` and `dask.distributed` to query the archives concurrently on a Dask Gateway cluster
  * `lightkurve` to search TESS, Kepler, and K2 archives
  * `matplotlib` for plotting
- * `multiprocessing` to use the power of multiple CPUs to get work done faster
  * `numpy` for numerical processing
  * `pandas` with their `[aws]` extras for their data structure DataFrame and all the accompanying functions
  * `pyarrow` to work with Parquet files for WISE and ZTF
@@ -87,13 +85,14 @@ This cell will install them if needed:
 ```
 
 ```{code-cell} ipython3
-import multiprocessing as mp
 import sys
 import time
 
 import astropy.units as u
 import pandas as pd
 from astropy.table import Table
+from dask.distributed import Client
+from dask_gateway import Gateway
 
 # local code imports
 sys.path.append('code_src/')
@@ -407,17 +406,12 @@ print('total time for serial archive calls is ', end_serial - start_serial, 's')
 
 ## 4. Parallel processing the archive calls
 
-This section shows how to increase the speed of the multi-archive search by running the calls in parallel using python's `multiprocessing` library.
-This can be a convenient and efficient method for small to medium sample sizes.
-One drawback is that error messages tend to get lost in the background and never displayed for the user.
-Running this on very large samples may fail because of the way the platform is setup to cull sessions which appear to be inactive.
-For sample sizes >~500 and/or improved logging and monitoring options, consider using the bash script demonstrated in the related tutorial notebook [scale_up](scale_up.md).
+This section shows how to increase the speed of the multi-archive search by running the calls in parallel on a [Dask Gateway](https://gateway.dask.org/) cluster.
 
 ```{code-cell} ipython3
-# number of workers to use in the parallel processing pool
-# this should equal the total number of archives called in the pool below
-# (Gaia, ZTF, and Pan-STARRS are run outside the pool, see below)
-n_workers = 4
+# number of workers to start on the Dask Gateway cluster
+# this should equal the total number of *_get_lightcurves calls we're making
+n_workers = 8
 
 # keyword arguments for the archive calls
 heasarc_kwargs = dict(catalog_constraints={"FERMIGTRIG": 1.0, "SAXGRBMGRB": 3.0,
@@ -435,33 +429,30 @@ rsp_kwargs = dict(search_radius=rsp_search_radius)
 ```{code-cell} ipython3
 parallel_starttime = time.time()
 
-# start a multiprocessing pool and run all the archive queries
+# start a Dask Gateway cluster and connect a client to it
+gateway = Gateway()
+cluster = gateway.new_cluster()
+cluster.scale(n_workers)
+client = Client(cluster)
+
+# submit all of the archive queries to the cluster and run them concurrently
 parallel_df_lc = MultiIndexDFObject()  # to collect the results
-callback = parallel_df_lc.append  # will be called once on the result returned by each archive
-with mp.Pool(processes=n_workers) as pool:
+futures = [
+    client.submit(heasarc_get_lightcurves, sample_table, **heasarc_kwargs),
+    client.submit(wise_get_lightcurves, sample_table, **wise_kwargs),
+    client.submit(tess_kepler_get_lightcurves, sample_table, **tess_kepler_kwargs),
+    client.submit(hcv_get_lightcurves, sample_table, **hcv_kwargs),
+    client.submit(gaia_get_lightcurves, sample_table, **gaia_kwargs),
+    client.submit(ztf_get_lightcurves, sample_table, radius=ztf_search_radius),
+    client.submit(panstarrs_get_lightcurves, sample_table, radius=panstarrs_search_radius),
+#    client.submit(rubin_get_lightcurves, sample_table, **rsp_kwargs),
+]
+for df_lc in client.gather(futures):
+    parallel_df_lc.append(df_lc)
 
-    # start the processes that call the archives
-    pool.apply_async(heasarc_get_lightcurves, args=(sample_table,), kwds=heasarc_kwargs, callback=callback)
-    pool.apply_async(wise_get_lightcurves, args=(sample_table,), kwds=wise_kwargs, callback=callback)
-    pool.apply_async(tess_kepler_get_lightcurves, args=(sample_table,), kwds=tess_kepler_kwargs, callback=callback)
-    pool.apply_async(hcv_get_lightcurves, args=(sample_table,), kwds=hcv_kwargs, callback=callback)
-#    pool.apply_async(rubin_get_lightcurves, args=(sample_table,), kwds=rsp_kwargs, callback=callback)
-
-    pool.close()  # signal that no more jobs will be submitted to the pool
-    pool.join()  # wait for all jobs to complete, including the callback
-
-# run Gaia, ZTF, and panstarrs queries outside of multiprocessing since they
-# are using dask distributed under the hood,
-# which doesn't work with multiprocessing, and dask is already parallelized
-
-df_lc_gaia = gaia_get_lightcurves(sample_table, **gaia_kwargs)
-parallel_df_lc.append(df_lc_gaia)# add the resulting dataframe to all other archives
-
-df_lc_ZTF = ztf_get_lightcurves(sample_table, radius = ztf_search_radius)
-parallel_df_lc.append(df_lc_ZTF)# add the resulting dataframe to all other archives
-
-df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius=panstarrs_search_radius)
-parallel_df_lc.append(df_lc_panstarrs) # add the panstarrs dataframe to all other archives
+# shut down the cluster now that all archive calls have completed
+client.close()
+cluster.shutdown()
 
 parallel_endtime = time.time()
 

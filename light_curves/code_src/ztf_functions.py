@@ -1,10 +1,9 @@
 import lsdb
 import pandas as pd
 from astropy import units as u
-from dask.distributed import Client
 
 from data_structures import MultiIndexDFObject
-from lsdb_utils import sample_table_to_lsdb
+from lsdb_utils import dask_client, sample_table_to_lsdb
 
 
 def ztf_get_lightcurves(sample_table, *, radius=1.0):
@@ -53,54 +52,50 @@ def ztf_get_lightcurves(sample_table, *, radius=1.0):
     - Fluxes are converted from AB magnitudes using Astropy, then converted to mJy.
     """
 
-    # 1) Start Dask client
-    # Use multiple workers with a single thread per worker for better performance on Fornax
-    client = Client(threads_per_worker=1, memory_limit=None)
-
-    # 2) Convert Astropy table → LSDB catalog
+    # 1) Convert Astropy table → LSDB catalog
     sample_lsdb = sample_table_to_lsdb(sample_table)
 
-    # 3) Cross-match per band
+    # 2) Cross-match per band, computing using an existing Dask cluster (e.g., a shared
+    # Dask Gateway cluster) if there is one, otherwise a local cluster
     band_map = {1: "ztf_g", 2: "ztf_r", 3: "ztf_i"}
     per_band_dfs = []
 
-    for fid, band_name in band_map.items():
-        # 3a) open ZTF light-curve catalog filtered to each band
-        ztf_band = lsdb.open_catalog(
-            's3://ipac-irsa-ztf/ztf/enhanced/dr24/lc/hats',
-            filters=[("filterid", "==", fid)],
-            columns=[
-                "objectid", "objra", "objdec", "filterid",
-                "lightcurve.hmjd", "lightcurve.mag", "lightcurve.magerr", "lightcurve.catflags"
-            ]
-        )
+    with dask_client():
+        for fid, band_name in band_map.items():
+            # 2a) open ZTF light-curve catalog filtered to each band
+            ztf_band = lsdb.open_catalog(
+                's3://ipac-irsa-ztf/ztf/enhanced/dr24/lc/hats',
+                filters=[("filterid", "==", fid)],
+                columns=[
+                    "objectid", "objra", "objdec", "filterid",
+                    "lightcurve.hmjd", "lightcurve.mag", "lightcurve.magerr", "lightcurve.catflags"
+                ]
+            )
 
-        # 3b) crossmatch: sample (left) → filtered band (right)
-        matched = sample_lsdb.crossmatch(
-            ztf_band,
-            radius_arcsec=radius,
-            n_neighbors=1,
-            require_right_margin=True,
-            suffixes=("_sample", ""),
-            suffix_method="overlapping_columns",
-            log_changes=False,
-        )
-        df = matched.compute()
+            # 2b) crossmatch: sample (left) → filtered band (right)
+            matched = sample_lsdb.crossmatch(
+                ztf_band,
+                radius_arcsec=radius,
+                n_neighbors=1,
+                require_right_margin=True,
+                suffixes=("_sample", ""),
+                suffix_method="overlapping_columns",
+                log_changes=False,
+            )
+            df = matched.compute()
 
-        # 3c) explode to one row per data point, add band name, and drop points with bad flags
-        df["lightcurve.objectid"] = df["objectid_sample"]
-        df["lightcurve.label"] = df["label"]
-        df["lightcurve.band"] = band_name
-        df = df["lightcurve"].nest.to_flat()
-        df = df.query("catflags < 32768")
-        del df["catflags"]
+            # 2c) explode to one row per data point, add band name, and drop points with bad flags
+            df["lightcurve.objectid"] = df["objectid_sample"]
+            df["lightcurve.label"] = df["label"]
+            df["lightcurve.band"] = band_name
+            df = df["lightcurve"].nest.to_flat()
+            df = df.query("catflags < 32768")
+            del df["catflags"]
 
-        per_band_dfs.append(df)
-        del df
+            per_band_dfs.append(df)
+            del df
 
-    client.close()
-
-    # 4) Concatenate, convert mags → fluxes, and build final MultiIndex
+    # 3) Concatenate, convert mags → fluxes, and build final MultiIndex
     df_all = pd.concat(per_band_dfs, ignore_index=True).rename(columns={"hmjd": "time"})
     del per_band_dfs
     mag = df_all["mag"].to_numpy()
