@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image: ${{ github.event_name == 'pull_request' && ["stable"] || ["stable", "develop"] }}
+        image: ${{ github.event_name == 'pull_request' && '["stable"]' || '["stable", "develop"]' }}
 
     container:
       # Revise once https://github.com/actions/checkout/issues/1575 is addressed differently
