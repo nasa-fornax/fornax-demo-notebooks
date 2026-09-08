@@ -60,6 +60,32 @@ By the end of this tutorial, you will be able to:
 
 ## Imports
 
+:::{warning}
+For the parallel section, Python and several Dask-related libraries must be pinned to the exact versions installed on the Dask Gateway cluster.
+Use `requirements_light_curve_collector_dg.txt` to create a new environment and kernel with those versions.
+First, you must copy the into a directory where it's the only requirements file because Fornax's `setup-pip-env` expects to find exactly one and this directory has several.
+
+```sh
+# Assuming your home directory doesn't already have a requirements file.
+cp requirements_light_curve_collector_dg.txt ~/.
+cd ~/
+# Create the env and kernel.
+# Remove --user to make them temporary so they don't persist across restarts.
+setup-pip-env --user --python=3.13.6
+
+# You must know the path the environment was installed to configure the worker environments.
+# Find it with:
+ls $USER_ENV_DIR  # if you passed --user above
+ls $ENV_DIR  # if you didn't
+```
+
+:::
+
+```{code-cell} python3
+# [FIXME] Paste the path to your environment below.
+env_path =
+```
+
  * `acstools` to work with HST magnitude to flux conversion
  * `astropy` to work with coordinates/units and data structures
  * `astroquery` to interface with archives APIs
@@ -68,6 +94,7 @@ By the end of this tutorial, you will be able to:
  * `lightkurve` to search TESS, Kepler, and K2 archives
  * `matplotlib` for plotting
  * `numpy` for numerical processing
+ * `pathlib` to build the filesystem paths used to configure the Dask worker environment
  * `pandas` with their `[aws]` extras for their data structure DataFrame and all the accompanying functions
  * `pyarrow` to work with Parquet files for WISE and ZTF
  * `pyvo` for accessing Virtual Observatory(VO) standard data
@@ -75,7 +102,6 @@ By the end of this tutorial, you will be able to:
  * `scipy` to do statistics
  * `tqdm` to track progress on long running jobs
  * `urllib` to handle archive searches with website interface
-
 
 This cell will install them if needed:
 
@@ -87,11 +113,12 @@ This cell will install them if needed:
 ```{code-cell} ipython3
 import sys
 import time
+from pathlib import Path
 
 import astropy.units as u
 import pandas as pd
 from astropy.table import Table
-from dask.distributed import Client
+from dask.distributed import Client, WorkerPlugin
 from dask_gateway import Gateway
 
 # local code imports
@@ -426,14 +453,44 @@ rsp_search_radius = 0.001
 rsp_kwargs = dict(search_radius=rsp_search_radius)
 ```
 
+Dask workers do not inherit this notebook's environment, so each one needs to be told where to find the libraries this notebook imports (installed above) and the local `code_src/` modules.
+
+```{code-cell} ipython3
+class WorkerEnvPlugin(WorkerPlugin):
+    """Add directories to worker `sys.path`."""
+
+    def __init__(self, paths):
+        self.paths = paths
+
+    def setup(self, worker):
+        import sys
+
+        for path in self.paths:
+            path = str(path)
+            if path not in sys.path:
+                sys.path.append(path)
+```
+
+```{code-cell} ipython3
+# Path to this environment's installed packages and to the local code_src/ directory.
+# env_packages_path must point to the directory where the libraries in the environment live.
+# If you set the right env_path above, this should point to the right place.
+env_packages_path = Path.home() / env_path / "lib" / "python3.13" / "site-packages"
+code_src_path = Path("code_src").resolve()
+worker_env_plugin = WorkerEnvPlugin([env_packages_path, code_src_path])
+```
+
 ```{code-cell} ipython3
 parallel_starttime = time.time()
 
 # start a Dask Gateway cluster and connect a client to it
 gateway = Gateway()
-cluster = gateway.new_cluster()
+cluster = gateway.new_cluster(worker_profile="Standard")  # Standard => 7.5 CPU and 29.5 GB per worker
 cluster.scale(n_workers)
 client = Client(cluster)
+
+# configure the workers' environment before submitting any work
+client.register_plugin(worker_env_plugin)
 
 # submit all of the archive queries to the cluster and run them concurrently
 parallel_df_lc = MultiIndexDFObject()  # to collect the results

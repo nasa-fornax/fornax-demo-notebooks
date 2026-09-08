@@ -22,12 +22,13 @@ lsdb>=0.8.1
 s3fs
 # Required by lsdb, a few versions are known to cause issues
 fsspec!=2025.12,!=2026.1
-# We use distributed in this notebook, but installing any dask would make the [dataframe] extras required by dependencies for other notebooks.
-# It feels to be the cleanest solution to add the dependency here as we don't directly use it elsewhere.
-dask[distributed,dataframe]
-# Used to run the archive calls concurrently on a Dask Gateway cluster
-dask-gateway
 # Required by functionality we use from acstools
 scikit-image
 # Required for sensible progress bars
 ipywidgets
+# These must be pinned to the same version as installed on the Dask Gateway cluster.
+dask[distributed,dataframe]==2026.3.0
+distributed==2026.3.0
+dask-gateway==2026.3.0
+msgpack==1.1.2
+tornado==6.5.5
