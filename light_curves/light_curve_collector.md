@@ -40,9 +40,7 @@ By the end of this tutorial, you will be able to:
  Astropy does not currently have a good option for multi-band light curve storage.
 
  * This notebook walks through the individual steps required to collect the targets and their light curves and create figures.
- It also shows how to speed up the collection of light curves using python's `multiprocessing`.
- This is expected to be sufficient for up to ~500 targets.
- For a larger number of targets, consider using the bash script demonstrated in the neighboring notebook [scale_up](scale_up.md).
+ It also shows how to speed up the collection of light curves using Dask Gateway to query the archives concurrently.
 
  * ML work using these time-series light curves is in two neighboring notebooks: [ML_AGNzoo](ML_AGNzoo.md) and [light_curve_classifier](light_curve_classifier.md).
 
@@ -62,14 +60,52 @@ By the end of this tutorial, you will be able to:
 
 ## Imports
 
+:::{warning}
+For the parallel section, Python and several Dask-related libraries must be pinned to the exact versions installed on the Dask Gateway cluster.
+Use `requirements_light_curve_collector.txt` to create a new environment and kernel with those versions.
+First, you must copy the into a directory where it's the only requirements file because Fornax's `setup-pip-env` expects to find exactly one and this directory has several.
+
+```sh
+# Must rename to have dash after 'requirements'.
+# This assumes your home directory doesn't already have a requirements file.
+cp requirements_light_curve_collector.txt ~/requirements-light_curve_collector.txt
+cd ~/
+# Create the env and kernel.
+# Remove --user to make them temporary so they don't persist across restarts.
+setup-pip-env --user --python=3.13.6
+```
+
+You must know the path the environment was installed to configure the worker environments.
+The name of the environment and kernel will be the filename minus 'requirements-' and '.txt'.
+You can check with:
+
+```sh
+# if you passed --user above:
+echo $USER_ENV_DIR
+ls $USER_ENV_DIR
+
+# if you didn't pass --user above:
+echo $ENV_DIR
+ls $ENV_DIR
+```
+
+Now connect the notebook to the kernel.
+:::
+
+```{code-cell} python3
+# [FIXME] Paste the full path to your environment below.
+env_path = ''
+```
+
  * `acstools` to work with HST magnitude to flux conversion
  * `astropy` to work with coordinates/units and data structures
  * `astroquery` to interface with archives APIs
  * `hpgeom` to locate coordinates in HEALPix space
+ * `dask_gateway` and `dask.distributed` to query the archives concurrently on a Dask Gateway cluster
  * `lightkurve` to search TESS, Kepler, and K2 archives
  * `matplotlib` for plotting
- * `multiprocessing` to use the power of multiple CPUs to get work done faster
  * `numpy` for numerical processing
+ * `pathlib` to build the filesystem paths used to configure the Dask worker environment
  * `pandas` with their `[aws]` extras for their data structure DataFrame and all the accompanying functions
  * `pyarrow` to work with Parquet files for WISE and ZTF
  * `pyvo` for accessing Virtual Observatory(VO) standard data
@@ -77,7 +113,6 @@ By the end of this tutorial, you will be able to:
  * `scipy` to do statistics
  * `tqdm` to track progress on long running jobs
  * `urllib` to handle archive searches with website interface
-
 
 This cell will install them if needed:
 
@@ -87,13 +122,15 @@ This cell will install them if needed:
 ```
 
 ```{code-cell} ipython3
-import multiprocessing as mp
 import sys
 import time
+from pathlib import Path
 
 import astropy.units as u
 import pandas as pd
 from astropy.table import Table
+from dask.distributed import Client, WorkerPlugin, PipInstall
+from dask_gateway import Gateway
 
 # local code imports
 sys.path.append('code_src/')
@@ -407,17 +444,12 @@ print('total time for serial archive calls is ', end_serial - start_serial, 's')
 
 ## 4. Parallel processing the archive calls
 
-This section shows how to increase the speed of the multi-archive search by running the calls in parallel using python's `multiprocessing` library.
-This can be a convenient and efficient method for small to medium sample sizes.
-One drawback is that error messages tend to get lost in the background and never displayed for the user.
-Running this on very large samples may fail because of the way the platform is setup to cull sessions which appear to be inactive.
-For sample sizes >~500 and/or improved logging and monitoring options, consider using the bash script demonstrated in the related tutorial notebook [scale_up](scale_up.md).
+This section shows how to increase the speed of the multi-archive search by running the calls in parallel on a [Dask Gateway](https://gateway.dask.org/) cluster.
 
 ```{code-cell} ipython3
-# number of workers to use in the parallel processing pool
-# this should equal the total number of archives called in the pool below
-# (Gaia, ZTF, and Pan-STARRS are run outside the pool, see below)
-n_workers = 4
+# number of workers to start on the Dask Gateway cluster
+# this should equal the total number of *_get_lightcurves calls we're making
+n_workers = 8
 
 # keyword arguments for the archive calls
 heasarc_kwargs = dict(catalog_constraints={"FERMIGTRIG": 1.0, "SAXGRBMGRB": 3.0,
@@ -432,36 +464,76 @@ rsp_search_radius = 0.001
 rsp_kwargs = dict(search_radius=rsp_search_radius)
 ```
 
+Dask workers do not inherit this notebook's environment, so each one needs to be told where to find the libraries this notebook imports (installed above) and the local `code_src/` modules.
+
+```{code-cell} ipython3
+class WorkerEnvPlugin(WorkerPlugin):
+    """Add directories to worker `sys.path`."""
+
+    def __init__(self, paths):
+        self.paths = paths
+
+    def setup(self, worker):
+        import sys
+
+        for path in self.paths:
+            path = str(path)
+            if path not in sys.path:
+                sys.path.append(path)
+```
+
+```{code-cell} ipython3
+# Path to this environment's installed packages and to the local code_src/ directory.
+# env_packages_path must point to the directory where the libraries in the environment live.
+# If you set the right env_path above, this should point to the right place.
+env_packages_path = Path.home() / env_path / "lib" / "python3.13" / "site-packages"
+code_src_path = Path("code_src").resolve()
+worker_env_plugin = WorkerEnvPlugin([env_packages_path, code_src_path])
+```
+
+```{code-cell} ipython3
+# start a Dask Gateway cluster and connect a client to it
+gateway = Gateway()
+cluster = gateway.new_cluster(worker_profile="Standard")  # Standard => 7.5 CPU and 29.5 GB per worker
+print(cluster.dashboard_link)
+
+# configure the workers' environment and scale the cluster before submitting any work
+client = Client(cluster)
+client.register_plugin(worker_env_plugin)
+client.register_plugin(PipInstall(packages=["pandas==2.3.3"]))  # 2.3.3 used by lsdb
+cluster.scale(n_workers)
+```
+
 ```{code-cell} ipython3
 parallel_starttime = time.time()
 
-# start a multiprocessing pool and run all the archive queries
+# start a Dask Gateway cluster and connect a client to it
+gateway = Gateway()
+cluster = gateway.new_cluster(worker_profile="Standard")  # Standard => 7.5 CPU and 29.5 GB per worker
+cluster.scale(n_workers)
+client = Client(cluster)
+
+# configure the workers' environment before submitting any work
+client.register_plugin(worker_env_plugin)
+
+# submit all of the archive queries to the cluster and run them concurrently
 parallel_df_lc = MultiIndexDFObject()  # to collect the results
-callback = parallel_df_lc.append  # will be called once on the result returned by each archive
-with mp.Pool(processes=n_workers) as pool:
+futures = [
+    client.submit(heasarc_get_lightcurves, sample_table, **heasarc_kwargs),
+    client.submit(wise_get_lightcurves, sample_table, **wise_kwargs),
+    client.submit(tess_kepler_get_lightcurves, sample_table, **tess_kepler_kwargs),
+    client.submit(hcv_get_lightcurves, sample_table, **hcv_kwargs),
+    client.submit(gaia_get_lightcurves, sample_table, **gaia_kwargs),
+    client.submit(ztf_get_lightcurves, sample_table, radius=ztf_search_radius),
+    client.submit(panstarrs_get_lightcurves, sample_table, radius=panstarrs_search_radius),
+#    client.submit(rubin_get_lightcurves, sample_table, **rsp_kwargs),
+]
+for df_lc in client.gather(futures):
+    parallel_df_lc.append(df_lc)
 
-    # start the processes that call the archives
-    pool.apply_async(heasarc_get_lightcurves, args=(sample_table,), kwds=heasarc_kwargs, callback=callback)
-    pool.apply_async(wise_get_lightcurves, args=(sample_table,), kwds=wise_kwargs, callback=callback)
-    pool.apply_async(tess_kepler_get_lightcurves, args=(sample_table,), kwds=tess_kepler_kwargs, callback=callback)
-    pool.apply_async(hcv_get_lightcurves, args=(sample_table,), kwds=hcv_kwargs, callback=callback)
-#    pool.apply_async(rubin_get_lightcurves, args=(sample_table,), kwds=rsp_kwargs, callback=callback)
-
-    pool.close()  # signal that no more jobs will be submitted to the pool
-    pool.join()  # wait for all jobs to complete, including the callback
-
-# run Gaia, ZTF, and panstarrs queries outside of multiprocessing since they
-# are using dask distributed under the hood,
-# which doesn't work with multiprocessing, and dask is already parallelized
-
-df_lc_gaia = gaia_get_lightcurves(sample_table, **gaia_kwargs)
-parallel_df_lc.append(df_lc_gaia)# add the resulting dataframe to all other archives
-
-df_lc_ZTF = ztf_get_lightcurves(sample_table, radius = ztf_search_radius)
-parallel_df_lc.append(df_lc_ZTF)# add the resulting dataframe to all other archives
-
-df_lc_panstarrs = panstarrs_get_lightcurves(sample_table, radius=panstarrs_search_radius)
-parallel_df_lc.append(df_lc_panstarrs) # add the panstarrs dataframe to all other archives
+# shut down the cluster now that all archive calls have completed
+client.close()
+cluster.shutdown()
 
 parallel_endtime = time.time()
 

@@ -1,10 +1,9 @@
 import lsdb
 import numpy as np
 import pandas as pd
-from dask.distributed import Client
 
 from data_structures import MultiIndexDFObject
-from lsdb_utils import sample_table_to_lsdb
+from lsdb_utils import dask_client, sample_table_to_lsdb
 
 # panstarrs light curves from hats catalog in S3 using lsdb
 
@@ -96,10 +95,9 @@ def panstarrs_get_lightcurves(sample_table, *, radius=1):
         log_changes=False,
     )
 
-    # Create default local cluster
-    # here is where the actual work gets done
-    # Use multiple workers with a single thread per worker for better performance on Fornax
-    with Client(threads_per_worker=1, memory_limit=None):
+    # here is where the actual work gets done: compute using an existing Dask cluster
+    # (e.g., a shared Dask Gateway cluster) if there is one, otherwise a local cluster
+    with dask_client():
         # compute the cross match with object table
         # and the join with the detections table
         matched_df = matched_lc.compute()
