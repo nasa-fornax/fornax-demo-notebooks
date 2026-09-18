@@ -62,28 +62,39 @@ By the end of this tutorial, you will be able to:
 
 :::{warning}
 For the parallel section, Python and several Dask-related libraries must be pinned to the exact versions installed on the Dask Gateway cluster.
-Use `requirements_light_curve_collector_dg.txt` to create a new environment and kernel with those versions.
+Use `requirements_light_curve_collector.txt` to create a new environment and kernel with those versions.
 First, you must copy the into a directory where it's the only requirements file because Fornax's `setup-pip-env` expects to find exactly one and this directory has several.
 
 ```sh
-# Assuming your home directory doesn't already have a requirements file.
-cp requirements_light_curve_collector_dg.txt ~/.
+# Must rename to have dash after 'requirements'.
+# This assumes your home directory doesn't already have a requirements file.
+cp requirements_light_curve_collector.txt ~/requirements-light_curve_collector.txt
 cd ~/
 # Create the env and kernel.
 # Remove --user to make them temporary so they don't persist across restarts.
 setup-pip-env --user --python=3.13.6
-
-# You must know the path the environment was installed to configure the worker environments.
-# Find it with:
-ls $USER_ENV_DIR  # if you passed --user above
-ls $ENV_DIR  # if you didn't
 ```
 
+You must know the path the environment was installed to configure the worker environments.
+The name of the environment and kernel will be the filename minus 'requirements-' and '.txt'.
+You can check with:
+
+```sh
+# if you passed --user above:
+echo $USER_ENV_DIR
+ls $USER_ENV_DIR
+
+# if you didn't pass --user above:
+echo $ENV_DIR
+ls $ENV_DIR
+```
+
+Now connect the notebook to the kernel.
 :::
 
 ```{code-cell} python3
-# [FIXME] Paste the path to your environment below.
-env_path =
+# [FIXME] Paste the full path to your environment below.
+env_path = ''
 ```
 
  * `acstools` to work with HST magnitude to flux conversion
@@ -118,7 +129,7 @@ from pathlib import Path
 import astropy.units as u
 import pandas as pd
 from astropy.table import Table
-from dask.distributed import Client, WorkerPlugin
+from dask.distributed import Client, WorkerPlugin, PipInstall
 from dask_gateway import Gateway
 
 # local code imports
@@ -478,6 +489,19 @@ class WorkerEnvPlugin(WorkerPlugin):
 env_packages_path = Path.home() / env_path / "lib" / "python3.13" / "site-packages"
 code_src_path = Path("code_src").resolve()
 worker_env_plugin = WorkerEnvPlugin([env_packages_path, code_src_path])
+```
+
+```{code-cell} ipython3
+# start a Dask Gateway cluster and connect a client to it
+gateway = Gateway()
+cluster = gateway.new_cluster(worker_profile="Standard")  # Standard => 7.5 CPU and 29.5 GB per worker
+print(cluster.dashboard_link)
+
+# configure the workers' environment and scale the cluster before submitting any work
+client = Client(cluster)
+client.register_plugin(worker_env_plugin)
+client.register_plugin(PipInstall(packages=["pandas==2.3.3"]))  # 2.3.3 used by lsdb
+cluster.scale(n_workers)
 ```
 
 ```{code-cell} ipython3

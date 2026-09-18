@@ -3,7 +3,6 @@
 # contain dependencies that are actually used in the notebook.
 requests
 tqdm
-numpy
 scipy
 pandas[aws, parquet]
 matplotlib
@@ -31,4 +30,6 @@ dask[distributed,dataframe]==2026.3.0
 distributed==2026.3.0
 dask-gateway==2026.3.0
 msgpack==1.1.2
+numpy==2.4.4
 tornado==6.5.5
+# lz4==4.4.5 need to remove this from the env?
