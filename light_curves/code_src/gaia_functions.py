@@ -3,9 +3,9 @@ import time
 import lsdb
 import numpy as np
 import pandas as pd
-from dask.distributed import Client
 
 from data_structures import MultiIndexDFObject
+from lsdb_utils import dask_client
 
 # Gaia DR3 epoch photometry, hosted as a HATS catalog by LINCC.
 # This "object" catalog holds exactly the DR3 sources that have epoch photometry (one row per
@@ -151,9 +151,9 @@ def gaia_retrieve_epoch_photometry(sample_table, search_radius, verbose):
         suffix_method="all_columns",
     )
 
-    # the cross-match is lazy; run it on a local Dask cluster.
-    # Use multiple workers with a single thread per worker for better performance on Fornax
-    with Client(threads_per_worker=1, memory_limit=None):
+    # the cross-match is lazy; compute it using an existing Dask cluster (e.g., a shared
+    # Dask Gateway cluster) if there is one, otherwise fall back to a local cluster
+    with dask_client():
         matched_df = matched.compute()
 
     if verbose:
