@@ -11,9 +11,7 @@ hpgeom
 astropy
 pyvo
 # astroquery>=0.4.12 needed for table upload to Heasarc.query_tap and new NED API.
-# .dev needed until v0.4.12 is released.
-# When .dev is removed, also remove --pre from pip-install cell of notebook.
-astroquery>=0.4.12.dev
+astroquery>=0.4.12
 acstools
 lightkurve
 alerce
