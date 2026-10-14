@@ -11,6 +11,9 @@ from sklearn.neighbors import KNeighborsRegressor
 # local code imports
 from fluxconversions import mjd_to_jd
 
+# for pandas2 compatibility
+pd.options.future.infer_string = False
+
 
 def sigmaclip_lightcurves(df_lc, sigmaclip_value=10.0, include_plot=False, verbose=False):
     """
