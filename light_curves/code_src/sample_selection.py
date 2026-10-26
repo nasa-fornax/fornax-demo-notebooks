@@ -42,7 +42,7 @@ def get_lamassa_sample(coords, labels, *, verbose=1):
         return
 
     lamassa_CLQ = lamassa_CLQ[0]  # dont know what those other targets are.
-    coords.append(SkyCoord(lamassa_CLQ['RA'], lamassa_CLQ['DEC'], frame='icrs', unit='deg'))
+    coords.append(SkyCoord(lamassa_CLQ['RA'], lamassa_CLQ['Dec'], frame='icrs', unit='deg'))
     labels.append('LaMassa 15')
     if verbose:
         print('Changing Look AGN- Lamassa et al: ', len(labels))
@@ -109,7 +109,7 @@ def get_ruan_sample(coords, labels, *, verbose=1):
         return
 
     ruan_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
-                   for ra, dec in zip(ruan_CSQ['RA'], ruan_CSQ['DEC'])]
+                   for ra, dec in zip(ruan_CSQ['RA'], ruan_CSQ['Dec'])]
     ruan_labels = ['Ruan 16' for ra in ruan_CSQ['RA']]
     coords.extend(ruan_coords)
     labels.extend(ruan_labels)
@@ -186,7 +186,7 @@ def get_sheng_sample(coords, labels, *, verbose=1):
 
     sheng_CLQ = CLQ[[0, 1, 3]]  # need the first 3 objects in their table,
     sheng_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
-                    for ra, dec in zip(sheng_CLQ['RA'], sheng_CLQ['DEC'])]
+                    for ra, dec in zip(sheng_CLQ['RA'], sheng_CLQ['Dec'])]
     sheng_labels = ['Sheng 20' for ra in sheng_CLQ['RA']]
 
     coords.extend(sheng_coords)
@@ -267,7 +267,7 @@ def get_lyu_sample(coords, labels, *, verbose=1):
         return
 
     lyu_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
-                  for ra, dec in zip(CLQ['RA'], CLQ['DEC'])]
+                  for ra, dec in zip(CLQ['RA'], CLQ['Dec'])]
     lyu_labels = ['Lyu 22' for ra in CLQ['RA']]
 
     coords.extend(lyu_coords)
@@ -298,7 +298,7 @@ def get_lopeznavas_sample(coords, labels, *, verbose=1):
     result_table = result_table[[0, 1, 2, 3]]  # pick the correct sources by hand
 
     ln_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
-                 for ra, dec in zip(result_table['RA'], result_table['DEC'])]
+                 for ra, dec in zip(result_table['RA'], result_table['Dec'])]
     ln_labels = ['Lopez-Navas 22' for ra in result_table['RA']]
 
     coords.extend(ln_coords)
@@ -332,7 +332,7 @@ def get_hon_sample(coords, labels, *, verbose=1):
         return
 
     hon_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
-                  for ra, dec in zip(CLQ['RA'], CLQ['DEC'])]
+                  for ra, dec in zip(CLQ['RA'], CLQ['Dec'])]
     hon_labels = ['Hon 22' for ra in CLQ['RA']]
 
     coords.extend(hon_coords)
@@ -366,7 +366,7 @@ def get_yang_sample(coords, labels, *, verbose=1):
         return
 
     yang_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
-                   for ra, dec in zip(CLQ['RA'], CLQ['DEC'])]
+                   for ra, dec in zip(CLQ['RA'], CLQ['Dec'])]
     yang_labels = ['Yang 18' for ra in CLQ['RA']]
 
     coords.extend(yang_coords)
@@ -402,7 +402,7 @@ def get_sanchezsaez_sample(coords, labels, *, verbose=1):
         return
 
     ss_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
-                 for ra, dec in zip(CSAGN['RA'], CSAGN['DEC'])]
+                 for ra, dec in zip(CSAGN['RA'], CSAGN['Dec'])]
     ss_labels = ['Sanchez-Saez 21' for ra in CSAGN['RA']]
     coords.extend(ss_coords)
     labels.extend(ss_labels)
@@ -583,7 +583,7 @@ def get_paper_sample(coords, labels, *, paper_link="2019A&A...627A..33D", label=
         return
 
     paper_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
-                    for ra, dec in zip(paper['RA'], paper['DEC'])]
+                    for ra, dec in zip(paper['RA'], paper['Dec'])]
     paper_labels = [label for ra in paper['RA']]
     coords.extend(paper_coords)
     labels.extend(paper_labels)
