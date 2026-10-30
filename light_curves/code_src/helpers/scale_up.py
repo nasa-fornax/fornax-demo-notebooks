@@ -164,10 +164,11 @@ def _build_sample(*, get_samples, consolidate_nearby_objects, sample_file, overw
     for get_sample_fnc, kwargs in get_sample_functions:
         get_sample_fnc(coords, labels, **kwargs)
 
-    # create an astropy Table of objects
+    # create an astropy Table and validate
     sample_table = sample_selection.clean_sample(
         coords, labels, consolidate_nearby_objects=consolidate_nearby_objects
     )
+    sample_selection.validate_sample_table(sample_table)
 
     # save and return the Table
     sample_table.write(sample_file, format="ascii.ecsv", overwrite=True)
