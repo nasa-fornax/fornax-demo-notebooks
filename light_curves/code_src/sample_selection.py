@@ -306,8 +306,8 @@ def get_lopeznavas_sample(coords, labels, *, verbose=1):
     result_table = result_table[[i for i, row in enumerate(result_table) if row['main_id'] in ln_names]]
 
     ln_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
-                 for ra, dec in zip(result_table['ra'], result_table['dec'])]
-    ln_labels = ['Lopez-Navas 22' for ra in result_table['ra']]
+                 for ra, dec in zip(result_table['RA'], result_table['Dec'])]
+    ln_labels = ['Lopez-Navas 22' for ra in result_table['RA']]
 
     coords.extend(ln_coords)
     labels.extend(ln_labels)
