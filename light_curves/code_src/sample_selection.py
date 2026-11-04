@@ -41,7 +41,8 @@ def get_lamassa_sample(coords, labels, *, verbose=1):
         # Warning will be printed from Ned_query_refcode_exceptions()
         return
 
-    lamassa_CLQ = lamassa_CLQ[0]  # dont know what those other targets are.
+    # Select the CLAGN by name.
+    lamassa_CLQ = lamassa_CLQ[lamassa_CLQ['Object Name'] == '2MASS J01595763+0033105'][0]
     coords.append(SkyCoord(lamassa_CLQ['RA'], lamassa_CLQ['Dec'], frame='icrs', unit='deg'))
     labels.append('LaMassa 15')
     if verbose:
@@ -184,7 +185,9 @@ def get_sheng_sample(coords, labels, *, verbose=1):
         # Warning will be printed from Ned_query_refcode_exceptions()
         return
 
-    sheng_CLQ = CLQ[[0, 1, 3]]  # need the first 3 objects in their table,
+    # Select the three CLAGN by name.
+    sheng_names = ['WISEA J125258.72+591832.7', 'WISEA J130716.98+450645.3', 'WISEA J142846.71+172353.1']
+    sheng_CLQ = CLQ[[i for i, row in enumerate(CLQ) if row['Object Name'] in sheng_names]]
     sheng_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
                     for ra, dec in zip(sheng_CLQ['RA'], sheng_CLQ['Dec'])]
     sheng_labels = ['Sheng 20' for ra in sheng_CLQ['RA']]
@@ -295,7 +298,12 @@ def get_lopeznavas_sample(coords, labels, *, verbose=1):
     None
     """
     result_table = Simbad.query_bibobj('2022MNRAS.513L..57L')
-    result_table = result_table[[0, 1, 2, 3]]  # pick the correct sources by hand
+    # Pick the 4 confirmed CLAGN (Table 2) by name.
+    # Note that Table 2 lists "SDSS J001014.86+000820.7" but Simbad returns "SDSS J001014.87+000820.7".
+    # NED lists those as cross-identifications for the same object.
+    ln_names = ['SDSS J001014.87+000820.7', 'SDSS J011311.82+013542.4',
+                '2MASX J07554435+1923367', '2MASX J08124075+0715280']
+    result_table = result_table[[i for i, row in enumerate(result_table) if row['main_id'] in ln_names]]
 
     ln_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
                  for ra, dec in zip(result_table['RA'], result_table['Dec'])]
@@ -304,7 +312,7 @@ def get_lopeznavas_sample(coords, labels, *, verbose=1):
     coords.extend(ln_coords)
     labels.extend(ln_labels)
     if verbose:
-        print('Changing Look AGN- Lopez-navas et al 2022: ', len(result_table['RA']))
+        print('Changing Look AGN- Lopez-navas et al 2022: ', len(result_table['ra']))
 
 
 # Hon et al., 2022
