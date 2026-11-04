@@ -77,7 +77,7 @@ def sigmaclip_lightcurves(df_lc, sigmaclip_value=10.0, include_plot=False, verbo
     return clipped_df_lc
 
 
-def remove_objects_without_band(df_lc, bandname_to_keep="W1", verbose=False):
+def remove_objects_without_band(df_lc, bandname_to_keep="WISE_W1", verbose=False):
     # drop objects that do not have data in the band bandname_to_keep
     """
     Drop objects that do not have data in the band bandname_to_keep.  This is needed for normalization.
@@ -86,7 +86,7 @@ def remove_objects_without_band(df_lc, bandname_to_keep="W1", verbose=False):
     ----------
     df_lc: Pandas dataframe with light curve info
 
-    bandname_to_keep: str "w1"
+    bandname_to_keep: str "WISE_W1"
 
     verbose: should the function provide feedback
 
@@ -262,7 +262,7 @@ def missingdata_drop_bands(df_lc, bands_to_keep, verbose=False):
     ----------
     df_lc: Pandas dataframe with light curve info
     bands_to_keep = list of strings with band names
-        example: ['W1','W2','panstarrs g','panstarrs i', 'panstarrs r','panstarrs y','panstarrs z','zg','zr']
+        example: ['WISE_W1','WISE_W2','Pan-STARRS g','Pan-STARRS i', 'Pan-STARRS r','Pan-STARRS y','Pan-STARRS z','ztf_g','ztf_r']
 
     Returns
     --------
@@ -353,7 +353,7 @@ def uniform_length_spacing(df_lc, final_freq_interpol, include_plot=True):
 
         if include_plot:
             # see what this looks like on just a single light curve for now
-            if (band == 'zr') and (oid == 9):
+            if (band == 'ztf_r') and (oid == 9):
                 # see if this looks reasonable
                 plt.errorbar(X, y, dy, linestyle="None", color="tab:blue", marker=".")
                 plt.plot(x_interpol, mean_prediction, label="Mean prediction")
@@ -401,7 +401,7 @@ def reformat_df(df_lc):
     return reformat_df
 
 
-def local_normalization_max(df_lc, norm_column="flux_W1"):
+def local_normalization_max(df_lc, norm_column="flux_WISE_W1"):
     """
     normalize each individual light curve by the max value in one band
 
