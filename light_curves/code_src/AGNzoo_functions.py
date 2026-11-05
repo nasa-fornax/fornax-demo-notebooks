@@ -75,13 +75,13 @@ def autopct_format(values):
     return my_format
 
 
-def unify_lc(df_lc, bands_inlc=['zr', 'zi', 'zg'], xres=160, numplots=1, low_limit_size=5):
+def unify_lc(df_lc, bands_inlc=['ztf_r', 'ztf_i', 'ztf_g'], xres=160, numplots=1, low_limit_size=5):
     '''
     Function to preprocess and unify time dimension of light curve data with linear interpolation.
 
     Parameters:
     - df_lc: DataFrame with light curve data.
-    - bands_inlc: List of bands to include in the analysis (default: ['zr', 'zi', 'zg']).
+    - bands_inlc: List of bands to include in the analysis (default: ['ztf_r', 'ztf_i', 'ztf_g']).
     - xres: Resolution for interpolation (default: 160).
     - numplots: Number of plots to display (default: 1).
     - low_limit_size: Minimum number of data points required in a band (default: 5).
@@ -144,7 +144,7 @@ def unify_lc(df_lc, bands_inlc=['zr', 'zi', 'zg'], xres=160, numplots=1, low_lim
                     if printcounter < numplots:
                         plt.errorbar(x2, y2, dy2, capsize=1.0, marker='.',
                                      linestyle='', label=label[0] + band)
-                        if band in ['W1', 'W2']:
+                        if band in ['WISE_W1', 'WISE_W2']:
                             plt.plot(x_wise, f(x_wise), '--',
                                      label='nearest interpolation ' + str(band))
                         else:
@@ -152,7 +152,7 @@ def unify_lc(df_lc, bands_inlc=['zr', 'zi', 'zg'], xres=160, numplots=1, low_lim
                                      label='nearest interpolation ' + str(band))
 
                     # Assign interpolated values based on the band
-                    if band == 'W1' or band == 'W2':
+                    if band == 'WISE_W1' or band == 'WISE_W2':
                         obj_newy[l] = f(x_wise)  # /f(x_wise).max()
                         obj_newdy[l] = df(x_wise)
                     else:
@@ -179,13 +179,13 @@ def unify_lc(df_lc, bands_inlc=['zr', 'zi', 'zg'], xres=160, numplots=1, low_lim
     return np.array(objects), np.array(dobjects), flabels, keeps
 
 
-def unify_lc_gp(df_lc, bands_inlc=['zr', 'zi', 'zg'], xres=160, numplots=1, low_limit_size=5):
+def unify_lc_gp(df_lc, bands_inlc=['ztf_r', 'ztf_i', 'ztf_g'], xres=160, numplots=1, low_limit_size=5):
     '''
     Function to preprocess and unify the time dimension of light curve data using Gaussian Processes.
 
     Parameters:
     - df_lc: DataFrame with light curve data.
-    - bands_inlc: List of bands to include in the analysis (default: ['zr', 'zi', 'zg']).
+    - bands_inlc: List of bands to include in the analysis (default: ['ztf_r', 'ztf_i', 'ztf_g']).
     - xres: Resolution for interpolation (default: 160).
     - numplots: Number of plots to display (default: 1).
     - low_limit_size: Minimum number of data points required in a band (default: 5).
@@ -224,7 +224,7 @@ def unify_lc_gp(df_lc, bands_inlc=['zr', 'zi', 'zg'], xres=160, numplots=1, low_
                     for b in range(1, n):
                         x2[::b + 1] = x2[::b + 1] + 1 * 0.001
                     X = x2.reshape(-1, 1)
-                    if band == 'W1' or band == 'W2':
+                    if band == 'WISE_W1' or band == 'WISE_W2':
                         kernel = 1.0 * RBF(length_scale=200)
                         gpw = GaussianProcessRegressor(kernel=kernel, alpha=(dy2)**2)
                         gpw.fit(X, y2)
@@ -238,7 +238,7 @@ def unify_lc_gp(df_lc, bands_inlc=['zr', 'zi', 'zg'], xres=160, numplots=1, low_
                     if printcounter < numplots:
                         plt.errorbar(x2, y2, dy2, capsize=1.0, marker='.',
                                      linestyle='', label=label[0] + band)
-                        if band == 'W1' or band == 'W2':
+                        if band == 'WISE_W1' or band == 'WISE_W2':
                             y_pred, sigma = gpw.predict(x_wise, return_std=True)
                             plt.plot(x_wise, y_pred, '--', label='Gaussian Process Reg.' + str(band))
                             plt.fill_between(x_wise.flatten(), y_pred - 1.96 * sigma,
