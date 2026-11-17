@@ -517,7 +517,7 @@ def get_sdss_sample(coords, labels, *, num=10, zmin=0, zmax=10, randomize_z=Fals
     """
     # Define the query
     query = "SELECT TOP " + str(num) + " specObjID, ra, dec, z FROM SpecObj \
-    WHERE ( z > " + str(zmin) + "AND z < " + str(zmax) + " AND class='QSO' AND zWARNING=0 )"
+    WHERE ( z > " + str(zmin) + " AND z < " + str(zmax) + " AND class='QSO' AND zWARNING=0 )"
     if randomize_z:
         query = query + " ORDER BY NEWID()"
 
