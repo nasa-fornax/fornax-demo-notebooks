@@ -1,40 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="http://localhost:3000/sitemap_style.xsl" ?>
+<?xml-stylesheet type="text/xsl" href="http://pre.render/sitemap_style.xsl" ?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>http://localhost:3000</loc>
+    <loc>http://pre.render</loc>
   </url>
   <url>
-    <loc>http://localhost:3000/time-domain</loc>
+    <loc>http://pre.render/time-domain</loc>
   </url>
   <url>
-    <loc>http://localhost:3000/light-curve-collector</loc>
+    <loc>http://pre.render/light-curve-collector</loc>
   </url>
   <url>
-    <loc>http://localhost:3000/scale-up</loc>
+    <loc>http://pre.render/scale-up</loc>
   </url>
   <url>
-    <loc>http://localhost:3000/light-curve-classifier</loc>
+    <loc>http://pre.render/light-curve-classifier</loc>
   </url>
   <url>
-    <loc>http://localhost:3000/ml-agnzoo</loc>
+    <loc>http://pre.render/ml-agnzoo</loc>
   </url>
   <url>
-    <loc>http://localhost:3000/spectroscopy</loc>
+    <loc>http://pre.render/spectroscopy</loc>
   </url>
   <url>
-    <loc>http://localhost:3000/spectra-collector</loc>
+    <loc>http://pre.render/spectra-collector</loc>
   </url>
   <url>
-    <loc>http://localhost:3000/forced-photometry</loc>
+    <loc>http://pre.render/forced-photometry</loc>
   </url>
   <url>
-    <loc>http://localhost:3000/multiband-photometry</loc>
+    <loc>http://pre.render/multiband-photometry</loc>
   </url>
   <url>
-    <loc>http://localhost:3000/crossmatch</loc>
+    <loc>http://pre.render/crossmatch</loc>
   </url>
   <url>
-    <loc>http://localhost:3000/ztf-ps1-crossmatch</loc>
+    <loc>http://pre.render/ztf-ps1-crossmatch</loc>
   </url>
 </urlset>
