@@ -306,8 +306,8 @@ def get_lopeznavas_sample(coords, labels, *, verbose=1):
     result_table = result_table[[i for i, row in enumerate(result_table) if row['main_id'] in ln_names]]
 
     ln_coords = [SkyCoord(ra, dec, frame='icrs', unit='deg')
-                 for ra, dec in zip(result_table['RA'], result_table['Dec'])]
-    ln_labels = ['Lopez-Navas 22' for ra in result_table['RA']]
+                 for ra, dec in zip(result_table['ra'], result_table['dec'])]
+    ln_labels = ['Lopez-Navas 22' for ra in result_table['ra']]
 
     coords.extend(ln_coords)
     labels.extend(ln_labels)
@@ -517,7 +517,7 @@ def get_sdss_sample(coords, labels, *, num=10, zmin=0, zmax=10, randomize_z=Fals
     """
     # Define the query
     query = "SELECT TOP " + str(num) + " specObjID, ra, dec, z FROM SpecObj \
-    WHERE ( z > " + str(zmin) + "AND z < " + str(zmax) + " AND class='QSO' AND zWARNING=0 )"
+    WHERE ( z > " + str(zmin) + " AND z < " + str(zmax) + " AND class='QSO' AND zWARNING=0 )"
     if randomize_z:
         query = query + " ORDER BY NEWID()"
 

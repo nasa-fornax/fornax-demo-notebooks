@@ -115,12 +115,12 @@ If you want a notebook or script to run for longer than 15 minutes and you will 
 
 This cell will install the dependencies, if needed:
 
-```{code-cell} ipython3#
+```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
 # %pip install --pre -r requirements_scale_up.txt
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 import multiprocessing  # python parallelization method
 import pandas as pd  # use a DataFrame to work with light-curve and other data
 import sys  # add code directories to the path
@@ -174,7 +174,7 @@ Example 2 shows how to load the data.
 
 Command output from 2024/03/01 logs:
 
-```{code-cell}
+```{code-cell} ipython3
 !cat output/lightcurves-demo-SDSS-500k/logs/scale_up.sh.log
 # There is a warning that the SDSS 'specObjID' column was converted from an int to a string.
 # The column is immediately dropped. It is not used in the code.
@@ -245,12 +245,12 @@ There are at least three places to look for information about a run's status.
 
 #### 1.4.1 Logs
 
-```{code-cell}
+```{code-cell} ipython3
 # Gaia log from 2024/03/01 (success)
 !cat output/lightcurves-demo-SDSS-500k/logs/gaia.log
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 # ZTF log from 2024/03/01 (failure)
 !cat output/lightcurves-demo-SDSS-500k/logs/ztf.log
 ```
@@ -284,24 +284,24 @@ Once saved to file, the helper can parse the `top` output into pandas DataFrames
 
 `top` output from 2024/03/01:
 
-```{code-cell}
+```{code-cell} ipython3
 run_id = "demo-SDSS-500k"
 logs_dir = helpers.scale_up.run(build="logs_dir", run_id=run_id)
 
 toplog = helpers.top.load_top_output(toptxt_dir=logs_dir, run_id=run_id)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 # System summary information from lines 1-5 of `top` output. One row per time step.
 toplog.summary_df.sample(5)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 # Information about running processes from lines 6+ of `top` output. One row per process, per time step.
 toplog.pids_df.sample(5)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 fig = toplog.plot_overview()
 ```
 
@@ -322,7 +322,7 @@ Another observation is that the WISE call's CPU activity seems to slow down when
 We want to learn why the ZTF job failed.
 Let's zoom in on that time period:
 
-```{code-cell}
+```{code-cell} ipython3
 fig = toplog.plot_overview(between_time=("22:55", "23:10"))
 ```
 
@@ -335,7 +335,7 @@ The solution is to rerun the ZTF archive call on a machine with more RAM.
 
 To learn exactly which step in `ztf_get_lightcurves` was causing this and how much memory it actually needed, additional print statements were inserted into the code similar to the following:
 
-```{code-cell}
+```{code-cell} ipython3
 # this was inserted just before "exploding" the dataframe in ztf_functions.py
 # helpers.scale_up._now() prints the current timestamp
 print(f"{helpers.scale_up._now()} | starting explode", flush=True)
@@ -345,13 +345,13 @@ print(f"{helpers.scale_up._now()} | starting explode", flush=True)
 ZTF was then rerun on a large machine and `top` output was saved.
 After the run, we manually compared timestamps between the ZTF log and `top` output and tagged relevant `top` timestamps with corresponding step names by appending the name to the '----' delineator, like this for the "explode" step:
 
-```{code-cell}
+```{code-cell} ipython3
 !cat output/lightcurves-demo-SDSS-500k/logs/top.tag-ztf.txt | grep -A12 explode
 ```
 
 The helper can recognize these tags and show them on a figure:
 
-```{code-cell}
+```{code-cell} ipython3
 ztf_toplog = helpers.top.load_top_output(toptxt_file="top.tag-ztf.txt", toptxt_dir=logs_dir, run_id=run_id)
 
 fig = ztf_toplog.plot_time_tags(summary_y="used_GiB")
@@ -375,7 +375,7 @@ If you want a sample larger than a few hundred, consider using the bash script i
 
 Define the keyword arguments for the run:
 
-```{code-cell}
+```{code-cell} ipython3
 kwargs_dict = {
     "run_id": "demo-Yang-sample",
     # Paper names to gather the sample from.
@@ -397,7 +397,7 @@ Decide which archives to query.
 This is a separate list because the helper can only run one archive call at a time.
 We will iterate over this list and launch each job separately.
 
-```{code-cell}
+```{code-cell} ipython3
 # archive_names = ["PanSTARRS", "WISE"]  # choose your own list
 archive_names = helpers.scale_up.ARCHIVE_NAMES["all"]  # predefined list
 archive_names
@@ -414,7 +414,7 @@ We'll just skip the affected archive calls here and encourage the user towards t
 is one of the main reasons that it was developed -- it launches the archive jobs in parallel, but in a
 different way, so that the calls are also allowed to parallelize their own internal code and thus run much faster.
 
-```{code-cell}
+```{code-cell} ipython3
 # Skip archive calls that use internal parallelization.
 _archive_names = [name for name in archive_names if name.lower() not in ["gaia", "panstarrs", "ztf"]]
 
@@ -438,7 +438,7 @@ The light curves are saved in the "parquet_dir" directory.
 Each archive call writes data to a parquet file in its own subdirectory.
 These can be loaded together as a single dataset:
 
-```{code-cell}
+```{code-cell} ipython3
 # copy/paste the directory path from the output above, or ask the helper for it like this:
 parquet_dir = helpers.scale_up.run(build="parquet_dir", **kwargs_dict)
 df_lc = pd.read_parquet(parquet_dir)
@@ -448,7 +448,7 @@ df_lc.sample(10)
 
 Now we can make figures:
 
-```{code-cell}
+```{code-cell} ipython3
 _ = create_figures(df_lc=MultiIndexDFObject(data=df_lc), show_nbr_figures=1, save_output=False)
 ```
 
@@ -467,12 +467,12 @@ This example shows the python `kwargs_dict` and bash script flag options in more
 - other keyword arguments used directly by the helper.
   These options and their defaults are shown below, further documented in the helper's `run` function.
 
-```{code-cell}
+```{code-cell} ipython3
 # show kwargs_dict defaults
 helpers.scale_up.DEFAULTS
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 # show parameter documentation
 print(helpers.scale_up.run.__doc__)
 ```
@@ -481,7 +481,7 @@ print(helpers.scale_up.run.__doc__)
 
 Use the `-h` (help) flag to view the script's flag options:
 
-```{code-cell}
+```{code-cell} ipython3
 # show flag documentation
 !bash code_src/helpers/scale_up.sh -h
 ```
@@ -492,7 +492,7 @@ It can be convenient to save the parameters in a yaml file, especially when usin
 
 Define an extended set of parameters and save it as a yaml file:
 
-```{code-cell}
+```{code-cell} ipython3
 yaml_run_id = "demo-kwargs-yaml"
 
 get_samples = {
@@ -530,7 +530,7 @@ To use the file, set the kwarg `use_yaml=True`.
 
 Python example for the get-sample step:
 
-```{code-cell}
+```{code-cell} ipython3
 sample_table = helpers.scale_up.run(build="sample", run_id=yaml_run_id, use_yaml=True)
 ```
 
