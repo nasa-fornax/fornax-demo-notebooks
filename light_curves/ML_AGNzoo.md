@@ -119,6 +119,15 @@ gdown 1gb2vWn0V2unstElGTTrHIIWIftHbXJvz -O ./data/df_lc_020724.parquet.gzip
 ```{code-cell} ipython3
 df_lc = pd.read_parquet('data/df_lc_020724.parquet.gzip')
 
+# This stored file was made with an older version of the light_curve_collector notebook, which used
+# different band names. Rename them to match the current light_curve_collector output.
+old_to_new_bandnames = {'W1': 'WISE_W1', 'W2': 'WISE_W2',
+                        'zg': 'ztf_g', 'zr': 'ztf_r', 'zi': 'ztf_i',
+                        'panstarrs g': 'Pan-STARRS g', 'panstarrs i': 'Pan-STARRS i', 'panstarrs r': 'Pan-STARRS r',
+                        'panstarrs y': 'Pan-STARRS y', 'panstarrs z': 'Pan-STARRS z',
+                        'G': 'Gaia_G', 'BP': 'Gaia_BP', 'RP': 'Gaia_RP'}
+df_lc = df_lc.rename(index=old_to_new_bandnames, level='band')
+
 # remove 64 for SPIDER only as its too large compared to the rest of the labels
 df_lc = df_lc[df_lc.index.get_level_values('label') != '64']
 # remove all bitwise sums that had 64 in them
@@ -203,7 +212,7 @@ We first look at this sample only in ZTF bands which have the largest number of 
 The unify_lc, or unify_lc_gp functions do the unification of the lightcurve arrays. For details please see the codes. The time arrays are chosen based on the average duration of observations, with ZTF and WISE covering 1600, 4000 days respectively. We note that we disregard the time of observation of each source, by subtracting the initial time from the array and bringing all lightcurves to the same footing. This has to be taken into account if it influences the science of interest. We then interoplate the time arrays with linear or Gaussian Process regression (unift_lc/ unify_lc_gp respectively). We also remove from the sample objects with less than 5 datapoints in their light curve. We measure basic statistics and combine the tree observed ZTF bands into one longer array as input to dimensionailty reduction after deciding on normalization. We also do a shuffling of the sample to be sure that the separations of different classes by ML are not simply due to the order they are seen in training (in case it is not done by the ML routine itself).
 
 ```{code-cell} ipython3
-bands_inlc = ['zg', 'zr', 'zi']
+bands_inlc = ['ztf_g', 'ztf_r', 'ztf_i']
 
 # nearest neighbor linear interpolation:
 objects, dobjects, flabels, keeps = unify_lc(df_lc, bands_inlc, xres=60, numplots=5,
@@ -571,7 +580,7 @@ skipping the normalization of lightcurves, further separates turn on/off CLAGNs 
 ## 4. Repeating the above, this time with ZTF + WISE manifold
 
 ```{code-cell} ipython3
-bands_inlc = ['zg', 'zr', 'zi', 'W1', 'W2']
+bands_inlc = ['ztf_g', 'ztf_r', 'ztf_i', 'WISE_W1', 'WISE_W2']
 objects, dobjects, flabels, keeps = unify_lc(df_lc, bands_inlc, xres=30, numplots=3)
 # calculate some basic statistics
 fvar, maxarray, meanarray = stat_bands(objects, dobjects, bands_inlc)
@@ -661,7 +670,7 @@ plt.tight_layout()
 ## 5. Wise bands alone
 
 ```{code-cell} ipython3
-bands_inlcw = ['W1', 'W2']
+bands_inlcw = ['WISE_W1', 'WISE_W2']
 objectsw, dobjectsw, flabelsw, keepsw = unify_lc(df_lc, bands_inlc, xres=30)
 # calculate some basic statistics
 fvarw, maxarrayw, meanarrayw = stat_bands(objectsw, dobjectsw, bands_inlcw)

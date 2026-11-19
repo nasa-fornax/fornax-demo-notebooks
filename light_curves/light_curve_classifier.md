@@ -136,6 +136,15 @@ gdd.download_file_from_google_drive(file_id='1DrB-CWdBBBYuO0WzNnMl5uQnnckL7MWH',
 
 #load the data into a pandas dataframe
 df_lc = pd.read_parquet(savename_df_lc)
+
+# This stored file was made with an older version of the light_curve_collector notebook, which used
+# different band names. Rename them to match the current light_curve_collector output.
+old_to_new_bandnames = {'W1': 'WISE_W1', 'W2': 'WISE_W2',
+                        'zg': 'ztf_g', 'zr': 'ztf_r', 'zi': 'ztf_i',
+                        'panstarrs g': 'Pan-STARRS g', 'panstarrs i': 'Pan-STARRS i', 'panstarrs r': 'Pan-STARRS r',
+                        'panstarrs y': 'Pan-STARRS y', 'panstarrs z': 'Pan-STARRS z',
+                        'G': 'Gaia_G', 'BP': 'Gaia_BP', 'RP': 'Gaia_RP'}
+df_lc = df_lc.rename(index=old_to_new_bandnames, level='band')
 ```
 
 ```{code-cell} ipython3
@@ -202,7 +211,7 @@ df_lc.band.unique()
 
 ```{code-cell} ipython3
 #plot a single band for all objects
-band_of_interest = 'zr'
+band_of_interest = 'ztf_r'
 band_lc = df_lc[df_lc['band'] == band_of_interest]
 #reset zero time to be start of that mission
 band_lc["time"] = band_lc["time"] - band_lc["time"].min()
@@ -283,7 +292,7 @@ threshold_too_few = 3
 df_lc = remove_incomplete_data(df_lc, threshold_too_few, verbose = False)
 
 #remove objects without W1 fluxes
-df_lc = remove_objects_without_band(df_lc, 'W1', verbose=True)
+df_lc = remove_objects_without_band(df_lc, 'WISE_W1', verbose=True)
 
 print(df_lc.groupby(["objectid"]).ngroups, "n objects after cleaning the data")
 ```
@@ -302,7 +311,7 @@ Functions are inlcuded for both options.
 #choose what to do with missing data...
 #df_lc = missingdata_to_zeros(df_lc)
 #or
-bands_to_keep = ['W1','W2','panstarrs g','panstarrs i', 'panstarrs r','panstarrs y','panstarrs z','zg','zr']
+bands_to_keep = ['WISE_W1','WISE_W2','Pan-STARRS g','Pan-STARRS i', 'Pan-STARRS r','Pan-STARRS y','Pan-STARRS z','ztf_g','ztf_r']
 df_lc = missingdata_drop_bands(df_lc, bands_to_keep, verbose = True)
 ```
 
@@ -359,7 +368,7 @@ We chose to normalize by the maximum flux in one band, and not median or mean be
 
 ```{code-cell} ipython3
 #normalize by W1 band
-df_lc = local_normalization_max(df_lc, norm_column = "flux_W1")
+df_lc = local_normalization_max(df_lc, norm_column = "flux_WISE_W1")
 ```
 
 ### 2.9 Cleanup
@@ -392,8 +401,8 @@ parquet_savename = 'output/df_lc_ML.parquet'
 
 ```{code-cell} ipython3
 #try dropping the uncertainty columns as variables for sktime
-df_lc.drop(columns = ['err_panstarrs_g',	'err_panstarrs_i',	'err_panstarrs_r',	'err_panstarrs_y',
-                      'err_panstarrs_z',	'err_W1',	'err_W2',	'err_zg',	'err_zr'], inplace = True)
+df_lc.drop(columns = ['err_Pan-STARRS_g',	'err_Pan-STARRS_i',	'err_Pan-STARRS_r',	'err_Pan-STARRS_y',
+                      'err_Pan-STARRS_z',	'err_WISE_W1',	'err_WISE_W2',	'err_ztf_g',	'err_ztf_r'], inplace = True)
 
 #drop also the time column because time shouldn't be a feature
 df_lc.drop(columns = ['time'],inplace = True)
@@ -578,6 +587,9 @@ Lets assume we now have a classifier which can accurately differentiate CLAGN fr
 # replace this with your favorite sample run through the light_curve_collector in this same repo.
 path_to_sample = './data/small_CLAGN_SDSS_df_lc.parquet'
 my_sample = pd.read_parquet(path_to_sample)
+
+# rename the old band names in this stored file (see above); not needed for current light_curve_collector output
+my_sample = my_sample.rename(index=old_to_new_bandnames, level='band')
 ```
 
 ```{code-cell} ipython3
@@ -603,7 +615,7 @@ my_sample.dropna(inplace = True, axis = 0)
 my_sample = sigmaclip_lightcurves(my_sample, sigmaclip_value, include_plot = False, verbose= False)
 
 #remove objects without W1 fluxes
-my_sample = remove_objects_without_band(my_sample, 'W1', verbose=False)
+my_sample = remove_objects_without_band(my_sample, 'WISE_W1', verbose=False)
 
 #remove incomplete data
 #make sure your sample has the same threshold_too_few as were run to train the classifier
@@ -622,7 +634,7 @@ my_sample = my_sample.astype({col: "float" for col in ["time", "flux", "err"]})
 my_sample = reformat_df(my_sample)
 
 #normalize
-my_sample = local_normalization_max(my_sample, norm_column = "flux_W1")
+my_sample = local_normalization_max(my_sample, norm_column = "flux_WISE_W1")
 
 #make datetime column
 my_sample['datetime'] = mjd_to_datetime(my_sample)
@@ -631,8 +643,8 @@ my_sample['datetime'] = mjd_to_datetime(my_sample)
 my_sample = my_sample.set_index(["objectid", "label", "datetime"])
 
 #drop the uncertainty and time columns
-my_sample.drop(columns = ['err_panstarrs_g',	'err_panstarrs_i',	'err_panstarrs_r',	'err_panstarrs_y',
-                          'err_panstarrs_z',	'err_W1',	'err_W2',	'err_zg',	'err_zr','time'], inplace = True)
+my_sample.drop(columns = ['err_Pan-STARRS_g',	'err_Pan-STARRS_i',	'err_Pan-STARRS_r',	'err_Pan-STARRS_y',
+                          'err_Pan-STARRS_z',	'err_WISE_W1',	'err_WISE_W2',	'err_ztf_g',	'err_ztf_r','time'], inplace = True)
 
  #make X
 X_mysample  = my_sample.droplevel('label')
