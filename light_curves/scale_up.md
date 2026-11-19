@@ -7,9 +7,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.16.1
 kernelspec:
-  display_name: py-scale_up
+  display_name: py-light_curves
   language: python
-  name: py-scale_up
+  name: py-light_curves
 execution:
   timeout: 1200
 ---
@@ -117,7 +117,7 @@ This cell will install the dependencies, if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-# %pip install --pre -r requirements_scale_up.txt
+# %pip install --pre -r requirements_light_curves.txt
 ```
 
 ```{code-cell} ipython3
