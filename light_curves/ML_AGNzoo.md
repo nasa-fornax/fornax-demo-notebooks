@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.16.4
 kernelspec:
-  display_name: py-ml_agnzoo
+  display_name: py-light_curves
   language: python
-  name: py-ml_agnzoo
+  name: py-light_curves
 ---
 
 # AGN Zoo: Comparison of AGN selected with different metrics
@@ -55,7 +55,7 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-# %pip install -r requirements_ML_AGNzoo.txt
+# %pip install -r requirements_light_curves.txt
 ```
 
 ```{code-cell} ipython3

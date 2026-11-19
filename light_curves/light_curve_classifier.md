@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.16.0
 kernelspec:
-  display_name: py-light_curve_classifier
+  display_name: py-light_curves
   language: python
-  name: py-light_curve_classifier
+  name: py-light_curves
 ---
 
 # Light Curve Classifier
@@ -76,7 +76,7 @@ This cell will install them if needed:
 
 ```{code-cell} ipython3
 # Uncomment the next line to install dependencies if needed.
-# %pip install -r requirements_light_curve_classifier.txt
+# %pip install -r requirements_light_curves.txt
 ```
 
 ```{code-cell} ipython3
