@@ -2,17 +2,34 @@
 # beginning of the notebook, make sure the lists are consistent and only
 # contain dependencies that are actually used in the notebook.
 numpy
-pandas[parquet]
+scipy
+pandas[aws, parquet]
 matplotlib
 astropy
+requests
+pyvo
+# astroquery>=0.4.12 needed for table upload to Heasarc.query_tap and new NED API.
+astroquery>=0.4.12.dev11095
 # explicit lower pin helps uv with dependency resolution, TODO: explore what the actual minimum
 # version we require is, it is likely much newer than this pin
 sktime>=0.26
 tqdm
+gdown
 googledrivedownloader>=1.0
 scikit-learn
+scikit-image
+umap-learn
+minisom
 acstools
-## Optional indirect dependencies required by functionalities used in the notebook
+python-dateutil
+PyYAML
+lightkurve
+alerce
+lsdb[s3fs]>=0.8.1
+# Required by lsdb, a few versions are known to cause issues
+fsspec!=2025.12,!=2026.1
+hpgeom
+## Optional indirect dependencies required by functionalities
 # Required by functionality we use from acstools
 scikit-image
 # Required by functionality we use from sktime
